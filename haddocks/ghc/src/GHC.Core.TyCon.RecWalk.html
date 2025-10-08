@@ -74,10 +74,10 @@ The function that manages all this is checkRecTc.
 </span><span id="line-74"></span><span>  </span><span class="hs-comment">-- we have encountered each TyCon</span><span>
 </span><span id="line-75"></span><span>
 </span><span id="line-76"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RecTcChecker"><span class="hs-identifier hs-type">RecTcChecker</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-77"></span><span>  </span><span id="local-6989586621682397681"><span class="annot"><span class="annottext">ppr :: RecTcChecker -&gt; SDoc
-</span><a href="#local-6989586621682397681"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-type">RC</span></a></span><span> </span><span id="local-6989586621682397683"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397683"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682397684"><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397684"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621682555694"><span class="annot"><span class="annottext">ppr :: RecTcChecker -&gt; SDoc
+</span><a href="#local-6989586621682555694"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-type">RC</span></a></span><span> </span><span id="local-6989586621682555696"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555696"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682555697"><span class="annot"><span class="annottext">TyConEnv Int
+</span><a href="#local-6989586621682555697"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;RC:&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -85,12 +85,12 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; SDoc
 forall doc. IsLine doc =&gt; Int -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397683"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682555696"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">TyConEnv Int -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397684"><span class="hs-identifier hs-var">env</span></a></span><span>
+</span><a href="#local-6989586621682555697"><span class="hs-identifier hs-var">env</span></a></span><span>
 </span><span id="line-78"></span><span>
 </span><span id="line-79"></span><span class="annot"><span class="hs-comment">-- | Initialise a 'RecTcChecker' with 'defaultRecTcMaxBound'.</span></span><span>
 </span><span id="line-80"></span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#initRecTc"><span class="hs-identifier hs-type">initRecTc</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RecTcChecker"><span class="hs-identifier hs-type">RecTcChecker</span></a></span><span>
@@ -113,33 +113,33 @@ forall a. TyConEnv a
 </span><span id="line-90"></span><span class="hs-comment">-- to encounter each 'TyCon'.</span><span>
 </span><span id="line-91"></span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#setRecTcMaxBound"><span class="hs-identifier hs-type">setRecTcMaxBound</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RecTcChecker"><span class="hs-identifier hs-type">RecTcChecker</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RecTcChecker"><span class="hs-identifier hs-type">RecTcChecker</span></a></span><span>
 </span><span id="line-92"></span><span id="setRecTcMaxBound"><span class="annot"><span class="annottext">setRecTcMaxBound :: Int -&gt; RecTcChecker -&gt; RecTcChecker
-</span><a href="GHC.Core.TyCon.RecWalk.html#setRecTcMaxBound"><span class="hs-identifier hs-var hs-var">setRecTcMaxBound</span></a></span></span><span> </span><span id="local-6989586621682397690"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397690"><span class="hs-identifier hs-var">new_bound</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-type">RC</span></a></span><span> </span><span id="local-6989586621682397691"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397691"><span class="hs-identifier hs-var">_old_bound</span></a></span></span><span> </span><span id="local-6989586621682397692"><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397692"><span class="hs-identifier hs-var">rec_nts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; TyConEnv Int -&gt; RecTcChecker
+</span><a href="GHC.Core.TyCon.RecWalk.html#setRecTcMaxBound"><span class="hs-identifier hs-var hs-var">setRecTcMaxBound</span></a></span></span><span> </span><span id="local-6989586621682555703"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555703"><span class="hs-identifier hs-var">new_bound</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-type">RC</span></a></span><span> </span><span id="local-6989586621682555704"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555704"><span class="hs-identifier hs-var">_old_bound</span></a></span></span><span> </span><span id="local-6989586621682555705"><span class="annot"><span class="annottext">TyConEnv Int
+</span><a href="#local-6989586621682555705"><span class="hs-identifier hs-var">rec_nts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; TyConEnv Int -&gt; RecTcChecker
 </span><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-var">RC</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397690"><span class="hs-identifier hs-var">new_bound</span></a></span><span> </span><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397692"><span class="hs-identifier hs-var">rec_nts</span></a></span><span>
+</span><a href="#local-6989586621682555703"><span class="hs-identifier hs-var">new_bound</span></a></span><span> </span><span class="annot"><span class="annottext">TyConEnv Int
+</span><a href="#local-6989586621682555705"><span class="hs-identifier hs-var">rec_nts</span></a></span><span>
 </span><span id="line-93"></span><span>
 </span><span id="line-94"></span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#checkRecTc"><span class="hs-identifier hs-type">checkRecTc</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RecTcChecker"><span class="hs-identifier hs-type">RecTcChecker</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.html#TyCon"><span class="hs-identifier hs-type">TyCon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RecTcChecker"><span class="hs-identifier hs-type">RecTcChecker</span></a></span><span>
 </span><span id="line-95"></span><span class="hs-comment">-- Nothing      =&gt; Recursion detected</span><span>
 </span><span id="line-96"></span><span class="hs-comment">-- Just rec_tcs =&gt; Keep going</span><span>
 </span><span id="line-97"></span><span id="checkRecTc"><span class="annot"><span class="annottext">checkRecTc :: RecTcChecker -&gt; TyCon -&gt; Maybe RecTcChecker
-</span><a href="GHC.Core.TyCon.RecWalk.html#checkRecTc"><span class="hs-identifier hs-var hs-var">checkRecTc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-type">RC</span></a></span><span> </span><span id="local-6989586621682397693"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397693"><span class="hs-identifier hs-var">bound</span></a></span></span><span> </span><span id="local-6989586621682397694"><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397694"><span class="hs-identifier hs-var">rec_nts</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682397695"><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682397695"><span class="hs-identifier hs-var">tc</span></a></span></span><span>
+</span><a href="GHC.Core.TyCon.RecWalk.html#checkRecTc"><span class="hs-identifier hs-var hs-var">checkRecTc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-type">RC</span></a></span><span> </span><span id="local-6989586621682555706"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555706"><span class="hs-identifier hs-var">bound</span></a></span></span><span> </span><span id="local-6989586621682555707"><span class="annot"><span class="annottext">TyConEnv Int
+</span><a href="#local-6989586621682555707"><span class="hs-identifier hs-var">rec_nts</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682555708"><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682555708"><span class="hs-identifier hs-var">tc</span></a></span></span><span>
 </span><span id="line-98"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">TyConEnv Int -&gt; TyCon -&gt; Maybe Int
 forall a. TyConEnv a -&gt; TyCon -&gt; Maybe a
 </span><a href="GHC.Core.TyCon.Env.html#lookupTyConEnv"><span class="hs-identifier hs-var">lookupTyConEnv</span></a></span><span> </span><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397694"><span class="hs-identifier hs-var">rec_nts</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682397695"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-99"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682397697"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397697"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397697"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682555707"><span class="hs-identifier hs-var">rec_nts</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682555708"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-99"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682555710"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555710"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555710"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397693"><span class="hs-identifier hs-var">bound</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe RecTcChecker
+</span><a href="#local-6989586621682555706"><span class="hs-identifier hs-var">bound</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe RecTcChecker
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-100"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -147,12 +147,12 @@ forall a. Maybe a
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; TyConEnv Int -&gt; RecTcChecker
 </span><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-var">RC</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397693"><span class="hs-identifier hs-var">bound</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyConEnv Int -&gt; TyCon -&gt; Int -&gt; TyConEnv Int
+</span><a href="#local-6989586621682555706"><span class="hs-identifier hs-var">bound</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyConEnv Int -&gt; TyCon -&gt; Int -&gt; TyConEnv Int
 forall a. TyConEnv a -&gt; TyCon -&gt; a -&gt; TyConEnv a
 </span><a href="GHC.Core.TyCon.Env.html#extendTyConEnv"><span class="hs-identifier hs-var">extendTyConEnv</span></a></span><span> </span><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397694"><span class="hs-identifier hs-var">rec_nts</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682397695"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397697"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682555707"><span class="hs-identifier hs-var">rec_nts</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682555708"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555710"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
@@ -161,10 +161,10 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; TyConEnv Int -&gt; RecTcChecker
 </span><a href="GHC.Core.TyCon.RecWalk.html#RC"><span class="hs-identifier hs-var">RC</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682397693"><span class="hs-identifier hs-var">bound</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyConEnv Int -&gt; TyCon -&gt; Int -&gt; TyConEnv Int
+</span><a href="#local-6989586621682555706"><span class="hs-identifier hs-var">bound</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyConEnv Int -&gt; TyCon -&gt; Int -&gt; TyConEnv Int
 forall a. TyConEnv a -&gt; TyCon -&gt; a -&gt; TyConEnv a
 </span><a href="GHC.Core.TyCon.Env.html#extendTyConEnv"><span class="hs-identifier hs-var">extendTyConEnv</span></a></span><span> </span><span class="annot"><span class="annottext">TyConEnv Int
-</span><a href="#local-6989586621682397694"><span class="hs-identifier hs-var">rec_nts</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682397695"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682555707"><span class="hs-identifier hs-var">rec_nts</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682555708"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-102"></span></pre></body></html>

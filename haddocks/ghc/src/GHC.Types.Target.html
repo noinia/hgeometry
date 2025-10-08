@@ -13,7 +13,7 @@
 </span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Data.StringBuffer.html"><span class="hs-identifier">GHC.Data.StringBuffer</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Data.StringBuffer.html#StringBuffer"><span class="hs-identifier">StringBuffer</span></a></span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html"><span class="hs-identifier">GHC.Utils.Outputable</span></a></span><span>
 </span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../time-1.12.2-ab16/src//Data.Time.html/Data.Time.html"><span class="hs-identifier">Data.Time</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../time-1.14-9bf8/src/Data.Time.html"><span class="hs-identifier">Data.Time</span></a></span><span>
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span><span class="hs-comment">-- | A compilation target.</span><span>
 </span><span id="line-19"></span><span class="hs-comment">--</span><span>
@@ -32,7 +32,7 @@
 </span><span id="line-30"></span><span>      </span><span id="targetUnitId"><span class="annot"><span class="annottext">Target -&gt; UnitId
 </span><a href="GHC.Types.Target.html#targetUnitId"><span class="hs-identifier hs-var hs-var">targetUnitId</span></a></span></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="GHC.Unit.Types.html#UnitId"><span class="hs-identifier hs-type">UnitId</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="hs-comment">-- ^ id of the unit this target is part of</span></span><span>
 </span><span id="line-31"></span><span>      </span><span id="targetContents"><span class="annot"><span class="annottext">Target -&gt; Maybe (InputFileBuffer, UTCTime)
-</span><a href="GHC.Types.Target.html#targetContents"><span class="hs-identifier hs-var hs-var">targetContents</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Target.html#InputFileBuffer"><span class="hs-identifier hs-type">InputFileBuffer</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../time-1.12.2-ab16/src//Data.Time.Clock.Internal.UTCTime.html/Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="GHC.Types.Target.html#targetContents"><span class="hs-identifier hs-var hs-var">targetContents</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Target.html#InputFileBuffer"><span class="hs-identifier hs-type">InputFileBuffer</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../time-1.14-9bf8/src/Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-32"></span><span>      </span><span class="hs-comment">-- ^ Optional in-memory buffer containing the source code GHC should</span><span>
 </span><span id="line-33"></span><span>      </span><span class="hs-comment">-- use for this target instead of reading it from disk.</span><span>
 </span><span id="line-34"></span><span>      </span><span class="hs-comment">--</span><span>
@@ -53,7 +53,7 @@
 </span><span id="line-49"></span><span>        </span><span class="hs-comment">-- If specified, the Phase indicates how to compile this file</span><span>
 </span><span id="line-50"></span><span>        </span><span class="hs-comment">-- (which phase to start from).  Nothing indicates the starting phase</span><span>
 </span><span id="line-51"></span><span>        </span><span class="hs-comment">-- should be determined from the suffix of the filename.</span><span>
-</span><span id="line-52"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621682559609"><span id="local-6989586621682559622"><span class="annot"><span class="annottext">TargetId -&gt; TargetId -&gt; Bool
+</span><span id="line-52"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621682738704"><span id="local-6989586621682738717"><span class="annot"><span class="annottext">TargetId -&gt; TargetId -&gt; Bool
 (TargetId -&gt; TargetId -&gt; Bool)
 -&gt; (TargetId -&gt; TargetId -&gt; Bool) -&gt; Eq TargetId
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -69,14 +69,14 @@ $c/= :: TargetId -&gt; TargetId -&gt; Bool
 </span><span id="line-57"></span><span class="annot"><a href="GHC.Types.Target.html#pprTarget"><span class="hs-identifier hs-type">pprTarget</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Target.html#Target"><span class="hs-identifier hs-type">Target</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span>
 </span><span id="line-58"></span><span id="pprTarget"><span class="annot"><span class="annottext">pprTarget :: Target -&gt; SDoc
 </span><a href="GHC.Types.Target.html#pprTarget"><span class="hs-identifier hs-var hs-var">pprTarget</span></a></span></span><span> </span><span class="annot"><a href="GHC.Types.Target.html#Target"><span class="hs-identifier hs-type">Target</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">targetUnitId :: Target -&gt; UnitId
-</span><a href="GHC.Types.Target.html#targetUnitId"><span class="hs-identifier hs-var">targetUnitId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682559628"><span class="annot"><span class="annottext">UnitId
-</span><a href="#local-6989586621682559628"><span class="hs-identifier hs-var">uid</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">targetId :: Target -&gt; TargetId
-</span><a href="GHC.Types.Target.html#targetId"><span class="hs-identifier hs-var">targetId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682559629"><span class="annot"><span class="annottext">TargetId
-</span><a href="#local-6989586621682559629"><span class="hs-identifier hs-var">id</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">targetAllowObjCode :: Target -&gt; Bool
-</span><a href="GHC.Types.Target.html#targetAllowObjCode"><span class="hs-identifier hs-var">targetAllowObjCode</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682559630"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682559630"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Types.Target.html#targetUnitId"><span class="hs-identifier hs-var">targetUnitId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682738723"><span class="annot"><span class="annottext">UnitId
+</span><a href="#local-6989586621682738723"><span class="hs-identifier hs-var">uid</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">targetId :: Target -&gt; TargetId
+</span><a href="GHC.Types.Target.html#targetId"><span class="hs-identifier hs-var">targetId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682738724"><span class="annot"><span class="annottext">TargetId
+</span><a href="#local-6989586621682738724"><span class="hs-identifier hs-var">id</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">targetAllowObjCode :: Target -&gt; Bool
+</span><a href="GHC.Types.Target.html#targetAllowObjCode"><span class="hs-identifier hs-var">targetAllowObjCode</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682738725"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682738725"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-59"></span><span>    </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682559630"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682738725"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">SDoc
 forall doc. IsOutput doc =&gt; doc
 </span><a href="GHC.Utils.Outputable.html#empty"><span class="hs-identifier hs-var">empty</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Char -&gt; SDoc
 forall doc. IsLine doc =&gt; Char -&gt; doc
@@ -86,7 +86,7 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">UnitId -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">UnitId
-</span><a href="#local-6989586621682559628"><span class="hs-identifier hs-var">uid</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682738723"><span class="hs-identifier hs-var">uid</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
 forall doc. IsLine doc =&gt; doc
@@ -94,29 +94,29 @@ forall doc. IsLine doc =&gt; doc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">TargetId -&gt; SDoc
 </span><a href="GHC.Types.Target.html#pprTargetId"><span class="hs-identifier hs-var">pprTargetId</span></a></span><span> </span><span class="annot"><span class="annottext">TargetId
-</span><a href="#local-6989586621682559629"><span class="hs-identifier hs-var">id</span></a></span><span>
+</span><a href="#local-6989586621682738724"><span class="hs-identifier hs-var">id</span></a></span><span>
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Target.html#Target"><span class="hs-identifier hs-type">Target</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-62"></span><span>    </span><span id="local-6989586621682559639"><span class="annot"><span class="annottext">ppr :: Target -&gt; SDoc
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621682738734"><span class="annot"><span class="annottext">ppr :: Target -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Target -&gt; SDoc
 </span><a href="GHC.Types.Target.html#pprTarget"><span class="hs-identifier hs-var">pprTarget</span></a></span><span>
 </span><span id="line-63"></span><span>
 </span><span id="line-64"></span><span class="annot"><a href="GHC.Types.Target.html#pprTargetId"><span class="hs-identifier hs-type">pprTargetId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Target.html#TargetId"><span class="hs-identifier hs-type">TargetId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span>
 </span><span id="line-65"></span><span id="pprTargetId"><span class="annot"><span class="annottext">pprTargetId :: TargetId -&gt; SDoc
-</span><a href="GHC.Types.Target.html#pprTargetId"><span class="hs-identifier hs-var hs-var">pprTargetId</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Target.html#TargetModule"><span class="hs-identifier hs-type">TargetModule</span></a></span><span> </span><span id="local-6989586621682559640"><span class="annot"><span class="annottext">ModuleName
-</span><a href="#local-6989586621682559640"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ModuleName -&gt; SDoc
+</span><a href="GHC.Types.Target.html#pprTargetId"><span class="hs-identifier hs-var hs-var">pprTargetId</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Target.html#TargetModule"><span class="hs-identifier hs-type">TargetModule</span></a></span><span> </span><span id="local-6989586621682738735"><span class="annot"><span class="annottext">ModuleName
+</span><a href="#local-6989586621682738735"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ModuleName -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">ModuleName
-</span><a href="#local-6989586621682559640"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-66"></span><span class="annot"><a href="GHC.Types.Target.html#pprTargetId"><span class="hs-identifier hs-var">pprTargetId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Target.html#TargetFile"><span class="hs-identifier hs-type">TargetFile</span></a></span><span> </span><span id="local-6989586621682559641"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621682559641"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe Phase
+</span><a href="#local-6989586621682738735"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-66"></span><span class="annot"><a href="GHC.Types.Target.html#pprTargetId"><span class="hs-identifier hs-var">pprTargetId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Target.html#TargetFile"><span class="hs-identifier hs-type">TargetFile</span></a></span><span> </span><span id="local-6989586621682738736"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682738736"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe Phase
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; SDoc
 forall doc. IsLine doc =&gt; FilePath -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621682559641"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><a href="#local-6989586621682738736"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-67"></span><span>
 </span><span id="line-68"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Target.html#TargetId"><span class="hs-identifier hs-type">TargetId</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-69"></span><span>    </span><span id="local-6989586621682559645"><span class="annot"><span class="annottext">ppr :: TargetId -&gt; SDoc
+</span><span id="line-69"></span><span>    </span><span id="local-6989586621682738740"><span class="annot"><span class="annottext">ppr :: TargetId -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TargetId -&gt; SDoc
 </span><a href="GHC.Types.Target.html#pprTargetId"><span class="hs-identifier hs-var">pprTargetId</span></a></span><span>
 </span><span id="line-70"></span><span>

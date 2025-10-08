@@ -18,7 +18,7 @@
 </span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="zSupportsNoRebindableSyntax"><span class="annot"><span class="annottext">Z -&gt; Bool
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zSupportsNoRebindableSyntax"><span class="hs-identifier hs-var hs-var">zSupportsNoRebindableSyntax</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-14"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-15"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679453176"><span id="local-6989586621679453178"><span class="annot"><span class="annottext">(forall x. Z -&gt; Rep Z x) -&gt; (forall x. Rep Z x -&gt; Z) -&gt; Generic Z
+</span><span id="line-15"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679511249"><span id="local-6989586621679511251"><span class="annot"><span class="annottext">(forall x. Z -&gt; Rep Z x) -&gt; (forall x. Rep Z x -&gt; Z) -&gt; Generic Z
 forall x. Rep Z x -&gt; Z
 forall x. Z -&gt; Rep Z x
 forall a.
@@ -31,15 +31,15 @@ to :: forall x. Rep Z x -&gt; Z
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="annot"><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#render"><span class="hs-identifier hs-type">render</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#Z"><span class="hs-identifier hs-type">Z</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-18"></span><span id="render"><span class="annot"><span class="annottext">render :: Z -&gt; String
-</span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#render"><span class="hs-identifier hs-var hs-var">render</span></a></span></span><span> </span><span id="local-6989586621679453183"><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Writer () -&gt; String
+</span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#render"><span class="hs-identifier hs-var hs-var">render</span></a></span></span><span> </span><span id="local-6989586621679511256"><span class="annot"><span class="annottext">Z
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Writer () -&gt; String
 forall a. Writer a -&gt; String
 </span><a href="Distribution.ZinzaPrelude.html#execWriter"><span class="hs-identifier hs-var">execWriter</span></a></span><span> </span><span class="annot"><span class="annottext">(Writer () -&gt; String) -&gt; Writer () -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-19"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Z -&gt; Bool
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zSupportsNoRebindableSyntax"><span class="hs-identifier hs-var">zSupportsNoRebindableSyntax</span></a></span><span> </span><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-20"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-21"></span><span>      </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -65,7 +65,7 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span id="line-28"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Z -&gt; String
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zPackageName"><span class="hs-identifier hs-var">zPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-29"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; (\n&quot;</span></span><span>
@@ -112,7 +112,7 @@ forall a. Show a =&gt; a -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Z -&gt; String
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zPackageName"><span class="hs-identifier hs-var">zPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-43"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;\n&quot;</span></span><span>
@@ -125,7 +125,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-46"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Z -&gt; String
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zVersionDigits"><span class="hs-identifier hs-var">zVersionDigits</span></a></span><span> </span><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-47"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; []\n&quot;</span></span><span>
@@ -145,7 +145,7 @@ forall a. Show a =&gt; a -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Z -&gt; String
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zSynopsis"><span class="hs-identifier hs-var">zSynopsis</span></a></span><span> </span><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;\n&quot;</span></span><span>
@@ -162,7 +162,7 @@ forall a. Show a =&gt; a -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Z -&gt; String
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zCopyright"><span class="hs-identifier hs-var">zCopyright</span></a></span><span> </span><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;\n&quot;</span></span><span>
@@ -179,7 +179,7 @@ forall a. Show a =&gt; a -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Z -&gt; String
 </span><a href="Distribution.Simple.Build.PackageInfoModule.Z.html#zHomepage"><span class="hs-identifier hs-var">zHomepage</span></a></span><span> </span><span class="annot"><span class="annottext">Z
-</span><a href="#local-6989586621679453183"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679511256"><span class="hs-identifier hs-var">z_root</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Writer ()
 </span><a href="Distribution.ZinzaPrelude.html#tell"><span class="hs-identifier hs-var">tell</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;\n&quot;</span></span><span>

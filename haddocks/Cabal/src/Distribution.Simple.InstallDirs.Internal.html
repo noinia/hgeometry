@@ -6,13 +6,13 @@
 </span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier">PathTemplateVariable</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-7"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-11"></span><span>
 </span><span id="line-12"></span><span class="hs-keyword">data</span><span> </span><span id="PathComponent"><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-var">PathComponent</span></a></span></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Ordinary"><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#Ordinary"><span class="hs-identifier hs-var">Ordinary</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
 </span><span id="line-14"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Variable"><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#Variable"><span class="hs-identifier hs-var">Variable</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span><span>
-</span><span id="line-15"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679443872"><span id="local-6989586621679443882"><span class="annot"><span class="annottext">PathComponent -&gt; PathComponent -&gt; Bool
+</span><span id="line-15"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679497355"><span id="local-6989586621679497365"><span class="annot"><span class="annottext">PathComponent -&gt; PathComponent -&gt; Bool
 (PathComponent -&gt; PathComponent -&gt; Bool)
 -&gt; (PathComponent -&gt; PathComponent -&gt; Bool) -&gt; Eq PathComponent
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -20,7 +20,7 @@ $c== :: PathComponent -&gt; PathComponent -&gt; Bool
 == :: PathComponent -&gt; PathComponent -&gt; Bool
 $c/= :: PathComponent -&gt; PathComponent -&gt; Bool
 /= :: PathComponent -&gt; PathComponent -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679443890"><span id="local-6989586621679443897"><span id="local-6989586621679443902"><span id="local-6989586621679443906"><span id="local-6989586621679443909"><span id="local-6989586621679443912"><span id="local-6989586621679443915"><span class="annot"><span class="annottext">Eq PathComponent
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497373"><span id="local-6989586621679497380"><span id="local-6989586621679497385"><span id="local-6989586621679497389"><span id="local-6989586621679497392"><span id="local-6989586621679497395"><span id="local-6989586621679497398"><span class="annot"><span class="annottext">Eq PathComponent
 Eq PathComponent =&gt;
 (PathComponent -&gt; PathComponent -&gt; Ordering)
 -&gt; (PathComponent -&gt; PathComponent -&gt; Bool)
@@ -57,7 +57,7 @@ $cmax :: PathComponent -&gt; PathComponent -&gt; PathComponent
 max :: PathComponent -&gt; PathComponent -&gt; PathComponent
 $cmin :: PathComponent -&gt; PathComponent -&gt; PathComponent
 min :: PathComponent -&gt; PathComponent -&gt; PathComponent
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679443924"><span id="local-6989586621679443926"><span class="annot"><span class="annottext">(forall x. PathComponent -&gt; Rep PathComponent x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497407"><span id="local-6989586621679497409"><span class="annot"><span class="annottext">(forall x. PathComponent -&gt; Rep PathComponent x)
 -&gt; (forall x. Rep PathComponent x -&gt; PathComponent)
 -&gt; Generic PathComponent
 forall x. Rep PathComponent x -&gt; PathComponent
@@ -70,8 +70,8 @@ $cto :: forall x. Rep PathComponent x -&gt; PathComponent
 to :: forall x. Rep PathComponent x -&gt; PathComponent
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679443932"><span id="local-6989586621679443939"><span id="local-6989586621679443945"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span></span></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679443987"><span id="local-6989586621679443994"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497415"><span id="local-6989586621679497422"><span id="local-6989586621679497428"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span></span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497470"><span id="local-6989586621679497477"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span></span><span>
 </span><span id="line-19"></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="PathTemplateVariable"><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-var">PathTemplateVariable</span></a></span></span><span>
 </span><span id="line-21"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-comment">-- | The @$prefix@ path variable</span></span><span>
@@ -121,7 +121,7 @@ to :: forall x. Rep PathComponent x -&gt; PathComponent
 </span><span id="line-65"></span><span>    </span><span id="TestSuiteResultVar"><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#TestSuiteResultVar"><span class="hs-identifier hs-var">TestSuiteResultVar</span></a></span></span><span>
 </span><span id="line-66"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | The name of the benchmark being run</span></span><span>
 </span><span id="line-67"></span><span>    </span><span id="BenchmarkNameVar"><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#BenchmarkNameVar"><span class="hs-identifier hs-var">BenchmarkNameVar</span></a></span></span><span>
-</span><span id="line-68"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679444057"><span id="local-6989586621679444061"><span class="annot"><span class="annottext">PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool
+</span><span id="line-68"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679497540"><span id="local-6989586621679497544"><span class="annot"><span class="annottext">PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool
 (PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool)
 -&gt; (PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool)
 -&gt; Eq PathTemplateVariable
@@ -130,7 +130,7 @@ $c== :: PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool
 == :: PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool
 $c/= :: PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool
 /= :: PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679444066"><span id="local-6989586621679444070"><span id="local-6989586621679444074"><span id="local-6989586621679444077"><span id="local-6989586621679444080"><span id="local-6989586621679444083"><span id="local-6989586621679444086"><span class="annot"><span class="annottext">Eq PathTemplateVariable
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497549"><span id="local-6989586621679497553"><span id="local-6989586621679497557"><span id="local-6989586621679497560"><span id="local-6989586621679497563"><span id="local-6989586621679497566"><span id="local-6989586621679497569"><span class="annot"><span class="annottext">Eq PathTemplateVariable
 Eq PathTemplateVariable =&gt;
 (PathTemplateVariable -&gt; PathTemplateVariable -&gt; Ordering)
 -&gt; (PathTemplateVariable -&gt; PathTemplateVariable -&gt; Bool)
@@ -174,7 +174,7 @@ $cmin :: PathTemplateVariable
 -&gt; PathTemplateVariable -&gt; PathTemplateVariable
 min :: PathTemplateVariable
 -&gt; PathTemplateVariable -&gt; PathTemplateVariable
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679444089"><span id="local-6989586621679444091"><span class="annot"><span class="annottext">(forall x. PathTemplateVariable -&gt; Rep PathTemplateVariable x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497572"><span id="local-6989586621679497574"><span class="annot"><span class="annottext">(forall x. PathTemplateVariable -&gt; Rep PathTemplateVariable x)
 -&gt; (forall x. Rep PathTemplateVariable x -&gt; PathTemplateVariable)
 -&gt; Generic PathTemplateVariable
 forall x. Rep PathTemplateVariable x -&gt; PathTemplateVariable
@@ -187,12 +187,12 @@ $cto :: forall x. Rep PathTemplateVariable x -&gt; PathTemplateVariable
 to :: forall x. Rep PathTemplateVariable x -&gt; PathTemplateVariable
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679444094"><span id="local-6989586621679444100"><span id="local-6989586621679444106"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span></span><span>
-</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679444288"><span id="local-6989586621679444294"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497577"><span id="local-6989586621679497583"><span id="local-6989586621679497589"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497771"><span id="local-6989586621679497777"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span><span>
 </span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679444415"><span id="local-6989586621679444420"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>  </span><span id="local-6989586621679444423"><span class="annot"><span class="annottext">show :: PathTemplateVariable -&gt; FilePath
-</span><a href="#local-6989586621679444423"><span class="hs-identifier hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="annot"><span class="annottext">PathTemplateVariable
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497898"><span id="local-6989586621679497903"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621679497906"><span class="annot"><span class="annottext">show :: PathTemplateVariable -&gt; FilePath
+</span><a href="#local-6989586621679497906"><span class="hs-identifier hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="annot"><span class="annottext">PathTemplateVariable
 </span><a href="Distribution.Simple.InstallDirs.Internal.html#PrefixVar"><span class="hs-identifier hs-var">PrefixVar</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;prefix&quot;</span></span><span>
 </span><span id="line-75"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">PathTemplateVariable
@@ -259,11 +259,11 @@ to :: forall x. Rep PathTemplateVariable x -&gt; PathTemplateVariable
 </span><a href="Distribution.Simple.InstallDirs.Internal.html#BenchmarkNameVar"><span class="hs-identifier hs-var">BenchmarkNameVar</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;benchmark&quot;</span></span><span>
 </span><span id="line-96"></span><span>
-</span><span id="line-97"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679444427"><span id="local-6989586621679444431"><span id="local-6989586621679444434"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-98"></span><span>  </span><span id="local-6989586621679444440"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS PathTemplateVariable
-</span><a href="#local-6989586621679444440"><span class="hs-identifier hs-var hs-var hs-var">readsPrec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679444442"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444442"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-97"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497910"><span id="local-6989586621679497914"><span id="local-6989586621679497917"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathTemplateVariable"><span class="hs-identifier hs-type">PathTemplateVariable</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621679497923"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS PathTemplateVariable
+</span><a href="#local-6989586621679497923"><span class="hs-identifier hs-var hs-var hs-var">readsPrec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679497925"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497925"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-99"></span><span>    </span><span class="annot"><span class="annottext">Int
 -&gt; [(PathTemplateVariable, FilePath)]
 -&gt; [(PathTemplateVariable, FilePath)]
@@ -272,28 +272,28 @@ forall a. Int -&gt; [a] -&gt; [a]
 </span><span id="line-100"></span><span>      </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-101"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PathTemplateVariable
-</span><a href="#local-6989586621679444444"><span class="hs-identifier hs-var">var</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ShowS
+</span><a href="#local-6989586621679497927"><span class="hs-identifier hs-var">var</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; Int
 forall a. [a] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444447"><span class="hs-identifier hs-var">varStr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444442"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-102"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679444447"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444447"><span class="hs-identifier hs-var">varStr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679444444"><span class="annot"><span class="annottext">PathTemplateVariable
-</span><a href="#local-6989586621679444444"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(FilePath, PathTemplateVariable)]
-</span><a href="#local-6989586621679444448"><span class="hs-identifier hs-var">vars</span></a></span><span>
+</span><a href="#local-6989586621679497930"><span class="hs-identifier hs-var">varStr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497925"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679497930"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497930"><span class="hs-identifier hs-var">varStr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497927"><span class="annot"><span class="annottext">PathTemplateVariable
+</span><a href="#local-6989586621679497927"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(FilePath, PathTemplateVariable)]
+</span><a href="#local-6989586621679497931"><span class="hs-identifier hs-var">vars</span></a></span><span>
 </span><span id="line-103"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444447"><span class="hs-identifier hs-var">varStr</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; Bool
+</span><a href="#local-6989586621679497930"><span class="hs-identifier hs-var">varStr</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; Bool
 forall a. Eq a =&gt; [a] -&gt; [a] -&gt; Bool
 </span><span class="hs-operator hs-var">`isPrefixOf`</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444442"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679497925"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-104"></span><span>      </span><span class="hs-special">]</span><span>
 </span><span id="line-105"></span><span>    </span><span class="hs-keyword">where</span><span>
 </span><span id="line-106"></span><span>      </span><span class="hs-comment">-- NB: order matters! Longer strings first</span><span>
-</span><span id="line-107"></span><span>      </span><span id="local-6989586621679444448"><span class="annot"><span class="annottext">vars :: [(FilePath, PathTemplateVariable)]
-</span><a href="#local-6989586621679444448"><span class="hs-identifier hs-var hs-var">vars</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-107"></span><span>      </span><span id="local-6989586621679497931"><span class="annot"><span class="annottext">vars :: [(FilePath, PathTemplateVariable)]
+</span><a href="#local-6989586621679497931"><span class="hs-identifier hs-var hs-var">vars</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-108"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;prefix&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">PathTemplateVariable
 </span><a href="Distribution.Simple.InstallDirs.Internal.html#PrefixVar"><span class="hs-identifier hs-var">PrefixVar</span></a></span><span class="hs-special">)</span><span>
@@ -365,145 +365,145 @@ forall a. Eq a =&gt; [a] -&gt; [a] -&gt; Bool
 </span><a href="Distribution.Simple.InstallDirs.Internal.html#BenchmarkNameVar"><span class="hs-identifier hs-var">BenchmarkNameVar</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-131"></span><span>        </span><span class="hs-special">]</span><span>
 </span><span id="line-132"></span><span>
-</span><span id="line-133"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679444451"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-134"></span><span>  </span><span id="local-6989586621679444457"><span class="annot"><span class="annottext">show :: PathComponent -&gt; FilePath
-</span><span class="hs-identifier hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#Ordinary"><span class="hs-identifier hs-type">Ordinary</span></a></span><span> </span><span id="local-6989586621679444458"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444458"><span class="hs-identifier hs-var">path</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444458"><span class="hs-identifier hs-var">path</span></a></span><span>
-</span><span id="line-135"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#Variable"><span class="hs-identifier hs-type">Variable</span></a></span><span> </span><span id="local-6989586621679444459"><span class="annot"><span class="annottext">PathTemplateVariable
-</span><a href="#local-6989586621679444459"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><span id="line-133"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497934"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-134"></span><span>  </span><span id="local-6989586621679497940"><span class="annot"><span class="annottext">show :: PathComponent -&gt; FilePath
+</span><span class="hs-identifier hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#Ordinary"><span class="hs-identifier hs-type">Ordinary</span></a></span><span> </span><span id="local-6989586621679497941"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497941"><span class="hs-identifier hs-var">path</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497941"><span class="hs-identifier hs-var">path</span></a></span><span>
+</span><span id="line-135"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#Variable"><span class="hs-identifier hs-type">Variable</span></a></span><span> </span><span id="local-6989586621679497942"><span class="annot"><span class="annottext">PathTemplateVariable
+</span><a href="#local-6989586621679497942"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">PathTemplateVariable -&gt; FilePath
 forall a. Show a =&gt; a -&gt; FilePath
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">PathTemplateVariable
-</span><a href="#local-6989586621679444459"><span class="hs-identifier hs-var">var</span></a></span><span>
-</span><span id="line-136"></span><span>  </span><span id="local-6989586621679444462"><span class="annot"><span class="annottext">showList :: [PathComponent] -&gt; ShowS
-</span><a href="#local-6989586621679444462"><span class="hs-identifier hs-var hs-var hs-var">showList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PathComponent -&gt; ShowS -&gt; ShowS)
+</span><a href="#local-6989586621679497942"><span class="hs-identifier hs-var">var</span></a></span><span>
+</span><span id="line-136"></span><span>  </span><span id="local-6989586621679497945"><span class="annot"><span class="annottext">showList :: [PathComponent] -&gt; ShowS
+</span><a href="#local-6989586621679497945"><span class="hs-identifier hs-var hs-var hs-var">showList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PathComponent -&gt; ShowS -&gt; ShowS)
 -&gt; ShowS -&gt; [PathComponent] -&gt; ShowS
 forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) a b.
 Foldable t =&gt;
 (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
-</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679444465"><span class="annot"><span class="annottext">PathComponent
-</span><a href="#local-6989586621679444465"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PathComponent -&gt; ShowS
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679497948"><span class="annot"><span class="annottext">PathComponent
+</span><a href="#local-6989586621679497948"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PathComponent -&gt; ShowS
 forall a. Show a =&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">shows</span></span><span> </span><span class="annot"><span class="annottext">PathComponent
-</span><a href="#local-6989586621679444465"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><a href="#local-6989586621679497948"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ShowS
 forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span>
 </span><span id="line-137"></span><span>
-</span><span id="line-138"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679444472"><span id="local-6989586621679444476"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-138"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679497955"><span id="local-6989586621679497959"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.Internal.html#PathComponent"><span class="hs-identifier hs-type">PathComponent</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-139"></span><span>  </span><span class="hs-comment">-- for some reason we collapse multiple $ symbols here</span><span>
-</span><span id="line-140"></span><span>  </span><span id="local-6989586621679444478"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS PathComponent
+</span><span id="line-140"></span><span>  </span><span id="local-6989586621679497961"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS PathComponent
 </span><span class="hs-identifier hs-var hs-var hs-var">readsPrec</span></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadS PathComponent
-</span><a href="#local-6989586621679444479"><span class="hs-identifier hs-var">lex0</span></a></span><span>
+</span><a href="#local-6989586621679497962"><span class="hs-identifier hs-var">lex0</span></a></span><span>
 </span><span id="line-141"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-142"></span><span>      </span><span id="local-6989586621679444479"><span class="annot"><span class="annottext">lex0 :: ReadS PathComponent
-</span><a href="#local-6989586621679444479"><span class="hs-identifier hs-var hs-var">lex0</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-143"></span><span>      </span><span class="annot"><a href="#local-6989586621679444479"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span id="line-142"></span><span>      </span><span id="local-6989586621679497962"><span class="annot"><span class="annottext">lex0 :: ReadS PathComponent
+</span><a href="#local-6989586621679497962"><span class="hs-identifier hs-var hs-var">lex0</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-143"></span><span>      </span><span class="annot"><a href="#local-6989586621679497962"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679444481"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444481"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadS PathComponent
-</span><a href="#local-6989586621679444479"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679497964"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497964"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadS PathComponent
+</span><a href="#local-6989586621679497962"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444481"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-144"></span><span>      </span><span class="annot"><a href="#local-6989586621679444479"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679444482"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444482"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PathTemplateVariable -&gt; PathComponent
+</span><a href="#local-6989586621679497964"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span>      </span><span class="annot"><a href="#local-6989586621679497962"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679497965"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497965"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PathTemplateVariable -&gt; PathComponent
 </span><a href="Distribution.Simple.InstallDirs.Internal.html#Variable"><span class="hs-identifier hs-var">Variable</span></a></span><span> </span><span class="annot"><span class="annottext">PathTemplateVariable
-</span><a href="#local-6989586621679444483"><span class="hs-identifier hs-var">var</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444484"><span class="hs-identifier hs-var">s''</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-145"></span><span>                             </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679444483"><span class="annot"><span class="annottext">PathTemplateVariable
-</span><a href="#local-6989586621679444483"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679444484"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444484"><span class="hs-identifier hs-var">s''</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS PathTemplateVariable
+</span><a href="#local-6989586621679497966"><span class="hs-identifier hs-var">var</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497967"><span class="hs-identifier hs-var">s''</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span>                             </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679497966"><span class="annot"><span class="annottext">PathTemplateVariable
+</span><a href="#local-6989586621679497966"><span class="hs-identifier hs-var">var</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497967"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497967"><span class="hs-identifier hs-var">s''</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS PathTemplateVariable
 forall a. Read a =&gt; ReadS a
 </span><span class="hs-identifier hs-var">reads</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444482"><span class="hs-identifier hs-var">s'</span></a></span><span>
+</span><a href="#local-6989586621679497965"><span class="hs-identifier hs-var">s'</span></a></span><span>
 </span><span id="line-146"></span><span>                             </span><span class="hs-special">]</span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-147"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ReadS PathComponent
-</span><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;$&quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444482"><span class="hs-identifier hs-var">s'</span></a></span><span>
-</span><span id="line-148"></span><span>        </span><span id="local-6989586621679444487"><span class="annot"><span class="annottext">[(PathComponent, FilePath)]
-</span><a href="#local-6989586621679444487"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[(PathComponent, FilePath)]
-</span><a href="#local-6989586621679444487"><span class="hs-identifier hs-var">ok</span></a></span><span>
-</span><span id="line-149"></span><span>      </span><span class="annot"><a href="#local-6989586621679444479"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span id="local-6989586621679444488"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444488"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ReadS PathComponent
-</span><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444488"><span class="hs-identifier hs-var">s'</span></a></span><span>
-</span><span id="line-150"></span><span>      </span><span id="local-6989586621679444486"><span class="annot"><span class="annottext">lex1 :: FilePath -&gt; ReadS PathComponent
-</span><a href="#local-6989586621679444486"><span class="hs-identifier hs-var hs-var">lex1</span></a></span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497965"><span class="hs-identifier hs-var">s'</span></a></span><span>
+</span><span id="line-148"></span><span>        </span><span id="local-6989586621679497970"><span class="annot"><span class="annottext">[(PathComponent, FilePath)]
+</span><a href="#local-6989586621679497970"><span class="hs-identifier hs-var">ok</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[(PathComponent, FilePath)]
+</span><a href="#local-6989586621679497970"><span class="hs-identifier hs-var">ok</span></a></span><span>
+</span><span id="line-149"></span><span>      </span><span class="annot"><a href="#local-6989586621679497962"><span class="hs-identifier hs-var">lex0</span></a></span><span> </span><span id="local-6989586621679497971"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497971"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ReadS PathComponent
+</span><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497971"><span class="hs-identifier hs-var">s'</span></a></span><span>
+</span><span id="line-150"></span><span>      </span><span id="local-6989586621679497969"><span class="annot"><span class="annottext">lex1 :: FilePath -&gt; ReadS PathComponent
+</span><a href="#local-6989586621679497969"><span class="hs-identifier hs-var hs-var">lex1</span></a></span></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-151"></span><span>      </span><span class="annot"><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679444489"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444489"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-151"></span><span>      </span><span class="annot"><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679497972"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497972"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; PathComponent
 </span><a href="Distribution.Simple.InstallDirs.Internal.html#Ordinary"><span class="hs-identifier hs-var">Ordinary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ShowS
 forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444489"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497972"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><span id="line-152"></span><span>      </span><span class="annot"><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679444491"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444491"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span id="line-152"></span><span>      </span><span class="annot"><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679497974"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497974"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679444492"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444492"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ReadS PathComponent
-</span><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444491"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679497975"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497975"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ReadS PathComponent
+</span><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497974"><span class="hs-identifier hs-var">acc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444492"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-153"></span><span>      </span><span class="annot"><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679444493"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444493"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679444494"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444494"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; PathComponent
+</span><a href="#local-6989586621679497975"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>      </span><span class="annot"><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679497976"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497976"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679497977"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497977"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; PathComponent
 </span><a href="Distribution.Simple.InstallDirs.Internal.html#Ordinary"><span class="hs-identifier hs-var">Ordinary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ShowS
 forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444493"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679497976"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'$'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444494"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><span id="line-154"></span><span>      </span><span class="annot"><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679444495"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444495"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679444496"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679444496"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679444497"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444497"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ReadS PathComponent
-</span><a href="#local-6989586621679444486"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679444496"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><a href="#local-6989586621679497977"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-154"></span><span>      </span><span class="annot"><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span id="local-6989586621679497978"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497978"><span class="hs-identifier hs-var">acc</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679497979"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679497979"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679497980"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497980"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ReadS PathComponent
+</span><a href="#local-6989586621679497969"><span class="hs-identifier hs-var">lex1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679497979"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444495"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444497"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-155"></span><span>  </span><span id="local-6989586621679444500"><span class="annot"><span class="annottext">readList :: ReadS [PathComponent]
-</span><a href="#local-6989586621679444500"><span class="hs-identifier hs-var hs-var hs-var">readList</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497978"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497980"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-155"></span><span>  </span><span id="local-6989586621679497983"><span class="annot"><span class="annottext">readList :: ReadS [PathComponent]
+</span><a href="#local-6989586621679497983"><span class="hs-identifier hs-var hs-var hs-var">readList</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><span id="line-156"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">readList</span></span><span> </span><span id="local-6989586621679444502"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444502"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-156"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">readList</span></span><span> </span><span id="local-6989586621679497985"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497985"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-157"></span><span>    </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PathComponent
-</span><a href="#local-6989586621679444503"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="annot"><span class="annottext">PathComponent -&gt; [PathComponent] -&gt; [PathComponent]
+</span><a href="#local-6989586621679497986"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="annot"><span class="annottext">PathComponent -&gt; [PathComponent] -&gt; [PathComponent]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[PathComponent]
-</span><a href="#local-6989586621679444504"><span class="hs-identifier hs-var">components</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444505"><span class="hs-identifier hs-var">s''</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-158"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679444503"><span class="annot"><span class="annottext">PathComponent
-</span><a href="#local-6989586621679444503"><span class="hs-identifier hs-var">component</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679444506"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444506"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS PathComponent
+</span><a href="#local-6989586621679497987"><span class="hs-identifier hs-var">components</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497988"><span class="hs-identifier hs-var">s''</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679497986"><span class="annot"><span class="annottext">PathComponent
+</span><a href="#local-6989586621679497986"><span class="hs-identifier hs-var">component</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497989"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497989"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS PathComponent
 forall a. Read a =&gt; ReadS a
 </span><span class="hs-identifier hs-var">reads</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444502"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-159"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679444504"><span class="annot"><span class="annottext">[PathComponent]
-</span><a href="#local-6989586621679444504"><span class="hs-identifier hs-var">components</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679444505"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444505"><span class="hs-identifier hs-var">s''</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS [PathComponent]
+</span><a href="#local-6989586621679497985"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-159"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679497987"><span class="annot"><span class="annottext">[PathComponent]
+</span><a href="#local-6989586621679497987"><span class="hs-identifier hs-var">components</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679497988"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679497988"><span class="hs-identifier hs-var">s''</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadS [PathComponent]
 forall a. Read a =&gt; ReadS [a]
 </span><span class="hs-identifier hs-var">readList</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679444506"><span class="hs-identifier hs-var">s'</span></a></span><span>
+</span><a href="#local-6989586621679497989"><span class="hs-identifier hs-var">s'</span></a></span><span>
 </span><span id="line-160"></span><span>    </span><span class="hs-special">]</span><span>
 </span><span id="line-161"></span></pre></body></html>

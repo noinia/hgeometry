@@ -17,7 +17,7 @@
 --   legacy <tt>parsec-2</tt> API and may be removed at some point in the
 --   future.
 @package parsec
-@version 3.1.17.0
+@version 3.1.18.0
 
 
 -- | Textual source positions.
@@ -473,7 +473,7 @@ instance GHC.Internal.Base.Functor (Text.Parsec.Prim.Reply s u)
 instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Text.Parsec.Prim.ParsecT s u m)
 instance Control.Monad.Error.Class.MonadError e m => Control.Monad.Error.Class.MonadError e (Text.Parsec.Prim.ParsecT s u m)
 instance GHC.Internal.Control.Monad.Fail.MonadFail (Text.Parsec.Prim.ParsecT s u m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Text.Parsec.Prim.ParsecT s u m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Text.Parsec.Prim.ParsecT s u m)
 instance GHC.Internal.Base.Monad (Text.Parsec.Prim.ParsecT s u m)
 instance GHC.Internal.Base.MonadPlus (Text.Parsec.Prim.ParsecT s u m)
 instance Control.Monad.Reader.Class.MonadReader r m => Control.Monad.Reader.Class.MonadReader r (Text.Parsec.Prim.ParsecT s u m)

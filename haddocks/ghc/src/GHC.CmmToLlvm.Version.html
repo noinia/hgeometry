@@ -14,9 +14,9 @@
 </span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToLlvm.Version.Type.html"><span class="hs-identifier">GHC.CmmToLlvm.Version.Type</span></a></span><span>
 </span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToLlvm.Version.Bounds.html"><span class="hs-identifier">GHC.CmmToLlvm.Version.Bounds</span></a></span><span>
 </span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Char.html/Data.Char.html"><span class="hs-identifier">Data.Char</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">isDigit</span></span><span class="hs-special">)</span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.html/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">intercalate</span></span><span class="hs-special">)</span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Char.html"><span class="hs-identifier">Data.Char</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">isDigit</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">intercalate</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
 </span><span id="line-20"></span><span>
 </span><span id="line-21"></span><span class="annot"><a href="GHC.CmmToLlvm.Version.html#parseLlvmVersion"><span class="hs-identifier hs-type">parseLlvmVersion</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.CmmToLlvm.Version.Type.html#LlvmVersion"><span class="hs-identifier hs-type">LlvmVersion</span></a></span><span>
 </span><span id="line-22"></span><span id="parseLlvmVersion"><span class="annot"><span class="annottext">parseLlvmVersion :: String -&gt; Maybe LlvmVersion
@@ -31,12 +31,12 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Maybe (NonEmpty Int)
 forall a. [a] -&gt; Maybe (NonEmpty a)
-</span><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html#nonEmpty"><span class="hs-identifier hs-var">NE.nonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; Maybe (NonEmpty Int))
+</span><a href="../../base-4.21.0.0-ae91/src/Data.List.NonEmpty.html#nonEmpty"><span class="hs-identifier hs-var">NE.nonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; Maybe (NonEmpty Int))
 -&gt; (String -&gt; [Int]) -&gt; String -&gt; Maybe (NonEmpty Int)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; String -&gt; [Int]
 forall {a}. Read a =&gt; [a] -&gt; String -&gt; [a]
-</span><a href="#local-6989586621682327033"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">(String -&gt; [Int]) -&gt; (String -&gt; String) -&gt; String -&gt; [Int]
+</span><a href="#local-6989586621682464669"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">(String -&gt; [Int]) -&gt; (String -&gt; String) -&gt; String -&gt; [Int]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; String
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
@@ -46,32 +46,32 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isDigit</span></span><span class="hs-special">)</span><span>
 </span><span id="line-24"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-25"></span><span>    </span><span id="local-6989586621682327033"><span class="annot"><span class="annottext">go :: [a] -&gt; String -&gt; [a]
-</span><a href="#local-6989586621682327033"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621682327041"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621682327041"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621682327042"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327042"><span class="hs-identifier hs-var">s</span></a></span></span><span>
+</span><span id="line-25"></span><span>    </span><span id="local-6989586621682464669"><span class="annot"><span class="annottext">go :: [a] -&gt; String -&gt; [a]
+</span><a href="#local-6989586621682464669"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621682464677"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621682464677"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span id="local-6989586621682464678"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682464678"><span class="hs-identifier hs-var">s</span></a></span></span><span>
 </span><span id="line-26"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327044"><span class="hs-identifier hs-var">ver_str</span></a></span><span>
+</span><a href="#local-6989586621682464680"><span class="hs-identifier hs-var">ver_str</span></a></span><span>
 </span><span id="line-27"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
 forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621682327041"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><a href="#local-6989586621682464677"><span class="hs-identifier hs-var">vs</span></a></span><span>
 </span><span id="line-28"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'.'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621682327046"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327046"><span class="hs-identifier hs-var">rest'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327047"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><span class="hs-char">'.'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621682464682"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682464682"><span class="hs-identifier hs-var">rest'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682464683"><span class="hs-identifier hs-var">rest</span></a></span><span>
 </span><span id="line-29"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; String -&gt; [a]
-</span><a href="#local-6989586621682327033"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; a
+</span><a href="#local-6989586621682464669"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; a
 forall a. Read a =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">read</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327044"><span class="hs-identifier hs-var">ver_str</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621682464680"><span class="hs-identifier hs-var">ver_str</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621682327041"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327046"><span class="hs-identifier hs-var">rest'</span></a></span><span>
+</span><a href="#local-6989586621682464677"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682464682"><span class="hs-identifier hs-var">rest'</span></a></span><span>
 </span><span id="line-30"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>
 </span><span id="line-31"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
@@ -79,30 +79,30 @@ forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; a
 forall a. Read a =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">read</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327044"><span class="hs-identifier hs-var">ver_str</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621682464680"><span class="hs-identifier hs-var">ver_str</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621682327041"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682464677"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-32"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-33"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682327044"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327044"><span class="hs-identifier hs-var">ver_str</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682327047"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327047"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
+</span><span id="line-33"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682464680"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682464680"><span class="hs-identifier hs-var">ver_str</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682464683"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682464683"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">span</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isDigit</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682327042"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621682464678"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span class="annot"><a href="GHC.CmmToLlvm.Version.html#llvmVersionSupported"><span class="hs-identifier hs-type">llvmVersionSupported</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToLlvm.Version.Type.html#LlvmVersion"><span class="hs-identifier hs-type">LlvmVersion</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-36"></span><span id="llvmVersionSupported"><span class="annot"><span class="annottext">llvmVersionSupported :: LlvmVersion -&gt; Bool
-</span><a href="GHC.CmmToLlvm.Version.html#llvmVersionSupported"><span class="hs-identifier hs-var hs-var">llvmVersionSupported</span></a></span></span><span> </span><span id="local-6989586621682327050"><span class="annot"><span class="annottext">LlvmVersion
-</span><a href="#local-6989586621682327050"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.CmmToLlvm.Version.html#llvmVersionSupported"><span class="hs-identifier hs-var hs-var">llvmVersionSupported</span></a></span></span><span> </span><span id="local-6989586621682464686"><span class="annot"><span class="annottext">LlvmVersion
+</span><a href="#local-6989586621682464686"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-37"></span><span>  </span><span class="annot"><span class="annottext">LlvmVersion
-</span><a href="#local-6989586621682327050"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LlvmVersion -&gt; LlvmVersion -&gt; Bool
+</span><a href="#local-6989586621682464686"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LlvmVersion -&gt; LlvmVersion -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">LlvmVersion
 </span><a href="GHC.CmmToLlvm.Version.Bounds.html#supportedLlvmVersionLowerBound"><span class="hs-identifier hs-var">supportedLlvmVersionLowerBound</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">LlvmVersion
-</span><a href="#local-6989586621682327050"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LlvmVersion -&gt; LlvmVersion -&gt; Bool
+</span><a href="#local-6989586621682464686"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LlvmVersion -&gt; LlvmVersion -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">LlvmVersion
 </span><a href="GHC.CmmToLlvm.Version.Bounds.html#supportedLlvmVersionUpperBound"><span class="hs-identifier hs-var">supportedLlvmVersionUpperBound</span></a></span><span>
@@ -129,7 +129,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-43"></span><span id="llvmVersionList"><span class="annot"><span class="annottext">llvmVersionList :: LlvmVersion -&gt; [Int]
 </span><a href="GHC.CmmToLlvm.Version.html#llvmVersionList"><span class="hs-identifier hs-var hs-var">llvmVersionList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty Int -&gt; [Int]
 forall a. NonEmpty a -&gt; [a]
-</span><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html#toList"><span class="hs-identifier hs-var">NE.toList</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty Int -&gt; [Int])
+</span><a href="../../base-4.21.0.0-ae91/src/Data.List.NonEmpty.html#toList"><span class="hs-identifier hs-var">NE.toList</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty Int -&gt; [Int])
 -&gt; (LlvmVersion -&gt; NonEmpty Int) -&gt; LlvmVersion -&gt; [Int]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LlvmVersion -&gt; NonEmpty Int

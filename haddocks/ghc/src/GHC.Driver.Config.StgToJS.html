@@ -18,8 +18,8 @@
 </span><span id="line-18"></span><span class="annot"><span class="hs-comment">-- | Initialize StgToJS settings from DynFlags</span></span><span>
 </span><span id="line-19"></span><span class="annot"><a href="GHC.Driver.Config.StgToJS.html#initStgToJSConfig"><span class="hs-identifier hs-type">initStgToJSConfig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Driver.DynFlags.html#DynFlags"><span class="hs-identifier hs-type">DynFlags</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.StgToJS.Types.html#StgToJSConfig"><span class="hs-identifier hs-type">StgToJSConfig</span></a></span><span>
 </span><span id="line-20"></span><span id="initStgToJSConfig"><span class="annot"><span class="annottext">initStgToJSConfig :: DynFlags -&gt; StgToJSConfig
-</span><a href="GHC.Driver.Config.StgToJS.html#initStgToJSConfig"><span class="hs-identifier hs-var hs-var">initStgToJSConfig</span></a></span></span><span> </span><span id="local-6989586621682761072"><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761072"><span class="hs-identifier hs-var">dflags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.StgToJS.Types.html#StgToJSConfig"><span class="hs-identifier hs-type">StgToJSConfig</span></a></span><span>
+</span><a href="GHC.Driver.Config.StgToJS.html#initStgToJSConfig"><span class="hs-identifier hs-var hs-var">initStgToJSConfig</span></a></span></span><span> </span><span id="local-6989586621682970177"><span class="annot"><span class="annottext">DynFlags
+</span><a href="#local-6989586621682970177"><span class="hs-identifier hs-var">dflags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.StgToJS.Types.html#StgToJSConfig"><span class="hs-identifier hs-type">StgToJSConfig</span></a></span><span>
 </span><span id="line-21"></span><span>  </span><span class="hs-comment">-- flags</span><span>
 </span><span id="line-22"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">csInlinePush :: Bool
 </span><a href="GHC.StgToJS.Types.html#csInlinePush"><span class="hs-identifier hs-var">csInlinePush</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -40,7 +40,7 @@
 </span><a href="GHC.StgToJS.Types.html#csPrettyRender"><span class="hs-identifier hs-var">csPrettyRender</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GeneralFlag -&gt; DynFlags -&gt; Bool
 </span><a href="GHC.Driver.DynFlags.html#gopt"><span class="hs-identifier hs-var">gopt</span></a></span><span> </span><span class="annot"><span class="annottext">GeneralFlag
 </span><a href="GHC.Driver.Flags.html#Opt_DisableJsMinifier"><span class="hs-identifier hs-var">Opt_DisableJsMinifier</span></a></span><span> </span><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761072"><span class="hs-identifier hs-var">dflags</span></a></span><span>
+</span><a href="#local-6989586621682970177"><span class="hs-identifier hs-var">dflags</span></a></span><span>
 </span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">csTraceRts :: Bool
 </span><a href="GHC.StgToJS.Types.html#csTraceRts"><span class="hs-identifier hs-var">csTraceRts</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
@@ -51,7 +51,7 @@
 </span><a href="GHC.StgToJS.Types.html#csBoundsCheck"><span class="hs-identifier hs-var">csBoundsCheck</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GeneralFlag -&gt; DynFlags -&gt; Bool
 </span><a href="GHC.Driver.DynFlags.html#gopt"><span class="hs-identifier hs-var">gopt</span></a></span><span> </span><span class="annot"><span class="annottext">GeneralFlag
 </span><a href="GHC.Driver.Flags.html#Opt_DoBoundsChecking"><span class="hs-identifier hs-var">Opt_DoBoundsChecking</span></a></span><span> </span><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761072"><span class="hs-identifier hs-var">dflags</span></a></span><span>
+</span><a href="#local-6989586621682970177"><span class="hs-identifier hs-var">dflags</span></a></span><span>
 </span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">csDebugAlloc :: Bool
 </span><a href="GHC.StgToJS.Types.html#csDebugAlloc"><span class="hs-identifier hs-var">csDebugAlloc</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
@@ -61,7 +61,7 @@
 </span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">csProf :: Bool
 </span><a href="GHC.StgToJS.Types.html#csProf"><span class="hs-identifier hs-var">csProf</span></a></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynFlags -&gt; Ways
 </span><a href="GHC.Driver.DynFlags.html#ways"><span class="hs-identifier hs-var">ways</span></a></span><span> </span><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761072"><span class="hs-identifier hs-var">dflags</span></a></span><span> </span><span class="annot"><span class="annottext">Ways -&gt; Way -&gt; Bool
+</span><a href="#local-6989586621682970177"><span class="hs-identifier hs-var">dflags</span></a></span><span> </span><span class="annot"><span class="annottext">Ways -&gt; Way -&gt; Bool
 </span><a href="GHC.Platform.Ways.html#hasWay"><span class="hs-operator hs-var">`hasWay`</span></a></span><span> </span><span class="annot"><span class="annottext">Way
 </span><a href="GHC.Platform.Ways.html#WayProf"><span class="hs-identifier hs-var">WayProf</span></a></span><span>
 </span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">csRuntimeAssert :: Bool
@@ -71,19 +71,19 @@
 </span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">csContext :: SDocContext
 </span><a href="GHC.StgToJS.Types.html#csContext"><span class="hs-identifier hs-var">csContext</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynFlags -&gt; PprStyle -&gt; SDocContext
 </span><a href="GHC.Driver.DynFlags.html#initSDocContext"><span class="hs-identifier hs-var">initSDocContext</span></a></span><span> </span><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761072"><span class="hs-identifier hs-var">dflags</span></a></span><span> </span><span class="annot"><span class="annottext">PprStyle
+</span><a href="#local-6989586621682970177"><span class="hs-identifier hs-var">dflags</span></a></span><span> </span><span class="annot"><span class="annottext">PprStyle
 </span><a href="GHC.Utils.Outputable.html#defaultDumpStyle"><span class="hs-identifier hs-var">defaultDumpStyle</span></a></span><span>
 </span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">csLinkerConfig :: LinkerConfig
 </span><a href="GHC.StgToJS.Types.html#csLinkerConfig"><span class="hs-identifier hs-var">csLinkerConfig</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DynFlags -&gt; LinkerConfig
 </span><a href="GHC.Driver.Config.Linker.html#initLinkerConfig"><span class="hs-identifier hs-var">initLinkerConfig</span></a></span><span> </span><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761072"><span class="hs-identifier hs-var">dflags</span></a></span><span>
+</span><a href="#local-6989586621682970177"><span class="hs-identifier hs-var">dflags</span></a></span><span>
 </span><span id="line-38"></span><span>  </span><span class="hs-special">}</span><span>
 </span><span id="line-39"></span><span>
 </span><span id="line-40"></span><span class="annot"><span class="hs-comment">-- | Default linker configuration</span></span><span>
 </span><span id="line-41"></span><span class="annot"><a href="GHC.Driver.Config.StgToJS.html#initJSLinkConfig"><span class="hs-identifier hs-type">initJSLinkConfig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Driver.DynFlags.html#DynFlags"><span class="hs-identifier hs-type">DynFlags</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.StgToJS.Linker.Types.html#JSLinkConfig"><span class="hs-identifier hs-type">JSLinkConfig</span></a></span><span>
 </span><span id="line-42"></span><span id="initJSLinkConfig"><span class="annot"><span class="annottext">initJSLinkConfig :: DynFlags -&gt; JSLinkConfig
-</span><a href="GHC.Driver.Config.StgToJS.html#initJSLinkConfig"><span class="hs-identifier hs-var hs-var">initJSLinkConfig</span></a></span></span><span> </span><span id="local-6989586621682761098"><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761098"><span class="hs-identifier hs-var">dflags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.StgToJS.Linker.Types.html#JSLinkConfig"><span class="hs-identifier hs-type">JSLinkConfig</span></a></span><span>
+</span><a href="GHC.Driver.Config.StgToJS.html#initJSLinkConfig"><span class="hs-identifier hs-var hs-var">initJSLinkConfig</span></a></span></span><span> </span><span id="local-6989586621682970203"><span class="annot"><span class="annottext">DynFlags
+</span><a href="#local-6989586621682970203"><span class="hs-identifier hs-var">dflags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.StgToJS.Linker.Types.html#JSLinkConfig"><span class="hs-identifier hs-type">JSLinkConfig</span></a></span><span>
 </span><span id="line-43"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">lcNoJSExecutables :: Bool
 </span><a href="GHC.StgToJS.Linker.Types.html#lcNoJSExecutables"><span class="hs-identifier hs-var">lcNoJSExecutables</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
@@ -110,7 +110,7 @@
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">GeneralFlag -&gt; DynFlags -&gt; Bool
 </span><a href="GHC.Driver.DynFlags.html#gopt"><span class="hs-identifier hs-var">gopt</span></a></span><span> </span><span class="annot"><span class="annottext">GeneralFlag
 </span><a href="GHC.Driver.Flags.html#Opt_DisableJsCsources"><span class="hs-identifier hs-var">Opt_DisableJsCsources</span></a></span><span> </span><span class="annot"><span class="annottext">DynFlags
-</span><a href="#local-6989586621682761098"><span class="hs-identifier hs-var">dflags</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682970203"><span class="hs-identifier hs-var">dflags</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-51"></span><span>  </span><span class="hs-special">}</span><span>
 </span><span id="line-52"></span><span>
 </span><span id="line-53"></span></pre></body></html>

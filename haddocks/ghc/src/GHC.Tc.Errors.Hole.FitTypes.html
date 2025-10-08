@@ -19,7 +19,7 @@
 </span><span id="line-19"></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Data.Bag.html"><span class="hs-identifier">GHC.Data.Bag</span></a></span><span>
 </span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Function.html/Data.Function.html"><span class="hs-identifier">Data.Function</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">on</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Function.html"><span class="hs-identifier">Data.Function</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">on</span></span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-23"></span><span>
 </span><span id="line-24"></span><span class="hs-keyword">data</span><span> </span><span id="TypedHole"><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#TypedHole"><span class="hs-identifier hs-var">TypedHole</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TypedHole"><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#TypedHole"><span class="hs-identifier hs-var">TypedHole</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="th_relevant_cts"><span class="annot"><span class="annottext">TypedHole -&gt; Bag CtEvidence
 </span><a href="GHC.Tc.Errors.Hole.FitTypes.html#th_relevant_cts"><span class="hs-identifier hs-var hs-var">th_relevant_cts</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Data.Bag.html#Bag"><span class="hs-identifier hs-type">Bag</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Types.Constraint.html#CtEvidence"><span class="hs-identifier hs-type">CtEvidence</span></a></span><span>
@@ -34,16 +34,16 @@
 </span><span id="line-31"></span><span>                           </span><span class="hs-special">}</span><span>
 </span><span id="line-32"></span><span>
 </span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#TypedHole"><span class="hs-identifier hs-type">TypedHole</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-34"></span><span>  </span><span id="local-6989586621682545732"><span class="annot"><span class="annottext">ppr :: TypedHole -&gt; SDoc
-</span><a href="#local-6989586621682545732"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#TypedHole"><span class="hs-identifier hs-type">TypedHole</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">th_relevant_cts :: TypedHole -&gt; Bag CtEvidence
-</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#th_relevant_cts"><span class="hs-identifier hs-var">th_relevant_cts</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682545734"><span class="annot"><span class="annottext">Bag CtEvidence
-</span><a href="#local-6989586621682545734"><span class="hs-identifier hs-var">rels</span></a></span></span><span>
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621682724238"><span class="annot"><span class="annottext">ppr :: TypedHole -&gt; SDoc
+</span><a href="#local-6989586621682724238"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#TypedHole"><span class="hs-identifier hs-type">TypedHole</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">th_relevant_cts :: TypedHole -&gt; Bag CtEvidence
+</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#th_relevant_cts"><span class="hs-identifier hs-var">th_relevant_cts</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682724240"><span class="annot"><span class="annottext">Bag CtEvidence
+</span><a href="#local-6989586621682724240"><span class="hs-identifier hs-var">rels</span></a></span></span><span>
 </span><span id="line-35"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">th_implics :: TypedHole -&gt; [Implication]
-</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#th_implics"><span class="hs-identifier hs-var">th_implics</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682545735"><span class="annot"><span class="annottext">[Implication]
-</span><a href="#local-6989586621682545735"><span class="hs-identifier hs-var">implics</span></a></span></span><span>
+</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#th_implics"><span class="hs-identifier hs-var">th_implics</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682724241"><span class="annot"><span class="annottext">[Implication]
+</span><a href="#local-6989586621682724241"><span class="hs-identifier hs-var">implics</span></a></span></span><span>
 </span><span id="line-36"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">th_hole :: TypedHole -&gt; Maybe Hole
-</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#th_hole"><span class="hs-identifier hs-var">th_hole</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682545736"><span class="annot"><span class="annottext">Maybe Hole
-</span><a href="#local-6989586621682545736"><span class="hs-identifier hs-var">hole</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#th_hole"><span class="hs-identifier hs-var">th_hole</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682724242"><span class="annot"><span class="annottext">Maybe Hole
+</span><a href="#local-6989586621682724242"><span class="hs-identifier hs-var">hole</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-37"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; Int -&gt; SDoc -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#hang"><span class="hs-identifier hs-var">hang</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -53,15 +53,15 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><span id="line-38"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bag CtEvidence -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Bag CtEvidence
-</span><a href="#local-6989586621682545734"><span class="hs-identifier hs-var">rels</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682724240"><span class="hs-identifier hs-var">rels</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#%24%2B%24"><span class="hs-operator hs-var">$+$</span></a></span><span> </span><span class="annot"><span class="annottext">[Implication] -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">[Implication]
-</span><a href="#local-6989586621682545735"><span class="hs-identifier hs-var">implics</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682724241"><span class="hs-identifier hs-var">implics</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#%24%2B%24"><span class="hs-operator hs-var">$+$</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Hole -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Hole
-</span><a href="#local-6989586621682545736"><span class="hs-identifier hs-var">hole</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682724242"><span class="hs-identifier hs-var">hole</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-39"></span><span>
 </span><span id="line-40"></span><span class="hs-comment">-- | HoleFitCandidates are passed to hole fit plugins and then</span><span>
 </span><span id="line-41"></span><span class="hs-comment">-- checked whether they fit a given typed-hole.</span><span>
@@ -69,47 +69,47 @@ forall a. Outputable a =&gt; a -&gt; SDoc
 </span><span id="line-43"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span id="NameHFCand"><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-var">NameHFCand</span></a></span></span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>         </span><span class="hs-comment">-- A name, like built-in syntax.</span><span>
 </span><span id="line-44"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span id="GreHFCand"><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-var">GreHFCand</span></a></span></span><span> </span><span class="annot"><a href="GHC.Types.Name.Reader.html#GlobalRdrElt"><span class="hs-identifier hs-type">GlobalRdrElt</span></a></span><span>  </span><span class="hs-comment">-- A global, like imported ids.</span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682545745"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-47"></span><span>  </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682545754"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545754"><span class="hs-identifier hs-var">i1</span></a></span></span><span> </span><span id="local-6989586621682545755"><span class="annot"><span class="annottext">== :: HoleFitCandidate -&gt; HoleFitCandidate -&gt; Bool
-</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682545756"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545756"><span class="hs-identifier hs-var">i2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545754"><span class="hs-identifier hs-var">i1</span></a></span><span> </span><span class="annot"><span class="annottext">Id -&gt; Id -&gt; Bool
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682724251"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682724260"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682724260"><span class="hs-identifier hs-var">i1</span></a></span></span><span> </span><span id="local-6989586621682724261"><span class="annot"><span class="annottext">== :: HoleFitCandidate -&gt; HoleFitCandidate -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682724262"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682724262"><span class="hs-identifier hs-var">i2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682724260"><span class="hs-identifier hs-var">i1</span></a></span><span> </span><span class="annot"><span class="annottext">Id -&gt; Id -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545756"><span class="hs-identifier hs-var">i2</span></a></span><span>
-</span><span id="line-48"></span><span>  </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682545757"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545757"><span class="hs-identifier hs-var">n1</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682545758"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545758"><span class="hs-identifier hs-var">n2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545757"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
+</span><a href="#local-6989586621682724262"><span class="hs-identifier hs-var">i2</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682724263"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682724263"><span class="hs-identifier hs-var">n1</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682724264"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682724264"><span class="hs-identifier hs-var">n2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682724263"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545758"><span class="hs-identifier hs-var">n2</span></a></span><span>
-</span><span id="line-49"></span><span>  </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682545759"><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545759"><span class="hs-identifier hs-var">gre1</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682545760"><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545760"><span class="hs-identifier hs-var">gre2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Name
+</span><a href="#local-6989586621682724264"><span class="hs-identifier hs-var">n2</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682724265"><span class="annot"><span class="annottext">GlobalRdrElt
+</span><a href="#local-6989586621682724265"><span class="hs-identifier hs-var">gre1</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682724266"><span class="annot"><span class="annottext">GlobalRdrElt
+</span><a href="#local-6989586621682724266"><span class="hs-identifier hs-var">gre2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Name
 forall info. GlobalRdrEltX info -&gt; Name
 </span><a href="GHC.Types.Name.Reader.html#greName"><span class="hs-identifier hs-var">greName</span></a></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545759"><span class="hs-identifier hs-var">gre1</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
+</span><a href="#local-6989586621682724265"><span class="hs-identifier hs-var">gre1</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Name
 forall info. GlobalRdrEltX info -&gt; Name
 </span><a href="GHC.Types.Name.Reader.html#greName"><span class="hs-identifier hs-var">greName</span></a></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545760"><span class="hs-identifier hs-var">gre2</span></a></span><span>
+</span><a href="#local-6989586621682724266"><span class="hs-identifier hs-var">gre2</span></a></span><span>
 </span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">HoleFitCandidate
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-53"></span><span>  </span><span id="local-6989586621682545764"><span class="annot"><span class="annottext">ppr :: HoleFitCandidate -&gt; SDoc
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621682724270"><span class="annot"><span class="annottext">ppr :: HoleFitCandidate -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate -&gt; SDoc
 </span><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-var">pprHoleFitCand</span></a></span><span>
 </span><span id="line-54"></span><span>
 </span><span id="line-55"></span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-type">pprHoleFitCand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span>
 </span><span id="line-56"></span><span id="pprHoleFitCand"><span class="annot"><span class="annottext">pprHoleFitCand :: HoleFitCandidate -&gt; SDoc
-</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-var hs-var">pprHoleFitCand</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682545765"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545765"><span class="hs-identifier hs-var">cid</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-var hs-var">pprHoleFitCand</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682724271"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682724271"><span class="hs-identifier hs-var">cid</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Id HFC: &quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -117,9 +117,9 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Id -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545765"><span class="hs-identifier hs-var">cid</span></a></span><span>
-</span><span id="line-57"></span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-var">pprHoleFitCand</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682545767"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545767"><span class="hs-identifier hs-var">cname</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><a href="#local-6989586621682724271"><span class="hs-identifier hs-var">cid</span></a></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-var">pprHoleFitCand</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682724273"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682724273"><span class="hs-identifier hs-var">cname</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Name HFC: &quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -127,9 +127,9 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545767"><span class="hs-identifier hs-var">cname</span></a></span><span>
-</span><span id="line-58"></span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-var">pprHoleFitCand</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682545768"><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545768"><span class="hs-identifier hs-var">cgre</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><a href="#local-6989586621682724273"><span class="hs-identifier hs-var">cname</span></a></span><span>
+</span><span id="line-58"></span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#pprHoleFitCand"><span class="hs-identifier hs-var">pprHoleFitCand</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682724274"><span class="annot"><span class="annottext">GlobalRdrElt
+</span><a href="#local-6989586621682724274"><span class="hs-identifier hs-var">cgre</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Gre HFC: &quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -137,58 +137,58 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545768"><span class="hs-identifier hs-var">cgre</span></a></span><span>
+</span><a href="#local-6989586621682724274"><span class="hs-identifier hs-var">cgre</span></a></span><span>
 </span><span id="line-59"></span><span>
 </span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#NamedThing"><span class="hs-identifier hs-type">NamedThing</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-61"></span><span>  </span><span id="local-6989586621682545773"><span class="annot"><span class="annottext">getName :: HoleFitCandidate -&gt; Name
-</span><a href="#local-6989586621682545773"><span class="hs-identifier hs-var hs-var hs-var">getName</span></a></span></span><span> </span><span id="local-6989586621682545775"><span class="annot"><span class="annottext">HoleFitCandidate
-</span><a href="#local-6989586621682545775"><span class="hs-identifier hs-var">hfc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate
-</span><a href="#local-6989586621682545775"><span class="hs-identifier hs-var">hfc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-62"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682545776"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545776"><span class="hs-identifier hs-var">cid</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Name
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621682724279"><span class="annot"><span class="annottext">getName :: HoleFitCandidate -&gt; Name
+</span><a href="#local-6989586621682724279"><span class="hs-identifier hs-var hs-var hs-var">getName</span></a></span></span><span> </span><span id="local-6989586621682724281"><span class="annot"><span class="annottext">HoleFitCandidate
+</span><a href="#local-6989586621682724281"><span class="hs-identifier hs-var">hfc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate
+</span><a href="#local-6989586621682724281"><span class="hs-identifier hs-var">hfc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-62"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682724282"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682724282"><span class="hs-identifier hs-var">cid</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Name
 </span><a href="GHC.Types.Id.html#idName"><span class="hs-identifier hs-var">idName</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545776"><span class="hs-identifier hs-var">cid</span></a></span><span>
-</span><span id="line-63"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682545778"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545778"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545778"><span class="hs-identifier hs-var">cname</span></a></span><span>
-</span><span id="line-64"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682545779"><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545779"><span class="hs-identifier hs-var">cgre</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Name
+</span><a href="#local-6989586621682724282"><span class="hs-identifier hs-var">cid</span></a></span><span>
+</span><span id="line-63"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682724284"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682724284"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682724284"><span class="hs-identifier hs-var">cname</span></a></span><span>
+</span><span id="line-64"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682724285"><span class="annot"><span class="annottext">GlobalRdrElt
+</span><a href="#local-6989586621682724285"><span class="hs-identifier hs-var">cgre</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Name
 forall info. GlobalRdrEltX info -&gt; Name
 </span><a href="GHC.Types.Name.Reader.html#greName"><span class="hs-identifier hs-var">greName</span></a></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545779"><span class="hs-identifier hs-var">cgre</span></a></span><span>
-</span><span id="line-65"></span><span>  </span><span id="local-6989586621682545785"><span class="annot"><span class="annottext">getOccName :: HoleFitCandidate -&gt; OccName
-</span><a href="#local-6989586621682545785"><span class="hs-identifier hs-var hs-var hs-var">getOccName</span></a></span></span><span> </span><span id="local-6989586621682545787"><span class="annot"><span class="annottext">HoleFitCandidate
-</span><a href="#local-6989586621682545787"><span class="hs-identifier hs-var">hfc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate
-</span><a href="#local-6989586621682545787"><span class="hs-identifier hs-var">hfc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-66"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682545788"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545788"><span class="hs-identifier hs-var">cid</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Id -&gt; OccName
+</span><a href="#local-6989586621682724285"><span class="hs-identifier hs-var">cgre</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621682724291"><span class="annot"><span class="annottext">getOccName :: HoleFitCandidate -&gt; OccName
+</span><a href="#local-6989586621682724291"><span class="hs-identifier hs-var hs-var hs-var">getOccName</span></a></span></span><span> </span><span id="local-6989586621682724293"><span class="annot"><span class="annottext">HoleFitCandidate
+</span><a href="#local-6989586621682724293"><span class="hs-identifier hs-var">hfc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate
+</span><a href="#local-6989586621682724293"><span class="hs-identifier hs-var">hfc</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-66"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span id="local-6989586621682724294"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682724294"><span class="hs-identifier hs-var">cid</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Id -&gt; OccName
 forall name. HasOccName name =&gt; name -&gt; OccName
 </span><a href="GHC.Types.Name.Occurrence.html#occName"><span class="hs-identifier hs-var">occName</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682545788"><span class="hs-identifier hs-var">cid</span></a></span><span>
-</span><span id="line-67"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682545790"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545790"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OccName
+</span><a href="#local-6989586621682724294"><span class="hs-identifier hs-var">cid</span></a></span><span>
+</span><span id="line-67"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span id="local-6989586621682724296"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682724296"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OccName
 forall name. HasOccName name =&gt; name -&gt; OccName
 </span><a href="GHC.Types.Name.Occurrence.html#occName"><span class="hs-identifier hs-var">occName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682545790"><span class="hs-identifier hs-var">cname</span></a></span><span>
-</span><span id="line-68"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682545791"><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545791"><span class="hs-identifier hs-var">cgre</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OccName
+</span><a href="#local-6989586621682724296"><span class="hs-identifier hs-var">cname</span></a></span><span>
+</span><span id="line-68"></span><span>                     </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682724297"><span class="annot"><span class="annottext">GlobalRdrElt
+</span><a href="#local-6989586621682724297"><span class="hs-identifier hs-var">cgre</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OccName
 forall name. HasOccName name =&gt; name -&gt; OccName
 </span><a href="GHC.Types.Name.Occurrence.html#occName"><span class="hs-identifier hs-var">occName</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; OccName) -&gt; Name -&gt; OccName
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Name
 forall info. GlobalRdrEltX info -&gt; Name
 </span><a href="GHC.Types.Name.Reader.html#greName"><span class="hs-identifier hs-var">greName</span></a></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545791"><span class="hs-identifier hs-var">cgre</span></a></span><span>
+</span><a href="#local-6989586621682724297"><span class="hs-identifier hs-var">cgre</span></a></span><span>
 </span><span id="line-69"></span><span>
 </span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Types.Name.Occurrence.html#HasOccName"><span class="hs-identifier hs-type">HasOccName</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-71"></span><span>  </span><span id="local-6989586621682545796"><span class="annot"><span class="annottext">occName :: HoleFitCandidate -&gt; OccName
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621682724302"><span class="annot"><span class="annottext">occName :: HoleFitCandidate -&gt; OccName
 </span><a href="GHC.Types.Name.Occurrence.html#occName"><span class="hs-identifier hs-var hs-var hs-var">occName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate -&gt; OccName
 forall a. NamedThing a =&gt; a -&gt; OccName
 </span><a href="GHC.Types.Name.html#getOccName"><span class="hs-identifier hs-var">getOccName</span></a></span><span>
 </span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682545801"><span id="local-6989586621682545805"><span id="local-6989586621682545808"><span id="local-6989586621682545811"><span id="local-6989586621682545814"><span id="local-6989586621682545817"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>  </span><span id="local-6989586621682545823"><span class="annot"><span class="annottext">compare :: HoleFitCandidate -&gt; HoleFitCandidate -&gt; Ordering
-</span><a href="#local-6989586621682545823"><span class="hs-identifier hs-var hs-var hs-var">compare</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Ordering
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682724307"><span id="local-6989586621682724311"><span id="local-6989586621682724314"><span id="local-6989586621682724317"><span id="local-6989586621682724320"><span id="local-6989586621682724323"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFitCandidate"><span class="hs-identifier hs-type">HoleFitCandidate</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621682724329"><span class="annot"><span class="annottext">compare :: HoleFitCandidate -&gt; HoleFitCandidate -&gt; Ordering
+</span><a href="#local-6989586621682724329"><span class="hs-identifier hs-var hs-var hs-var">compare</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Name -&gt; Ordering)
 -&gt; (HoleFitCandidate -&gt; Name)
@@ -227,8 +227,8 @@ forall a. NamedThing a =&gt; a -&gt; Name
 </span><span id="line-93"></span><span> </span><span class="hs-comment">--   can inject any fit they want.</span><span>
 </span><span id="line-94"></span><span>
 </span><span id="line-95"></span><span class="hs-comment">-- We define an Eq and Ord instance to be able to build a graph.</span><span>
-</span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682545836"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-97"></span><span>   </span><span id="local-6989586621682545840"><span class="annot"><span class="annottext">== :: HoleFit -&gt; HoleFit -&gt; Bool
+</span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682724342"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>   </span><span id="local-6989586621682724346"><span class="annot"><span class="annottext">== :: HoleFit -&gt; HoleFit -&gt; Bool
 </span><span class="hs-operator hs-var hs-var hs-var">(==)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Id -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">(==)</span></span><span> </span><span class="annot"><span class="annottext">(Id -&gt; Id -&gt; Bool) -&gt; (HoleFit -&gt; Id) -&gt; HoleFit -&gt; HoleFit -&gt; Bool
@@ -237,31 +237,31 @@ forall b c a. (b -&gt; b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; a -&gt; c
 </span><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfId"><span class="hs-identifier hs-var">hfId</span></a></span><span>
 </span><span id="line-98"></span><span>
 </span><span id="line-99"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-100"></span><span>  </span><span id="local-6989586621682545858"><span class="annot"><span class="annottext">ppr :: HoleFit -&gt; SDoc
-</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#RawHoleFit"><span class="hs-identifier hs-type">RawHoleFit</span></a></span><span> </span><span id="local-6989586621682545859"><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682545859"><span class="hs-identifier hs-var">sd</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682545859"><span class="hs-identifier hs-var">sd</span></a></span><span>
+</span><span id="line-100"></span><span>  </span><span id="local-6989586621682724364"><span class="annot"><span class="annottext">ppr :: HoleFit -&gt; SDoc
+</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#RawHoleFit"><span class="hs-identifier hs-type">RawHoleFit</span></a></span><span> </span><span id="local-6989586621682724365"><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682724365"><span class="hs-identifier hs-var">sd</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682724365"><span class="hs-identifier hs-var">sd</span></a></span><span>
 </span><span id="line-101"></span><span>  </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682545860"><span class="annot"><span class="annottext">HoleFitCandidate
-</span><a href="#local-6989586621682545860"><span class="hs-identifier hs-var">cand</span></a></span></span><span> </span><span id="local-6989586621682545861"><span class="annot"><span class="annottext">TcType
-</span><a href="#local-6989586621682545861"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682724366"><span class="annot"><span class="annottext">HoleFitCandidate
+</span><a href="#local-6989586621682724366"><span class="hs-identifier hs-var">cand</span></a></span></span><span> </span><span id="local-6989586621682724367"><span class="annot"><span class="annottext">TcType
+</span><a href="#local-6989586621682724367"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">[TcType]
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682545862"><span class="annot"><span class="annottext">[TcType]
-</span><a href="#local-6989586621682545862"><span class="hs-identifier hs-var">mtchs</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe [HsDocString]
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682724368"><span class="annot"><span class="annottext">[TcType]
+</span><a href="#local-6989586621682724368"><span class="hs-identifier hs-var">mtchs</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe [HsDocString]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-102"></span><span>    </span><span class="annot"><span class="annottext">SDoc -&gt; Int -&gt; SDoc -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#hang"><span class="hs-identifier hs-var">hang</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682545863"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682724369"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682545865"><span class="hs-identifier hs-var">holes</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682724371"><span class="hs-identifier hs-var">holes</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;where&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682545863"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682724369"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
 </span><a href="GHC.Utils.Outputable.html#dcolon"><span class="hs-identifier hs-var">dcolon</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -269,18 +269,18 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TcType -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">TcType
-</span><a href="#local-6989586621682545861"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-103"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682545863"><span class="annot"><span class="annottext">name :: SDoc
-</span><a href="#local-6989586621682545863"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
+</span><a href="#local-6989586621682724367"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682724369"><span class="annot"><span class="annottext">name :: SDoc
+</span><a href="#local-6989586621682724369"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; SDoc) -&gt; Name -&gt; SDoc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate -&gt; Name
 forall a. NamedThing a =&gt; a -&gt; Name
 </span><a href="GHC.Types.Name.html#getName"><span class="hs-identifier hs-var">getName</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFitCandidate
-</span><a href="#local-6989586621682545860"><span class="hs-identifier hs-var">cand</span></a></span><span>
-</span><span id="line-104"></span><span>          </span><span id="local-6989586621682545865"><span class="annot"><span class="annottext">holes :: SDoc
-</span><a href="#local-6989586621682545865"><span class="hs-identifier hs-var hs-var">holes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
+</span><a href="#local-6989586621682724366"><span class="hs-identifier hs-var">cand</span></a></span><span>
+</span><span id="line-104"></span><span>          </span><span id="local-6989586621682724371"><span class="annot"><span class="annottext">holes :: SDoc
+</span><a href="#local-6989586621682724371"><span class="hs-identifier hs-var hs-var">holes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsLine doc =&gt; [doc] -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#sep"><span class="hs-identifier hs-var">sep</span></a></span><span> </span><span class="annot"><span class="annottext">([SDoc] -&gt; SDoc) -&gt; [SDoc] -&gt; SDoc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -303,14 +303,14 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">TcType -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[TcType]
-</span><a href="#local-6989586621682545862"><span class="hs-identifier hs-var">mtchs</span></a></span><span>
+</span><a href="#local-6989586621682724368"><span class="hs-identifier hs-var">mtchs</span></a></span><span>
 </span><span id="line-105"></span><span>
 </span><span id="line-106"></span><span class="hs-comment">-- We compare HoleFits by their name instead of their Id, since we don't</span><span>
 </span><span id="line-107"></span><span class="hs-comment">-- want our tests to be affected by the non-determinism of `nonDetCmpVar`,</span><span>
 </span><span id="line-108"></span><span class="hs-comment">-- which is used to compare Ids. When comparing, we want HoleFits with a lower</span><span>
 </span><span id="line-109"></span><span class="hs-comment">-- refinement level to come first.</span><span>
-</span><span id="line-110"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682545874"><span id="local-6989586621682545878"><span id="local-6989586621682545881"><span id="local-6989586621682545884"><span id="local-6989586621682545887"><span id="local-6989586621682545890"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-111"></span><span>  </span><span id="local-6989586621682545898"><span class="annot"><span class="annottext">compare :: HoleFit -&gt; HoleFit -&gt; Ordering
+</span><span id="line-110"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682724380"><span id="local-6989586621682724384"><span id="local-6989586621682724387"><span id="local-6989586621682724390"><span id="local-6989586621682724393"><span id="local-6989586621682724396"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-111"></span><span>  </span><span id="local-6989586621682724404"><span class="annot"><span class="annottext">compare :: HoleFit -&gt; HoleFit -&gt; Ordering
 </span><span class="hs-identifier hs-var hs-var hs-var">compare</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#RawHoleFit"><span class="hs-identifier hs-type">RawHoleFit</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#RawHoleFit"><span class="hs-identifier hs-type">RawHoleFit</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
@@ -323,20 +323,20 @@ forall a. Outputable a =&gt; a -&gt; SDoc
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#RawHoleFit"><span class="hs-identifier hs-type">RawHoleFit</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">GT</span></span><span>
-</span><span id="line-114"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">compare</span></span><span> </span><span id="local-6989586621682545899"><span class="annot"><span class="annottext">a :: HoleFit
-</span><a href="#local-6989586621682545899"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span id="local-6989586621682545900"><span class="annot"><span class="annottext">b :: HoleFit
-</span><a href="#local-6989586621682545900"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HoleFit -&gt; HoleFit -&gt; Ordering
-</span><a href="#local-6989586621682545901"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
-</span><a href="#local-6989586621682545899"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
-</span><a href="#local-6989586621682545900"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-115"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682545901"><span class="annot"><span class="annottext">cmp :: HoleFit -&gt; HoleFit -&gt; Ordering
-</span><a href="#local-6989586621682545901"><span class="hs-identifier hs-var hs-var">cmp</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">HoleFit -&gt; Int
+</span><span id="line-114"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">compare</span></span><span> </span><span id="local-6989586621682724405"><span class="annot"><span class="annottext">a :: HoleFit
+</span><a href="#local-6989586621682724405"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span id="local-6989586621682724406"><span class="annot"><span class="annottext">b :: HoleFit
+</span><a href="#local-6989586621682724406"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HoleFit -&gt; HoleFit -&gt; Ordering
+</span><a href="#local-6989586621682724407"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
+</span><a href="#local-6989586621682724405"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
+</span><a href="#local-6989586621682724406"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682724407"><span class="annot"><span class="annottext">cmp :: HoleFit -&gt; HoleFit -&gt; Ordering
+</span><a href="#local-6989586621682724407"><span class="hs-identifier hs-var hs-var">cmp</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">HoleFit -&gt; Int
 </span><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfRefLvl"><span class="hs-identifier hs-var">hfRefLvl</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
-</span><a href="#local-6989586621682545899"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682724405"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">HoleFit -&gt; Int
 </span><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfRefLvl"><span class="hs-identifier hs-var">hfRefLvl</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
-</span><a href="#local-6989586621682545900"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621682724406"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-116"></span><span>                 </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Name -&gt; Ordering)
@@ -359,21 +359,21 @@ forall b c a. (b -&gt; b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; a -&gt; c
 </span><span id="line-118"></span><span>
 </span><span id="line-119"></span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfIsLcl"><span class="hs-identifier hs-type">hfIsLcl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-120"></span><span id="hfIsLcl"><span class="annot"><span class="annottext">hfIsLcl :: HoleFit -&gt; Bool
-</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfIsLcl"><span class="hs-identifier hs-var hs-var">hfIsLcl</span></a></span></span><span> </span><span id="local-6989586621682545902"><span class="annot"><span class="annottext">hf :: HoleFit
-</span><a href="#local-6989586621682545902"><span class="hs-identifier hs-var">hf</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HoleFit -&gt; HoleFitCandidate
+</span><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfIsLcl"><span class="hs-identifier hs-var hs-var">hfIsLcl</span></a></span></span><span> </span><span id="local-6989586621682724408"><span class="annot"><span class="annottext">hf :: HoleFit
+</span><a href="#local-6989586621682724408"><span class="hs-identifier hs-var">hf</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#HoleFit"><span class="hs-identifier hs-type">HoleFit</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HoleFit -&gt; HoleFitCandidate
 </span><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfCand"><span class="hs-identifier hs-var">hfCand</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
-</span><a href="#local-6989586621682545902"><span class="hs-identifier hs-var">hf</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682724408"><span class="hs-identifier hs-var">hf</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-121"></span><span>                            </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#IdHFCand"><span class="hs-identifier hs-type">IdHFCand</span></a></span><span> </span><span class="annot"><span class="annottext">Id
 </span><span class="hs-identifier">_</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
 </span><span id="line-122"></span><span>                            </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#NameHFCand"><span class="hs-identifier hs-type">NameHFCand</span></a></span><span> </span><span class="annot"><span class="annottext">Name
 </span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-123"></span><span>                            </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682545903"><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545903"><span class="hs-identifier hs-var">gre</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Bool
+</span><span id="line-123"></span><span>                            </span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#GreHFCand"><span class="hs-identifier hs-type">GreHFCand</span></a></span><span> </span><span id="local-6989586621682724409"><span class="annot"><span class="annottext">GlobalRdrElt
+</span><a href="#local-6989586621682724409"><span class="hs-identifier hs-var">gre</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt -&gt; Bool
 forall info. GlobalRdrEltX info -&gt; Bool
 </span><a href="GHC.Types.Name.Reader.html#gre_lcl"><span class="hs-identifier hs-var">gre_lcl</span></a></span><span> </span><span class="annot"><span class="annottext">GlobalRdrElt
-</span><a href="#local-6989586621682545903"><span class="hs-identifier hs-var">gre</span></a></span><span>
+</span><a href="#local-6989586621682724409"><span class="hs-identifier hs-var">gre</span></a></span><span>
 </span><span id="line-124"></span><span class="annot"><a href="GHC.Tc.Errors.Hole.FitTypes.html#hfIsLcl"><span class="hs-identifier hs-var">hfIsLcl</span></a></span><span> </span><span class="annot"><span class="annottext">HoleFit
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>

@@ -36,7 +36,7 @@
 --   <a>text-icu package</a> based on the well-respected and liberally
 --   licensed <a>ICU library</a>.
 @package text
-@version 2.1.1
+@version 2.1.2
 
 
 -- | Packed, unboxed, heap-resident arrays. Suitable for performance
@@ -433,28 +433,33 @@ pack :: String -> Text
 module Data.Text.Internal.StrictBuilder
 
 -- | A delayed representation of strict <a>Text</a>.
-data StrictBuilder
-StrictBuilder :: {-# UNPACK #-} !Int -> (forall s. () => MArray s -> Int -> ST s ()) -> StrictBuilder
-[sbLength] :: StrictBuilder -> {-# UNPACK #-} !Int
-[sbWrite] :: StrictBuilder -> forall s. () => MArray s -> Int -> ST s ()
+data StrictTextBuilder
+StrictTextBuilder :: {-# UNPACK #-} !Int -> (forall s. () => MArray s -> Int -> ST s ()) -> StrictTextBuilder
+[sbLength] :: StrictTextBuilder -> {-# UNPACK #-} !Int
+[sbWrite] :: StrictTextBuilder -> forall s. () => MArray s -> Int -> ST s ()
+
+-- | A delayed representation of strict <a>Text</a>.
+
+-- | <i>Deprecated: Use StrictTextBuilder instead</i>
+type StrictBuilder = StrictTextBuilder
 
 -- | Use <a>StrictBuilder</a> to build <a>Text</a>.
-toText :: StrictBuilder -> Text
+toText :: StrictTextBuilder -> Text
 
-fromChar :: Char -> StrictBuilder
+fromChar :: Char -> StrictTextBuilder
 
 -- | Copy <a>Text</a> in a <a>StrictBuilder</a>
-fromText :: Text -> StrictBuilder
+fromText :: Text -> StrictTextBuilder
 
 -- | Copy a <a>ByteString</a>.
 --   
 --   Unsafe: This may not be valid UTF-8 text.
-unsafeFromByteString :: ByteString -> StrictBuilder
+unsafeFromByteString :: ByteString -> StrictTextBuilder
 
 -- | Unsafe: This may not be valid UTF-8 text.
-unsafeFromWord8 :: Word8 -> StrictBuilder
-instance GHC.Internal.Base.Monoid Data.Text.Internal.StrictBuilder.StrictBuilder
-instance GHC.Internal.Base.Semigroup Data.Text.Internal.StrictBuilder.StrictBuilder
+unsafeFromWord8 :: Word8 -> StrictTextBuilder
+instance GHC.Internal.Base.Monoid Data.Text.Internal.StrictBuilder.StrictTextBuilder
+instance GHC.Internal.Base.Semigroup Data.Text.Internal.StrictBuilder.StrictTextBuilder
 
 
 -- | Fast substring search for <a>Text</a>, based on work by Boyer, Moore,
@@ -913,6 +918,15 @@ foldr :: (Char -> b -> b) -> b -> Stream Char -> b
 --   </pre>
 foldr1 :: HasCallStack => (Char -> Char -> Char) -> Stream Char -> Char
 
+-- | A monadic version of <a>foldl</a>.
+--   
+--   <b>Properties</b>
+--   
+--   <pre>
+--   <a>foldlM'</a> f z0 . <a>stream</a> = <a>foldlM'</a> f z0
+--   </pre>
+foldlM' :: Monad m => (b -> Char -> m b) -> b -> Stream Char -> m b
+
 -- | <i>O(n)</i> Concatenate a list of streams.
 --   
 --   <b>Properties</b>
@@ -1247,7 +1261,7 @@ validateUtf8More :: Utf8State -> ByteString -> (Int, Maybe Utf8State)
 --   <pre>
 --   <a>encodeUtf8</a> (<a>strictBuilderToText</a> builder) <a>&lt;&gt;</a> rest = chunk
 --   </pre>
-decodeUtf8Chunk :: ByteString -> (StrictBuilder, ByteString, Maybe Utf8State)
+decodeUtf8Chunk :: ByteString -> (StrictTextBuilder, ByteString, Maybe Utf8State)
 
 -- | Decode another chunk in an ongoing UTF-8 stream.
 --   
@@ -1286,7 +1300,7 @@ decodeUtf8Chunk :: ByteString -> (StrictBuilder, ByteString, Maybe Utf8State)
 --   </pre>we have:<pre>s2b (pre1 <a>&lt;&gt;</a> pre2) = s2b pre3 ms2 =
 --   ms3 </pre></li>
 --   </ol>
-decodeUtf8More :: Utf8State -> ByteString -> (StrictBuilder, ByteString, Maybe Utf8State)
+decodeUtf8More :: Utf8State -> ByteString -> (StrictTextBuilder, ByteString, Maybe Utf8State)
 
 -- | Helper for <a>decodeUtf8With</a>.
 decodeUtf8With1 :: OnDecodeError -> String -> ByteString -> Text
@@ -1296,7 +1310,7 @@ decodeUtf8With1 :: OnDecodeError -> String -> ByteString -> Text
 --   process bad bytes.
 --   
 --   See <a>decodeUtf8Chunk</a> for a more flexible alternative.
-decodeUtf8With2 :: OnDecodeError -> String -> Utf8State -> ByteString -> (StrictBuilder, ByteString, Utf8State)
+decodeUtf8With2 :: OnDecodeError -> String -> Utf8State -> ByteString -> (StrictTextBuilder, ByteString, Utf8State)
 
 -- | State of decoding a <a>ByteString</a> in UTF-8. Enables incremental
 --   decoding (<a>validateUtf8Chunk</a>, <a>validateUtf8More</a>,
@@ -1307,19 +1321,24 @@ data Utf8State
 startUtf8State :: Utf8State
 
 -- | A delayed representation of strict <a>Text</a>.
-data StrictBuilder
+data StrictTextBuilder
+
+-- | A delayed representation of strict <a>Text</a>.
+
+-- | <i>Deprecated: Use StrictTextBuilder instead</i>
+type StrictBuilder = StrictTextBuilder
 
 -- | Use <a>StrictBuilder</a> to build <a>Text</a>.
-strictBuilderToText :: StrictBuilder -> Text
+strictBuilderToText :: StrictTextBuilder -> Text
 
 -- | Copy <a>Text</a> in a <a>StrictBuilder</a>
-textToStrictBuilder :: Text -> StrictBuilder
+textToStrictBuilder :: Text -> StrictTextBuilder
 
 -- | Call the error handler on each byte of the partial code point stored
 --   in <a>Utf8State</a> and append the results.
 --   
 --   Exported for use in lazy <a>decodeUtf8With</a>.
-skipIncomplete :: OnDecodeError -> String -> Utf8State -> StrictBuilder
+skipIncomplete :: OnDecodeError -> String -> Utf8State -> StrictTextBuilder
 
 -- | Exported for testing.
 getCompleteLen :: Utf8State -> Int
@@ -1498,6 +1517,10 @@ Yield :: !a -> !s -> Step s a
 --   <a>stream</a> . <a>unstream</a> = <a>id</a>
 --   </pre>
 stream :: Text -> Stream Char
+
+-- | <i>O(n)</i> <tt><a>streamLn</a> t = <a>stream</a> (t &lt;&gt;
+--   '\n')</tt>
+streamLn :: Text -> Stream Char
 
 -- | <i>O(n)</i> Convert <a>Stream</a> <a>Char</a> into a <a>Text</a>.
 --   
@@ -1797,7 +1820,7 @@ Some :: !Text -> !ByteString -> (ByteString -> Decoding) -> Decoding
 --   <pre>
 --   <a>encodeUtf8</a> (<a>strictBuilderToText</a> builder) <a>&lt;&gt;</a> rest = chunk
 --   </pre>
-decodeUtf8Chunk :: ByteString -> (StrictBuilder, ByteString, Maybe Utf8State)
+decodeUtf8Chunk :: ByteString -> (StrictTextBuilder, ByteString, Maybe Utf8State)
 
 -- | Decode another chunk in an ongoing UTF-8 stream.
 --   
@@ -1836,7 +1859,7 @@ decodeUtf8Chunk :: ByteString -> (StrictBuilder, ByteString, Maybe Utf8State)
 --   </pre>we have:<pre>s2b (pre1 <a>&lt;&gt;</a> pre2) = s2b pre3 ms2 =
 --   ms3 </pre></li>
 --   </ol>
-decodeUtf8More :: Utf8State -> ByteString -> (StrictBuilder, ByteString, Maybe Utf8State)
+decodeUtf8More :: Utf8State -> ByteString -> (StrictTextBuilder, ByteString, Maybe Utf8State)
 
 -- | State of decoding a <a>ByteString</a> in UTF-8. Enables incremental
 --   decoding (<a>validateUtf8Chunk</a>, <a>validateUtf8More</a>,
@@ -1847,13 +1870,18 @@ data Utf8State
 startUtf8State :: Utf8State
 
 -- | A delayed representation of strict <a>Text</a>.
-data StrictBuilder
+
+-- | <i>Deprecated: Use StrictTextBuilder instead</i>
+type StrictBuilder = StrictTextBuilder
+
+-- | A delayed representation of strict <a>Text</a>.
+data StrictTextBuilder
 
 -- | Use <a>StrictBuilder</a> to build <a>Text</a>.
-strictBuilderToText :: StrictBuilder -> Text
+strictBuilderToText :: StrictTextBuilder -> Text
 
 -- | Copy <a>Text</a> in a <a>StrictBuilder</a>
-textToStrictBuilder :: Text -> StrictBuilder
+textToStrictBuilder :: Text -> StrictTextBuilder
 
 -- | Decode a <a>ByteString</a> containing 7-bit ASCII encoded text.
 --   
@@ -2023,8 +2051,16 @@ useAsPtr :: Text -> (Ptr Word8 -> I8 -> IO a) -> IO a
 -- | <i>O(n)</i> Make a mutable copy of a <a>Text</a>.
 asForeignPtr :: Text -> IO (ForeignPtr Word8, I8)
 
+-- | <i>O(n)</i> Decode a null-terminated C string, which is assumed to
+--   have been encoded as UTF-8. If decoding fails, a
+--   <tt>UnicodeException</tt> is thrown.
+peekCString :: CString -> IO Text
+
 -- | Marshal a <a>Text</a> into a C string with a trailing NUL byte,
 --   encoded as UTF-8 in temporary storage.
+--   
+--   The <a>Text</a> itself must not contain any NUL bytes, this
+--   precondition is not checked. Cf. <a>withCStringLen</a>.
 --   
 --   The temporary storage is freed when the subcomputation terminates
 --   (either normally or via an exception), so the pointer to the temporary
@@ -2125,6 +2161,21 @@ singleton :: Char -> Text
 
 -- | <i>O(1)</i> The empty <a>Text</a>.
 empty :: Text
+
+-- | Bidirectional pattern synonym for <a>empty</a> and <a>null</a> (both
+--   <i>O(1)</i>), to be used together with <a>(:&lt;)</a> or
+--   <a>(:&gt;)</a>.
+pattern Empty :: Text
+
+-- | Bidirectional pattern synonym for <a>cons</a> (<i>O(n)</i>) and
+--   <a>uncons</a> (<i>O(1)</i>), to be used together with <a>Empty</a>.
+pattern (:<) :: Char -> Text -> Text
+infixr 5 :<
+
+-- | Bidirectional pattern synonym for <a>snoc</a> (<i>O(n)</i>) and
+--   <a>unsnoc</a> (<i>O(1)</i>) to be used together with <a>Empty</a>.
+pattern (:>) :: Text -> Char -> Text
+infixl 5 :>
 
 -- | <i>O(n)</i> Adds a character to the front of a <a>Text</a>. This
 --   function is more costly than its <tt>List</tt> counterpart because it
@@ -2437,6 +2488,9 @@ foldr' :: (Char -> a -> a) -> a -> Text -> a
 -- | <i>O(n)</i> A variant of <a>foldr</a> that has no starting value
 --   argument, and thus must be applied to a non-empty <a>Text</a>.
 foldr1 :: HasCallStack => (Char -> Char -> Char) -> Text -> Char
+
+-- | <i>O(n)</i> A monadic version of <a>foldl'</a>.
+foldlM' :: Monad m => (a -> Char -> m a) -> a -> Text -> m a
 
 -- | <i>O(n)</i> Concatenate a list of <a>Text</a>s.
 concat :: [Text] -> Text
@@ -2776,9 +2830,17 @@ groupBy :: (Char -> Char -> Bool) -> Text -> [Text]
 --   shortest first.
 inits :: Text -> [Text]
 
+-- | <i>O(n)</i> Return all initial segments of the given <a>Text</a>,
+--   shortest first.
+initsNE :: Text -> NonEmpty Text
+
 -- | <i>O(n)</i> Return all final segments of the given <a>Text</a>,
 --   longest first.
 tails :: Text -> [Text]
+
+-- | <i>O(n)</i> Return all final segments of the given <a>Text</a>,
+--   longest first.
+tailsNE :: Text -> NonEmpty Text
 
 -- | <i>O(m+n)</i> Break a <a>Text</a> into pieces separated by the first
 --   <a>Text</a> argument (which cannot be empty), consuming the delimiter.
@@ -3052,6 +3114,9 @@ zip :: Text -> Text -> [(Char, Char)]
 --   Performs replacement on invalid scalar values.
 zipWith :: (Char -> Char -> Char) -> Text -> Text -> Text
 
+-- | Convert a value to <a>Text</a>.
+show :: Show a => a -> Text
+
 -- | <i>O(n)</i> Make a distinct copy of the given string, sharing no
 --   storage with the original string.
 --   
@@ -3090,7 +3155,7 @@ instance GHC.Internal.Data.Data.Data Data.Text.Internal.Text
 instance GHC.Classes.Eq Data.Text.Internal.Text
 instance GHC.Internal.IsList.IsList Data.Text.Internal.Text
 instance GHC.Internal.Data.String.IsString Data.Text.Internal.Text
-instance Language.Haskell.TH.Syntax.Lift Data.Text.Internal.Text
+instance GHC.Internal.TH.Lift.Lift Data.Text.Internal.Text
 instance GHC.Internal.Base.Monoid Data.Text.Internal.Text
 instance Control.DeepSeq.NFData Data.Text.Internal.Text
 instance GHC.Classes.Ord Data.Text.Internal.Text
@@ -3188,7 +3253,11 @@ double :: Reader Double
 --   module.
 module Data.Text.Internal.Lazy
 data Text
+
+-- | Empty text.
 Empty :: Text
+
+-- | Chunks must be non-empty, this invariant is not checked.
 Chunk :: {-# UNPACK #-} !Text -> Text -> Text
 
 -- | Type synonym for the lazy flavour of <a>Text</a>.
@@ -3264,6 +3333,10 @@ module Data.Text.Internal.Lazy.Fusion
 
 -- | <i>O(n)</i> Convert a <a>Text</a> into a 'Stream Char'.
 stream :: Text -> Stream Char
+
+-- | <i>O(n)</i> <tt><a>streamLn</a> t = <a>stream</a> (t &lt;&gt;
+--   '\n')</tt>
+streamLn :: Text -> Stream Char
 
 -- | <i>O(n)</i> Convert a 'Stream Char' into a <a>Text</a>, using
 --   <a>defaultChunkSize</a>.
@@ -3465,6 +3538,19 @@ foldrChunks :: (Text -> a -> a) -> a -> Text -> a
 -- | Consume the chunks of a lazy <a>Text</a> with a strict,
 --   tail-recursive, accumulating left fold.
 foldlChunks :: (a -> Text -> a) -> a -> Text -> a
+
+-- | Empty text.
+pattern Empty :: () => Text
+
+-- | Bidirectional pattern synonym for <a>cons</a> (<i>O(n)</i>) and
+--   <a>uncons</a> (<i>O(1)</i>), to be used together with <a>Empty</a>.
+pattern (:<) :: Char -> Text -> Text
+infixr 5 :<
+
+-- | Bidirectional pattern synonym for <a>snoc</a> (<i>O(n)</i>) and
+--   <a>unsnoc</a> (<i>O(1)</i>) to be used together with <a>Empty</a>.
+pattern (:>) :: Text -> Char -> Text
+infixl 5 :>
 
 -- | <i>O(1)</i> Adds a character to the front of a <a>Text</a>.
 cons :: Char -> Text -> Text
@@ -3715,6 +3801,9 @@ foldr :: (Char -> a -> a) -> a -> Text -> a
 -- | <i>O(n)</i> A variant of <a>foldr</a> that has no starting value
 --   argument, and thus must be applied to a non-empty <a>Text</a>.
 foldr1 :: HasCallStack => (Char -> Char -> Char) -> Text -> Char
+
+-- | <i>O(n)</i> A monadic version of <a>foldl'</a>.
+foldlM' :: Monad m => (a -> Char -> m a) -> a -> Text -> m a
 
 -- | <i>O(n)</i> Concatenate a list of <a>Text</a>s.
 concat :: [Text] -> Text
@@ -4065,13 +4154,21 @@ group :: Text -> [Text]
 --   <a>group</a>.
 groupBy :: (Char -> Char -> Bool) -> Text -> [Text]
 
--- | <i>O(n)</i> Return all initial segments of the given <a>Text</a>,
+-- | <i>O(n²)</i> Return all initial segments of the given <a>Text</a>,
 --   shortest first.
 inits :: Text -> [Text]
+
+-- | <i>O(n²)</i> Return all initial segments of the given <a>Text</a>,
+--   shortest first.
+initsNE :: Text -> NonEmpty Text
 
 -- | <i>O(n)</i> Return all final segments of the given <a>Text</a>,
 --   longest first.
 tails :: Text -> [Text]
+
+-- | <i>O(n)</i> Return all final segments of the given <a>Text</a>,
+--   longest first.
+tailsNE :: Text -> NonEmpty Text
 
 -- | <i>O(m+n)</i> Break a <a>Text</a> into pieces separated by the first
 --   <a>Text</a> argument (which cannot be an empty string), consuming the
@@ -4297,12 +4394,15 @@ zip :: Text -> Text -> [(Char, Char)]
 --   function given as the first argument, instead of a tupling function.
 --   Performs replacement on invalid scalar values.
 zipWith :: (Char -> Char -> Char) -> Text -> Text -> Text
+
+-- | Convert a value to lazy <a>Text</a>.
+show :: Show a => a -> Text
 instance Data.Binary.Class.Binary Data.Text.Internal.Lazy.Text
 instance GHC.Internal.Data.Data.Data Data.Text.Internal.Lazy.Text
 instance GHC.Classes.Eq Data.Text.Internal.Lazy.Text
 instance GHC.Internal.IsList.IsList Data.Text.Internal.Lazy.Text
 instance GHC.Internal.Data.String.IsString Data.Text.Internal.Lazy.Text
-instance Language.Haskell.TH.Syntax.Lift Data.Text.Internal.Lazy.Text
+instance GHC.Internal.TH.Lift.Lift Data.Text.Internal.Lazy.Text
 instance GHC.Internal.Base.Monoid Data.Text.Internal.Lazy.Text
 instance Control.DeepSeq.NFData Data.Text.Internal.Lazy.Text
 instance GHC.Classes.Ord Data.Text.Internal.Lazy.Text
@@ -4407,6 +4507,80 @@ hGetLineWith :: ([Text] -> t) -> Handle -> IO t
 --   strict and lazy implementations of hGetContents.
 readChunk :: Handle__ -> CharBuffer -> IO Text
 
+-- | Print a <tt>Stream Char</tt>.
+hPutStream :: Handle -> Stream Char -> IO ()
+
+-- | Write a string to a handle.
+hPutStr :: Handle -> Text -> IO ()
+
+-- | Write a string to a handle, followed by a newline.
+hPutStrLn :: Handle -> Text -> IO ()
+
+
+-- | Efficient locale-sensitive support for lazy text I/O.
+--   
+--   The functions in this module obey the runtime system's locale,
+--   character set encoding, and line ending conversion settings.
+--   
+--   If you know in advance that you will be working with data that has a
+--   specific encoding (e.g. UTF-8), and your application is highly
+--   performance sensitive, you may find that it is faster to perform I/O
+--   with bytestrings and to encode and decode yourself than to use the
+--   functions in this module.
+module Data.Text.Lazy.IO
+
+-- | Read a file and return its contents as a string. The file is read
+--   lazily, as with <a>getContents</a>.
+--   
+--   Beware that this function (similarly to <a>readFile</a>) is
+--   locale-dependent. Unexpected system locale may cause your application
+--   to read corrupted data or throw runtime exceptions about "invalid
+--   argument (invalid byte sequence)" or "invalid argument (invalid
+--   character)". This is also slow, because GHC first converts an entire
+--   input to UTF-32, which is afterwards converted to UTF-8.
+--   
+--   If your data is UTF-8, using <a>decodeUtf8</a> <a>.</a>
+--   <a>readFile</a> is a much faster and safer alternative.
+readFile :: FilePath -> IO Text
+
+-- | Write a string to a file. The file is truncated to zero length before
+--   writing begins.
+writeFile :: FilePath -> Text -> IO ()
+
+-- | Write a string to the end of a file.
+appendFile :: FilePath -> Text -> IO ()
+
+-- | Lazily read the remaining contents of a <a>Handle</a>. The
+--   <a>Handle</a> will be closed after the read completes, or on error.
+hGetContents :: Handle -> IO Text
+
+-- | Read a single line from a handle.
+hGetLine :: Handle -> IO Text
+
+-- | Write a string to a handle.
+hPutStr :: Handle -> Text -> IO ()
+
+-- | Write a string to a handle, followed by a newline.
+hPutStrLn :: Handle -> Text -> IO ()
+
+-- | The <a>interact</a> function takes a function of type <tt>Text -&gt;
+--   Text</tt> as its argument. The entire input from the standard input
+--   device is passed (lazily) to this function as its argument, and the
+--   resulting string is output on the standard output device.
+interact :: (Text -> Text) -> IO ()
+
+-- | Lazily read all user input on <a>stdin</a> as a single string.
+getContents :: IO Text
+
+-- | Read a single line of user input from <a>stdin</a>.
+getLine :: IO Text
+
+-- | Write a string to <a>stdout</a>.
+putStr :: Text -> IO ()
+
+-- | Write a string to <a>stdout</a>, followed by a newline.
+putStrLn :: Text -> IO ()
+
 
 -- | <i>Warning</i>: this is an internal module, and does not have a stable
 --   API or name. Functions in this module may not check or enforce
@@ -4444,6 +4618,7 @@ module Data.Text.Internal.Builder
 --   to become a new chunk of the resulting lazy <tt>Text</tt>. All this is
 --   hidden from the user of the <tt>Builder</tt>.
 data Builder
+type LazyTextBuilder = Builder
 
 -- | <i>O(n).</i> Extract a lazy <tt>Text</tt> from a <tt>Builder</tt> with
 --   a default buffer size. The construction work takes place if and when
@@ -4557,6 +4732,7 @@ module Data.Text.Lazy.Builder
 --   to become a new chunk of the resulting lazy <tt>Text</tt>. All this is
 --   hidden from the user of the <tt>Builder</tt>.
 data Builder
+type LazyTextBuilder = Builder
 
 -- | <i>O(n).</i> Extract a lazy <tt>Text</tt> from a <tt>Builder</tt> with
 --   a default buffer size. The construction work takes place if and when
@@ -4799,71 +4975,6 @@ hPutStrLn :: Handle -> Text -> IO ()
 interact :: (Text -> Text) -> IO ()
 
 -- | Read all user input on <a>stdin</a> as a single string.
-getContents :: IO Text
-
--- | Read a single line of user input from <a>stdin</a>.
-getLine :: IO Text
-
--- | Write a string to <a>stdout</a>.
-putStr :: Text -> IO ()
-
--- | Write a string to <a>stdout</a>, followed by a newline.
-putStrLn :: Text -> IO ()
-
-
--- | Efficient locale-sensitive support for lazy text I/O.
---   
---   The functions in this module obey the runtime system's locale,
---   character set encoding, and line ending conversion settings.
---   
---   If you know in advance that you will be working with data that has a
---   specific encoding (e.g. UTF-8), and your application is highly
---   performance sensitive, you may find that it is faster to perform I/O
---   with bytestrings and to encode and decode yourself than to use the
---   functions in this module.
-module Data.Text.Lazy.IO
-
--- | Read a file and return its contents as a string. The file is read
---   lazily, as with <a>getContents</a>.
---   
---   Beware that this function (similarly to <a>readFile</a>) is
---   locale-dependent. Unexpected system locale may cause your application
---   to read corrupted data or throw runtime exceptions about "invalid
---   argument (invalid byte sequence)" or "invalid argument (invalid
---   character)". This is also slow, because GHC first converts an entire
---   input to UTF-32, which is afterwards converted to UTF-8.
---   
---   If your data is UTF-8, using <a>decodeUtf8</a> <a>.</a>
---   <a>readFile</a> is a much faster and safer alternative.
-readFile :: FilePath -> IO Text
-
--- | Write a string to a file. The file is truncated to zero length before
---   writing begins.
-writeFile :: FilePath -> Text -> IO ()
-
--- | Write a string to the end of a file.
-appendFile :: FilePath -> Text -> IO ()
-
--- | Lazily read the remaining contents of a <a>Handle</a>. The
---   <a>Handle</a> will be closed after the read completes, or on error.
-hGetContents :: Handle -> IO Text
-
--- | Read a single line from a handle.
-hGetLine :: Handle -> IO Text
-
--- | Write a string to a handle.
-hPutStr :: Handle -> Text -> IO ()
-
--- | Write a string to a handle, followed by a newline.
-hPutStrLn :: Handle -> Text -> IO ()
-
--- | The <a>interact</a> function takes a function of type <tt>Text -&gt;
---   Text</tt> as its argument. The entire input from the standard input
---   device is passed (lazily) to this function as its argument, and the
---   resulting string is output on the standard output device.
-interact :: (Text -> Text) -> IO ()
-
--- | Lazily read all user input on <a>stdin</a> as a single string.
 getContents :: IO Text
 
 -- | Read a single line of user input from <a>stdin</a>.

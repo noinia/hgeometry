@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679477984"><span id="local-6989586621679477985"><span id="local-6989586621679477986"><span id="local-6989586621679477987"></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679493054"><span id="local-6989586621679493055"><span id="local-6989586621679493056"><span id="local-6989586621679493057"></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
 </span><span id="line-4"></span><span>
@@ -36,14 +36,14 @@
 </span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
 </span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Utils.Generic.html"><span class="hs-identifier">Distribution.Utils.Generic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Utils.Generic.html#lowercase"><span class="hs-identifier">lowercase</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html"><span class="hs-identifier">Distribution.Utils.ShortText</span></a></span><span>
-</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-40"></span><span>
 </span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span>
 </span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
 </span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Map.html/Data.Map.html"><span class="hs-identifier">Data.Map</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Map.html"><span class="hs-identifier">Data.Map</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
 </span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html"><span class="hs-identifier">Distribution.Compat.CharParsing</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span class="hs-comment">-- -----------------------------------------------------------------------------</span><span>
 </span><span id="line-49"></span><span class="hs-comment">-- The Flag' type</span><span>
@@ -60,7 +60,7 @@
 </span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="flagManual"><span class="annot"><span class="annottext">PackageFlag -&gt; Bool
 </span><a href="Distribution.Types.Flag.html#flagManual"><span class="hs-identifier hs-var hs-var">flagManual</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-58"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-59"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478034"><span id="local-6989586621679478045"><span id="local-6989586621679478049"><span class="annot"><span class="annottext">Int -&gt; PackageFlag -&gt; ShowS
+</span><span id="line-59"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493104"><span id="local-6989586621679493115"><span id="local-6989586621679493119"><span class="annot"><span class="annottext">Int -&gt; PackageFlag -&gt; ShowS
 [PackageFlag] -&gt; ShowS
 PackageFlag -&gt; String
 (Int -&gt; PackageFlag -&gt; ShowS)
@@ -75,7 +75,7 @@ $cshow :: PackageFlag -&gt; String
 show :: PackageFlag -&gt; String
 $cshowList :: [PackageFlag] -&gt; ShowS
 showList :: [PackageFlag] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478055"><span id="local-6989586621679478065"><span class="annot"><span class="annottext">PackageFlag -&gt; PackageFlag -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493125"><span id="local-6989586621679493135"><span class="annot"><span class="annottext">PackageFlag -&gt; PackageFlag -&gt; Bool
 (PackageFlag -&gt; PackageFlag -&gt; Bool)
 -&gt; (PackageFlag -&gt; PackageFlag -&gt; Bool) -&gt; Eq PackageFlag
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -83,7 +83,7 @@ $c== :: PackageFlag -&gt; PackageFlag -&gt; Bool
 == :: PackageFlag -&gt; PackageFlag -&gt; Bool
 $c/= :: PackageFlag -&gt; PackageFlag -&gt; Bool
 /= :: PackageFlag -&gt; PackageFlag -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478073"><span id="local-6989586621679478083"><span id="local-6989586621679478090"><span id="local-6989586621679478092"><span id="local-6989586621679478094"><span id="local-6989586621679478100"><span id="local-6989586621679478105"><span id="local-6989586621679478108"><span id="local-6989586621679478111"><span id="local-6989586621679478114"><span id="local-6989586621679478117"><span id="local-6989586621679478120"><span id="local-6989586621679478125"><span id="local-6989586621679478130"><span class="annot"><span class="annottext">Typeable PackageFlag
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493143"><span id="local-6989586621679493153"><span id="local-6989586621679493160"><span id="local-6989586621679493162"><span id="local-6989586621679493164"><span id="local-6989586621679493170"><span id="local-6989586621679493175"><span id="local-6989586621679493178"><span id="local-6989586621679493181"><span id="local-6989586621679493184"><span id="local-6989586621679493187"><span id="local-6989586621679493190"><span id="local-6989586621679493195"><span id="local-6989586621679493200"><span class="annot"><span class="annottext">Typeable PackageFlag
 Typeable PackageFlag =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -249,7 +249,7 @@ MonadPlus m =&gt;
 gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d) -&gt; PackageFlag -&gt; m PackageFlag
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478141"><span id="local-6989586621679478143"><span class="annot"><span class="annottext">(forall x. PackageFlag -&gt; Rep PackageFlag x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493211"><span id="local-6989586621679493213"><span class="annot"><span class="annottext">(forall x. PackageFlag -&gt; Rep PackageFlag x)
 -&gt; (forall x. Rep PackageFlag x -&gt; PackageFlag)
 -&gt; Generic PackageFlag
 forall x. Rep PackageFlag x -&gt; PackageFlag
@@ -262,22 +262,22 @@ $cto :: forall x. Rep PackageFlag x -&gt; PackageFlag
 to :: forall x. Rep PackageFlag x -&gt; PackageFlag
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-60"></span><span>
-</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478149"><span id="local-6989586621679478156"><span id="local-6989586621679478162"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#PackageFlag"><span class="hs-identifier hs-type">PackageFlag</span></a></span></span></span></span><span>
-</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478208"><span id="local-6989586621679478215"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#PackageFlag"><span class="hs-identifier hs-type">PackageFlag</span></a></span></span></span><span>
-</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#PackageFlag"><span class="hs-identifier hs-type">PackageFlag</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679478290"><span class="annot"><span class="annottext">rnf :: PackageFlag -&gt; ()
-</span><a href="#local-6989586621679478290"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageFlag -&gt; ()
+</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493219"><span id="local-6989586621679493226"><span id="local-6989586621679493232"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#PackageFlag"><span class="hs-identifier hs-type">PackageFlag</span></a></span></span></span></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493278"><span id="local-6989586621679493285"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#PackageFlag"><span class="hs-identifier hs-type">PackageFlag</span></a></span></span></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#PackageFlag"><span class="hs-identifier hs-type">PackageFlag</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679493360"><span class="annot"><span class="annottext">rnf :: PackageFlag -&gt; ()
+</span><a href="#local-6989586621679493360"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageFlag -&gt; ()
 forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><a href="Distribution.Compat.Prelude.html#genericRnf"><span class="hs-identifier hs-var">genericRnf</span></a></span><span>
 </span><span id="line-64"></span><span>
 </span><span id="line-65"></span><span class="annot"><span class="hs-comment">-- | A 'PackageFlag' initialized with default parameters.</span></span><span>
 </span><span id="line-66"></span><span class="annot"><a href="Distribution.Types.Flag.html#emptyFlag"><span class="hs-identifier hs-type">emptyFlag</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#PackageFlag"><span class="hs-identifier hs-type">PackageFlag</span></a></span><span>
 </span><span id="line-67"></span><span id="emptyFlag"><span class="annot"><span class="annottext">emptyFlag :: FlagName -&gt; PackageFlag
-</span><a href="Distribution.Types.Flag.html#emptyFlag"><span class="hs-identifier hs-var hs-var">emptyFlag</span></a></span></span><span> </span><span id="local-6989586621679478293"><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478293"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Types.Flag.html#emptyFlag"><span class="hs-identifier hs-var hs-var">emptyFlag</span></a></span></span><span> </span><span id="local-6989586621679493363"><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679493363"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-68"></span><span>  </span><span class="annot"><a href="Distribution.Types.Flag.html#MkPackageFlag"><span class="hs-identifier hs-type">MkPackageFlag</span></a></span><span>
 </span><span id="line-69"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">flagName :: FlagName
 </span><a href="Distribution.Types.Flag.html#flagName"><span class="hs-identifier hs-var">flagName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478293"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><a href="#local-6989586621679493363"><span class="hs-identifier hs-var">name</span></a></span><span>
 </span><span id="line-70"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagDescription :: String
 </span><a href="Distribution.Types.Flag.html#flagDescription"><span class="hs-identifier hs-var">flagDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
@@ -297,7 +297,7 @@ forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><span id="line-80"></span><span class="hs-comment">--</span><span>
 </span><span id="line-81"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-82"></span><span class="hs-keyword">newtype</span><span> </span><span id="FlagName"><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-var">FlagName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FlagName"><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-var">FlagName</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html#ShortText"><span class="hs-identifier hs-type">ShortText</span></a></span><span>
-</span><span id="line-83"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478296"><span id="local-6989586621679478301"><span class="annot"><span class="annottext">FlagName -&gt; FlagName -&gt; Bool
+</span><span id="line-83"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493366"><span id="local-6989586621679493371"><span class="annot"><span class="annottext">FlagName -&gt; FlagName -&gt; Bool
 (FlagName -&gt; FlagName -&gt; Bool)
 -&gt; (FlagName -&gt; FlagName -&gt; Bool) -&gt; Eq FlagName
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -305,7 +305,7 @@ $c== :: FlagName -&gt; FlagName -&gt; Bool
 == :: FlagName -&gt; FlagName -&gt; Bool
 $c/= :: FlagName -&gt; FlagName -&gt; Bool
 /= :: FlagName -&gt; FlagName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478306"><span id="local-6989586621679478308"><span class="annot"><span class="annottext">(forall x. FlagName -&gt; Rep FlagName x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493376"><span id="local-6989586621679493378"><span class="annot"><span class="annottext">(forall x. FlagName -&gt; Rep FlagName x)
 -&gt; (forall x. Rep FlagName x -&gt; FlagName) -&gt; Generic FlagName
 forall x. Rep FlagName x -&gt; FlagName
 forall x. FlagName -&gt; Rep FlagName x
@@ -315,7 +315,7 @@ $cfrom :: forall x. FlagName -&gt; Rep FlagName x
 from :: forall x. FlagName -&gt; Rep FlagName x
 $cto :: forall x. Rep FlagName x -&gt; FlagName
 to :: forall x. Rep FlagName x -&gt; FlagName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478313"><span id="local-6989586621679478318"><span id="local-6989586621679478322"><span id="local-6989586621679478326"><span id="local-6989586621679478330"><span id="local-6989586621679478334"><span id="local-6989586621679478338"><span class="annot"><span class="annottext">Eq FlagName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493383"><span id="local-6989586621679493388"><span id="local-6989586621679493392"><span id="local-6989586621679493396"><span id="local-6989586621679493400"><span id="local-6989586621679493404"><span id="local-6989586621679493408"><span class="annot"><span class="annottext">Eq FlagName
 Eq FlagName =&gt;
 (FlagName -&gt; FlagName -&gt; Ordering)
 -&gt; (FlagName -&gt; FlagName -&gt; Bool)
@@ -352,7 +352,7 @@ $cmax :: FlagName -&gt; FlagName -&gt; FlagName
 max :: FlagName -&gt; FlagName -&gt; FlagName
 $cmin :: FlagName -&gt; FlagName -&gt; FlagName
 min :: FlagName -&gt; FlagName -&gt; FlagName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478349"><span id="local-6989586621679478354"><span id="local-6989586621679478357"><span class="annot"><span class="annottext">Int -&gt; FlagName -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493419"><span id="local-6989586621679493424"><span id="local-6989586621679493427"><span class="annot"><span class="annottext">Int -&gt; FlagName -&gt; ShowS
 [FlagName] -&gt; ShowS
 FlagName -&gt; String
 (Int -&gt; FlagName -&gt; ShowS)
@@ -365,7 +365,7 @@ $cshow :: FlagName -&gt; String
 show :: FlagName -&gt; String
 $cshowList :: [FlagName] -&gt; ShowS
 showList :: [FlagName] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478360"><span id="local-6989586621679478364"><span id="local-6989586621679478367"><span id="local-6989586621679478375"><span class="annot"><span class="annottext">ReadPrec [FlagName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493430"><span id="local-6989586621679493434"><span id="local-6989586621679493437"><span id="local-6989586621679493445"><span class="annot"><span class="annottext">ReadPrec [FlagName]
 ReadPrec FlagName
 Int -&gt; ReadS FlagName
 ReadS [FlagName]
@@ -385,7 +385,7 @@ $creadPrec :: ReadPrec FlagName
 readPrec :: ReadPrec FlagName
 $creadListPrec :: ReadPrec [FlagName]
 readListPrec :: ReadPrec [FlagName]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478384"><span id="local-6989586621679478388"><span id="local-6989586621679478391"><span id="local-6989586621679478393"><span id="local-6989586621679478395"><span id="local-6989586621679478400"><span id="local-6989586621679478405"><span id="local-6989586621679478408"><span id="local-6989586621679478411"><span id="local-6989586621679478414"><span id="local-6989586621679478417"><span id="local-6989586621679478420"><span id="local-6989586621679478425"><span id="local-6989586621679478430"><span class="annot"><span class="annottext">Typeable FlagName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493454"><span id="local-6989586621679493458"><span id="local-6989586621679493461"><span id="local-6989586621679493463"><span id="local-6989586621679493465"><span id="local-6989586621679493470"><span id="local-6989586621679493475"><span id="local-6989586621679493478"><span id="local-6989586621679493481"><span id="local-6989586621679493484"><span id="local-6989586621679493487"><span id="local-6989586621679493490"><span id="local-6989586621679493495"><span id="local-6989586621679493500"><span class="annot"><span class="annottext">Typeable FlagName
 Typeable FlagName =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -546,12 +546,12 @@ MonadPlus m =&gt;
 gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d) -&gt; FlagName -&gt; m FlagName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478435"><span class="annot"><span class="annottext">FlagName -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493505"><span class="annot"><span class="annottext">FlagName -&gt; ()
 (FlagName -&gt; ()) -&gt; NFData FlagName
 forall a. (a -&gt; ()) -&gt; NFData a
 $crnf :: FlagName -&gt; ()
 rnf :: FlagName -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-84"></span><span>
 </span><span id="line-85"></span><span class="hs-comment">-- | Construct a 'FlagName' from a 'String'</span><span>
 </span><span id="line-86"></span><span class="hs-comment">--</span><span>
@@ -574,7 +574,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-97"></span><span class="hs-comment">--</span><span>
 </span><span id="line-98"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-99"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-100"></span><span>  </span><span id="local-6989586621679478444"><span class="annot"><span class="annottext">fromString :: String -&gt; FlagName
+</span><span id="line-100"></span><span>  </span><span id="local-6989586621679493514"><span class="annot"><span class="annottext">fromString :: String -&gt; FlagName
 </span><span class="hs-identifier hs-var hs-var hs-var">fromString</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; FlagName
 </span><a href="Distribution.Types.Flag.html#mkFlagName"><span class="hs-identifier hs-var">mkFlagName</span></a></span><span>
 </span><span id="line-101"></span><span>
@@ -583,18 +583,18 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-104"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-105"></span><span class="annot"><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-type">unFlagName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-106"></span><span id="unFlagName"><span class="annot"><span class="annottext">unFlagName :: FlagName -&gt; String
-</span><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-var hs-var">unFlagName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span id="local-6989586621679478445"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679478445"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
+</span><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-var hs-var">unFlagName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span id="local-6989586621679493515"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679493515"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
 </span><a href="Distribution.Utils.ShortText.html#fromShortText"><span class="hs-identifier hs-var">fromShortText</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679478445"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679493515"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-107"></span><span>
-</span><span id="line-108"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478448"><span id="local-6989586621679478454"><span id="local-6989586621679478460"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span></span></span></span><span>
-</span><span id="line-109"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478474"><span id="local-6989586621679478480"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span></span></span><span>
+</span><span id="line-108"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493518"><span id="local-6989586621679493524"><span id="local-6989586621679493530"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span></span></span></span><span>
+</span><span id="line-109"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493544"><span id="local-6989586621679493550"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span></span></span><span>
 </span><span id="line-110"></span><span>
-</span><span id="line-111"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478500"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-112"></span><span>  </span><span id="local-6989586621679478504"><span class="annot"><span class="annottext">pretty :: FlagName -&gt; Doc
-</span><a href="#local-6989586621679478504"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; (FlagName -&gt; String) -&gt; FlagName -&gt; Doc
+</span><span id="line-111"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493570"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-112"></span><span>  </span><span id="local-6989586621679493574"><span class="annot"><span class="annottext">pretty :: FlagName -&gt; Doc
+</span><a href="#local-6989586621679493574"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; (FlagName -&gt; String) -&gt; FlagName -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FlagName -&gt; String
 </span><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-var">unFlagName</span></a></span><span>
@@ -602,51 +602,51 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-114"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-115"></span><span>  </span><span class="hs-comment">-- Note:  we don't check that FlagName doesn't have leading dash,</span><span>
 </span><span id="line-116"></span><span>  </span><span class="hs-comment">-- cabal check will do that.</span><span>
-</span><span id="line-117"></span><span>  </span><span id="local-6989586621679478524"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagName
-</span><a href="#local-6989586621679478524"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; FlagName
+</span><span id="line-117"></span><span>  </span><span id="local-6989586621679493594"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagName
+</span><a href="#local-6989586621679493594"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; FlagName
 </span><a href="Distribution.Types.Flag.html#mkFlagName"><span class="hs-identifier hs-var">mkFlagName</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; FlagName) -&gt; ShowS -&gt; String -&gt; FlagName
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ShowS
 </span><a href="Distribution.Utils.Generic.html#lowercase"><span class="hs-identifier hs-var">lowercase</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; FlagName) -&gt; m String -&gt; m FlagName
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m String
-</span><a href="#local-6989586621679478527"><span class="hs-identifier hs-var">parsec'</span></a></span><span>
+</span><a href="#local-6989586621679493597"><span class="hs-identifier hs-var">parsec'</span></a></span><span>
 </span><span id="line-118"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-119"></span><span>      </span><span id="local-6989586621679478527"><span class="annot"><span class="annottext">parsec' :: m String
-</span><a href="#local-6989586621679478527"><span class="hs-identifier hs-var hs-var">parsec'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; ShowS) -&gt; m Char -&gt; m ShowS
+</span><span id="line-119"></span><span>      </span><span id="local-6989586621679493597"><span class="annot"><span class="annottext">parsec' :: m String
+</span><a href="#local-6989586621679493597"><span class="hs-identifier hs-var hs-var">parsec'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; ShowS) -&gt; m Char -&gt; m ShowS
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m Char
-</span><a href="#local-6989586621679478531"><span class="hs-identifier hs-var">lead</span></a></span><span> </span><span class="annot"><span class="annottext">m ShowS -&gt; m String -&gt; m String
+</span><a href="#local-6989586621679493601"><span class="hs-identifier hs-var">lead</span></a></span><span> </span><span class="annot"><span class="annottext">m ShowS -&gt; m String -&gt; m String
 forall a b. m (a -&gt; b) -&gt; m a -&gt; m b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m String
-</span><a href="#local-6989586621679478532"><span class="hs-identifier hs-var">rest</span></a></span><span>
-</span><span id="line-120"></span><span>      </span><span id="local-6989586621679478531"><span class="annot"><span class="annottext">lead :: m Char
-</span><a href="#local-6989586621679478531"><span class="hs-identifier hs-var hs-var">lead</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; m Char
+</span><a href="#local-6989586621679493602"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><span id="line-120"></span><span>      </span><span id="local-6989586621679493601"><span class="annot"><span class="annottext">lead :: m Char
+</span><a href="#local-6989586621679493601"><span class="hs-identifier hs-var hs-var">lead</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; (Char -&gt; Bool) -&gt; m Char
-</span><a href="Distribution.Compat.CharParsing.html#satisfy"><span class="hs-identifier hs-var">P.satisfy</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478540"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679478540"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><a href="Distribution.Compat.CharParsing.html#satisfy"><span class="hs-identifier hs-var">P.satisfy</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679493610"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679493610"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isAlphaNum</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679478540"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679493610"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679478540"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679493610"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'_'</span></span><span class="hs-special">)</span><span>
-</span><span id="line-121"></span><span>      </span><span id="local-6989586621679478532"><span class="annot"><span class="annottext">rest :: m String
-</span><a href="#local-6989586621679478532"><span class="hs-identifier hs-var hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; m String
+</span><span id="line-121"></span><span>      </span><span id="local-6989586621679493602"><span class="annot"><span class="annottext">rest :: m String
+</span><a href="#local-6989586621679493602"><span class="hs-identifier hs-var hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; m String
 forall (m :: * -&gt; *). CharParsing m =&gt; (Char -&gt; Bool) -&gt; m String
-</span><a href="Distribution.Compat.CharParsing.html#munch"><span class="hs-identifier hs-var">P.munch</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478551"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679478551"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><a href="Distribution.Compat.CharParsing.html#munch"><span class="hs-identifier hs-var">P.munch</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679493621"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679493621"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isAlphaNum</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679478551"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679493621"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679478551"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679493621"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'_'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679478551"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679493621"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span class="hs-special">)</span><span>
@@ -658,8 +658,8 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-127"></span><span class="hs-comment">--</span><span>
 </span><span id="line-128"></span><span class="hs-comment">-- TODO: Why we record the multiplicity of the flag?</span><span>
 </span><span id="line-129"></span><span class="hs-keyword">newtype</span><span> </span><span id="FlagAssignment"><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-var">FlagAssignment</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FlagAssignment"><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-var">FlagAssignment</span></a></span></span><span> </span><span class="hs-special">{</span><span id="getFlagAssignment"><span class="annot"><span class="annottext">FlagAssignment -&gt; Map FlagName (Int, Bool)
-</span><a href="Distribution.Types.Flag.html#getFlagAssignment"><span class="hs-identifier hs-var hs-var">getFlagAssignment</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#Map"><span class="hs-identifier hs-type">Map.Map</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span class="hs-special">}</span><span>
-</span><span id="line-130"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478555"><span id="local-6989586621679478562"><span id="local-6989586621679478568"><span class="annot"><span class="annottext">Get FlagAssignment
+</span><a href="Distribution.Types.Flag.html#getFlagAssignment"><span class="hs-identifier hs-var hs-var">getFlagAssignment</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#Map"><span class="hs-identifier hs-type">Map.Map</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span class="hs-special">}</span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493625"><span id="local-6989586621679493632"><span id="local-6989586621679493638"><span class="annot"><span class="annottext">Get FlagAssignment
 [FlagAssignment] -&gt; Put
 FlagAssignment -&gt; Put
 (FlagAssignment -&gt; Put)
@@ -673,7 +673,7 @@ $cget :: Get FlagAssignment
 get :: Get FlagAssignment
 $cputList :: [FlagAssignment] -&gt; Put
 putList :: [FlagAssignment] -&gt; Put
-</span><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Binary</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478586"><span id="local-6989586621679478588"><span class="annot"><span class="annottext">(forall x. FlagAssignment -&gt; Rep FlagAssignment x)
+</span><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Binary</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493656"><span id="local-6989586621679493658"><span class="annot"><span class="annottext">(forall x. FlagAssignment -&gt; Rep FlagAssignment x)
 -&gt; (forall x. Rep FlagAssignment x -&gt; FlagAssignment)
 -&gt; Generic FlagAssignment
 forall x. Rep FlagAssignment x -&gt; FlagAssignment
@@ -684,20 +684,20 @@ $cfrom :: forall x. FlagAssignment -&gt; Rep FlagAssignment x
 from :: forall x. FlagAssignment -&gt; Rep FlagAssignment x
 $cto :: forall x. Rep FlagAssignment x -&gt; FlagAssignment
 to :: forall x. Rep FlagAssignment x -&gt; FlagAssignment
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478591"><span class="annot"><span class="annottext">FlagAssignment -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493661"><span class="annot"><span class="annottext">FlagAssignment -&gt; ()
 (FlagAssignment -&gt; ()) -&gt; NFData FlagAssignment
 forall a. (a -&gt; ()) -&gt; NFData a
 $crnf :: FlagAssignment -&gt; ()
 rnf :: FlagAssignment -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-131"></span><span>
-</span><span id="line-132"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478605"><span id="local-6989586621679478612"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span><span>
+</span><span id="line-132"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493675"><span id="local-6989586621679493682"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span><span>
 </span><span id="line-133"></span><span>
-</span><span id="line-134"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478637"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-135"></span><span>  </span><span id="local-6989586621679478647"><span class="annot"><span class="annottext">== :: FlagAssignment -&gt; FlagAssignment -&gt; Bool
-</span><span class="hs-operator hs-var hs-var hs-var">(==)</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679478648"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478648"><span class="hs-identifier hs-var">m1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679478649"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478649"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-134"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493707"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-135"></span><span>  </span><span id="local-6989586621679493717"><span class="annot"><span class="annottext">== :: FlagAssignment -&gt; FlagAssignment -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">(==)</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679493718"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493718"><span class="hs-identifier hs-var">m1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679493719"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493719"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-136"></span><span>    </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; Bool)
 -&gt; Map FlagName (Int, Bool) -&gt; Map FlagName Bool
 forall a b. (a -&gt; b) -&gt; Map FlagName a -&gt; Map FlagName b
@@ -705,7 +705,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; Bool
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478648"><span class="hs-identifier hs-var">m1</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName Bool -&gt; Map FlagName Bool -&gt; Bool
+</span><a href="#local-6989586621679493718"><span class="hs-identifier hs-var">m1</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName Bool -&gt; Map FlagName Bool -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; Bool)
 -&gt; Map FlagName (Int, Bool) -&gt; Map FlagName Bool
@@ -714,13 +714,13 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; Bool
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478649"><span class="hs-identifier hs-var">m2</span></a></span><span>
+</span><a href="#local-6989586621679493719"><span class="hs-identifier hs-var">m2</span></a></span><span>
 </span><span id="line-137"></span><span>
-</span><span id="line-138"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478655"><span id="local-6989586621679478659"><span id="local-6989586621679478662"><span id="local-6989586621679478665"><span id="local-6989586621679478668"><span id="local-6989586621679478671"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-139"></span><span>  </span><span id="local-6989586621679478679"><span class="annot"><span class="annottext">compare :: FlagAssignment -&gt; FlagAssignment -&gt; Ordering
-</span><span class="hs-identifier hs-var hs-var hs-var">compare</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679478680"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478680"><span class="hs-identifier hs-var">m1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679478681"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478681"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-138"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493725"><span id="local-6989586621679493729"><span id="local-6989586621679493732"><span id="local-6989586621679493735"><span id="local-6989586621679493738"><span id="local-6989586621679493741"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-139"></span><span>  </span><span id="local-6989586621679493749"><span class="annot"><span class="annottext">compare :: FlagAssignment -&gt; FlagAssignment -&gt; Ordering
+</span><span class="hs-identifier hs-var hs-var hs-var">compare</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679493750"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493750"><span class="hs-identifier hs-var">m1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679493751"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493751"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-140"></span><span>    </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; Bool)
 -&gt; Map FlagName (Int, Bool) -&gt; Map FlagName Bool
 forall a b. (a -&gt; b) -&gt; Map FlagName a -&gt; Map FlagName b
@@ -728,7 +728,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; Bool
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478680"><span class="hs-identifier hs-var">m1</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName Bool -&gt; Map FlagName Bool -&gt; Ordering
+</span><a href="#local-6989586621679493750"><span class="hs-identifier hs-var">m1</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName Bool -&gt; Map FlagName Bool -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; Bool)
 -&gt; Map FlagName (Int, Bool) -&gt; Map FlagName Bool
@@ -737,7 +737,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; Bool
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478681"><span class="hs-identifier hs-var">m2</span></a></span><span>
+</span><a href="#local-6989586621679493751"><span class="hs-identifier hs-var">m2</span></a></span><span>
 </span><span id="line-141"></span><span>
 </span><span id="line-142"></span><span class="hs-comment">-- | Combines pairs of values contained in the 'FlagAssignment' Map.</span><span>
 </span><span id="line-143"></span><span class="hs-comment">--</span><span>
@@ -745,16 +745,16 @@ forall a b. (a, b) -&gt; b
 </span><span id="line-145"></span><span class="hs-comment">-- of times we have seen the flag.</span><span>
 </span><span id="line-146"></span><span class="annot"><a href="Distribution.Types.Flag.html#combineFlagValues"><span class="hs-identifier hs-type">combineFlagValues</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
 </span><span id="line-147"></span><span id="combineFlagValues"><span class="annot"><span class="annottext">combineFlagValues :: (Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool)
-</span><a href="Distribution.Types.Flag.html#combineFlagValues"><span class="hs-identifier hs-var hs-var">combineFlagValues</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478683"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478683"><span class="hs-identifier hs-var">c1</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478684"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478684"><span class="hs-identifier hs-var">c2</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478685"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679478685"><span class="hs-identifier hs-var">b2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478683"><span class="hs-identifier hs-var">c1</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="Distribution.Types.Flag.html#combineFlagValues"><span class="hs-identifier hs-var hs-var">combineFlagValues</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493753"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679493753"><span class="hs-identifier hs-var">c1</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493754"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679493754"><span class="hs-identifier hs-var">c2</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493755"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679493755"><span class="hs-identifier hs-var">b2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679493753"><span class="hs-identifier hs-var">c1</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478684"><span class="hs-identifier hs-var">c2</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679478685"><span class="hs-identifier hs-var">b2</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679493754"><span class="hs-identifier hs-var">c2</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679493755"><span class="hs-identifier hs-var">b2</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-148"></span><span>
 </span><span id="line-149"></span><span class="hs-comment">-- The 'Semigroup' instance currently is right-biased.</span><span>
 </span><span id="line-150"></span><span class="hs-comment">--</span><span>
@@ -762,29 +762,29 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-152"></span><span class="hs-comment">-- take precedence and we want to know how many times the flag has been</span><span>
 </span><span id="line-153"></span><span class="hs-comment">-- specified so that we have the option of warning the user about</span><span>
 </span><span id="line-154"></span><span class="hs-comment">-- supplying duplicate flags.</span><span>
-</span><span id="line-155"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478689"><span id="local-6989586621679478693"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-156"></span><span>  </span><span id="local-6989586621679478699"><span class="annot"><span class="annottext">&lt;&gt; :: FlagAssignment -&gt; FlagAssignment -&gt; FlagAssignment
-</span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679478700"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478700"><span class="hs-identifier hs-var">m1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679478701"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478701"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-155"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493759"><span id="local-6989586621679493763"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-156"></span><span>  </span><span id="local-6989586621679493769"><span class="annot"><span class="annottext">&lt;&gt; :: FlagAssignment -&gt; FlagAssignment -&gt; FlagAssignment
+</span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679493770"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493770"><span class="hs-identifier hs-var">m1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679493771"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493771"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-157"></span><span>    </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; FlagAssignment
 </span><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-var">FlagAssignment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool))
 -&gt; Map FlagName (Int, Bool)
 -&gt; Map FlagName (Int, Bool)
 -&gt; Map FlagName (Int, Bool)
 forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; Map k a -&gt; Map k a -&gt; Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#unionWith"><span class="hs-identifier hs-var">Map.unionWith</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool)
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#unionWith"><span class="hs-identifier hs-var">Map.unionWith</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool)
 </span><a href="Distribution.Types.Flag.html#combineFlagValues"><span class="hs-identifier hs-var">combineFlagValues</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478700"><span class="hs-identifier hs-var">m1</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478701"><span class="hs-identifier hs-var">m2</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679493770"><span class="hs-identifier hs-var">m1</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493771"><span class="hs-identifier hs-var">m2</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-158"></span><span>
-</span><span id="line-159"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478708"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-160"></span><span>  </span><span id="local-6989586621679478712"><span class="annot"><span class="annottext">mempty :: FlagAssignment
+</span><span id="line-159"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493778"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621679493782"><span class="annot"><span class="annottext">mempty :: FlagAssignment
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; FlagAssignment
 </span><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-var">FlagAssignment</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
 forall k a. Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#empty"><span class="hs-identifier hs-var">Map.empty</span></a></span><span>
-</span><span id="line-161"></span><span>  </span><span id="local-6989586621679478715"><span class="annot"><span class="annottext">mappend :: FlagAssignment -&gt; FlagAssignment -&gt; FlagAssignment
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#empty"><span class="hs-identifier hs-var">Map.empty</span></a></span><span>
+</span><span id="line-161"></span><span>  </span><span id="local-6989586621679493785"><span class="annot"><span class="annottext">mappend :: FlagAssignment -&gt; FlagAssignment -&gt; FlagAssignment
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FlagAssignment -&gt; FlagAssignment -&gt; FlagAssignment
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
@@ -808,7 +808,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool))
 -&gt; [(FlagName, (Int, Bool))] -&gt; Map FlagName (Int, Bool)
 forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#fromListWith"><span class="hs-identifier hs-var">Map.fromListWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool))
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#fromListWith"><span class="hs-identifier hs-var">Map.fromListWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool))
 -&gt; (Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool)
 forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
 </span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool)
@@ -826,10 +826,10 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 -&gt; (FlagName, Bool) -&gt; (FlagName, (Int, Bool))
 forall a b. (a -&gt; b) -&gt; (FlagName, a) -&gt; (FlagName, b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478718"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679478718"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679493788"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679493788"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679478718"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679493788"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-174"></span><span>
 </span><span id="line-175"></span><span class="hs-comment">-- | Deconstruct a 'FlagAssignment' into a list of flag/value pairs.</span><span>
 </span><span id="line-176"></span><span class="hs-comment">--</span><span>
@@ -855,7 +855,7 @@ forall a b. (a, b) -&gt; b
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; [(FlagName, (Int, Bool))]
 forall k a. Map k a -&gt; [(k, a)]
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#toList"><span class="hs-identifier hs-var">Map.toList</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; [(FlagName, (Int, Bool))])
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#toList"><span class="hs-identifier hs-var">Map.toList</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; [(FlagName, (Int, Bool))])
 -&gt; (FlagAssignment -&gt; Map FlagName (Int, Bool))
 -&gt; FlagAssignment
 -&gt; [(FlagName, (Int, Bool))]
@@ -870,7 +870,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-187"></span><span id="nullFlagAssignment"><span class="annot"><span class="annottext">nullFlagAssignment :: FlagAssignment -&gt; Bool
 </span><a href="Distribution.Types.Flag.html#nullFlagAssignment"><span class="hs-identifier hs-var hs-var">nullFlagAssignment</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; Bool
 forall k a. Map k a -&gt; Bool
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#null"><span class="hs-identifier hs-var">Map.null</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; Bool)
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#null"><span class="hs-identifier hs-var">Map.null</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; Bool)
 -&gt; (FlagAssignment -&gt; Map FlagName (Int, Bool))
 -&gt; FlagAssignment
 -&gt; Bool
@@ -885,8 +885,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-193"></span><span class="hs-comment">-- @since 2.2.0</span><span>
 </span><span id="line-194"></span><span class="annot"><a href="Distribution.Types.Flag.html#lookupFlagAssignment"><span class="hs-identifier hs-type">lookupFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-195"></span><span id="lookupFlagAssignment"><span class="annot"><span class="annottext">lookupFlagAssignment :: FlagName -&gt; FlagAssignment -&gt; Maybe Bool
-</span><a href="Distribution.Types.Flag.html#lookupFlagAssignment"><span class="hs-identifier hs-var hs-var">lookupFlagAssignment</span></a></span></span><span> </span><span id="local-6989586621679478723"><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478723"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; Bool) -&gt; Maybe (Int, Bool) -&gt; Maybe Bool
+</span><a href="Distribution.Types.Flag.html#lookupFlagAssignment"><span class="hs-identifier hs-var hs-var">lookupFlagAssignment</span></a></span></span><span> </span><span id="local-6989586621679493793"><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679493793"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; Bool) -&gt; Maybe (Int, Bool) -&gt; Maybe Bool
 forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; Bool
@@ -898,8 +898,8 @@ forall a b. (a, b) -&gt; b
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FlagName -&gt; Map FlagName (Int, Bool) -&gt; Maybe (Int, Bool)
 forall k a. Ord k =&gt; k -&gt; Map k a -&gt; Maybe a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#lookup"><span class="hs-identifier hs-var">Map.lookup</span></a></span><span> </span><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478723"><span class="hs-identifier hs-var">fn</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; Maybe (Int, Bool))
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#lookup"><span class="hs-identifier hs-var">Map.lookup</span></a></span><span> </span><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679493793"><span class="hs-identifier hs-var">fn</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; Maybe (Int, Bool))
 -&gt; (FlagAssignment -&gt; Map FlagName (Int, Bool))
 -&gt; FlagAssignment
 -&gt; Maybe (Int, Bool)
@@ -920,9 +920,9 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-207"></span><span class="hs-comment">-- flag; rather than enforcing uniqueness at construction, it's</span><span>
 </span><span id="line-208"></span><span class="hs-comment">-- verified later on via `D.C.Dependency.configuredPackageProblems`</span><span>
 </span><span id="line-209"></span><span id="insertFlagAssignment"><span class="annot"><span class="annottext">insertFlagAssignment :: FlagName -&gt; Bool -&gt; FlagAssignment -&gt; FlagAssignment
-</span><a href="Distribution.Types.Flag.html#insertFlagAssignment"><span class="hs-identifier hs-var hs-var">insertFlagAssignment</span></a></span></span><span> </span><span id="local-6989586621679478725"><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478725"><span class="hs-identifier hs-var">flag</span></a></span></span><span> </span><span id="local-6989586621679478726"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679478726"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Types.Flag.html#insertFlagAssignment"><span class="hs-identifier hs-var hs-var">insertFlagAssignment</span></a></span></span><span> </span><span id="local-6989586621679493795"><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679493795"><span class="hs-identifier hs-var">flag</span></a></span></span><span> </span><span id="local-6989586621679493796"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679493796"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-210"></span><span>  </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; FlagAssignment
 </span><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-var">FlagAssignment</span></a></span><span>
 </span><span id="line-211"></span><span>    </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; FlagAssignment)
@@ -936,14 +936,14 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 -&gt; Map FlagName (Int, Bool)
 -&gt; Map FlagName (Int, Bool)
 forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; Map k a -&gt; Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#insertWith"><span class="hs-identifier hs-var">Map.insertWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool))
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#insertWith"><span class="hs-identifier hs-var">Map.insertWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool))
 -&gt; (Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool)
 forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
 </span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">(Int, Bool) -&gt; (Int, Bool) -&gt; (Int, Bool)
 </span><a href="Distribution.Types.Flag.html#combineFlagValues"><span class="hs-identifier hs-var">combineFlagValues</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478725"><span class="hs-identifier hs-var">flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679493795"><span class="hs-identifier hs-var">flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679478726"><span class="hs-identifier hs-var">val</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679493796"><span class="hs-identifier hs-var">val</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-212"></span><span>    </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; Map FlagName (Int, Bool))
 -&gt; (FlagAssignment -&gt; Map FlagName (Int, Bool))
 -&gt; FlagAssignment
@@ -963,19 +963,19 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-222"></span><span class="hs-comment">-- @since 2.2.0</span><span>
 </span><span id="line-223"></span><span class="annot"><a href="Distribution.Types.Flag.html#diffFlagAssignment"><span class="hs-identifier hs-type">diffFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span>
 </span><span id="line-224"></span><span id="diffFlagAssignment"><span class="annot"><span class="annottext">diffFlagAssignment :: FlagAssignment -&gt; FlagAssignment -&gt; FlagAssignment
-</span><a href="Distribution.Types.Flag.html#diffFlagAssignment"><span class="hs-identifier hs-var hs-var">diffFlagAssignment</span></a></span></span><span> </span><span id="local-6989586621679478728"><span class="annot"><span class="annottext">FlagAssignment
-</span><a href="#local-6989586621679478728"><span class="hs-identifier hs-var">fa1</span></a></span></span><span> </span><span id="local-6989586621679478729"><span class="annot"><span class="annottext">FlagAssignment
-</span><a href="#local-6989586621679478729"><span class="hs-identifier hs-var">fa2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Types.Flag.html#diffFlagAssignment"><span class="hs-identifier hs-var hs-var">diffFlagAssignment</span></a></span></span><span> </span><span id="local-6989586621679493798"><span class="annot"><span class="annottext">FlagAssignment
+</span><a href="#local-6989586621679493798"><span class="hs-identifier hs-var">fa1</span></a></span></span><span> </span><span id="local-6989586621679493799"><span class="annot"><span class="annottext">FlagAssignment
+</span><a href="#local-6989586621679493799"><span class="hs-identifier hs-var">fa2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-225"></span><span>  </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; FlagAssignment
 </span><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-var">FlagAssignment</span></a></span><span>
 </span><span id="line-226"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
 -&gt; Map FlagName (Int, Bool) -&gt; Map FlagName (Int, Bool)
 forall k a b. Ord k =&gt; Map k a -&gt; Map k b -&gt; Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#difference"><span class="hs-identifier hs-var">Map.difference</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FlagAssignment -&gt; Map FlagName (Int, Bool)
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#difference"><span class="hs-identifier hs-var">Map.difference</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FlagAssignment -&gt; Map FlagName (Int, Bool)
 </span><a href="Distribution.Types.Flag.html#getFlagAssignment"><span class="hs-identifier hs-var">getFlagAssignment</span></a></span><span> </span><span class="annot"><span class="annottext">FlagAssignment
-</span><a href="#local-6989586621679478728"><span class="hs-identifier hs-var">fa1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FlagAssignment -&gt; Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493798"><span class="hs-identifier hs-var">fa1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FlagAssignment -&gt; Map FlagName (Int, Bool)
 </span><a href="Distribution.Types.Flag.html#getFlagAssignment"><span class="hs-identifier hs-var">getFlagAssignment</span></a></span><span> </span><span class="annot"><span class="annottext">FlagAssignment
-</span><a href="#local-6989586621679478729"><span class="hs-identifier hs-var">fa2</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679493799"><span class="hs-identifier hs-var">fa2</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-227"></span><span>
 </span><span id="line-228"></span><span class="hs-comment">-- | Find the 'FlagName's that have been listed more than once.</span><span>
 </span><span id="line-229"></span><span class="hs-comment">--</span><span>
@@ -985,7 +985,7 @@ forall k a b. Ord k =&gt; Map k a -&gt; Map k b -&gt; Map k a
 </span><a href="Distribution.Types.Flag.html#findDuplicateFlagAssignments"><span class="hs-identifier hs-var hs-var">findDuplicateFlagAssignments</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-233"></span><span>  </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; [FlagName]
 forall k a. Map k a -&gt; [k]
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#keys"><span class="hs-identifier hs-var">Map.keys</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; [FlagName])
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#keys"><span class="hs-identifier hs-var">Map.keys</span></a></span><span> </span><span class="annot"><span class="annottext">(Map FlagName (Int, Bool) -&gt; [FlagName])
 -&gt; (FlagAssignment -&gt; Map FlagName (Int, Bool))
 -&gt; FlagAssignment
 -&gt; [FlagName]
@@ -993,7 +993,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Int, Bool) -&gt; Bool)
 -&gt; Map FlagName (Int, Bool) -&gt; Map FlagName (Int, Bool)
 forall a k. (a -&gt; Bool) -&gt; Map k a -&gt; Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#filter"><span class="hs-identifier hs-var">Map.filter</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#filter"><span class="hs-identifier hs-var">Map.filter</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Bool) -&gt; ((Int, Bool) -&gt; Int) -&gt; (Int, Bool) -&gt; Bool
@@ -1009,55 +1009,55 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><a href="Distribution.Types.Flag.html#getFlagAssignment"><span class="hs-identifier hs-var">getFlagAssignment</span></a></span><span>
 </span><span id="line-234"></span><span>
 </span><span id="line-235"></span><span class="annot"><span class="hs-comment">-- | @since 2.2.0</span></span><span>
-</span><span id="line-236"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478736"><span id="local-6989586621679478740"><span id="local-6989586621679478743"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-237"></span><span>  </span><span id="local-6989586621679478754"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS FlagAssignment
-</span><a href="#local-6989586621679478754"><span class="hs-identifier hs-var hs-var hs-var">readsPrec</span></a></span></span><span> </span><span id="local-6989586621679478756"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478756"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679478757"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679478757"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; FlagAssignment
+</span><span id="line-236"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493806"><span id="local-6989586621679493810"><span id="local-6989586621679493813"><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-237"></span><span>  </span><span id="local-6989586621679493824"><span class="annot"><span class="annottext">readsPrec :: Int -&gt; ReadS FlagAssignment
+</span><a href="#local-6989586621679493824"><span class="hs-identifier hs-var hs-var hs-var">readsPrec</span></a></span></span><span> </span><span id="local-6989586621679493826"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679493826"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679493827"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679493827"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map FlagName (Int, Bool) -&gt; FlagAssignment
 </span><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-var">FlagAssignment</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478758"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679478759"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478758"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478758"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478759"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679478759"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ReadS (Map FlagName (Int, Bool))
+</span><a href="#local-6989586621679493828"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679493829"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493828"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493828"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493829"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679493829"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ReadS (Map FlagName (Int, Bool))
 forall a. Read a =&gt; Int -&gt; ReadS a
 </span><span class="hs-identifier hs-var">readsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478756"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679478757"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679493826"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679493827"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-238"></span><span>
 </span><span id="line-239"></span><span class="annot"><span class="hs-comment">-- | @since 2.2.0</span></span><span>
-</span><span id="line-240"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478762"><span id="local-6989586621679478766"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-241"></span><span>  </span><span id="local-6989586621679478776"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; FlagAssignment -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679478777"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478777"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679478778"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478778"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Map FlagName (Int, Bool) -&gt; ShowS
+</span><span id="line-240"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493832"><span id="local-6989586621679493836"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-241"></span><span>  </span><span id="local-6989586621679493846"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; FlagAssignment -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></span></span><span> </span><span id="local-6989586621679493847"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679493847"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span id="local-6989586621679493848"><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493848"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Map FlagName (Int, Bool) -&gt; ShowS
 forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679478777"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
-</span><a href="#local-6989586621679478778"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679493847"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Map FlagName (Int, Bool)
+</span><a href="#local-6989586621679493848"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-242"></span><span>
 </span><span id="line-243"></span><span class="annot"><span class="hs-comment">-- | String representation of a flag-value pair.</span></span><span>
 </span><span id="line-244"></span><span class="annot"><a href="Distribution.Types.Flag.html#showFlagValue"><span class="hs-identifier hs-type">showFlagValue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-245"></span><span id="showFlagValue"><span class="annot"><span class="annottext">showFlagValue :: (FlagName, Bool) -&gt; String
-</span><a href="Distribution.Types.Flag.html#showFlagValue"><span class="hs-identifier hs-var hs-var">showFlagValue</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478779"><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478779"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="Distribution.Types.Flag.html#showFlagValue"><span class="hs-identifier hs-var hs-var">showFlagValue</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493849"><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679493849"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'+'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FlagName -&gt; String
 </span><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-var">unFlagName</span></a></span><span> </span><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478779"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-246"></span><span class="annot"><a href="Distribution.Types.Flag.html#showFlagValue"><span class="hs-identifier hs-var">showFlagValue</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478780"><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478780"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679493849"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-246"></span><span class="annot"><a href="Distribution.Types.Flag.html#showFlagValue"><span class="hs-identifier hs-var">showFlagValue</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493850"><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679493850"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FlagName -&gt; String
 </span><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-var">unFlagName</span></a></span><span> </span><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478780"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><a href="#local-6989586621679493850"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-247"></span><span>
 </span><span id="line-248"></span><span class="annot"><span class="hs-comment">-- | @since 3.4.0.0</span></span><span>
-</span><span id="line-249"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478783"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-250"></span><span>  </span><span id="local-6989586621679478786"><span class="annot"><span class="annottext">pretty :: FlagAssignment -&gt; Doc
+</span><span id="line-249"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679493853"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-250"></span><span>  </span><span id="local-6989586621679493856"><span class="annot"><span class="annottext">pretty :: FlagAssignment -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FlagAssignment -&gt; Doc
 </span><a href="Distribution.Types.Flag.html#dispFlagAssignment"><span class="hs-identifier hs-var">dispFlagAssignment</span></a></span><span>
 </span><span id="line-251"></span><span>
@@ -1091,22 +1091,22 @@ forall a. a -&gt; [a] -&gt; [a]
 </span><span id="line-279"></span><span class="hs-comment">--</span><span>
 </span><span id="line-280"></span><span class="hs-comment">-- @since 3.4.0.0</span><span>
 </span><span id="line-281"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-282"></span><span>  </span><span id="local-6989586621679478791"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagAssignment
+</span><span id="line-282"></span><span>  </span><span id="local-6989586621679493861"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagAssignment
 </span><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m FlagAssignment
 forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagAssignment
 </span><a href="Distribution.Types.Flag.html#parsecFlagAssignment"><span class="hs-identifier hs-var">parsecFlagAssignment</span></a></span><span>
 </span><span id="line-283"></span><span>
 </span><span id="line-284"></span><span class="annot"><span class="hs-comment">-- | Pretty-prints a flag assignment.</span></span><span>
-</span><span id="line-285"></span><span class="annot"><a href="Distribution.Types.Flag.html#dispFlagAssignment"><span class="hs-identifier hs-type">dispFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#Doc"><span class="hs-identifier hs-type">Disp.Doc</span></a></span><span>
+</span><span id="line-285"></span><span class="annot"><a href="Distribution.Types.Flag.html#dispFlagAssignment"><span class="hs-identifier hs-type">dispFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#Doc"><span class="hs-identifier hs-type">Disp.Doc</span></a></span><span>
 </span><span id="line-286"></span><span id="dispFlagAssignment"><span class="annot"><span class="annottext">dispFlagAssignment :: FlagAssignment -&gt; Doc
 </span><a href="Distribution.Types.Flag.html#dispFlagAssignment"><span class="hs-identifier hs-var hs-var">dispFlagAssignment</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Doc] -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#hsep"><span class="hs-identifier hs-var">Disp.hsep</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; Doc)
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#hsep"><span class="hs-identifier hs-var">Disp.hsep</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; Doc)
 -&gt; (FlagAssignment -&gt; [Doc]) -&gt; FlagAssignment -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((FlagName, Bool) -&gt; Doc) -&gt; [(FlagName, Bool)] -&gt; [Doc]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc)
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc)
 -&gt; ((FlagName, Bool) -&gt; String) -&gt; (FlagName, Bool) -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(FlagName, Bool) -&gt; String
@@ -1119,7 +1119,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><a href="Distribution.Types.Flag.html#unFlagAssignment"><span class="hs-identifier hs-var">unFlagAssignment</span></a></span><span>
 </span><span id="line-287"></span><span>
 </span><span id="line-288"></span><span class="annot"><span class="hs-comment">-- | Parses a flag assignment.</span></span><span>
-</span><span id="line-289"></span><span id="local-6989586621679478793"><span class="annot"><a href="Distribution.Types.Flag.html#parsecFlagAssignment"><span class="hs-identifier hs-type">parsecFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478793"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679478793"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span>
+</span><span id="line-289"></span><span id="local-6989586621679493863"><span class="annot"><a href="Distribution.Types.Flag.html#parsecFlagAssignment"><span class="hs-identifier hs-type">parsecFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679493863"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679493863"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span>
 </span><span id="line-290"></span><span id="parsecFlagAssignment"><span class="annot"><span class="annottext">parsecFlagAssignment :: forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagAssignment
 </span><a href="Distribution.Types.Flag.html#parsecFlagAssignment"><span class="hs-identifier hs-var hs-var">parsecFlagAssignment</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(FlagName, Bool)] -&gt; FlagAssignment
 </span><a href="Distribution.Types.Flag.html#mkFlagAssignment"><span class="hs-identifier hs-var">mkFlagAssignment</span></a></span><span> </span><span class="annot"><span class="annottext">([(FlagName, Bool)] -&gt; FlagAssignment)
@@ -1127,64 +1127,64 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m () -&gt; m [(FlagName, Bool)]
 forall (m :: * -&gt; *) a b. CabalParsing m =&gt; m a -&gt; m b -&gt; m [a]
-</span><a href="#local-6989586621679478809"><span class="hs-identifier hs-var">sepByEnding</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m (FlagName, Bool)
-</span><a href="#local-6989586621679478810"><span class="hs-identifier hs-var">onFlag</span></a></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m (FlagName, Bool) -&gt; m (FlagName, Bool)
+</span><a href="#local-6989586621679493879"><span class="hs-identifier hs-var">sepByEnding</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m (FlagName, Bool)
+</span><a href="#local-6989586621679493880"><span class="hs-identifier hs-var">onFlag</span></a></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m (FlagName, Bool) -&gt; m (FlagName, Bool)
 forall a. m a -&gt; m a -&gt; m a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool)
-</span><a href="#local-6989586621679478812"><span class="hs-identifier hs-var">offFlag</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621679493882"><span class="hs-identifier hs-var">offFlag</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m ()
 forall (m :: * -&gt; *). CharParsing m =&gt; m ()
 </span><a href="Distribution.Compat.CharParsing.html#skipSpaces1"><span class="hs-identifier hs-var">P.skipSpaces1</span></a></span><span>
 </span><span id="line-291"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-292"></span><span>    </span><span id="local-6989586621679478810"><span class="annot"><span class="annottext">onFlag :: m (FlagName, Bool)
-</span><a href="#local-6989586621679478810"><span class="hs-identifier hs-var hs-var">onFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-292"></span><span>    </span><span id="local-6989586621679493880"><span class="annot"><span class="annottext">onFlag :: m (FlagName, Bool)
+</span><a href="#local-6989586621679493880"><span class="hs-identifier hs-var hs-var">onFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-293"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'+'</span></span><span>
-</span><span id="line-294"></span><span>      </span><span id="local-6989586621679478843"><span class="annot"><a href="#local-6989586621679478843"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
-</span><span id="line-295"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679478843"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>
-</span><span id="line-296"></span><span>    </span><span id="local-6989586621679478812"><span class="annot"><span class="annottext">offFlag :: m (FlagName, Bool)
-</span><a href="#local-6989586621679478812"><span class="hs-identifier hs-var hs-var">offFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-294"></span><span>      </span><span id="local-6989586621679493913"><span class="annot"><a href="#local-6989586621679493913"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
+</span><span id="line-295"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679493913"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-296"></span><span>    </span><span id="local-6989586621679493882"><span class="annot"><span class="annottext">offFlag :: m (FlagName, Bool)
+</span><a href="#local-6989586621679493882"><span class="hs-identifier hs-var hs-var">offFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-297"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span>
-</span><span id="line-298"></span><span>      </span><span id="local-6989586621679478872"><span class="annot"><a href="#local-6989586621679478872"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
-</span><span id="line-299"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679478872"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span>
+</span><span id="line-298"></span><span>      </span><span id="local-6989586621679493942"><span class="annot"><a href="#local-6989586621679493942"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
+</span><span id="line-299"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679493942"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span>
 </span><span id="line-300"></span><span>
-</span><span id="line-301"></span><span>    </span><span id="local-6989586621679477916"><span id="local-6989586621679477917"><span id="local-6989586621679477918"><span class="annot"><a href="#local-6989586621679478809"><span class="hs-identifier hs-type">sepByEnding</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477916"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679477916"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477917"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679477916"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477918"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679477916"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679477917"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span><span>
-</span><span id="line-302"></span><span>    </span><span id="local-6989586621679478809"><span class="annot"><span class="annottext">sepByEnding :: forall (m :: * -&gt; *) a b. CabalParsing m =&gt; m a -&gt; m b -&gt; m [a]
-</span><a href="#local-6989586621679478809"><span class="hs-identifier hs-var hs-var">sepByEnding</span></a></span></span><span> </span><span id="local-6989586621679478878"><span class="annot"><span class="annottext">m a
-</span><a href="#local-6989586621679478878"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679478879"><span class="annot"><span class="annottext">m b
-</span><a href="#local-6989586621679478879"><span class="hs-identifier hs-var">sep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478880"><span class="hs-identifier hs-var">afterSeparator</span></a></span><span>
+</span><span id="line-301"></span><span>    </span><span id="local-6989586621679492986"><span id="local-6989586621679492987"><span id="local-6989586621679492988"><span class="annot"><a href="#local-6989586621679493879"><span class="hs-identifier hs-type">sepByEnding</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492986"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679492986"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492987"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679492986"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492988"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679492986"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679492987"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-302"></span><span>    </span><span id="local-6989586621679493879"><span class="annot"><span class="annottext">sepByEnding :: forall (m :: * -&gt; *) a b. CabalParsing m =&gt; m a -&gt; m b -&gt; m [a]
+</span><a href="#local-6989586621679493879"><span class="hs-identifier hs-var hs-var">sepByEnding</span></a></span></span><span> </span><span id="local-6989586621679493948"><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679493948"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679493949"><span class="annot"><span class="annottext">m b
+</span><a href="#local-6989586621679493949"><span class="hs-identifier hs-var">sep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
+</span><a href="#local-6989586621679493950"><span class="hs-identifier hs-var">afterSeparator</span></a></span><span>
 </span><span id="line-303"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-304"></span><span>        </span><span id="local-6989586621679478891"><span class="annot"><span class="annottext">element :: m [a]
-</span><a href="#local-6989586621679478891"><span class="hs-identifier hs-var hs-var">element</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a] -&gt; [a]) -&gt; m a -&gt; m ([a] -&gt; [a])
+</span><span id="line-304"></span><span>        </span><span id="local-6989586621679493961"><span class="annot"><span class="annottext">element :: m [a]
+</span><a href="#local-6989586621679493961"><span class="hs-identifier hs-var hs-var">element</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a] -&gt; [a]) -&gt; m a -&gt; m ([a] -&gt; [a])
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m a
-</span><a href="#local-6989586621679478878"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">m ([a] -&gt; [a]) -&gt; m [a] -&gt; m [a]
+</span><a href="#local-6989586621679493948"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">m ([a] -&gt; [a]) -&gt; m [a] -&gt; m [a]
 forall a b. m (a -&gt; b) -&gt; m a -&gt; m b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478892"><span class="hs-identifier hs-var">afterElement</span></a></span><span>
-</span><span id="line-305"></span><span>        </span><span id="local-6989586621679478892"><span class="annot"><span class="annottext">afterElement :: m [a]
-</span><a href="#local-6989586621679478892"><span class="hs-identifier hs-var hs-var">afterElement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m b
-</span><a href="#local-6989586621679478879"><span class="hs-identifier hs-var">sep</span></a></span><span> </span><span class="annot"><span class="annottext">m b -&gt; m [a] -&gt; m [a]
+</span><a href="#local-6989586621679493962"><span class="hs-identifier hs-var">afterElement</span></a></span><span>
+</span><span id="line-305"></span><span>        </span><span id="local-6989586621679493962"><span class="annot"><span class="annottext">afterElement :: m [a]
+</span><a href="#local-6989586621679493962"><span class="hs-identifier hs-var hs-var">afterElement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m b
+</span><a href="#local-6989586621679493949"><span class="hs-identifier hs-var">sep</span></a></span><span> </span><span class="annot"><span class="annottext">m b -&gt; m [a] -&gt; m [a]
 forall a b. m a -&gt; m b -&gt; m b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 </span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478880"><span class="hs-identifier hs-var">afterSeparator</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
+</span><a href="#local-6989586621679493950"><span class="hs-identifier hs-var">afterSeparator</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
 forall a. m a -&gt; m a -&gt; m a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; m [a]
 forall a. a -&gt; m a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-306"></span><span>        </span><span id="local-6989586621679478880"><span class="annot"><span class="annottext">afterSeparator :: m [a]
-</span><a href="#local-6989586621679478880"><span class="hs-identifier hs-var hs-var">afterSeparator</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478891"><span class="hs-identifier hs-var">element</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
+</span><span id="line-306"></span><span>        </span><span id="local-6989586621679493950"><span class="annot"><span class="annottext">afterSeparator :: m [a]
+</span><a href="#local-6989586621679493950"><span class="hs-identifier hs-var hs-var">afterSeparator</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
+</span><a href="#local-6989586621679493961"><span class="hs-identifier hs-var">element</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
 forall a. m a -&gt; m a -&gt; m a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; m [a]
@@ -1197,7 +1197,7 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span id="line-310"></span><span class="hs-comment">-- The flags have to explicitly start with minus or plus.</span><span>
 </span><span id="line-311"></span><span class="hs-comment">--</span><span>
 </span><span id="line-312"></span><span class="hs-comment">-- @since 3.4.0.0</span><span>
-</span><span id="line-313"></span><span id="local-6989586621679478893"><span class="annot"><a href="Distribution.Types.Flag.html#parsecFlagAssignmentNonEmpty"><span class="hs-identifier hs-type">parsecFlagAssignmentNonEmpty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478893"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679478893"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span>
+</span><span id="line-313"></span><span id="local-6989586621679493963"><span class="annot"><a href="Distribution.Types.Flag.html#parsecFlagAssignmentNonEmpty"><span class="hs-identifier hs-type">parsecFlagAssignmentNonEmpty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679493963"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679493963"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span>
 </span><span id="line-314"></span><span id="parsecFlagAssignmentNonEmpty"><span class="annot"><span class="annottext">parsecFlagAssignmentNonEmpty :: forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagAssignment
 </span><a href="Distribution.Types.Flag.html#parsecFlagAssignmentNonEmpty"><span class="hs-identifier hs-var hs-var">parsecFlagAssignmentNonEmpty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(FlagName, Bool)] -&gt; FlagAssignment
 </span><a href="Distribution.Types.Flag.html#mkFlagAssignment"><span class="hs-identifier hs-var">mkFlagAssignment</span></a></span><span> </span><span class="annot"><span class="annottext">([(FlagName, Bool)] -&gt; FlagAssignment)
@@ -1205,64 +1205,64 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m () -&gt; m [(FlagName, Bool)]
 forall (m :: * -&gt; *) a b. CabalParsing m =&gt; m a -&gt; m b -&gt; m [a]
-</span><a href="#local-6989586621679478907"><span class="hs-identifier hs-var">sepByEnding1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m (FlagName, Bool)
-</span><a href="#local-6989586621679478908"><span class="hs-identifier hs-var">onFlag</span></a></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m (FlagName, Bool) -&gt; m (FlagName, Bool)
+</span><a href="#local-6989586621679493977"><span class="hs-identifier hs-var">sepByEnding1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m (FlagName, Bool)
+</span><a href="#local-6989586621679493978"><span class="hs-identifier hs-var">onFlag</span></a></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m (FlagName, Bool) -&gt; m (FlagName, Bool)
 forall a. m a -&gt; m a -&gt; m a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool)
-</span><a href="#local-6989586621679478909"><span class="hs-identifier hs-var">offFlag</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621679493979"><span class="hs-identifier hs-var">offFlag</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m ()
 forall (m :: * -&gt; *). CharParsing m =&gt; m ()
 </span><a href="Distribution.Compat.CharParsing.html#skipSpaces1"><span class="hs-identifier hs-var">P.skipSpaces1</span></a></span><span>
 </span><span id="line-315"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-316"></span><span>    </span><span id="local-6989586621679478908"><span class="annot"><span class="annottext">onFlag :: m (FlagName, Bool)
-</span><a href="#local-6989586621679478908"><span class="hs-identifier hs-var hs-var">onFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-316"></span><span>    </span><span id="local-6989586621679493978"><span class="annot"><span class="annottext">onFlag :: m (FlagName, Bool)
+</span><a href="#local-6989586621679493978"><span class="hs-identifier hs-var hs-var">onFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-317"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'+'</span></span><span>
-</span><span id="line-318"></span><span>      </span><span id="local-6989586621679478938"><span class="annot"><a href="#local-6989586621679478938"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
-</span><span id="line-319"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679478938"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>
-</span><span id="line-320"></span><span>    </span><span id="local-6989586621679478909"><span class="annot"><span class="annottext">offFlag :: m (FlagName, Bool)
-</span><a href="#local-6989586621679478909"><span class="hs-identifier hs-var hs-var">offFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-318"></span><span>      </span><span id="local-6989586621679494008"><span class="annot"><a href="#local-6989586621679494008"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
+</span><span id="line-319"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679494008"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-320"></span><span>    </span><span id="local-6989586621679493979"><span class="annot"><span class="annottext">offFlag :: m (FlagName, Bool)
+</span><a href="#local-6989586621679493979"><span class="hs-identifier hs-var hs-var">offFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-321"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span>
-</span><span id="line-322"></span><span>      </span><span id="local-6989586621679478967"><span class="annot"><a href="#local-6989586621679478967"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
-</span><span id="line-323"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679478967"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span>
+</span><span id="line-322"></span><span>      </span><span id="local-6989586621679494037"><span class="annot"><a href="#local-6989586621679494037"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
+</span><span id="line-323"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679494037"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span>
 </span><span id="line-324"></span><span>
-</span><span id="line-325"></span><span>    </span><span id="local-6989586621679478968"><span id="local-6989586621679478969"><span id="local-6989586621679478970"><span class="annot"><a href="#local-6989586621679478907"><span class="hs-identifier hs-type">sepByEnding1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478968"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679478968"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478969"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679478968"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478970"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679478968"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679478969"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span><span>
-</span><span id="line-326"></span><span>    </span><span id="local-6989586621679478907"><span class="annot"><span class="annottext">sepByEnding1 :: forall (m :: * -&gt; *) a b. CabalParsing m =&gt; m a -&gt; m b -&gt; m [a]
-</span><a href="#local-6989586621679478907"><span class="hs-identifier hs-var hs-var">sepByEnding1</span></a></span></span><span> </span><span id="local-6989586621679478976"><span class="annot"><span class="annottext">m a
-</span><a href="#local-6989586621679478976"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679478977"><span class="annot"><span class="annottext">m b
-</span><a href="#local-6989586621679478977"><span class="hs-identifier hs-var">sep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478978"><span class="hs-identifier hs-var">element</span></a></span><span>
+</span><span id="line-325"></span><span>    </span><span id="local-6989586621679494038"><span id="local-6989586621679494039"><span id="local-6989586621679494040"><span class="annot"><a href="#local-6989586621679493977"><span class="hs-identifier hs-type">sepByEnding1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679494038"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679494038"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679494039"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679494038"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679494040"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679494038"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679494039"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-326"></span><span>    </span><span id="local-6989586621679493977"><span class="annot"><span class="annottext">sepByEnding1 :: forall (m :: * -&gt; *) a b. CabalParsing m =&gt; m a -&gt; m b -&gt; m [a]
+</span><a href="#local-6989586621679493977"><span class="hs-identifier hs-var hs-var">sepByEnding1</span></a></span></span><span> </span><span id="local-6989586621679494046"><span class="annot"><span class="annottext">m a
+</span><a href="#local-6989586621679494046"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679494047"><span class="annot"><span class="annottext">m b
+</span><a href="#local-6989586621679494047"><span class="hs-identifier hs-var">sep</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
+</span><a href="#local-6989586621679494048"><span class="hs-identifier hs-var">element</span></a></span><span>
 </span><span id="line-327"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-328"></span><span>        </span><span id="local-6989586621679478978"><span class="annot"><span class="annottext">element :: m [a]
-</span><a href="#local-6989586621679478978"><span class="hs-identifier hs-var hs-var">element</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a] -&gt; [a]) -&gt; m a -&gt; m ([a] -&gt; [a])
+</span><span id="line-328"></span><span>        </span><span id="local-6989586621679494048"><span class="annot"><span class="annottext">element :: m [a]
+</span><a href="#local-6989586621679494048"><span class="hs-identifier hs-var hs-var">element</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a -&gt; [a] -&gt; [a]) -&gt; m a -&gt; m ([a] -&gt; [a])
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m a
-</span><a href="#local-6989586621679478976"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">m ([a] -&gt; [a]) -&gt; m [a] -&gt; m [a]
+</span><a href="#local-6989586621679494046"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">m ([a] -&gt; [a]) -&gt; m [a] -&gt; m [a]
 forall a b. m (a -&gt; b) -&gt; m a -&gt; m b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478989"><span class="hs-identifier hs-var">afterElement</span></a></span><span>
-</span><span id="line-329"></span><span>        </span><span id="local-6989586621679478989"><span class="annot"><span class="annottext">afterElement :: m [a]
-</span><a href="#local-6989586621679478989"><span class="hs-identifier hs-var hs-var">afterElement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m b
-</span><a href="#local-6989586621679478977"><span class="hs-identifier hs-var">sep</span></a></span><span> </span><span class="annot"><span class="annottext">m b -&gt; m [a] -&gt; m [a]
+</span><a href="#local-6989586621679494059"><span class="hs-identifier hs-var">afterElement</span></a></span><span>
+</span><span id="line-329"></span><span>        </span><span id="local-6989586621679494059"><span class="annot"><span class="annottext">afterElement :: m [a]
+</span><a href="#local-6989586621679494059"><span class="hs-identifier hs-var hs-var">afterElement</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m b
+</span><a href="#local-6989586621679494047"><span class="hs-identifier hs-var">sep</span></a></span><span> </span><span class="annot"><span class="annottext">m b -&gt; m [a] -&gt; m [a]
 forall a b. m a -&gt; m b -&gt; m b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 </span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478990"><span class="hs-identifier hs-var">afterSeparator</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
+</span><a href="#local-6989586621679494060"><span class="hs-identifier hs-var">afterSeparator</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
 forall a. m a -&gt; m a -&gt; m a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; m [a]
 forall a. a -&gt; m a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-330"></span><span>        </span><span id="local-6989586621679478990"><span class="annot"><span class="annottext">afterSeparator :: m [a]
-</span><a href="#local-6989586621679478990"><span class="hs-identifier hs-var hs-var">afterSeparator</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
-</span><a href="#local-6989586621679478978"><span class="hs-identifier hs-var">element</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
+</span><span id="line-330"></span><span>        </span><span id="local-6989586621679494060"><span class="annot"><span class="annottext">afterSeparator :: m [a]
+</span><a href="#local-6989586621679494060"><span class="hs-identifier hs-var hs-var">afterSeparator</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m [a]
+</span><a href="#local-6989586621679494048"><span class="hs-identifier hs-var">element</span></a></span><span> </span><span class="annot"><span class="annottext">m [a] -&gt; m [a] -&gt; m [a]
 forall a. m a -&gt; m a -&gt; m a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; m [a]
@@ -1299,13 +1299,13 @@ forall a. Pretty a =&gt; a -&gt; String
 -&gt; (FlagAssignment -&gt; Doc) -&gt; FlagAssignment -&gt; String
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Doc] -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#hsep"><span class="hs-identifier hs-var">Disp.hsep</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; Doc)
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#hsep"><span class="hs-identifier hs-var">Disp.hsep</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; Doc)
 -&gt; (FlagAssignment -&gt; [Doc]) -&gt; FlagAssignment -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; [String] -&gt; [Doc]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [Doc])
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [Doc])
 -&gt; (FlagAssignment -&gt; [String]) -&gt; FlagAssignment -&gt; [Doc]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FlagAssignment -&gt; [String]
@@ -1328,25 +1328,25 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-353"></span><span class="annot"><span class="hs-comment">-- | @since 3.4.0.0</span></span><span>
 </span><span id="line-354"></span><span class="annot"><a href="Distribution.Types.Flag.html#legacyShowFlagValue"><span class="hs-identifier hs-type">legacyShowFlagValue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Flag.html#FlagName"><span class="hs-identifier hs-type">FlagName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-355"></span><span id="legacyShowFlagValue"><span class="annot"><span class="annottext">legacyShowFlagValue :: (FlagName, Bool) -&gt; String
-</span><a href="Distribution.Types.Flag.html#legacyShowFlagValue"><span class="hs-identifier hs-var hs-var">legacyShowFlagValue</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478993"><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478993"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="Distribution.Types.Flag.html#legacyShowFlagValue"><span class="hs-identifier hs-var hs-var">legacyShowFlagValue</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679494063"><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679494063"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FlagName -&gt; String
 </span><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-var">unFlagName</span></a></span><span> </span><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478993"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-356"></span><span class="annot"><a href="Distribution.Types.Flag.html#legacyShowFlagValue"><span class="hs-identifier hs-var">legacyShowFlagValue</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478994"><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478994"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679494063"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-356"></span><span class="annot"><a href="Distribution.Types.Flag.html#legacyShowFlagValue"><span class="hs-identifier hs-var">legacyShowFlagValue</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679494064"><span class="annot"><span class="annottext">FlagName
+</span><a href="#local-6989586621679494064"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FlagName -&gt; String
 </span><a href="Distribution.Types.Flag.html#unFlagName"><span class="hs-identifier hs-var">unFlagName</span></a></span><span> </span><span class="annot"><span class="annottext">FlagName
-</span><a href="#local-6989586621679478994"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><a href="#local-6989586621679494064"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-357"></span><span>
 </span><span id="line-358"></span><span class="hs-comment">-- |</span><span>
 </span><span id="line-359"></span><span class="hs-comment">-- We need this as far as we support custom setups older than 2.2.0.0</span><span>
 </span><span id="line-360"></span><span class="hs-comment">--</span><span>
 </span><span id="line-361"></span><span class="hs-comment">-- @since 3.4.0.0</span><span>
-</span><span id="line-362"></span><span id="local-6989586621679478995"><span class="annot"><a href="Distribution.Types.Flag.html#legacyParsecFlagAssignment"><span class="hs-identifier hs-type">legacyParsecFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478995"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679478995"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span>
+</span><span id="line-362"></span><span id="local-6989586621679494065"><span class="annot"><a href="Distribution.Types.Flag.html#legacyParsecFlagAssignment"><span class="hs-identifier hs-type">legacyParsecFlagAssignment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679494065"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679494065"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Flag.html#FlagAssignment"><span class="hs-identifier hs-type">FlagAssignment</span></a></span></span><span>
 </span><span id="line-363"></span><span id="legacyParsecFlagAssignment"><span class="annot"><span class="annottext">legacyParsecFlagAssignment :: forall (m :: * -&gt; *). CabalParsing m =&gt; m FlagAssignment
 </span><a href="Distribution.Types.Flag.html#legacyParsecFlagAssignment"><span class="hs-identifier hs-var hs-var">legacyParsecFlagAssignment</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-364"></span><span>  </span><span class="annot"><span class="annottext">[(FlagName, Bool)] -&gt; FlagAssignment
@@ -1357,30 +1357,30 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m () -&gt; m [(FlagName, Bool)]
 forall (m :: * -&gt; *) a sep. Alternative m =&gt; m a -&gt; m sep -&gt; m [a]
 </span><a href="Distribution.Compat.Parsing.html#sepBy"><span class="hs-identifier hs-var">P.sepBy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m (FlagName, Bool)
-</span><a href="#local-6989586621679479010"><span class="hs-identifier hs-var">onFlag</span></a></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m (FlagName, Bool) -&gt; m (FlagName, Bool)
+</span><a href="#local-6989586621679494080"><span class="hs-identifier hs-var">onFlag</span></a></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool) -&gt; m (FlagName, Bool) -&gt; m (FlagName, Bool)
 forall a. m a -&gt; m a -&gt; m a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">m (FlagName, Bool)
-</span><a href="#local-6989586621679479011"><span class="hs-identifier hs-var">offFlag</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m ()
+</span><a href="#local-6989586621679494081"><span class="hs-identifier hs-var">offFlag</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">m ()
 forall (m :: * -&gt; *). CharParsing m =&gt; m ()
 </span><a href="Distribution.Compat.CharParsing.html#skipSpaces1"><span class="hs-identifier hs-var">P.skipSpaces1</span></a></span><span>
 </span><span id="line-366"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-367"></span><span>    </span><span id="local-6989586621679479010"><span class="annot"><span class="annottext">onFlag :: m (FlagName, Bool)
-</span><a href="#local-6989586621679479010"><span class="hs-identifier hs-var hs-var">onFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-367"></span><span>    </span><span id="local-6989586621679494080"><span class="annot"><span class="annottext">onFlag :: m (FlagName, Bool)
+</span><a href="#local-6989586621679494080"><span class="hs-identifier hs-var hs-var">onFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-368"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m Char -&gt; m (Maybe Char)
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f (Maybe a)
-</span><a href="../../base-4.20.0.0-4014/src//Control.Applicative.html/Control.Applicative.html#optional"><span class="hs-identifier hs-var">P.optional</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; m Char
+</span><a href="../../base-4.21.0.0-ae91/src/Control.Applicative.html#optional"><span class="hs-identifier hs-var">P.optional</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'+'</span></span><span class="hs-special">)</span><span>
-</span><span id="line-369"></span><span>      </span><span id="local-6989586621679479044"><span class="annot"><a href="#local-6989586621679479044"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
-</span><span id="line-370"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679479044"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>
-</span><span id="line-371"></span><span>    </span><span id="local-6989586621679479011"><span class="annot"><span class="annottext">offFlag :: m (FlagName, Bool)
-</span><a href="#local-6989586621679479011"><span class="hs-identifier hs-var hs-var">offFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-369"></span><span>      </span><span id="local-6989586621679494114"><span class="annot"><a href="#local-6989586621679494114"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
+</span><span id="line-370"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679494114"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-371"></span><span>    </span><span id="local-6989586621679494081"><span class="annot"><span class="annottext">offFlag :: m (FlagName, Bool)
+</span><a href="#local-6989586621679494081"><span class="hs-identifier hs-var hs-var">offFlag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-372"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span>
-</span><span id="line-373"></span><span>      </span><span id="local-6989586621679479073"><span class="annot"><a href="#local-6989586621679479073"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
-</span><span id="line-374"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679479073"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span>
+</span><span id="line-373"></span><span>      </span><span id="local-6989586621679494143"><span class="annot"><a href="#local-6989586621679494143"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span>
+</span><span id="line-374"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679494143"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span class="hs-special">)</span><span>
 </span><span id="line-375"></span></pre></body></html>

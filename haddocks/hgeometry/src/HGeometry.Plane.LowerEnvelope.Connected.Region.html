@@ -2,94 +2,97 @@
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances  #-}</span><span>
 </span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html"><span class="hs-identifier">HGeometry.Plane.LowerEnvelope.Connected.Region</span></a></span><span>
 </span><span id="line-4"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier">Region</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier">MDVertex</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier">MDVertex</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#location"><span class="hs-identifier">location</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier">MDVertex</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier">MDVertex</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#location"><span class="hs-identifier">location</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#vertexData"><span class="hs-identifier">vertexData</span></a></span><span>
 </span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#ClippedBoundedRegion"><span class="hs-identifier">ClippedBoundedRegion</span></a></span><span>
 </span><span id="line-7"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- import qualified Data.List.NonEmpty as NonEmpty</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifoldable</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Box</span></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.HyperPlane</span></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Number.Real.Rational.html/HGeometry.Number.Real.Rational.html"><span class="hs-identifier">HGeometry.Number.Real.Rational</span></a></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html"><span class="hs-identifier">HGeometry.Plane.LowerEnvelope.Connected.VertexForm</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#Definers"><span class="hs-identifier">Definers</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#HasDefiners"><span class="hs-identifier">HasDefiners</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point.Either</span></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon</span></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon.Convex</span></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon.Convex.Unbounded</span></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon.Simple</span></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html/HGeometry.Sequence.Alternating.html"><span class="hs-identifier">HGeometry.Sequence.Alternating</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html/HGeometry.Sequence.Alternating.html#separators"><span class="hs-identifier">separators</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Triangle</span></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
-</span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html/HGeometry.Cyclic.html"><span class="hs-identifier">HGeometry.Cyclic</span></a></span><span>
-</span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span class="hs-comment">-- | A vertex of the minimzation Diagram that is defined by the intersection of a number</span><span>
-</span><span id="line-34"></span><span class="hs-comment">-- of planes.</span><span>
-</span><span id="line-35"></span><span class="hs-comment">--</span><span>
-</span><span id="line-36"></span><span class="hs-comment">-- Note that we interpet this vertex as a 2-dimensional thing.</span><span>
-</span><span id="line-37"></span><span class="hs-keyword">data</span><span> </span><span id="MDVertex"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-var">MDVertex</span></a></span></span><span> </span><span id="local-6989586621679456942"><span class="annot"><a href="#local-6989586621679456942"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679456943"><span class="annot"><a href="#local-6989586621679456943"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MDVertex"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-var">MDVertex</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_location"><span class="annot"><span class="annottext">forall r plane. MDVertex r plane -&gt; Point 3 r
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#_location"><span class="hs-identifier hs-var hs-var">_location</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679456942"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-38"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span id="_definers"><span class="annot"><span class="annottext">forall r plane. MDVertex r plane -&gt; Definers plane
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#_definers"><span class="hs-identifier hs-var hs-var">_definers</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#Definers"><span class="hs-identifier hs-type">Definers</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679456943"><span class="hs-identifier hs-type">plane</span></a></span><span>
-</span><span id="line-39"></span><span>                                 </span><span class="annot"><span class="hs-comment">-- ^ the definers of the vertex</span></span><span>
-</span><span id="line-40"></span><span>                                 </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679457280"><span id="local-6989586621679457291"><span id="local-6989586621679457295"><span class="annot"><span class="annottext">Int -&gt; MDVertex r plane -&gt; ShowS
-[MDVertex r plane] -&gt; ShowS
-MDVertex r plane -&gt; String
-(Int -&gt; MDVertex r plane -&gt; ShowS)
--&gt; (MDVertex r plane -&gt; String)
--&gt; ([MDVertex r plane] -&gt; ShowS)
--&gt; Show (MDVertex r plane)
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html"><span class="hs-identifier">HGeometry.Plane.LowerEnvelope.Connected.VertexForm</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#Definers"><span class="hs-identifier">Definers</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#HasDefiners"><span class="hs-identifier">HasDefiners</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point.Either</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon.Convex.Unbounded</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html"><span class="hs-identifier">HGeometry.Cyclic</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- | A vertex of the minimzation Diagram that is defined by the intersection of a number</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- of planes.</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- Note that we interpet this vertex as a 2-dimensional thing.</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">data</span><span> </span><span id="MDVertex"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-var">MDVertex</span></a></span></span><span> </span><span id="local-6989586621679457840"><span class="annot"><a href="#local-6989586621679457840"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679457841"><span class="annot"><a href="#local-6989586621679457841"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span id="local-6989586621679457842"><span class="annot"><a href="#local-6989586621679457842"><span class="hs-identifier hs-type">a</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="MDVertex"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-var">MDVertex</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_location"><span class="annot"><span class="annottext">forall r plane a. MDVertex r plane a -&gt; Point 3 r
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#_location"><span class="hs-identifier hs-var hs-var">_location</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679457840"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-31"></span><span>                                    </span><span class="hs-special">,</span><span> </span><span id="_definers"><span class="annot"><span class="annottext">forall r plane a. MDVertex r plane a -&gt; Definers plane
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#_definers"><span class="hs-identifier hs-var hs-var">_definers</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#Definers"><span class="hs-identifier hs-type">Definers</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457841"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-32"></span><span>                                     </span><span class="annot"><span class="hs-comment">-- ^ the definers of the vertex</span></span><span>
+</span><span id="line-33"></span><span>                                    </span><span class="hs-special">,</span><span> </span><span id="_vertexData"><span class="annot"><span class="annottext">forall r plane a. MDVertex r plane a -&gt; a
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#_vertexData"><span class="hs-identifier hs-var hs-var">_vertexData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679457842"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-34"></span><span>                                    </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679458309"><span id="local-6989586621679458321"><span id="local-6989586621679458325"><span class="annot"><span class="annottext">Int -&gt; MDVertex r plane a -&gt; ShowS
+[MDVertex r plane a] -&gt; ShowS
+MDVertex r plane a -&gt; String
+(Int -&gt; MDVertex r plane a -&gt; ShowS)
+-&gt; (MDVertex r plane a -&gt; String)
+-&gt; ([MDVertex r plane a] -&gt; ShowS)
+-&gt; Show (MDVertex r plane a)
 forall a.
 (Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
-forall r plane.
-(Show r, Show plane) =&gt;
-Int -&gt; MDVertex r plane -&gt; ShowS
-forall r plane. (Show r, Show plane) =&gt; [MDVertex r plane] -&gt; ShowS
-forall r plane. (Show r, Show plane) =&gt; MDVertex r plane -&gt; String
-$cshowsPrec :: forall r plane.
-(Show r, Show plane) =&gt;
-Int -&gt; MDVertex r plane -&gt; ShowS
-showsPrec :: Int -&gt; MDVertex r plane -&gt; ShowS
-$cshow :: forall r plane. (Show r, Show plane) =&gt; MDVertex r plane -&gt; String
-show :: MDVertex r plane -&gt; String
-$cshowList :: forall r plane. (Show r, Show plane) =&gt; [MDVertex r plane] -&gt; ShowS
-showList :: [MDVertex r plane] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679457330"><span id="local-6989586621679457337"><span class="annot"><span class="annottext">MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-(MDVertex r plane -&gt; MDVertex r plane -&gt; Bool)
--&gt; (MDVertex r plane -&gt; MDVertex r plane -&gt; Bool)
--&gt; Eq (MDVertex r plane)
+forall r plane a.
+(Show r, Show plane, Show a) =&gt;
+Int -&gt; MDVertex r plane a -&gt; ShowS
+forall r plane a.
+(Show r, Show plane, Show a) =&gt;
+[MDVertex r plane a] -&gt; ShowS
+forall r plane a.
+(Show r, Show plane, Show a) =&gt;
+MDVertex r plane a -&gt; String
+$cshowsPrec :: forall r plane a.
+(Show r, Show plane, Show a) =&gt;
+Int -&gt; MDVertex r plane a -&gt; ShowS
+showsPrec :: Int -&gt; MDVertex r plane a -&gt; ShowS
+$cshow :: forall r plane a.
+(Show r, Show plane, Show a) =&gt;
+MDVertex r plane a -&gt; String
+show :: MDVertex r plane a -&gt; String
+$cshowList :: forall r plane a.
+(Show r, Show plane, Show a) =&gt;
+[MDVertex r plane a] -&gt; ShowS
+showList :: [MDVertex r plane a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458361"><span id="local-6989586621679458369"><span class="annot"><span class="annottext">MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+(MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool)
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool)
+-&gt; Eq (MDVertex r plane a)
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
-forall r plane.
-(Eq r, Eq plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-$c== :: forall r plane.
-(Eq r, Eq plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-== :: MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-$c/= :: forall r plane.
-(Eq r, Eq plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-/= :: MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679457349"><span id="local-6989586621679457356"><span id="local-6989586621679457361"><span id="local-6989586621679457365"><span id="local-6989586621679457368"><span id="local-6989586621679457371"><span id="local-6989586621679457374"><span class="annot"><span class="annottext">Eq (MDVertex r plane)
-Eq (MDVertex r plane) =&gt;
-(MDVertex r plane -&gt; MDVertex r plane -&gt; Ordering)
--&gt; (MDVertex r plane -&gt; MDVertex r plane -&gt; Bool)
--&gt; (MDVertex r plane -&gt; MDVertex r plane -&gt; Bool)
--&gt; (MDVertex r plane -&gt; MDVertex r plane -&gt; Bool)
--&gt; (MDVertex r plane -&gt; MDVertex r plane -&gt; Bool)
--&gt; (MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane)
--&gt; (MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane)
--&gt; Ord (MDVertex r plane)
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-MDVertex r plane -&gt; MDVertex r plane -&gt; Ordering
-MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane
+forall r plane a.
+(Eq r, Eq plane, Eq a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+$c== :: forall r plane a.
+(Eq r, Eq plane, Eq a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+== :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+$c/= :: forall r plane a.
+(Eq r, Eq plane, Eq a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+/= :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458383"><span id="local-6989586621679458391"><span id="local-6989586621679458397"><span id="local-6989586621679458401"><span id="local-6989586621679458404"><span id="local-6989586621679458407"><span id="local-6989586621679458410"><span class="annot"><span class="annottext">Eq (MDVertex r plane a)
+Eq (MDVertex r plane a) =&gt;
+(MDVertex r plane a -&gt; MDVertex r plane a -&gt; Ordering)
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool)
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool)
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool)
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool)
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a)
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a)
+-&gt; Ord (MDVertex r plane a)
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Ordering
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a
 forall a.
 Eq a =&gt;
 (a -&gt; a -&gt; Ordering)
@@ -100,98 +103,102 @@ Eq a =&gt;
 -&gt; (a -&gt; a -&gt; a)
 -&gt; (a -&gt; a -&gt; a)
 -&gt; Ord a
-forall r plane. (Ord r, Ord plane) =&gt; Eq (MDVertex r plane)
-forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Ordering
-forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane
-$ccompare :: forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Ordering
-compare :: MDVertex r plane -&gt; MDVertex r plane -&gt; Ordering
-$c&lt; :: forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-&lt; :: MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-$c&lt;= :: forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-&lt;= :: MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-$c&gt; :: forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-&gt; :: MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-$c&gt;= :: forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-&gt;= :: MDVertex r plane -&gt; MDVertex r plane -&gt; Bool
-$cmax :: forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane
-max :: MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane
-$cmin :: forall r plane.
-(Ord r, Ord plane) =&gt;
-MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane
-min :: MDVertex r plane -&gt; MDVertex r plane -&gt; MDVertex r plane
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679457384"><span id="local-6989586621679457388"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; MDVertex r a -&gt; MDVertex r b)
--&gt; (forall a b. a -&gt; MDVertex r b -&gt; MDVertex r a)
--&gt; Functor (MDVertex r)
-forall a b. a -&gt; MDVertex r b -&gt; MDVertex r a
-forall a b. (a -&gt; b) -&gt; MDVertex r a -&gt; MDVertex r b
-forall r a b. a -&gt; MDVertex r b -&gt; MDVertex r a
-forall r a b. (a -&gt; b) -&gt; MDVertex r a -&gt; MDVertex r b
+forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+Eq (MDVertex r plane a)
+forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Ordering
+forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a
+$ccompare :: forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Ordering
+compare :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; Ordering
+$c&lt; :: forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+&lt; :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+$c&lt;= :: forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+&lt;= :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+$c&gt; :: forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+&gt; :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+$c&gt;= :: forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+&gt;= :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; Bool
+$cmax :: forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a
+max :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a
+$cmin :: forall r plane a.
+(Ord r, Ord plane, Ord a) =&gt;
+MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a
+min :: MDVertex r plane a -&gt; MDVertex r plane a -&gt; MDVertex r plane a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458420"><span id="local-6989586621679458422"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; MDVertex r plane a -&gt; MDVertex r plane b)
+-&gt; (forall a b. a -&gt; MDVertex r plane b -&gt; MDVertex r plane a)
+-&gt; Functor (MDVertex r plane)
+forall a b. a -&gt; MDVertex r plane b -&gt; MDVertex r plane a
+forall a b. (a -&gt; b) -&gt; MDVertex r plane a -&gt; MDVertex r plane b
+forall r plane a b. a -&gt; MDVertex r plane b -&gt; MDVertex r plane a
+forall r plane a b.
+(a -&gt; b) -&gt; MDVertex r plane a -&gt; MDVertex r plane b
 forall (f :: * -&gt; *).
 (forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
 -&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
-$cfmap :: forall r a b. (a -&gt; b) -&gt; MDVertex r a -&gt; MDVertex r b
-fmap :: forall a b. (a -&gt; b) -&gt; MDVertex r a -&gt; MDVertex r b
-$c&lt;$ :: forall r a b. a -&gt; MDVertex r b -&gt; MDVertex r a
-&lt;$ :: forall a b. a -&gt; MDVertex r b -&gt; MDVertex r a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679457394"><span id="local-6989586621679457400"><span id="local-6989586621679457406"><span id="local-6989586621679457411"><span id="local-6989586621679457414"><span id="local-6989586621679457417"><span id="local-6989586621679457420"><span id="local-6989586621679457423"><span id="local-6989586621679457426"><span id="local-6989586621679457429"><span id="local-6989586621679457432"><span id="local-6989586621679457435"><span id="local-6989586621679457438"><span id="local-6989586621679457443"><span id="local-6989586621679457448"><span id="local-6989586621679457453"><span id="local-6989586621679457458"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; MDVertex r m -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m)
--&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b)
--&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b)
--&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a)
--&gt; (forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a)
--&gt; (forall a. MDVertex r a -&gt; [a])
--&gt; (forall a. MDVertex r a -&gt; Bool)
--&gt; (forall a. MDVertex r a -&gt; Int)
--&gt; (forall a. Eq a =&gt; a -&gt; MDVertex r a -&gt; Bool)
--&gt; (forall a. Ord a =&gt; MDVertex r a -&gt; a)
--&gt; (forall a. Ord a =&gt; MDVertex r a -&gt; a)
--&gt; (forall a. Num a =&gt; MDVertex r a -&gt; a)
--&gt; (forall a. Num a =&gt; MDVertex r a -&gt; a)
--&gt; Foldable (MDVertex r)
-forall a. Eq a =&gt; a -&gt; MDVertex r a -&gt; Bool
-forall a. Num a =&gt; MDVertex r a -&gt; a
-forall a. Ord a =&gt; MDVertex r a -&gt; a
-forall m. Monoid m =&gt; MDVertex r m -&gt; m
-forall a. MDVertex r a -&gt; Bool
-forall a. MDVertex r a -&gt; Int
-forall a. MDVertex r a -&gt; [a]
-forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a
-forall r a. Eq a =&gt; a -&gt; MDVertex r a -&gt; Bool
-forall r a. Num a =&gt; MDVertex r a -&gt; a
-forall r a. Ord a =&gt; MDVertex r a -&gt; a
-forall r m. Monoid m =&gt; MDVertex r m -&gt; m
-forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m
-forall r a. MDVertex r a -&gt; Bool
-forall r a. MDVertex r a -&gt; Int
-forall r a. MDVertex r a -&gt; [a]
-forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-forall r a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a
-forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m
-forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
+$cfmap :: forall r plane a b.
+(a -&gt; b) -&gt; MDVertex r plane a -&gt; MDVertex r plane b
+fmap :: forall a b. (a -&gt; b) -&gt; MDVertex r plane a -&gt; MDVertex r plane b
+$c&lt;$ :: forall r plane a b. a -&gt; MDVertex r plane b -&gt; MDVertex r plane a
+&lt;$ :: forall a b. a -&gt; MDVertex r plane b -&gt; MDVertex r plane a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458427"><span id="local-6989586621679458433"><span id="local-6989586621679458436"><span id="local-6989586621679458441"><span id="local-6989586621679458443"><span id="local-6989586621679458446"><span id="local-6989586621679458449"><span id="local-6989586621679458452"><span id="local-6989586621679458455"><span id="local-6989586621679458458"><span id="local-6989586621679458461"><span id="local-6989586621679458463"><span id="local-6989586621679458466"><span id="local-6989586621679458471"><span id="local-6989586621679458476"><span id="local-6989586621679458481"><span id="local-6989586621679458486"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; MDVertex r plane m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a)
+-&gt; (forall a. MDVertex r plane a -&gt; [a])
+-&gt; (forall a. MDVertex r plane a -&gt; Bool)
+-&gt; (forall a. MDVertex r plane a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; MDVertex r plane a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; MDVertex r plane a -&gt; a)
+-&gt; (forall a. Ord a =&gt; MDVertex r plane a -&gt; a)
+-&gt; (forall a. Num a =&gt; MDVertex r plane a -&gt; a)
+-&gt; (forall a. Num a =&gt; MDVertex r plane a -&gt; a)
+-&gt; Foldable (MDVertex r plane)
+forall a. Eq a =&gt; a -&gt; MDVertex r plane a -&gt; Bool
+forall a. Num a =&gt; MDVertex r plane a -&gt; a
+forall a. Ord a =&gt; MDVertex r plane a -&gt; a
+forall m. Monoid m =&gt; MDVertex r plane m -&gt; m
+forall a. MDVertex r plane a -&gt; Bool
+forall a. MDVertex r plane a -&gt; Int
+forall a. MDVertex r plane a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+forall r plane a. Eq a =&gt; a -&gt; MDVertex r plane a -&gt; Bool
+forall r plane a. Num a =&gt; MDVertex r plane a -&gt; a
+forall r plane a. Ord a =&gt; MDVertex r plane a -&gt; a
+forall r plane m. Monoid m =&gt; MDVertex r plane m -&gt; m
+forall r plane a. MDVertex r plane a -&gt; Bool
+forall r plane a. MDVertex r plane a -&gt; Int
+forall r plane a. MDVertex r plane a -&gt; [a]
+forall r plane a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a
+forall r plane m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m
+forall r plane b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+forall r plane a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
 forall (t :: * -&gt; *).
 (forall m. Monoid m =&gt; t m -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
@@ -211,52 +218,71 @@ forall (t :: * -&gt; *).
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; (forall a. Num a =&gt; t a -&gt; a)
 -&gt; Foldable t
-$cfold :: forall r m. Monoid m =&gt; MDVertex r m -&gt; m
-fold :: forall m. Monoid m =&gt; MDVertex r m -&gt; m
-$cfoldMap :: forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m
-foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m
-$cfoldMap' :: forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m
-foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r a -&gt; m
-$cfoldr :: forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-$cfoldr' :: forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-$cfoldl :: forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-$cfoldl' :: forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r a -&gt; b
-$cfoldr1 :: forall r a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a
-foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a
-$cfoldl1 :: forall r a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a
-foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r a -&gt; a
-$ctoList :: forall r a. MDVertex r a -&gt; [a]
-toList :: forall a. MDVertex r a -&gt; [a]
-$cnull :: forall r a. MDVertex r a -&gt; Bool
-null :: forall a. MDVertex r a -&gt; Bool
-$clength :: forall r a. MDVertex r a -&gt; Int
-length :: forall a. MDVertex r a -&gt; Int
-$celem :: forall r a. Eq a =&gt; a -&gt; MDVertex r a -&gt; Bool
-elem :: forall a. Eq a =&gt; a -&gt; MDVertex r a -&gt; Bool
-$cmaximum :: forall r a. Ord a =&gt; MDVertex r a -&gt; a
-maximum :: forall a. Ord a =&gt; MDVertex r a -&gt; a
-$cminimum :: forall r a. Ord a =&gt; MDVertex r a -&gt; a
-minimum :: forall a. Ord a =&gt; MDVertex r a -&gt; a
-$csum :: forall r a. Num a =&gt; MDVertex r a -&gt; a
-sum :: forall a. Num a =&gt; MDVertex r a -&gt; a
-$cproduct :: forall r a. Num a =&gt; MDVertex r a -&gt; a
-product :: forall a. Num a =&gt; MDVertex r a -&gt; a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-41"></span><span id="local-6989586621679456942"><span id="local-6989586621679456943"><span id="local-6989586621679457029"><span id="local-6989586621679457030"><span id="location"><span id="definers"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">MDVertex</span></span></span></span></span></span></span><span>
-</span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679457479"><span id="local-6989586621679457480"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457479"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457480"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679457481"><span id="local-6989586621679457482"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457481"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457482"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679457481"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679457047"><span id="local-6989586621679457048"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679457047"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsBoxable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457047"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457048"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-47"></span><span>  </span><span id="local-6989586621679457508"><span class="annot"><span class="annottext">boundingBox :: forall (d :: Nat) r.
-(d ~ Dimension (MDVertex r plane), r ~ NumType (MDVertex r plane),
- Ord r) =&gt;
-MDVertex r plane -&gt; Box (Point d r)
-</span><a href="#local-6989586621679457508"><span class="hs-identifier hs-var hs-var hs-var">boundingBox</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Box (Point d r)
+$cfold :: forall r plane m. Monoid m =&gt; MDVertex r plane m -&gt; m
+fold :: forall m. Monoid m =&gt; MDVertex r plane m -&gt; m
+$cfoldMap :: forall r plane m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m
+$cfoldMap' :: forall r plane m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MDVertex r plane a -&gt; m
+$cfoldr :: forall r plane a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+$cfoldr' :: forall r plane a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+$cfoldl :: forall r plane b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+$cfoldl' :: forall r plane b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MDVertex r plane a -&gt; b
+$cfoldr1 :: forall r plane a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a
+$cfoldl1 :: forall r plane a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; MDVertex r plane a -&gt; a
+$ctoList :: forall r plane a. MDVertex r plane a -&gt; [a]
+toList :: forall a. MDVertex r plane a -&gt; [a]
+$cnull :: forall r plane a. MDVertex r plane a -&gt; Bool
+null :: forall a. MDVertex r plane a -&gt; Bool
+$clength :: forall r plane a. MDVertex r plane a -&gt; Int
+length :: forall a. MDVertex r plane a -&gt; Int
+$celem :: forall r plane a. Eq a =&gt; a -&gt; MDVertex r plane a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; MDVertex r plane a -&gt; Bool
+$cmaximum :: forall r plane a. Ord a =&gt; MDVertex r plane a -&gt; a
+maximum :: forall a. Ord a =&gt; MDVertex r plane a -&gt; a
+$cminimum :: forall r plane a. Ord a =&gt; MDVertex r plane a -&gt; a
+minimum :: forall a. Ord a =&gt; MDVertex r plane a -&gt; a
+$csum :: forall r plane a. Num a =&gt; MDVertex r plane a -&gt; a
+sum :: forall a. Num a =&gt; MDVertex r plane a -&gt; a
+$cproduct :: forall r plane a. Num a =&gt; MDVertex r plane a -&gt; a
+product :: forall a. Num a =&gt; MDVertex r plane a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458495"><span id="local-6989586621679458497"><span class="annot"><span class="annottext">(forall x. MDVertex r plane a -&gt; Rep (MDVertex r plane a) x)
+-&gt; (forall x. Rep (MDVertex r plane a) x -&gt; MDVertex r plane a)
+-&gt; Generic (MDVertex r plane a)
+forall x. Rep (MDVertex r plane a) x -&gt; MDVertex r plane a
+forall x. MDVertex r plane a -&gt; Rep (MDVertex r plane a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall r plane a x.
+Rep (MDVertex r plane a) x -&gt; MDVertex r plane a
+forall r plane a x.
+MDVertex r plane a -&gt; Rep (MDVertex r plane a) x
+$cfrom :: forall r plane a x.
+MDVertex r plane a -&gt; Rep (MDVertex r plane a) x
+from :: forall x. MDVertex r plane a -&gt; Rep (MDVertex r plane a) x
+$cto :: forall r plane a x.
+Rep (MDVertex r plane a) x -&gt; MDVertex r plane a
+to :: forall x. Rep (MDVertex r plane a) x -&gt; MDVertex r plane a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span id="local-6989586621679457840"><span id="local-6989586621679457841"><span id="local-6989586621679457842"><span id="local-6989586621679457952"><span id="local-6989586621679457953"><span id="local-6989586621679457954"><span id="location"><span id="vertexData"><span id="definers"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">MDVertex</span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679458524"><span id="local-6989586621679458525"><span id="local-6989586621679458526"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458524"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458525"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458526"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679458527"><span id="local-6989586621679458528"><span id="local-6989586621679458529"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458527"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458528"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458529"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679458527"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679457991"><span id="local-6989586621679457992"><span id="local-6989586621679457993"><span id="local-6989586621679458534"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679457991"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679457992"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679457993"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457991"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457992"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457993"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458003"><span id="local-6989586621679458004"><span id="local-6989586621679458005"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679458003"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsBoxable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458003"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458004"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458005"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679458584"><span class="annot"><span class="annottext">boundingBox :: forall (d :: Nat) r.
+(d ~ Dimension (MDVertex r plane a),
+ r ~ NumType (MDVertex r plane a), Ord r) =&gt;
+MDVertex r plane a -&gt; Box (Point d r)
+</span><a href="#local-6989586621679458584"><span class="hs-identifier hs-var hs-var hs-var">boundingBox</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Box (Point d r)
 forall (d :: Nat) r.
 (d ~ Dimension (Point 2 r), r ~ NumType (Point 2 r), Ord r) =&gt;
 Point 2 r -&gt; Box (Point d r)
@@ -264,49 +290,91 @@ forall g (d :: Nat) r.
 (IsBoxable g, d ~ Dimension g, r ~ NumType g, Ord r) =&gt;
 g -&gt; Box (Point d r)
 </span><span class="hs-identifier hs-var">boundingBox</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Box (Point d r))
--&gt; (MDVertex r plane -&gt; Point 2 r)
--&gt; MDVertex r plane
+-&gt; (MDVertex r plane a -&gt; Point 2 r)
+-&gt; MDVertex r plane a
 -&gt; Box (Point d r)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (MDVertex r plane) (Point 2 r)
--&gt; MDVertex r plane -&gt; Point 2 r
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (MDVertex r plane a) (Point 2 r)
+-&gt; MDVertex r plane a -&gt; Point 2 r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (MDVertex r plane) (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (MDVertex r plane a) (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
-Lens' (MDVertex r plane) (Point 2 r)
+Lens' (MDVertex r plane a) (Point 2 r)
 </span><span class="hs-identifier hs-var">asPoint</span></span><span>
-</span><span id="line-48"></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458043"><span id="local-6989586621679458593"><span id="local-6989586621679458597"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458043"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679458602"><span class="annot"><span class="annottext">bimap :: forall a b c d.
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; MDVertex r a c -&gt; MDVertex r b d
+</span><a href="#local-6989586621679458602"><span class="hs-identifier hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679458604"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679458604"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679458605"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679458605"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span id="local-6989586621679458606"><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679458606"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679458607"><span class="annot"><span class="annottext">Definers a
+</span><a href="#local-6989586621679458607"><span class="hs-identifier hs-var">defs</span></a></span></span><span> </span><span id="local-6989586621679458608"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679458608"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Definers b -&gt; d -&gt; MDVertex r b d
+forall r plane a.
+Point 3 r -&gt; Definers plane -&gt; a -&gt; MDVertex r plane a
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-var">MDVertex</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679458606"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679458604"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Definers a -&gt; Definers b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Definers a
+</span><a href="#local-6989586621679458607"><span class="hs-identifier hs-var">defs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679458605"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679458608"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458065"><span id="local-6989586621679458611"><span id="local-6989586621679458618"><span id="local-6989586621679458621"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458065"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679458631"><span class="annot"><span class="annottext">bifoldMap :: forall m a b.
+Monoid m =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; MDVertex r a b -&gt; m
+</span><a href="#local-6989586621679458631"><span class="hs-identifier hs-var hs-var hs-var">bifoldMap</span></a></span></span><span> </span><span id="local-6989586621679458633"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679458633"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679458634"><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679458634"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679458635"><span class="annot"><span class="annottext">Definers a
+</span><a href="#local-6989586621679458635"><span class="hs-identifier hs-var">defs</span></a></span></span><span> </span><span id="local-6989586621679458636"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679458636"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Definers a -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Definers a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679458633"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Definers a
+</span><a href="#local-6989586621679458635"><span class="hs-identifier hs-var">defs</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679458634"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679458636"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679457080"><span id="local-6989586621679457081"><span id="local-6989586621679457526"><span id="local-6989586621679457534"><span id="local-6989586621679457540"><span class="annot"><span class="hs-identifier hs-type">Affine_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457080"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457081"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679457080"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679457082"><span id="local-6989586621679457083"><span class="annot"><span class="hs-identifier hs-type">HasVector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457082"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457083"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457082"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457083"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-52"></span><span>  </span><span id="local-6989586621679457616"><span class="annot"><span class="annottext">vector :: forall (d :: Nat) r s.
-(Dimension (MDVertex r plane) ~ d, NumType (MDVertex r plane) ~ r,
- Dimension (MDVertex r plane) ~ d,
- NumType (MDVertex r plane) ~ s) =&gt;
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458081"><span id="local-6989586621679458082"><span id="local-6989586621679458083"><span id="local-6989586621679458650"><span id="local-6989586621679458658"><span id="local-6989586621679458664"><span class="annot"><span class="hs-identifier hs-type">Affine_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458081"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458082"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458083"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679458081"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458084"><span id="local-6989586621679458085"><span id="local-6989586621679458086"><span class="annot"><span class="hs-identifier hs-type">HasVector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458084"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458085"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458086"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458084"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458085"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458086"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679458740"><span class="annot"><span class="annottext">vector :: forall (d :: Nat) r s.
+(Dimension (MDVertex r plane a) ~ d,
+ NumType (MDVertex r plane a) ~ r,
+ Dimension (MDVertex r plane a) ~ d,
+ NumType (MDVertex r plane a) ~ s) =&gt;
 Lens
-  (MDVertex r plane) (MDVertex r plane) (Vector d r) (Vector d s)
-</span><a href="#local-6989586621679457616"><span class="hs-identifier hs-var hs-var hs-var">vector</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(MDVertex r plane -&gt; Vector d r)
--&gt; (MDVertex r plane -&gt; Vector d s -&gt; MDVertex r plane)
+  (MDVertex r plane a) (MDVertex r plane a) (Vector d r) (Vector d s)
+</span><a href="#local-6989586621679458740"><span class="hs-identifier hs-var hs-var hs-var">vector</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(MDVertex r plane a -&gt; Vector d r)
+-&gt; (MDVertex r plane a -&gt; Vector d s -&gt; MDVertex r plane a)
 -&gt; Lens
-     (MDVertex r plane) (MDVertex r plane) (Vector d r) (Vector d s)
+     (MDVertex r plane a) (MDVertex r plane a) (Vector d r) (Vector d s)
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MDVertex r plane
--&gt; Getting (Vector d r) (MDVertex r plane) (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MDVertex r plane a
+-&gt; Getting (Vector d r) (MDVertex r plane a) (Vector d r)
 -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Point 3 r -&gt; Const (Vector d r) (Point 3 r))
--&gt; MDVertex r plane -&gt; Const (Vector d r) (MDVertex r plane)
-forall r plane r (f :: * -&gt; *).
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Point 3 r -&gt; Const (Vector d r) (Point 3 r))
+-&gt; MDVertex r plane a -&gt; Const (Vector d r) (MDVertex r plane a)
+forall r plane a r (f :: * -&gt; *).
 Functor f =&gt;
 (Point 3 r -&gt; f (Point 3 r))
--&gt; MDVertex r plane -&gt; f (MDVertex r plane)
+-&gt; MDVertex r plane a -&gt; f (MDVertex r plane a)
 </span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#location"><span class="hs-identifier hs-var">location</span></a></span><span class="annot"><span class="annottext">((Point 3 r -&gt; Const (Vector d r) (Point 3 r))
- -&gt; MDVertex r plane -&gt; Const (Vector d r) (MDVertex r plane))
+ -&gt; MDVertex r plane a -&gt; Const (Vector d r) (MDVertex r plane a))
 -&gt; ((Vector d r -&gt; Const (Vector d r) (Vector d r))
     -&gt; Point 3 r -&gt; Const (Vector d r) (Point 3 r))
--&gt; Getting (Vector d r) (MDVertex r plane) (Vector d r)
+-&gt; Getting (Vector d r) (MDVertex r plane a) (Vector d r)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Vector 3 r -&gt; Const (Vector d r) (Vector 3 r))
 -&gt; Point 3 r -&gt; Const (Vector d r) (Point 3 r)
@@ -332,103 +400,106 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
 (Profunctor p, Contravariant f) =&gt;
 (s -&gt; a) -&gt; Optic' p f s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 2 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 2 r
 forall (i :: Nat) (d :: Nat) vector vector' r.
 (i &lt;= d, Vector_ vector d r, Vector_ vector' i r) =&gt;
 vector -&gt; vector'
 </span><span class="hs-identifier hs-var">prefix</span></span><span class="hs-special">)</span><span>
-</span><span id="line-53"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679457622"><span class="annot"><span class="annottext">MDVertex r plane
-</span><a href="#local-6989586621679457622"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679457624"><span class="annot"><span class="annottext">s
-</span><a href="#local-6989586621679457624"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679457625"><span class="annot"><span class="annottext">s
-</span><a href="#local-6989586621679457625"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MDVertex r plane
-</span><a href="#local-6989586621679457622"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">MDVertex r plane
--&gt; (MDVertex r plane -&gt; MDVertex r plane) -&gt; MDVertex r plane
+</span><span id="line-54"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679458746"><span class="annot"><span class="annottext">MDVertex r plane a
+</span><a href="#local-6989586621679458746"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679458748"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679458748"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679458749"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679458749"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MDVertex r plane a
+</span><a href="#local-6989586621679458746"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">MDVertex r plane a
+-&gt; (MDVertex r plane a -&gt; MDVertex r plane a) -&gt; MDVertex r plane a
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Point 3 r -&gt; Identity (Point 3 r))
--&gt; MDVertex r plane -&gt; Identity (MDVertex r plane)
-forall r plane r (f :: * -&gt; *).
+-&gt; MDVertex r plane a -&gt; Identity (MDVertex r plane a)
+forall r plane a r (f :: * -&gt; *).
 Functor f =&gt;
 (Point 3 r -&gt; f (Point 3 r))
--&gt; MDVertex r plane -&gt; f (MDVertex r plane)
+-&gt; MDVertex r plane a -&gt; f (MDVertex r plane a)
 </span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#location"><span class="hs-identifier hs-var">location</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 3 r -&gt; Identity (Point 3 r))
- -&gt; MDVertex r plane -&gt; Identity (MDVertex r plane))
--&gt; (Point 3 r -&gt; Point 3 r) -&gt; MDVertex r plane -&gt; MDVertex r plane
+ -&gt; MDVertex r plane a -&gt; Identity (MDVertex r plane a))
+-&gt; (Point 3 r -&gt; Point 3 r)
+-&gt; MDVertex r plane a
+-&gt; MDVertex r plane a
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point3</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point3</span></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679457629"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679457629"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Point 3 r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679458753"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679458753"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Point 3 r
 forall r. r -&gt; r -&gt; r -&gt; Point 3 r
 </span><span class="hs-identifier hs-var">Point3</span></span><span> </span><span class="annot"><span class="annottext">r
 s
-</span><a href="#local-6989586621679457624"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679458748"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r
 s
-</span><a href="#local-6989586621679457625"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679457629"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679457142"><span id="local-6989586621679457143"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#HasDefiners"><span class="hs-identifier hs-type">HasDefiners</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457142"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457143"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679457143"><span class="hs-identifier hs-type">plane</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-56"></span><span>  </span><span id="local-6989586621679457635"><span class="annot"><span class="annottext">definersOf :: MDVertex r plane -&gt; Definers plane
-</span><a href="#local-6989586621679457635"><span class="hs-identifier hs-var hs-var hs-var">definersOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Definers plane) (MDVertex r plane) (Definers plane)
--&gt; MDVertex r plane -&gt; Definers plane
+</span><a href="#local-6989586621679458749"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679458753"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458147"><span id="local-6989586621679458148"><span id="local-6989586621679458149"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.VertexForm.html#HasDefiners"><span class="hs-identifier hs-type">HasDefiners</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458147"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458148"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458149"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679458148"><span class="hs-identifier hs-type">plane</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621679458759"><span class="annot"><span class="annottext">definersOf :: MDVertex r plane a -&gt; Definers plane
+</span><a href="#local-6989586621679458759"><span class="hs-identifier hs-var hs-var hs-var">definersOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Definers plane) (MDVertex r plane a) (Definers plane)
+-&gt; MDVertex r plane a -&gt; Definers plane
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Definers plane) (MDVertex r plane) (Definers plane)
-forall r plane plane (f :: * -&gt; *).
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Definers plane) (MDVertex r plane a) (Definers plane)
+forall r plane a plane (f :: * -&gt; *).
 Functor f =&gt;
 (Definers plane -&gt; f (Definers plane))
--&gt; MDVertex r plane -&gt; f (MDVertex r plane)
+-&gt; MDVertex r plane a -&gt; f (MDVertex r plane a)
 </span><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#definers"><span class="hs-identifier hs-var">definers</span></a></span><span>
-</span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679457637"><span id="local-6989586621679457638"><span class="annot"><span class="hs-identifier hs-type">HasCoordinates</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457637"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457638"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457637"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457638"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-59"></span><span>  </span><span class="hs-comment">-- ^ Note that this only traverses the x and y coordinates of the vertex!</span><span>
-</span><span id="line-60"></span><span>  </span><span id="local-6989586621679457673"><span class="annot"><span class="annottext">coordinates :: IndexedTraversal1
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458761"><span id="local-6989586621679458762"><span id="local-6989586621679458763"><span class="annot"><span class="hs-identifier hs-type">HasCoordinates</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458761"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458762"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458763"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458761"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458762"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458763"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-comment">-- ^ Note that this only traverses the x and y coordinates of the vertex!</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679458798"><span class="annot"><span class="annottext">coordinates :: IndexedTraversal1
   Int
-  (MDVertex r plane)
-  (MDVertex r plane)
-  (NumType (MDVertex r plane))
-  (NumType (MDVertex r plane))
-</span><a href="#local-6989586621679457673"><span class="hs-identifier hs-var hs-var hs-var">coordinates</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; f (Vector 2 r))
--&gt; MDVertex r plane -&gt; f (MDVertex r plane)
+  (MDVertex r plane a)
+  (MDVertex r plane a)
+  (NumType (MDVertex r plane a))
+  (NumType (MDVertex r plane a))
+</span><a href="#local-6989586621679458798"><span class="hs-identifier hs-var hs-var hs-var">coordinates</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; f (Vector 2 r))
+-&gt; MDVertex r plane a -&gt; f (MDVertex r plane a)
 forall (d :: Nat) r s.
-(Dimension (MDVertex r plane) ~ d, NumType (MDVertex r plane) ~ r,
- Dimension (MDVertex r plane) ~ d,
- NumType (MDVertex r plane) ~ s) =&gt;
+(Dimension (MDVertex r plane a) ~ d,
+ NumType (MDVertex r plane a) ~ r,
+ Dimension (MDVertex r plane a) ~ d,
+ NumType (MDVertex r plane a) ~ s) =&gt;
 Lens
-  (MDVertex r plane) (MDVertex r plane) (Vector d r) (Vector d s)
+  (MDVertex r plane a) (MDVertex r plane a) (Vector d r) (Vector d s)
 forall point point' (d :: Nat) r s.
 (HasVector point point', Dimension point ~ d, NumType point ~ r,
  Dimension point' ~ d, NumType point' ~ s) =&gt;
 Lens point point' (Vector d r) (Vector d s)
 Lens
-  (MDVertex r plane) (MDVertex r plane) (Vector 2 r) (Vector 2 r)
+  (MDVertex r plane a) (MDVertex r plane a) (Vector 2 r) (Vector 2 r)
 </span><span class="hs-identifier hs-var">vector</span></span><span class="annot"><span class="annottext">((Vector 2 r -&gt; f (Vector 2 r))
- -&gt; MDVertex r plane -&gt; f (MDVertex r plane))
+ -&gt; MDVertex r plane a -&gt; f (MDVertex r plane a))
 -&gt; (p r (f r) -&gt; Vector 2 r -&gt; f (Vector 2 r))
 -&gt; p r (f r)
--&gt; MDVertex r plane
--&gt; f (MDVertex r plane)
+-&gt; MDVertex r plane a
+-&gt; f (MDVertex r plane a)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">p r (f r) -&gt; Vector 2 r -&gt; f (Vector 2 r)
 forall (f :: * -&gt; *) a b.
 Traversable1 f =&gt;
 IndexedTraversal1 Int (f a) (f b) a b
 IndexedTraversal1 Int (Vector 2 r) (Vector 2 r) r r
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Traversal.html/Control.Lens.Traversal.html#traversed1"><span class="hs-identifier hs-var">traversed1</span></a></span><span>
-</span><span id="line-61"></span><span>
-</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679457058"><span id="local-6989586621679457059"><span id="local-6989586621679457682"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679457058"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457058"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457059"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679457058"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span class="annot"><span class="hs-comment">-- | A Convex bounded region, which may be clipped using vertices of type 'corner'.</span></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">type</span><span> </span><span id="ClippedBoundedRegion"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#ClippedBoundedRegion"><span class="hs-identifier hs-var">ClippedBoundedRegion</span></a></span></span><span> </span><span id="local-6989586621679457685"><span class="annot"><a href="#local-6989586621679457685"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679457686"><span class="annot"><a href="#local-6989586621679457686"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679457687"><span class="annot"><a href="#local-6989586621679457687"><span class="hs-identifier hs-type">corner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-68"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">ConvexPolygonF</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OriginalOrExtra</span></span><span> </span><span class="annot"><a href="#local-6989586621679457686"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457687"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span class="hs-comment">-- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the</span><span>
-</span><span id="line-73"></span><span class="hs-comment">-- region is to the left of the boundary.</span><span>
-</span><span id="line-74"></span><span class="hs-keyword">data</span><span> </span><span id="Region"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-var">Region</span></a></span></span><span> </span><span id="local-6989586621679457689"><span class="annot"><a href="#local-6989586621679457689"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679457690"><span class="annot"><a href="#local-6989586621679457690"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="BoundedRegion"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#BoundedRegion"><span class="hs-identifier hs-var">BoundedRegion</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ConvexPolygonF</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679457690"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-75"></span><span>                     </span><span class="hs-glyph">|</span><span> </span><span id="UnboundedRegion"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#UnboundedRegion"><span class="hs-identifier hs-var">UnboundedRegion</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></span><span> </span><span class="annot"><a href="#local-6989586621679457689"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679457690"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-76"></span><span>                     </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679457694"><span id="local-6989586621679457702"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Traversal.html#traversed1"><span class="hs-identifier hs-var">traversed1</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458015"><span id="local-6989586621679458016"><span id="local-6989586621679458017"><span id="local-6989586621679458807"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679458015"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#MDVertex"><span class="hs-identifier hs-type">MDVertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458015"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458016"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458017"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679458015"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="annot"><span class="hs-comment">-- | A Convex bounded region, which may be clipped using vertices of type 'corner'.</span></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">type</span><span> </span><span id="ClippedBoundedRegion"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#ClippedBoundedRegion"><span class="hs-identifier hs-var">ClippedBoundedRegion</span></a></span></span><span> </span><span id="local-6989586621679458810"><span class="annot"><a href="#local-6989586621679458810"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679458811"><span class="annot"><a href="#local-6989586621679458811"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679458812"><span class="annot"><a href="#local-6989586621679458812"><span class="hs-identifier hs-type">corner</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">ConvexPolygonF</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OriginalOrExtra</span></span><span> </span><span class="annot"><a href="#local-6989586621679458811"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458812"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- region is to the left of the boundary.</span><span>
+</span><span id="line-75"></span><span class="hs-keyword">data</span><span> </span><span id="Region"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-var">Region</span></a></span></span><span> </span><span id="local-6989586621679458814"><span class="annot"><a href="#local-6989586621679458814"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679458815"><span class="annot"><a href="#local-6989586621679458815"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="BoundedRegion"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#BoundedRegion"><span class="hs-identifier hs-var">BoundedRegion</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ConvexPolygonF</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679458815"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>                     </span><span class="hs-glyph">|</span><span> </span><span id="UnboundedRegion"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#UnboundedRegion"><span class="hs-identifier hs-var">UnboundedRegion</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></span><span> </span><span class="annot"><a href="#local-6989586621679458814"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679458815"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>                     </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679458819"><span id="local-6989586621679458827"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b)
 -&gt; (forall a b. a -&gt; Region r b -&gt; Region r a)
 -&gt; Functor (Region r)
 forall a b. a -&gt; Region r b -&gt; Region r a
@@ -442,7 +513,7 @@ $cfmap :: forall r a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b
 fmap :: forall a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b
 $c&lt;$ :: forall r a b. a -&gt; Region r b -&gt; Region r a
 &lt;$ :: forall a b. a -&gt; Region r b -&gt; Region r a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679457711"><span id="local-6989586621679457717"><span id="local-6989586621679457728"><span id="local-6989586621679457733"><span id="local-6989586621679457739"><span id="local-6989586621679457742"><span id="local-6989586621679457745"><span id="local-6989586621679457748"><span id="local-6989586621679457751"><span id="local-6989586621679457754"><span id="local-6989586621679457757"><span id="local-6989586621679457763"><span id="local-6989586621679457766"><span id="local-6989586621679457771"><span id="local-6989586621679457776"><span id="local-6989586621679457781"><span id="local-6989586621679457786"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Region r m -&gt; m)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458836"><span id="local-6989586621679458842"><span id="local-6989586621679458853"><span id="local-6989586621679458858"><span id="local-6989586621679458864"><span id="local-6989586621679458867"><span id="local-6989586621679458870"><span id="local-6989586621679458873"><span id="local-6989586621679458876"><span id="local-6989586621679458879"><span id="local-6989586621679458882"><span id="local-6989586621679458888"><span id="local-6989586621679458891"><span id="local-6989586621679458896"><span id="local-6989586621679458901"><span id="local-6989586621679458906"><span id="local-6989586621679458911"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Region r m -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Region r a -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Region r a -&gt; m)
 -&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Region r a -&gt; b)
@@ -535,7 +606,7 @@ $csum :: forall r a. Num a =&gt; Region r a -&gt; a
 sum :: forall a. Num a =&gt; Region r a -&gt; a
 $cproduct :: forall r a. Num a =&gt; Region r a -&gt; a
 product :: forall a. Num a =&gt; Region r a -&gt; a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679457797"><span id="local-6989586621679457811"><span id="local-6989586621679457817"><span id="local-6989586621679457822"><span class="annot"><span class="annottext">Functor (Region r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458922"><span id="local-6989586621679458936"><span id="local-6989586621679458942"><span id="local-6989586621679458947"><span class="annot"><span class="annottext">Functor (Region r)
 Foldable (Region r)
 (Functor (Region r), Foldable (Region r)) =&gt;
 (forall (f :: * -&gt; *) a b.
@@ -608,14 +679,29 @@ $csequence :: forall r (m :: * -&gt; *) a.
 Monad m =&gt;
 Region r (m a) -&gt; m (Region r a)
 sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Region r (m a) -&gt; m (Region r a)
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-77"></span><span>
-</span><span id="line-78"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679457831"><span id="local-6989586621679457832"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457831"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457832"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679457831"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-79"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679457833"><span id="local-6989586621679457834"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457833"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457834"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679457834"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-80"></span><span>
-</span><span id="line-81"></span><span id="local-6989586621679457248"><span id="local-6989586621679457249"><span id="local-6989586621679457839"><span id="local-6989586621679457849"><span id="local-6989586621679457853"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679457248"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679457249"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679457249"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679457248"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457248"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457249"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
-</span><span id="line-82"></span><span id="local-6989586621679457265"><span id="local-6989586621679457266"><span id="local-6989586621679457964"><span id="local-6989586621679457975"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679457265"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679457266"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457265"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679457266"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679458957"><span id="local-6989586621679458959"><span class="annot"><span class="annottext">(forall x. Region r vertex -&gt; Rep (Region r vertex) x)
+-&gt; (forall x. Rep (Region r vertex) x -&gt; Region r vertex)
+-&gt; Generic (Region r vertex)
+forall x. Rep (Region r vertex) x -&gt; Region r vertex
+forall x. Region r vertex -&gt; Rep (Region r vertex) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall r vertex x. Rep (Region r vertex) x -&gt; Region r vertex
+forall r vertex x. Region r vertex -&gt; Rep (Region r vertex) x
+$cfrom :: forall r vertex x. Region r vertex -&gt; Rep (Region r vertex) x
+from :: forall x. Region r vertex -&gt; Rep (Region r vertex) x
+$cto :: forall r vertex x. Rep (Region r vertex) x -&gt; Region r vertex
+to :: forall x. Rep (Region r vertex) x -&gt; Region r vertex
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679458961"><span id="local-6989586621679458962"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458961"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458962"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679458961"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-80"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679458963"><span id="local-6989586621679458964"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458963"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458964"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679458964"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679458234"><span id="local-6989586621679458235"><span id="local-6989586621679458968"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679458234"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679458235"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458234"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458235"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span>
-</span><span id="line-85"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-86"></span></pre></body></html>
+</span><span id="line-84"></span><span id="local-6989586621679458277"><span id="local-6989586621679458278"><span id="local-6989586621679458994"><span id="local-6989586621679459004"><span id="local-6989586621679459008"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679458277"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679458278"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679458278"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679458277"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458277"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458278"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679458293"><span id="local-6989586621679458294"><span id="local-6989586621679459119"><span id="local-6989586621679459130"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679458293"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679458294"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Region.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458293"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679458294"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-89"></span></pre></body></html>

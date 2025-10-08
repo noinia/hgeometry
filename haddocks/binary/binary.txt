@@ -11,7 +11,7 @@
 --   Serialisation speeds of over 1 G/sec have been observed, so this
 --   library should be suitable for high performance scenarios.
 @package binary
-@version 0.8.9.2
+@version 0.8.9.3
 
 
 -- | Efficient constructions of lazy bytestrings.
@@ -304,7 +304,7 @@ instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Binary.Get.Int
 --   The fields in <tt>Trade</tt> are marked as strict (using <tt>!</tt>)
 --   since we don't need laziness here. In practise, you would probably
 --   consider using the UNPACK pragma as well.
---   <a>https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#unpack-pragma</a>
+--   <a>https://downloads.haskell.org/ghc/latest/docs/users_guide/exts/pragmas.html#unpack-pragma</a>
 --   
 --   Now, let's have a look at a decoder for this format.
 --   

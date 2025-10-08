@@ -12,7 +12,7 @@
 --   minimal set of transitive dependencies, since it is intended to be
 --   depended upon by user code.
 @package ghc-boot-th
-@version 9.10.1
+@version 9.12.2
 
 module GHC.ForeignSrcLang.Type
 
@@ -39,9 +39,71 @@ LangJs :: ForeignSrcLang
 
 -- | Object (.o)
 RawObject :: ForeignSrcLang
-instance GHC.Classes.Eq GHC.ForeignSrcLang.Type.ForeignSrcLang
-instance GHC.Internal.Generics.Generic GHC.ForeignSrcLang.Type.ForeignSrcLang
-instance GHC.Internal.Show.Show GHC.ForeignSrcLang.Type.ForeignSrcLang
+
+module GHC.Internal.TH.Lib.Map
+data Map k a
+empty :: Map k a
+insert :: Ord k => k -> a -> Map k a -> Map k a
+lookup :: Ord k => k -> Map k a -> Maybe a
+
+
+-- | Monadic front-end to Text.PrettyPrint
+module GHC.Internal.TH.PprLib
+type Doc = PprM Doc
+data PprM a
+empty :: Doc
+semi :: Doc
+comma :: Doc
+colon :: Doc
+dcolon :: Doc
+space :: Doc
+equals :: Doc
+arrow :: Doc
+lparen :: Doc
+rparen :: Doc
+lbrack :: Doc
+rbrack :: Doc
+lbrace :: Doc
+rbrace :: Doc
+text :: String -> Doc
+char :: Char -> Doc
+ptext :: String -> Doc
+int :: Int -> Doc
+integer :: Integer -> Doc
+float :: Float -> Doc
+double :: Double -> Doc
+rational :: Rational -> Doc
+parens :: Doc -> Doc
+brackets :: Doc -> Doc
+braces :: Doc -> Doc
+quotes :: Doc -> Doc
+doubleQuotes :: Doc -> Doc
+(<>) :: Doc -> Doc -> Doc
+infixl 6 <>
+(<+>) :: Doc -> Doc -> Doc
+infixl 6 <+>
+hcat :: [Doc] -> Doc
+hsep :: [Doc] -> Doc
+($$) :: Doc -> Doc -> Doc
+infixl 5 $$
+($+$) :: Doc -> Doc -> Doc
+infixl 5 $+$
+vcat :: [Doc] -> Doc
+sep :: [Doc] -> Doc
+cat :: [Doc] -> Doc
+fsep :: [Doc] -> Doc
+fcat :: [Doc] -> Doc
+nest :: Int -> Doc -> Doc
+hang :: Doc -> Int -> Doc -> Doc
+punctuate :: Doc -> [Doc] -> [Doc]
+isEmpty :: Doc -> PprM Bool
+to_HPJ_Doc :: Doc -> Doc
+pprName :: Name -> Doc
+pprName' :: NameIs -> Name -> Doc
+instance GHC.Internal.Base.Applicative GHC.Internal.TH.PprLib.PprM
+instance GHC.Internal.Base.Functor GHC.Internal.TH.PprLib.PprM
+instance GHC.Internal.Base.Monad GHC.Internal.TH.PprLib.PprM
+instance GHC.Internal.Show.Show GHC.Internal.TH.PprLib.Doc
 
 
 -- | A data type defining the language extensions supported by GHC.
@@ -65,6 +127,7 @@ MonoLocalBinds :: Extension
 DeepSubsumption :: Extension
 RelaxedPolyRec :: Extension
 ExtendedDefaultRules :: Extension
+NamedDefaults :: Extension
 ForeignFunctionInterface :: Extension
 UnliftedFFITypes :: Extension
 InterruptibleFFI :: Extension
@@ -96,6 +159,7 @@ DisambiguateRecordFields :: Extension
 RecordWildCards :: Extension
 NamedFieldPuns :: Extension
 ViewPatterns :: Extension
+OrPatterns :: Extension
 GADTs :: Extension
 GADTSyntax :: Extension
 NPlusKPatterns :: Extension
@@ -185,12 +249,7 @@ OverloadedRecordUpdate :: Extension
 TypeAbstractions :: Extension
 ExtendedLiterals :: Extension
 ListTuplePuns :: Extension
-instance GHC.Internal.Enum.Bounded GHC.LanguageExtensions.Type.Extension
-instance GHC.Internal.Enum.Enum GHC.LanguageExtensions.Type.Extension
-instance GHC.Classes.Eq GHC.LanguageExtensions.Type.Extension
-instance GHC.Internal.Generics.Generic GHC.LanguageExtensions.Type.Extension
-instance GHC.Classes.Ord GHC.LanguageExtensions.Type.Extension
-instance GHC.Internal.Show.Show GHC.LanguageExtensions.Type.Extension
+MultilineStrings :: Extension
 
 
 -- | Functions to evaluate whether or not a string is a valid identifier.
@@ -205,3 +264,149 @@ isVarSymChar :: Char -> Bool
 -- | Is this character acceptable in a symbol (after the first char)? See
 --   alexGetByte in GHC.Parser.Lexer
 okSymChar :: Char -> Bool
+
+
+-- | contains a prettyprinter for the Template Haskell datatypes
+module GHC.Internal.TH.Ppr
+nestDepth :: Int
+type Precedence = Int
+appPrec :: Precedence
+opPrec :: Precedence
+unopPrec :: Precedence
+funPrec :: Precedence
+qualPrec :: Precedence
+sigPrec :: Precedence
+noPrec :: Precedence
+parensIf :: Bool -> Doc -> Doc
+pprint :: Ppr a => a -> String
+class Ppr a
+ppr :: Ppr a => a -> Doc
+ppr_list :: Ppr a => [a] -> Doc
+ppr_sig :: Name -> Type -> Doc
+pprFixity :: Name -> Fixity -> NamespaceSpecifier -> Doc
+pprNamespaceSpecifier :: NamespaceSpecifier -> Doc
+
+-- | Pretty prints a pattern synonym type signature
+pprPatSynSig :: Name -> PatSynType -> Doc
+
+-- | Pretty prints a pattern synonym's type; follows the usual conventions
+--   to print a pattern synonym type compactly, yet unambiguously. See the
+--   note on <a>PatSynType</a> and the section on pattern synonyms in the
+--   GHC user's guide for more information.
+pprPatSynType :: PatSynType -> Doc
+pprPrefixOcc :: Name -> Doc
+isSymOcc :: Name -> Bool
+pprInfixExp :: Exp -> Doc
+pprExp :: Precedence -> Exp -> Doc
+pprFields :: [(Name, Exp)] -> Doc
+pprMaybeExp :: Precedence -> Maybe Exp -> Doc
+pprMatchPat :: Pat -> Doc
+pprGuarded :: Doc -> (Guard, Exp) -> Doc
+pprBody :: Bool -> Body -> Doc
+pprClause :: Bool -> Clause -> Doc
+pprLit :: Precedence -> Lit -> Doc
+bytesToString :: [Word8] -> String
+pprString :: String -> Doc
+pprPat :: Precedence -> Pat -> Doc
+ppr_dec :: Bool -> Dec -> Doc
+ppr_deriv_strategy :: DerivStrategy -> Doc
+ppr_overlap :: Overlap -> Doc
+ppr_data :: Bool -> Doc -> Cxt -> Maybe Name -> Doc -> Maybe Kind -> [Con] -> [DerivClause] -> Doc
+ppr_newtype :: Bool -> Doc -> Cxt -> Maybe Name -> Doc -> Maybe Kind -> Con -> [DerivClause] -> Doc
+ppr_type_data :: Bool -> Doc -> Cxt -> Maybe Name -> Doc -> Maybe Kind -> [Con] -> [DerivClause] -> Doc
+ppr_typedef :: String -> Bool -> Doc -> Cxt -> Maybe Name -> Doc -> Maybe Kind -> [Con] -> [DerivClause] -> Doc
+ppr_deriv_clause :: DerivClause -> Doc
+ppr_tySyn :: Doc -> Maybe Name -> Doc -> Type -> Doc
+ppr_tf_head :: TypeFamilyHead -> Doc
+ppr_bndrs :: PprFlag flag => Maybe [TyVarBndr flag] -> Doc
+commaSepApplied :: [Name] -> Doc
+pprForall :: [TyVarBndr Specificity] -> Cxt -> Doc
+pprForallVis :: [TyVarBndr ()] -> Cxt -> Doc
+pprForall' :: PprFlag flag => ForallVisFlag -> [TyVarBndr flag] -> Cxt -> Doc
+pprRecFields :: [(Name, Strict, Type)] -> Type -> Doc
+pprGadtRHS :: [(Strict, Type)] -> Type -> Doc
+pprVarBangType :: VarBangType -> Doc
+pprBangType :: BangType -> Doc
+
+-- | <i>Deprecated: As of <tt>template-haskell-2.11.0.0</tt>,
+--   <a>VarStrictType</a> has been replaced by <a>VarBangType</a>. Please
+--   use <a>pprVarBangType</a> instead.</i>
+pprVarStrictType :: (Name, Strict, Type) -> Doc
+
+-- | <i>Deprecated: As of <tt>template-haskell-2.11.0.0</tt>,
+--   <a>StrictType</a> has been replaced by <a>BangType</a>. Please use
+--   <a>pprBangType</a> instead.</i>
+pprStrictType :: (Strict, Type) -> Doc
+pprType :: Precedence -> Type -> Doc
+pprParendType :: Type -> Doc
+pprInfixT :: Precedence -> Type -> Doc
+pprParendTypeArg :: TypeArg -> Doc
+isStarT :: Type -> Bool
+pprTyApp :: Precedence -> (Type, [TypeArg]) -> Doc
+fromTANormal :: TypeArg -> Maybe Type
+pprFunArgType :: Type -> Doc
+data ForallVisFlag
+ForallVis :: ForallVisFlag
+ForallInvis :: ForallVisFlag
+data TypeArg
+TANormal :: Type -> TypeArg
+TyArg :: Kind -> TypeArg
+split :: Type -> (Type, [TypeArg])
+pprTyLit :: TyLit -> Doc
+class PprFlag flag
+pprTyVarBndr :: PprFlag flag => TyVarBndr flag -> Doc
+pprBndrVis :: BndrVis -> Doc -> Doc
+pprCtxWith :: Ppr a => (Precedence -> a -> Doc) -> [a] -> Doc
+pprCxt :: Cxt -> Doc
+ppr_ctx_preds_with :: Ppr a => (Precedence -> a -> Doc) -> Precedence -> [a] -> Doc
+ppr_cxt_preds :: Precedence -> Cxt -> Doc
+where_clause :: [Dec] -> Doc
+showtextl :: Show a => a -> Doc
+hashParens :: Doc -> Doc
+quoteParens :: Doc -> Doc
+sepWith :: Doc -> (a -> Doc) -> [a] -> Doc
+commaSep :: Ppr a => [a] -> Doc
+commaSepWith :: (a -> Doc) -> [a] -> Doc
+semiSep :: Ppr a => [a] -> Doc
+semiSepWith :: (a -> Doc) -> [a] -> Doc
+unboxedSumBars :: Doc -> SumAlt -> SumArity -> Doc
+bar :: Doc
+instance GHC.Internal.TH.Ppr.PprFlag GHC.Internal.TH.Syntax.BndrVis
+instance GHC.Internal.TH.Ppr.PprFlag GHC.Internal.TH.Syntax.Specificity
+instance GHC.Internal.TH.Ppr.PprFlag ()
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Bang
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Clause
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Con
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Dec
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.DecidedStrictness
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Exp
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.FamilyResultSig
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Foreign
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.FunDep
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Info
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.InjectivityAnn
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Inline
+instance GHC.Internal.TH.Ppr.Ppr a => GHC.Internal.TH.Ppr.Ppr [a]
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Lit
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Loc
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Match
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Module
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.ModuleInfo
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Name
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Pat
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.PatSynArgs
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.PatSynDir
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Phases
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Pragma
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Range
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Role
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.RuleBndr
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.RuleMatch
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.SourceStrictness
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.SourceUnpackedness
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Stmt
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.TyLit
+instance GHC.Internal.TH.Ppr.PprFlag flag => GHC.Internal.TH.Ppr.Ppr (GHC.Internal.TH.Syntax.TyVarBndr flag)
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Syntax.Type
+instance GHC.Internal.TH.Ppr.Ppr GHC.Internal.TH.Ppr.TypeArg
+instance GHC.Internal.Show.Show GHC.Internal.TH.Ppr.ForallVisFlag

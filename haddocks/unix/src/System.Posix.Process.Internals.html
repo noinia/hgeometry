@@ -8,11 +8,11 @@
 </span><span id="line-7"></span><span>       </span><span class="annot"><a href="System.Posix.Process.Internals.html#pPrPr_disableITimers"><span class="hs-identifier">pPrPr_disableITimers</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="System.Posix.Process.Internals.html#c_execvpe"><span class="hs-identifier">c_execvpe</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-8"></span><span>       </span><span class="annot"><a href="System.Posix.Process.Internals.html#decipherWaitStatus"><span class="hs-identifier">decipherWaitStatus</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="System.Posix.Process.Internals.html#ProcessStatus"><span class="hs-identifier">ProcessStatus</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-9"></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.html/Foreign.html"><span class="hs-identifier">Foreign</span></a></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.C.html/Foreign.C.html"><span class="hs-identifier">Foreign.C</span></a></span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Exit.html/System.Exit.html"><span class="hs-identifier">System.Exit</span></a></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.IO.Error.html/System.IO.Error.html"><span class="hs-identifier">System.IO.Error</span></a></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//GHC.Conc.html/GHC.Conc.html"><span class="hs-identifier">GHC.Conc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Signal</span></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.html"><span class="hs-identifier">Foreign</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.C.html"><span class="hs-identifier">Foreign.C</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.Exit.html"><span class="hs-identifier">System.Exit</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.IO.Error.html"><span class="hs-identifier">System.IO.Error</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/GHC.Conc.html"><span class="hs-identifier">GHC.Conc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Signal</span></span><span class="hs-special">)</span><span>
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="hs-pragma">{-# LINE 20 &quot;libraries/unix/System/Posix/Process/Internals.hsc&quot; #-}</span><span>
@@ -27,7 +27,7 @@
 </span><span id="line-28"></span><span>                            </span><span class="hs-comment">--</span><span>
 </span><span id="line-29"></span><span>                            </span><span class="hs-comment">-- @since 2.7.0.0</span><span>
 </span><span id="line-30"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="Stopped"><span class="annot"><a href="System.Posix.Process.Internals.html#Stopped"><span class="hs-identifier hs-var">Stopped</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Signal</span></span><span>         </span><span class="annot"><span class="hs-comment">-- ^ the process was stopped by a signal</span></span><span>
-</span><span id="line-31"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679107959"><span id="local-6989586621679107970"><span class="annot"><span class="annottext">ProcessStatus -&gt; ProcessStatus -&gt; Bool
+</span><span id="line-31"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679113111"><span id="local-6989586621679113122"><span class="annot"><span class="annottext">ProcessStatus -&gt; ProcessStatus -&gt; Bool
 (ProcessStatus -&gt; ProcessStatus -&gt; Bool)
 -&gt; (ProcessStatus -&gt; ProcessStatus -&gt; Bool) -&gt; Eq ProcessStatus
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -35,7 +35,7 @@ $c== :: ProcessStatus -&gt; ProcessStatus -&gt; Bool
 == :: ProcessStatus -&gt; ProcessStatus -&gt; Bool
 $c/= :: ProcessStatus -&gt; ProcessStatus -&gt; Bool
 /= :: ProcessStatus -&gt; ProcessStatus -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679107977"><span id="local-6989586621679107986"><span id="local-6989586621679107992"><span id="local-6989586621679107996"><span id="local-6989586621679107999"><span id="local-6989586621679108002"><span id="local-6989586621679108005"><span class="annot"><span class="annottext">Eq ProcessStatus
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679113129"><span id="local-6989586621679113138"><span id="local-6989586621679113144"><span id="local-6989586621679113148"><span id="local-6989586621679113151"><span id="local-6989586621679113154"><span id="local-6989586621679113157"><span class="annot"><span class="annottext">Eq ProcessStatus
 Eq ProcessStatus =&gt;
 (ProcessStatus -&gt; ProcessStatus -&gt; Ordering)
 -&gt; (ProcessStatus -&gt; ProcessStatus -&gt; Bool)
@@ -72,7 +72,7 @@ $cmax :: ProcessStatus -&gt; ProcessStatus -&gt; ProcessStatus
 max :: ProcessStatus -&gt; ProcessStatus -&gt; ProcessStatus
 $cmin :: ProcessStatus -&gt; ProcessStatus -&gt; ProcessStatus
 min :: ProcessStatus -&gt; ProcessStatus -&gt; ProcessStatus
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679108013"><span id="local-6989586621679108026"><span id="local-6989586621679108030"><span class="annot"><span class="annottext">Int -&gt; ProcessStatus -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679113165"><span id="local-6989586621679113178"><span id="local-6989586621679113182"><span class="annot"><span class="annottext">Int -&gt; ProcessStatus -&gt; ShowS
 [ProcessStatus] -&gt; ShowS
 ProcessStatus -&gt; String
 (Int -&gt; ProcessStatus -&gt; ShowS)
@@ -102,21 +102,21 @@ showList :: [ProcessStatus] -&gt; ShowS
 </span><span id="line-48"></span><span>
 </span><span id="line-49"></span><span class="annot"><a href="System.Posix.Process.Internals.html#decipherWaitStatus"><span class="hs-identifier hs-type">decipherWaitStatus</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CInt</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="System.Posix.Process.Internals.html#ProcessStatus"><span class="hs-identifier hs-type">ProcessStatus</span></a></span><span>
 </span><span id="line-50"></span><span id="decipherWaitStatus"><span class="annot"><span class="annottext">decipherWaitStatus :: CInt -&gt; IO ProcessStatus
-</span><a href="System.Posix.Process.Internals.html#decipherWaitStatus"><span class="hs-identifier hs-var hs-var">decipherWaitStatus</span></a></span></span><span> </span><span id="local-6989586621679108035"><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="System.Posix.Process.Internals.html#decipherWaitStatus"><span class="hs-identifier hs-var hs-var">decipherWaitStatus</span></a></span></span><span> </span><span id="local-6989586621679113187"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-51"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
 </span><a href="System.Posix.Process.Internals.html#c_WIFEXITED"><span class="hs-identifier hs-var">c_WIFEXITED</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CInt
 </span><span class="hs-number">0</span></span><span>
 </span><span id="line-52"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-53"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679108038"><span class="annot"><span class="annottext">exitstatus :: CInt
-</span><a href="#local-6989586621679108038"><span class="hs-identifier hs-var hs-var">exitstatus</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
+</span><span id="line-53"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679113190"><span class="annot"><span class="annottext">exitstatus :: CInt
+</span><a href="#local-6989586621679113190"><span class="hs-identifier hs-var hs-var">exitstatus</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
 </span><a href="System.Posix.Process.Internals.html#c_WEXITSTATUS"><span class="hs-identifier hs-var">c_WEXITSTATUS</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span><span>
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span><span>
 </span><span id="line-54"></span><span>        </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108038"><span class="hs-identifier hs-var">exitstatus</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+</span><a href="#local-6989586621679113190"><span class="hs-identifier hs-var">exitstatus</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CInt
 </span><span class="hs-number">0</span></span><span>
@@ -134,23 +134,23 @@ forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">ExitFailure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CInt -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108038"><span class="hs-identifier hs-var">exitstatus</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679113190"><span class="hs-identifier hs-var">exitstatus</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-57"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-58"></span><span>        </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
 </span><a href="System.Posix.Process.Internals.html#c_WIFSIGNALED"><span class="hs-identifier hs-var">c_WIFSIGNALED</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CInt
 </span><span class="hs-number">0</span></span><span>
 </span><span id="line-59"></span><span>           </span><span class="hs-keyword">then</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-60"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679108043"><span class="annot"><span class="annottext">termsig :: CInt
-</span><a href="#local-6989586621679108043"><span class="hs-identifier hs-var hs-var hs-var">termsig</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
+</span><span id="line-60"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679113195"><span class="annot"><span class="annottext">termsig :: CInt
+</span><a href="#local-6989586621679113195"><span class="hs-identifier hs-var hs-var hs-var">termsig</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
 </span><a href="System.Posix.Process.Internals.html#c_WTERMSIG"><span class="hs-identifier hs-var">c_WTERMSIG</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span><span>
-</span><span id="line-61"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679108047"><span class="annot"><span class="annottext">coredumped :: Bool
-</span><a href="#local-6989586621679108047"><span class="hs-identifier hs-var hs-var">coredumped</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span><span>
+</span><span id="line-61"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679113199"><span class="annot"><span class="annottext">coredumped :: Bool
+</span><a href="#local-6989586621679113199"><span class="hs-identifier hs-var hs-var">coredumped</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
 </span><a href="System.Posix.Process.Internals.html#c_WCOREDUMP"><span class="hs-identifier hs-var">c_WCOREDUMP</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CInt
 </span><span class="hs-number">0</span></span><span>
@@ -159,29 +159,29 @@ forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CInt -&gt; Bool -&gt; ProcessStatus
 </span><a href="System.Posix.Process.Internals.html#Terminated"><span class="hs-identifier hs-var">Terminated</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108043"><span class="hs-identifier hs-var">termsig</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679108047"><span class="hs-identifier hs-var">coredumped</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679113195"><span class="hs-identifier hs-var">termsig</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679113199"><span class="hs-identifier hs-var">coredumped</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-63"></span><span>           </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-64"></span><span>                </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
 </span><a href="System.Posix.Process.Internals.html#c_WIFSTOPPED"><span class="hs-identifier hs-var">c_WIFSTOPPED</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CInt
 </span><span class="hs-number">0</span></span><span>
 </span><span id="line-65"></span><span>                   </span><span class="hs-keyword">then</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-66"></span><span>                        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679108050"><span class="annot"><span class="annottext">stopsig :: CInt
-</span><a href="#local-6989586621679108050"><span class="hs-identifier hs-var hs-var">stopsig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
+</span><span id="line-66"></span><span>                        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679113202"><span class="annot"><span class="annottext">stopsig :: CInt
+</span><a href="#local-6989586621679113202"><span class="hs-identifier hs-var hs-var">stopsig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt
 </span><a href="System.Posix.Process.Internals.html#c_WSTOPSIG"><span class="hs-identifier hs-var">c_WSTOPSIG</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108035"><span class="hs-identifier hs-var">wstat</span></a></span><span>
+</span><a href="#local-6989586621679113187"><span class="hs-identifier hs-var">wstat</span></a></span><span>
 </span><span id="line-67"></span><span>                        </span><span class="annot"><span class="annottext">ProcessStatus -&gt; IO ProcessStatus
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CInt -&gt; ProcessStatus
 </span><a href="System.Posix.Process.Internals.html#Stopped"><span class="hs-identifier hs-var">Stopped</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
-</span><a href="#local-6989586621679108050"><span class="hs-identifier hs-var">stopsig</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679113202"><span class="hs-identifier hs-var">stopsig</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-68"></span><span>                   </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-69"></span><span>                        </span><span class="annot"><span class="annottext">IOError -&gt; IO ProcessStatus
-forall a. IOError -&gt; IO a
+forall a. HasCallStack =&gt; IOError -&gt; IO a
 </span><span class="hs-identifier hs-var">ioError</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IOErrorType -&gt; String -&gt; Maybe Handle -&gt; Maybe String -&gt; IOError
 </span><span class="hs-identifier hs-var">mkIOError</span></span><span> </span><span class="annot"><span class="annottext">IOErrorType
 </span><span class="hs-identifier hs-var">illegalOperationErrorType</span></span><span>

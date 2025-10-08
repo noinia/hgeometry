@@ -41,7 +41,7 @@
 </span><span id="line-41"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-42"></span><span>
 </span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-45"></span><span>
 </span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Backpack.html"><span class="hs-identifier">Distribution.Backpack</span></a></span><span>
 </span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.CabalSpecVersion.html"><span class="hs-identifier">Distribution.CabalSpecVersion</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.CabalSpecVersion.html#cabalSpecLatest"><span class="hs-identifier">cabalSpecLatest</span></a></span><span class="hs-special">)</span><span>
@@ -53,33 +53,33 @@
 </span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html"><span class="hs-identifier">Distribution.Types.ComponentName</span></a></span><span>
 </span><span id="line-54"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Utils.Generic.html"><span class="hs-identifier">Distribution.Utils.Generic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Utils.Generic.html#toUTF8BS"><span class="hs-identifier">toUTF8BS</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-55"></span><span>
-</span><span id="line-56"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../bytestring-0.12.1.0-f8cd/src//Data.ByteString.html/Data.ByteString.html"><span class="hs-identifier">Data.ByteString</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../bytestring-0.12.1.0-f8cd/src//Data.ByteString.Internal.Type.html/Data.ByteString.Internal.Type.html#ByteString"><span class="hs-identifier">ByteString</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../bytestring-0.12.2.0-7dd0/src/Data.ByteString.html"><span class="hs-identifier">Data.ByteString</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../bytestring-0.12.2.0-7dd0/src/Data.ByteString.Internal.Type.html#ByteString"><span class="hs-identifier">ByteString</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Map.html/Data.Map.html"><span class="hs-identifier">Data.Map</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Map.html"><span class="hs-identifier">Data.Map</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
 </span><span id="line-59"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Fields.html"><span class="hs-identifier">Distribution.Fields</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
-</span><span id="line-60"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
 </span><span id="line-61"></span><span>
 </span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html"><span class="hs-identifier">Distribution.Types.InstalledPackageInfo</span></a></span><span>
 </span><span id="line-63"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.FieldGrammar.html"><span class="hs-identifier">Distribution.Types.InstalledPackageInfo.FieldGrammar</span></a></span><span>
 </span><span id="line-64"></span><span>
 </span><span id="line-65"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#installedComponentId"><span class="hs-identifier hs-type">installedComponentId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentId.html#ComponentId"><span class="hs-identifier hs-type">ComponentId</span></a></span><span>
 </span><span id="line-66"></span><span id="installedComponentId"><span class="annot"><span class="annottext">installedComponentId :: InstalledPackageInfo -&gt; ComponentId
-</span><a href="Distribution.InstalledPackageInfo.html#installedComponentId"><span class="hs-identifier hs-var hs-var">installedComponentId</span></a></span></span><span> </span><span id="local-6989586621679538062"><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538062"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.InstalledPackageInfo.html#installedComponentId"><span class="hs-identifier hs-var hs-var">installedComponentId</span></a></span></span><span> </span><span id="local-6989586621679560773"><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679560773"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-67"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ComponentId -&gt; String
 </span><a href="Distribution.Types.ComponentId.html#unComponentId"><span class="hs-identifier hs-var">unComponentId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; ComponentId
 </span><a href="Distribution.Types.InstalledPackageInfo.html#installedComponentId_"><span class="hs-identifier hs-var">installedComponentId_</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538062"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679560773"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-68"></span><span>    </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ComponentId
 </span><a href="Distribution.Types.ComponentId.html#mkComponentId"><span class="hs-identifier hs-var">mkComponentId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UnitId -&gt; String
 </span><a href="Distribution.Types.UnitId.html#unUnitId"><span class="hs-identifier hs-var">unUnitId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; UnitId
 </span><a href="Distribution.Types.InstalledPackageInfo.html#installedUnitId"><span class="hs-identifier hs-var">installedUnitId</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538062"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679560773"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; ComponentId
 </span><a href="Distribution.Types.InstalledPackageInfo.html#installedComponentId_"><span class="hs-identifier hs-var">installedComponentId_</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538062"><span class="hs-identifier hs-var">ipi</span></a></span><span>
+</span><a href="#local-6989586621679560773"><span class="hs-identifier hs-var">ipi</span></a></span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span class="hs-comment">-- | Get the indefinite unit identity representing this package.</span><span>
 </span><span id="line-72"></span><span class="hs-comment">-- This IS NOT guaranteed to give you a substitution; for</span><span>
@@ -88,30 +88,30 @@
 </span><span id="line-75"></span><span class="hs-comment">-- an @OpenUnitId@ with the appropriate 'OpenModuleSubst'.</span><span>
 </span><span id="line-76"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#installedOpenUnitId"><span class="hs-identifier hs-type">installedOpenUnitId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Backpack.html#OpenUnitId"><span class="hs-identifier hs-type">OpenUnitId</span></a></span><span>
 </span><span id="line-77"></span><span id="installedOpenUnitId"><span class="annot"><span class="annottext">installedOpenUnitId :: InstalledPackageInfo -&gt; OpenUnitId
-</span><a href="Distribution.InstalledPackageInfo.html#installedOpenUnitId"><span class="hs-identifier hs-var hs-var">installedOpenUnitId</span></a></span></span><span> </span><span id="local-6989586621679538068"><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538068"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.InstalledPackageInfo.html#installedOpenUnitId"><span class="hs-identifier hs-var hs-var">installedOpenUnitId</span></a></span></span><span> </span><span id="local-6989586621679560779"><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679560779"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-78"></span><span>  </span><span class="annot"><span class="annottext">UnitId -&gt; ComponentId -&gt; OpenModuleSubst -&gt; OpenUnitId
 </span><a href="Distribution.Backpack.html#mkOpenUnitId"><span class="hs-identifier hs-var">mkOpenUnitId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; UnitId
 </span><a href="Distribution.Types.InstalledPackageInfo.html#installedUnitId"><span class="hs-identifier hs-var">installedUnitId</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538068"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; ComponentId
+</span><a href="#local-6989586621679560779"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; ComponentId
 </span><a href="Distribution.InstalledPackageInfo.html#installedComponentId"><span class="hs-identifier hs-var">installedComponentId</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538068"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(ModuleName, OpenModule)] -&gt; OpenModuleSubst
+</span><a href="#local-6989586621679560779"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(ModuleName, OpenModule)] -&gt; OpenModuleSubst
 forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#fromList"><span class="hs-identifier hs-var">Map.fromList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; [(ModuleName, OpenModule)]
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#fromList"><span class="hs-identifier hs-var">Map.fromList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; [(ModuleName, OpenModule)]
 </span><a href="Distribution.Types.InstalledPackageInfo.html#instantiatedWith"><span class="hs-identifier hs-var">instantiatedWith</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538068"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679560779"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-79"></span><span>
 </span><span id="line-80"></span><span class="hs-comment">-- | Returns the set of module names which need to be filled for</span><span>
 </span><span id="line-81"></span><span class="hs-comment">-- an indefinite package, or the empty set if the package is definite.</span><span>
-</span><span id="line-82"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#requiredSignatures"><span class="hs-identifier hs-type">requiredSignatures</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Set.Internal.html/Data.Set.Internal.html#Set"><span class="hs-identifier hs-type">Set</span></a></span><span> </span><span class="annot"><a href="Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span>
+</span><span id="line-82"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#requiredSignatures"><span class="hs-identifier hs-type">requiredSignatures</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Set.Internal.html#Set"><span class="hs-identifier hs-type">Set</span></a></span><span> </span><span class="annot"><a href="Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span>
 </span><span id="line-83"></span><span id="requiredSignatures"><span class="annot"><span class="annottext">requiredSignatures :: InstalledPackageInfo -&gt; Set ModuleName
-</span><a href="Distribution.InstalledPackageInfo.html#requiredSignatures"><span class="hs-identifier hs-var hs-var">requiredSignatures</span></a></span></span><span> </span><span id="local-6989586621679538072"><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538072"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OpenModuleSubst -&gt; Set ModuleName
+</span><a href="Distribution.InstalledPackageInfo.html#requiredSignatures"><span class="hs-identifier hs-var hs-var">requiredSignatures</span></a></span></span><span> </span><span id="local-6989586621679560783"><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679560783"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OpenModuleSubst -&gt; Set ModuleName
 </span><a href="Distribution.Backpack.html#openModuleSubstFreeHoles"><span class="hs-identifier hs-var">openModuleSubstFreeHoles</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(ModuleName, OpenModule)] -&gt; OpenModuleSubst
 forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#fromList"><span class="hs-identifier hs-var">Map.fromList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; [(ModuleName, OpenModule)]
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#fromList"><span class="hs-identifier hs-var">Map.fromList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; [(ModuleName, OpenModule)]
 </span><a href="Distribution.Types.InstalledPackageInfo.html#instantiatedWith"><span class="hs-identifier hs-var">instantiatedWith</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538072"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679560783"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-84"></span><span>
 </span><span id="line-85"></span><span class="hs-comment">-- -----------------------------------------------------------------------------</span><span>
 </span><span id="line-86"></span><span class="hs-comment">-- Munging</span><span>
@@ -132,31 +132,31 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-93"></span><span>
 </span><span id="line-94"></span><span class="annot"><span class="hs-comment">-- | Return either errors, or IPI with list of warnings</span></span><span>
 </span><span id="line-95"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#parseInstalledPackageInfo"><span class="hs-identifier hs-type">parseInstalledPackageInfo</span></a></span><span>
-</span><span id="line-96"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../bytestring-0.12.1.0-f8cd/src//Data.ByteString.Internal.Type.html/Data.ByteString.Internal.Type.html#ByteString"><span class="hs-identifier hs-type">ByteString</span></a></span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../bytestring-0.12.2.0-7dd0/src/Data.ByteString.Internal.Type.html#ByteString"><span class="hs-identifier hs-type">ByteString</span></a></span><span>
 </span><span id="line-97"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-98"></span><span id="parseInstalledPackageInfo"><span class="annot"><span class="annottext">parseInstalledPackageInfo :: ByteString
 -&gt; Either (NonEmpty String) ([String], InstalledPackageInfo)
-</span><a href="Distribution.InstalledPackageInfo.html#parseInstalledPackageInfo"><span class="hs-identifier hs-var hs-var">parseInstalledPackageInfo</span></a></span></span><span> </span><span id="local-6989586621679538077"><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679538077"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either ParseError [Field Position]
+</span><a href="Distribution.InstalledPackageInfo.html#parseInstalledPackageInfo"><span class="hs-identifier hs-var hs-var">parseInstalledPackageInfo</span></a></span></span><span> </span><span id="local-6989586621679560788"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679560788"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Either ParseError [Field Position]
 </span><a href="Distribution.Fields.Parser.html#readFields"><span class="hs-identifier hs-var">P.readFields</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621679538077"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-99"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679538079"><span class="annot"><span class="annottext">ParseError
-</span><a href="#local-6989586621679538079"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty String
+</span><a href="#local-6989586621679560788"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679560790"><span class="annot"><span class="annottext">ParseError
+</span><a href="#local-6989586621679560790"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty String
 -&gt; Either (NonEmpty String) ([String], InstalledPackageInfo)
 forall a b. a -&gt; Either a b
 </span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ParseError -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">ParseError
-</span><a href="#local-6989586621679538079"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; NonEmpty String
+</span><a href="#local-6989586621679560790"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; NonEmpty String
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-100"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679538082"><span class="annot"><span class="annottext">[Field Position]
-</span><a href="#local-6989586621679538082"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[Field Position] -&gt; (Fields Position, [[Section Position]])
+</span><span id="line-100"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679560793"><span class="annot"><span class="annottext">[Field Position]
+</span><a href="#local-6989586621679560793"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[Field Position] -&gt; (Fields Position, [[Section Position]])
 forall ann. [Field ann] -&gt; (Fields ann, [[Section ann]])
 </span><a href="Distribution.FieldGrammar.html#partitionFields"><span class="hs-identifier hs-var">partitionFields</span></a></span><span> </span><span class="annot"><span class="annottext">[Field Position]
-</span><a href="#local-6989586621679538082"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-101"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679538084"><span class="annot"><span class="annottext">Fields Position
-</span><a href="#local-6989586621679538084"><span class="hs-identifier hs-var">fs'</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[[Section Position]]
+</span><a href="#local-6989586621679560793"><span class="hs-identifier hs-var">fs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679560795"><span class="annot"><span class="annottext">Fields Position
+</span><a href="#local-6989586621679560795"><span class="hs-identifier hs-var">fs'</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[[Section Position]]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ParseResult InstalledPackageInfo
 -&gt; ([PWarning],
     Either (Maybe Version, NonEmpty PError) InstalledPackageInfo)
@@ -179,7 +179,7 @@ CabalSpecVersion
 -&gt; Fields Position -&gt; ParsecFieldGrammar s a -&gt; ParseResult a
 </span><a href="Distribution.FieldGrammar.Parsec.html#parseFieldGrammar"><span class="hs-identifier hs-var">parseFieldGrammar</span></a></span><span> </span><span class="annot"><span class="annottext">CabalSpecVersion
 </span><a href="Distribution.CabalSpecVersion.html#cabalSpecLatest"><span class="hs-identifier hs-var">cabalSpecLatest</span></a></span><span> </span><span class="annot"><span class="annottext">Fields Position
-</span><a href="#local-6989586621679538084"><span class="hs-identifier hs-var">fs'</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecFieldGrammar InstalledPackageInfo InstalledPackageInfo
+</span><a href="#local-6989586621679560795"><span class="hs-identifier hs-var">fs'</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecFieldGrammar InstalledPackageInfo InstalledPackageInfo
 forall (c :: * -&gt; Constraint) (g :: * -&gt; * -&gt; *).
 (FieldGrammar c g, Applicative (g InstalledPackageInfo),
  Applicative (g Basic), c (Identity AbiHash),
@@ -194,56 +194,56 @@ forall (c :: * -&gt; Constraint) (g :: * -&gt; * -&gt; *).
  c SpecLicenseLenient) =&gt;
 g InstalledPackageInfo InstalledPackageInfo
 </span><a href="Distribution.Types.InstalledPackageInfo.FieldGrammar.html#ipiFieldGrammar"><span class="hs-identifier hs-var">ipiFieldGrammar</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-102"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679538088"><span class="annot"><span class="annottext">[PWarning]
-</span><a href="#local-6989586621679538088"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679538089"><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538089"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538089"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><span id="line-102"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679560799"><span class="annot"><span class="annottext">[PWarning]
+</span><a href="#local-6989586621679560799"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679560800"><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679560800"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679560800"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
 -&gt; Either (NonEmpty String) ([String], InstalledPackageInfo)
 -&gt; Either (NonEmpty String) ([String], InstalledPackageInfo)
 forall a b. NFData a =&gt; a -&gt; b -&gt; b
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#deepseq"><span class="hs-operator hs-var">`deepseq`</span></a></span><span> </span><span class="annot"><span class="annottext">([String], InstalledPackageInfo)
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#deepseq"><span class="hs-operator hs-var">`deepseq`</span></a></span><span> </span><span class="annot"><span class="annottext">([String], InstalledPackageInfo)
 -&gt; Either (NonEmpty String) ([String], InstalledPackageInfo)
 forall a b. b -&gt; Either a b
 </span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679538091"><span class="hs-identifier hs-var">ws'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538089"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679560802"><span class="hs-identifier hs-var">ws'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679560800"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-103"></span><span>        </span><span class="hs-keyword">where</span><span>
-</span><span id="line-104"></span><span>          </span><span id="local-6989586621679538091"><span class="annot"><span class="annottext">ws' :: [String]
-</span><a href="#local-6989586621679538091"><span class="hs-identifier hs-var hs-var">ws'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-104"></span><span>          </span><span id="local-6989586621679560802"><span class="annot"><span class="annottext">ws' :: [String]
+</span><a href="#local-6989586621679560802"><span class="hs-identifier hs-var hs-var">ws'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-105"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String -&gt; PWarning -&gt; String
 </span><a href="Distribution.Parsec.Warning.html#showPWarning"><span class="hs-identifier hs-var">P.showPWarning</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="annot"><span class="annottext">PWarning
-</span><a href="#local-6989586621679538095"><span class="hs-identifier hs-var">w</span></a></span><span>
-</span><span id="line-106"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679538095"><span class="annot"><span class="annottext">w :: PWarning
-</span><a href="#local-6989586621679538095"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">P.PWarning</span></a></span><span> </span><span id="local-6989586621679538097"><span class="annot"><span class="annottext">PWarnType
-</span><a href="#local-6989586621679538097"><span class="hs-identifier hs-var">wt</span></a></span></span><span> </span><span class="annot"><span class="annottext">Position
+</span><a href="#local-6989586621679560806"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-106"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679560806"><span class="annot"><span class="annottext">w :: PWarning
+</span><a href="#local-6989586621679560806"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">P.PWarning</span></a></span><span> </span><span id="local-6989586621679560808"><span class="annot"><span class="annottext">PWarnType
+</span><a href="#local-6989586621679560808"><span class="hs-identifier hs-var">wt</span></a></span></span><span> </span><span class="annot"><span class="annottext">Position
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[PWarning]
-</span><a href="#local-6989586621679538088"><span class="hs-identifier hs-var">ws</span></a></span><span>
+</span><a href="#local-6989586621679560799"><span class="hs-identifier hs-var">ws</span></a></span><span>
 </span><span id="line-107"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- filter out warnings about experimental features</span><span>
 </span><span id="line-108"></span><span>            </span><span class="annot"><span class="annottext">PWarnType
-</span><a href="#local-6989586621679538097"><span class="hs-identifier hs-var">wt</span></a></span><span> </span><span class="annot"><span class="annottext">PWarnType -&gt; PWarnType -&gt; Bool
+</span><a href="#local-6989586621679560808"><span class="hs-identifier hs-var">wt</span></a></span><span> </span><span class="annot"><span class="annottext">PWarnType -&gt; PWarnType -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">PWarnType
 </span><a href="Distribution.Parsec.Warning.html#PWTExperimental"><span class="hs-identifier hs-var">P.PWTExperimental</span></a></span><span>
 </span><span id="line-109"></span><span>            </span><span class="hs-special">]</span><span>
 </span><span id="line-110"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[PWarning]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe Version
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679538100"><span class="annot"><span class="annottext">NonEmpty PError
-</span><a href="#local-6989586621679538100"><span class="hs-identifier hs-var">errs</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty String
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679560811"><span class="annot"><span class="annottext">NonEmpty PError
+</span><a href="#local-6989586621679560811"><span class="hs-identifier hs-var">errs</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty String
 -&gt; Either (NonEmpty String) ([String], InstalledPackageInfo)
 forall a b. a -&gt; Either a b
 </span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty String
-</span><a href="#local-6989586621679538101"><span class="hs-identifier hs-var">errs'</span></a></span><span>
+</span><a href="#local-6989586621679560812"><span class="hs-identifier hs-var">errs'</span></a></span><span>
 </span><span id="line-111"></span><span>        </span><span class="hs-keyword">where</span><span>
-</span><span id="line-112"></span><span>          </span><span id="local-6989586621679538101"><span class="annot"><span class="annottext">errs' :: NonEmpty String
-</span><a href="#local-6989586621679538101"><span class="hs-identifier hs-var hs-var">errs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PError -&gt; String) -&gt; NonEmpty PError -&gt; NonEmpty String
+</span><span id="line-112"></span><span>          </span><span id="local-6989586621679560812"><span class="annot"><span class="annottext">errs' :: NonEmpty String
+</span><a href="#local-6989586621679560812"><span class="hs-identifier hs-var hs-var">errs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PError -&gt; String) -&gt; NonEmpty PError -&gt; NonEmpty String
 forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PError -&gt; String
 </span><a href="Distribution.Parsec.Error.html#showPError"><span class="hs-identifier hs-var">P.showPError</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty PError
-</span><a href="#local-6989586621679538100"><span class="hs-identifier hs-var">errs</span></a></span><span>
+</span><a href="#local-6989586621679560811"><span class="hs-identifier hs-var">errs</span></a></span><span>
 </span><span id="line-113"></span><span>
 </span><span id="line-114"></span><span class="hs-comment">-- -----------------------------------------------------------------------------</span><span>
 </span><span id="line-115"></span><span class="hs-comment">-- Pretty-printing</span><span>
@@ -253,11 +253,11 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span id="line-119"></span><span class="hs-comment">-- @pkgRoot@ isn't printed, as ghc-pkg prints it manually (as GHC-8.4).</span><span>
 </span><span id="line-120"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#showInstalledPackageInfo"><span class="hs-identifier hs-type">showInstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-121"></span><span id="showInstalledPackageInfo"><span class="annot"><span class="annottext">showInstalledPackageInfo :: InstalledPackageInfo -&gt; String
-</span><a href="Distribution.InstalledPackageInfo.html#showInstalledPackageInfo"><span class="hs-identifier hs-var hs-var">showInstalledPackageInfo</span></a></span></span><span> </span><span id="local-6989586621679538105"><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538105"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.InstalledPackageInfo.html#showInstalledPackageInfo"><span class="hs-identifier hs-var hs-var">showInstalledPackageInfo</span></a></span></span><span> </span><span id="local-6989586621679560816"><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679560816"><span class="hs-identifier hs-var">ipi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-122"></span><span>  </span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; String
 </span><a href="Distribution.InstalledPackageInfo.html#showFullInstalledPackageInfo"><span class="hs-identifier hs-var">showFullInstalledPackageInfo</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679538105"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#pkgRoot"><span class="hs-identifier hs-var">pkgRoot</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span class="hs-special">}</span><span>
+</span><a href="#local-6989586621679560816"><span class="hs-identifier hs-var">ipi</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#pkgRoot"><span class="hs-identifier hs-var">pkgRoot</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span class="hs-special">}</span><span>
 </span><span id="line-123"></span><span>
 </span><span id="line-124"></span><span class="annot"><span class="hs-comment">-- | The variant of 'showInstalledPackageInfo' which outputs @pkgroot@ field too.</span></span><span>
 </span><span id="line-125"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#showFullInstalledPackageInfo"><span class="hs-identifier hs-type">showFullInstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
@@ -302,25 +302,25 @@ g InstalledPackageInfo InstalledPackageInfo
 </span><span id="line-132"></span><span class="hs-comment">-- Just &quot;maintainer: Tester&quot;</span><span>
 </span><span id="line-133"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#showInstalledPackageInfoField"><span class="hs-identifier hs-type">showInstalledPackageInfoField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span>
 </span><span id="line-134"></span><span id="showInstalledPackageInfoField"><span class="annot"><span class="annottext">showInstalledPackageInfoField :: String -&gt; Maybe (InstalledPackageInfo -&gt; String)
-</span><a href="Distribution.InstalledPackageInfo.html#showInstalledPackageInfoField"><span class="hs-identifier hs-var hs-var">showInstalledPackageInfoField</span></a></span></span><span> </span><span id="local-6989586621679538111"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679538111"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.InstalledPackageInfo.html#showInstalledPackageInfoField"><span class="hs-identifier hs-var hs-var">showInstalledPackageInfoField</span></a></span></span><span> </span><span id="local-6989586621679560822"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679560822"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-135"></span><span>  </span><span class="annot"><span class="annottext">((InstalledPackageInfo -&gt; Doc) -&gt; InstalledPackageInfo -&gt; String)
 -&gt; Maybe (InstalledPackageInfo -&gt; Doc)
 -&gt; Maybe (InstalledPackageInfo -&gt; String)
 forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679538112"><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; Doc
-</span><a href="#local-6989586621679538112"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc -&gt; String
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#render"><span class="hs-identifier hs-var">Disp.render</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; String)
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679560823"><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; Doc
+</span><a href="#local-6989586621679560823"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc -&gt; String
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#render"><span class="hs-identifier hs-var">Disp.render</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; String)
 -&gt; (InstalledPackageInfo -&gt; Doc) -&gt; InstalledPackageInfo -&gt; String
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc -&gt; Doc
 </span><a href="Distribution.InstalledPackageInfo.html#ppField"><span class="hs-identifier hs-var">ppField</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679538111"><span class="hs-identifier hs-var">fn</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; Doc)
+</span><a href="#local-6989586621679560822"><span class="hs-identifier hs-var">fn</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; Doc)
 -&gt; (InstalledPackageInfo -&gt; Doc) -&gt; InstalledPackageInfo -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; Doc
-</span><a href="#local-6989586621679538112"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (InstalledPackageInfo -&gt; Doc)
+</span><a href="#local-6989586621679560823"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (InstalledPackageInfo -&gt; Doc)
  -&gt; Maybe (InstalledPackageInfo -&gt; String))
 -&gt; Maybe (InstalledPackageInfo -&gt; Doc)
 -&gt; Maybe (InstalledPackageInfo -&gt; String)
@@ -344,20 +344,20 @@ forall (c :: * -&gt; Constraint) (g :: * -&gt; * -&gt; *).
 g InstalledPackageInfo InstalledPackageInfo
 </span><a href="Distribution.Types.InstalledPackageInfo.FieldGrammar.html#ipiFieldGrammar"><span class="hs-identifier hs-var">ipiFieldGrammar</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ByteString
 </span><a href="Distribution.Utils.Generic.html#toUTF8BS"><span class="hs-identifier hs-var">toUTF8BS</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679538111"><span class="hs-identifier hs-var">fn</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679560822"><span class="hs-identifier hs-var">fn</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-136"></span><span>
 </span><span id="line-137"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#showSimpleInstalledPackageInfoField"><span class="hs-identifier hs-type">showSimpleInstalledPackageInfoField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier hs-type">InstalledPackageInfo</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span>
 </span><span id="line-138"></span><span id="showSimpleInstalledPackageInfoField"><span class="annot"><span class="annottext">showSimpleInstalledPackageInfoField :: String -&gt; Maybe (InstalledPackageInfo -&gt; String)
-</span><a href="Distribution.InstalledPackageInfo.html#showSimpleInstalledPackageInfoField"><span class="hs-identifier hs-var hs-var">showSimpleInstalledPackageInfoField</span></a></span></span><span> </span><span id="local-6989586621679538116"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679538116"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.InstalledPackageInfo.html#showSimpleInstalledPackageInfoField"><span class="hs-identifier hs-var hs-var">showSimpleInstalledPackageInfoField</span></a></span></span><span> </span><span id="local-6989586621679560827"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679560827"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-139"></span><span>  </span><span class="annot"><span class="annottext">((InstalledPackageInfo -&gt; Doc) -&gt; InstalledPackageInfo -&gt; String)
 -&gt; Maybe (InstalledPackageInfo -&gt; Doc)
 -&gt; Maybe (InstalledPackageInfo -&gt; String)
 forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Style -&gt; Doc -&gt; String
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#renderStyle"><span class="hs-identifier hs-var">Disp.renderStyle</span></a></span><span> </span><span class="annot"><span class="annottext">Style
-</span><a href="#local-6989586621679538118"><span class="hs-identifier hs-var">myStyle</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; String)
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#renderStyle"><span class="hs-identifier hs-var">Disp.renderStyle</span></a></span><span> </span><span class="annot"><span class="annottext">Style
+</span><a href="#local-6989586621679560829"><span class="hs-identifier hs-var">myStyle</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; String)
 -&gt; (InstalledPackageInfo -&gt; Doc) -&gt; InstalledPackageInfo -&gt; String
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (InstalledPackageInfo -&gt; Doc)
@@ -384,28 +384,28 @@ forall (c :: * -&gt; Constraint) (g :: * -&gt; * -&gt; *).
 g InstalledPackageInfo InstalledPackageInfo
 </span><a href="Distribution.Types.InstalledPackageInfo.FieldGrammar.html#ipiFieldGrammar"><span class="hs-identifier hs-var">ipiFieldGrammar</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ByteString
 </span><a href="Distribution.Utils.Generic.html#toUTF8BS"><span class="hs-identifier hs-var">toUTF8BS</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679538116"><span class="hs-identifier hs-var">fn</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679560827"><span class="hs-identifier hs-var">fn</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-140"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-141"></span><span>    </span><span id="local-6989586621679538118"><span class="annot"><span class="annottext">myStyle :: Style
-</span><a href="#local-6989586621679538118"><span class="hs-identifier hs-var hs-var">myStyle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Style
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.Annotated.HughesPJ.html/Text.PrettyPrint.Annotated.HughesPJ.html#style"><span class="hs-identifier hs-var">Disp.style</span></a></span><span class="hs-special">{</span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.Annotated.HughesPJ.html/Text.PrettyPrint.Annotated.HughesPJ.html#mode"><span class="hs-identifier hs-var">Disp.mode</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.Annotated.HughesPJ.html/Text.PrettyPrint.Annotated.HughesPJ.html#LeftMode"><span class="hs-identifier hs-type">Disp.LeftMode</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-141"></span><span>    </span><span id="local-6989586621679560829"><span class="annot"><span class="annottext">myStyle :: Style
+</span><a href="#local-6989586621679560829"><span class="hs-identifier hs-var hs-var">myStyle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Style
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.Annotated.HughesPJ.html#style"><span class="hs-identifier hs-var">Disp.style</span></a></span><span class="hs-special">{</span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.Annotated.HughesPJ.html#mode"><span class="hs-identifier hs-var">Disp.mode</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.Annotated.HughesPJ.html#LeftMode"><span class="hs-identifier hs-type">Disp.LeftMode</span></a></span><span class="hs-special">}</span><span>
 </span><span id="line-142"></span><span>
-</span><span id="line-143"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#ppField"><span class="hs-identifier hs-type">ppField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#Doc"><span class="hs-identifier hs-type">Disp.Doc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#Doc"><span class="hs-identifier hs-type">Disp.Doc</span></a></span><span>
+</span><span id="line-143"></span><span class="annot"><a href="Distribution.InstalledPackageInfo.html#ppField"><span class="hs-identifier hs-type">ppField</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#Doc"><span class="hs-identifier hs-type">Disp.Doc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#Doc"><span class="hs-identifier hs-type">Disp.Doc</span></a></span><span>
 </span><span id="line-144"></span><span id="ppField"><span class="annot"><span class="annottext">ppField :: String -&gt; Doc -&gt; Doc
-</span><a href="Distribution.InstalledPackageInfo.html#ppField"><span class="hs-identifier hs-var hs-var">ppField</span></a></span></span><span> </span><span id="local-6989586621679538122"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679538122"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679538123"><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679538123"><span class="hs-identifier hs-var">fielddoc</span></a></span></span><span>
+</span><a href="Distribution.InstalledPackageInfo.html#ppField"><span class="hs-identifier hs-var hs-var">ppField</span></a></span></span><span> </span><span id="local-6989586621679560833"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679560833"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679560834"><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679560834"><span class="hs-identifier hs-var">fielddoc</span></a></span></span><span>
 </span><span id="line-145"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Bool
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#isEmpty"><span class="hs-identifier hs-var">Disp.isEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679538123"><span class="hs-identifier hs-var">fielddoc</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#isEmpty"><span class="hs-identifier hs-var">Disp.isEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679560834"><span class="hs-identifier hs-var">fielddoc</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
 </span><span id="line-146"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679538122"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679560833"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">Disp.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">Disp.&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679538123"><span class="hs-identifier hs-var">fielddoc</span></a></span><span>
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">Disp.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">Disp.&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679560834"><span class="hs-identifier hs-var">fielddoc</span></a></span><span>
 </span><span id="line-147"></span></pre></body></html>

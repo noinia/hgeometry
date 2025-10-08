@@ -1,113 +1,125 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
-</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
-</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
-</span><span id="line-5"></span><span>
-</span><span id="line-6"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
-</span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- Module      :  Distribution.Simple.PreProcess.Types</span><span>
-</span><span id="line-10"></span><span class="hs-comment">-- Copyright   :  (c) 2003-2005, Isaac Jones, Malcolm Wallace</span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- License     :  BSD3</span><span>
-</span><span id="line-12"></span><span class="hs-comment">--</span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
-</span><span id="line-14"></span><span class="hs-comment">-- Portability :  portable</span><span>
-</span><span id="line-15"></span><span class="hs-comment">--</span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- This defines a 'PreProcessor' abstraction which represents a pre-processor</span><span>
-</span><span id="line-17"></span><span class="hs-comment">-- that can transform one kind of file into another.</span><span>
-</span><span id="line-18"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html"><span class="hs-identifier">Distribution.Simple.PreProcess.Types</span></a></span><span>
-</span><span id="line-19"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier">Suffix</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessor"><span class="hs-identifier">PreProcessor</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellSuffixes"><span class="hs-identifier">builtinHaskellSuffixes</span></a></span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellBootSuffixes"><span class="hs-identifier">builtinHaskellBootSuffixes</span></a></span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-24"></span><span class="hs-keyword">where</span><span>
-</span><span id="line-25"></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.ModuleName.html/Distribution.ModuleName.html"><span class="hs-identifier">Distribution.ModuleName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.ModuleName.html/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier">ModuleName</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
-</span><span id="line-33"></span><span>
-</span><span id="line-34"></span><span class="hs-comment">-- | The interface to a preprocessor, which may be implemented using an</span><span>
-</span><span id="line-35"></span><span class="hs-comment">--  external program, but need not be.  The arguments are the name of</span><span>
-</span><span id="line-36"></span><span class="hs-comment">--  the input file, the name of the output file and a verbosity level.</span><span>
-</span><span id="line-37"></span><span class="hs-comment">--  Here is a simple example that merely prepends a comment to the given</span><span>
-</span><span id="line-38"></span><span class="hs-comment">--  source file:</span><span>
-</span><span id="line-39"></span><span class="hs-comment">--</span><span>
-</span><span id="line-40"></span><span class="hs-comment">--  &gt; ppTestHandler :: PreProcessor</span><span>
-</span><span id="line-41"></span><span class="hs-comment">--  &gt; ppTestHandler =</span><span>
-</span><span id="line-42"></span><span class="hs-comment">--  &gt;   PreProcessor {</span><span>
-</span><span id="line-43"></span><span class="hs-comment">--  &gt;     platformIndependent = True,</span><span>
-</span><span id="line-44"></span><span class="hs-comment">--  &gt;     runPreProcessor = mkSimplePreProcessor $ \inFile outFile verbosity -&gt;</span><span>
-</span><span id="line-45"></span><span class="hs-comment">--  &gt;       do info verbosity (inFile++&quot; has been preprocessed to &quot;++outFile)</span><span>
-</span><span id="line-46"></span><span class="hs-comment">--  &gt;          stuff &lt;- readFile inFile</span><span>
-</span><span id="line-47"></span><span class="hs-comment">--  &gt;          writeFile outFile (&quot;-- preprocessed as a test\n\n&quot; ++ stuff)</span><span>
-</span><span id="line-48"></span><span class="hs-comment">--  &gt;          return ExitSuccess</span><span>
-</span><span id="line-49"></span><span class="hs-comment">--</span><span>
-</span><span id="line-50"></span><span class="hs-comment">--  We split the input and output file names into a base directory and the</span><span>
-</span><span id="line-51"></span><span class="hs-comment">--  rest of the file name. The input base dir is the path in the list of search</span><span>
-</span><span id="line-52"></span><span class="hs-comment">--  dirs that this file was found in. The output base dir is the build dir where</span><span>
-</span><span id="line-53"></span><span class="hs-comment">--  all the generated source files are put.</span><span>
-</span><span id="line-54"></span><span class="hs-comment">--</span><span>
-</span><span id="line-55"></span><span class="hs-comment">--  The reason for splitting it up this way is that some pre-processors don't</span><span>
-</span><span id="line-56"></span><span class="hs-comment">--  simply generate one output .hs file from one input file but have</span><span>
-</span><span id="line-57"></span><span class="hs-comment">--  dependencies on other generated files (notably c2hs, where building one</span><span>
-</span><span id="line-58"></span><span class="hs-comment">--  .hs file may require reading other .chi files, and then compiling the .hs</span><span>
-</span><span id="line-59"></span><span class="hs-comment">--  file may require reading a generated .h file). In these cases the generated</span><span>
-</span><span id="line-60"></span><span class="hs-comment">--  files need to embed relative path names to each other (eg the generated .hs</span><span>
-</span><span id="line-61"></span><span class="hs-comment">--  file mentions the .h file in the FFI imports). This path must be relative to</span><span>
-</span><span id="line-62"></span><span class="hs-comment">--  the base directory where the generated files are located, it cannot be</span><span>
-</span><span id="line-63"></span><span class="hs-comment">--  relative to the top level of the build tree because the compilers do not</span><span>
-</span><span id="line-64"></span><span class="hs-comment">--  look for .h files relative to there, ie we do not use \&quot;-I .\&quot;, instead we</span><span>
-</span><span id="line-65"></span><span class="hs-comment">--  use \&quot;-I dist\/build\&quot; (or whatever dist dir has been set by the user)</span><span>
-</span><span id="line-66"></span><span class="hs-comment">--</span><span>
-</span><span id="line-67"></span><span class="hs-comment">--  Most pre-processors do not care of course, so mkSimplePreProcessor and</span><span>
-</span><span id="line-68"></span><span class="hs-comment">--  runSimplePreProcessor functions handle the simple case.</span><span>
-</span><span id="line-69"></span><span class="hs-keyword">data</span><span> </span><span id="PreProcessor"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessor"><span class="hs-identifier hs-var">PreProcessor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PreProcessor"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessor"><span class="hs-identifier hs-var">PreProcessor</span></a></span></span><span>
-</span><span id="line-70"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="hs-comment">-- Is the output of the pre-processor platform independent? eg happy output</span><span>
-</span><span id="line-71"></span><span>    </span><span class="hs-comment">-- is portable haskell but c2hs's output is platform dependent.</span><span>
-</span><span id="line-72"></span><span>    </span><span class="hs-comment">-- This matters since only platform independent generated code can be</span><span>
-</span><span id="line-73"></span><span>    </span><span class="hs-comment">-- included into a source tarball.</span><span>
-</span><span id="line-74"></span><span>    </span><span id="platformIndependent"><span class="annot"><span class="annottext">PreProcessor -&gt; Bool
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.PreProcess.Types</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  (c) 2003-2005, Isaac Jones, Malcolm Wallace</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- License     :  BSD3</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- This defines a 'PreProcessor' abstraction which represents a pre-processor</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- that can transform one kind of file into another.</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html"><span class="hs-identifier">Distribution.Simple.PreProcess.Types</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier">Suffix</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessor"><span class="hs-identifier">PreProcessor</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessCommand"><span class="hs-identifier">PreProcessCommand</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellSuffixes"><span class="hs-identifier">builtinHaskellSuffixes</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellBootSuffixes"><span class="hs-identifier">builtinHaskellBootSuffixes</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.ModuleName.html"><span class="hs-identifier">Distribution.ModuleName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier">ModuleName</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html"><span class="hs-identifier">Distribution.Utils.Path</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | The interface to a preprocessor, which may be implemented using an</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--  external program, but need not be.  The arguments are the name of</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--  the input file, the name of the output file and a verbosity level.</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--  Here is a simple example that merely prepends a comment to the given</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--  source file:</span><span>
+</span><span id="line-42"></span><span class="hs-comment">--</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--  &gt; ppTestHandler :: PreProcessor</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--  &gt; ppTestHandler =</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--  &gt;   PreProcessor {</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--  &gt;     platformIndependent = True,</span><span>
+</span><span id="line-47"></span><span class="hs-comment">--  &gt;     runPreProcessor = mkSimplePreProcessor $ \inFile outFile verbosity -&gt;</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--  &gt;       do info verbosity (inFile++&quot; has been preprocessed to &quot;++outFile)</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--  &gt;          stuff &lt;- readFile inFile</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--  &gt;          writeFile outFile (&quot;-- preprocessed as a test\n\n&quot; ++ stuff)</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--  &gt;          return ExitSuccess</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--  We split the input and output file names into a base directory and the</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--  rest of the file name. The input base dir is the path in the list of search</span><span>
+</span><span id="line-55"></span><span class="hs-comment">--  dirs that this file was found in. The output base dir is the build dir where</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--  all the generated source files are put.</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--  The reason for splitting it up this way is that some pre-processors don't</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--  simply generate one output .hs file from one input file but have</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--  dependencies on other generated files (notably c2hs, where building one</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--  .hs file may require reading other .chi files, and then compiling the .hs</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--  file may require reading a generated .h file). In these cases the generated</span><span>
+</span><span id="line-63"></span><span class="hs-comment">--  files need to embed relative path names to each other (eg the generated .hs</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--  file mentions the .h file in the FFI imports). This path must be relative to</span><span>
+</span><span id="line-65"></span><span class="hs-comment">--  the base directory where the generated files are located, it cannot be</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--  relative to the top level of the build tree because the compilers do not</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--  look for .h files relative to there, ie we do not use \&quot;-I .\&quot;, instead we</span><span>
+</span><span id="line-68"></span><span class="hs-comment">--  use \&quot;-I dist\/build\&quot; (or whatever dist dir has been set by the user)</span><span>
+</span><span id="line-69"></span><span class="hs-comment">--</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--  Most pre-processors do not care of course, so mkSimplePreProcessor and</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--  runSimplePreProcessor functions handle the simple case.</span><span>
+</span><span id="line-72"></span><span class="hs-keyword">data</span><span> </span><span id="PreProcessor"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessor"><span class="hs-identifier hs-var">PreProcessor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PreProcessor"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessor"><span class="hs-identifier hs-var">PreProcessor</span></a></span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="hs-comment">-- Is the output of the pre-processor platform independent? eg happy output</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-comment">-- is portable haskell but c2hs's output is platform dependent.</span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-comment">-- This matters since only platform independent generated code can be</span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-comment">-- included into a source tarball.</span><span>
+</span><span id="line-77"></span><span>    </span><span id="platformIndependent"><span class="annot"><span class="annottext">PreProcessor -&gt; Bool
 </span><a href="Distribution.Simple.PreProcess.Types.html#platformIndependent"><span class="hs-identifier hs-var hs-var">platformIndependent</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-75"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- TODO: deal with pre-processors that have implementation dependent output</span><span>
-</span><span id="line-76"></span><span>    </span><span class="hs-comment">--       eg alex and happy have --ghc flags. However we can't really include</span><span>
-</span><span id="line-77"></span><span>    </span><span class="hs-comment">--       ghc-specific code into supposedly portable source tarballs.</span><span>
-</span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span>    </span><span id="ppOrdering"><span class="annot"><span class="annottext">PreProcessor
--&gt; Verbosity -&gt; [FilePath] -&gt; [ModuleName] -&gt; IO [ModuleName]
-</span><a href="Distribution.Simple.PreProcess.Types.html#ppOrdering"><span class="hs-identifier hs-var hs-var">ppOrdering</span></a></span></span><span>
-</span><span id="line-80"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
-</span><span id="line-81"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Source directories</span><span>
-</span><span id="line-82"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.ModuleName.html/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Module names</span><span>
-</span><span id="line-83"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.ModuleName.html/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Sorted modules</span><span>
-</span><span id="line-84"></span><span>
-</span><span id="line-85"></span><span>  </span><span class="hs-comment">-- ^ This function can reorder /all/ modules, not just those that the</span><span>
-</span><span id="line-86"></span><span>  </span><span class="hs-comment">-- require the preprocessor in question. As such, this function should be</span><span>
-</span><span id="line-87"></span><span>  </span><span class="hs-comment">-- well-behaved and not reorder modules it doesn't have dominion over!</span><span>
-</span><span id="line-88"></span><span>  </span><span class="hs-comment">--</span><span>
-</span><span id="line-89"></span><span>  </span><span class="hs-comment">-- @since 3.8.1.0</span><span>
-</span><span id="line-90"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="runPreProcessor"><span class="annot"><span class="annottext">PreProcessor
--&gt; (FilePath, FilePath)
--&gt; (FilePath, FilePath)
+</span><span id="line-78"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- TODO: deal with pre-processors that have implementation dependent output</span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-comment">--       eg alex and happy have --ghc flags. However we can't really include</span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-comment">--       ghc-specific code into supposedly portable source tarballs.</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span>    </span><span id="ppOrdering"><span class="annot"><span class="annottext">PreProcessor
 -&gt; Verbosity
--&gt; IO ()
+-&gt; [SymbolicPath Pkg ('Dir Source)]
+-&gt; [ModuleName]
+-&gt; IO [ModuleName]
+</span><a href="Distribution.Simple.PreProcess.Types.html#ppOrdering"><span class="hs-identifier hs-var hs-var">ppOrdering</span></a></span></span><span>
+</span><span id="line-83"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-84"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Source"><span class="hs-identifier hs-type">Source</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Source directories</span><span>
+</span><span id="line-85"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Module names</span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Sorted modules</span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-comment">-- ^ This function can reorder /all/ modules, not just those that the</span><span>
+</span><span id="line-89"></span><span>  </span><span class="hs-comment">-- require the preprocessor in question. As such, this function should be</span><span>
+</span><span id="line-90"></span><span>  </span><span class="hs-comment">-- well-behaved and not reorder modules it doesn't have dominion over!</span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-comment">-- @since 3.8.1.0</span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="runPreProcessor"><span class="annot"><span class="annottext">PreProcessor -&gt; PreProcessCommand
 </span><a href="Distribution.Simple.PreProcess.Types.html#runPreProcessor"><span class="hs-identifier hs-var hs-var">runPreProcessor</span></a></span></span><span>
-</span><span id="line-91"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- Location of the source file relative to a base dir</span><span>
-</span><span id="line-92"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- Output file name, relative to an output base dir</span><span>
-</span><span id="line-93"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span> </span><span class="hs-comment">-- verbosity</span><span>
-</span><span id="line-94"></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- Should exit if the preprocessor fails</span><span>
+</span><span id="line-94"></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessCommand"><span class="hs-identifier hs-type">PreProcessCommand</span></a></span><span>
 </span><span id="line-95"></span><span>  </span><span class="hs-special">}</span><span>
 </span><span id="line-96"></span><span>
-</span><span id="line-97"></span><span class="hs-comment">-- | A suffix (or file extension).</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- | A command to run a given preprocessor on a single source file.</span><span>
 </span><span id="line-98"></span><span class="hs-comment">--</span><span>
-</span><span id="line-99"></span><span class="hs-comment">-- Mostly used to decide which preprocessor to use, e.g. files with suffix @&quot;y&quot;@</span><span>
-</span><span id="line-100"></span><span class="hs-comment">-- are usually processed by the @&quot;happy&quot;@ build tool.</span><span>
-</span><span id="line-101"></span><span class="hs-keyword">newtype</span><span> </span><span id="Suffix"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Suffix"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-102"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679450457"><span id="local-6989586621679450463"><span class="annot"><span class="annottext">Suffix -&gt; Suffix -&gt; Bool
+</span><span id="line-99"></span><span class="hs-comment">-- The input and output file paths are passed in as arguments, as it is</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- the build system and not the package author which chooses the location of</span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- source files.</span><span>
+</span><span id="line-102"></span><span class="hs-keyword">type</span><span> </span><span id="PreProcessCommand"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#PreProcessCommand"><span class="hs-identifier hs-var">PreProcessCommand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Location of the source file relative to a base dir</span></span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Output file name, relative to an output base dir</span></span><span>
+</span><span id="line-107"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-108"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- Should exit if the preprocessor fails</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- | A suffix (or file extension).</span><span>
+</span><span id="line-111"></span><span class="hs-comment">--</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- Mostly used to decide which preprocessor to use, e.g. files with suffix @&quot;y&quot;@</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- are usually processed by the @&quot;happy&quot;@ build tool.</span><span>
+</span><span id="line-114"></span><span class="hs-keyword">newtype</span><span> </span><span id="Suffix"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Suffix"><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679508320"><span id="local-6989586621679508326"><span class="annot"><span class="annottext">Suffix -&gt; Suffix -&gt; Bool
 (Suffix -&gt; Suffix -&gt; Bool)
 -&gt; (Suffix -&gt; Suffix -&gt; Bool) -&gt; Eq Suffix
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -115,7 +127,7 @@ $c== :: Suffix -&gt; Suffix -&gt; Bool
 == :: Suffix -&gt; Suffix -&gt; Bool
 $c/= :: Suffix -&gt; Suffix -&gt; Bool
 /= :: Suffix -&gt; Suffix -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450474"><span id="local-6989586621679450480"><span id="local-6989586621679450485"><span id="local-6989586621679450490"><span id="local-6989586621679450495"><span id="local-6989586621679450500"><span id="local-6989586621679450505"><span class="annot"><span class="annottext">Eq Suffix
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679508337"><span id="local-6989586621679508343"><span id="local-6989586621679508348"><span id="local-6989586621679508353"><span id="local-6989586621679508358"><span id="local-6989586621679508363"><span id="local-6989586621679508368"><span class="annot"><span class="annottext">Eq Suffix
 Eq Suffix =&gt;
 (Suffix -&gt; Suffix -&gt; Ordering)
 -&gt; (Suffix -&gt; Suffix -&gt; Bool)
@@ -152,23 +164,23 @@ $cmax :: Suffix -&gt; Suffix -&gt; Suffix
 max :: Suffix -&gt; Suffix -&gt; Suffix
 $cmin :: Suffix -&gt; Suffix -&gt; Suffix
 min :: Suffix -&gt; Suffix -&gt; Suffix
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450519"><span id="local-6989586621679450526"><span id="local-6989586621679450530"><span class="annot"><span class="annottext">Int -&gt; Suffix -&gt; FilePath -&gt; FilePath
-[Suffix] -&gt; FilePath -&gt; FilePath
-Suffix -&gt; FilePath
-(Int -&gt; Suffix -&gt; FilePath -&gt; FilePath)
--&gt; (Suffix -&gt; FilePath)
--&gt; ([Suffix] -&gt; FilePath -&gt; FilePath)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679508382"><span id="local-6989586621679508389"><span id="local-6989586621679508393"><span class="annot"><span class="annottext">Int -&gt; Suffix -&gt; String -&gt; String
+[Suffix] -&gt; String -&gt; String
+Suffix -&gt; String
+(Int -&gt; Suffix -&gt; String -&gt; String)
+-&gt; (Suffix -&gt; String)
+-&gt; ([Suffix] -&gt; String -&gt; String)
 -&gt; Show Suffix
 forall a.
-(Int -&gt; a -&gt; FilePath -&gt; FilePath)
--&gt; (a -&gt; FilePath) -&gt; ([a] -&gt; FilePath -&gt; FilePath) -&gt; Show a
-$cshowsPrec :: Int -&gt; Suffix -&gt; FilePath -&gt; FilePath
-showsPrec :: Int -&gt; Suffix -&gt; FilePath -&gt; FilePath
-$cshow :: Suffix -&gt; FilePath
-show :: Suffix -&gt; FilePath
-$cshowList :: [Suffix] -&gt; FilePath -&gt; FilePath
-showList :: [Suffix] -&gt; FilePath -&gt; FilePath
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450536"><span id="local-6989586621679450538"><span class="annot"><span class="annottext">(forall x. Suffix -&gt; Rep Suffix x)
+(Int -&gt; a -&gt; String -&gt; String)
+-&gt; (a -&gt; String) -&gt; ([a] -&gt; String -&gt; String) -&gt; Show a
+$cshowsPrec :: Int -&gt; Suffix -&gt; String -&gt; String
+showsPrec :: Int -&gt; Suffix -&gt; String -&gt; String
+$cshow :: Suffix -&gt; String
+show :: Suffix -&gt; String
+$cshowList :: [Suffix] -&gt; String -&gt; String
+showList :: [Suffix] -&gt; String -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679508399"><span id="local-6989586621679508401"><span class="annot"><span class="annottext">(forall x. Suffix -&gt; Rep Suffix x)
 -&gt; (forall x. Rep Suffix x -&gt; Suffix) -&gt; Generic Suffix
 forall x. Rep Suffix x -&gt; Suffix
 forall x. Suffix -&gt; Rep Suffix x
@@ -178,40 +190,40 @@ $cfrom :: forall x. Suffix -&gt; Rep Suffix x
 from :: forall x. Suffix -&gt; Rep Suffix x
 $cto :: forall x. Rep Suffix x -&gt; Suffix
 to :: forall x. Rep Suffix x -&gt; Suffix
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450544"><span class="annot"><span class="annottext">FilePath -&gt; Suffix
-(FilePath -&gt; Suffix) -&gt; IsString Suffix
-forall a. (FilePath -&gt; a) -&gt; IsString a
-$cfromString :: FilePath -&gt; Suffix
-fromString :: FilePath -&gt; Suffix
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679508407"><span class="annot"><span class="annottext">String -&gt; Suffix
+(String -&gt; Suffix) -&gt; IsString Suffix
+forall a. (String -&gt; a) -&gt; IsString a
+$cfromString :: String -&gt; Suffix
+fromString :: String -&gt; Suffix
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">IsString</span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-103"></span><span>
-</span><span id="line-104"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679450553"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-105"></span><span>  </span><span id="local-6989586621679450557"><span class="annot"><span class="annottext">pretty :: Suffix -&gt; Doc
-</span><a href="#local-6989586621679450557"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span><span> </span><span id="local-6989586621679450559"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679450559"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679450559"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-106"></span><span>
-</span><span id="line-107"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679450562"><span id="local-6989586621679450569"><span id="local-6989586621679450575"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span></span></span></span><span>
-</span><span id="line-108"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679450597"><span id="local-6989586621679450604"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span></span></span><span>
-</span><span id="line-109"></span><span>
-</span><span id="line-110"></span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellSuffixes"><span class="hs-identifier hs-type">builtinHaskellSuffixes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-111"></span><span id="builtinHaskellSuffixes"><span class="annot"><span class="annottext">builtinHaskellSuffixes :: [Suffix]
-</span><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellSuffixes"><span class="hs-identifier hs-var hs-var">builtinHaskellSuffixes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; Suffix) -&gt; [FilePath] -&gt; [Suffix]
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679508416"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-118"></span><span>  </span><span id="local-6989586621679508420"><span class="annot"><span class="annottext">pretty :: Suffix -&gt; Doc
+</span><a href="#local-6989586621679508420"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span><span> </span><span id="local-6989586621679508422"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679508422"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679508422"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679508425"><span id="local-6989586621679508432"><span id="local-6989586621679508438"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span></span></span></span><span>
+</span><span id="line-121"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679508460"><span id="local-6989586621679508467"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span></span></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellSuffixes"><span class="hs-identifier hs-type">builtinHaskellSuffixes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-124"></span><span id="builtinHaskellSuffixes"><span class="annot"><span class="annottext">builtinHaskellSuffixes :: [Suffix]
+</span><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellSuffixes"><span class="hs-identifier hs-var hs-var">builtinHaskellSuffixes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String -&gt; Suffix) -&gt; [String] -&gt; [Suffix]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Suffix
-</span><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
-</span><span class="hs-string">&quot;hs&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><span class="hs-string">&quot;lhs&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><span class="hs-string">&quot;hsig&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Suffix
+</span><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;hs&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;lhs&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;hsig&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;lhsig&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-112"></span><span>
-</span><span id="line-113"></span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellBootSuffixes"><span class="hs-identifier hs-type">builtinHaskellBootSuffixes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-114"></span><span id="builtinHaskellBootSuffixes"><span class="annot"><span class="annottext">builtinHaskellBootSuffixes :: [Suffix]
-</span><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellBootSuffixes"><span class="hs-identifier hs-var hs-var">builtinHaskellBootSuffixes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; Suffix) -&gt; [FilePath] -&gt; [Suffix]
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellBootSuffixes"><span class="hs-identifier hs-type">builtinHaskellBootSuffixes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-type">Suffix</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-127"></span><span id="builtinHaskellBootSuffixes"><span class="annot"><span class="annottext">builtinHaskellBootSuffixes :: [Suffix]
+</span><a href="Distribution.Simple.PreProcess.Types.html#builtinHaskellBootSuffixes"><span class="hs-identifier hs-var hs-var">builtinHaskellBootSuffixes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String -&gt; Suffix) -&gt; [String] -&gt; [Suffix]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Suffix
-</span><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
-</span><span class="hs-string">&quot;hs-boot&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Suffix
+</span><a href="Distribution.Simple.PreProcess.Types.html#Suffix"><span class="hs-identifier hs-var">Suffix</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;hs-boot&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;lhs-boot&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-115"></span></pre></body></html>
+</span><span id="line-128"></span></pre></body></html>

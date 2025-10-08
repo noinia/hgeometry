@@ -48,22 +48,22 @@
 </span><span id="line-48"></span><span class="hs-comment">-- the best source position to describe that info table arose from.</span><span>
 </span><span id="line-49"></span><span class="hs-comment">--</span><span>
 </span><span id="line-50"></span><span class="hs-comment">-- @since base-4.16.0.0</span><span>
-</span><span id="line-51"></span><span id="local-6989586621679662442"><span class="annot"><a href="GHC.Internal.InfoProv.html#whereFrom"><span class="hs-identifier hs-type">whereFrom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679662442"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Internal.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="GHC.Internal.InfoProv.Types.html#InfoProv"><span class="hs-identifier hs-type">InfoProv</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679811411"><span class="annot"><a href="GHC.Internal.InfoProv.html#whereFrom"><span class="hs-identifier hs-type">whereFrom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679811411"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Internal.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="GHC.Internal.InfoProv.Types.html#InfoProv"><span class="hs-identifier hs-type">InfoProv</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-52"></span><span id="whereFrom"><span class="annot"><span class="annottext">whereFrom :: forall a. a -&gt; IO (Maybe InfoProv)
-</span><a href="GHC.Internal.InfoProv.html#whereFrom"><span class="hs-identifier hs-var hs-var">whereFrom</span></a></span></span><span> </span><span id="local-6989586621679662462"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679662462"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="GHC.Internal.InfoProv.html#whereFrom"><span class="hs-identifier hs-var hs-var">whereFrom</span></a></span></span><span> </span><span id="local-6989586621679811431"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679811431"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
 -&gt; Maybe InfoProv
 -&gt; (Ptr InfoProvEnt -&gt; IO (Maybe InfoProv))
 -&gt; IO (Maybe InfoProv)
 forall a r. a -&gt; r -&gt; (Ptr InfoProvEnt -&gt; IO r) -&gt; IO r
 </span><a href="GHC.Internal.InfoProv.Types.html#getIPE"><span class="hs-identifier hs-var">getIPE</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679662462"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe InfoProv
+</span><a href="#local-6989586621679811431"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe InfoProv
 forall a. Maybe a
 </span><a href="GHC.Internal.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr InfoProvEnt -&gt; IO (Maybe InfoProv)) -&gt; IO (Maybe InfoProv))
 -&gt; (Ptr InfoProvEnt -&gt; IO (Maybe InfoProv)) -&gt; IO (Maybe InfoProv)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679662464"><span class="annot"><span class="annottext">Ptr InfoProvEnt
-</span><a href="#local-6989586621679662464"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679811433"><span class="annot"><span class="annottext">Ptr InfoProvEnt
+</span><a href="#local-6989586621679811433"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-53"></span><span>    </span><span class="annot"><span class="annottext">InfoProv -&gt; Maybe InfoProv
 forall a. a -&gt; Maybe a
 </span><a href="GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">(InfoProv -&gt; Maybe InfoProv) -&gt; IO InfoProv -&gt; IO (Maybe InfoProv)
@@ -72,5 +72,5 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><a href="GHC.Internal.Base.html#fmap"><span class="hs-operator hs-var">`fmap`</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr InfoProv -&gt; IO InfoProv
 </span><a href="GHC.Internal.InfoProv.Types.html#peekInfoProv"><span class="hs-identifier hs-var">peekInfoProv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr InfoProvEnt -&gt; Ptr InfoProv
 </span><a href="GHC.Internal.InfoProv.Types.html#ipeProv"><span class="hs-identifier hs-var">ipeProv</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr InfoProvEnt
-</span><a href="#local-6989586621679662464"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679811433"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span></pre></body></html>

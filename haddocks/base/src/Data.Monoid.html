@@ -24,52 +24,55 @@
 </span><span id="line-24"></span><span class="hs-comment">--</span><span>
 </span><span id="line-25"></span><span class="hs-comment">-- The 'Sum' monoid is defined by the numerical addition operator and `0` as neutral element:</span><span>
 </span><span id="line-26"></span><span class="hs-comment">--</span><span>
-</span><span id="line-27"></span><span class="hs-comment">-- &gt;&gt;&gt; mempty :: Sum Int</span><span>
-</span><span id="line-28"></span><span class="hs-comment">-- Sum {getSum = 0}</span><span>
-</span><span id="line-29"></span><span class="hs-comment">-- &gt;&gt;&gt; Sum 1 &lt;&gt; Sum 2 &lt;&gt; Sum 3 &lt;&gt; Sum 4 :: Sum Int</span><span>
-</span><span id="line-30"></span><span class="hs-comment">-- Sum {getSum = 10}</span><span>
-</span><span id="line-31"></span><span class="hs-comment">--</span><span>
-</span><span id="line-32"></span><span class="hs-comment">-- We can combine multiple values in a list into a single value using the `mconcat` function.</span><span>
-</span><span id="line-33"></span><span class="hs-comment">-- Note that we have to specify the type here since 'Int' is a monoid under several different</span><span>
-</span><span id="line-34"></span><span class="hs-comment">-- operations:</span><span>
-</span><span id="line-35"></span><span class="hs-comment">--</span><span>
-</span><span id="line-36"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [1,2,3,4] :: Sum Int</span><span>
-</span><span id="line-37"></span><span class="hs-comment">-- Sum {getSum = 10}</span><span>
-</span><span id="line-38"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [] :: Sum Int</span><span>
-</span><span id="line-39"></span><span class="hs-comment">-- Sum {getSum = 0}</span><span>
-</span><span id="line-40"></span><span class="hs-comment">--</span><span>
-</span><span id="line-41"></span><span class="hs-comment">-- Another valid monoid instance of 'Int' is 'Product' It is defined by multiplication</span><span>
-</span><span id="line-42"></span><span class="hs-comment">-- and `1` as neutral element:</span><span>
-</span><span id="line-43"></span><span class="hs-comment">--</span><span>
-</span><span id="line-44"></span><span class="hs-comment">-- &gt;&gt;&gt; Product 1 &lt;&gt; Product 2 &lt;&gt; Product 3 &lt;&gt; Product 4 :: Product Int</span><span>
-</span><span id="line-45"></span><span class="hs-comment">-- Product {getProduct = 24}</span><span>
-</span><span id="line-46"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [1,2,3,4] :: Product Int</span><span>
-</span><span id="line-47"></span><span class="hs-comment">-- Product {getProduct = 24}</span><span>
-</span><span id="line-48"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [] :: Product Int</span><span>
-</span><span id="line-49"></span><span class="hs-comment">-- Product {getProduct = 1}</span><span>
-</span><span id="line-50"></span><span class="hs-comment">--</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Int</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- &gt;&gt;&gt; mempty :: Sum Int</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- Sum {getSum = 0}</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- &gt;&gt;&gt; Sum 1 &lt;&gt; Sum 2 &lt;&gt; Sum 3 &lt;&gt; Sum 4 :: Sum Int</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- Sum {getSum = 10}</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- We can combine multiple values in a list into a single value using the `mconcat` function.</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- Note that we have to specify the type here since 'Int' is a monoid under several different</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- operations:</span><span>
+</span><span id="line-36"></span><span class="hs-comment">--</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [1,2,3,4] :: Sum Int</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- Sum {getSum = 10}</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [] :: Sum Int</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- Sum {getSum = 0}</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- Another valid monoid instance of 'Int' is 'Product' It is defined by multiplication</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- and `1` as neutral element:</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- &gt;&gt;&gt; Product 1 &lt;&gt; Product 2 &lt;&gt; Product 3 &lt;&gt; Product 4 :: Product Int</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- Product {getProduct = 24}</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [1,2,3,4] :: Product Int</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- Product {getProduct = 24}</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- &gt;&gt;&gt; mconcat [] :: Product Int</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- Product {getProduct = 1}</span><span>
 </span><span id="line-51"></span><span class="hs-comment">--</span><span>
-</span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Monoid.html"><span class="hs-identifier">Data.Monoid</span></a></span><span>
-</span><span id="line-54"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-comment">-- *  'Monoid' typeclass</span></span><span>
-</span><span id="line-55"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Base.html/GHC.Internal.Base.html#Monoid"><span class="hs-identifier">Monoid</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-56"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Base.html/GHC.Internal.Base.html#%3C%3E"><span class="hs-operator">(&lt;&gt;)</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-57"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Semigroup.Internal.html/GHC.Internal.Data.Semigroup.Internal.html#Dual"><span class="hs-identifier">Dual</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-58"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Semigroup.Internal.html/GHC.Internal.Data.Semigroup.Internal.html#Endo"><span class="hs-identifier">Endo</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-59"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Bool' wrappers</span></span><span>
-</span><span id="line-60"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Semigroup.Internal.html/GHC.Internal.Data.Semigroup.Internal.html#All"><span class="hs-identifier">All</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-61"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Semigroup.Internal.html/GHC.Internal.Data.Semigroup.Internal.html#Any"><span class="hs-identifier">Any</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-62"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Num' wrappers</span></span><span>
-</span><span id="line-63"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Semigroup.Internal.html/GHC.Internal.Data.Semigroup.Internal.html#Sum"><span class="hs-identifier">Sum</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-64"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Semigroup.Internal.html/GHC.Internal.Data.Semigroup.Internal.html#Product"><span class="hs-identifier">Product</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-65"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Maybe' wrappers</span></span><span>
-</span><span id="line-66"></span><span>     </span><span class="annot"><span class="hs-comment">-- $MaybeExamples</span></span><span>
-</span><span id="line-67"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Monoid.html/GHC.Internal.Data.Monoid.html#First"><span class="hs-identifier">First</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-68"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Monoid.html/GHC.Internal.Data.Monoid.html#Last"><span class="hs-identifier">Last</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-69"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Alternative' wrapper</span></span><span>
-</span><span id="line-70"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Semigroup.Internal.html/GHC.Internal.Data.Semigroup.Internal.html#Alt"><span class="hs-identifier">Alt</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
-</span><span id="line-71"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Applicative' wrapper</span></span><span>
-</span><span id="line-72"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Monoid.html/GHC.Internal.Data.Monoid.html#Ap"><span class="hs-identifier">Ap</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-73"></span><span>     </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>
-</span><span id="line-75"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Data.Monoid.html/GHC.Internal.Data.Monoid.html"><span class="hs-identifier">GHC.Internal.Data.Monoid</span></a></span></pre></body></html>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Monoid.html"><span class="hs-identifier">Data.Monoid</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-comment">-- *  'Monoid' typeclass</span></span><span>
+</span><span id="line-56"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#Monoid"><span class="hs-identifier">Monoid</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-57"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3C%3E"><span class="hs-operator">(&lt;&gt;)</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Semigroup.Internal.html#Dual"><span class="hs-identifier">Dual</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-59"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Semigroup.Internal.html#Endo"><span class="hs-identifier">Endo</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-60"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Bool' wrappers</span></span><span>
+</span><span id="line-61"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Semigroup.Internal.html#All"><span class="hs-identifier">All</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-62"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Semigroup.Internal.html#Any"><span class="hs-identifier">Any</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-63"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Num' wrappers</span></span><span>
+</span><span id="line-64"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Semigroup.Internal.html#Sum"><span class="hs-identifier">Sum</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-65"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Semigroup.Internal.html#Product"><span class="hs-identifier">Product</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-66"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Maybe' wrappers</span></span><span>
+</span><span id="line-67"></span><span>     </span><span class="annot"><span class="hs-comment">-- $MaybeExamples</span></span><span>
+</span><span id="line-68"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Monoid.html#First"><span class="hs-identifier">First</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-69"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Monoid.html#Last"><span class="hs-identifier">Last</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Alternative' wrapper</span></span><span>
+</span><span id="line-71"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Semigroup.Internal.html#Alt"><span class="hs-identifier">Alt</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-72"></span><span>     </span><span class="annot"><span class="hs-comment">-- *  'Applicative' wrapper</span></span><span>
+</span><span id="line-73"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Monoid.html#Ap"><span class="hs-identifier">Ap</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>     </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Monoid.html"><span class="hs-identifier">GHC.Internal.Data.Monoid</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span></pre></body></html>

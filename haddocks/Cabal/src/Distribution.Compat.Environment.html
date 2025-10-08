@@ -6,12 +6,12 @@
 </span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Compat.Environment.html"><span class="hs-identifier">Distribution.Compat.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Compat.Environment.html#getEnvironment"><span class="hs-identifier">getEnvironment</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">lookupEnv</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Compat.Environment.html#setEnv"><span class="hs-identifier">setEnv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unsetEnv</span></span><span class="hs-special">)</span><span>
 </span><span id="line-7"></span><span class="hs-keyword">where</span><span>
 </span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span>
 </span><span id="line-12"></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Environment.html/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lookupEnv</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unsetEnv</span></span><span class="hs-special">)</span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Environment.html/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">System</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lookupEnv</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unsetEnv</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">System</span></span><span>
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Stack.html"><span class="hs-identifier">Distribution.Compat.Stack</span></a></span><span class="hs-cpp">
 
@@ -19,10 +19,10 @@
 </span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Foreign.C</span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Windows</span><span class="hs-cpp">
 #else
-</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.C.Types.html/Foreign.C.Types.html"><span class="hs-identifier">Foreign.C.Types</span></a></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.C.String.html/Foreign.C.String.html"><span class="hs-identifier">Foreign.C.String</span></a></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.C.Error.html/Foreign.C.Error.html"><span class="hs-identifier">Foreign.C.Error</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">throwErrnoIfMinus1_</span></span><span class="hs-special">)</span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Posix.Internals.html/System.Posix.Internals.html"><span class="hs-identifier">System.Posix.Internals</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">withFilePath</span></span><span> </span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.C.Types.html"><span class="hs-identifier">Foreign.C.Types</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.C.String.html"><span class="hs-identifier">Foreign.C.String</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.C.Error.html"><span class="hs-identifier">Foreign.C.Error</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">throwErrnoIfMinus1_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.Posix.Internals.html"><span class="hs-identifier">System.Posix.Internals</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">withFilePath</span></span><span> </span><span class="hs-special">)</span><span class="hs-cpp">
 #endif /* mingw32_HOST_OS */
 </span><span>
 </span><span id="line-28"></span><span class="annot"><a href="Distribution.Compat.Environment.html#getEnvironment"><span class="hs-identifier hs-type">getEnvironment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-cpp">
@@ -46,24 +46,24 @@
 </span><span id="line-44"></span><span class="hs-comment">-- empty string or contains an equals sign.</span><span>
 </span><span id="line-45"></span><span class="annot"><a href="Distribution.Compat.Environment.html#setEnv"><span class="hs-identifier hs-type">setEnv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-46"></span><span id="setEnv"><span class="annot"><span class="annottext">setEnv :: String -&gt; String -&gt; IO ()
-</span><a href="Distribution.Compat.Environment.html#setEnv"><span class="hs-identifier hs-var hs-var">setEnv</span></a></span></span><span> </span><span id="local-6989586621679440973"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440973"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679440974"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440974"><span class="hs-identifier hs-var">value_</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; IO ()
+</span><a href="Distribution.Compat.Environment.html#setEnv"><span class="hs-identifier hs-var hs-var">setEnv</span></a></span></span><span> </span><span id="local-6989586621679492332"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679492332"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679492333"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679492333"><span class="hs-identifier hs-var">value_</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; IO ()
 </span><a href="Distribution.Compat.Environment.html#setEnv_"><span class="hs-identifier hs-var">setEnv_</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440973"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440976"><span class="hs-identifier hs-var">value</span></a></span><span>
+</span><a href="#local-6989586621679492332"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679492335"><span class="hs-identifier hs-var">value</span></a></span><span>
 </span><span id="line-47"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-48"></span><span>    </span><span class="hs-comment">-- NOTE: Anything that follows NUL is ignored on both POSIX and Windows. We</span><span>
 </span><span id="line-49"></span><span>    </span><span class="hs-comment">-- still strip it manually so that the null check above succeeds if a value</span><span>
 </span><span id="line-50"></span><span>    </span><span class="hs-comment">-- starts with NUL.</span><span>
-</span><span id="line-51"></span><span>    </span><span id="local-6989586621679440976"><span class="annot"><span class="annottext">value :: String
-</span><a href="#local-6989586621679440976"><span class="hs-identifier hs-var hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; String
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679492335"><span class="annot"><span class="annottext">value :: String
+</span><a href="#local-6989586621679492335"><span class="hs-identifier hs-var hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; String
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">takeWhile</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'\NUL'</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440974"><span class="hs-identifier hs-var">value_</span></a></span><span>
+</span><a href="#local-6989586621679492333"><span class="hs-identifier hs-var">value_</span></a></span><span>
 </span><span id="line-52"></span><span>
 </span><span id="line-53"></span><span class="annot"><a href="Distribution.Compat.Environment.html#setEnv_"><span class="hs-identifier hs-type">setEnv_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-cpp">
 
@@ -88,23 +88,23 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-73"></span><span>  </span><span class="hs-identifier">c_SetEnvironmentVariable</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">LPTSTR</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">LPTSTR</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">Prelude.IO</span><span> </span><span class="hs-identifier">Bool</span><span class="hs-cpp">
 #else
 </span><span id="setEnv_"><span class="annot"><span class="annottext">setEnv_ :: String -&gt; String -&gt; IO ()
-</span><a href="Distribution.Compat.Environment.html#setEnv_"><span class="hs-identifier hs-var hs-var">setEnv_</span></a></span></span><span> </span><span id="local-6989586621679440981"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440981"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679440982"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440982"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="Distribution.Compat.Environment.html#setEnv_"><span class="hs-identifier hs-var hs-var">setEnv_</span></a></span></span><span> </span><span id="local-6989586621679492340"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679492340"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679492341"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679492341"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-76"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; (CString -&gt; IO ()) -&gt; IO ()
 forall a. String -&gt; (CString -&gt; IO a) -&gt; IO a
 </span><span class="hs-identifier hs-var">withFilePath</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440981"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO ()) -&gt; IO ()) -&gt; (CString -&gt; IO ()) -&gt; IO ()
+</span><a href="#local-6989586621679492340"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO ()) -&gt; IO ()) -&gt; (CString -&gt; IO ()) -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621679440983"><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679440983"><span class="hs-identifier hs-var">keyP</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621679492342"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679492342"><span class="hs-identifier hs-var">keyP</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-77"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; (CString -&gt; IO ()) -&gt; IO ()
 forall a. String -&gt; (CString -&gt; IO a) -&gt; IO a
 </span><span class="hs-identifier hs-var">withFilePath</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679440982"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO ()) -&gt; IO ()) -&gt; (CString -&gt; IO ()) -&gt; IO ()
+</span><a href="#local-6989586621679492341"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">((CString -&gt; IO ()) -&gt; IO ()) -&gt; (CString -&gt; IO ()) -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621679440984"><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679440984"><span class="hs-identifier hs-var">valueP</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621679492343"><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679492343"><span class="hs-identifier hs-var">valueP</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-78"></span><span>      </span><span class="annot"><span class="annottext">String -&gt; IO CInt -&gt; IO ()
 forall a. (Eq a, Num a) =&gt; String -&gt; IO a -&gt; IO ()
 </span><span class="hs-identifier hs-var">throwErrnoIfMinus1_</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -113,8 +113,8 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-79"></span><span>        </span><span class="annot"><span class="annottext">CString -&gt; CString -&gt; CInt -&gt; IO CInt
 </span><a href="Distribution.Compat.Environment.html#c_setenv"><span class="hs-identifier hs-var">c_setenv</span></a></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679440983"><span class="hs-identifier hs-var">keyP</span></a></span><span> </span><span class="annot"><span class="annottext">CString
-</span><a href="#local-6989586621679440984"><span class="hs-identifier hs-var">valueP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; CInt
+</span><a href="#local-6989586621679492342"><span class="hs-identifier hs-var">keyP</span></a></span><span> </span><span class="annot"><span class="annottext">CString
+</span><a href="#local-6989586621679492343"><span class="hs-identifier hs-var">valueP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; CInt
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int

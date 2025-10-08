@@ -15,16 +15,16 @@
 </span><span id="line-15"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Ratio.html"><span class="hs-identifier">Data.Ratio</span></a></span><span>
-</span><span id="line-18"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#Ratio"><span class="hs-identifier">Ratio</span></a></span><span>
-</span><span id="line-19"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#Rational"><span class="hs-identifier">Rational</span></a></span><span>
-</span><span id="line-20"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#%25"><span class="hs-operator">(%)</span></a></span><span>
-</span><span id="line-21"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#numerator"><span class="hs-identifier">numerator</span></a></span><span>
-</span><span id="line-22"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#denominator"><span class="hs-identifier">denominator</span></a></span><span>
+</span><span id="line-18"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Ratio"><span class="hs-identifier">Ratio</span></a></span><span>
+</span><span id="line-19"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Rational"><span class="hs-identifier">Rational</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#%25"><span class="hs-operator">(%)</span></a></span><span>
+</span><span id="line-21"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#numerator"><span class="hs-identifier">numerator</span></a></span><span>
+</span><span id="line-22"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#denominator"><span class="hs-identifier">denominator</span></a></span><span>
 </span><span id="line-23"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Ratio.html#approxRational"><span class="hs-identifier">approxRational</span></a></span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html"><span class="hs-identifier">GHC.Internal.Real</span></a></span><span>         </span><span class="hs-comment">-- The basic defns for Ratio</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html"><span class="hs-identifier">GHC.Internal.Real</span></a></span><span>         </span><span class="hs-comment">-- The basic defns for Ratio</span><span>
 </span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span class="hs-comment">-- -----------------------------------------------------------------------------</span><span>
@@ -48,179 +48,179 @@
 </span><span id="line-48"></span><span class="hs-comment">-- and abs r' &lt; d', and the simplest rational is q%1 + the reciprocal of</span><span>
 </span><span id="line-49"></span><span class="hs-comment">-- the simplest rational between d'%r' and d%r.</span><span>
 </span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span id="local-6989586621679130243"><span class="annot"><a href="Data.Ratio.html#approxRational"><span class="hs-identifier hs-type">approxRational</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#RealFrac"><span class="hs-identifier hs-type">RealFrac</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130243"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130243"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130243"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#Rational"><span class="hs-identifier hs-type">Rational</span></a></span></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679140642"><span class="annot"><a href="Data.Ratio.html#approxRational"><span class="hs-identifier hs-type">approxRational</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#RealFrac"><span class="hs-identifier hs-type">RealFrac</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679140642"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679140642"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679140642"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Rational"><span class="hs-identifier hs-type">Rational</span></a></span></span><span>
 </span><span id="line-52"></span><span id="approxRational"><span class="annot"><span class="annottext">approxRational :: forall a. RealFrac a =&gt; a -&gt; a -&gt; Rational
-</span><a href="Data.Ratio.html#approxRational"><span class="hs-identifier hs-var hs-var">approxRational</span></a></span></span><span> </span><span id="local-6989586621679130276"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130276"><span class="hs-identifier hs-var">rat</span></a></span></span><span> </span><span id="local-6989586621679130277"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130277"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Data.Ratio.html#approxRational"><span class="hs-identifier hs-var hs-var">approxRational</span></a></span></span><span> </span><span id="local-6989586621679140675"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140675"><span class="hs-identifier hs-var">rat</span></a></span></span><span> </span><span id="local-6989586621679140676"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140676"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-53"></span><span>    </span><span class="hs-comment">-- We convert rat and eps to rational *before* subtracting/adding since</span><span>
 </span><span id="line-54"></span><span>    </span><span class="hs-comment">-- otherwise we may overflow. This was the cause of #14425.</span><span>
 </span><span id="line-55"></span><span>    </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
 forall {a}. Real a =&gt; a -&gt; a -&gt; Rational
-</span><a href="#local-6989586621679130278"><span class="hs-identifier hs-var">simplest</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Rational
+</span><a href="#local-6989586621679140677"><span class="hs-identifier hs-var">simplest</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130276"><span class="hs-identifier hs-var">rat</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140675"><span class="hs-identifier hs-var">rat</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Num.html/GHC.Internal.Num.html#-"><span class="hs-glyph hs-var">-</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#-"><span class="hs-glyph hs-var">-</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130277"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Rational
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140676"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130276"><span class="hs-identifier hs-var">rat</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140675"><span class="hs-identifier hs-var">rat</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Num.html/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130277"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140676"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-56"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-57"></span><span>    </span><span id="local-6989586621679130278"><span class="annot"><span class="annottext">simplest :: a -&gt; a -&gt; Rational
-</span><a href="#local-6989586621679130278"><span class="hs-identifier hs-var hs-var">simplest</span></a></span></span><span> </span><span id="local-6989586621679130302"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130302"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679130303"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130303"><span class="hs-identifier hs-var">y</span></a></span></span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679140677"><span class="annot"><span class="annottext">simplest :: a -&gt; a -&gt; Rational
+</span><a href="#local-6989586621679140677"><span class="hs-identifier hs-var hs-var">simplest</span></a></span></span><span> </span><span id="local-6989586621679140701"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140701"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679140702"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140702"><span class="hs-identifier hs-var">y</span></a></span></span><span>
 </span><span id="line-58"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130303"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679140702"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130302"><span class="hs-identifier hs-var">x</span></a></span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Rational
-</span><a href="#local-6989586621679130278"><span class="hs-identifier hs-var">simplest</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130303"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130302"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140701"><span class="hs-identifier hs-var">x</span></a></span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Rational
+</span><a href="#local-6989586621679140677"><span class="hs-identifier hs-var">simplest</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140702"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140701"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-59"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130302"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679140701"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130303"><span class="hs-identifier hs-var">y</span></a></span><span>     </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679130305"><span class="hs-identifier hs-var">xr</span></a></span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140702"><span class="hs-identifier hs-var">y</span></a></span><span>     </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679140704"><span class="hs-identifier hs-var">xr</span></a></span><span>
 </span><span id="line-60"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130302"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679140701"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer -&gt; Integer -&gt; Rational
 forall {a}. Integral a =&gt; a -&gt; a -&gt; a -&gt; a -&gt; Ratio a
-</span><a href="#local-6989586621679130307"><span class="hs-identifier hs-var">simplest'</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130308"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130309"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130310"><span class="hs-identifier hs-var">n'</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130311"><span class="hs-identifier hs-var">d'</span></a></span><span>
+</span><a href="#local-6989586621679140706"><span class="hs-identifier hs-var">simplest'</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140707"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140708"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140709"><span class="hs-identifier hs-var">n'</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140710"><span class="hs-identifier hs-var">d'</span></a></span><span>
 </span><span id="line-61"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130303"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679140702"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="hs-glyph">-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer -&gt; Integer -&gt; Rational
 forall {a}. Integral a =&gt; a -&gt; a -&gt; a -&gt; a -&gt; Ratio a
-</span><a href="#local-6989586621679130307"><span class="hs-identifier hs-var">simplest'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130310"><span class="hs-identifier hs-var">n'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130311"><span class="hs-identifier hs-var">d'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130308"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679130309"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><a href="#local-6989586621679140706"><span class="hs-identifier hs-var">simplest'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140709"><span class="hs-identifier hs-var">n'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140710"><span class="hs-identifier hs-var">d'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140707"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679140708"><span class="hs-identifier hs-var">d</span></a></span><span>
 </span><span id="line-62"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Base.html/GHC.Internal.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Integer
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Rational
 forall a. a -&gt; a -&gt; Ratio a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span>
-</span><span id="line-63"></span><span>      </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679130305"><span class="annot"><span class="annottext">xr :: Rational
-</span><a href="#local-6989586621679130305"><span class="hs-identifier hs-var hs-var">xr</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
+</span><span id="line-63"></span><span>      </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679140704"><span class="annot"><span class="annottext">xr :: Rational
+</span><a href="#local-6989586621679140704"><span class="hs-identifier hs-var hs-var">xr</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130302"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-64"></span><span>            </span><span id="local-6989586621679130308"><span class="annot"><span class="annottext">n :: Integer
-</span><a href="#local-6989586621679130308"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140701"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-64"></span><span>            </span><span id="local-6989586621679140707"><span class="annot"><span class="annottext">n :: Integer
+</span><a href="#local-6989586621679140707"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#numerator"><span class="hs-identifier hs-var">numerator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679130305"><span class="hs-identifier hs-var">xr</span></a></span><span>
-</span><span id="line-65"></span><span>            </span><span id="local-6989586621679130309"><span class="annot"><span class="annottext">d :: Integer
-</span><a href="#local-6989586621679130309"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#numerator"><span class="hs-identifier hs-var">numerator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679140704"><span class="hs-identifier hs-var">xr</span></a></span><span>
+</span><span id="line-65"></span><span>            </span><span id="local-6989586621679140708"><span class="annot"><span class="annottext">d :: Integer
+</span><a href="#local-6989586621679140708"><span class="hs-identifier hs-var hs-var">d</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#denominator"><span class="hs-identifier hs-var">denominator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679130305"><span class="hs-identifier hs-var">xr</span></a></span><span>
-</span><span id="line-66"></span><span>            </span><span id="local-6989586621679130320"><span class="annot"><span class="annottext">nd' :: Rational
-</span><a href="#local-6989586621679130320"><span class="hs-identifier hs-var hs-var">nd'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#denominator"><span class="hs-identifier hs-var">denominator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679140704"><span class="hs-identifier hs-var">xr</span></a></span><span>
+</span><span id="line-66"></span><span>            </span><span id="local-6989586621679140719"><span class="annot"><span class="annottext">nd' :: Rational
+</span><a href="#local-6989586621679140719"><span class="hs-identifier hs-var hs-var">nd'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130303"><span class="hs-identifier hs-var">y</span></a></span><span>
-</span><span id="line-67"></span><span>            </span><span id="local-6989586621679130310"><span class="annot"><span class="annottext">n' :: Integer
-</span><a href="#local-6989586621679130310"><span class="hs-identifier hs-var hs-var">n'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#toRational"><span class="hs-identifier hs-var">toRational</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140702"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-67"></span><span>            </span><span id="local-6989586621679140709"><span class="annot"><span class="annottext">n' :: Integer
+</span><a href="#local-6989586621679140709"><span class="hs-identifier hs-var hs-var">n'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#numerator"><span class="hs-identifier hs-var">numerator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679130320"><span class="hs-identifier hs-var">nd'</span></a></span><span>
-</span><span id="line-68"></span><span>            </span><span id="local-6989586621679130311"><span class="annot"><span class="annottext">d' :: Integer
-</span><a href="#local-6989586621679130311"><span class="hs-identifier hs-var hs-var">d'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#numerator"><span class="hs-identifier hs-var">numerator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679140719"><span class="hs-identifier hs-var">nd'</span></a></span><span>
+</span><span id="line-68"></span><span>            </span><span id="local-6989586621679140710"><span class="annot"><span class="annottext">d' :: Integer
+</span><a href="#local-6989586621679140710"><span class="hs-identifier hs-var hs-var">d'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#denominator"><span class="hs-identifier hs-var">denominator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679130320"><span class="hs-identifier hs-var">nd'</span></a></span><span>
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#denominator"><span class="hs-identifier hs-var">denominator</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679140719"><span class="hs-identifier hs-var">nd'</span></a></span><span>
 </span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679130307"><span class="annot"><span class="annottext">simplest' :: a -&gt; a -&gt; a -&gt; a -&gt; Ratio a
-</span><a href="#local-6989586621679130307"><span class="hs-identifier hs-var hs-var">simplest'</span></a></span></span><span> </span><span id="local-6989586621679130338"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130338"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679130339"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130339"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679130340"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130340"><span class="hs-identifier hs-var">n'</span></a></span></span><span> </span><span id="local-6989586621679130341"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130341"><span class="hs-identifier hs-var">d'</span></a></span></span><span>       </span><span class="hs-comment">-- assumes 0 &lt; n%d &lt; n'%d'</span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679140706"><span class="annot"><span class="annottext">simplest' :: a -&gt; a -&gt; a -&gt; a -&gt; Ratio a
+</span><a href="#local-6989586621679140706"><span class="hs-identifier hs-var hs-var">simplest'</span></a></span></span><span> </span><span id="local-6989586621679140737"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140737"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679140738"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140738"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679140739"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140739"><span class="hs-identifier hs-var">n'</span></a></span></span><span> </span><span id="local-6989586621679140740"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140740"><span class="hs-identifier hs-var">d'</span></a></span></span><span>       </span><span class="hs-comment">-- assumes 0 &lt; n%d &lt; n'%d'</span><span>
 </span><span id="line-71"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130342"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679140741"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span>     </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130343"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ratio a
+</span><a href="#local-6989586621679140742"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ratio a
 forall a. a -&gt; a -&gt; Ratio a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-72"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130343"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679140742"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%2F%3D"><span class="hs-operator hs-var">/=</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130345"><span class="hs-identifier hs-var">q'</span></a></span><span>    </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130343"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%2F%3D"><span class="hs-operator hs-var">/=</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140744"><span class="hs-identifier hs-var">q'</span></a></span><span>    </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140742"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Num.html/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span class="annot"><span class="annottext">a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ratio a
 forall a. a -&gt; a -&gt; Ratio a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-73"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Base.html/GHC.Internal.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130343"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140742"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Num.html/GHC.Internal.Num.html#%2A"><span class="hs-operator hs-var">*</span></a></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130347"><span class="hs-identifier hs-var">n''</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#%2A"><span class="hs-operator hs-var">*</span></a></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140746"><span class="hs-identifier hs-var">n''</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Num.html/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130348"><span class="hs-identifier hs-var">d''</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ratio a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140747"><span class="hs-identifier hs-var">d''</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ratio a
 forall a. a -&gt; a -&gt; Ratio a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130347"><span class="hs-identifier hs-var">n''</span></a></span><span>
-</span><span id="line-74"></span><span>      </span><span class="hs-keyword">where</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130343"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130343"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679130342"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130342"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; (a, a)
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#%3A%25"><span class="hs-operator hs-var">:%</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140746"><span class="hs-identifier hs-var">n''</span></a></span><span>
+</span><span id="line-74"></span><span>      </span><span class="hs-keyword">where</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679140742"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140742"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679140741"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140741"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; (a, a)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#quotRem"><span class="hs-identifier hs-var">quotRem</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130338"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130339"><span class="hs-identifier hs-var">d</span></a></span><span>
-</span><span id="line-75"></span><span>            </span><span class="hs-special">(</span><span id="local-6989586621679130345"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130345"><span class="hs-identifier hs-var">q'</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679130362"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130362"><span class="hs-identifier hs-var">r'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; (a, a)
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#quotRem"><span class="hs-identifier hs-var">quotRem</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140737"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140738"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-75"></span><span>            </span><span class="hs-special">(</span><span id="local-6989586621679140744"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140744"><span class="hs-identifier hs-var">q'</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679140761"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140761"><span class="hs-identifier hs-var">r'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; (a, a)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#quotRem"><span class="hs-identifier hs-var">quotRem</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130340"><span class="hs-identifier hs-var">n'</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130341"><span class="hs-identifier hs-var">d'</span></a></span><span>
-</span><span id="line-76"></span><span>            </span><span id="local-6989586621679130363"><span class="annot"><span class="annottext">nd'' :: Ratio a
-</span><a href="#local-6989586621679130363"><span class="hs-identifier hs-var hs-var">nd''</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; a -&gt; Ratio a
-</span><a href="#local-6989586621679130307"><span class="hs-identifier hs-var">simplest'</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130341"><span class="hs-identifier hs-var">d'</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130362"><span class="hs-identifier hs-var">r'</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130339"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679130342"><span class="hs-identifier hs-var">r</span></a></span><span>
-</span><span id="line-77"></span><span>            </span><span id="local-6989586621679130347"><span class="annot"><span class="annottext">n'' :: a
-</span><a href="#local-6989586621679130347"><span class="hs-identifier hs-var hs-var">n''</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Ratio a -&gt; a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#quotRem"><span class="hs-identifier hs-var">quotRem</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140739"><span class="hs-identifier hs-var">n'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140740"><span class="hs-identifier hs-var">d'</span></a></span><span>
+</span><span id="line-76"></span><span>            </span><span id="local-6989586621679140762"><span class="annot"><span class="annottext">nd'' :: Ratio a
+</span><a href="#local-6989586621679140762"><span class="hs-identifier hs-var hs-var">nd''</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; a -&gt; Ratio a
+</span><a href="#local-6989586621679140706"><span class="hs-identifier hs-var">simplest'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140740"><span class="hs-identifier hs-var">d'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140761"><span class="hs-identifier hs-var">r'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140738"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679140741"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-77"></span><span>            </span><span id="local-6989586621679140746"><span class="annot"><span class="annottext">n'' :: a
+</span><a href="#local-6989586621679140746"><span class="hs-identifier hs-var hs-var">n''</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Ratio a -&gt; a
 forall a. Ratio a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#numerator"><span class="hs-identifier hs-var">numerator</span></a></span><span> </span><span class="annot"><span class="annottext">Ratio a
-</span><a href="#local-6989586621679130363"><span class="hs-identifier hs-var">nd''</span></a></span><span>
-</span><span id="line-78"></span><span>            </span><span id="local-6989586621679130348"><span class="annot"><span class="annottext">d'' :: a
-</span><a href="#local-6989586621679130348"><span class="hs-identifier hs-var hs-var">d''</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Ratio a -&gt; a
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#numerator"><span class="hs-identifier hs-var">numerator</span></a></span><span> </span><span class="annot"><span class="annottext">Ratio a
+</span><a href="#local-6989586621679140762"><span class="hs-identifier hs-var">nd''</span></a></span><span>
+</span><span id="line-78"></span><span>            </span><span id="local-6989586621679140747"><span class="annot"><span class="annottext">d'' :: a
+</span><a href="#local-6989586621679140747"><span class="hs-identifier hs-var hs-var">d''</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Ratio a -&gt; a
 forall a. Ratio a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Real.html/GHC.Internal.Real.html#denominator"><span class="hs-identifier hs-var">denominator</span></a></span><span> </span><span class="annot"><span class="annottext">Ratio a
-</span><a href="#local-6989586621679130363"><span class="hs-identifier hs-var">nd''</span></a></span><span>
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#denominator"><span class="hs-identifier hs-var">denominator</span></a></span><span> </span><span class="annot"><span class="annottext">Ratio a
+</span><a href="#local-6989586621679140762"><span class="hs-identifier hs-var">nd''</span></a></span><span>
 </span><span id="line-79"></span><span>
 </span><span id="line-80"></span></pre></body></html>

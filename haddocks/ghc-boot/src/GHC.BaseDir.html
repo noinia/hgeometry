@@ -18,14 +18,14 @@
 </span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.BaseDir.html#getBaseDir"><span class="hs-identifier">getBaseDir</span></a></span><span>
 </span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-20"></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-comment">-- See Note [Why do we import Prelude here?]</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-comment">-- See Note [Why do we import Prelude here?]</span><span>
 </span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.html/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">stripPrefix</span></span><span class="hs-special">)</span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Maybe.html/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">listToMaybe</span></span><span class="hs-special">)</span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span class="hs-cpp">
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">stripPrefix</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">listToMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span class="hs-cpp">
 
 #if MIN_VERSION_base(4,17,0) &amp;&amp; !defined(openbsd_HOST_OS)
-</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Environment.html/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">executablePath</span></span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">executablePath</span></span><span class="hs-special">)</span><span class="hs-cpp">
 #else
 </span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">System.Environment</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">getExecutablePath</span><span class="hs-special">)</span><span class="hs-cpp">
 #endif
@@ -42,47 +42,47 @@
 </span><span id="line-39"></span><span class="hs-comment">--   replaces occurrences of variable @$var@ with @value@ in str.</span><span>
 </span><span id="line-40"></span><span class="annot"><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-type">expandPathVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-41"></span><span id="expandPathVar"><span class="annot"><span class="annottext">expandPathVar :: FilePath -&gt; FilePath -&gt; FilePath -&gt; FilePath
-</span><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-var hs-var">expandPathVar</span></a></span></span><span> </span><span id="local-6989586621679077505"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077505"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679077506"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077506"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span id="local-6989586621679077507"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077507"><span class="hs-identifier hs-var">str</span></a></span></span><span>
-</span><span id="line-42"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679077508"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077508"><span class="hs-identifier hs-var">str'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; Maybe FilePath
+</span><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-var hs-var">expandPathVar</span></a></span></span><span> </span><span id="local-6989586621679081512"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081512"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679081513"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081513"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span id="local-6989586621679081514"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081514"><span class="hs-identifier hs-var">str</span></a></span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679081515"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081515"><span class="hs-identifier hs-var">str'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; Maybe FilePath
 forall a. Eq a =&gt; [a] -&gt; [a] -&gt; Maybe [a]
 </span><span class="hs-identifier hs-var">stripPrefix</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'$'</span></span><span class="annot"><span class="annottext">Char -&gt; FilePath -&gt; FilePath
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077505"><span class="hs-identifier hs-var">var</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077507"><span class="hs-identifier hs-var">str</span></a></span><span>
+</span><a href="#local-6989586621679081512"><span class="hs-identifier hs-var">var</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081514"><span class="hs-identifier hs-var">str</span></a></span><span>
 </span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; (Char -&gt; Bool) -&gt; Maybe Char -&gt; Bool
 forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
 </span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#isPathSeparator"><span class="hs-identifier hs-var">isPathSeparator</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; Maybe Char
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#isPathSeparator"><span class="hs-identifier hs-var">isPathSeparator</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; Maybe Char
 forall a. [a] -&gt; Maybe a
 </span><span class="hs-identifier hs-var">listToMaybe</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077508"><span class="hs-identifier hs-var">str'</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679081515"><span class="hs-identifier hs-var">str'</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-44"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077506"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
+</span><a href="#local-6989586621679081513"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath -&gt; FilePath
 </span><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-var">expandPathVar</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077505"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077506"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077508"><span class="hs-identifier hs-var">str'</span></a></span><span>
-</span><span id="line-45"></span><span class="annot"><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-var">expandPathVar</span></a></span><span> </span><span id="local-6989586621679077511"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077511"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679077512"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077512"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679077513"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679077513"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679077514"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077514"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679077513"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; FilePath -&gt; FilePath
+</span><a href="#local-6989586621679081512"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081513"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081515"><span class="hs-identifier hs-var">str'</span></a></span><span>
+</span><span id="line-45"></span><span class="annot"><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-var">expandPathVar</span></a></span><span> </span><span id="local-6989586621679081518"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081518"><span class="hs-identifier hs-var">var</span></a></span></span><span> </span><span id="local-6989586621679081519"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081519"><span class="hs-identifier hs-var">value</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679081520"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679081520"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679081521"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081521"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679081520"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; FilePath -&gt; FilePath
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath -&gt; FilePath
 </span><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-var">expandPathVar</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077511"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077512"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679077514"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679081518"><span class="hs-identifier hs-var">var</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081519"><span class="hs-identifier hs-var">value</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679081521"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-46"></span><span class="annot"><a href="GHC.BaseDir.html#expandPathVar"><span class="hs-identifier hs-var">expandPathVar</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-cpp">
@@ -140,12 +140,12 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;lib&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; FilePath)
 -&gt; (FilePath -&gt; FilePath) -&gt; FilePath -&gt; FilePath
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath
-</span><a href="#local-6989586621679077517"><span class="hs-identifier hs-var">rootDir</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; FilePath) -&gt; Maybe FilePath -&gt; Maybe FilePath
+</span><a href="#local-6989586621679081524"><span class="hs-identifier hs-var">rootDir</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; FilePath) -&gt; Maybe FilePath -&gt; Maybe FilePath
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe FilePath -&gt; Maybe FilePath)
 -&gt; IO (Maybe FilePath) -&gt; IO (Maybe FilePath)
@@ -153,13 +153,13 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (IO (Maybe FilePath))
 </span><span class="hs-identifier hs-var">executablePath</span></span><span>
 </span><span id="line-90"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-91"></span><span>    </span><span class="annot"><a href="#local-6989586621679077517"><span class="hs-identifier hs-type">rootDir</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-92"></span><span>    </span><span id="local-6989586621679077517"><span class="annot"><span class="annottext">rootDir :: FilePath -&gt; FilePath
-</span><a href="#local-6989586621679077517"><span class="hs-identifier hs-var hs-var">rootDir</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeDirectory"><span class="hs-identifier hs-var">takeDirectory</span></a></span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; FilePath)
+</span><span id="line-91"></span><span>    </span><span class="annot"><a href="#local-6989586621679081524"><span class="hs-identifier hs-type">rootDir</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-92"></span><span>    </span><span id="local-6989586621679081524"><span class="annot"><span class="annottext">rootDir :: FilePath -&gt; FilePath
+</span><a href="#local-6989586621679081524"><span class="hs-identifier hs-var hs-var">rootDir</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeDirectory"><span class="hs-identifier hs-var">takeDirectory</span></a></span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; FilePath)
 -&gt; (FilePath -&gt; FilePath) -&gt; FilePath -&gt; FilePath
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeDirectory"><span class="hs-identifier hs-var">takeDirectory</span></a></span><span class="hs-cpp">
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeDirectory"><span class="hs-identifier hs-var">takeDirectory</span></a></span><span class="hs-cpp">
 #endif
 </span></pre></body></html>

@@ -39,80 +39,80 @@
 </span><span id="line-39"></span><span>
 </span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Data.SmallArray.html"><span class="hs-identifier">GHC.Data.SmallArray</span></a></span><span>
 </span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Maybe.html/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">listToMaybe</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">maybeToList</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">listToMaybe</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">maybeToList</span></span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-43"></span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | Build a PrimOp Id</span></span><span>
 </span><span id="line-46"></span><span class="annot"><a href="GHC.Builtin.PrimOps.Ids.html#mkPrimOpId"><span class="hs-identifier hs-type">mkPrimOpId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Builtin.PrimOps.html#PrimOp"><span class="hs-identifier hs-type">PrimOp</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span>
 </span><span id="line-47"></span><span id="mkPrimOpId"><span class="annot"><span class="annottext">mkPrimOpId :: PrimOp -&gt; TyVar
-</span><a href="GHC.Builtin.PrimOps.Ids.html#mkPrimOpId"><span class="hs-identifier hs-var hs-var">mkPrimOpId</span></a></span></span><span> </span><span id="local-6989586621682722766"><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722766"><span class="hs-identifier hs-var">prim_op</span></a></span></span><span>
+</span><a href="GHC.Builtin.PrimOps.Ids.html#mkPrimOpId"><span class="hs-identifier hs-var hs-var">mkPrimOpId</span></a></span></span><span> </span><span id="local-6989586621682928822"><span class="annot"><span class="annottext">PrimOp
+</span><a href="#local-6989586621682928822"><span class="hs-identifier hs-var">prim_op</span></a></span></span><span>
 </span><span id="line-48"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722767"><span class="hs-identifier hs-var">id</span></a></span><span>
+</span><a href="#local-6989586621682928823"><span class="hs-identifier hs-var">id</span></a></span><span>
 </span><span id="line-49"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-50"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682722768"><span class="annot"><span class="annottext">[TyVarBinder]
-</span><a href="#local-6989586621682722768"><span class="hs-identifier hs-var">tyvars</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682722769"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682722769"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682722770"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722770"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722771"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722771"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722772"><span class="annot"><span class="annottext">DmdSig
-</span><a href="#local-6989586621682722772"><span class="hs-identifier hs-var">strict_sig</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PrimOp -&gt; ([TyVarBinder], [Type], Type, Int, DmdSig)
+</span><span id="line-50"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682928824"><span class="annot"><span class="annottext">[TyVarBinder]
+</span><a href="#local-6989586621682928824"><span class="hs-identifier hs-var">tyvars</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682928825"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682928825"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682928826"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928826"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928827"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682928827"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928828"><span class="annot"><span class="annottext">DmdSig
+</span><a href="#local-6989586621682928828"><span class="hs-identifier hs-var">strict_sig</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PrimOp -&gt; ([TyVarBinder], [Type], Type, Int, DmdSig)
 </span><a href="GHC.Builtin.PrimOps.html#primOpSig"><span class="hs-identifier hs-var">primOpSig</span></a></span><span> </span><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722766"><span class="hs-identifier hs-var">prim_op</span></a></span><span>
-</span><span id="line-51"></span><span>    </span><span id="local-6989586621682722774"><span class="annot"><span class="annottext">ty :: Type
-</span><a href="#local-6989586621682722774"><span class="hs-identifier hs-var hs-var">ty</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[TyVarBinder] -&gt; Type -&gt; Type
+</span><a href="#local-6989586621682928822"><span class="hs-identifier hs-var">prim_op</span></a></span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621682928830"><span class="annot"><span class="annottext">ty :: Type
+</span><a href="#local-6989586621682928830"><span class="hs-identifier hs-var hs-var">ty</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[TyVarBinder] -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkForAllTys"><span class="hs-identifier hs-var">mkForAllTys</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVarBinder]
-</span><a href="#local-6989586621682722768"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Type] -&gt; Type -&gt; Type
+</span><a href="#local-6989586621682928824"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Type] -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkVisFunTysMany"><span class="hs-identifier hs-var">mkVisFunTysMany</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682722769"><span class="hs-identifier hs-var">arg_tys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722770"><span class="hs-identifier hs-var">res_ty</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-52"></span><span>    </span><span id="local-6989586621682722777"><span class="annot"><span class="annottext">name :: Name
-</span><a href="#local-6989586621682722777"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Module -&gt; OccName -&gt; Unique -&gt; TyThing -&gt; BuiltInSyntax -&gt; Name
+</span><a href="#local-6989586621682928825"><span class="hs-identifier hs-var">arg_tys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928826"><span class="hs-identifier hs-var">res_ty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621682928833"><span class="annot"><span class="annottext">name :: Name
+</span><a href="#local-6989586621682928833"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Module -&gt; OccName -&gt; Unique -&gt; TyThing -&gt; BuiltInSyntax -&gt; Name
 </span><a href="GHC.Types.Name.html#mkWiredInName"><span class="hs-identifier hs-var">mkWiredInName</span></a></span><span> </span><span class="annot"><span class="annottext">Module
 </span><a href="GHC.Builtin.Names.html#gHC_PRIM"><span class="hs-identifier hs-var">gHC_PRIM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PrimOp -&gt; OccName
 </span><a href="GHC.Builtin.PrimOps.html#primOpOcc"><span class="hs-identifier hs-var">primOpOcc</span></a></span><span> </span><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722766"><span class="hs-identifier hs-var">prim_op</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928822"><span class="hs-identifier hs-var">prim_op</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-53"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Unique
 </span><a href="GHC.Builtin.Uniques.html#mkPrimOpIdUnique"><span class="hs-identifier hs-var">mkPrimOpIdUnique</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PrimOp -&gt; Int
 </span><a href="GHC.Builtin.PrimOps.html#primOpTag"><span class="hs-identifier hs-var">primOpTag</span></a></span><span> </span><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722766"><span class="hs-identifier hs-var">prim_op</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928822"><span class="hs-identifier hs-var">prim_op</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyVar -&gt; TyThing
 </span><a href="GHC.Types.TyThing.html#AnId"><span class="hs-identifier hs-var">AnId</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722767"><span class="hs-identifier hs-var">id</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BuiltInSyntax
+</span><a href="#local-6989586621682928823"><span class="hs-identifier hs-var">id</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BuiltInSyntax
 </span><a href="GHC.Types.Name.html#UserSyntax"><span class="hs-identifier hs-var">UserSyntax</span></a></span><span>
-</span><span id="line-55"></span><span>    </span><span id="local-6989586621682722767"><span class="annot"><span class="annottext">id :: TyVar
-</span><a href="#local-6989586621682722767"><span class="hs-identifier hs-var hs-var">id</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IdDetails -&gt; Name -&gt; Type -&gt; IdInfo -&gt; TyVar
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621682928823"><span class="annot"><span class="annottext">id :: TyVar
+</span><a href="#local-6989586621682928823"><span class="hs-identifier hs-var hs-var">id</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IdDetails -&gt; Name -&gt; Type -&gt; IdInfo -&gt; TyVar
 </span><a href="GHC.Types.Id.html#mkGlobalId"><span class="hs-identifier hs-var">mkGlobalId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PrimOp -&gt; ConcreteTyVars -&gt; IdDetails
 </span><a href="GHC.Types.Id.Info.html#PrimOpId"><span class="hs-identifier hs-var">PrimOpId</span></a></span><span> </span><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722766"><span class="hs-identifier hs-var">prim_op</span></a></span><span> </span><span class="annot"><span class="annottext">ConcreteTyVars
-</span><a href="#local-6989586621682722787"><span class="hs-identifier hs-var">conc_tvs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682722777"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722774"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">IdInfo
-</span><a href="#local-6989586621682722788"><span class="hs-identifier hs-var">info</span></a></span><span>
+</span><a href="#local-6989586621682928822"><span class="hs-identifier hs-var">prim_op</span></a></span><span> </span><span class="annot"><span class="annottext">ConcreteTyVars
+</span><a href="#local-6989586621682928843"><span class="hs-identifier hs-var">conc_tvs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682928833"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928830"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">IdInfo
+</span><a href="#local-6989586621682928844"><span class="hs-identifier hs-var">info</span></a></span><span>
 </span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span>    </span><span id="local-6989586621682722787"><span class="annot"><span class="annottext">conc_tvs :: ConcreteTyVars
-</span><a href="#local-6989586621682722787"><span class="hs-identifier hs-var hs-var">conc_tvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [TyVarBinder] -&gt; [Type] -&gt; Type -&gt; ConcreteTyVars
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621682928843"><span class="annot"><span class="annottext">conc_tvs :: ConcreteTyVars
+</span><a href="#local-6989586621682928843"><span class="hs-identifier hs-var hs-var">conc_tvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; [TyVarBinder] -&gt; [Type] -&gt; Type -&gt; ConcreteTyVars
 </span><a href="GHC.Builtin.PrimOps.Ids.html#computePrimOpConcTyVarsFromType"><span class="hs-identifier hs-var">computePrimOpConcTyVarsFromType</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682722777"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVarBinder]
-</span><a href="#local-6989586621682722768"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682722769"><span class="hs-identifier hs-var">arg_tys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722770"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
+</span><a href="#local-6989586621682928833"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVarBinder]
+</span><a href="#local-6989586621682928824"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682928825"><span class="hs-identifier hs-var">arg_tys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928826"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
 </span><span id="line-58"></span><span>
 </span><span id="line-59"></span><span>    </span><span class="hs-comment">-- PrimOps don't ever construct a product, but we want to preserve bottoms</span><span>
-</span><span id="line-60"></span><span>    </span><span id="local-6989586621682722790"><span class="annot"><span class="annottext">cpr :: Cpr
-</span><a href="#local-6989586621682722790"><span class="hs-identifier hs-var hs-var">cpr</span></a></span></span><span>
+</span><span id="line-60"></span><span>    </span><span id="local-6989586621682928846"><span class="annot"><span class="annottext">cpr :: Cpr
+</span><a href="#local-6989586621682928846"><span class="hs-identifier hs-var hs-var">cpr</span></a></span></span><span>
 </span><span id="line-61"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Divergence -&gt; Bool
 </span><a href="GHC.Types.Demand.html#isDeadEndDiv"><span class="hs-identifier hs-var">isDeadEndDiv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([Demand], Divergence) -&gt; Divergence
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DmdSig -&gt; ([Demand], Divergence)
 </span><a href="GHC.Types.Demand.html#splitDmdSig"><span class="hs-identifier hs-var">splitDmdSig</span></a></span><span> </span><span class="annot"><span class="annottext">DmdSig
-</span><a href="#local-6989586621682722772"><span class="hs-identifier hs-var">strict_sig</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682928828"><span class="hs-identifier hs-var">strict_sig</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#botCpr"><span class="hs-identifier hs-var">botCpr</span></a></span><span>
 </span><span id="line-62"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>                                   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#topCpr"><span class="hs-identifier hs-var">topCpr</span></a></span><span>
 </span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span>    </span><span id="local-6989586621682722788"><span class="annot"><span class="annottext">info :: IdInfo
-</span><a href="#local-6989586621682722788"><span class="hs-identifier hs-var hs-var">info</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IdInfo
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621682928844"><span class="annot"><span class="annottext">info :: IdInfo
+</span><a href="#local-6989586621682928844"><span class="hs-identifier hs-var hs-var">info</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IdInfo
 </span><a href="GHC.Types.Id.Info.html#noCafIdInfo"><span class="hs-identifier hs-var">noCafIdInfo</span></a></span><span>
 </span><span id="line-65"></span><span>           </span><span class="annot"><span class="annottext">IdInfo -&gt; RuleInfo -&gt; IdInfo
 </span><a href="GHC.Types.Id.Info.html#setRuleInfo"><span class="hs-operator hs-var">`setRuleInfo`</span></a></span><span>           </span><span class="annot"><span class="annottext">[CoreRule] -&gt; RuleInfo
@@ -122,19 +122,19 @@ forall a. Maybe a -&gt; [a]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; PrimOp -&gt; Maybe CoreRule
 </span><a href="GHC.Core.Opt.ConstantFold.html#primOpRules"><span class="hs-identifier hs-var">primOpRules</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682722777"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722766"><span class="hs-identifier hs-var">prim_op</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928833"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">PrimOp
+</span><a href="#local-6989586621682928822"><span class="hs-identifier hs-var">prim_op</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-66"></span><span>           </span><span class="annot"><span class="annottext">IdInfo -&gt; Int -&gt; IdInfo
 </span><a href="GHC.Types.Id.Info.html#setArityInfo"><span class="hs-operator hs-var">`setArityInfo`</span></a></span><span>          </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722771"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682928827"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-67"></span><span>           </span><span class="annot"><span class="annottext">IdInfo -&gt; DmdSig -&gt; IdInfo
 </span><a href="GHC.Types.Id.Info.html#setDmdSigInfo"><span class="hs-operator hs-var">`setDmdSigInfo`</span></a></span><span>         </span><span class="annot"><span class="annottext">DmdSig
-</span><a href="#local-6989586621682722772"><span class="hs-identifier hs-var">strict_sig</span></a></span><span>
+</span><a href="#local-6989586621682928828"><span class="hs-identifier hs-var">strict_sig</span></a></span><span>
 </span><span id="line-68"></span><span>           </span><span class="annot"><span class="annottext">IdInfo -&gt; CprSig -&gt; IdInfo
 </span><a href="GHC.Types.Id.Info.html#setCprSigInfo"><span class="hs-operator hs-var">`setCprSigInfo`</span></a></span><span>         </span><span class="annot"><span class="annottext">Int -&gt; Cpr -&gt; CprSig
 </span><a href="GHC.Types.Cpr.html#mkCprSig"><span class="hs-identifier hs-var">mkCprSig</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722771"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621682722790"><span class="hs-identifier hs-var">cpr</span></a></span><span>
+</span><a href="#local-6989586621682928827"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682928846"><span class="hs-identifier hs-var">cpr</span></a></span><span>
 </span><span id="line-69"></span><span>           </span><span class="annot"><span class="annottext">IdInfo -&gt; InlinePragma -&gt; IdInfo
 </span><a href="GHC.Types.Id.Info.html#setInlinePragInfo"><span class="hs-operator hs-var">`setInlinePragInfo`</span></a></span><span>     </span><span class="annot"><span class="annottext">InlinePragma
 </span><a href="GHC.Types.Basic.html#neverInlinePragma"><span class="hs-identifier hs-var">neverInlinePragma</span></a></span><span>
@@ -151,64 +151,64 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-80"></span><span class="hs-comment">-- negative position in the type of the primop.</span><span>
 </span><span id="line-81"></span><span class="annot"><a href="GHC.Builtin.PrimOps.Ids.html#computePrimOpConcTyVarsFromType"><span class="hs-identifier hs-type">computePrimOpConcTyVarsFromType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Var.html#TyVarBinder"><span class="hs-identifier hs-type">TyVarBinder</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Tc.Utils.TcType.html#ConcreteTyVars"><span class="hs-identifier hs-type">ConcreteTyVars</span></a></span><span>
 </span><span id="line-82"></span><span id="computePrimOpConcTyVarsFromType"><span class="annot"><span class="annottext">computePrimOpConcTyVarsFromType :: Name -&gt; [TyVarBinder] -&gt; [Type] -&gt; Type -&gt; ConcreteTyVars
-</span><a href="GHC.Builtin.PrimOps.Ids.html#computePrimOpConcTyVarsFromType"><span class="hs-identifier hs-var hs-var">computePrimOpConcTyVarsFromType</span></a></span></span><span> </span><span id="local-6989586621682722804"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682722804"><span class="hs-identifier hs-var">nm</span></a></span></span><span> </span><span id="local-6989586621682722805"><span class="annot"><span class="annottext">[TyVarBinder]
-</span><a href="#local-6989586621682722805"><span class="hs-identifier hs-var">tyvars</span></a></span></span><span> </span><span id="local-6989586621682722806"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682722806"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span> </span><span id="local-6989586621682722807"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722807"><span class="hs-identifier hs-var">_res_ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, ConcreteTvOrigin)] -&gt; ConcreteTyVars
+</span><a href="GHC.Builtin.PrimOps.Ids.html#computePrimOpConcTyVarsFromType"><span class="hs-identifier hs-var hs-var">computePrimOpConcTyVarsFromType</span></a></span></span><span> </span><span id="local-6989586621682928860"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682928860"><span class="hs-identifier hs-var">nm</span></a></span></span><span> </span><span id="local-6989586621682928861"><span class="annot"><span class="annottext">[TyVarBinder]
+</span><a href="#local-6989586621682928861"><span class="hs-identifier hs-var">tyvars</span></a></span></span><span> </span><span id="local-6989586621682928862"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682928862"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span> </span><span id="local-6989586621682928863"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928863"><span class="hs-identifier hs-var">_res_ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, ConcreteTvOrigin)] -&gt; ConcreteTyVars
 forall a. [(Name, a)] -&gt; NameEnv a
 </span><a href="GHC.Types.Name.Env.html#mkNameEnv"><span class="hs-identifier hs-var">mkNameEnv</span></a></span><span> </span><span class="annot"><span class="annottext">[(Name, ConcreteTvOrigin)]
-</span><a href="#local-6989586621682722809"><span class="hs-identifier hs-var">concs</span></a></span><span>
+</span><a href="#local-6989586621682928865"><span class="hs-identifier hs-var">concs</span></a></span><span>
 </span><span id="line-83"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-84"></span><span>    </span><span id="local-6989586621682722809"><span class="annot"><span class="annottext">concs :: [(Name, ConcreteTvOrigin)]
-</span><a href="#local-6989586621682722809"><span class="hs-identifier hs-var hs-var">concs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyVar -&gt; Name
+</span><span id="line-84"></span><span>    </span><span id="local-6989586621682928865"><span class="annot"><span class="annottext">concs :: [(Name, ConcreteTvOrigin)]
+</span><a href="#local-6989586621682928865"><span class="hs-identifier hs-var hs-var">concs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyVar -&gt; Name
 </span><a href="GHC.Types.Var.html#tyVarName"><span class="hs-identifier hs-var">tyVarName</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722811"><span class="hs-identifier hs-var">kind_tv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FixedRuntimeRepOrigin -&gt; ConcreteTvOrigin
+</span><a href="#local-6989586621682928867"><span class="hs-identifier hs-var">kind_tv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FixedRuntimeRepOrigin -&gt; ConcreteTvOrigin
 </span><a href="GHC.Tc.Utils.TcType.html#ConcreteFRR"><span class="hs-identifier hs-var">ConcreteFRR</span></a></span><span> </span><span class="annot"><span class="annottext">FixedRuntimeRepOrigin
-</span><a href="#local-6989586621682722813"><span class="hs-identifier hs-var">frr_orig</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-85"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Bndr"><span class="hs-identifier hs-type">Bndr</span></a></span><span> </span><span id="local-6989586621682722815"><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722815"><span class="hs-identifier hs-var">tv</span></a></span></span><span> </span><span id="local-6989586621682722816"><span class="annot"><span class="annottext">ForAllTyFlag
-</span><a href="#local-6989586621682722816"><span class="hs-identifier hs-var">_af</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[TyVarBinder]
-</span><a href="#local-6989586621682722805"><span class="hs-identifier hs-var">tyvars</span></a></span><span>
-</span><span id="line-86"></span><span>            </span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722811"><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722811"><span class="hs-identifier hs-var">kind_tv</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; [TyVar]
+</span><a href="#local-6989586621682928869"><span class="hs-identifier hs-var">frr_orig</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Bndr"><span class="hs-identifier hs-type">Bndr</span></a></span><span> </span><span id="local-6989586621682928871"><span class="annot"><span class="annottext">TyVar
+</span><a href="#local-6989586621682928871"><span class="hs-identifier hs-var">tv</span></a></span></span><span> </span><span id="local-6989586621682928872"><span class="annot"><span class="annottext">ForAllTyFlag
+</span><a href="#local-6989586621682928872"><span class="hs-identifier hs-var">_af</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[TyVarBinder]
+</span><a href="#local-6989586621682928861"><span class="hs-identifier hs-var">tyvars</span></a></span><span>
+</span><span id="line-86"></span><span>            </span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928867"><span class="annot"><span class="annottext">TyVar
+</span><a href="#local-6989586621682928867"><span class="hs-identifier hs-var">kind_tv</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; [TyVar]
 </span><a href="GHC.Core.TyCo.FVs.html#tyCoVarsOfTypeWellScoped"><span class="hs-identifier hs-var">tyCoVarsOfTypeWellScoped</span></a></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; [TyVar]) -&gt; Type -&gt; [TyVar]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Type
 </span><a href="GHC.Types.Var.html#tyVarKind"><span class="hs-identifier hs-var">tyVarKind</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722815"><span class="hs-identifier hs-var">tv</span></a></span><span>
-</span><span id="line-87"></span><span>            </span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722819"><span class="annot"><span class="annottext">Position 'Neg
-</span><a href="#local-6989586621682722819"><span class="hs-identifier hs-var">neg_pos</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe (Position 'Neg) -&gt; [Position 'Neg]
+</span><a href="#local-6989586621682928871"><span class="hs-identifier hs-var">tv</span></a></span><span>
+</span><span id="line-87"></span><span>            </span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928875"><span class="annot"><span class="annottext">Position 'Neg
+</span><a href="#local-6989586621682928875"><span class="hs-identifier hs-var">neg_pos</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe (Position 'Neg) -&gt; [Position 'Neg]
 forall a. Maybe a -&gt; [a]
 </span><span class="hs-identifier hs-var">maybeToList</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (Position 'Neg) -&gt; [Position 'Neg])
 -&gt; Maybe (Position 'Neg) -&gt; [Position 'Neg]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Maybe (Position 'Neg)
-</span><a href="#local-6989586621682722820"><span class="hs-identifier hs-var">frr_tyvar_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722811"><span class="hs-identifier hs-var">kind_tv</span></a></span><span>
-</span><span id="line-88"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682722813"><span class="annot"><span class="annottext">frr_orig :: FixedRuntimeRepOrigin
-</span><a href="#local-6989586621682722813"><span class="hs-identifier hs-var hs-var">frr_orig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Tc.Types.Origin.html#FixedRuntimeRepOrigin"><span class="hs-identifier hs-type">FixedRuntimeRepOrigin</span></a></span><span>
+</span><a href="#local-6989586621682928876"><span class="hs-identifier hs-var">frr_tyvar_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
+</span><a href="#local-6989586621682928867"><span class="hs-identifier hs-var">kind_tv</span></a></span><span>
+</span><span id="line-88"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682928869"><span class="annot"><span class="annottext">frr_orig :: FixedRuntimeRepOrigin
+</span><a href="#local-6989586621682928869"><span class="hs-identifier hs-var hs-var">frr_orig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Tc.Types.Origin.html#FixedRuntimeRepOrigin"><span class="hs-identifier hs-type">FixedRuntimeRepOrigin</span></a></span><span>
 </span><span id="line-89"></span><span>                           </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">frr_type :: Type
 </span><a href="GHC.Tc.Types.Origin.html#frr_type"><span class="hs-identifier hs-var">frr_type</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkTyVarTy"><span class="hs-identifier hs-var">mkTyVarTy</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722815"><span class="hs-identifier hs-var">tv</span></a></span><span>
+</span><a href="#local-6989586621682928871"><span class="hs-identifier hs-var">tv</span></a></span><span>
 </span><span id="line-90"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">frr_context :: FixedRuntimeRepContext
 </span><a href="GHC.Tc.Types.Origin.html#frr_context"><span class="hs-identifier hs-var">frr_context</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; RepPolyId -&gt; Position 'Neg -&gt; FixedRuntimeRepContext
 </span><a href="GHC.Tc.Types.Origin.html#FRRRepPolyId"><span class="hs-identifier hs-var">FRRRepPolyId</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682722804"><span class="hs-identifier hs-var">nm</span></a></span><span> </span><span class="annot"><span class="annottext">RepPolyId
+</span><a href="#local-6989586621682928860"><span class="hs-identifier hs-var">nm</span></a></span><span> </span><span class="annot"><span class="annottext">RepPolyId
 </span><a href="GHC.Tc.Types.Origin.html#RepPolyPrimOp"><span class="hs-identifier hs-var">RepPolyPrimOp</span></a></span><span> </span><span class="annot"><span class="annottext">Position 'Neg
-</span><a href="#local-6989586621682722819"><span class="hs-identifier hs-var">neg_pos</span></a></span><span>
+</span><a href="#local-6989586621682928875"><span class="hs-identifier hs-var">neg_pos</span></a></span><span>
 </span><span id="line-91"></span><span>                           </span><span class="hs-special">}</span><span>
 </span><span id="line-92"></span><span>            </span><span class="hs-special">]</span><span>
 </span><span id="line-93"></span><span>
 </span><span id="line-94"></span><span>    </span><span class="hs-comment">-- As per Note [Levity and representation polymorphic primops]</span><span>
 </span><span id="line-95"></span><span>    </span><span class="hs-comment">-- in GHC.Builtin.Primops.txt.pp, we compute the ConcreteTyVars associated</span><span>
 </span><span id="line-96"></span><span>    </span><span class="hs-comment">-- to a primop by inspecting the type variable names.</span><span>
-</span><span id="line-97"></span><span>    </span><span id="local-6989586621682722820"><span class="annot"><span class="annottext">frr_tyvar_maybe :: TyVar -&gt; Maybe (Position 'Neg)
-</span><a href="#local-6989586621682722820"><span class="hs-identifier hs-var hs-var">frr_tyvar_maybe</span></a></span></span><span> </span><span id="local-6989586621682722827"><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722827"><span class="hs-identifier hs-var">tv</span></a></span></span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621682928876"><span class="annot"><span class="annottext">frr_tyvar_maybe :: TyVar -&gt; Maybe (Position 'Neg)
+</span><a href="#local-6989586621682928876"><span class="hs-identifier hs-var hs-var">frr_tyvar_maybe</span></a></span></span><span> </span><span id="local-6989586621682928883"><span class="annot"><span class="annottext">TyVar
+</span><a href="#local-6989586621682928883"><span class="hs-identifier hs-var">tv</span></a></span></span><span>
 </span><span id="line-98"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722827"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; [TyVar] -&gt; Bool
+</span><a href="#local-6989586621682928883"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; [TyVar] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">TyVar
@@ -227,24 +227,24 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-101"></span><span>          </span><span class="annot"><span class="annottext">((Int, Type) -&gt; Maybe (Position 'Neg))
 -&gt; [(Int, Type)] -&gt; [Position 'Neg]
 forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682722834"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722834"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682722835"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722835"><span class="hs-identifier hs-var">arg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Position (FlipPolarity 'Neg) -&gt; Position 'Neg
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682928890"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682928890"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682928891"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928891"><span class="hs-identifier hs-var">arg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Position (FlipPolarity 'Neg) -&gt; Position 'Neg
 forall (p :: Polarity).
 Int -&gt; Position (FlipPolarity p) -&gt; Position p
 </span><a href="GHC.Tc.Types.Origin.html#Argument"><span class="hs-identifier hs-var">Argument</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722834"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">(Position 'Pos -&gt; Position 'Neg)
+</span><a href="#local-6989586621682928890"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">(Position 'Pos -&gt; Position 'Neg)
 -&gt; Maybe (Position 'Pos) -&gt; Maybe (Position 'Neg)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Type -&gt; Maybe (Position 'Pos)
 </span><a href="GHC.Builtin.PrimOps.Ids.html#positiveKindPos_maybe"><span class="hs-identifier hs-var">positiveKindPos_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722827"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722835"><span class="hs-identifier hs-var">arg</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928883"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928891"><span class="hs-identifier hs-var">arg</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-102"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Int] -&gt; [Type] -&gt; [(Int, Type)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682722806"><span class="hs-identifier hs-var">arg_tys</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928862"><span class="hs-identifier hs-var">arg_tys</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-103"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>
 </span><span id="line-104"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Position 'Neg)
@@ -264,14 +264,14 @@ forall a. Maybe a
 </span><span id="line-116"></span><span class="hs-comment">-- its type, see 'computePrimOpConcTyVarsFromType'.</span><span>
 </span><span id="line-117"></span><span class="annot"><a href="GHC.Builtin.PrimOps.Ids.html#negativeKindPos_maybe"><span class="hs-identifier hs-type">negativeKindPos_maybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#TcTyVar"><span class="hs-identifier hs-type">TcTyVar</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Tc.Utils.TcType.html#TcType"><span class="hs-identifier hs-type">TcType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Types.Origin.html#Position"><span class="hs-identifier hs-type">Position</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Types.Origin.html#Neg"><span class="hs-identifier hs-type">Neg</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-118"></span><span id="negativeKindPos_maybe"><span class="annot"><span class="annottext">negativeKindPos_maybe :: TyVar -&gt; Type -&gt; Maybe (Position 'Neg)
-</span><a href="GHC.Builtin.PrimOps.Ids.html#negativeKindPos_maybe"><span class="hs-identifier hs-var hs-var">negativeKindPos_maybe</span></a></span></span><span> </span><span id="local-6989586621682722841"><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722841"><span class="hs-identifier hs-var">tv</span></a></span></span><span> </span><span id="local-6989586621682722842"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722842"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
-</span><span id="line-119"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682722843"><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682722843"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722844"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722844"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; ([Scaled Type], Type)
+</span><a href="GHC.Builtin.PrimOps.Ids.html#negativeKindPos_maybe"><span class="hs-identifier hs-var hs-var">negativeKindPos_maybe</span></a></span></span><span> </span><span id="local-6989586621682928897"><span class="annot"><span class="annottext">TyVar
+</span><a href="#local-6989586621682928897"><span class="hs-identifier hs-var">tv</span></a></span></span><span> </span><span id="local-6989586621682928898"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928898"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682928899"><span class="annot"><span class="annottext">[Scaled Type]
+</span><a href="#local-6989586621682928899"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928900"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928900"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; ([Scaled Type], Type)
 </span><a href="GHC.Core.Type.html#splitFunTys"><span class="hs-identifier hs-var">splitFunTys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722842"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><a href="#local-6989586621682928898"><span class="hs-identifier hs-var">ty</span></a></span><span>
 </span><span id="line-120"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Position 'Neg] -&gt; Maybe (Position 'Neg)
 forall a. [a] -&gt; Maybe a
 </span><span class="hs-identifier hs-var">listToMaybe</span></span><span> </span><span class="annot"><span class="annottext">([Position 'Neg] -&gt; Maybe (Position 'Neg))
@@ -287,7 +287,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682722843"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe (Position 'Neg)
+</span><a href="#local-6989586621682928899"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe (Position 'Neg)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Position 'Neg -&gt; Position 'Neg
 forall (p :: Polarity). Position p -&gt; Position p
@@ -296,8 +296,8 @@ forall (p :: Polarity). Position p -&gt; Position p
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Type -&gt; Maybe (Position 'Neg)
 </span><a href="GHC.Builtin.PrimOps.Ids.html#negativeKindPos_maybe"><span class="hs-identifier hs-var">negativeKindPos_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722841"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722844"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928897"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928900"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-122"></span><span>      </span><span class="annot"><span class="annottext">Maybe (Position 'Neg)
 -&gt; [Maybe (Position 'Neg)] -&gt; [Maybe (Position 'Neg)]
 forall a. a -&gt; [a] -&gt; [a]
@@ -305,30 +305,30 @@ forall a. a -&gt; [a] -&gt; [a]
 -&gt; [(Int, Scaled Type)] -&gt; [Maybe (Position 'Neg)]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(Int, Scaled Type) -&gt; Maybe (Position 'Neg)
-</span><a href="#local-6989586621682722848"><span class="hs-identifier hs-var">recur</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Int] -&gt; [Scaled Type] -&gt; [(Int, Scaled Type)]
+</span><a href="#local-6989586621682928904"><span class="hs-identifier hs-var">recur</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Int] -&gt; [Scaled Type] -&gt; [(Int, Scaled Type)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682722843"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928899"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-123"></span><span>      </span><span class="hs-special">)</span><span>
 </span><span id="line-124"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-125"></span><span>    </span><span id="local-6989586621682722848"><span class="annot"><span class="annottext">recur :: (Int, Scaled Type) -&gt; Maybe (Position 'Neg)
-</span><a href="#local-6989586621682722848"><span class="hs-identifier hs-var hs-var">recur</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682722849"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722849"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722850"><span class="annot"><span class="annottext">Scaled Type
-</span><a href="#local-6989586621682722850"><span class="hs-identifier hs-var">scaled_ty</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621682928904"><span class="annot"><span class="annottext">recur :: (Int, Scaled Type) -&gt; Maybe (Position 'Neg)
+</span><a href="#local-6989586621682928904"><span class="hs-identifier hs-var hs-var">recur</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682928905"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682928905"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928906"><span class="annot"><span class="annottext">Scaled Type
+</span><a href="#local-6989586621682928906"><span class="hs-identifier hs-var">scaled_ty</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-126"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Position (FlipPolarity 'Neg) -&gt; Position 'Neg
 forall (p :: Polarity).
 Int -&gt; Position (FlipPolarity p) -&gt; Position p
 </span><a href="GHC.Tc.Types.Origin.html#Argument"><span class="hs-identifier hs-var">Argument</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722849"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">(Position 'Pos -&gt; Position 'Neg)
+</span><a href="#local-6989586621682928905"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">(Position 'Pos -&gt; Position 'Neg)
 -&gt; Maybe (Position 'Pos) -&gt; Maybe (Position 'Neg)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Type -&gt; Maybe (Position 'Pos)
 </span><a href="GHC.Builtin.PrimOps.Ids.html#positiveKindPos_maybe"><span class="hs-identifier hs-var">positiveKindPos_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722841"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scaled Type -&gt; Type
+</span><a href="#local-6989586621682928897"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scaled Type -&gt; Type
 forall a. Scaled a -&gt; a
 </span><a href="GHC.Core.TyCo.Rep.html#scaledThing"><span class="hs-identifier hs-var">scaledThing</span></a></span><span> </span><span class="annot"><span class="annottext">Scaled Type
-</span><a href="#local-6989586621682722850"><span class="hs-identifier hs-var">scaled_ty</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928906"><span class="hs-identifier hs-var">scaled_ty</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-127"></span><span>    </span><span class="hs-comment">-- (assumes we don't have any function types nested inside other types)</span><span>
 </span><span id="line-128"></span><span>
 </span><span id="line-129"></span><span class="hs-comment">-- | Does this type variable appear in a kind in a positive position in the</span><span>
@@ -342,14 +342,14 @@ forall a. Scaled a -&gt; a
 </span><span id="line-137"></span><span class="hs-comment">-- its type, see 'computePrimOpConcTyVarsFromType'.</span><span>
 </span><span id="line-138"></span><span class="annot"><a href="GHC.Builtin.PrimOps.Ids.html#positiveKindPos_maybe"><span class="hs-identifier hs-type">positiveKindPos_maybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#TcTyVar"><span class="hs-identifier hs-type">TcTyVar</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Tc.Utils.TcType.html#TcType"><span class="hs-identifier hs-type">TcType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Tc.Types.Origin.html#Position"><span class="hs-identifier hs-type">Position</span></a></span><span> </span><span class="annot"><a href="GHC.Tc.Types.Origin.html#Pos"><span class="hs-identifier hs-type">Pos</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-139"></span><span id="positiveKindPos_maybe"><span class="annot"><span class="annottext">positiveKindPos_maybe :: TyVar -&gt; Type -&gt; Maybe (Position 'Pos)
-</span><a href="GHC.Builtin.PrimOps.Ids.html#positiveKindPos_maybe"><span class="hs-identifier hs-var hs-var">positiveKindPos_maybe</span></a></span></span><span> </span><span id="local-6989586621682722851"><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722851"><span class="hs-identifier hs-var">tv</span></a></span></span><span> </span><span id="local-6989586621682722852"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722852"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
-</span><span id="line-140"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682722853"><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682722853"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722854"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722854"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; ([Scaled Type], Type)
+</span><a href="GHC.Builtin.PrimOps.Ids.html#positiveKindPos_maybe"><span class="hs-identifier hs-var hs-var">positiveKindPos_maybe</span></a></span></span><span> </span><span id="local-6989586621682928907"><span class="annot"><span class="annottext">TyVar
+</span><a href="#local-6989586621682928907"><span class="hs-identifier hs-var">tv</span></a></span></span><span> </span><span id="local-6989586621682928908"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928908"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
+</span><span id="line-140"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682928909"><span class="annot"><span class="annottext">[Scaled Type]
+</span><a href="#local-6989586621682928909"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928910"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928910"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; ([Scaled Type], Type)
 </span><a href="GHC.Core.Type.html#splitFunTys"><span class="hs-identifier hs-var">splitFunTys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722852"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><a href="#local-6989586621682928908"><span class="hs-identifier hs-var">ty</span></a></span><span>
 </span><span id="line-141"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Position 'Pos] -&gt; Maybe (Position 'Pos)
 forall a. [a] -&gt; Maybe a
 </span><span class="hs-identifier hs-var">listToMaybe</span></span><span> </span><span class="annot"><span class="annottext">([Position 'Pos] -&gt; Maybe (Position 'Pos))
@@ -365,17 +365,17 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682722853"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Type -&gt; Maybe (Position 'Pos)
-</span><a href="#local-6989586621682722855"><span class="hs-identifier hs-var">finish</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722854"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Position 'Pos -&gt; Position 'Pos
+</span><a href="#local-6989586621682928909"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Type -&gt; Maybe (Position 'Pos)
+</span><a href="#local-6989586621682928911"><span class="hs-identifier hs-var">finish</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928910"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Position 'Pos -&gt; Position 'Pos
 forall (p :: Polarity). Position p -&gt; Position p
 </span><a href="GHC.Tc.Types.Origin.html#Result"><span class="hs-identifier hs-var">Result</span></a></span><span> </span><span class="annot"><span class="annottext">(Position 'Pos -&gt; Position 'Pos)
 -&gt; Maybe (Position 'Pos) -&gt; Maybe (Position 'Pos)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Type -&gt; Maybe (Position 'Pos)
 </span><a href="GHC.Builtin.PrimOps.Ids.html#positiveKindPos_maybe"><span class="hs-identifier hs-var">positiveKindPos_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722851"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722854"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928907"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928910"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-143"></span><span>      </span><span class="annot"><span class="annottext">Maybe (Position 'Pos)
 -&gt; [Maybe (Position 'Pos)] -&gt; [Maybe (Position 'Pos)]
 forall a. a -&gt; [a] -&gt; [a]
@@ -383,41 +383,41 @@ forall a. a -&gt; [a] -&gt; [a]
 -&gt; [(Int, Scaled Type)] -&gt; [Maybe (Position 'Pos)]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(Int, Scaled Type) -&gt; Maybe (Position 'Pos)
-</span><a href="#local-6989586621682722856"><span class="hs-identifier hs-var">recur</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Int] -&gt; [Scaled Type] -&gt; [(Int, Scaled Type)]
+</span><a href="#local-6989586621682928912"><span class="hs-identifier hs-var">recur</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Int] -&gt; [Scaled Type] -&gt; [(Int, Scaled Type)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682722853"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928909"><span class="hs-identifier hs-var">args</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-144"></span><span>      </span><span class="hs-special">)</span><span>
 </span><span id="line-145"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-146"></span><span>    </span><span id="local-6989586621682722856"><span class="annot"><span class="annottext">recur :: (Int, Scaled Type) -&gt; Maybe (Position 'Pos)
-</span><a href="#local-6989586621682722856"><span class="hs-identifier hs-var hs-var">recur</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682722857"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722857"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682722858"><span class="annot"><span class="annottext">Scaled Type
-</span><a href="#local-6989586621682722858"><span class="hs-identifier hs-var">scaled_ty</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621682928912"><span class="annot"><span class="annottext">recur :: (Int, Scaled Type) -&gt; Maybe (Position 'Pos)
+</span><a href="#local-6989586621682928912"><span class="hs-identifier hs-var hs-var">recur</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682928913"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682928913"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682928914"><span class="annot"><span class="annottext">Scaled Type
+</span><a href="#local-6989586621682928914"><span class="hs-identifier hs-var">scaled_ty</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-147"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Position (FlipPolarity 'Pos) -&gt; Position 'Pos
 forall (p :: Polarity).
 Int -&gt; Position (FlipPolarity p) -&gt; Position p
 </span><a href="GHC.Tc.Types.Origin.html#Argument"><span class="hs-identifier hs-var">Argument</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682722857"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">(Position 'Neg -&gt; Position 'Pos)
+</span><a href="#local-6989586621682928913"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">(Position 'Neg -&gt; Position 'Pos)
 -&gt; Maybe (Position 'Neg) -&gt; Maybe (Position 'Pos)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; Type -&gt; Maybe (Position 'Neg)
 </span><a href="GHC.Builtin.PrimOps.Ids.html#negativeKindPos_maybe"><span class="hs-identifier hs-var">negativeKindPos_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722851"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scaled Type -&gt; Type
+</span><a href="#local-6989586621682928907"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scaled Type -&gt; Type
 forall a. Scaled a -&gt; a
 </span><a href="GHC.Core.TyCo.Rep.html#scaledThing"><span class="hs-identifier hs-var">scaledThing</span></a></span><span> </span><span class="annot"><span class="annottext">Scaled Type
-</span><a href="#local-6989586621682722858"><span class="hs-identifier hs-var">scaled_ty</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928914"><span class="hs-identifier hs-var">scaled_ty</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-148"></span><span>    </span><span class="hs-comment">-- (assumes we don't have any function types nested inside other types)</span><span>
-</span><span id="line-149"></span><span>    </span><span id="local-6989586621682722855"><span class="annot"><span class="annottext">finish :: Type -&gt; Maybe (Position 'Pos)
-</span><a href="#local-6989586621682722855"><span class="hs-identifier hs-var hs-var">finish</span></a></span></span><span> </span><span id="local-6989586621682722859"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722859"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
+</span><span id="line-149"></span><span>    </span><span id="local-6989586621682928911"><span class="annot"><span class="annottext">finish :: Type -&gt; Maybe (Position 'Pos)
+</span><a href="#local-6989586621682928911"><span class="hs-identifier hs-var hs-var">finish</span></a></span></span><span> </span><span id="local-6989586621682928915"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682928915"><span class="hs-identifier hs-var">ty</span></a></span></span><span>
 </span><span id="line-150"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">TyVar
-</span><a href="#local-6989586621682722851"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; VarSet -&gt; Bool
+</span><a href="#local-6989586621682928907"><span class="hs-identifier hs-var">tv</span></a></span><span> </span><span class="annot"><span class="annottext">TyVar -&gt; VarSet -&gt; Bool
 </span><a href="GHC.Types.Var.Set.html#elemVarSet"><span class="hs-operator hs-var">`elemVarSet`</span></a></span><span> </span><span class="annot"><span class="annottext">Type -&gt; VarSet
 </span><a href="GHC.Core.TyCo.FVs.html#tyCoVarsOfType"><span class="hs-identifier hs-var">tyCoVarsOfType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Type -&gt; Type
 Type -&gt; Type
 </span><a href="GHC.Core.Type.html#typeKind"><span class="hs-identifier hs-var">typeKind</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682722859"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928915"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-151"></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Position 'Pos -&gt; Maybe (Position 'Pos)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Position 'Pos
@@ -457,13 +457,13 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-167"></span><span class="annot"><a href="GHC.Builtin.PrimOps.Ids.html#primOpId"><span class="hs-identifier hs-type">primOpId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Builtin.PrimOps.html#PrimOp"><span class="hs-identifier hs-type">PrimOp</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span>
 </span><span id="line-168"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Builtin.PrimOps.Ids.html#primOpId"><span class="hs-pragma hs-type">primOpId</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-169"></span><span id="primOpId"><span class="annot"><span class="annottext">primOpId :: PrimOp -&gt; TyVar
-</span><a href="GHC.Builtin.PrimOps.Ids.html#primOpId"><span class="hs-identifier hs-var hs-var">primOpId</span></a></span></span><span> </span><span id="local-6989586621682722869"><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722869"><span class="hs-identifier hs-var">op</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SmallArray TyVar -&gt; Int -&gt; TyVar
+</span><a href="GHC.Builtin.PrimOps.Ids.html#primOpId"><span class="hs-identifier hs-var hs-var">primOpId</span></a></span></span><span> </span><span id="local-6989586621682928925"><span class="annot"><span class="annottext">PrimOp
+</span><a href="#local-6989586621682928925"><span class="hs-identifier hs-var">op</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SmallArray TyVar -&gt; Int -&gt; TyVar
 forall a. SmallArray a -&gt; Int -&gt; a
 </span><a href="GHC.Data.SmallArray.html#indexSmallArray"><span class="hs-identifier hs-var">indexSmallArray</span></a></span><span> </span><span class="annot"><span class="annottext">SmallArray TyVar
 </span><a href="GHC.Builtin.PrimOps.Ids.html#primOpIds"><span class="hs-identifier hs-var">primOpIds</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PrimOp -&gt; Int
 </span><a href="GHC.Builtin.PrimOps.html#primOpTag"><span class="hs-identifier hs-var">primOpTag</span></a></span><span> </span><span class="annot"><span class="annottext">PrimOp
-</span><a href="#local-6989586621682722869"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682928925"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-170"></span><span>
 </span><span id="line-171"></span><span class="annot"><span class="hs-comment">-- | All the primop ids, as a list</span></span><span>
 </span><span id="line-172"></span><span class="annot"><a href="GHC.Builtin.PrimOps.Ids.html#allThePrimOpIds"><span class="hs-identifier hs-type">allThePrimOpIds</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span class="hs-special">]</span><span>

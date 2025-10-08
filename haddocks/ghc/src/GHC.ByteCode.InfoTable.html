@@ -37,10 +37,10 @@
 </span><span id="line-37"></span><span class="hs-comment">-- Make info tables for the data decls in this module</span><span>
 </span><span id="line-38"></span><span class="annot"><a href="GHC.ByteCode.InfoTable.html#mkITbls"><span class="hs-identifier hs-type">mkITbls</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Runtime.Interpreter.Types.html#Interp"><span class="hs-identifier hs-type">Interp</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Profile.html#Profile"><span class="hs-identifier hs-type">Profile</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Core.TyCon.html#TyCon"><span class="hs-identifier hs-type">TyCon</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblEnv"><span class="hs-identifier hs-type">ItblEnv</span></a></span><span>
 </span><span id="line-39"></span><span id="mkITbls"><span class="annot"><span class="annottext">mkITbls :: Interp -&gt; Profile -&gt; [TyCon] -&gt; IO ItblEnv
-</span><a href="GHC.ByteCode.InfoTable.html#mkITbls"><span class="hs-identifier hs-var hs-var">mkITbls</span></a></span></span><span> </span><span id="local-6989586621682754420"><span class="annot"><span class="annottext">Interp
-</span><a href="#local-6989586621682754420"><span class="hs-identifier hs-var">interp</span></a></span></span><span> </span><span id="local-6989586621682754421"><span class="annot"><span class="annottext">Profile
-</span><a href="#local-6989586621682754421"><span class="hs-identifier hs-var">profile</span></a></span></span><span> </span><span id="local-6989586621682754422"><span class="annot"><span class="annottext">[TyCon]
-</span><a href="#local-6989586621682754422"><span class="hs-identifier hs-var">tcs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.ByteCode.InfoTable.html#mkITbls"><span class="hs-identifier hs-var hs-var">mkITbls</span></a></span></span><span> </span><span id="local-6989586621682963116"><span class="annot"><span class="annottext">Interp
+</span><a href="#local-6989586621682963116"><span class="hs-identifier hs-var">interp</span></a></span></span><span> </span><span id="local-6989586621682963117"><span class="annot"><span class="annottext">Profile
+</span><a href="#local-6989586621682963117"><span class="hs-identifier hs-var">profile</span></a></span></span><span> </span><span id="local-6989586621682963118"><span class="annot"><span class="annottext">[TyCon]
+</span><a href="#local-6989586621682963118"><span class="hs-identifier hs-var">tcs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-40"></span><span>  </span><span class="annot"><span class="annottext">(ItblEnv -&gt; ItblEnv -&gt; ItblEnv) -&gt; ItblEnv -&gt; [ItblEnv] -&gt; ItblEnv
 forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) a b.
@@ -59,36 +59,36 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (a -&gt; m b) -&gt; t a -&gt; m (t b)
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; [a] -&gt; m [b]
 </span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; IO ItblEnv
-</span><a href="#local-6989586621682754428"><span class="hs-identifier hs-var">mkITbl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(TyCon -&gt; Bool) -&gt; [TyCon] -&gt; [TyCon]
+</span><a href="#local-6989586621682963124"><span class="hs-identifier hs-var">mkITbl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(TyCon -&gt; Bool) -&gt; [TyCon] -&gt; [TyCon]
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Bool
 </span><a href="GHC.Core.TyCon.html#isDataTyCon"><span class="hs-identifier hs-var">isDataTyCon</span></a></span><span> </span><span class="annot"><span class="annottext">[TyCon]
-</span><a href="#local-6989586621682754422"><span class="hs-identifier hs-var">tcs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682963118"><span class="hs-identifier hs-var">tcs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-42"></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-43"></span><span>  </span><span class="annot"><a href="#local-6989586621682754428"><span class="hs-identifier hs-type">mkITbl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.html#TyCon"><span class="hs-identifier hs-type">TyCon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblEnv"><span class="hs-identifier hs-type">ItblEnv</span></a></span><span>
-</span><span id="line-44"></span><span>  </span><span id="local-6989586621682754428"><span class="annot"><span class="annottext">mkITbl :: TyCon -&gt; IO ItblEnv
-</span><a href="#local-6989586621682754428"><span class="hs-identifier hs-var hs-var">mkITbl</span></a></span></span><span> </span><span id="local-6989586621682754429"><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682754429"><span class="hs-identifier hs-var">tc</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><a href="#local-6989586621682963124"><span class="hs-identifier hs-type">mkITbl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.html#TyCon"><span class="hs-identifier hs-type">TyCon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblEnv"><span class="hs-identifier hs-type">ItblEnv</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621682963124"><span class="annot"><span class="annottext">mkITbl :: TyCon -&gt; IO ItblEnv
+</span><a href="#local-6989586621682963124"><span class="hs-identifier hs-var hs-var">mkITbl</span></a></span></span><span> </span><span id="local-6989586621682963125"><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682963125"><span class="hs-identifier hs-var">tc</span></a></span></span><span>
 </span><span id="line-45"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[DataCon]
-</span><a href="#local-6989586621682754430"><span class="hs-identifier hs-var">dcs</span></a></span><span> </span><span class="annot"><span class="annottext">[DataCon] -&gt; WordOff -&gt; Bool
+</span><a href="#local-6989586621682963126"><span class="hs-identifier hs-var">dcs</span></a></span><span> </span><span class="annot"><span class="annottext">[DataCon] -&gt; WordOff -&gt; Bool
 forall a. [a] -&gt; WordOff -&gt; Bool
 </span><a href="GHC.Utils.Misc.html#lengthIs"><span class="hs-operator hs-var">`lengthIs`</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754432"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-comment">-- paranoia; this is an assertion.</span><span>
+</span><a href="#local-6989586621682963128"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-comment">-- paranoia; this is an assertion.</span><span>
 </span><span id="line-46"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interp -&gt; Profile -&gt; [DataCon] -&gt; IO ItblEnv
 </span><a href="GHC.ByteCode.InfoTable.html#make_constr_itbls"><span class="hs-identifier hs-var">make_constr_itbls</span></a></span><span> </span><span class="annot"><span class="annottext">Interp
-</span><a href="#local-6989586621682754420"><span class="hs-identifier hs-var">interp</span></a></span><span> </span><span class="annot"><span class="annottext">Profile
-</span><a href="#local-6989586621682754421"><span class="hs-identifier hs-var">profile</span></a></span><span> </span><span class="annot"><span class="annottext">[DataCon]
-</span><a href="#local-6989586621682754430"><span class="hs-identifier hs-var">dcs</span></a></span><span>
+</span><a href="#local-6989586621682963116"><span class="hs-identifier hs-var">interp</span></a></span><span> </span><span class="annot"><span class="annottext">Profile
+</span><a href="#local-6989586621682963117"><span class="hs-identifier hs-var">profile</span></a></span><span> </span><span class="annot"><span class="annottext">[DataCon]
+</span><a href="#local-6989586621682963126"><span class="hs-identifier hs-var">dcs</span></a></span><span>
 </span><span id="line-47"></span><span>       </span><span class="hs-keyword">where</span><span>
-</span><span id="line-48"></span><span>          </span><span id="local-6989586621682754430"><span class="annot"><span class="annottext">dcs :: [DataCon]
-</span><a href="#local-6989586621682754430"><span class="hs-identifier hs-var hs-var">dcs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; [DataCon]
+</span><span id="line-48"></span><span>          </span><span id="local-6989586621682963126"><span class="annot"><span class="annottext">dcs :: [DataCon]
+</span><a href="#local-6989586621682963126"><span class="hs-identifier hs-var hs-var">dcs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; [DataCon]
 </span><a href="GHC.Core.TyCon.html#tyConDataCons"><span class="hs-identifier hs-var">tyConDataCons</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682754429"><span class="hs-identifier hs-var">tc</span></a></span><span>
-</span><span id="line-49"></span><span>          </span><span id="local-6989586621682754432"><span class="annot"><span class="annottext">n :: WordOff
-</span><a href="#local-6989586621682754432"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; WordOff
+</span><a href="#local-6989586621682963125"><span class="hs-identifier hs-var">tc</span></a></span><span>
+</span><span id="line-49"></span><span>          </span><span id="local-6989586621682963128"><span class="annot"><span class="annottext">n :: WordOff
+</span><a href="#local-6989586621682963128"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; WordOff
 </span><a href="GHC.Core.TyCon.html#tyConFamilySize"><span class="hs-identifier hs-var">tyConFamilySize</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682754429"><span class="hs-identifier hs-var">tc</span></a></span><span>
-</span><span id="line-50"></span><span>  </span><span class="annot"><a href="#local-6989586621682754428"><span class="hs-identifier hs-var">mkITbl</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682963125"><span class="hs-identifier hs-var">tc</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><a href="#local-6989586621682963124"><span class="hs-identifier hs-var">mkITbl</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; IO ItblEnv
 forall a. HasCallStack =&gt; String -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-var">panic</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -96,24 +96,24 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span class="annot"><a href="GHC.ByteCode.InfoTable.html#mkItblEnv"><span class="hs-identifier hs-type">mkItblEnv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span class="hs-special">,</span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblPtr"><span class="hs-identifier hs-type">ItblPtr</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblEnv"><span class="hs-identifier hs-type">ItblEnv</span></a></span><span>
 </span><span id="line-53"></span><span id="mkItblEnv"><span class="annot"><span class="annottext">mkItblEnv :: [(Name, ItblPtr)] -&gt; ItblEnv
-</span><a href="GHC.ByteCode.InfoTable.html#mkItblEnv"><span class="hs-identifier hs-var hs-var">mkItblEnv</span></a></span></span><span> </span><span id="local-6989586621682754436"><span class="annot"><span class="annottext">[(Name, ItblPtr)]
-</span><a href="#local-6989586621682754436"><span class="hs-identifier hs-var">pairs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, (Name, ItblPtr))] -&gt; ItblEnv
+</span><a href="GHC.ByteCode.InfoTable.html#mkItblEnv"><span class="hs-identifier hs-var hs-var">mkItblEnv</span></a></span></span><span> </span><span id="local-6989586621682963132"><span class="annot"><span class="annottext">[(Name, ItblPtr)]
+</span><a href="#local-6989586621682963132"><span class="hs-identifier hs-var">pairs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Name, (Name, ItblPtr))] -&gt; ItblEnv
 forall a. [(Name, a)] -&gt; NameEnv a
 </span><a href="GHC.Types.Name.Env.html#mkNameEnv"><span class="hs-identifier hs-var">mkNameEnv</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682754438"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682754438"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">ItblPtr
-</span><a href="#local-6989586621682754439"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682754438"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682754438"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682754439"><span class="annot"><span class="annottext">ItblPtr
-</span><a href="#local-6989586621682754439"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Name, ItblPtr)]
-</span><a href="#local-6989586621682754436"><span class="hs-identifier hs-var">pairs</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682963134"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682963134"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">ItblPtr
+</span><a href="#local-6989586621682963135"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682963134"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682963134"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682963135"><span class="annot"><span class="annottext">ItblPtr
+</span><a href="#local-6989586621682963135"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Name, ItblPtr)]
+</span><a href="#local-6989586621682963132"><span class="hs-identifier hs-var">pairs</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-54"></span><span>
 </span><span id="line-55"></span><span class="hs-comment">-- Assumes constructors are numbered from zero, not one</span><span>
 </span><span id="line-56"></span><span class="annot"><a href="GHC.ByteCode.InfoTable.html#make_constr_itbls"><span class="hs-identifier hs-type">make_constr_itbls</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Runtime.Interpreter.Types.html#Interp"><span class="hs-identifier hs-type">Interp</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Profile.html#Profile"><span class="hs-identifier hs-type">Profile</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Core.DataCon.html#DataCon"><span class="hs-identifier hs-type">DataCon</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblEnv"><span class="hs-identifier hs-type">ItblEnv</span></a></span><span>
 </span><span id="line-57"></span><span id="make_constr_itbls"><span class="annot"><span class="annottext">make_constr_itbls :: Interp -&gt; Profile -&gt; [DataCon] -&gt; IO ItblEnv
-</span><a href="GHC.ByteCode.InfoTable.html#make_constr_itbls"><span class="hs-identifier hs-var hs-var">make_constr_itbls</span></a></span></span><span> </span><span id="local-6989586621682754440"><span class="annot"><span class="annottext">Interp
-</span><a href="#local-6989586621682754440"><span class="hs-identifier hs-var">interp</span></a></span></span><span> </span><span id="local-6989586621682754441"><span class="annot"><span class="annottext">Profile
-</span><a href="#local-6989586621682754441"><span class="hs-identifier hs-var">profile</span></a></span></span><span> </span><span id="local-6989586621682754442"><span class="annot"><span class="annottext">[DataCon]
-</span><a href="#local-6989586621682754442"><span class="hs-identifier hs-var">cons</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.ByteCode.InfoTable.html#make_constr_itbls"><span class="hs-identifier hs-var hs-var">make_constr_itbls</span></a></span></span><span> </span><span id="local-6989586621682963136"><span class="annot"><span class="annottext">Interp
+</span><a href="#local-6989586621682963136"><span class="hs-identifier hs-var">interp</span></a></span></span><span> </span><span id="local-6989586621682963137"><span class="annot"><span class="annottext">Profile
+</span><a href="#local-6989586621682963137"><span class="hs-identifier hs-var">profile</span></a></span></span><span> </span><span id="local-6989586621682963138"><span class="annot"><span class="annottext">[DataCon]
+</span><a href="#local-6989586621682963138"><span class="hs-identifier hs-var">cons</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-58"></span><span>  </span><span class="hs-comment">-- TODO: the profile should be bundled with the interpreter: the rts ways are</span><span>
 </span><span id="line-59"></span><span>  </span><span class="hs-comment">-- fixed for an interpreter</span><span>
 </span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">[(Name, ItblPtr)] -&gt; ItblEnv
@@ -130,107 +130,107 @@ forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; [a] -&gt; m [b]
 -&gt; (DataCon, WordOff) -&gt; IO (Name, ItblPtr)
 forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
 </span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; WordOff -&gt; IO (Name, ItblPtr)
-</span><a href="#local-6989586621682754444"><span class="hs-identifier hs-var">mk_itbl</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DataCon] -&gt; [WordOff] -&gt; [(DataCon, WordOff)]
+</span><a href="#local-6989586621682963140"><span class="hs-identifier hs-var">mk_itbl</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[DataCon] -&gt; [WordOff] -&gt; [(DataCon, WordOff)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[DataCon]
-</span><a href="#local-6989586621682754442"><span class="hs-identifier hs-var">cons</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963138"><span class="hs-identifier hs-var">cons</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">WordOff
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-62"></span><span>  </span><span class="annot"><a href="#local-6989586621682754444"><span class="hs-identifier hs-type">mk_itbl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.DataCon.html#DataCon"><span class="hs-identifier hs-type">DataCon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span class="hs-special">,</span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblPtr"><span class="hs-identifier hs-type">ItblPtr</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-63"></span><span>  </span><span id="local-6989586621682754444"><span class="annot"><span class="annottext">mk_itbl :: DataCon -&gt; WordOff -&gt; IO (Name, ItblPtr)
-</span><a href="#local-6989586621682754444"><span class="hs-identifier hs-var hs-var">mk_itbl</span></a></span></span><span> </span><span id="local-6989586621682754445"><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682754445"><span class="hs-identifier hs-var">dcon</span></a></span></span><span> </span><span id="local-6989586621682754446"><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754446"><span class="hs-identifier hs-var">conNo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-64"></span><span>     </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682754447"><span class="annot"><span class="annottext">rep_args :: [PrimRep]
-</span><a href="#local-6989586621682754447"><span class="hs-identifier hs-var hs-var hs-var">rep_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">PrimRep
-</span><a href="#local-6989586621682754448"><span class="hs-identifier hs-var">prim_rep</span></a></span><span>
-</span><span id="line-65"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682754449"><span class="annot"><span class="annottext">Scaled Type
-</span><a href="#local-6989586621682754449"><span class="hs-identifier hs-var">arg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; [Scaled Type]
+</span><span id="line-62"></span><span>  </span><span class="annot"><a href="#local-6989586621682963140"><span class="hs-identifier hs-type">mk_itbl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.DataCon.html#DataCon"><span class="hs-identifier hs-type">DataCon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span class="hs-special">,</span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblPtr"><span class="hs-identifier hs-type">ItblPtr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621682963140"><span class="annot"><span class="annottext">mk_itbl :: DataCon -&gt; WordOff -&gt; IO (Name, ItblPtr)
+</span><a href="#local-6989586621682963140"><span class="hs-identifier hs-var hs-var">mk_itbl</span></a></span></span><span> </span><span id="local-6989586621682963141"><span class="annot"><span class="annottext">DataCon
+</span><a href="#local-6989586621682963141"><span class="hs-identifier hs-var">dcon</span></a></span></span><span> </span><span id="local-6989586621682963142"><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963142"><span class="hs-identifier hs-var">conNo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-64"></span><span>     </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682963143"><span class="annot"><span class="annottext">rep_args :: [PrimRep]
+</span><a href="#local-6989586621682963143"><span class="hs-identifier hs-var hs-var hs-var">rep_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">PrimRep
+</span><a href="#local-6989586621682963144"><span class="hs-identifier hs-var">prim_rep</span></a></span><span>
+</span><span id="line-65"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682963145"><span class="annot"><span class="annottext">Scaled Type
+</span><a href="#local-6989586621682963145"><span class="hs-identifier hs-var">arg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; [Scaled Type]
 </span><a href="GHC.Core.DataCon.html#dataConRepArgTys"><span class="hs-identifier hs-var">dataConRepArgTys</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682754445"><span class="hs-identifier hs-var">dcon</span></a></span><span>
-</span><span id="line-66"></span><span>                    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621682754448"><span class="annot"><span class="annottext">PrimRep
-</span><a href="#local-6989586621682754448"><span class="hs-identifier hs-var">prim_rep</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Type -&gt; [PrimRep]
+</span><a href="#local-6989586621682963141"><span class="hs-identifier hs-var">dcon</span></a></span><span>
+</span><span id="line-66"></span><span>                    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621682963144"><span class="annot"><span class="annottext">PrimRep
+</span><a href="#local-6989586621682963144"><span class="hs-identifier hs-var">prim_rep</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Type -&gt; [PrimRep]
 Type -&gt; [PrimRep]
 </span><a href="GHC.Types.RepType.html#typePrimRep"><span class="hs-identifier hs-var">typePrimRep</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scaled Type -&gt; Type
 forall a. Scaled a -&gt; a
 </span><a href="GHC.Core.TyCo.Rep.html#scaledThing"><span class="hs-identifier hs-var">scaledThing</span></a></span><span> </span><span class="annot"><span class="annottext">Scaled Type
-</span><a href="#local-6989586621682754449"><span class="hs-identifier hs-var">arg</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682963145"><span class="hs-identifier hs-var">arg</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-67"></span><span>
-</span><span id="line-68"></span><span>         </span><span class="hs-special">(</span><span id="local-6989586621682754451"><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754451"><span class="hs-identifier hs-var hs-var">tot_wds</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682754452"><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754452"><span class="hs-identifier hs-var hs-var">ptr_wds</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-68"></span><span>         </span><span class="hs-special">(</span><span id="local-6989586621682963147"><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963147"><span class="hs-identifier hs-var hs-var">tot_wds</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682963148"><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963148"><span class="hs-identifier hs-var hs-var">ptr_wds</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-69"></span><span>             </span><span class="annot"><span class="annottext">Profile -&gt; [PrimRep] -&gt; (WordOff, WordOff)
 </span><a href="GHC.StgToCmm.Layout.html#mkVirtConstrSizes"><span class="hs-identifier hs-var">mkVirtConstrSizes</span></a></span><span> </span><span class="annot"><span class="annottext">Profile
-</span><a href="#local-6989586621682754441"><span class="hs-identifier hs-var">profile</span></a></span><span> </span><span class="annot"><span class="annottext">[PrimRep]
-</span><a href="#local-6989586621682754447"><span class="hs-identifier hs-var">rep_args</span></a></span><span>
+</span><a href="#local-6989586621682963137"><span class="hs-identifier hs-var">profile</span></a></span><span> </span><span class="annot"><span class="annottext">[PrimRep]
+</span><a href="#local-6989586621682963143"><span class="hs-identifier hs-var">rep_args</span></a></span><span>
 </span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span>         </span><span id="local-6989586621682754453"><span class="annot"><span class="annottext">ptrs' :: WordOff
-</span><a href="#local-6989586621682754453"><span class="hs-identifier hs-var hs-var hs-var">ptrs'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754452"><span class="hs-identifier hs-var">ptr_wds</span></a></span><span>
-</span><span id="line-72"></span><span>         </span><span id="local-6989586621682754454"><span class="annot"><span class="annottext">nptrs' :: WordOff
-</span><a href="#local-6989586621682754454"><span class="hs-identifier hs-var hs-var hs-var">nptrs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754451"><span class="hs-identifier hs-var">tot_wds</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; WordOff
+</span><span id="line-71"></span><span>         </span><span id="local-6989586621682963149"><span class="annot"><span class="annottext">ptrs' :: WordOff
+</span><a href="#local-6989586621682963149"><span class="hs-identifier hs-var hs-var hs-var">ptrs'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963148"><span class="hs-identifier hs-var">ptr_wds</span></a></span><span>
+</span><span id="line-72"></span><span>         </span><span id="local-6989586621682963150"><span class="annot"><span class="annottext">nptrs' :: WordOff
+</span><a href="#local-6989586621682963150"><span class="hs-identifier hs-var hs-var hs-var">nptrs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963147"><span class="hs-identifier hs-var">tot_wds</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; WordOff
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754452"><span class="hs-identifier hs-var">ptr_wds</span></a></span><span>
-</span><span id="line-73"></span><span>         </span><span id="local-6989586621682754455"><span class="annot"><span class="annottext">nptrs_really :: WordOff
-</span><a href="#local-6989586621682754455"><span class="hs-identifier hs-var hs-var hs-var">nptrs_really</span></a></span></span><span>
+</span><a href="#local-6989586621682963148"><span class="hs-identifier hs-var">ptr_wds</span></a></span><span>
+</span><span id="line-73"></span><span>         </span><span id="local-6989586621682963151"><span class="annot"><span class="annottext">nptrs_really :: WordOff
+</span><a href="#local-6989586621682963151"><span class="hs-identifier hs-var hs-var hs-var">nptrs_really</span></a></span></span><span>
 </span><span id="line-74"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754453"><span class="hs-identifier hs-var">ptrs'</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; WordOff
+</span><a href="#local-6989586621682963149"><span class="hs-identifier hs-var">ptrs'</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; WordOff
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754454"><span class="hs-identifier hs-var">nptrs'</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; Bool
+</span><a href="#local-6989586621682963150"><span class="hs-identifier hs-var">nptrs'</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">PlatformConstants -&gt; WordOff
 </span><a href="GHC.Platform.Constants.html#pc_MIN_PAYLOAD_SIZE"><span class="hs-identifier hs-var">pc_MIN_PAYLOAD_SIZE</span></a></span><span> </span><span class="annot"><span class="annottext">PlatformConstants
-</span><a href="#local-6989586621682754458"><span class="hs-identifier hs-var">constants</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754454"><span class="hs-identifier hs-var">nptrs'</span></a></span><span>
+</span><a href="#local-6989586621682963154"><span class="hs-identifier hs-var">constants</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963150"><span class="hs-identifier hs-var">nptrs'</span></a></span><span>
 </span><span id="line-75"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlatformConstants -&gt; WordOff
 </span><a href="GHC.Platform.Constants.html#pc_MIN_PAYLOAD_SIZE"><span class="hs-identifier hs-var">pc_MIN_PAYLOAD_SIZE</span></a></span><span> </span><span class="annot"><span class="annottext">PlatformConstants
-</span><a href="#local-6989586621682754458"><span class="hs-identifier hs-var">constants</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; WordOff
+</span><a href="#local-6989586621682963154"><span class="hs-identifier hs-var">constants</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff -&gt; WordOff -&gt; WordOff
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754453"><span class="hs-identifier hs-var">ptrs'</span></a></span><span>
+</span><a href="#local-6989586621682963149"><span class="hs-identifier hs-var">ptrs'</span></a></span><span>
 </span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span>         </span><span id="local-6989586621682754459"><span class="annot"><span class="annottext">descr :: ByteString
-</span><a href="#local-6989586621682754459"><span class="hs-identifier hs-var hs-var hs-var">descr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; ByteString
+</span><span id="line-77"></span><span>         </span><span id="local-6989586621682963155"><span class="annot"><span class="annottext">descr :: ByteString
+</span><a href="#local-6989586621682963155"><span class="hs-identifier hs-var hs-var hs-var">descr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; ByteString
 </span><a href="GHC.Core.DataCon.html#dataConIdentity"><span class="hs-identifier hs-var">dataConIdentity</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682754445"><span class="hs-identifier hs-var">dcon</span></a></span><span>
+</span><a href="#local-6989586621682963141"><span class="hs-identifier hs-var">dcon</span></a></span><span>
 </span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span>         </span><span id="local-6989586621682754460"><span class="annot"><span class="annottext">platform :: Platform
-</span><a href="#local-6989586621682754460"><span class="hs-identifier hs-var hs-var hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Profile -&gt; Platform
+</span><span id="line-79"></span><span>         </span><span id="local-6989586621682963156"><span class="annot"><span class="annottext">platform :: Platform
+</span><a href="#local-6989586621682963156"><span class="hs-identifier hs-var hs-var hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Profile -&gt; Platform
 </span><a href="GHC.Platform.Profile.html#profilePlatform"><span class="hs-identifier hs-var">profilePlatform</span></a></span><span> </span><span class="annot"><span class="annottext">Profile
-</span><a href="#local-6989586621682754441"><span class="hs-identifier hs-var">profile</span></a></span><span>
-</span><span id="line-80"></span><span>         </span><span id="local-6989586621682754458"><span class="annot"><span class="annottext">constants :: PlatformConstants
-</span><a href="#local-6989586621682754458"><span class="hs-identifier hs-var hs-var hs-var">constants</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; PlatformConstants
+</span><a href="#local-6989586621682963137"><span class="hs-identifier hs-var">profile</span></a></span><span>
+</span><span id="line-80"></span><span>         </span><span id="local-6989586621682963154"><span class="annot"><span class="annottext">constants :: PlatformConstants
+</span><a href="#local-6989586621682963154"><span class="hs-identifier hs-var hs-var hs-var">constants</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; PlatformConstants
 </span><a href="GHC.Platform.html#platformConstants"><span class="hs-identifier hs-var">platformConstants</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682754460"><span class="hs-identifier hs-var">platform</span></a></span><span>
-</span><span id="line-81"></span><span>         </span><span id="local-6989586621682754463"><span class="annot"><span class="annottext">tables_next_to_code :: Bool
-</span><a href="#local-6989586621682754463"><span class="hs-identifier hs-var hs-var hs-var">tables_next_to_code</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Bool
+</span><a href="#local-6989586621682963156"><span class="hs-identifier hs-var">platform</span></a></span><span>
+</span><span id="line-81"></span><span>         </span><span id="local-6989586621682963159"><span class="annot"><span class="annottext">tables_next_to_code :: Bool
+</span><a href="#local-6989586621682963159"><span class="hs-identifier hs-var hs-var hs-var">tables_next_to_code</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Bool
 </span><a href="GHC.Platform.html#platformTablesNextToCode"><span class="hs-identifier hs-var">platformTablesNextToCode</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682754460"><span class="hs-identifier hs-var">platform</span></a></span><span>
+</span><a href="#local-6989586621682963156"><span class="hs-identifier hs-var">platform</span></a></span><span>
 </span><span id="line-82"></span><span>
-</span><span id="line-83"></span><span>     </span><span id="local-6989586621682754465"><span class="annot"><a href="#local-6989586621682754465"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Interp
+</span><span id="line-83"></span><span>     </span><span id="local-6989586621682963161"><span class="annot"><a href="#local-6989586621682963161"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Interp
 -&gt; Message (RemotePtr StgInfoTable) -&gt; IO (RemotePtr StgInfoTable)
 forall a. Binary a =&gt; Interp -&gt; Message a -&gt; IO a
 </span><a href="GHC.Runtime.Interpreter.html#interpCmd"><span class="hs-identifier hs-var">interpCmd</span></a></span><span> </span><span class="annot"><span class="annottext">Interp
-</span><a href="#local-6989586621682754440"><span class="hs-identifier hs-var">interp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682963136"><span class="hs-identifier hs-var">interp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
 -&gt; WordOff
 -&gt; WordOff
 -&gt; WordOff
 -&gt; WordOff
 -&gt; ByteString
 -&gt; Message (RemotePtr StgInfoTable)
-</span><a href="../../ghci-9.10.1-b775/src//GHCi.Message.html/GHCi.Message.html#MkConInfoTable"><span class="hs-identifier hs-var">MkConInfoTable</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682754463"><span class="hs-identifier hs-var">tables_next_to_code</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754453"><span class="hs-identifier hs-var">ptrs'</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754455"><span class="hs-identifier hs-var">nptrs_really</span></a></span><span>
+</span><a href="../../ghci-9.12.2-bd10/src/GHCi.Message.html#MkConInfoTable"><span class="hs-identifier hs-var">MkConInfoTable</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682963159"><span class="hs-identifier hs-var">tables_next_to_code</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963149"><span class="hs-identifier hs-var">ptrs'</span></a></span><span> </span><span class="annot"><span class="annottext">WordOff
+</span><a href="#local-6989586621682963151"><span class="hs-identifier hs-var">nptrs_really</span></a></span><span>
 </span><span id="line-84"></span><span>                              </span><span class="annot"><span class="annottext">WordOff
-</span><a href="#local-6989586621682754446"><span class="hs-identifier hs-var">conNo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Platform -&gt; DataCon -&gt; WordOff
+</span><a href="#local-6989586621682963142"><span class="hs-identifier hs-var">conNo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Platform -&gt; DataCon -&gt; WordOff
 </span><a href="GHC.StgToCmm.Closure.html#tagForCon"><span class="hs-identifier hs-var">tagForCon</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682754460"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682754445"><span class="hs-identifier hs-var">dcon</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621682754459"><span class="hs-identifier hs-var">descr</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-85"></span><span>     </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.html#getName"><span class="hs-identifier hs-type">getName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682754445"><span class="hs-identifier hs-type">dcon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblPtr"><span class="hs-identifier hs-type">ItblPtr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682754465"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682963156"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
+</span><a href="#local-6989586621682963141"><span class="hs-identifier hs-var">dcon</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621682963155"><span class="hs-identifier hs-var">descr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>     </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.html#getName"><span class="hs-identifier hs-type">getName</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682963141"><span class="hs-identifier hs-type">dcon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.ByteCode.Types.html#ItblPtr"><span class="hs-identifier hs-type">ItblPtr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682963161"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-86"></span></pre></body></html>

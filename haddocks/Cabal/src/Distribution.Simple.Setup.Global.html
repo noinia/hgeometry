@@ -1,56 +1,60 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
-</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
-</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
-</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
-</span><span id="line-6"></span><span>
-</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
-</span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Global</span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
-</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
-</span><span id="line-14"></span><span class="hs-comment">--</span><span>
-</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
-</span><span id="line-17"></span><span class="hs-comment">--</span><span>
-</span><span id="line-18"></span><span class="hs-comment">-- Definition of the global command-line options.</span><span>
-</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html"><span class="hs-identifier">Distribution.Simple.Setup.Global</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier">GlobalFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#emptyGlobalFlags"><span class="hs-identifier">emptyGlobalFlags</span></a></span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#defaultGlobalFlags"><span class="hs-identifier">defaultGlobalFlags</span></a></span><span>
-</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalCommand"><span class="hs-identifier">globalCommand</span></a></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
-</span><span id="line-33"></span><span>
-</span><span id="line-34"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Global</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- License     :  BSD3</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- Definition of the global command-line options.</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html"><span class="hs-identifier">Distribution.Simple.Setup.Global</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier">GlobalFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#emptyGlobalFlags"><span class="hs-identifier">emptyGlobalFlags</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#defaultGlobalFlags"><span class="hs-identifier">defaultGlobalFlags</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalCommand"><span class="hs-identifier">globalCommand</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html"><span class="hs-identifier">Distribution.Utils.Path</span></a></span><span>
 </span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- * Global flags</span></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
 </span><span id="line-37"></span><span>
-</span><span id="line-38"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- * Global flags</span></span><span>
 </span><span id="line-39"></span><span>
-</span><span id="line-40"></span><span class="hs-comment">-- In fact since individual flags types are monoids and these are just sets of</span><span>
-</span><span id="line-41"></span><span class="hs-comment">-- flags then they are also monoids pointwise. This turns out to be really</span><span>
-</span><span id="line-42"></span><span class="hs-comment">-- useful. The mempty is the set of empty flags and mappend allows us to</span><span>
-</span><span id="line-43"></span><span class="hs-comment">-- override specific flags. For example we can start with default flags and</span><span>
-</span><span id="line-44"></span><span class="hs-comment">-- override with the ones we get from a file or the command line, or both.</span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Flags that apply at the top level, not to any sub-command.</span></span><span>
-</span><span id="line-47"></span><span class="hs-keyword">data</span><span> </span><span id="GlobalFlags"><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-var">GlobalFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GlobalFlags"><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-var">GlobalFlags</span></a></span></span><span>
-</span><span id="line-48"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="globalVersion"><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
+</span><span id="line-40"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- In fact since individual flags types are monoids and these are just sets of</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- flags then they are also monoids pointwise. This turns out to be really</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- useful. The mempty is the set of empty flags and mappend allows us to</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- override specific flags. For example we can start with default flags and</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- override with the ones we get from a file or the command line, or both.</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | Flags that apply at the top level, not to any sub-command.</span></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">data</span><span> </span><span id="GlobalFlags"><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-var">GlobalFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GlobalFlags"><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-var">GlobalFlags</span></a></span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="globalVersion"><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Global.html#globalVersion"><span class="hs-identifier hs-var hs-var">globalVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="globalNumericVersion"><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
+</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="globalNumericVersion"><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Global.html#globalNumericVersion"><span class="hs-identifier hs-var hs-var">globalNumericVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-50"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-51"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679469893"><span id="local-6989586621679469895"><span class="annot"><span class="annottext">(forall x. GlobalFlags -&gt; Rep GlobalFlags x)
+</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="globalWorkingDir"><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+</span><a href="Distribution.Simple.Setup.Global.html#globalWorkingDir"><span class="hs-identifier hs-var hs-var">globalWorkingDir</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#CWD"><span class="hs-identifier hs-type">CWD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679530640"><span id="local-6989586621679530642"><span class="annot"><span class="annottext">(forall x. GlobalFlags -&gt; Rep GlobalFlags x)
 -&gt; (forall x. Rep GlobalFlags x -&gt; GlobalFlags)
 -&gt; Generic GlobalFlags
 forall x. Rep GlobalFlags x -&gt; GlobalFlags
@@ -62,71 +66,75 @@ from :: forall x. GlobalFlags -&gt; Rep GlobalFlags x
 $cto :: forall x. Rep GlobalFlags x -&gt; GlobalFlags
 to :: forall x. Rep GlobalFlags x -&gt; GlobalFlags
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
-</span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#defaultGlobalFlags"><span class="hs-identifier hs-type">defaultGlobalFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span><span>
-</span><span id="line-54"></span><span id="defaultGlobalFlags"><span class="annot"><span class="annottext">defaultGlobalFlags :: GlobalFlags
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#defaultGlobalFlags"><span class="hs-identifier hs-type">defaultGlobalFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span><span>
+</span><span id="line-57"></span><span id="defaultGlobalFlags"><span class="annot"><span class="annottext">defaultGlobalFlags :: GlobalFlags
 </span><a href="Distribution.Simple.Setup.Global.html#defaultGlobalFlags"><span class="hs-identifier hs-var hs-var">defaultGlobalFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-55"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span><span>
-</span><span id="line-56"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">globalVersion :: Flag Bool
+</span><span id="line-58"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">globalVersion :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Global.html#globalVersion"><span class="hs-identifier hs-var">globalVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-57"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">globalNumericVersion :: Flag Bool
+</span><span id="line-60"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">globalNumericVersion :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Global.html#globalNumericVersion"><span class="hs-identifier hs-var">globalNumericVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-58"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span id="local-6989586621679469826"><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalCommand"><span class="hs-identifier hs-type">globalCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Command.html#Command"><span class="hs-identifier hs-type">Command</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679469826"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span></span><span>
-</span><span id="line-61"></span><span id="globalCommand"><span class="annot"><span class="annottext">globalCommand :: forall action. [Command action] -&gt; CommandUI GlobalFlags
-</span><a href="Distribution.Simple.Setup.Global.html#globalCommand"><span class="hs-identifier hs-var hs-var">globalCommand</span></a></span></span><span> </span><span id="local-6989586621679469903"><span class="annot"><span class="annottext">[Command action]
-</span><a href="#local-6989586621679469903"><span class="hs-identifier hs-var">commands</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-62"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
-</span><span id="line-63"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: String
+</span><span id="line-61"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">globalWorkingDir :: Flag (SymbolicPath CWD ('Dir Pkg))
+</span><a href="Distribution.Simple.Setup.Global.html#globalWorkingDir"><span class="hs-identifier hs-var">globalWorkingDir</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag (SymbolicPath CWD ('Dir Pkg))
+forall a. Flag a
+</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span id="local-6989586621679530567"><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalCommand"><span class="hs-identifier hs-type">globalCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Command.html#Command"><span class="hs-identifier hs-type">Command</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679530567"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span></span><span>
+</span><span id="line-65"></span><span id="globalCommand"><span class="annot"><span class="annottext">globalCommand :: forall action. [Command action] -&gt; CommandUI GlobalFlags
+</span><a href="Distribution.Simple.Setup.Global.html#globalCommand"><span class="hs-identifier hs-var hs-var">globalCommand</span></a></span></span><span> </span><span id="local-6989586621679530651"><span class="annot"><span class="annottext">[Command action]
+</span><a href="#local-6989586621679530651"><span class="hs-identifier hs-var">commands</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: String
 </span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-64"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: String
+</span><span id="line-68"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: String
 </span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-65"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: String -&gt; String
-</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679469908"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469908"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-66"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: String -&gt; String
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679530656"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530656"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-70"></span><span>        </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;This Setup program uses the Haskell Cabal Infrastructure.\n&quot;</span></span><span>
-</span><span id="line-67"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;See http://www.haskell.org/cabal/ for more information.\n&quot;</span></span><span>
-</span><span id="line-68"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;\n&quot;</span></span><span>
-</span><span id="line-69"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;Usage: &quot;</span></span><span>
-</span><span id="line-70"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469908"><span class="hs-identifier hs-var">pname</span></a></span><span>
 </span><span id="line-71"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;See http://www.haskell.org/cabal/ for more information.\n&quot;</span></span><span>
+</span><span id="line-72"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\n&quot;</span></span><span>
+</span><span id="line-73"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Usage: &quot;</span></span><span>
+</span><span id="line-74"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530656"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-75"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; [GLOBAL FLAGS] [COMMAND [FLAGS]]\n&quot;</span></span><span>
-</span><span id="line-72"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe (String -&gt; String)
+</span><span id="line-76"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe (String -&gt; String)
 </span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String -&gt; String) -&gt; Maybe (String -&gt; String)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; String) -&gt; Maybe (String -&gt; String))
 -&gt; (String -&gt; String) -&gt; Maybe (String -&gt; String)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679469910"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469910"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-73"></span><span>        </span><span class="hs-keyword">let</span><span>
-</span><span id="line-74"></span><span>          </span><span id="local-6989586621679469913"><span class="annot"><span class="annottext">commands' :: [Command action]
-</span><a href="#local-6989586621679469913"><span class="hs-identifier hs-var hs-var">commands'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Command action]
-</span><a href="#local-6989586621679469903"><span class="hs-identifier hs-var">commands</span></a></span><span> </span><span class="annot"><span class="annottext">[Command action] -&gt; [Command action] -&gt; [Command action]
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679530658"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530658"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-77"></span><span>        </span><span class="hs-keyword">let</span><span>
+</span><span id="line-78"></span><span>          </span><span id="local-6989586621679530661"><span class="annot"><span class="annottext">commands' :: [Command action]
+</span><a href="#local-6989586621679530661"><span class="hs-identifier hs-var hs-var">commands'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Command action]
+</span><a href="#local-6989586621679530651"><span class="hs-identifier hs-var">commands</span></a></span><span> </span><span class="annot"><span class="annottext">[Command action] -&gt; [Command action] -&gt; [Command action]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">CommandUI () -&gt; (() -&gt; [String] -&gt; action) -&gt; Command action
 forall flags action.
@@ -135,13 +143,13 @@ CommandUI flags -&gt; (flags -&gt; [String] -&gt; action) -&gt; Command action
 </span><a href="Distribution.Simple.Command.html#helpCommandUI"><span class="hs-identifier hs-var">helpCommandUI</span></a></span><span> </span><span class="annot"><span class="annottext">() -&gt; [String] -&gt; action
 forall a. HasCallStack =&gt; a
 </span><span class="hs-identifier hs-var">undefined</span></span><span class="hs-special">]</span><span>
-</span><span id="line-75"></span><span>          </span><span id="local-6989586621679469917"><span class="annot"><span class="annottext">cmdDescs :: [(String, String)]
-</span><a href="#local-6989586621679469917"><span class="hs-identifier hs-var hs-var">cmdDescs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Command action] -&gt; [(String, String)]
+</span><span id="line-79"></span><span>          </span><span id="local-6989586621679530665"><span class="annot"><span class="annottext">cmdDescs :: [(String, String)]
+</span><a href="#local-6989586621679530665"><span class="hs-identifier hs-var hs-var">cmdDescs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Command action] -&gt; [(String, String)]
 forall action. [Command action] -&gt; [(String, String)]
 </span><a href="Distribution.Simple.Command.html#getNormalCommandDescriptions"><span class="hs-identifier hs-var">getNormalCommandDescriptions</span></a></span><span> </span><span class="annot"><span class="annottext">[Command action]
-</span><a href="#local-6989586621679469913"><span class="hs-identifier hs-var">commands'</span></a></span><span>
-</span><span id="line-76"></span><span>          </span><span id="local-6989586621679469923"><span class="annot"><span class="annottext">maxlen :: Int
-</span><a href="#local-6989586621679469923"><span class="hs-identifier hs-var hs-var">maxlen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int
+</span><a href="#local-6989586621679530661"><span class="hs-identifier hs-var">commands'</span></a></span><span>
+</span><span id="line-80"></span><span>          </span><span id="local-6989586621679530671"><span class="annot"><span class="annottext">maxlen :: Int
+</span><a href="#local-6989586621679530671"><span class="hs-identifier hs-var hs-var">maxlen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int
 forall a. Ord a =&gt; [a] -&gt; a
 forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; Int) -&gt; [Int] -&gt; Int
@@ -150,110 +158,110 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a. [a] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469926"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679469926"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469926"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530674"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679530674"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530674"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(String, String)]
-</span><a href="#local-6989586621679469917"><span class="hs-identifier hs-var">cmdDescs</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-77"></span><span>          </span><span id="local-6989586621679469930"><span class="annot"><span class="annottext">align :: String -&gt; String
-</span><a href="#local-6989586621679469930"><span class="hs-identifier hs-var hs-var">align</span></a></span></span><span> </span><span id="local-6989586621679469931"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469931"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469931"><span class="hs-identifier hs-var">str</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621679530665"><span class="hs-identifier hs-var">cmdDescs</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-81"></span><span>          </span><span id="local-6989586621679530678"><span class="annot"><span class="annottext">align :: String -&gt; String
+</span><a href="#local-6989586621679530678"><span class="hs-identifier hs-var hs-var">align</span></a></span></span><span> </span><span id="local-6989586621679530679"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530679"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530679"><span class="hs-identifier hs-var">str</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Char -&gt; String
 forall a. Int -&gt; a -&gt; [a]
 </span><span class="hs-identifier hs-var">replicate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679469923"><span class="hs-identifier hs-var">maxlen</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679530671"><span class="hs-identifier hs-var">maxlen</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Int
 forall a. [a] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469931"><span class="hs-identifier hs-var">str</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679530679"><span class="hs-identifier hs-var">str</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">' '</span></span><span>
-</span><span id="line-78"></span><span>         </span><span class="hs-keyword">in</span><span>
-</span><span id="line-79"></span><span>          </span><span class="annot"><span class="annottext">String
+</span><span id="line-82"></span><span>         </span><span class="hs-keyword">in</span><span>
+</span><span id="line-83"></span><span>          </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Commands:\n&quot;</span></span><span>
-</span><span id="line-80"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><span id="line-84"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
 </span><span class="hs-identifier hs-var">unlines</span></span><span>
-</span><span id="line-81"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-85"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;  &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String
-</span><a href="#local-6989586621679469930"><span class="hs-identifier hs-var">align</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469934"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621679530678"><span class="hs-identifier hs-var">align</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530682"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;    &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469935"><span class="hs-identifier hs-var">descr</span></a></span><span>
-</span><span id="line-82"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679469934"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469934"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679469935"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469935"><span class="hs-identifier hs-var">descr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(String, String)]
-</span><a href="#local-6989586621679469917"><span class="hs-identifier hs-var">cmdDescs</span></a></span><span>
-</span><span id="line-83"></span><span>              </span><span class="hs-special">]</span><span>
-</span><span id="line-84"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;\n&quot;</span></span><span>
-</span><span id="line-85"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;For more information about a command use\n&quot;</span></span><span>
-</span><span id="line-86"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;  &quot;</span></span><span>
-</span><span id="line-87"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469910"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><a href="#local-6989586621679530683"><span class="hs-identifier hs-var">descr</span></a></span><span>
+</span><span id="line-86"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679530682"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530682"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679530683"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530683"><span class="hs-identifier hs-var">descr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(String, String)]
+</span><a href="#local-6989586621679530665"><span class="hs-identifier hs-var">cmdDescs</span></a></span><span>
+</span><span id="line-87"></span><span>              </span><span class="hs-special">]</span><span>
 </span><span id="line-88"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot; COMMAND --help\n\n&quot;</span></span><span>
+</span><span class="hs-string">&quot;\n&quot;</span></span><span>
 </span><span id="line-89"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;Typical steps for installing Cabal packages:\n&quot;</span></span><span>
+</span><span class="hs-string">&quot;For more information about a command use\n&quot;</span></span><span>
 </span><span id="line-90"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;  &quot;</span></span><span>
+</span><span id="line-91"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530658"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-92"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; COMMAND --help\n\n&quot;</span></span><span>
+</span><span id="line-93"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Typical steps for installing Cabal packages:\n&quot;</span></span><span>
+</span><span id="line-94"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
 forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">concat</span></span><span>
-</span><span id="line-91"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-95"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;  &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469910"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621679530658"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469937"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621679530685"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;\n&quot;</span></span><span>
-</span><span id="line-92"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679469937"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679469937"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span id="line-96"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679530685"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679530685"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;configure&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;build&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;install&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-93"></span><span>              </span><span class="hs-special">]</span><span>
-</span><span id="line-94"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe (String -&gt; String)
-</span><a href="#local-6989586621679469938"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (String -&gt; String)
+</span><span id="line-97"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe (String -&gt; String)
+</span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (String -&gt; String)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-95"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: GlobalFlags
-</span><a href="#local-6989586621679469939"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
+</span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: GlobalFlags
+</span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
 </span><a href="Distribution.Simple.Setup.Global.html#defaultGlobalFlags"><span class="hs-identifier hs-var">defaultGlobalFlags</span></a></span><span>
-</span><span id="line-96"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField GlobalFlags]
-</span><a href="#local-6989586621679469940"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><span id="line-100"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField GlobalFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">ShowOrParseArgs
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-97"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-101"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
 -&gt; [String]
 -&gt; String
 -&gt; (GlobalFlags -&gt; Flag Bool)
@@ -272,25 +280,25 @@ String
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-98"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Char
+</span><span id="line-102"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'V'</span></span><span class="hs-special">]</span><span>
-</span><span id="line-99"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span id="line-103"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;version&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-100"></span><span>            </span><span class="annot"><span class="annottext">String
+</span><span id="line-104"></span><span>            </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Print version information&quot;</span></span><span>
-</span><span id="line-101"></span><span>            </span><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
+</span><span id="line-105"></span><span>            </span><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Global.html#globalVersion"><span class="hs-identifier hs-var">globalVersion</span></a></span><span>
-</span><span id="line-102"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679469942"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679469942"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679469943"><span class="annot"><span class="annottext">GlobalFlags
-</span><a href="#local-6989586621679469943"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
-</span><a href="#local-6989586621679469943"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalVersion"><span class="hs-identifier hs-var">globalVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679469942"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-103"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-106"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679530690"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679530690"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679530691"><span class="annot"><span class="annottext">GlobalFlags
+</span><a href="#local-6989586621679530691"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
+</span><a href="#local-6989586621679530691"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalVersion"><span class="hs-identifier hs-var">globalVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679530690"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
   (GlobalFlags -&gt; Flag Bool)
   (Flag Bool -&gt; GlobalFlags -&gt; GlobalFlags)
   GlobalFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-104"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-108"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 -&gt; [String]
 -&gt; String
 -&gt; (GlobalFlags -&gt; Flag Bool)
@@ -309,45 +317,92 @@ String
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-105"></span><span>            </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-106"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span id="line-109"></span><span>            </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-110"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;numeric-version&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-107"></span><span>            </span><span class="annot"><span class="annottext">String
+</span><span id="line-111"></span><span>            </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Print just the version number&quot;</span></span><span>
-</span><span id="line-108"></span><span>            </span><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
+</span><span id="line-112"></span><span>            </span><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Global.html#globalNumericVersion"><span class="hs-identifier hs-var">globalNumericVersion</span></a></span><span>
-</span><span id="line-109"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679469945"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679469945"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679469946"><span class="annot"><span class="annottext">GlobalFlags
-</span><a href="#local-6989586621679469946"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
-</span><a href="#local-6989586621679469946"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalNumericVersion"><span class="hs-identifier hs-var">globalNumericVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679469945"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-110"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-113"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679530693"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679530693"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679530694"><span class="annot"><span class="annottext">GlobalFlags
+</span><a href="#local-6989586621679530694"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
+</span><a href="#local-6989586621679530694"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalNumericVersion"><span class="hs-identifier hs-var">globalNumericVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679530693"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
   (GlobalFlags -&gt; Flag Bool)
   (Flag Bool -&gt; GlobalFlags -&gt; GlobalFlags)
   GlobalFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-111"></span><span>        </span><span class="hs-special">]</span><span>
-</span><span id="line-112"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-113"></span><span>
-</span><span id="line-114"></span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#emptyGlobalFlags"><span class="hs-identifier hs-type">emptyGlobalFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span><span>
-</span><span id="line-115"></span><span id="emptyGlobalFlags"><span class="annot"><span class="annottext">emptyGlobalFlags :: GlobalFlags
+</span><span id="line-115"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
+-&gt; (GlobalFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg)))
+-&gt; (Flag (SymbolicPath CWD ('Dir Pkg))
+    -&gt; GlobalFlags -&gt; GlobalFlags)
+-&gt; MkOptDescr
+     (GlobalFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg)))
+     (Flag (SymbolicPath CWD ('Dir Pkg)) -&gt; GlobalFlags -&gt; GlobalFlags)
+     GlobalFlags
+-&gt; OptionField GlobalFlags
+forall get set a.
+String
+-&gt; [String]
+-&gt; String
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-116"></span><span>            </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-117"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;working-dir&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-118"></span><span>            </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Set working directory&quot;</span></span><span>
+</span><span id="line-119"></span><span>            </span><span class="annot"><span class="annottext">GlobalFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+</span><a href="Distribution.Simple.Setup.Global.html#globalWorkingDir"><span class="hs-identifier hs-var">globalWorkingDir</span></a></span><span>
+</span><span id="line-120"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679530695"><span class="annot"><span class="annottext">Flag (SymbolicPath CWD ('Dir Pkg))
+</span><a href="#local-6989586621679530695"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679530696"><span class="annot"><span class="annottext">GlobalFlags
+</span><a href="#local-6989586621679530696"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
+</span><a href="#local-6989586621679530696"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#globalWorkingDir"><span class="hs-identifier hs-var">globalWorkingDir</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679530695"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+-&gt; MkOptDescr
+     (GlobalFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg)))
+     (Flag (SymbolicPath CWD ('Dir Pkg)) -&gt; GlobalFlags -&gt; GlobalFlags)
+     GlobalFlags
+forall b from (to :: FileOrDir).
+String
+-&gt; String
+-&gt; [String]
+-&gt; String
+-&gt; (b -&gt; Flag (SymbolicPath from to))
+-&gt; (Flag (SymbolicPath from to) -&gt; b -&gt; b)
+-&gt; OptDescr b
+</span><a href="Distribution.Simple.Setup.Common.html#reqSymbolicPathArgFlag"><span class="hs-identifier hs-var">reqSymbolicPathArgFlag</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;DIR&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>        </span><span class="hs-special">]</span><span>
+</span><span id="line-123"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#emptyGlobalFlags"><span class="hs-identifier hs-type">emptyGlobalFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span><span>
+</span><span id="line-126"></span><span id="emptyGlobalFlags"><span class="annot"><span class="annottext">emptyGlobalFlags :: GlobalFlags
 </span><a href="Distribution.Simple.Setup.Global.html#emptyGlobalFlags"><span class="hs-identifier hs-var hs-var">emptyGlobalFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-116"></span><span>
-</span><span id="line-117"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679469953"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-118"></span><span>  </span><span id="local-6989586621679469971"><span class="annot"><span class="annottext">mempty :: GlobalFlags
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679530704"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>  </span><span id="local-6989586621679530727"><span class="annot"><span class="annottext">mempty :: GlobalFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalFlags
 forall a. (Generic a, GMonoid (Rep a)) =&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
-</span><span id="line-119"></span><span>  </span><span id="local-6989586621679469974"><span class="annot"><span class="annottext">mappend :: GlobalFlags -&gt; GlobalFlags -&gt; GlobalFlags
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-130"></span><span>  </span><span id="local-6989586621679530730"><span class="annot"><span class="annottext">mappend :: GlobalFlags -&gt; GlobalFlags -&gt; GlobalFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalFlags -&gt; GlobalFlags -&gt; GlobalFlags
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
-</span><span id="line-120"></span><span>
-</span><span id="line-121"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679469977"><span id="local-6989586621679469980"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-122"></span><span>  </span><span id="local-6989586621679469997"><span class="annot"><span class="annottext">&lt;&gt; :: GlobalFlags -&gt; GlobalFlags -&gt; GlobalFlags
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679530733"><span id="local-6989586621679530736"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Global.html#GlobalFlags"><span class="hs-identifier hs-type">GlobalFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-133"></span><span>  </span><span id="local-6989586621679530757"><span class="annot"><span class="annottext">&lt;&gt; :: GlobalFlags -&gt; GlobalFlags -&gt; GlobalFlags
 </span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GlobalFlags -&gt; GlobalFlags -&gt; GlobalFlags
 forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
-</span><span id="line-123"></span></pre></body></html>
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-134"></span></pre></body></html>

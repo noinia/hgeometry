@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679473466"><span id="local-6989586621679473467"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679488064"><span id="local-6989586621679488065"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
 </span><span id="line-4"></span><span>
@@ -10,13 +10,13 @@
 </span><span id="line-10"></span><span>
 </span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
 </span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html"><span class="hs-identifier">Distribution.Utils.ShortText</span></a></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-14"></span><span>
 </span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span>
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html"><span class="hs-identifier">Distribution.Compat.CharParsing</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
 </span><span id="line-20"></span><span>
 </span><span id="line-21"></span><span class="hs-comment">-- | A pkg-config library name</span><span>
 </span><span id="line-22"></span><span class="hs-comment">--</span><span>
@@ -24,7 +24,7 @@
 </span><span id="line-24"></span><span class="hs-comment">--</span><span>
 </span><span id="line-25"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-26"></span><span class="hs-keyword">newtype</span><span> </span><span id="PkgconfigName"><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-var">PkgconfigName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PkgconfigName"><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-var">PkgconfigName</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html#ShortText"><span class="hs-identifier hs-type">ShortText</span></a></span><span>
-</span><span id="line-27"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679473472"><span id="local-6989586621679473474"><span class="annot"><span class="annottext">(forall x. PkgconfigName -&gt; Rep PkgconfigName x)
+</span><span id="line-27"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679488070"><span id="local-6989586621679488072"><span class="annot"><span class="annottext">(forall x. PkgconfigName -&gt; Rep PkgconfigName x)
 -&gt; (forall x. Rep PkgconfigName x -&gt; PkgconfigName)
 -&gt; Generic PkgconfigName
 forall x. Rep PkgconfigName x -&gt; PkgconfigName
@@ -35,7 +35,7 @@ $cfrom :: forall x. PkgconfigName -&gt; Rep PkgconfigName x
 from :: forall x. PkgconfigName -&gt; Rep PkgconfigName x
 $cto :: forall x. Rep PkgconfigName x -&gt; PkgconfigName
 to :: forall x. Rep PkgconfigName x -&gt; PkgconfigName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679473480"><span id="local-6989586621679473484"><span id="local-6989586621679473487"><span id="local-6989586621679473495"><span class="annot"><span class="annottext">ReadPrec [PkgconfigName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679488078"><span id="local-6989586621679488082"><span id="local-6989586621679488085"><span id="local-6989586621679488093"><span class="annot"><span class="annottext">ReadPrec [PkgconfigName]
 ReadPrec PkgconfigName
 Int -&gt; ReadS PkgconfigName
 ReadS [PkgconfigName]
@@ -55,7 +55,7 @@ $creadPrec :: ReadPrec PkgconfigName
 readPrec :: ReadPrec PkgconfigName
 $creadListPrec :: ReadPrec [PkgconfigName]
 readListPrec :: ReadPrec [PkgconfigName]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679473502"><span id="local-6989586621679473508"><span id="local-6989586621679473512"><span class="annot"><span class="annottext">Int -&gt; PkgconfigName -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679488100"><span id="local-6989586621679488106"><span id="local-6989586621679488110"><span class="annot"><span class="annottext">Int -&gt; PkgconfigName -&gt; ShowS
 [PkgconfigName] -&gt; ShowS
 PkgconfigName -&gt; String
 (Int -&gt; PkgconfigName -&gt; ShowS)
@@ -70,7 +70,7 @@ $cshow :: PkgconfigName -&gt; String
 show :: PkgconfigName -&gt; String
 $cshowList :: [PkgconfigName] -&gt; ShowS
 showList :: [PkgconfigName] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679473517"><span id="local-6989586621679473522"><span class="annot"><span class="annottext">PkgconfigName -&gt; PkgconfigName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679488115"><span id="local-6989586621679488120"><span class="annot"><span class="annottext">PkgconfigName -&gt; PkgconfigName -&gt; Bool
 (PkgconfigName -&gt; PkgconfigName -&gt; Bool)
 -&gt; (PkgconfigName -&gt; PkgconfigName -&gt; Bool) -&gt; Eq PkgconfigName
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -78,7 +78,7 @@ $c== :: PkgconfigName -&gt; PkgconfigName -&gt; Bool
 == :: PkgconfigName -&gt; PkgconfigName -&gt; Bool
 $c/= :: PkgconfigName -&gt; PkgconfigName -&gt; Bool
 /= :: PkgconfigName -&gt; PkgconfigName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679473531"><span id="local-6989586621679473536"><span id="local-6989586621679473540"><span id="local-6989586621679473544"><span id="local-6989586621679473548"><span id="local-6989586621679473552"><span id="local-6989586621679473556"><span class="annot"><span class="annottext">Eq PkgconfigName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679488129"><span id="local-6989586621679488134"><span id="local-6989586621679488138"><span id="local-6989586621679488142"><span id="local-6989586621679488146"><span id="local-6989586621679488150"><span id="local-6989586621679488154"><span class="annot"><span class="annottext">Eq PkgconfigName
 Eq PkgconfigName =&gt;
 (PkgconfigName -&gt; PkgconfigName -&gt; Ordering)
 -&gt; (PkgconfigName -&gt; PkgconfigName -&gt; Bool)
@@ -115,7 +115,7 @@ $cmax :: PkgconfigName -&gt; PkgconfigName -&gt; PkgconfigName
 max :: PkgconfigName -&gt; PkgconfigName -&gt; PkgconfigName
 $cmin :: PkgconfigName -&gt; PkgconfigName -&gt; PkgconfigName
 min :: PkgconfigName -&gt; PkgconfigName -&gt; PkgconfigName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679473570"><span id="local-6989586621679473574"><span id="local-6989586621679473577"><span id="local-6989586621679473579"><span id="local-6989586621679473581"><span id="local-6989586621679473587"><span id="local-6989586621679473592"><span id="local-6989586621679473595"><span id="local-6989586621679473598"><span id="local-6989586621679473601"><span id="local-6989586621679473604"><span id="local-6989586621679473607"><span id="local-6989586621679473612"><span id="local-6989586621679473617"><span class="annot"><span class="annottext">Typeable PkgconfigName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679488168"><span id="local-6989586621679488172"><span id="local-6989586621679488175"><span id="local-6989586621679488177"><span id="local-6989586621679488179"><span id="local-6989586621679488185"><span id="local-6989586621679488190"><span id="local-6989586621679488193"><span id="local-6989586621679488196"><span id="local-6989586621679488199"><span id="local-6989586621679488202"><span id="local-6989586621679488205"><span id="local-6989586621679488210"><span id="local-6989586621679488215"><span class="annot"><span class="annottext">Typeable PkgconfigName
 Typeable PkgconfigName =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -288,10 +288,10 @@ MonadPlus m =&gt;
 </span><span id="line-31"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-32"></span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#unPkgconfigName"><span class="hs-identifier hs-type">unPkgconfigName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-33"></span><span id="unPkgconfigName"><span class="annot"><span class="annottext">unPkgconfigName :: PkgconfigName -&gt; String
-</span><a href="Distribution.Types.PkgconfigName.html#unPkgconfigName"><span class="hs-identifier hs-var hs-var">unPkgconfigName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span id="local-6989586621679473626"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679473626"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
+</span><a href="Distribution.Types.PkgconfigName.html#unPkgconfigName"><span class="hs-identifier hs-var hs-var">unPkgconfigName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span id="local-6989586621679488224"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679488224"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
 </span><a href="Distribution.Utils.ShortText.html#fromShortText"><span class="hs-identifier hs-var">fromShortText</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679473626"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679488224"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span class="hs-comment">-- | Construct a 'PkgconfigName' from a 'String'</span><span>
 </span><span id="line-36"></span><span class="hs-comment">--</span><span>
@@ -314,59 +314,59 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-47"></span><span class="hs-comment">--</span><span>
 </span><span id="line-48"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-50"></span><span>  </span><span id="local-6989586621679473633"><span class="annot"><span class="annottext">fromString :: String -&gt; PkgconfigName
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679488231"><span class="annot"><span class="annottext">fromString :: String -&gt; PkgconfigName
 </span><span class="hs-identifier hs-var hs-var hs-var">fromString</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PkgconfigName
 </span><a href="Distribution.Types.PkgconfigName.html#mkPkgconfigName"><span class="hs-identifier hs-var">mkPkgconfigName</span></a></span><span>
 </span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679473635"><span id="local-6989586621679473642"><span id="local-6989586621679473648"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span></span></span></span><span>
-</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679473667"><span id="local-6989586621679473674"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span></span></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679488233"><span id="local-6989586621679488240"><span id="local-6989586621679488246"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span></span></span></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679488265"><span id="local-6989586621679488272"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span></span></span><span>
 </span><span id="line-54"></span><span>
 </span><span id="line-55"></span><span class="hs-comment">-- pkg-config allows versions and other letters in package names, eg</span><span>
 </span><span id="line-56"></span><span class="hs-comment">-- &quot;gtk+-2.0&quot; is a valid pkg-config package _name_.  It then has a package</span><span>
 </span><span id="line-57"></span><span class="hs-comment">-- version number like 2.10.13</span><span>
-</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679473704"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-59"></span><span>  </span><span id="local-6989586621679473708"><span class="annot"><span class="annottext">pretty :: PkgconfigName -&gt; Doc
-</span><a href="#local-6989586621679473708"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc)
+</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679488302"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679488306"><span class="annot"><span class="annottext">pretty :: PkgconfigName -&gt; Doc
+</span><a href="#local-6989586621679488306"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc)
 -&gt; (PkgconfigName -&gt; String) -&gt; PkgconfigName -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PkgconfigName -&gt; String
 </span><a href="Distribution.Types.PkgconfigName.html#unPkgconfigName"><span class="hs-identifier hs-var">unPkgconfigName</span></a></span><span>
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-62"></span><span>  </span><span id="local-6989586621679473727"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m PkgconfigName
-</span><a href="#local-6989586621679473727"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PkgconfigName
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679488325"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m PkgconfigName
+</span><a href="#local-6989586621679488325"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PkgconfigName
 </span><a href="Distribution.Types.PkgconfigName.html#mkPkgconfigName"><span class="hs-identifier hs-var">mkPkgconfigName</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; PkgconfigName) -&gt; m String -&gt; m PkgconfigName
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; m String
 forall (m :: * -&gt; *). CharParsing m =&gt; (Char -&gt; Bool) -&gt; m String
 </span><a href="Distribution.Compat.CharParsing.html#munch1"><span class="hs-identifier hs-var">P.munch1</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
-</span><a href="#local-6989586621679473731"><span class="hs-identifier hs-var">isNameChar</span></a></span><span>
+</span><a href="#local-6989586621679488329"><span class="hs-identifier hs-var">isNameChar</span></a></span><span>
 </span><span id="line-63"></span><span>    </span><span class="hs-keyword">where</span><span>
 </span><span id="line-64"></span><span>      </span><span class="hs-comment">-- https://gitlab.haskell.org/ghc/ghc/issues/17752</span><span>
-</span><span id="line-65"></span><span>      </span><span id="local-6989586621679473731"><span class="annot"><span class="annottext">isNameChar :: Char -&gt; Bool
-</span><a href="#local-6989586621679473731"><span class="hs-identifier hs-var hs-var">isNameChar</span></a></span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span id="line-65"></span><span>      </span><span id="local-6989586621679488329"><span class="annot"><span class="annottext">isNameChar :: Char -&gt; Bool
+</span><a href="#local-6989586621679488329"><span class="hs-identifier hs-var hs-var">isNameChar</span></a></span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-66"></span><span>      </span><span class="annot"><a href="#local-6989586621679473731"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span id="line-66"></span><span>      </span><span class="annot"><a href="#local-6989586621679488329"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'_'</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-67"></span><span>      </span><span class="annot"><a href="#local-6989586621679473731"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span id="line-67"></span><span>      </span><span class="annot"><a href="#local-6989586621679488329"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'.'</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-68"></span><span>      </span><span class="annot"><a href="#local-6989586621679473731"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span id="line-68"></span><span>      </span><span class="annot"><a href="#local-6989586621679488329"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'+'</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-69"></span><span>      </span><span class="annot"><a href="#local-6989586621679473731"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span id="local-6989586621679473732"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679473732"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span id="line-69"></span><span>      </span><span class="annot"><a href="#local-6989586621679488329"><span class="hs-identifier hs-var">isNameChar</span></a></span><span> </span><span id="local-6989586621679488330"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679488330"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isAlphaNum</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679473732"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621679488330"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-72"></span><span>  </span><span id="local-6989586621679473739"><span class="annot"><span class="annottext">rnf :: PkgconfigName -&gt; ()
-</span><a href="#local-6989586621679473739"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span id="local-6989586621679473741"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679473741"><span class="hs-identifier hs-var">pkg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; ()
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679488337"><span class="annot"><span class="annottext">rnf :: PkgconfigName -&gt; ()
+</span><a href="#local-6989586621679488337"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PkgconfigName.html#PkgconfigName"><span class="hs-identifier hs-type">PkgconfigName</span></a></span><span> </span><span id="local-6989586621679488339"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679488339"><span class="hs-identifier hs-var">pkg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679473741"><span class="hs-identifier hs-var">pkg</span></a></span><span>
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679488339"><span class="hs-identifier hs-var">pkg</span></a></span><span>
 </span><span id="line-73"></span></pre></body></html>

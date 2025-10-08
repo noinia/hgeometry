@@ -10,7 +10,7 @@
 --   mutable within appropriate monads, as well as some instances of these
 --   classes.
 @package array
-@version 0.5.7.0
+@version 0.5.8.0
 
 
 -- | Basic non-strict arrays.
@@ -195,6 +195,32 @@ amap :: (IArray a e', IArray a e, Ix i) => (e' -> e) -> a i e' -> a i e
 --   function to each of the indices.
 ixmap :: (IArray a e, Ix i, Ix j) => (i, i) -> (i -> j) -> a j e -> a i e
 
+-- | Lazy right-associative fold.
+foldrArray :: (IArray a e, Ix i) => (e -> b -> b) -> b -> a i e -> b
+
+-- | Strict accumulating left-associative fold.
+foldlArray' :: (IArray a e, Ix i) => (b -> e -> b) -> b -> a i e -> b
+
+-- | Lazy left-associative fold.
+foldlArray :: (IArray a e, Ix i) => (b -> e -> b) -> b -> a i e -> b
+
+-- | Strict accumulating right-associative fold.
+foldrArray' :: (IArray a e, Ix i) => (e -> b -> b) -> b -> a i e -> b
+
+-- | Map elements to applicative actions, sequence them left-to-right, and
+--   discard the results.
+traverseArray_ :: (IArray a e, Ix i, Applicative f) => (e -> f b) -> a i e -> f ()
+
+-- | <tt>forArray_</tt> is <a>traverseArray_</a> with its arguments
+--   flipped.
+forArray_ :: (IArray a e, Ix i, Applicative f) => a i e -> (e -> f b) -> f ()
+
+-- | Strict accumulating left-associative monadic fold.
+foldlArrayM' :: (IArray a e, Ix i, Monad m) => (b -> e -> m b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative monadic fold.
+foldrArrayM' :: (IArray a e, Ix i, Monad m) => (e -> b -> m b) -> b -> a i e -> m b
+
 -- | Arrays with unboxed elements. Instances of <a>IArray</a> are provided
 --   for <a>UArray</a> with certain element types (<a>Int</a>,
 --   <a>Float</a>, <a>Char</a>, etc.; see the <a>UArray</a> class for a
@@ -301,6 +327,25 @@ mapArray :: (MArray a e' m, MArray a e m, Ix i) => (e' -> e) -> a i e' -> m (a i
 -- | Constructs a new array derived from the original array by applying a
 --   function to each of the indices.
 mapIndices :: (MArray a e m, Ix i, Ix j) => (i, i) -> (i -> j) -> a j e -> m (a i e)
+
+-- | Strict accumulating left-associative fold.
+foldlMArray' :: (MArray a e m, Ix i) => (b -> e -> b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative fold.
+foldrMArray' :: (MArray a e m, Ix i) => (e -> b -> b) -> b -> a i e -> m b
+
+-- | Strict accumulating left-associative monadic fold.
+foldlMArrayM' :: (MArray a e m, Ix i) => (b -> e -> m b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative monadic fold.
+foldrMArrayM' :: (MArray a e m, Ix i) => (e -> b -> m b) -> b -> a i e -> m b
+
+-- | Map elements to monadic actions, sequence them left-to-right, and
+--   discard the results.
+mapMArrayM_ :: (MArray a e m, Ix i) => (e -> m b) -> a i e -> m ()
+
+-- | <tt>forMArrayM_</tt> is <a>mapMArrayM_</a> with its arguments flipped.
+forMArrayM_ :: (MArray a e m, Ix i) => a i e -> (e -> m b) -> m ()
 
 -- | A mutable array with unboxed elements, that can be manipulated in the
 --   <a>ST</a> monad. The type arguments are as follows:
@@ -554,6 +599,32 @@ elems :: (IArray a e, Ix i) => a i e -> [e]
 -- | Returns the contents of an array as a list of associations.
 assocs :: (IArray a e, Ix i) => a i e -> [(i, e)]
 
+-- | Lazy right-associative fold.
+foldrArray :: (IArray a e, Ix i) => (e -> b -> b) -> b -> a i e -> b
+
+-- | Strict accumulating left-associative fold.
+foldlArray' :: (IArray a e, Ix i) => (b -> e -> b) -> b -> a i e -> b
+
+-- | Lazy left-associative fold.
+foldlArray :: (IArray a e, Ix i) => (b -> e -> b) -> b -> a i e -> b
+
+-- | Strict accumulating right-associative fold.
+foldrArray' :: (IArray a e, Ix i) => (e -> b -> b) -> b -> a i e -> b
+
+-- | Map elements to applicative actions, sequence them left-to-right, and
+--   discard the results.
+traverseArray_ :: (IArray a e, Ix i, Applicative f) => (e -> f b) -> a i e -> f ()
+
+-- | <tt>forArray_</tt> is <a>traverseArray_</a> with its arguments
+--   flipped.
+forArray_ :: (IArray a e, Ix i, Applicative f) => a i e -> (e -> f b) -> f ()
+
+-- | Strict accumulating left-associative monadic fold.
+foldlArrayM' :: (IArray a e, Ix i, Monad m) => (b -> e -> m b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative monadic fold.
+foldrArrayM' :: (IArray a e, Ix i, Monad m) => (e -> b -> m b) -> b -> a i e -> m b
+
 -- | Takes an array and a list of pairs and returns an array identical to
 --   the left argument except that it has been updated by the associations
 --   in the right argument. For example, if m is a 1-origin, n by n matrix,
@@ -701,6 +772,25 @@ modifyArray :: (MArray a e m, Ix i) => a i e -> i -> (e -> e) -> m ()
 -- | Modify an element in a mutable array. Strict in the written element.
 modifyArray' :: (MArray a e m, Ix i) => a i e -> i -> (e -> e) -> m ()
 
+-- | Strict accumulating left-associative fold.
+foldlMArray' :: (MArray a e m, Ix i) => (b -> e -> b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative fold.
+foldrMArray' :: (MArray a e m, Ix i) => (e -> b -> b) -> b -> a i e -> m b
+
+-- | Map elements to monadic actions, sequence them left-to-right, and
+--   discard the results.
+mapMArrayM_ :: (MArray a e m, Ix i) => (e -> m b) -> a i e -> m ()
+
+-- | <tt>forMArrayM_</tt> is <a>mapMArrayM_</a> with its arguments flipped.
+forMArrayM_ :: (MArray a e m, Ix i) => a i e -> (e -> m b) -> m ()
+
+-- | Strict accumulating left-associative monadic fold.
+foldlMArrayM' :: (MArray a e m, Ix i) => (b -> e -> m b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative monadic fold.
+foldrMArrayM' :: (MArray a e m, Ix i) => (e -> b -> m b) -> b -> a i e -> m b
+
 -- | Constructs a new array derived from the original array by applying a
 --   function to each of the elements.
 mapArray :: (MArray a e' m, MArray a e m, Ix i) => (e' -> e) -> a i e' -> m (a i e)
@@ -801,6 +891,25 @@ readArray :: (MArray a e m, Ix i) => a i e -> i -> m e
 
 -- | Write an element in a mutable array
 writeArray :: (MArray a e m, Ix i) => a i e -> i -> e -> m ()
+
+-- | Strict accumulating left-associative fold.
+foldlMArray' :: (MArray a e m, Ix i) => (b -> e -> b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative fold.
+foldrMArray' :: (MArray a e m, Ix i) => (e -> b -> b) -> b -> a i e -> m b
+
+-- | Map elements to monadic actions, sequence them left-to-right, and
+--   discard the results.
+mapMArrayM_ :: (MArray a e m, Ix i) => (e -> m b) -> a i e -> m ()
+
+-- | <tt>forMArrayM_</tt> is <a>mapMArrayM_</a> with its arguments flipped.
+forMArrayM_ :: (MArray a e m, Ix i) => a i e -> (e -> m b) -> m ()
+
+-- | Strict accumulating left-associative monadic fold.
+foldlMArrayM' :: (MArray a e m, Ix i) => (b -> e -> m b) -> b -> a i e -> m b
+
+-- | Strict accumulating right-associative monadic fold.
+foldrMArrayM' :: (MArray a e m, Ix i) => (e -> b -> m b) -> b -> a i e -> m b
 
 -- | Constructs a new array derived from the original array by applying a
 --   function to each of the elements.

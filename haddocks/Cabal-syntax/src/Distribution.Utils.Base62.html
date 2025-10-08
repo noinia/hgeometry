@@ -2,36 +2,36 @@
 </span><span id="line-2"></span><span class="hs-comment">-- for fully instantiated unit ids.</span><span>
 </span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Utils.Base62.html"><span class="hs-identifier">Distribution.Utils.Base62</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Utils.Base62.html#hashToBase62"><span class="hs-identifier">hashToBase62</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-4"></span><span>
-</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Char.html/Data.Char.html"><span class="hs-identifier">Data.Char</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">chr</span></span><span class="hs-special">)</span><span>
-</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//GHC.Fingerprint.html/GHC.Fingerprint.html"><span class="hs-identifier">GHC.Fingerprint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Fingerprint</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">fingerprintString</span></span><span class="hs-special">)</span><span>
-</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Numeric.html/Numeric.html"><span class="hs-identifier">Numeric</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">showIntAtBase</span></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Char.html"><span class="hs-identifier">Data.Char</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">chr</span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/GHC.Fingerprint.html"><span class="hs-identifier">GHC.Fingerprint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Fingerprint</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">fingerprintString</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Numeric.html"><span class="hs-identifier">Numeric</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">showIntAtBase</span></span><span class="hs-special">)</span><span>
 </span><span id="line-8"></span><span>
 </span><span id="line-9"></span><span class="hs-comment">-- | Hash a string using GHC's fingerprinting algorithm (a 128-bit</span><span>
 </span><span id="line-10"></span><span class="hs-comment">-- MD5 hash) and then encode the resulting hash in base 62.</span><span>
 </span><span id="line-11"></span><span class="annot"><a href="Distribution.Utils.Base62.html#hashToBase62"><span class="hs-identifier hs-type">hashToBase62</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-12"></span><span id="hashToBase62"><span class="annot"><span class="annottext">hashToBase62 :: String -&gt; String
-</span><a href="Distribution.Utils.Base62.html#hashToBase62"><span class="hs-identifier hs-var hs-var">hashToBase62</span></a></span></span><span> </span><span id="local-6989586621679449230"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679449230"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fingerprint -&gt; String
-</span><a href="#local-6989586621679449231"><span class="hs-identifier hs-var">showFingerprint</span></a></span><span> </span><span class="annot"><span class="annottext">(Fingerprint -&gt; String) -&gt; Fingerprint -&gt; String
+</span><a href="Distribution.Utils.Base62.html#hashToBase62"><span class="hs-identifier hs-var hs-var">hashToBase62</span></a></span></span><span> </span><span id="local-6989586621679461812"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679461812"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Fingerprint -&gt; String
+</span><a href="#local-6989586621679461813"><span class="hs-identifier hs-var">showFingerprint</span></a></span><span> </span><span class="annot"><span class="annottext">(Fingerprint -&gt; String) -&gt; Fingerprint -&gt; String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Fingerprint
 </span><span class="hs-identifier hs-var">fingerprintString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679449230"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679461812"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-14"></span><span>    </span><span id="local-6989586621679449250"><span class="annot"><span class="annottext">showIntAtBase62 :: a -&gt; String
-</span><a href="#local-6989586621679449250"><span class="hs-identifier hs-var hs-var">showIntAtBase62</span></a></span></span><span> </span><span id="local-6989586621679449251"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679449251"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (Int -&gt; Char) -&gt; a -&gt; String -&gt; String
+</span><span id="line-14"></span><span>    </span><span id="local-6989586621679461832"><span class="annot"><span class="annottext">showIntAtBase62 :: a -&gt; String
+</span><a href="#local-6989586621679461832"><span class="hs-identifier hs-var hs-var">showIntAtBase62</span></a></span></span><span> </span><span id="local-6989586621679461833"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679461833"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (Int -&gt; Char) -&gt; a -&gt; String -&gt; String
 forall a. Integral a =&gt; a -&gt; (Int -&gt; Char) -&gt; a -&gt; String -&gt; String
 </span><span class="hs-identifier hs-var">showIntAtBase</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">62</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Char
-</span><a href="#local-6989586621679449252"><span class="hs-identifier hs-var">representBase62</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679449251"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679461834"><span class="hs-identifier hs-var">representBase62</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679461833"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-15"></span><span>    </span><span id="local-6989586621679449252"><span class="annot"><span class="annottext">representBase62 :: Int -&gt; Char
-</span><a href="#local-6989586621679449252"><span class="hs-identifier hs-var hs-var">representBase62</span></a></span></span><span> </span><span id="local-6989586621679449271"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679449271"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><span id="line-15"></span><span>    </span><span id="local-6989586621679461834"><span class="annot"><span class="annottext">representBase62 :: Int -&gt; Char
+</span><a href="#local-6989586621679461834"><span class="hs-identifier hs-var hs-var">representBase62</span></a></span></span><span> </span><span id="local-6989586621679461853"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">x</span></a></span></span><span>
 </span><span id="line-16"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679449271"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Char
@@ -39,9 +39,9 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-number">48</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679449271"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-17"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679449271"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">36</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Char
@@ -49,12 +49,12 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-number">65</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679449271"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span class="hs-special">)</span><span>
 </span><span id="line-18"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679449271"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">62</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Char
@@ -62,23 +62,23 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-number">97</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679449271"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">36</span></span><span class="hs-special">)</span><span>
 </span><span id="line-19"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'@'</span></span><span>
-</span><span id="line-20"></span><span>    </span><span id="local-6989586621679449231"><span class="annot"><span class="annottext">showFingerprint :: Fingerprint -&gt; String
-</span><a href="#local-6989586621679449231"><span class="hs-identifier hs-var hs-var">showFingerprint</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fingerprint</span></span><span> </span><span id="local-6989586621679449277"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621679449277"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679449278"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621679449278"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; String
+</span><span id="line-20"></span><span>    </span><span id="local-6989586621679461813"><span class="annot"><span class="annottext">showFingerprint :: Fingerprint -&gt; String
+</span><a href="#local-6989586621679461813"><span class="hs-identifier hs-var hs-var">showFingerprint</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fingerprint</span></span><span> </span><span id="local-6989586621679461859"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679461859"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679461860"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679461860"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; String
 forall {a}. Integral a =&gt; a -&gt; String
-</span><a href="#local-6989586621679449250"><span class="hs-identifier hs-var">showIntAtBase62</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621679449277"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621679461832"><span class="hs-identifier hs-var">showIntAtBase62</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679461859"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; String
 forall {a}. Integral a =&gt; a -&gt; String
-</span><a href="#local-6989586621679449250"><span class="hs-identifier hs-var">showIntAtBase62</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621679449278"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621679461832"><span class="hs-identifier hs-var">showIntAtBase62</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621679461860"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-21"></span></pre></body></html>

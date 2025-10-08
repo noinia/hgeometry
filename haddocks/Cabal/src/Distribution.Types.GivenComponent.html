@@ -3,30 +3,32 @@
 </span><span id="line-3"></span><span>
 </span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html"><span class="hs-identifier">Distribution.Types.GivenComponent</span></a></span><span>
 </span><span id="line-5"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier">GivenComponent</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-6"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-9"></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.ComponentId.html/Distribution.Types.ComponentId.html"><span class="hs-identifier">Distribution.Types.ComponentId</span></a></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.LibraryName.html/Distribution.Types.LibraryName.html"><span class="hs-identifier">Distribution.Types.LibraryName</span></a></span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageName.html/Distribution.Types.PackageName.html"><span class="hs-identifier">Distribution.Types.PackageName</span></a></span><span>
-</span><span id="line-13"></span><span>
-</span><span id="line-14"></span><span class="hs-comment">-- | A 'GivenComponent' represents a library depended on and explicitly</span><span>
-</span><span id="line-15"></span><span class="hs-comment">-- specified by the user/client with @--dependency@</span><span>
-</span><span id="line-16"></span><span class="hs-comment">--</span><span>
-</span><span id="line-17"></span><span class="hs-comment">-- It enables Cabal to know which 'ComponentId' to associate with a library</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#PromisedComponent"><span class="hs-identifier">PromisedComponent</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ComponentId.html"><span class="hs-identifier">Distribution.Types.ComponentId</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.LibraryName.html"><span class="hs-identifier">Distribution.Types.LibraryName</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageId.html"><span class="hs-identifier">Distribution.Types.PackageId</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageName.html"><span class="hs-identifier">Distribution.Types.PackageName</span></a></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- | A 'GivenComponent' represents a library depended on and explicitly</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- specified by the user/client with @--dependency@</span><span>
 </span><span id="line-18"></span><span class="hs-comment">--</span><span>
-</span><span id="line-19"></span><span class="hs-comment">-- @since 2.3.0.0</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="GivenComponent"><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-var">GivenComponent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GivenComponent"><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-var">GivenComponent</span></a></span></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="givenComponentPackage"><span class="annot"><span class="annottext">GivenComponent -&gt; PackageName
-</span><a href="Distribution.Types.GivenComponent.html#givenComponentPackage"><span class="hs-identifier hs-var hs-var">givenComponentPackage</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageName.html/Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="givenComponentName"><span class="annot"><span class="annottext">GivenComponent -&gt; LibraryName
-</span><a href="Distribution.Types.GivenComponent.html#givenComponentName"><span class="hs-identifier hs-var hs-var">givenComponentName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.LibraryName.html/Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span> </span><span class="hs-comment">-- --dependency is for libraries</span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-comment">-- only, not for any component</span><span>
-</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="givenComponentId"><span class="annot"><span class="annottext">GivenComponent -&gt; ComponentId
-</span><a href="Distribution.Types.GivenComponent.html#givenComponentId"><span class="hs-identifier hs-var hs-var">givenComponentId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.ComponentId.html/Distribution.Types.ComponentId.html#ComponentId"><span class="hs-identifier hs-type">ComponentId</span></a></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679447387"><span id="local-6989586621679447389"><span class="annot"><span class="annottext">(forall x. GivenComponent -&gt; Rep GivenComponent x)
+</span><span id="line-19"></span><span class="hs-comment">-- It enables Cabal to know which 'ComponentId' to associate with a library</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- @since 2.3.0.0</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">data</span><span> </span><span id="GivenComponent"><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-var">GivenComponent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GivenComponent"><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-var">GivenComponent</span></a></span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="givenComponentPackage"><span class="annot"><span class="annottext">GivenComponent -&gt; PackageName
+</span><a href="Distribution.Types.GivenComponent.html#givenComponentPackage"><span class="hs-identifier hs-var hs-var">givenComponentPackage</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="givenComponentName"><span class="annot"><span class="annottext">GivenComponent -&gt; LibraryName
+</span><a href="Distribution.Types.GivenComponent.html#givenComponentName"><span class="hs-identifier hs-var hs-var">givenComponentName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span> </span><span class="hs-comment">-- --dependency is for libraries</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-comment">-- only, not for any component</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="givenComponentId"><span class="annot"><span class="annottext">GivenComponent -&gt; ComponentId
+</span><a href="Distribution.Types.GivenComponent.html#givenComponentId"><span class="hs-identifier hs-var hs-var">givenComponentId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ComponentId.html#ComponentId"><span class="hs-identifier hs-type">ComponentId</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679501199"><span id="local-6989586621679501201"><span class="annot"><span class="annottext">(forall x. GivenComponent -&gt; Rep GivenComponent x)
 -&gt; (forall x. Rep GivenComponent x -&gt; GivenComponent)
 -&gt; Generic GivenComponent
 forall x. Rep GivenComponent x -&gt; GivenComponent
@@ -37,7 +39,7 @@ $cfrom :: forall x. GivenComponent -&gt; Rep GivenComponent x
 from :: forall x. GivenComponent -&gt; Rep GivenComponent x
 $cto :: forall x. Rep GivenComponent x -&gt; GivenComponent
 to :: forall x. Rep GivenComponent x -&gt; GivenComponent
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447395"><span id="local-6989586621679447399"><span id="local-6989586621679447402"><span id="local-6989586621679447420"><span class="annot"><span class="annottext">ReadPrec [GivenComponent]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679501207"><span id="local-6989586621679501211"><span id="local-6989586621679501214"><span id="local-6989586621679501232"><span class="annot"><span class="annottext">ReadPrec [GivenComponent]
 ReadPrec GivenComponent
 Int -&gt; ReadS GivenComponent
 ReadS [GivenComponent]
@@ -57,7 +59,7 @@ $creadPrec :: ReadPrec GivenComponent
 readPrec :: ReadPrec GivenComponent
 $creadListPrec :: ReadPrec [GivenComponent]
 readListPrec :: ReadPrec [GivenComponent]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447427"><span id="local-6989586621679447437"><span id="local-6989586621679447441"><span class="annot"><span class="annottext">Int -&gt; GivenComponent -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679501239"><span id="local-6989586621679501249"><span id="local-6989586621679501253"><span class="annot"><span class="annottext">Int -&gt; GivenComponent -&gt; ShowS
 [GivenComponent] -&gt; ShowS
 GivenComponent -&gt; String
 (Int -&gt; GivenComponent -&gt; ShowS)
@@ -72,7 +74,7 @@ $cshow :: GivenComponent -&gt; String
 show :: GivenComponent -&gt; String
 $cshowList :: [GivenComponent] -&gt; ShowS
 showList :: [GivenComponent] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447446"><span id="local-6989586621679447454"><span class="annot"><span class="annottext">GivenComponent -&gt; GivenComponent -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679501258"><span id="local-6989586621679501266"><span class="annot"><span class="annottext">GivenComponent -&gt; GivenComponent -&gt; Bool
 (GivenComponent -&gt; GivenComponent -&gt; Bool)
 -&gt; (GivenComponent -&gt; GivenComponent -&gt; Bool) -&gt; Eq GivenComponent
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -81,7 +83,82 @@ $c== :: GivenComponent -&gt; GivenComponent -&gt; Bool
 $c/= :: GivenComponent -&gt; GivenComponent -&gt; Bool
 /= :: GivenComponent -&gt; GivenComponent -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
-</span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679447459"><span id="local-6989586621679447466"><span id="local-6989586621679447472"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-type">GivenComponent</span></a></span></span></span></span><span>
-</span><span id="line-29"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679447511"><span id="local-6989586621679447518"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-type">GivenComponent</span></a></span></span></span><span>
-</span><span id="line-30"></span></pre></body></html>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679501271"><span id="local-6989586621679501278"><span id="local-6989586621679501284"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-type">GivenComponent</span></a></span></span></span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679501323"><span id="local-6989586621679501330"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#GivenComponent"><span class="hs-identifier hs-type">GivenComponent</span></a></span></span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | A 'PromisedComponent' represents a promised library depended on and explicitly</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- specified by the user/client with @--promised-dependency@</span><span>
+</span><span id="line-35"></span><span class="hs-comment">--</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- It enables Cabal to know which 'ComponentId' to associate with a library</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- @since 3.14.0.0</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="PromisedComponent"><span class="annot"><a href="Distribution.Types.GivenComponent.html#PromisedComponent"><span class="hs-identifier hs-var">PromisedComponent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PromisedComponent"><span class="annot"><a href="Distribution.Types.GivenComponent.html#PromisedComponent"><span class="hs-identifier hs-var">PromisedComponent</span></a></span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="promisedComponentPackage"><span class="annot"><span class="annottext">PromisedComponent -&gt; PackageId
+</span><a href="Distribution.Types.GivenComponent.html#promisedComponentPackage"><span class="hs-identifier hs-var hs-var">promisedComponentPackage</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageId.html#PackageId"><span class="hs-identifier hs-type">PackageId</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="promisedComponentName"><span class="annot"><span class="annottext">PromisedComponent -&gt; LibraryName
+</span><a href="Distribution.Types.GivenComponent.html#promisedComponentName"><span class="hs-identifier hs-var hs-var">promisedComponentName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span> </span><span class="hs-comment">-- --dependency is for libraries</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-comment">-- only, not for any component</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="promisedComponentId"><span class="annot"><span class="annottext">PromisedComponent -&gt; ComponentId
+</span><a href="Distribution.Types.GivenComponent.html#promisedComponentId"><span class="hs-identifier hs-var hs-var">promisedComponentId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ComponentId.html#ComponentId"><span class="hs-identifier hs-type">ComponentId</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679501376"><span id="local-6989586621679501378"><span class="annot"><span class="annottext">(forall x. PromisedComponent -&gt; Rep PromisedComponent x)
+-&gt; (forall x. Rep PromisedComponent x -&gt; PromisedComponent)
+-&gt; Generic PromisedComponent
+forall x. Rep PromisedComponent x -&gt; PromisedComponent
+forall x. PromisedComponent -&gt; Rep PromisedComponent x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. PromisedComponent -&gt; Rep PromisedComponent x
+from :: forall x. PromisedComponent -&gt; Rep PromisedComponent x
+$cto :: forall x. Rep PromisedComponent x -&gt; PromisedComponent
+to :: forall x. Rep PromisedComponent x -&gt; PromisedComponent
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679501381"><span id="local-6989586621679501385"><span id="local-6989586621679501388"><span id="local-6989586621679501403"><span class="annot"><span class="annottext">ReadPrec [PromisedComponent]
+ReadPrec PromisedComponent
+Int -&gt; ReadS PromisedComponent
+ReadS [PromisedComponent]
+(Int -&gt; ReadS PromisedComponent)
+-&gt; ReadS [PromisedComponent]
+-&gt; ReadPrec PromisedComponent
+-&gt; ReadPrec [PromisedComponent]
+-&gt; Read PromisedComponent
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS PromisedComponent
+readsPrec :: Int -&gt; ReadS PromisedComponent
+$creadList :: ReadS [PromisedComponent]
+readList :: ReadS [PromisedComponent]
+$creadPrec :: ReadPrec PromisedComponent
+readPrec :: ReadPrec PromisedComponent
+$creadListPrec :: ReadPrec [PromisedComponent]
+readListPrec :: ReadPrec [PromisedComponent]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679501406"><span id="local-6989586621679501413"><span id="local-6989586621679501417"><span class="annot"><span class="annottext">Int -&gt; PromisedComponent -&gt; ShowS
+[PromisedComponent] -&gt; ShowS
+PromisedComponent -&gt; String
+(Int -&gt; PromisedComponent -&gt; ShowS)
+-&gt; (PromisedComponent -&gt; String)
+-&gt; ([PromisedComponent] -&gt; ShowS)
+-&gt; Show PromisedComponent
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; PromisedComponent -&gt; ShowS
+showsPrec :: Int -&gt; PromisedComponent -&gt; ShowS
+$cshow :: PromisedComponent -&gt; String
+show :: PromisedComponent -&gt; String
+$cshowList :: [PromisedComponent] -&gt; ShowS
+showList :: [PromisedComponent] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679501420"><span id="local-6989586621679501426"><span class="annot"><span class="annottext">PromisedComponent -&gt; PromisedComponent -&gt; Bool
+(PromisedComponent -&gt; PromisedComponent -&gt; Bool)
+-&gt; (PromisedComponent -&gt; PromisedComponent -&gt; Bool)
+-&gt; Eq PromisedComponent
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: PromisedComponent -&gt; PromisedComponent -&gt; Bool
+== :: PromisedComponent -&gt; PromisedComponent -&gt; Bool
+$c/= :: PromisedComponent -&gt; PromisedComponent -&gt; Bool
+/= :: PromisedComponent -&gt; PromisedComponent -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679501430"><span id="local-6989586621679501437"><span id="local-6989586621679501443"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#PromisedComponent"><span class="hs-identifier hs-type">PromisedComponent</span></a></span></span></span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679501473"><span id="local-6989586621679501480"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.GivenComponent.html#PromisedComponent"><span class="hs-identifier hs-type">PromisedComponent</span></a></span></span></span><span>
+</span><span id="line-49"></span></pre></body></html>

@@ -8,7 +8,7 @@
 --   <tt>ghci</tt> interactive shell and <tt>iserv</tt>, GHC's
 --   out-of-process interpreter backend.
 @package ghci
-@version 9.10.1
+@version 9.12.2
 
 
 -- | Efficient serialisation for GHCi Instruction arrays
@@ -58,17 +58,11 @@ FFIUInt8 :: FFIType
 FFIUInt16 :: FFIType
 FFIUInt32 :: FFIType
 FFIUInt64 :: FFIType
-data FFIConv
-FFICCall :: FFIConv
-FFIStdCall :: FFIConv
 data C_ffi_cif
-prepForeignCall :: FFIConv -> [FFIType] -> FFIType -> IO (Ptr C_ffi_cif)
+prepForeignCall :: [FFIType] -> FFIType -> IO (Ptr C_ffi_cif)
 freeForeignCallInfo :: Ptr C_ffi_cif -> IO ()
-instance Data.Binary.Class.Binary GHCi.FFI.FFIConv
 instance Data.Binary.Class.Binary GHCi.FFI.FFIType
-instance GHC.Internal.Generics.Generic GHCi.FFI.FFIConv
 instance GHC.Internal.Generics.Generic GHCi.FFI.FFIType
-instance GHC.Internal.Show.Show GHCi.FFI.FFIConv
 instance GHC.Internal.Show.Show GHCi.FFI.FFIType
 
 
@@ -137,64 +131,17 @@ instance GHC.Internal.Show.Show GHCi.RemoteTypes.HValue
 instance GHC.Internal.Show.Show (GHCi.RemoteTypes.RemotePtr a)
 instance GHC.Internal.Show.Show (GHCi.RemoteTypes.RemoteRef a)
 
-
--- | Primarily, this module consists of an interface to the C-land dynamic
---   linker.
-module GHCi.ObjLink
-initObjLinker :: ShouldRetainCAFs -> IO ()
-data ShouldRetainCAFs
-
--- | Retain CAFs unconditionally in linked Haskell code. Note that this
---   prevents any code from being unloaded. It should not be necessary
---   unless you are GHCi or hs-plugins, which needs to be able call any
---   function in the compiled code.
-RetainCAFs :: ShouldRetainCAFs
-
--- | Do not retain CAFs. Everything reachable from foreign exports will be
---   retained, due to the StablePtrs created by the module initialisation
---   code. unloadObj frees these StablePtrs, which will allow the CAFs to
---   be GC'd and the code to be removed.
-DontRetainCAFs :: ShouldRetainCAFs
-
--- | loadDLL loads a dynamic library using the OS's native linker (i.e.
---   dlopen() on Unix, LoadLibrary() on Windows). It takes either an
---   absolute pathname to the file, or a relative filename (e.g.
---   "libfoo.so" or "foo.dll"). In the latter case, loadDLL searches the
---   standard locations for the appropriate library.
-loadDLL :: String -> IO (Maybe String)
-loadArchive :: String -> IO ()
-loadObj :: String -> IO ()
-
--- | <tt>unloadObj</tt> drops the given dynamic library from the symbol
---   table as well as enables the library to be removed from memory during
---   a future major GC.
-unloadObj :: String -> IO ()
-
--- | <tt>purgeObj</tt> drops the symbols for the dynamic library from the
---   symbol table. Unlike <a>unloadObj</a>, the library will not be dropped
---   memory during a future major GC.
-purgeObj :: String -> IO ()
-lookupSymbol :: String -> IO (Maybe (Ptr a))
-lookupClosure :: String -> IO (Maybe HValueRef)
-resolveObjs :: IO Bool
-addLibrarySearchPath :: String -> IO (Ptr ())
-removeLibrarySearchPath :: Ptr () -> IO Bool
-findSystemLibrary :: String -> IO (Maybe String)
-
 module GHCi.ResolvedBCO
 
 -- | A <a>ResolvedBCO</a> is one in which all the <tt>Name</tt> references
 --   have been resolved to actual addresses or <tt>RemoteHValues</tt>.
---   
---   Note, all arrays are zero-indexed (we assume this when
---   serializing/deserializing)
 data ResolvedBCO
-ResolvedBCO :: Bool -> {-# UNPACK #-} !Int -> UArray Int Word16 -> UArray Int Word64 -> UArray Int Word64 -> SizedSeq ResolvedBCOPtr -> ResolvedBCO
+ResolvedBCO :: Bool -> {-# UNPACK #-} !Int -> BCOByteArray Word16 -> BCOByteArray Word -> BCOByteArray Word -> SizedSeq ResolvedBCOPtr -> ResolvedBCO
 [resolvedBCOIsLE] :: ResolvedBCO -> Bool
 [resolvedBCOArity] :: ResolvedBCO -> {-# UNPACK #-} !Int
-[resolvedBCOInstrs] :: ResolvedBCO -> UArray Int Word16
-[resolvedBCOBitmap] :: ResolvedBCO -> UArray Int Word64
-[resolvedBCOLits] :: ResolvedBCO -> UArray Int Word64
+[resolvedBCOInstrs] :: ResolvedBCO -> BCOByteArray Word16
+[resolvedBCOBitmap] :: ResolvedBCO -> BCOByteArray Word
+[resolvedBCOLits] :: ResolvedBCO -> BCOByteArray Word
 [resolvedBCOPtrs] :: ResolvedBCO -> SizedSeq ResolvedBCOPtr
 data ResolvedBCOPtr
 
@@ -213,10 +160,22 @@ ResolvedBCOPtrBCO :: ResolvedBCO -> ResolvedBCOPtr
 -- | Resolves to the MutableArray# inside the BreakArray
 ResolvedBCOPtrBreakArray :: {-# UNPACK #-} !RemoteRef BreakArray -> ResolvedBCOPtr
 isLittleEndian :: Bool
+
+-- | Wrapper for a <a>ByteArray#</a>. The phantom type tells what elements
+--   are stored in the <a>ByteArray#</a>. Creating a <a>ByteArray#</a> can
+--   be achieved using <tt>UArray'</tt>s API, where the underlying
+--   <a>ByteArray#</a> can be unpacked.
+data BCOByteArray a
+BCOByteArray :: !ByteArray# -> BCOByteArray a
+[getBCOByteArray] :: BCOByteArray a -> !ByteArray#
+mkBCOByteArray :: UArray Int a -> BCOByteArray a
+instance (Data.Binary.Class.Binary a, GHC.Internal.Foreign.Storable.Storable a, Data.Array.Base.IArray Data.Array.Base.UArray a) => Data.Binary.Class.Binary (GHCi.ResolvedBCO.BCOByteArray a)
 instance Data.Binary.Class.Binary GHCi.ResolvedBCO.ResolvedBCO
 instance Data.Binary.Class.Binary GHCi.ResolvedBCO.ResolvedBCOPtr
 instance GHC.Internal.Generics.Generic GHCi.ResolvedBCO.ResolvedBCO
 instance GHC.Internal.Generics.Generic GHCi.ResolvedBCO.ResolvedBCOPtr
+instance GHC.Internal.Show.Show (GHCi.ResolvedBCO.BCOByteArray GHC.Internal.Word.Word16)
+instance GHC.Internal.Show.Show (GHCi.ResolvedBCO.BCOByteArray GHC.Types.Word)
 instance GHC.Internal.Show.Show GHCi.ResolvedBCO.ResolvedBCO
 instance GHC.Internal.Show.Show GHCi.ResolvedBCO.ResolvedBCOPtr
 
@@ -239,63 +198,63 @@ module GHCi.StaticPtrTable
 sptAddEntry :: Fingerprint -> HValue -> IO ()
 
 module GHCi.TH.Binary
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.AnnLookup
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.AnnTarget
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Bang
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.BndrVis
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Body
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Bytes
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Callconv
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Clause
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Con
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Dec
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DecidedStrictness
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DerivClause
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DerivStrategy
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DocLoc
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Exp
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FamilyResultSig
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Fixity
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FixityDirection
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Foreign
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FunDep
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Guard
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Info
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.InjectivityAnn
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Inline
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Lit
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Loc
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Match
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.ModName
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Module
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.ModuleInfo
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Name
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NameFlavour
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NameSpace
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NamespaceSpecifier
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.OccName
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Overlap
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Pat
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PatSynArgs
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PatSynDir
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Phases
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PkgName
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Pragma
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Range
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Role
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.RuleBndr
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.RuleMatch
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Safety
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.AnnLookup
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.AnnTarget
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Bang
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.BndrVis
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Body
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Bytes
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Callconv
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Clause
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Con
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Dec
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.DecidedStrictness
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.DerivClause
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.DerivStrategy
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.DocLoc
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Exp
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.FamilyResultSig
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Fixity
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.FixityDirection
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Foreign
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.FunDep
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Guard
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Info
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.InjectivityAnn
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Inline
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Lit
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Loc
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Match
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.ModName
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Module
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.ModuleInfo
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Name
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.NameFlavour
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.NameSpace
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.NamespaceSpecifier
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.OccName
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Overlap
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Pat
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.PatSynArgs
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.PatSynDir
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Phases
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.PkgName
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Pragma
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Range
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Role
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.RuleBndr
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.RuleMatch
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Safety
 instance Data.Binary.Class.Binary GHC.Serialized.Serialized
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.SourceStrictness
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.SourceUnpackedness
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Specificity
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Stmt
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TyLit
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TySynEqn
-instance Data.Binary.Class.Binary flag => Data.Binary.Class.Binary (Language.Haskell.TH.Syntax.TyVarBndr flag)
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Type
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TypeFamilyHead
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.SourceStrictness
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.SourceUnpackedness
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Specificity
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Stmt
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.TyLit
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.TySynEqn
+instance Data.Binary.Class.Binary flag => Data.Binary.Class.Binary (GHC.Internal.TH.Syntax.TyVarBndr flag)
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.Type
+instance Data.Binary.Class.Binary GHC.Internal.TH.Syntax.TypeFamilyHead
 
 
 -- | Remote GHCi message types and serialization.
@@ -313,8 +272,9 @@ data Message a
 [RtsRevertCAFs] :: Message ()
 [InitLinker] :: Message ()
 [LookupSymbol] :: String -> Message (Maybe (RemotePtr ()))
+[LookupSymbolInDLL] :: RemotePtr LoadedDLL -> String -> Message (Maybe (RemotePtr ()))
 [LookupClosure] :: String -> Message (Maybe HValueRef)
-[LoadDLL] :: String -> Message (Maybe String)
+[LoadDLL] :: String -> Message (Either String (RemotePtr LoadedDLL))
 [LoadArchive] :: String -> Message ()
 [LoadObj] :: String -> Message ()
 [UnloadObj] :: String -> Message ()
@@ -340,7 +300,7 @@ data Message a
 [MallocStrings] :: [ByteString] -> Message [RemotePtr ()]
 
 -- | Calls <a>prepareForeignCall</a>
-[PrepFFI] :: FFIConv -> [FFIType] -> FFIType -> Message (RemotePtr C_ffi_cif)
+[PrepFFI] :: [FFIType] -> FFIType -> Message (RemotePtr C_ffi_cif)
 
 -- | Free data previously created by <a>PrepFFI</a>
 [FreeFFI] :: RemotePtr C_ffi_cif -> Message ()
@@ -487,7 +447,19 @@ data EvalExpr a
 EvalThis :: a -> EvalExpr a
 EvalApp :: EvalExpr a -> EvalExpr a -> EvalExpr a
 data EvalBreakpoint
-EvalBreakpoint :: Int -> String -> EvalBreakpoint
+EvalBreakpoint :: String -> Int -> String -> Int -> EvalBreakpoint
+
+-- | Breakpoint tick module
+[eb_tick_mod] :: EvalBreakpoint -> String
+
+-- | Breakpoint tick index
+[eb_tick_index] :: EvalBreakpoint -> Int
+
+-- | Breakpoint info module
+[eb_info_mod] :: EvalBreakpoint -> String
+
+-- | Breakpoint info index
+[eb_info_index] :: EvalBreakpoint -> Int
 data SerializableException
 EUserInterrupt :: SerializableException
 EExitCode :: ExitCode -> SerializableException
@@ -539,6 +511,9 @@ writePipe :: Pipe -> Put -> IO ()
 -- | A dummy type that tags the pointer to a breakpoint's
 --   <tt>ModuleName</tt>, because that type isn't available here.
 data BreakModule
+
+-- | A dummy type that tags pointers returned by <a>LoadDLL</a>.
+data LoadedDLL
 instance Data.Binary.Class.Binary GHC.Internal.ClosureTypes.ClosureType
 instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.CostCentre
 instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
@@ -609,9 +584,54 @@ instance GHC.Internal.Exception.Type.Exception GHCi.TH.GHCiQException
 instance GHC.Internal.Base.Functor GHCi.TH.GHCiQ
 instance GHC.Internal.Control.Monad.Fail.MonadFail GHCi.TH.GHCiQ
 instance GHC.Internal.Base.Monad GHCi.TH.GHCiQ
-instance Control.Monad.IO.Class.MonadIO GHCi.TH.GHCiQ
-instance Language.Haskell.TH.Syntax.Quasi GHCi.TH.GHCiQ
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO GHCi.TH.GHCiQ
+instance GHC.Internal.TH.Syntax.Quasi GHCi.TH.GHCiQ
 instance GHC.Internal.Show.Show GHCi.TH.GHCiQException
+
+
+-- | Primarily, this module consists of an interface to the C-land dynamic
+--   linker.
+module GHCi.ObjLink
+initObjLinker :: ShouldRetainCAFs -> IO ()
+data ShouldRetainCAFs
+
+-- | Retain CAFs unconditionally in linked Haskell code. Note that this
+--   prevents any code from being unloaded. It should not be necessary
+--   unless you are GHCi or hs-plugins, which needs to be able call any
+--   function in the compiled code.
+RetainCAFs :: ShouldRetainCAFs
+
+-- | Do not retain CAFs. Everything reachable from foreign exports will be
+--   retained, due to the StablePtrs created by the module initialisation
+--   code. unloadObj frees these StablePtrs, which will allow the CAFs to
+--   be GC'd and the code to be removed.
+DontRetainCAFs :: ShouldRetainCAFs
+
+-- | loadDLL loads a dynamic library using the OS's native linker (i.e.
+--   dlopen() on Unix, LoadLibrary() on Windows). It takes either an
+--   absolute pathname to the file, or a relative filename (e.g.
+--   "libfoo.so" or "foo.dll"). In the latter case, loadDLL searches the
+--   standard locations for the appropriate library.
+loadDLL :: String -> IO (Either String (Ptr LoadedDLL))
+loadArchive :: String -> IO ()
+loadObj :: String -> IO ()
+
+-- | <tt>unloadObj</tt> drops the given dynamic library from the symbol
+--   table as well as enables the library to be removed from memory during
+--   a future major GC.
+unloadObj :: String -> IO ()
+
+-- | <tt>purgeObj</tt> drops the symbols for the dynamic library from the
+--   symbol table. Unlike <a>unloadObj</a>, the library will not be dropped
+--   memory during a future major GC.
+purgeObj :: String -> IO ()
+lookupSymbol :: String -> IO (Maybe (Ptr a))
+lookupSymbolInDLL :: Ptr LoadedDLL -> String -> IO (Maybe (Ptr a))
+lookupClosure :: String -> IO (Maybe HValueRef)
+resolveObjs :: IO Bool
+addLibrarySearchPath :: String -> IO (Ptr ())
+removeLibrarySearchPath :: Ptr () -> IO Bool
+findSystemLibrary :: String -> IO (Maybe String)
 
 
 -- | Execute GHCi messages.

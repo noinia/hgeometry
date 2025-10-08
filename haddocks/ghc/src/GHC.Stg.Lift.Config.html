@@ -22,7 +22,7 @@
 </span><a href="GHC.Stg.Lift.Config.html#c_liftLamsKnown"><span class="hs-identifier hs-var hs-var">c_liftLamsKnown</span></a></span></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-19"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Lambda lift even when this turns a known call into an unknown call.</span></span><span>
 </span><span id="line-20"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682369426"><span id="local-6989586621682369438"><span id="local-6989586621682369442"><span class="annot"><span class="annottext">Int -&gt; StgLiftConfig -&gt; ShowS
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682518808"><span id="local-6989586621682518820"><span id="local-6989586621682518824"><span class="annot"><span class="annottext">Int -&gt; StgLiftConfig -&gt; ShowS
 [StgLiftConfig] -&gt; ShowS
 StgLiftConfig -&gt; String
 (Int -&gt; StgLiftConfig -&gt; ShowS)
@@ -37,7 +37,7 @@ $cshow :: StgLiftConfig -&gt; String
 show :: StgLiftConfig -&gt; String
 $cshowList :: [StgLiftConfig] -&gt; ShowS
 showList :: [StgLiftConfig] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682369448"><span id="local-6989586621682369452"><span id="local-6989586621682369455"><span id="local-6989586621682369477"><span class="annot"><span class="annottext">ReadPrec [StgLiftConfig]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682518830"><span id="local-6989586621682518834"><span id="local-6989586621682518837"><span id="local-6989586621682518859"><span class="annot"><span class="annottext">ReadPrec [StgLiftConfig]
 ReadPrec StgLiftConfig
 Int -&gt; ReadS StgLiftConfig
 ReadS [StgLiftConfig]
@@ -57,7 +57,7 @@ $creadPrec :: ReadPrec StgLiftConfig
 readPrec :: ReadPrec StgLiftConfig
 $creadListPrec :: ReadPrec [StgLiftConfig]
 readListPrec :: ReadPrec [StgLiftConfig]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682369485"><span id="local-6989586621682369495"><span class="annot"><span class="annottext">StgLiftConfig -&gt; StgLiftConfig -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682518867"><span id="local-6989586621682518877"><span class="annot"><span class="annottext">StgLiftConfig -&gt; StgLiftConfig -&gt; Bool
 (StgLiftConfig -&gt; StgLiftConfig -&gt; Bool)
 -&gt; (StgLiftConfig -&gt; StgLiftConfig -&gt; Bool) -&gt; Eq StgLiftConfig
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -65,7 +65,7 @@ $c== :: StgLiftConfig -&gt; StgLiftConfig -&gt; Bool
 == :: StgLiftConfig -&gt; StgLiftConfig -&gt; Bool
 $c/= :: StgLiftConfig -&gt; StgLiftConfig -&gt; Bool
 /= :: StgLiftConfig -&gt; StgLiftConfig -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682369503"><span id="local-6989586621682369513"><span id="local-6989586621682369520"><span id="local-6989586621682369524"><span id="local-6989586621682369527"><span id="local-6989586621682369530"><span id="local-6989586621682369533"><span class="annot"><span class="annottext">Eq StgLiftConfig
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682518885"><span id="local-6989586621682518895"><span id="local-6989586621682518902"><span id="local-6989586621682518906"><span id="local-6989586621682518909"><span id="local-6989586621682518912"><span id="local-6989586621682518915"><span class="annot"><span class="annottext">Eq StgLiftConfig
 Eq StgLiftConfig =&gt;
 (StgLiftConfig -&gt; StgLiftConfig -&gt; Ordering)
 -&gt; (StgLiftConfig -&gt; StgLiftConfig -&gt; Bool)

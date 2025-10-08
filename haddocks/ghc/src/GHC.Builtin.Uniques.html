@@ -69,16 +69,16 @@
 </span><span id="line-69"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html"><span class="hs-identifier">GHC.Utils.Outputable</span></a></span><span>
 </span><span id="line-70"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.html"><span class="hs-identifier">GHC.Utils.Panic</span></a></span><span>
 </span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Maybe.html/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span>
 </span><span id="line-73"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Word64.html"><span class="hs-identifier">GHC.Utils.Word64</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Word64.html#word64ToInt"><span class="hs-identifier">word64ToInt</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="annot"><span class="hs-comment">-- | Get the 'Name' associated with a known-key 'Unique'.</span></span><span>
 </span><span id="line-76"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#knownUniqueName"><span class="hs-identifier hs-type">knownUniqueName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-77"></span><span id="knownUniqueName"><span class="annot"><span class="annottext">knownUniqueName :: Unique -&gt; Maybe Name
-</span><a href="GHC.Builtin.Uniques.html#knownUniqueName"><span class="hs-identifier hs-var hs-var">knownUniqueName</span></a></span></span><span> </span><span id="local-6989586621682373339"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373339"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#knownUniqueName"><span class="hs-identifier hs-var hs-var">knownUniqueName</span></a></span></span><span> </span><span id="local-6989586621682523514"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523514"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-78"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373340"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682523515"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-79"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'z'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -86,7 +86,7 @@ forall a. a -&gt; Maybe a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getUnboxedSumName"><span class="hs-identifier hs-var">getUnboxedSumName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-80"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'4'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -95,7 +95,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getTupleTyConName"><span class="hs-identifier hs-var">getTupleTyConName</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-81"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'5'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -104,7 +104,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getTupleTyConName"><span class="hs-identifier hs-var">getTupleTyConName</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-82"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'7'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -113,7 +113,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getTupleDataConName"><span class="hs-identifier hs-var">getTupleDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-83"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'8'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -122,7 +122,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getTupleDataConName"><span class="hs-identifier hs-var">getTupleDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-84"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'j'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -130,7 +130,7 @@ forall a. a -&gt; Maybe a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getCTupleSelIdName"><span class="hs-identifier hs-var">getCTupleSelIdName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-85"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'k'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -138,7 +138,7 @@ forall a. a -&gt; Maybe a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getCTupleTyConName"><span class="hs-identifier hs-var">getCTupleTyConName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-86"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'m'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
@@ -146,27 +146,27 @@ forall a. a -&gt; Maybe a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Uniques.html#getCTupleDataConName"><span class="hs-identifier hs-var">getCTupleDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var">n</span></a></span><span>
 </span><span id="line-87"></span><span>      </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-identifier">_</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Name
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-88"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-89"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682373340"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373340"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682373350"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373350"><span class="hs-identifier hs-var">n'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
+</span><span id="line-89"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682523515"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682523515"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682523525"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523525"><span class="hs-identifier hs-var">n'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
 </span><a href="GHC.Types.Unique.html#unpkUnique"><span class="hs-identifier hs-var">unpkUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373339"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><a href="#local-6989586621682523514"><span class="hs-identifier hs-var">u</span></a></span><span>
 </span><span id="line-90"></span><span>    </span><span class="hs-comment">-- Known unique names are guaranteed to fit in Int, so we don't need the whole Word64.</span><span>
-</span><span id="line-91"></span><span>    </span><span id="local-6989586621682373342"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621682373342"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Int -&gt; Int
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621682523517"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621682523517"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Int -&gt; Int
 forall a. HasCallStack =&gt; Bool -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-identifier hs-var">assert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unique -&gt; Bool
 </span><a href="GHC.Types.Unique.html#isValidKnownKeyUnique"><span class="hs-identifier hs-var">isValidKnownKeyUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373339"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HasCallStack =&gt; Word64 -&gt; Int
-Word64 -&gt; Int
+</span><a href="#local-6989586621682523514"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Int
+HasDebugCallStack =&gt; Word64 -&gt; Int
 </span><a href="GHC.Utils.Word64.html#word64ToInt"><span class="hs-identifier hs-var">word64ToInt</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373350"><span class="hs-identifier hs-var">n'</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523525"><span class="hs-identifier hs-var">n'</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-92"></span><span>
 </span><span id="line-93"></span><span class="hs-comment">{-
 Note [Unique layout for unboxed sums]
@@ -195,18 +195,18 @@ TypeRep for sum DataCon of arity k and alternative n (zero-based):
 </span><span id="line-117"></span><span>
 </span><span id="line-118"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkSumTyConUnique"><span class="hs-identifier hs-type">mkSumTyConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-119"></span><span id="mkSumTyConUnique"><span class="annot"><span class="annottext">mkSumTyConUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkSumTyConUnique"><span class="hs-identifier hs-var hs-var">mkSumTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682373355"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373355"><span class="hs-identifier hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#mkSumTyConUnique"><span class="hs-identifier hs-var hs-var">mkSumTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682523530"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523530"><span class="hs-identifier hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-120"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; SDoc -&gt; Unique -&gt; Unique
 forall a. HasCallStack =&gt; Bool -&gt; SDoc -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.html#assertPpr"><span class="hs-identifier hs-var">assertPpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373355"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682523530"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0x3f</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373355"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Unique -&gt; Unique) -&gt; Unique -&gt; Unique
+</span><a href="#local-6989586621682523530"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Unique -&gt; Unique) -&gt; Unique -&gt; Unique
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-121"></span><span>              </span><span class="hs-comment">-- 0x3f since we only have 6 bits to encode the</span><span>
@@ -214,7 +214,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-123"></span><span>    </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'z'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373355"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523530"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftL"><span class="hs-operator hs-var">`shiftL`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
@@ -224,11 +224,11 @@ forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span id="line-124"></span><span>
 </span><span id="line-125"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#isSumTyConUnique"><span class="hs-identifier hs-type">isSumTyConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span>
 </span><span id="line-126"></span><span id="isSumTyConUnique"><span class="annot"><span class="annottext">isSumTyConUnique :: Unique -&gt; Maybe Int
-</span><a href="GHC.Builtin.Uniques.html#isSumTyConUnique"><span class="hs-identifier hs-var hs-var">isSumTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682373362"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373362"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#isSumTyConUnique"><span class="hs-identifier hs-var hs-var">isSumTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682523537"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523537"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-127"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373363"><span class="hs-identifier hs-var">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373364"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Word64 -&gt; Word64
+</span><a href="#local-6989586621682523538"><span class="hs-identifier hs-var">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523539"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Word64 -&gt; Word64
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">0xfc</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
@@ -236,10 +236,10 @@ forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-char">'z'</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">0xfc</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe Int
 forall a. a -&gt; Maybe a
-</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HasCallStack =&gt; Word64 -&gt; Int
-Word64 -&gt; Int
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word64 -&gt; Int
+HasDebugCallStack =&gt; Word64 -&gt; Int
 </span><a href="GHC.Utils.Word64.html#word64ToInt"><span class="hs-identifier hs-var">word64ToInt</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373364"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523539"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftR"><span class="hs-operator hs-var">`shiftR`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">)</span><span>
@@ -248,22 +248,22 @@ forall a. Bits a =&gt; a -&gt; Int -&gt; a
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-130"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-131"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682373363"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373363"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682373364"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373364"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
+</span><span id="line-131"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682523538"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682523538"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682523539"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523539"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
 </span><a href="GHC.Types.Unique.html#unpkUnique"><span class="hs-identifier hs-var">unpkUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373362"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><a href="#local-6989586621682523537"><span class="hs-identifier hs-var">u</span></a></span><span>
 </span><span id="line-132"></span><span>
 </span><span id="line-133"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkSumDataConUnique"><span class="hs-identifier hs-type">mkSumDataConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#ConTagZ"><span class="hs-identifier hs-type">ConTagZ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-134"></span><span id="mkSumDataConUnique"><span class="annot"><span class="annottext">mkSumDataConUnique :: Int -&gt; Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkSumDataConUnique"><span class="hs-identifier hs-var hs-var">mkSumDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682373368"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373368"><span class="hs-identifier hs-var">alt</span></a></span></span><span> </span><span id="local-6989586621682373369"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373369"><span class="hs-identifier hs-var">arity</span></a></span></span><span>
+</span><a href="GHC.Builtin.Uniques.html#mkSumDataConUnique"><span class="hs-identifier hs-var hs-var">mkSumDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682523543"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523543"><span class="hs-identifier hs-var">alt</span></a></span></span><span> </span><span id="local-6989586621682523544"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523544"><span class="hs-identifier hs-var">arity</span></a></span></span><span>
 </span><span id="line-135"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373368"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682523543"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373369"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523544"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-136"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Unique
 forall a. HasCallStack =&gt; String -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-var">panic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
@@ -272,7 +272,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373368"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621682523543"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; &gt;= &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
@@ -280,29 +280,29 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373369"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523544"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-137"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>
 </span><span id="line-138"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'z'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373369"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523544"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftL"><span class="hs-operator hs-var">`shiftL`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373368"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523543"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftL"><span class="hs-operator hs-var">`shiftL`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">{- skip the tycon -}</span><span>
 </span><span id="line-139"></span><span>
 </span><span id="line-140"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#getUnboxedSumName"><span class="hs-identifier hs-type">getUnboxedSumName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-141"></span><span id="getUnboxedSumName"><span class="annot"><span class="annottext">getUnboxedSumName :: Int -&gt; Name
-</span><a href="GHC.Builtin.Uniques.html#getUnboxedSumName"><span class="hs-identifier hs-var hs-var">getUnboxedSumName</span></a></span></span><span> </span><span id="local-6989586621682373373"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373373"><span class="hs-identifier hs-var">n</span></a></span></span><span>
+</span><a href="GHC.Builtin.Uniques.html#getUnboxedSumName"><span class="hs-identifier hs-var hs-var">getUnboxedSumName</span></a></span></span><span> </span><span id="local-6989586621682523548"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523548"><span class="hs-identifier hs-var">n</span></a></span></span><span>
 </span><span id="line-142"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373373"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523548"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0xfc</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
@@ -310,21 +310,21 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0xfc</span></span><span>
 </span><span id="line-143"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373374"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682523549"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-144"></span><span>      </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0x0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Name
 </span><a href="GHC.Core.TyCon.html#tyConName"><span class="hs-identifier hs-var">tyConName</span></a></span><span> </span><span class="annot"><span class="annottext">(TyCon -&gt; Name) -&gt; TyCon -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; TyCon
 </span><a href="GHC.Builtin.Types.html#sumTyCon"><span class="hs-identifier hs-var">sumTyCon</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373377"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523552"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-145"></span><span>      </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0x1</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Name
-</span><a href="#local-6989586621682373378"><span class="hs-identifier hs-var">getRep</span></a></span><span> </span><span class="annot"><span class="annottext">(TyCon -&gt; Name) -&gt; TyCon -&gt; Name
+</span><a href="#local-6989586621682523553"><span class="hs-identifier hs-var">getRep</span></a></span><span> </span><span class="annot"><span class="annottext">(TyCon -&gt; Name) -&gt; TyCon -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; TyCon
 </span><a href="GHC.Builtin.Types.html#sumTyCon"><span class="hs-identifier hs-var">sumTyCon</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373377"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523552"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-146"></span><span>      </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; Name
 forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
@@ -332,9 +332,9 @@ forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 </span><span class="hs-string">&quot;getUnboxedSumName: invalid tag&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373374"><span class="hs-identifier hs-var">tag</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523549"><span class="hs-identifier hs-var">tag</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-147"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373374"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682523549"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0x0</span></span><span>
@@ -343,13 +343,13 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; DataCon
 </span><a href="GHC.Builtin.Types.html#sumDataCon"><span class="hs-identifier hs-var">sumDataCon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373382"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523557"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373377"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523552"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-149"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373374"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682523549"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0x1</span></span><span>
@@ -362,29 +362,29 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; DataCon
 </span><a href="GHC.Builtin.Types.html#sumDataCon"><span class="hs-identifier hs-var">sumDataCon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373382"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523557"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373377"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523552"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-151"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373374"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682523549"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0x2</span></span><span>
 </span><span id="line-152"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Name
-</span><a href="#local-6989586621682373378"><span class="hs-identifier hs-var">getRep</span></a></span><span> </span><span class="annot"><span class="annottext">(TyCon -&gt; Name) -&gt; TyCon -&gt; Name
+</span><a href="#local-6989586621682523553"><span class="hs-identifier hs-var">getRep</span></a></span><span> </span><span class="annot"><span class="annottext">(TyCon -&gt; Name) -&gt; TyCon -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; TyCon
 </span><a href="GHC.Core.DataCon.html#promoteDataCon"><span class="hs-identifier hs-var">promoteDataCon</span></a></span><span> </span><span class="annot"><span class="annottext">(DataCon -&gt; TyCon) -&gt; DataCon -&gt; TyCon
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; DataCon
 </span><a href="GHC.Builtin.Types.html#sumDataCon"><span class="hs-identifier hs-var">sumDataCon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373382"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523557"><span class="hs-identifier hs-var">alt</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373377"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523552"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-153"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>
 </span><span id="line-154"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; Name
@@ -393,32 +393,32 @@ forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 </span><span class="hs-string">&quot;getUnboxedSumName&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373373"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523548"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-155"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-156"></span><span>    </span><span id="local-6989586621682373377"><span class="annot"><span class="annottext">arity :: Int
-</span><a href="#local-6989586621682373377"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373373"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-156"></span><span>    </span><span id="local-6989586621682523552"><span class="annot"><span class="annottext">arity :: Int
+</span><a href="#local-6989586621682523552"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523548"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftR"><span class="hs-operator hs-var">`shiftR`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span>
-</span><span id="line-157"></span><span>    </span><span id="local-6989586621682373382"><span class="annot"><span class="annottext">alt :: Int
-</span><a href="#local-6989586621682373382"><span class="hs-identifier hs-var hs-var">alt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373373"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-157"></span><span>    </span><span id="local-6989586621682523557"><span class="annot"><span class="annottext">alt :: Int
+</span><a href="#local-6989586621682523557"><span class="hs-identifier hs-var hs-var">alt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523548"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0xfc</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftR"><span class="hs-operator hs-var">`shiftR`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span>
-</span><span id="line-158"></span><span>    </span><span id="local-6989586621682373374"><span class="annot"><span class="annottext">tag :: Int
-</span><a href="#local-6989586621682373374"><span class="hs-identifier hs-var hs-var">tag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-158"></span><span>    </span><span id="local-6989586621682523549"><span class="annot"><span class="annottext">tag :: Int
+</span><a href="#local-6989586621682523549"><span class="hs-identifier hs-var hs-var">tag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0x3</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373373"><span class="hs-identifier hs-var">n</span></a></span><span>
-</span><span id="line-159"></span><span>    </span><span id="local-6989586621682373378"><span class="annot"><span class="annottext">getRep :: TyCon -&gt; Name
-</span><a href="#local-6989586621682373378"><span class="hs-identifier hs-var hs-var">getRep</span></a></span></span><span> </span><span id="local-6989586621682373390"><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682373390"><span class="hs-identifier hs-var">tycon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682523548"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-159"></span><span>    </span><span id="local-6989586621682523553"><span class="annot"><span class="annottext">getRep :: TyCon -&gt; Name
+</span><a href="#local-6989586621682523553"><span class="hs-identifier hs-var hs-var">getRep</span></a></span></span><span> </span><span id="local-6989586621682523565"><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682523565"><span class="hs-identifier hs-var">tycon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-160"></span><span>        </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name -&gt; Name
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; Name
@@ -427,12 +427,12 @@ forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 </span><span class="hs-string">&quot;getUnboxedSumName(getRep)&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyCon -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682373390"><span class="hs-identifier hs-var">tycon</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523565"><span class="hs-identifier hs-var">tycon</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-161"></span><span>        </span><span class="annot"><span class="annottext">(Maybe Name -&gt; Name) -&gt; Maybe Name -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Maybe Name
 </span><a href="GHC.Core.TyCon.html#tyConRepName_maybe"><span class="hs-identifier hs-var">tyConRepName_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621682373390"><span class="hs-identifier hs-var">tycon</span></a></span><span>
+</span><a href="#local-6989586621682523565"><span class="hs-identifier hs-var">tycon</span></a></span><span>
 </span><span id="line-162"></span><span>
 </span><span id="line-163"></span><span class="hs-comment">-- Note [Uniques for tuple type and data constructors]</span><span>
 </span><span id="line-164"></span><span class="hs-comment">-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><span>
@@ -497,36 +497,36 @@ selector Uniques takes inspiration from the encoding for unboxed sum Uniques.
 </span><span id="line-223"></span><span>
 </span><span id="line-224"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkCTupleTyConUnique"><span class="hs-identifier hs-type">mkCTupleTyConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-225"></span><span id="mkCTupleTyConUnique"><span class="annot"><span class="annottext">mkCTupleTyConUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkCTupleTyConUnique"><span class="hs-identifier hs-var hs-var">mkCTupleTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682373393"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373393"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkCTupleTyConUnique"><span class="hs-identifier hs-var hs-var">mkCTupleTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682523568"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523568"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'k'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373393"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523568"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-226"></span><span>
 </span><span id="line-227"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkCTupleDataConUnique"><span class="hs-identifier hs-type">mkCTupleDataConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-228"></span><span id="mkCTupleDataConUnique"><span class="annot"><span class="annottext">mkCTupleDataConUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkCTupleDataConUnique"><span class="hs-identifier hs-var hs-var">mkCTupleDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682373395"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373395"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkCTupleDataConUnique"><span class="hs-identifier hs-var hs-var">mkCTupleDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682523570"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523570"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'m'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373395"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523570"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-229"></span><span>
 </span><span id="line-230"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkCTupleSelIdUnique"><span class="hs-identifier hs-type">mkCTupleSelIdUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#ConTagZ"><span class="hs-identifier hs-type">ConTagZ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-231"></span><span id="mkCTupleSelIdUnique"><span class="annot"><span class="annottext">mkCTupleSelIdUnique :: Int -&gt; Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkCTupleSelIdUnique"><span class="hs-identifier hs-var hs-var">mkCTupleSelIdUnique</span></a></span></span><span> </span><span id="local-6989586621682373396"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373396"><span class="hs-identifier hs-var">sc_pos</span></a></span></span><span> </span><span id="local-6989586621682373397"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373397"><span class="hs-identifier hs-var">arity</span></a></span></span><span>
+</span><a href="GHC.Builtin.Uniques.html#mkCTupleSelIdUnique"><span class="hs-identifier hs-var hs-var">mkCTupleSelIdUnique</span></a></span></span><span> </span><span id="local-6989586621682523571"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523571"><span class="hs-identifier hs-var">sc_pos</span></a></span></span><span> </span><span id="local-6989586621682523572"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523572"><span class="hs-identifier hs-var">arity</span></a></span></span><span>
 </span><span id="line-232"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373396"><span class="hs-identifier hs-var">sc_pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682523571"><span class="hs-identifier hs-var">sc_pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373397"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523572"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-233"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Unique
 forall a. HasCallStack =&gt; String -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-var">panic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
@@ -535,7 +535,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373396"><span class="hs-identifier hs-var">sc_pos</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621682523571"><span class="hs-identifier hs-var">sc_pos</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; &gt;= &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
@@ -543,42 +543,42 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373397"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523572"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-234"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>
 </span><span id="line-235"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'j'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373397"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523572"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftL"><span class="hs-operator hs-var">`shiftL`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="GHC.Builtin.Uniques.html#cTupleSelIdArityBits"><span class="hs-identifier hs-var">cTupleSelIdArityBits</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373396"><span class="hs-identifier hs-var">sc_pos</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523571"><span class="hs-identifier hs-var">sc_pos</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-236"></span><span>
 </span><span id="line-237"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#getCTupleTyConName"><span class="hs-identifier hs-type">getCTupleTyConName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-238"></span><span id="getCTupleTyConName"><span class="annot"><span class="annottext">getCTupleTyConName :: Int -&gt; Name
-</span><a href="GHC.Builtin.Uniques.html#getCTupleTyConName"><span class="hs-identifier hs-var hs-var">getCTupleTyConName</span></a></span></span><span> </span><span id="local-6989586621682373399"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373399"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#getCTupleTyConName"><span class="hs-identifier hs-var hs-var">getCTupleTyConName</span></a></span></span><span> </span><span id="local-6989586621682523574"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523574"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-239"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373399"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
+</span><a href="#local-6989586621682523574"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`divMod`</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-240"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373401"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373401"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-240"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523576"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523576"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Types.html#cTupleTyConName"><span class="hs-identifier hs-var">cTupleTyConName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373401"><span class="hs-identifier hs-var">arity</span></a></span><span>
-</span><span id="line-241"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373403"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373403"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523576"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><span id="line-241"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523578"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523578"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
 </span><a href="GHC.Core.TyCon.html#mkPrelTyConRepName"><span class="hs-identifier hs-var">mkPrelTyConRepName</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Name) -&gt; Name -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Types.html#cTupleTyConName"><span class="hs-identifier hs-var">cTupleTyConName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373403"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523578"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-242"></span><span>      </span><span class="annot"><span class="annottext">(Int, Int)
 </span><span class="hs-identifier">_</span></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Name
 forall a. HasCallStack =&gt; String -&gt; a
@@ -587,20 +587,20 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><span id="line-243"></span><span>
 </span><span id="line-244"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#getCTupleDataConName"><span class="hs-identifier hs-type">getCTupleDataConName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-245"></span><span id="getCTupleDataConName"><span class="annot"><span class="annottext">getCTupleDataConName :: Int -&gt; Name
-</span><a href="GHC.Builtin.Uniques.html#getCTupleDataConName"><span class="hs-identifier hs-var hs-var">getCTupleDataConName</span></a></span></span><span> </span><span id="local-6989586621682373405"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373405"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#getCTupleDataConName"><span class="hs-identifier hs-var hs-var">getCTupleDataConName</span></a></span></span><span> </span><span id="local-6989586621682523580"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523580"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-246"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373405"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
+</span><a href="#local-6989586621682523580"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`divMod`</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-247"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373406"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373406"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Int
+</span><span id="line-247"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523581"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523581"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Types.html#cTupleDataConName"><span class="hs-identifier hs-var">cTupleDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373406"><span class="hs-identifier hs-var">arity</span></a></span><span>
-</span><span id="line-248"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373408"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373408"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523581"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><span id="line-248"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523583"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523583"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Name
 forall a. NamedThing a =&gt; a -&gt; Name
 </span><a href="GHC.Types.Name.html#getName"><span class="hs-identifier hs-var">getName</span></a></span><span> </span><span class="annot"><span class="annottext">(Id -&gt; Name) -&gt; Id -&gt; Name
@@ -610,15 +610,15 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; DataCon
 </span><a href="GHC.Builtin.Types.html#cTupleDataCon"><span class="hs-identifier hs-var">cTupleDataCon</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373408"><span class="hs-identifier hs-var">arity</span></a></span><span>
-</span><span id="line-249"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373410"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373410"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523583"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><span id="line-249"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523585"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523585"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Name
 </span><a href="GHC.Core.TyCon.html#mkPrelTyConRepName"><span class="hs-identifier hs-var">mkPrelTyConRepName</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; Name) -&gt; Name -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Name
 </span><a href="GHC.Builtin.Types.html#cTupleDataConName"><span class="hs-identifier hs-var">cTupleDataConName</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373410"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523585"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-250"></span><span>      </span><span class="annot"><span class="annottext">(Int, Int)
 </span><span class="hs-identifier">_</span></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Name
 forall a. HasCallStack =&gt; String -&gt; a
@@ -627,24 +627,24 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><span id="line-251"></span><span>
 </span><span id="line-252"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#getCTupleSelIdName"><span class="hs-identifier hs-type">getCTupleSelIdName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-253"></span><span id="getCTupleSelIdName"><span class="annot"><span class="annottext">getCTupleSelIdName :: Int -&gt; Name
-</span><a href="GHC.Builtin.Uniques.html#getCTupleSelIdName"><span class="hs-identifier hs-var hs-var">getCTupleSelIdName</span></a></span></span><span> </span><span id="local-6989586621682373411"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373411"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Name
+</span><a href="GHC.Builtin.Uniques.html#getCTupleSelIdName"><span class="hs-identifier hs-var hs-var">getCTupleSelIdName</span></a></span></span><span> </span><span id="local-6989586621682523586"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523586"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Name
 </span><a href="GHC.Builtin.Types.html#cTupleSelIdName"><span class="hs-identifier hs-var">cTupleSelIdName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373413"><span class="hs-identifier hs-var">sc_pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523588"><span class="hs-identifier hs-var">sc_pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373414"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523589"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-254"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-255"></span><span>    </span><span id="local-6989586621682373414"><span class="annot"><span class="annottext">arity :: Int
-</span><a href="#local-6989586621682373414"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373411"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-255"></span><span>    </span><span id="local-6989586621682523589"><span class="annot"><span class="annottext">arity :: Int
+</span><a href="#local-6989586621682523589"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523586"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftR"><span class="hs-operator hs-var">`shiftR`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="GHC.Builtin.Uniques.html#cTupleSelIdArityBits"><span class="hs-identifier hs-var">cTupleSelIdArityBits</span></a></span><span>
-</span><span id="line-256"></span><span>    </span><span id="local-6989586621682373413"><span class="annot"><span class="annottext">sc_pos :: Int
-</span><a href="#local-6989586621682373413"><span class="hs-identifier hs-var hs-var">sc_pos</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373411"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-256"></span><span>    </span><span id="local-6989586621682523588"><span class="annot"><span class="annottext">sc_pos :: Int
+</span><a href="#local-6989586621682523588"><span class="hs-identifier hs-var hs-var">sc_pos</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523586"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="GHC.Builtin.Uniques.html#cTupleSelIdPosBitmask"><span class="hs-identifier hs-var">cTupleSelIdPosBitmask</span></a></span><span>
@@ -675,153 +675,153 @@ forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span id="line-277"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkTupleDataConUnique"><span class="hs-identifier hs-type">mkTupleDataConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#Boxity"><span class="hs-identifier hs-type">Boxity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-278"></span><span id="mkTupleDataConUnique"><span class="annot"><span class="annottext">mkTupleDataConUnique :: Boxity -&gt; Int -&gt; Unique
 </span><a href="GHC.Builtin.Uniques.html#mkTupleDataConUnique"><span class="hs-identifier hs-var hs-var">mkTupleDataConUnique</span></a></span></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span>          </span><span id="local-6989586621682373416"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373416"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span>          </span><span id="local-6989586621682523591"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523591"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'7'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373416"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>    </span><span class="hs-comment">-- may be used in C labels</span><span>
+</span><a href="#local-6989586621682523591"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>    </span><span class="hs-comment">-- may be used in C labels</span><span>
 </span><span id="line-279"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkTupleDataConUnique"><span class="hs-identifier hs-var">mkTupleDataConUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span>        </span><span id="local-6989586621682373417"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373417"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span>        </span><span id="local-6989586621682523592"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523592"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'8'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373417"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523592"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-280"></span><span>
 </span><span id="line-281"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkTupleTyConUnique"><span class="hs-identifier hs-type">mkTupleTyConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#Boxity"><span class="hs-identifier hs-type">Boxity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-282"></span><span id="mkTupleTyConUnique"><span class="annot"><span class="annottext">mkTupleTyConUnique :: Boxity -&gt; Int -&gt; Unique
 </span><a href="GHC.Builtin.Uniques.html#mkTupleTyConUnique"><span class="hs-identifier hs-var hs-var">mkTupleTyConUnique</span></a></span></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span>           </span><span id="local-6989586621682373418"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373418"><span class="hs-identifier hs-var">a</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span>           </span><span id="local-6989586621682523593"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523593"><span class="hs-identifier hs-var">a</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'4'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373418"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523593"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-283"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkTupleTyConUnique"><span class="hs-identifier hs-var">mkTupleTyConUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span>         </span><span id="local-6989586621682373419"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373419"><span class="hs-identifier hs-var">a</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span>         </span><span id="local-6989586621682523594"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523594"><span class="hs-identifier hs-var">a</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'5'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373419"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523594"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-284"></span><span>
 </span><span id="line-285"></span><span class="annot"><span class="hs-comment">-- | This function is an inverse of `mkTupleTyConUnique`</span></span><span>
 </span><span id="line-286"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#isTupleTyConUnique"><span class="hs-identifier hs-type">isTupleTyConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#Boxity"><span class="hs-identifier hs-type">Boxity</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-287"></span><span id="isTupleTyConUnique"><span class="annot"><span class="annottext">isTupleTyConUnique :: Unique -&gt; Maybe (Boxity, Int)
-</span><a href="GHC.Builtin.Uniques.html#isTupleTyConUnique"><span class="hs-identifier hs-var hs-var">isTupleTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682373420"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373420"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#isTupleTyConUnique"><span class="hs-identifier hs-var hs-var">isTupleTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682523595"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523595"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-288"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373421"><span class="hs-identifier hs-var">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373422"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682523596"><span class="hs-identifier hs-var">tag</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523597"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-289"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'4'</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Boxity, Int) -&gt; Maybe (Boxity, Int)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373423"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523598"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-290"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'5'</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Boxity, Int) -&gt; Maybe (Boxity, Int)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373423"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523598"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-291"></span><span>    </span><span class="annot"><span class="annottext">(Char, Word64)
 </span><span class="hs-identifier">_</span></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Boxity, Int)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-292"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-293"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682373421"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373421"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span>   </span><span id="local-6989586621682373424"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373424"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
+</span><span id="line-293"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682523596"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682523596"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span>   </span><span id="local-6989586621682523599"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523599"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
 </span><a href="GHC.Types.Unique.html#unpkUnique"><span class="hs-identifier hs-var">unpkUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373420"><span class="hs-identifier hs-var">u</span></a></span><span>
-</span><span id="line-294"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682373425"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373425"><span class="hs-identifier hs-var">arity'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682373422"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373422"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Word64 -&gt; (Word64, Word64)
+</span><a href="#local-6989586621682523595"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-294"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682523600"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523600"><span class="hs-identifier hs-var">arity'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682523597"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523597"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Word64 -&gt; (Word64, Word64)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-identifier hs-var">quotRem</span></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373424"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523599"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">2</span></span><span>
-</span><span id="line-295"></span><span>    </span><span id="local-6989586621682373423"><span class="annot"><span class="annottext">arity :: Int
-</span><a href="#local-6989586621682373423"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HasCallStack =&gt; Word64 -&gt; Int
-Word64 -&gt; Int
+</span><span id="line-295"></span><span>    </span><span id="local-6989586621682523598"><span class="annot"><span class="annottext">arity :: Int
+</span><a href="#local-6989586621682523598"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Int
+HasDebugCallStack =&gt; Word64 -&gt; Int
 </span><a href="GHC.Utils.Word64.html#word64ToInt"><span class="hs-identifier hs-var">word64ToInt</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373425"><span class="hs-identifier hs-var">arity'</span></a></span><span>
+</span><a href="#local-6989586621682523600"><span class="hs-identifier hs-var">arity'</span></a></span><span>
 </span><span id="line-296"></span><span>
 </span><span id="line-297"></span><span class="annot"><span class="hs-comment">-- | This function is an inverse of `mkTupleTyDataUnique` that also matches the worker and promoted tycon.</span></span><span>
 </span><span id="line-298"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#isTupleDataConLikeUnique"><span class="hs-identifier hs-type">isTupleDataConLikeUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#Boxity"><span class="hs-identifier hs-type">Boxity</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-299"></span><span id="isTupleDataConLikeUnique"><span class="annot"><span class="annottext">isTupleDataConLikeUnique :: Unique -&gt; Maybe (Boxity, Int)
-</span><a href="GHC.Builtin.Uniques.html#isTupleDataConLikeUnique"><span class="hs-identifier hs-var hs-var">isTupleDataConLikeUnique</span></a></span></span><span> </span><span id="local-6989586621682373427"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373427"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#isTupleDataConLikeUnique"><span class="hs-identifier hs-var hs-var">isTupleDataConLikeUnique</span></a></span></span><span> </span><span id="local-6989586621682523602"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523602"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-300"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373428"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682523603"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-301"></span><span>    </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'7'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Boxity, Int) -&gt; Maybe (Boxity, Int)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Boxed"><span class="hs-identifier hs-var">Boxed</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373429"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523604"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-302"></span><span>    </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'8'</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Boxity, Int) -&gt; Maybe (Boxity, Int)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Boxity
 </span><a href="Language.Haskell.Syntax.Basic.html#Unboxed"><span class="hs-identifier hs-var">Unboxed</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373429"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523604"><span class="hs-identifier hs-var">arity</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-303"></span><span>    </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Boxity, Int)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-304"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-305"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682373428"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373428"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span>   </span><span id="local-6989586621682373430"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373430"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
+</span><span id="line-305"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682523603"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682523603"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span>   </span><span id="local-6989586621682523605"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523605"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
 </span><a href="GHC.Types.Unique.html#unpkUnique"><span class="hs-identifier hs-var">unpkUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373427"><span class="hs-identifier hs-var">u</span></a></span><span>
-</span><span id="line-306"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682373431"><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373431"><span class="hs-identifier hs-var">arity'</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523602"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-306"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682523606"><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523606"><span class="hs-identifier hs-var">arity'</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Word64 -&gt; (Word64, Word64)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-identifier hs-var">quotRem</span></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373430"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523605"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">3</span></span><span>
-</span><span id="line-307"></span><span>    </span><span id="local-6989586621682373429"><span class="annot"><span class="annottext">arity :: Int
-</span><a href="#local-6989586621682373429"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HasCallStack =&gt; Word64 -&gt; Int
-Word64 -&gt; Int
+</span><span id="line-307"></span><span>    </span><span id="local-6989586621682523604"><span class="annot"><span class="annottext">arity :: Int
+</span><a href="#local-6989586621682523604"><span class="hs-identifier hs-var hs-var">arity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word64 -&gt; Int
+HasDebugCallStack =&gt; Word64 -&gt; Int
 </span><a href="GHC.Utils.Word64.html#word64ToInt"><span class="hs-identifier hs-var">word64ToInt</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
-</span><a href="#local-6989586621682373431"><span class="hs-identifier hs-var">arity'</span></a></span><span>
+</span><a href="#local-6989586621682523606"><span class="hs-identifier hs-var">arity'</span></a></span><span>
 </span><span id="line-308"></span><span>
 </span><span id="line-309"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#getTupleTyConName"><span class="hs-identifier hs-type">getTupleTyConName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#Boxity"><span class="hs-identifier hs-type">Boxity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-310"></span><span id="getTupleTyConName"><span class="annot"><span class="annottext">getTupleTyConName :: Boxity -&gt; Int -&gt; Name
-</span><a href="GHC.Builtin.Uniques.html#getTupleTyConName"><span class="hs-identifier hs-var hs-var">getTupleTyConName</span></a></span></span><span> </span><span id="local-6989586621682373432"><span class="annot"><span class="annottext">Boxity
-</span><a href="#local-6989586621682373432"><span class="hs-identifier hs-var">boxity</span></a></span></span><span> </span><span id="local-6989586621682373433"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373433"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#getTupleTyConName"><span class="hs-identifier hs-var hs-var">getTupleTyConName</span></a></span></span><span> </span><span id="local-6989586621682523607"><span class="annot"><span class="annottext">Boxity
+</span><a href="#local-6989586621682523607"><span class="hs-identifier hs-var">boxity</span></a></span></span><span> </span><span id="local-6989586621682523608"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523608"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-311"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373433"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
+</span><a href="#local-6989586621682523608"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`divMod`</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-312"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373434"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373434"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-312"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523609"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523609"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Name
 </span><a href="GHC.Core.TyCon.html#tyConName"><span class="hs-identifier hs-var">tyConName</span></a></span><span> </span><span class="annot"><span class="annottext">(TyCon -&gt; Name) -&gt; TyCon -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; TyCon
 </span><a href="GHC.Builtin.Types.html#tupleTyCon"><span class="hs-identifier hs-var">tupleTyCon</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="#local-6989586621682373432"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373434"><span class="hs-identifier hs-var">arity</span></a></span><span>
-</span><span id="line-313"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373436"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373436"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523607"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523609"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><span id="line-313"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523611"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523611"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name -&gt; Name
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Name
@@ -835,8 +835,8 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; TyCon
 </span><a href="GHC.Builtin.Types.html#tupleTyCon"><span class="hs-identifier hs-var">tupleTyCon</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="#local-6989586621682373432"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373436"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523607"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523611"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-315"></span><span>      </span><span class="annot"><span class="annottext">(Int, Int)
 </span><span class="hs-identifier">_</span></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Name
 forall a. HasCallStack =&gt; String -&gt; a
@@ -845,25 +845,25 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><span id="line-316"></span><span>
 </span><span id="line-317"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#getTupleDataConName"><span class="hs-identifier hs-type">getTupleDataConName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#Boxity"><span class="hs-identifier hs-type">Boxity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-318"></span><span id="getTupleDataConName"><span class="annot"><span class="annottext">getTupleDataConName :: Boxity -&gt; Int -&gt; Name
-</span><a href="GHC.Builtin.Uniques.html#getTupleDataConName"><span class="hs-identifier hs-var hs-var">getTupleDataConName</span></a></span></span><span> </span><span id="local-6989586621682373437"><span class="annot"><span class="annottext">Boxity
-</span><a href="#local-6989586621682373437"><span class="hs-identifier hs-var">boxity</span></a></span></span><span> </span><span id="local-6989586621682373438"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373438"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Builtin.Uniques.html#getTupleDataConName"><span class="hs-identifier hs-var hs-var">getTupleDataConName</span></a></span></span><span> </span><span id="local-6989586621682523612"><span class="annot"><span class="annottext">Boxity
+</span><a href="#local-6989586621682523612"><span class="hs-identifier hs-var">boxity</span></a></span></span><span> </span><span id="local-6989586621682523613"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523613"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-319"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373438"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
+</span><a href="#local-6989586621682523613"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int, Int)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`divMod`</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-320"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373439"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373439"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-320"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523614"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523614"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; Name
 </span><a href="GHC.Core.DataCon.html#dataConName"><span class="hs-identifier hs-var">dataConName</span></a></span><span> </span><span class="annot"><span class="annottext">(DataCon -&gt; Name) -&gt; DataCon -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; DataCon
 </span><a href="GHC.Builtin.Types.html#tupleDataCon"><span class="hs-identifier hs-var">tupleDataCon</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="#local-6989586621682373437"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373439"><span class="hs-identifier hs-var">arity</span></a></span><span>
-</span><span id="line-321"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373441"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373441"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523612"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523614"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><span id="line-321"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523616"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523616"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Name
 </span><a href="GHC.Types.Id.html#idName"><span class="hs-identifier hs-var">idName</span></a></span><span> </span><span class="annot"><span class="annottext">(Id -&gt; Name) -&gt; Id -&gt; Name
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -872,10 +872,10 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; DataCon
 </span><a href="GHC.Builtin.Types.html#tupleDataCon"><span class="hs-identifier hs-var">tupleDataCon</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="#local-6989586621682373437"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373441"><span class="hs-identifier hs-var">arity</span></a></span><span>
-</span><span id="line-322"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682373444"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373444"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523612"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523616"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><span id="line-322"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621682523619"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523619"><span class="hs-identifier hs-var">arity</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name -&gt; Name
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Name
@@ -889,8 +889,8 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Boxity -&gt; Int -&gt; TyCon
 </span><a href="GHC.Builtin.Types.html#promotedTupleDataCon"><span class="hs-identifier hs-var">promotedTupleDataCon</span></a></span><span> </span><span class="annot"><span class="annottext">Boxity
-</span><a href="#local-6989586621682373437"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373444"><span class="hs-identifier hs-var">arity</span></a></span><span>
+</span><a href="#local-6989586621682523612"><span class="hs-identifier hs-var">boxity</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523619"><span class="hs-identifier hs-var">arity</span></a></span><span>
 </span><span id="line-324"></span><span>      </span><span class="annot"><span class="annottext">(Int, Int)
 </span><span class="hs-identifier">_</span></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Name
 forall a. HasCallStack =&gt; String -&gt; a
@@ -959,61 +959,61 @@ Note [Related uniques for wired-in things]
 </span><span id="line-385"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkPreludeMiscIdUnique"><span class="hs-identifier hs-type">mkPreludeMiscIdUnique</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-386"></span><span>
 </span><span id="line-387"></span><span id="mkAlphaTyVarUnique"><span class="annot"><span class="annottext">mkAlphaTyVarUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkAlphaTyVarUnique"><span class="hs-identifier hs-var hs-var">mkAlphaTyVarUnique</span></a></span></span><span>   </span><span id="local-6989586621682373446"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373446"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkAlphaTyVarUnique"><span class="hs-identifier hs-var hs-var">mkAlphaTyVarUnique</span></a></span></span><span>   </span><span id="local-6989586621682523621"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523621"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'1'</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373446"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682523621"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-388"></span><span id="mkPreludeClassUnique"><span class="annot"><span class="annottext">mkPreludeClassUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkPreludeClassUnique"><span class="hs-identifier hs-var hs-var">mkPreludeClassUnique</span></a></span></span><span> </span><span id="local-6989586621682373447"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373447"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkPreludeClassUnique"><span class="hs-identifier hs-var hs-var">mkPreludeClassUnique</span></a></span></span><span> </span><span id="local-6989586621682523622"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523622"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'2'</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373447"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682523622"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-389"></span><span>
 </span><span id="line-390"></span><span class="hs-comment">--------------------------------------------------</span><span>
 </span><span id="line-391"></span><span id="mkPrimOpIdUnique"><span class="annot"><span class="annottext">mkPrimOpIdUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkPrimOpIdUnique"><span class="hs-identifier hs-var hs-var">mkPrimOpIdUnique</span></a></span></span><span> </span><span id="local-6989586621682373448"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373448"><span class="hs-identifier hs-var">op</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkPrimOpIdUnique"><span class="hs-identifier hs-var hs-var">mkPrimOpIdUnique</span></a></span></span><span> </span><span id="local-6989586621682523623"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523623"><span class="hs-identifier hs-var">op</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'9'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373448"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523623"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-392"></span><span id="mkPrimOpWrapperUnique"><span class="annot"><span class="annottext">mkPrimOpWrapperUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkPrimOpWrapperUnique"><span class="hs-identifier hs-var hs-var">mkPrimOpWrapperUnique</span></a></span></span><span> </span><span id="local-6989586621682373449"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373449"><span class="hs-identifier hs-var">op</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkPrimOpWrapperUnique"><span class="hs-identifier hs-var hs-var">mkPrimOpWrapperUnique</span></a></span></span><span> </span><span id="local-6989586621682523624"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523624"><span class="hs-identifier hs-var">op</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'9'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373449"><span class="hs-identifier hs-var">op</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682523624"><span class="hs-identifier hs-var">op</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-393"></span><span id="mkPreludeMiscIdUnique"><span class="annot"><span class="annottext">mkPreludeMiscIdUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkPreludeMiscIdUnique"><span class="hs-identifier hs-var hs-var">mkPreludeMiscIdUnique</span></a></span></span><span>  </span><span id="local-6989586621682373450"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373450"><span class="hs-identifier hs-var">i</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkPreludeMiscIdUnique"><span class="hs-identifier hs-var hs-var">mkPreludeMiscIdUnique</span></a></span></span><span>  </span><span id="local-6989586621682523625"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523625"><span class="hs-identifier hs-var">i</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'0'</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373450"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682523625"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-394"></span><span>
 </span><span id="line-395"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkPseudoUniqueE"><span class="hs-identifier hs-type">mkPseudoUniqueE</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkBuiltinUnique"><span class="hs-identifier hs-type">mkBuiltinUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-396"></span><span>
 </span><span id="line-397"></span><span id="mkBuiltinUnique"><span class="annot"><span class="annottext">mkBuiltinUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkBuiltinUnique"><span class="hs-identifier hs-var hs-var">mkBuiltinUnique</span></a></span></span><span> </span><span id="local-6989586621682373451"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373451"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkBuiltinUnique"><span class="hs-identifier hs-var hs-var">mkBuiltinUnique</span></a></span></span><span> </span><span id="local-6989586621682523626"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523626"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'B'</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373451"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682523626"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-398"></span><span id="mkPseudoUniqueE"><span class="annot"><span class="annottext">mkPseudoUniqueE :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkPseudoUniqueE"><span class="hs-identifier hs-var hs-var">mkPseudoUniqueE</span></a></span></span><span> </span><span id="local-6989586621682373452"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373452"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkPseudoUniqueE"><span class="hs-identifier hs-var hs-var">mkPseudoUniqueE</span></a></span></span><span> </span><span id="local-6989586621682523627"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523627"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'E'</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373452"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-comment">-- used in NCG spiller to create spill VirtualRegs</span><span>
+</span><a href="#local-6989586621682523627"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-comment">-- used in NCG spiller to create spill VirtualRegs</span><span>
 </span><span id="line-399"></span><span>
 </span><span id="line-400"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkRegSingleUnique"><span class="hs-identifier hs-type">mkRegSingleUnique</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkRegPairUnique"><span class="hs-identifier hs-type">mkRegPairUnique</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkRegSubUnique"><span class="hs-identifier hs-type">mkRegSubUnique</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkRegClassUnique"><span class="hs-identifier hs-type">mkRegClassUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-401"></span><span id="mkRegSingleUnique"><span class="annot"><span class="annottext">mkRegSingleUnique :: Int -&gt; Unique
@@ -1063,23 +1063,23 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-414"></span><span>
 </span><span id="line-415"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkFldNSUnique"><span class="hs-identifier hs-type">mkFldNSUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Data.FastString.html#FastString"><span class="hs-identifier hs-type">FastString</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-416"></span><span id="mkFldNSUnique"><span class="annot"><span class="annottext">mkFldNSUnique :: FastString -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkFldNSUnique"><span class="hs-identifier hs-var hs-var">mkFldNSUnique</span></a></span></span><span> </span><span id="local-6989586621682373454"><span class="annot"><span class="annottext">FastString
-</span><a href="#local-6989586621682373454"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkFldNSUnique"><span class="hs-identifier hs-var hs-var">mkFldNSUnique</span></a></span></span><span> </span><span id="local-6989586621682523629"><span class="annot"><span class="annottext">FastString
+</span><a href="#local-6989586621682523629"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'f'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FastString -&gt; Int
 </span><a href="GHC.Data.FastString.html#uniqueOfFS"><span class="hs-identifier hs-var">uniqueOfFS</span></a></span><span> </span><span class="annot"><span class="annottext">FastString
-</span><a href="#local-6989586621682373454"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523629"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-417"></span><span>
 </span><span id="line-418"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#isFldNSUnique"><span class="hs-identifier hs-type">isFldNSUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-419"></span><span id="isFldNSUnique"><span class="annot"><span class="annottext">isFldNSUnique :: Unique -&gt; Bool
-</span><a href="GHC.Builtin.Uniques.html#isFldNSUnique"><span class="hs-identifier hs-var hs-var">isFldNSUnique</span></a></span></span><span> </span><span id="local-6989586621682373456"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373456"><span class="hs-identifier hs-var">uniq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
+</span><a href="GHC.Builtin.Uniques.html#isFldNSUnique"><span class="hs-identifier hs-var hs-var">isFldNSUnique</span></a></span></span><span> </span><span id="local-6989586621682523631"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523631"><span class="hs-identifier hs-var">uniq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; (Char, Word64)
 </span><a href="GHC.Types.Unique.html#unpkUnique"><span class="hs-identifier hs-var">unpkUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373456"><span class="hs-identifier hs-var">uniq</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-420"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621682373457"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373457"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523631"><span class="hs-identifier hs-var">uniq</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-420"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621682523632"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682523632"><span class="hs-identifier hs-var">tag</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682373457"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682523632"><span class="hs-identifier hs-var">tag</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'f'</span></span><span>
@@ -1097,21 +1097,21 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-428"></span><span>
 </span><span id="line-429"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkPreludeTyConUnique"><span class="hs-identifier hs-type">mkPreludeTyConUnique</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-430"></span><span id="mkPreludeTyConUnique"><span class="annot"><span class="annottext">mkPreludeTyConUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkPreludeTyConUnique"><span class="hs-identifier hs-var hs-var">mkPreludeTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682373458"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373458"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkPreludeTyConUnique"><span class="hs-identifier hs-var hs-var">mkPreludeTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682523633"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523633"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'3'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373458"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523633"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-431"></span><span>
 </span><span id="line-432"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#tyConRepNameUnique"><span class="hs-identifier hs-type">tyConRepNameUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-433"></span><span id="tyConRepNameUnique"><span class="annot"><span class="annottext">tyConRepNameUnique :: Unique -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#tyConRepNameUnique"><span class="hs-identifier hs-var hs-var">tyConRepNameUnique</span></a></span></span><span>  </span><span id="local-6989586621682373459"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373459"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#tyConRepNameUnique"><span class="hs-identifier hs-var hs-var">tyConRepNameUnique</span></a></span></span><span>  </span><span id="local-6989586621682523634"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523634"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Unique
 </span><a href="GHC.Types.Unique.html#incrUnique"><span class="hs-identifier hs-var">incrUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373459"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><a href="#local-6989586621682523634"><span class="hs-identifier hs-var">u</span></a></span><span>
 </span><span id="line-434"></span><span>
 </span><span id="line-435"></span><span class="hs-comment">--------------------------------------------------</span><span>
 </span><span id="line-436"></span><span class="hs-comment">-- Wired-in data constructor keys occupy *three* slots:</span><span>
@@ -1119,26 +1119,26 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-438"></span><span>
 </span><span id="line-439"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkPreludeDataConUnique"><span class="hs-identifier hs-type">mkPreludeDataConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-440"></span><span id="mkPreludeDataConUnique"><span class="annot"><span class="annottext">mkPreludeDataConUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkPreludeDataConUnique"><span class="hs-identifier hs-var hs-var">mkPreludeDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682373461"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373461"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkPreludeDataConUnique"><span class="hs-identifier hs-var hs-var">mkPreludeDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682523636"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523636"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'6'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373461"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>    </span><span class="hs-comment">-- Must be alphabetic</span><span>
+</span><a href="#local-6989586621682523636"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>    </span><span class="hs-comment">-- Must be alphabetic</span><span>
 </span><span id="line-441"></span><span>
 </span><span id="line-442"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#dataConTyRepNameUnique"><span class="hs-identifier hs-type">dataConTyRepNameUnique</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Builtin.Uniques.html#dataConWorkerUnique"><span class="hs-identifier hs-type">dataConWorkerUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-443"></span><span id="dataConWorkerUnique"><span class="annot"><span class="annottext">dataConWorkerUnique :: Unique -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#dataConWorkerUnique"><span class="hs-identifier hs-var hs-var">dataConWorkerUnique</span></a></span></span><span>  </span><span id="local-6989586621682373462"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373462"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#dataConWorkerUnique"><span class="hs-identifier hs-var hs-var">dataConWorkerUnique</span></a></span></span><span>  </span><span id="local-6989586621682523637"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523637"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Unique
 </span><a href="GHC.Types.Unique.html#incrUnique"><span class="hs-identifier hs-var">incrUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373462"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><a href="#local-6989586621682523637"><span class="hs-identifier hs-var">u</span></a></span><span>
 </span><span id="line-444"></span><span id="dataConTyRepNameUnique"><span class="annot"><span class="annottext">dataConTyRepNameUnique :: Unique -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#dataConTyRepNameUnique"><span class="hs-identifier hs-var hs-var">dataConTyRepNameUnique</span></a></span></span><span> </span><span id="local-6989586621682373463"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373463"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Word64 -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#dataConTyRepNameUnique"><span class="hs-identifier hs-var hs-var">dataConTyRepNameUnique</span></a></span></span><span> </span><span id="local-6989586621682523638"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523638"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Word64 -&gt; Unique
 </span><a href="GHC.Types.Unique.html#stepUnique"><span class="hs-identifier hs-var">stepUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373463"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523638"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">2</span></span><span>
 </span><span id="line-445"></span><span>
 </span><span id="line-446"></span><span class="hs-comment">--------------------------------------------------</span><span>
@@ -1162,20 +1162,20 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-464"></span><span>
 </span><span id="line-465"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#mkBoxingTyConUnique"><span class="hs-identifier hs-type">mkBoxingTyConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-466"></span><span id="mkBoxingTyConUnique"><span class="annot"><span class="annottext">mkBoxingTyConUnique :: Int -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#mkBoxingTyConUnique"><span class="hs-identifier hs-var hs-var">mkBoxingTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682373465"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373465"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#mkBoxingTyConUnique"><span class="hs-identifier hs-var hs-var">mkBoxingTyConUnique</span></a></span></span><span> </span><span id="local-6989586621682523640"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682523640"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int -&gt; Unique
 </span><a href="GHC.Types.Unique.html#mkUniqueInt"><span class="hs-identifier hs-var">mkUniqueInt</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'b'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">5</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682373465"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682523640"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-467"></span><span>
 </span><span id="line-468"></span><span class="annot"><a href="GHC.Builtin.Uniques.html#boxingDataConUnique"><span class="hs-identifier hs-type">boxingDataConUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-469"></span><span id="boxingDataConUnique"><span class="annot"><span class="annottext">boxingDataConUnique :: Unique -&gt; Unique
-</span><a href="GHC.Builtin.Uniques.html#boxingDataConUnique"><span class="hs-identifier hs-var hs-var">boxingDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682373466"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373466"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Word64 -&gt; Unique
+</span><a href="GHC.Builtin.Uniques.html#boxingDataConUnique"><span class="hs-identifier hs-var hs-var">boxingDataConUnique</span></a></span></span><span> </span><span id="local-6989586621682523641"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682523641"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Word64 -&gt; Unique
 </span><a href="GHC.Types.Unique.html#stepUnique"><span class="hs-identifier hs-var">stepUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682373466"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
+</span><a href="#local-6989586621682523641"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Word64
 </span><span class="hs-number">2</span></span><span>
 </span><span id="line-470"></span></pre></body></html>

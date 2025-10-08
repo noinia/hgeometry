@@ -29,9 +29,9 @@
 </span><span id="line-28"></span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Posix.Types.html/System.Posix.Types.html"><span class="hs-identifier">System.Posix.Types</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.html/Foreign.html"><span class="hs-identifier">Foreign</span></a></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.C.html/Foreign.C.html"><span class="hs-identifier">Foreign.C</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.Posix.Types.html"><span class="hs-identifier">System.Posix.Types</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.html"><span class="hs-identifier">Foreign</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.C.html"><span class="hs-identifier">Foreign.C</span></a></span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span class="hs-pragma">{-# LINE 39 &quot;libraries/unix/System/Posix/Resource.hsc&quot; #-}</span><span>
@@ -62,7 +62,7 @@
 </span><span id="line-59"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="ResourceLimits"><span class="annot"><a href="System.Posix.Resource.html#ResourceLimits"><span class="hs-identifier hs-var">ResourceLimits</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="softLimit"><span class="annot"><span class="annottext">ResourceLimits -&gt; ResourceLimit
 </span><a href="System.Posix.Resource.html#softLimit"><span class="hs-identifier hs-var hs-var">softLimit</span></a></span></span><span class="hs-special">,</span><span> </span><span id="hardLimit"><span class="annot"><span class="annottext">ResourceLimits -&gt; ResourceLimit
 </span><a href="System.Posix.Resource.html#hardLimit"><span class="hs-identifier hs-var hs-var">hardLimit</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="System.Posix.Resource.html#ResourceLimit"><span class="hs-identifier hs-type">ResourceLimit</span></a></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-60"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679108867"><span id="local-6989586621679108872"><span class="annot"><span class="annottext">ResourceLimits -&gt; ResourceLimits -&gt; Bool
+</span><span id="line-60"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679114078"><span id="local-6989586621679114083"><span class="annot"><span class="annottext">ResourceLimits -&gt; ResourceLimits -&gt; Bool
 (ResourceLimits -&gt; ResourceLimits -&gt; Bool)
 -&gt; (ResourceLimits -&gt; ResourceLimits -&gt; Bool) -&gt; Eq ResourceLimits
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -70,7 +70,7 @@ $c== :: ResourceLimits -&gt; ResourceLimits -&gt; Bool
 == :: ResourceLimits -&gt; ResourceLimits -&gt; Bool
 $c/= :: ResourceLimits -&gt; ResourceLimits -&gt; Bool
 /= :: ResourceLimits -&gt; ResourceLimits -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679108876"><span id="local-6989586621679108883"><span id="local-6989586621679108887"><span class="annot"><span class="annottext">Int -&gt; ResourceLimits -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679114087"><span id="local-6989586621679114094"><span id="local-6989586621679114098"><span class="annot"><span class="annottext">Int -&gt; ResourceLimits -&gt; ShowS
 [ResourceLimits] -&gt; ShowS
 ResourceLimits -&gt; String
 (Int -&gt; ResourceLimits -&gt; ShowS)
@@ -91,7 +91,7 @@ showList :: [ResourceLimits] -&gt; ShowS
 </span><span id="line-63"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="ResourceLimitInfinity"><span class="annot"><a href="System.Posix.Resource.html#ResourceLimitInfinity"><span class="hs-identifier hs-var">ResourceLimitInfinity</span></a></span></span><span>
 </span><span id="line-64"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ResourceLimitUnknown"><span class="annot"><a href="System.Posix.Resource.html#ResourceLimitUnknown"><span class="hs-identifier hs-var">ResourceLimitUnknown</span></a></span></span><span>
 </span><span id="line-65"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ResourceLimit"><span class="annot"><a href="System.Posix.Resource.html#ResourceLimit"><span class="hs-identifier hs-var">ResourceLimit</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
-</span><span id="line-66"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679108893"><span id="local-6989586621679108899"><span class="annot"><span class="annottext">ResourceLimit -&gt; ResourceLimit -&gt; Bool
+</span><span id="line-66"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679114104"><span id="local-6989586621679114110"><span class="annot"><span class="annottext">ResourceLimit -&gt; ResourceLimit -&gt; Bool
 (ResourceLimit -&gt; ResourceLimit -&gt; Bool)
 -&gt; (ResourceLimit -&gt; ResourceLimit -&gt; Bool) -&gt; Eq ResourceLimit
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -99,7 +99,7 @@ $c== :: ResourceLimit -&gt; ResourceLimit -&gt; Bool
 == :: ResourceLimit -&gt; ResourceLimit -&gt; Bool
 $c/= :: ResourceLimit -&gt; ResourceLimit -&gt; Bool
 /= :: ResourceLimit -&gt; ResourceLimit -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679108902"><span id="local-6989586621679108907"><span id="local-6989586621679108910"><span class="annot"><span class="annottext">Int -&gt; ResourceLimit -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679114113"><span id="local-6989586621679114118"><span id="local-6989586621679114121"><span class="annot"><span class="annottext">Int -&gt; ResourceLimit -&gt; ShowS
 [ResourceLimit] -&gt; ShowS
 ResourceLimit -&gt; String
 (Int -&gt; ResourceLimit -&gt; ShowS)
@@ -129,16 +129,16 @@ showList :: [ResourceLimit] -&gt; ShowS
 </span><span id="line-89"></span><span>
 </span><span id="line-90"></span><span class="annot"><a href="System.Posix.Resource.html#getResourceLimit"><span class="hs-identifier hs-type">getResourceLimit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="System.Posix.Resource.html#Resource"><span class="hs-identifier hs-type">Resource</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="System.Posix.Resource.html#ResourceLimits"><span class="hs-identifier hs-type">ResourceLimits</span></a></span><span>
 </span><span id="line-91"></span><span id="getResourceLimit"><span class="annot"><span class="annottext">getResourceLimit :: Resource -&gt; IO ResourceLimits
-</span><a href="System.Posix.Resource.html#getResourceLimit"><span class="hs-identifier hs-var hs-var">getResourceLimit</span></a></span></span><span> </span><span id="local-6989586621679108914"><span class="annot"><span class="annottext">Resource
-</span><a href="#local-6989586621679108914"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="System.Posix.Resource.html#getResourceLimit"><span class="hs-identifier hs-var hs-var">getResourceLimit</span></a></span></span><span> </span><span id="local-6989586621679114125"><span class="annot"><span class="annottext">Resource
+</span><a href="#local-6989586621679114125"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-92"></span><span>  </span><span class="annot"><span class="annottext">Int -&gt; (Ptr RLimit -&gt; IO ResourceLimits) -&gt; IO ResourceLimits
 forall a b. Int -&gt; (Ptr a -&gt; IO b) -&gt; IO b
 </span><span class="hs-identifier hs-var">allocaBytes</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">16</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Ptr RLimit -&gt; IO ResourceLimits) -&gt; IO ResourceLimits)
 -&gt; (Ptr RLimit -&gt; IO ResourceLimits) -&gt; IO ResourceLimits
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679108916"><span class="annot"><span class="annottext">Ptr RLimit
-</span><a href="#local-6989586621679108916"><span class="hs-identifier hs-var">p_rlimit</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679114127"><span class="annot"><span class="annottext">Ptr RLimit
+</span><a href="#local-6989586621679114127"><span class="hs-identifier hs-var">p_rlimit</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-93"></span><span class="hs-pragma">{-# LINE 93 &quot;libraries/unix/System/Posix/Resource.hsc&quot; #-}</span><span>
 </span><span id="line-93"></span><span>    </span><span class="hs-identifier">throwErrnoIfMinus1_</span><span> </span><span class="hs-string">&quot;getResourceLimit&quot;</span><span> </span><span class="hs-operator">$</span><span>
 </span><span id="line-94"></span><span>      </span><span class="hs-identifier">c_getrlimit</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">packResource</span><span> </span><span class="hs-identifier">res</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">p_rlimit</span><span>
@@ -153,19 +153,19 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-101"></span><span>
 </span><span id="line-102"></span><span class="annot"><a href="System.Posix.Resource.html#setResourceLimit"><span class="hs-identifier hs-type">setResourceLimit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="System.Posix.Resource.html#Resource"><span class="hs-identifier hs-type">Resource</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="System.Posix.Resource.html#ResourceLimits"><span class="hs-identifier hs-type">ResourceLimits</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-103"></span><span id="setResourceLimit"><span class="annot"><span class="annottext">setResourceLimit :: Resource -&gt; ResourceLimits -&gt; IO ()
-</span><a href="System.Posix.Resource.html#setResourceLimit"><span class="hs-identifier hs-var hs-var">setResourceLimit</span></a></span></span><span> </span><span id="local-6989586621679108925"><span class="annot"><span class="annottext">Resource
-</span><a href="#local-6989586621679108925"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="annot"><a href="System.Posix.Resource.html#ResourceLimits"><span class="hs-identifier hs-type">ResourceLimits</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">softLimit :: ResourceLimits -&gt; ResourceLimit
-</span><a href="System.Posix.Resource.html#softLimit"><span class="hs-identifier hs-var">softLimit</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621679108926"><span class="annot"><span class="annottext">ResourceLimit
-</span><a href="#local-6989586621679108926"><span class="hs-identifier hs-var">soft</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">hardLimit :: ResourceLimits -&gt; ResourceLimit
-</span><a href="System.Posix.Resource.html#hardLimit"><span class="hs-identifier hs-var">hardLimit</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621679108927"><span class="annot"><span class="annottext">ResourceLimit
-</span><a href="#local-6989586621679108927"><span class="hs-identifier hs-var">hard</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="System.Posix.Resource.html#setResourceLimit"><span class="hs-identifier hs-var hs-var">setResourceLimit</span></a></span></span><span> </span><span id="local-6989586621679114136"><span class="annot"><span class="annottext">Resource
+</span><a href="#local-6989586621679114136"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="annot"><a href="System.Posix.Resource.html#ResourceLimits"><span class="hs-identifier hs-type">ResourceLimits</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">softLimit :: ResourceLimits -&gt; ResourceLimit
+</span><a href="System.Posix.Resource.html#softLimit"><span class="hs-identifier hs-var">softLimit</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621679114137"><span class="annot"><span class="annottext">ResourceLimit
+</span><a href="#local-6989586621679114137"><span class="hs-identifier hs-var">soft</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">hardLimit :: ResourceLimits -&gt; ResourceLimit
+</span><a href="System.Posix.Resource.html#hardLimit"><span class="hs-identifier hs-var">hardLimit</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621679114138"><span class="annot"><span class="annottext">ResourceLimit
+</span><a href="#local-6989586621679114138"><span class="hs-identifier hs-var">hard</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-104"></span><span>  </span><span class="annot"><span class="annottext">Int -&gt; (Ptr RLimit -&gt; IO ()) -&gt; IO ()
 forall a b. Int -&gt; (Ptr a -&gt; IO b) -&gt; IO b
 </span><span class="hs-identifier hs-var">allocaBytes</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">16</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Ptr RLimit -&gt; IO ()) -&gt; IO ()) -&gt; (Ptr RLimit -&gt; IO ()) -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679108928"><span class="annot"><span class="annottext">Ptr RLimit
-</span><a href="#local-6989586621679108928"><span class="hs-identifier hs-var">p_rlimit</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679114139"><span class="annot"><span class="annottext">Ptr RLimit
+</span><a href="#local-6989586621679114139"><span class="hs-identifier hs-var">p_rlimit</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-105"></span><span class="hs-pragma">{-# LINE 105 &quot;libraries/unix/System/Posix/Resource.hsc&quot; #-}</span><span>
 </span><span id="line-105"></span><span>    </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">pokeByteOff</span><span> </span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-number">0</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">p_rlimit</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">packRLimit</span><span> </span><span class="hs-identifier">soft</span><span> </span><span class="hs-identifier">True</span><span class="hs-special">)</span><span>
 </span><span id="line-106"></span><span class="hs-pragma">{-# LINE 106 &quot;libraries/unix/System/Posix/Resource.hsc&quot; #-}</span><span>
@@ -254,12 +254,12 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-151"></span><span class="hs-pragma">{-# LINE 151 &quot;libraries/unix/System/Posix/Resource.hsc&quot; #-}</span><span>
 </span><span id="line-151"></span><span>
 </span><span id="line-152"></span><span class="hs-pragma">{-# LINE 157 &quot;libraries/unix/System/Posix/Resource.hsc&quot; #-}</span><span>
-</span><span id="line-157"></span><span class="annot"><a href="System.Posix.Resource.html#packRLimit"><span class="hs-identifier hs-var">packRLimit</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="System.Posix.Resource.html#ResourceLimit"><span class="hs-identifier hs-type">ResourceLimit</span></a></span><span> </span><span id="local-6989586621679108935"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679108935"><span class="hs-identifier hs-var">other</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-157"></span><span class="annot"><a href="System.Posix.Resource.html#packRLimit"><span class="hs-identifier hs-var">packRLimit</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="System.Posix.Resource.html#ResourceLimit"><span class="hs-identifier hs-type">ResourceLimit</span></a></span><span> </span><span id="local-6989586621679114146"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679114146"><span class="hs-identifier hs-var">other</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier">_</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; CRLim
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679108935"><span class="hs-identifier hs-var">other</span></a></span><span>
+</span><a href="#local-6989586621679114146"><span class="hs-identifier hs-var">other</span></a></span><span>
 </span><span id="line-158"></span><span>
 </span><span id="line-159"></span><span>
 </span><span id="line-160"></span><span class="hs-comment">-- -----------------------------------------------------------------------------</span><span>

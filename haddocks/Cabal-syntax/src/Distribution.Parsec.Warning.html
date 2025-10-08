@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679455062"><span id="local-6989586621679455063"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679468576"><span id="local-6989586621679468577"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-2"></span><span>
 </span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html"><span class="hs-identifier">Distribution.Parsec.Warning</span></a></span><span>
 </span><span id="line-4"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier">PWarning</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
@@ -8,8 +8,8 @@
 </span><span id="line-8"></span><span>
 </span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
 </span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.Position.html"><span class="hs-identifier">Distribution.Parsec.Position</span></a></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#normalise"><span class="hs-identifier">normalise</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#normalise"><span class="hs-identifier">normalise</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-13"></span><span>
 </span><span id="line-14"></span><span class="hs-comment">-- | Type of parser warning. We do classify warnings.</span><span>
 </span><span id="line-15"></span><span class="hs-comment">--</span><span>
@@ -61,7 +61,7 @@
 </span><span id="line-61"></span><span>    </span><span id="PWTInconsistentIndentation"><span class="annot"><a href="Distribution.Parsec.Warning.html#PWTInconsistentIndentation"><span class="hs-identifier hs-var">PWTInconsistentIndentation</span></a></span></span><span>
 </span><span id="line-62"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | Experimental feature</span></span><span>
 </span><span id="line-63"></span><span>    </span><span id="PWTExperimental"><span class="annot"><a href="Distribution.Parsec.Warning.html#PWTExperimental"><span class="hs-identifier hs-var">PWTExperimental</span></a></span></span><span>
-</span><span id="line-64"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679455094"><span id="local-6989586621679455099"><span class="annot"><span class="annottext">PWarnType -&gt; PWarnType -&gt; Bool
+</span><span id="line-64"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679468608"><span id="local-6989586621679468613"><span class="annot"><span class="annottext">PWarnType -&gt; PWarnType -&gt; Bool
 (PWarnType -&gt; PWarnType -&gt; Bool)
 -&gt; (PWarnType -&gt; PWarnType -&gt; Bool) -&gt; Eq PWarnType
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -69,7 +69,7 @@ $c== :: PWarnType -&gt; PWarnType -&gt; Bool
 == :: PWarnType -&gt; PWarnType -&gt; Bool
 $c/= :: PWarnType -&gt; PWarnType -&gt; Bool
 /= :: PWarnType -&gt; PWarnType -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455106"><span id="local-6989586621679455110"><span id="local-6989586621679455114"><span id="local-6989586621679455118"><span id="local-6989586621679455121"><span id="local-6989586621679455124"><span id="local-6989586621679455127"><span class="annot"><span class="annottext">Eq PWarnType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679468620"><span id="local-6989586621679468624"><span id="local-6989586621679468628"><span id="local-6989586621679468632"><span id="local-6989586621679468635"><span id="local-6989586621679468638"><span id="local-6989586621679468641"><span class="annot"><span class="annottext">Eq PWarnType
 Eq PWarnType =&gt;
 (PWarnType -&gt; PWarnType -&gt; Ordering)
 -&gt; (PWarnType -&gt; PWarnType -&gt; Bool)
@@ -106,7 +106,7 @@ $cmax :: PWarnType -&gt; PWarnType -&gt; PWarnType
 max :: PWarnType -&gt; PWarnType -&gt; PWarnType
 $cmin :: PWarnType -&gt; PWarnType -&gt; PWarnType
 min :: PWarnType -&gt; PWarnType -&gt; PWarnType
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455135"><span id="local-6989586621679455137"><span id="local-6989586621679455141"><span class="annot"><span class="annottext">Int -&gt; PWarnType -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679468649"><span id="local-6989586621679468651"><span id="local-6989586621679468655"><span class="annot"><span class="annottext">Int -&gt; PWarnType -&gt; ShowS
 [PWarnType] -&gt; ShowS
 PWarnType -&gt; String
 (Int -&gt; PWarnType -&gt; ShowS)
@@ -121,7 +121,7 @@ $cshow :: PWarnType -&gt; String
 show :: PWarnType -&gt; String
 $cshowList :: [PWarnType] -&gt; ShowS
 showList :: [PWarnType] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455146"><span id="local-6989586621679455155"><span id="local-6989586621679455162"><span id="local-6989586621679455172"><span id="local-6989586621679455175"><span id="local-6989586621679455180"><span id="local-6989586621679455186"><span id="local-6989586621679455190"><span class="annot"><span class="annottext">Int -&gt; PWarnType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679468660"><span id="local-6989586621679468667"><span id="local-6989586621679468672"><span id="local-6989586621679468678"><span id="local-6989586621679468681"><span id="local-6989586621679468686"><span id="local-6989586621679468693"><span id="local-6989586621679468697"><span class="annot"><span class="annottext">Int -&gt; PWarnType
 PWarnType -&gt; Int
 PWarnType -&gt; [PWarnType]
 PWarnType -&gt; PWarnType
@@ -162,14 +162,14 @@ $cenumFromTo :: PWarnType -&gt; PWarnType -&gt; [PWarnType]
 enumFromTo :: PWarnType -&gt; PWarnType -&gt; [PWarnType]
 $cenumFromThenTo :: PWarnType -&gt; PWarnType -&gt; PWarnType -&gt; [PWarnType]
 enumFromThenTo :: PWarnType -&gt; PWarnType -&gt; PWarnType -&gt; [PWarnType]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455198"><span id="local-6989586621679455200"><span class="annot"><span class="annottext">PWarnType
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679468705"><span id="local-6989586621679468707"><span class="annot"><span class="annottext">PWarnType
 PWarnType -&gt; PWarnType -&gt; Bounded PWarnType
 forall a. a -&gt; a -&gt; Bounded a
 $cminBound :: PWarnType
 minBound :: PWarnType
 $cmaxBound :: PWarnType
 maxBound :: PWarnType
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455206"><span id="local-6989586621679455208"><span class="annot"><span class="annottext">(forall x. PWarnType -&gt; Rep PWarnType x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679468713"><span id="local-6989586621679468715"><span class="annot"><span class="annottext">(forall x. PWarnType -&gt; Rep PWarnType x)
 -&gt; (forall x. Rep PWarnType x -&gt; PWarnType) -&gt; Generic PWarnType
 forall x. Rep PWarnType x -&gt; PWarnType
 forall x. PWarnType -&gt; Rep PWarnType x
@@ -181,15 +181,15 @@ $cto :: forall x. Rep PWarnType x -&gt; PWarnType
 to :: forall x. Rep PWarnType x -&gt; PWarnType
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679455214"><span id="local-6989586621679455221"><span id="local-6989586621679455227"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarnType"><span class="hs-identifier hs-type">PWarnType</span></a></span></span></span></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarnType"><span class="hs-identifier hs-type">PWarnType</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679455517"><span class="annot"><span class="annottext">rnf :: PWarnType -&gt; ()
-</span><a href="#local-6989586621679455517"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PWarnType -&gt; ()
+</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468721"><span id="local-6989586621679468728"><span id="local-6989586621679468734"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarnType"><span class="hs-identifier hs-type">PWarnType</span></a></span></span></span></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarnType"><span class="hs-identifier hs-type">PWarnType</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679469024"><span class="annot"><span class="annottext">rnf :: PWarnType -&gt; ()
+</span><a href="#local-6989586621679469024"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PWarnType -&gt; ()
 forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><a href="Distribution.Compat.Prelude.html#genericRnf"><span class="hs-identifier hs-var">genericRnf</span></a></span><span>
 </span><span id="line-68"></span><span>
 </span><span id="line-69"></span><span class="annot"><span class="hs-comment">-- | Parser warning.</span></span><span>
 </span><span id="line-70"></span><span class="hs-keyword">data</span><span> </span><span id="PWarning"><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-var">PWarning</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PWarning"><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-var">PWarning</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarnType"><span class="hs-identifier hs-type">PWarnType</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Distribution.Parsec.Position.html#Position"><span class="hs-identifier hs-type">Position</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-71"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679455522"><span id="local-6989586621679455530"><span class="annot"><span class="annottext">PWarning -&gt; PWarning -&gt; Bool
+</span><span id="line-71"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679469029"><span id="local-6989586621679469037"><span class="annot"><span class="annottext">PWarning -&gt; PWarning -&gt; Bool
 (PWarning -&gt; PWarning -&gt; Bool)
 -&gt; (PWarning -&gt; PWarning -&gt; Bool) -&gt; Eq PWarning
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -197,7 +197,7 @@ $c== :: PWarning -&gt; PWarning -&gt; Bool
 == :: PWarning -&gt; PWarning -&gt; Bool
 $c/= :: PWarning -&gt; PWarning -&gt; Bool
 /= :: PWarning -&gt; PWarning -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455537"><span id="local-6989586621679455545"><span id="local-6989586621679455551"><span id="local-6989586621679455555"><span id="local-6989586621679455558"><span id="local-6989586621679455561"><span id="local-6989586621679455564"><span class="annot"><span class="annottext">Eq PWarning
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679469044"><span id="local-6989586621679469052"><span id="local-6989586621679469058"><span id="local-6989586621679469062"><span id="local-6989586621679469065"><span id="local-6989586621679469068"><span id="local-6989586621679469071"><span class="annot"><span class="annottext">Eq PWarning
 Eq PWarning =&gt;
 (PWarning -&gt; PWarning -&gt; Ordering)
 -&gt; (PWarning -&gt; PWarning -&gt; Bool)
@@ -234,7 +234,7 @@ $cmax :: PWarning -&gt; PWarning -&gt; PWarning
 max :: PWarning -&gt; PWarning -&gt; PWarning
 $cmin :: PWarning -&gt; PWarning -&gt; PWarning
 min :: PWarning -&gt; PWarning -&gt; PWarning
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455568"><span id="local-6989586621679455577"><span id="local-6989586621679455581"><span class="annot"><span class="annottext">Int -&gt; PWarning -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679469075"><span id="local-6989586621679469084"><span id="local-6989586621679469088"><span class="annot"><span class="annottext">Int -&gt; PWarning -&gt; ShowS
 [PWarning] -&gt; ShowS
 PWarning -&gt; String
 (Int -&gt; PWarning -&gt; ShowS)
@@ -247,7 +247,7 @@ $cshow :: PWarning -&gt; String
 show :: PWarning -&gt; String
 $cshowList :: [PWarning] -&gt; ShowS
 showList :: [PWarning] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679455585"><span id="local-6989586621679455587"><span class="annot"><span class="annottext">(forall x. PWarning -&gt; Rep PWarning x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679469092"><span id="local-6989586621679469094"><span class="annot"><span class="annottext">(forall x. PWarning -&gt; Rep PWarning x)
 -&gt; (forall x. Rep PWarning x -&gt; PWarning) -&gt; Generic PWarning
 forall x. Rep PWarning x -&gt; PWarning
 forall x. PWarning -&gt; Rep PWarning x
@@ -259,33 +259,33 @@ $cto :: forall x. Rep PWarning x -&gt; PWarning
 to :: forall x. Rep PWarning x -&gt; PWarning
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679455590"><span id="local-6989586621679455597"><span id="local-6989586621679455603"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">PWarning</span></a></span></span></span></span><span>
-</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">PWarning</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679455661"><span class="annot"><span class="annottext">rnf :: PWarning -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PWarning -&gt; ()
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679469097"><span id="local-6989586621679469104"><span id="local-6989586621679469110"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">PWarning</span></a></span></span></span></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">PWarning</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679469168"><span class="annot"><span class="annottext">rnf :: PWarning -&gt; ()
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PWarning -&gt; ()
 forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><a href="Distribution.Compat.Prelude.html#genericRnf"><span class="hs-identifier hs-var">genericRnf</span></a></span><span>
 </span><span id="line-75"></span><span>
 </span><span id="line-76"></span><span class="annot"><a href="Distribution.Parsec.Warning.html#showPWarning"><span class="hs-identifier hs-type">showPWarning</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">PWarning</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-77"></span><span id="showPWarning"><span class="annot"><span class="annottext">showPWarning :: String -&gt; PWarning -&gt; String
-</span><a href="Distribution.Parsec.Warning.html#showPWarning"><span class="hs-identifier hs-var hs-var">showPWarning</span></a></span></span><span> </span><span id="local-6989586621679455663"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679455663"><span class="hs-identifier hs-var">fpath</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">PWarning</span></a></span><span> </span><span class="annot"><span class="annottext">PWarnType
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679455664"><span class="annot"><span class="annottext">Position
-</span><a href="#local-6989586621679455664"><span class="hs-identifier hs-var">pos</span></a></span></span><span> </span><span id="local-6989586621679455665"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679455665"><span class="hs-identifier hs-var">msg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Parsec.Warning.html#showPWarning"><span class="hs-identifier hs-var hs-var">showPWarning</span></a></span></span><span> </span><span id="local-6989586621679469170"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679469170"><span class="hs-identifier hs-var">fpath</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Parsec.Warning.html#PWarning"><span class="hs-identifier hs-type">PWarning</span></a></span><span> </span><span class="annot"><span class="annottext">PWarnType
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679469171"><span class="annot"><span class="annottext">Position
+</span><a href="#local-6989586621679469171"><span class="hs-identifier hs-var">pos</span></a></span></span><span> </span><span id="local-6989586621679469172"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679469172"><span class="hs-identifier hs-var">msg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-78"></span><span>  </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#normalise"><span class="hs-identifier hs-var">normalise</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679455663"><span class="hs-identifier hs-var">fpath</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#normalise"><span class="hs-identifier hs-var">normalise</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679469170"><span class="hs-identifier hs-var">fpath</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;:&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Position -&gt; String
 </span><a href="Distribution.Parsec.Position.html#showPos"><span class="hs-identifier hs-var">showPos</span></a></span><span> </span><span class="annot"><span class="annottext">Position
-</span><a href="#local-6989586621679455664"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679469171"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679455665"><span class="hs-identifier hs-var">msg</span></a></span><span>
+</span><a href="#local-6989586621679469172"><span class="hs-identifier hs-var">msg</span></a></span><span>
 </span><span id="line-79"></span></pre></body></html>

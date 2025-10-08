@@ -30,8 +30,8 @@
 </span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html"><span class="hs-identifier">GHC.Utils.Outputable</span></a></span><span>
 </span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.html"><span class="hs-identifier">GHC.Utils.Panic</span></a></span><span>
 </span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.Var.Set.html"><span class="hs-identifier">GHC.Types.Var.Set</span></a></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.html/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">when</span></span><span> </span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Maybe.html/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">isNothing</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">when</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">isNothing</span></span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span class="hs-comment">-- Note [Late lambda lifting in STG]</span><span>
 </span><span id="line-37"></span><span class="hs-comment">-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><span>
@@ -132,13 +132,13 @@
 -&gt; UniqSupply
 -&gt; [InStgTopBinding]
 -&gt; [InStgTopBinding]
-</span><a href="GHC.Stg.Lift.html#stgLiftLams"><span class="hs-identifier hs-var hs-var">stgLiftLams</span></a></span></span><span> </span><span id="local-6989586621682687271"><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682687271"><span class="hs-identifier hs-var">this_mod</span></a></span></span><span> </span><span id="local-6989586621682687272"><span class="annot"><span class="annottext">StgLiftConfig
-</span><a href="#local-6989586621682687272"><span class="hs-identifier hs-var">cfg</span></a></span></span><span> </span><span id="local-6989586621682687273"><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682687273"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgLiftConfig -&gt; UniqSupply -&gt; LiftM () -&gt; [InStgTopBinding]
+</span><a href="GHC.Stg.Lift.html#stgLiftLams"><span class="hs-identifier hs-var hs-var">stgLiftLams</span></a></span></span><span> </span><span id="local-6989586621682890784"><span class="annot"><span class="annottext">Module
+</span><a href="#local-6989586621682890784"><span class="hs-identifier hs-var">this_mod</span></a></span></span><span> </span><span id="local-6989586621682890785"><span class="annot"><span class="annottext">StgLiftConfig
+</span><a href="#local-6989586621682890785"><span class="hs-identifier hs-var">cfg</span></a></span></span><span> </span><span id="local-6989586621682890786"><span class="annot"><span class="annottext">UniqSupply
+</span><a href="#local-6989586621682890786"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgLiftConfig -&gt; UniqSupply -&gt; LiftM () -&gt; [InStgTopBinding]
 </span><a href="GHC.Stg.Lift.Monad.html#runLiftM"><span class="hs-identifier hs-var">runLiftM</span></a></span><span> </span><span class="annot"><span class="annottext">StgLiftConfig
-</span><a href="#local-6989586621682687272"><span class="hs-identifier hs-var">cfg</span></a></span><span> </span><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682687273"><span class="hs-identifier hs-var">us</span></a></span><span> </span><span class="annot"><span class="annottext">(LiftM () -&gt; [InStgTopBinding])
+</span><a href="#local-6989586621682890785"><span class="hs-identifier hs-var">cfg</span></a></span><span> </span><span class="annot"><span class="annottext">UniqSupply
+</span><a href="#local-6989586621682890786"><span class="hs-identifier hs-var">us</span></a></span><span> </span><span class="annot"><span class="annottext">(LiftM () -&gt; [InStgTopBinding])
 -&gt; ([InStgTopBinding] -&gt; LiftM ())
 -&gt; [InStgTopBinding]
 -&gt; [InStgTopBinding]
@@ -151,7 +151,7 @@ Foldable t =&gt;
 (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
 </span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Module -&gt; InStgTopBinding -&gt; LiftM () -&gt; LiftM ()
 </span><a href="GHC.Stg.Lift.html#liftTopLvl"><span class="hs-identifier hs-var">liftTopLvl</span></a></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682687271"><span class="hs-identifier hs-var">this_mod</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; LiftM ()
+</span><a href="#local-6989586621682890784"><span class="hs-identifier hs-var">this_mod</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; LiftM ()
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
@@ -159,28 +159,28 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span id="line-132"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftTopLvl"><span class="hs-identifier hs-type">liftTopLvl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Unit.Types.html#Module"><span class="hs-identifier hs-type">Module</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#InStgTopBinding"><span class="hs-identifier hs-type">InStgTopBinding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-133"></span><span id="liftTopLvl"><span class="annot"><span class="annottext">liftTopLvl :: Module -&gt; InStgTopBinding -&gt; LiftM () -&gt; LiftM ()
 </span><a href="GHC.Stg.Lift.html#liftTopLvl"><span class="hs-identifier hs-var hs-var">liftTopLvl</span></a></span></span><span> </span><span class="annot"><span class="annottext">Module
-</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopStringLit"><span class="hs-identifier hs-type">StgTopStringLit</span></a></span><span> </span><span id="local-6989586621682687279"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687279"><span class="hs-identifier hs-var">bndr</span></a></span></span><span> </span><span id="local-6989586621682687280"><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621682687280"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682687281"><span class="annot"><span class="annottext">LiftM ()
-</span><a href="#local-6989586621682687281"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Id -&gt; (Id -&gt; LiftM ()) -&gt; LiftM ()
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopStringLit"><span class="hs-identifier hs-type">StgTopStringLit</span></a></span><span> </span><span id="local-6989586621682890792"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682890792"><span class="hs-identifier hs-var">bndr</span></a></span></span><span> </span><span id="local-6989586621682890793"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621682890793"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682890794"><span class="annot"><span class="annottext">LiftM ()
+</span><a href="#local-6989586621682890794"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Id -&gt; (Id -&gt; LiftM ()) -&gt; LiftM ()
 forall a. Id -&gt; (Id -&gt; LiftM a) -&gt; LiftM a
 </span><a href="GHC.Stg.Lift.Monad.html#withSubstBndr"><span class="hs-identifier hs-var">withSubstBndr</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687279"><span class="hs-identifier hs-var">bndr</span></a></span><span> </span><span class="annot"><span class="annottext">((Id -&gt; LiftM ()) -&gt; LiftM ()) -&gt; (Id -&gt; LiftM ()) -&gt; LiftM ()
+</span><a href="#local-6989586621682890792"><span class="hs-identifier hs-var">bndr</span></a></span><span> </span><span class="annot"><span class="annottext">((Id -&gt; LiftM ()) -&gt; LiftM ()) -&gt; (Id -&gt; LiftM ()) -&gt; LiftM ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687283"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687283"><span class="hs-identifier hs-var">bndr'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890796"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682890796"><span class="hs-identifier hs-var">bndr'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-134"></span><span>  </span><span class="annot"><span class="annottext">Id -&gt; ByteString -&gt; LiftM ()
 </span><a href="GHC.Stg.Lift.Monad.html#addTopStringLit"><span class="hs-identifier hs-var">addTopStringLit</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687283"><span class="hs-identifier hs-var">bndr'</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
-</span><a href="#local-6989586621682687280"><span class="hs-identifier hs-var">lit</span></a></span><span>
+</span><a href="#local-6989586621682890796"><span class="hs-identifier hs-var">bndr'</span></a></span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621682890793"><span class="hs-identifier hs-var">lit</span></a></span><span>
 </span><span id="line-135"></span><span>  </span><span class="annot"><span class="annottext">LiftM ()
-</span><a href="#local-6989586621682687281"><span class="hs-identifier hs-var">rest</span></a></span><span>
-</span><span id="line-136"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftTopLvl"><span class="hs-identifier hs-var">liftTopLvl</span></a></span><span> </span><span id="local-6989586621682687285"><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682687285"><span class="hs-identifier hs-var">this_mod</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopLifted"><span class="hs-identifier hs-type">StgTopLifted</span></a></span><span> </span><span id="local-6989586621682687287"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687287"><span class="hs-identifier hs-var">bind</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682687288"><span class="annot"><span class="annottext">LiftM ()
-</span><a href="#local-6989586621682687288"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-137"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682687289"><span class="annot"><span class="annottext">is_rec :: Bool
-</span><a href="#local-6989586621682687289"><span class="hs-identifier hs-var hs-var hs-var">is_rec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RecFlag -&gt; Bool
+</span><a href="#local-6989586621682890794"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><span id="line-136"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftTopLvl"><span class="hs-identifier hs-var">liftTopLvl</span></a></span><span> </span><span id="local-6989586621682890798"><span class="annot"><span class="annottext">Module
+</span><a href="#local-6989586621682890798"><span class="hs-identifier hs-var">this_mod</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopLifted"><span class="hs-identifier hs-type">StgTopLifted</span></a></span><span> </span><span id="local-6989586621682890800"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682890800"><span class="hs-identifier hs-var">bind</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682890801"><span class="annot"><span class="annottext">LiftM ()
+</span><a href="#local-6989586621682890801"><span class="hs-identifier hs-var">rest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682890802"><span class="annot"><span class="annottext">is_rec :: Bool
+</span><a href="#local-6989586621682890802"><span class="hs-identifier hs-var hs-var hs-var">is_rec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RecFlag -&gt; Bool
 </span><a href="GHC.Types.Basic.html#isRec"><span class="hs-identifier hs-var">isRec</span></a></span><span> </span><span class="annot"><span class="annottext">(RecFlag -&gt; Bool) -&gt; RecFlag -&gt; Bool
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(RecFlag, [(Id, GenStgRhs 'Vanilla)]) -&gt; RecFlag
@@ -193,17 +193,17 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall (pass :: StgPass).
 GenStgBinding pass -&gt; (RecFlag, [(BinderP pass, GenStgRhs pass)])
 </span><a href="GHC.Stg.Lift.Monad.html#decomposeStgBinding"><span class="hs-identifier hs-var">decomposeStgBinding</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687287"><span class="hs-identifier hs-var">bind</span></a></span><span>
+</span><a href="#local-6989586621682890800"><span class="hs-identifier hs-var">bind</span></a></span><span>
 </span><span id="line-138"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; LiftM () -&gt; LiftM ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682687289"><span class="hs-identifier hs-var">is_rec</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM ()
+</span><a href="#local-6989586621682890802"><span class="hs-identifier hs-var">is_rec</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM ()
 </span><a href="GHC.Stg.Lift.Monad.html#startBindingGroup"><span class="hs-identifier hs-var">startBindingGroup</span></a></span><span>
-</span><span id="line-139"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682687294"><span class="annot"><span class="annottext">bind_w_fvs :: CgStgBinding
-</span><a href="#local-6989586621682687294"><span class="hs-identifier hs-var hs-var">bind_w_fvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Module -&gt; GenStgBinding 'Vanilla -&gt; CgStgBinding
+</span><span id="line-139"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682890807"><span class="annot"><span class="annottext">bind_w_fvs :: CgStgBinding
+</span><a href="#local-6989586621682890807"><span class="hs-identifier hs-var hs-var">bind_w_fvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Module -&gt; GenStgBinding 'Vanilla -&gt; CgStgBinding
 </span><a href="GHC.Stg.FVs.html#annBindingFreeVars"><span class="hs-identifier hs-var">annBindingFreeVars</span></a></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682687285"><span class="hs-identifier hs-var">this_mod</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687287"><span class="hs-identifier hs-var">bind</span></a></span><span>
+</span><a href="#local-6989586621682890798"><span class="hs-identifier hs-var">this_mod</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682890800"><span class="hs-identifier hs-var">bind</span></a></span><span>
 </span><span id="line-140"></span><span>  </span><span class="annot"><span class="annottext">TopLevelFlag
 -&gt; LlStgBinding
 -&gt; Skeleton
@@ -218,17 +218,17 @@ TopLevelFlag
 </span><a href="GHC.Stg.Lift.html#withLiftedBind"><span class="hs-identifier hs-var">withLiftedBind</span></a></span><span> </span><span class="annot"><span class="annottext">TopLevelFlag
 </span><a href="GHC.Types.Basic.html#TopLevel"><span class="hs-identifier hs-var">TopLevel</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CgStgBinding -&gt; LlStgBinding
 </span><a href="GHC.Stg.Lift.Analysis.html#tagSkeletonTopBind"><span class="hs-identifier hs-var">tagSkeletonTopBind</span></a></span><span> </span><span class="annot"><span class="annottext">CgStgBinding
-</span><a href="#local-6989586621682687294"><span class="hs-identifier hs-var">bind_w_fvs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Skeleton
+</span><a href="#local-6989586621682890807"><span class="hs-identifier hs-var">bind_w_fvs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Skeleton
 </span><a href="GHC.Stg.Lift.Types.html#NilSk"><span class="hs-identifier hs-var">NilSk</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (GenStgBinding 'Vanilla) -&gt; LiftM ()) -&gt; LiftM ())
 -&gt; (Maybe (GenStgBinding 'Vanilla) -&gt; LiftM ()) -&gt; LiftM ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687299"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
-</span><a href="#local-6989586621682687299"><span class="hs-identifier hs-var">mb_bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890812"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
+</span><a href="#local-6989586621682890812"><span class="hs-identifier hs-var">mb_bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-141"></span><span>    </span><span class="hs-comment">-- We signal lifting of a binding through returning Nothing.</span><span>
 </span><span id="line-142"></span><span>    </span><span class="hs-comment">-- Should never happen for a top-level binding, though, since we are already</span><span>
 </span><span id="line-143"></span><span>    </span><span class="hs-comment">-- at top-level.</span><span>
 </span><span id="line-144"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
-</span><a href="#local-6989586621682687299"><span class="hs-identifier hs-var">mb_bind'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682890812"><span class="hs-identifier hs-var">mb_bind'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-145"></span><span>      </span><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; LiftM ()
 forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
@@ -237,35 +237,35 @@ forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Lifted top-level binding&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-146"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682687302"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687302"><span class="hs-identifier hs-var">bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla -&gt; LiftM ()
+</span><span id="line-146"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682890815"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682890815"><span class="hs-identifier hs-var">bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla -&gt; LiftM ()
 </span><a href="GHC.Stg.Lift.Monad.html#addLiftedBinding"><span class="hs-identifier hs-var">addLiftedBinding</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687302"><span class="hs-identifier hs-var">bind'</span></a></span><span>
+</span><a href="#local-6989586621682890815"><span class="hs-identifier hs-var">bind'</span></a></span><span>
 </span><span id="line-147"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; LiftM () -&gt; LiftM ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682687289"><span class="hs-identifier hs-var">is_rec</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM ()
+</span><a href="#local-6989586621682890802"><span class="hs-identifier hs-var">is_rec</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM ()
 </span><a href="GHC.Stg.Lift.Monad.html#endBindingGroup"><span class="hs-identifier hs-var">endBindingGroup</span></a></span><span>
 </span><span id="line-148"></span><span>    </span><span class="annot"><span class="annottext">LiftM ()
-</span><a href="#local-6989586621682687288"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><a href="#local-6989586621682890801"><span class="hs-identifier hs-var">rest</span></a></span><span>
 </span><span id="line-149"></span><span>
-</span><span id="line-150"></span><span id="local-6989586621682687108"><span class="annot"><a href="GHC.Stg.Lift.html#withLiftedBind"><span class="hs-identifier hs-type">withLiftedBind</span></a></span><span>
+</span><span id="line-150"></span><span id="local-6989586621682890621"><span class="annot"><a href="GHC.Stg.Lift.html#withLiftedBind"><span class="hs-identifier hs-type">withLiftedBind</span></a></span><span>
 </span><span id="line-151"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#TopLevelFlag"><span class="hs-identifier hs-type">TopLevelFlag</span></a></span><span>
 </span><span id="line-152"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#LlStgBinding"><span class="hs-identifier hs-type">LlStgBinding</span></a></span><span>
 </span><span id="line-153"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Types.html#Skeleton"><span class="hs-identifier hs-type">Skeleton</span></a></span><span>
-</span><span id="line-154"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgBinding"><span class="hs-identifier hs-type">OutStgBinding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687108"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-155"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687108"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-154"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgBinding"><span class="hs-identifier hs-type">OutStgBinding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890621"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890621"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-156"></span><span id="withLiftedBind"><span class="annot"><span class="annottext">withLiftedBind :: forall a.
 TopLevelFlag
 -&gt; LlStgBinding
 -&gt; Skeleton
 -&gt; (Maybe (GenStgBinding 'Vanilla) -&gt; LiftM a)
 -&gt; LiftM a
-</span><a href="GHC.Stg.Lift.html#withLiftedBind"><span class="hs-identifier hs-var hs-var">withLiftedBind</span></a></span></span><span> </span><span id="local-6989586621682687308"><span class="annot"><span class="annottext">TopLevelFlag
-</span><a href="#local-6989586621682687308"><span class="hs-identifier hs-var">top_lvl</span></a></span></span><span> </span><span id="local-6989586621682687309"><span class="annot"><span class="annottext">LlStgBinding
-</span><a href="#local-6989586621682687309"><span class="hs-identifier hs-var">bind</span></a></span></span><span> </span><span id="local-6989586621682687310"><span class="annot"><span class="annottext">Skeleton
-</span><a href="#local-6989586621682687310"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682687311"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla) -&gt; LiftM a
-</span><a href="#local-6989586621682687311"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><a href="GHC.Stg.Lift.html#withLiftedBind"><span class="hs-identifier hs-var hs-var">withLiftedBind</span></a></span></span><span> </span><span id="local-6989586621682890821"><span class="annot"><span class="annottext">TopLevelFlag
+</span><a href="#local-6989586621682890821"><span class="hs-identifier hs-var">top_lvl</span></a></span></span><span> </span><span id="local-6989586621682890822"><span class="annot"><span class="annottext">LlStgBinding
+</span><a href="#local-6989586621682890822"><span class="hs-identifier hs-var">bind</span></a></span></span><span> </span><span id="local-6989586621682890823"><span class="annot"><span class="annottext">Skeleton
+</span><a href="#local-6989586621682890823"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682890824"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla) -&gt; LiftM a
+</span><a href="#local-6989586621682890824"><span class="hs-identifier hs-var">k</span></a></span></span><span>
 </span><span id="line-157"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TopLevelFlag
 -&gt; RecFlag
 -&gt; [(BinderInfo, LlStgRhs)]
@@ -280,12 +280,12 @@ TopLevelFlag
 -&gt; (Maybe [(Id, GenStgRhs 'Vanilla)] -&gt; LiftM a)
 -&gt; LiftM a
 </span><a href="GHC.Stg.Lift.html#withLiftedBindPairs"><span class="hs-identifier hs-var">withLiftedBindPairs</span></a></span><span> </span><span class="annot"><span class="annottext">TopLevelFlag
-</span><a href="#local-6989586621682687308"><span class="hs-identifier hs-var">top_lvl</span></a></span><span> </span><span class="annot"><span class="annottext">RecFlag
-</span><a href="#local-6989586621682687313"><span class="hs-identifier hs-var">rec</span></a></span><span> </span><span class="annot"><span class="annottext">[(BinderInfo, LlStgRhs)]
+</span><a href="#local-6989586621682890821"><span class="hs-identifier hs-var">top_lvl</span></a></span><span> </span><span class="annot"><span class="annottext">RecFlag
+</span><a href="#local-6989586621682890826"><span class="hs-identifier hs-var">rec</span></a></span><span> </span><span class="annot"><span class="annottext">[(BinderInfo, LlStgRhs)]
 [(BinderP 'LiftLams, LlStgRhs)]
-</span><a href="#local-6989586621682687314"><span class="hs-identifier hs-var">pairs</span></a></span><span> </span><span class="annot"><span class="annottext">Skeleton
-</span><a href="#local-6989586621682687310"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla) -&gt; LiftM a
-</span><a href="#local-6989586621682687311"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (GenStgBinding 'Vanilla) -&gt; LiftM a)
+</span><a href="#local-6989586621682890827"><span class="hs-identifier hs-var">pairs</span></a></span><span> </span><span class="annot"><span class="annottext">Skeleton
+</span><a href="#local-6989586621682890823"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla) -&gt; LiftM a
+</span><a href="#local-6989586621682890824"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (GenStgBinding 'Vanilla) -&gt; LiftM a)
 -&gt; (Maybe [(Id, GenStgRhs 'Vanilla)]
     -&gt; Maybe (GenStgBinding 'Vanilla))
 -&gt; Maybe [(Id, GenStgRhs 'Vanilla)]
@@ -302,23 +302,23 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall (pass :: StgPass).
 RecFlag -&gt; [(BinderP pass, GenStgRhs pass)] -&gt; GenStgBinding pass
 </span><a href="GHC.Stg.Lift.Monad.html#mkStgBinding"><span class="hs-identifier hs-var">mkStgBinding</span></a></span><span> </span><span class="annot"><span class="annottext">RecFlag
-</span><a href="#local-6989586621682687313"><span class="hs-identifier hs-var">rec</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682890826"><span class="hs-identifier hs-var">rec</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-158"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-159"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682687313"><span class="annot"><span class="annottext">RecFlag
-</span><a href="#local-6989586621682687313"><span class="hs-identifier hs-var">rec</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682687314"><span class="annot"><span class="annottext">[(BinderP 'LiftLams, LlStgRhs)]
-</span><a href="#local-6989586621682687314"><span class="hs-identifier hs-var">pairs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LlStgBinding -&gt; (RecFlag, [(BinderP 'LiftLams, LlStgRhs)])
+</span><span id="line-159"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682890826"><span class="annot"><span class="annottext">RecFlag
+</span><a href="#local-6989586621682890826"><span class="hs-identifier hs-var">rec</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682890827"><span class="annot"><span class="annottext">[(BinderP 'LiftLams, LlStgRhs)]
+</span><a href="#local-6989586621682890827"><span class="hs-identifier hs-var">pairs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LlStgBinding -&gt; (RecFlag, [(BinderP 'LiftLams, LlStgRhs)])
 forall (pass :: StgPass).
 GenStgBinding pass -&gt; (RecFlag, [(BinderP pass, GenStgRhs pass)])
 </span><a href="GHC.Stg.Lift.Monad.html#decomposeStgBinding"><span class="hs-identifier hs-var">decomposeStgBinding</span></a></span><span> </span><span class="annot"><span class="annottext">LlStgBinding
-</span><a href="#local-6989586621682687309"><span class="hs-identifier hs-var">bind</span></a></span><span>
+</span><a href="#local-6989586621682890822"><span class="hs-identifier hs-var">bind</span></a></span><span>
 </span><span id="line-160"></span><span>
-</span><span id="line-161"></span><span id="local-6989586621682687113"><span class="annot"><a href="GHC.Stg.Lift.html#withLiftedBindPairs"><span class="hs-identifier hs-type">withLiftedBindPairs</span></a></span><span>
+</span><span id="line-161"></span><span id="local-6989586621682890626"><span class="annot"><a href="GHC.Stg.Lift.html#withLiftedBindPairs"><span class="hs-identifier hs-type">withLiftedBindPairs</span></a></span><span>
 </span><span id="line-162"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#TopLevelFlag"><span class="hs-identifier hs-type">TopLevelFlag</span></a></span><span>
 </span><span id="line-163"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#RecFlag"><span class="hs-identifier hs-type">RecFlag</span></a></span><span>
 </span><span id="line-164"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Lift.Types.html#BinderInfo"><span class="hs-identifier hs-type">BinderInfo</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#LlStgRhs"><span class="hs-identifier hs-type">LlStgRhs</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-165"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Types.html#Skeleton"><span class="hs-identifier hs-type">Skeleton</span></a></span><span>
-</span><span id="line-166"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgRhs"><span class="hs-identifier hs-type">OutStgRhs</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687113"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-167"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687113"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-166"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgRhs"><span class="hs-identifier hs-type">OutStgRhs</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890626"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-167"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890626"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-168"></span><span id="withLiftedBindPairs"><span class="annot"><span class="annottext">withLiftedBindPairs :: forall a.
 TopLevelFlag
 -&gt; RecFlag
@@ -326,40 +326,40 @@ TopLevelFlag
 -&gt; Skeleton
 -&gt; (Maybe [(Id, GenStgRhs 'Vanilla)] -&gt; LiftM a)
 -&gt; LiftM a
-</span><a href="GHC.Stg.Lift.html#withLiftedBindPairs"><span class="hs-identifier hs-var hs-var">withLiftedBindPairs</span></a></span></span><span> </span><span id="local-6989586621682687332"><span class="annot"><span class="annottext">TopLevelFlag
-</span><a href="#local-6989586621682687332"><span class="hs-identifier hs-var">top</span></a></span></span><span> </span><span id="local-6989586621682687333"><span class="annot"><span class="annottext">RecFlag
-</span><a href="#local-6989586621682687333"><span class="hs-identifier hs-var">rec</span></a></span></span><span> </span><span id="local-6989586621682687334"><span class="annot"><span class="annottext">[(BinderInfo, LlStgRhs)]
-</span><a href="#local-6989586621682687334"><span class="hs-identifier hs-var">pairs</span></a></span></span><span> </span><span id="local-6989586621682687335"><span class="annot"><span class="annottext">Skeleton
-</span><a href="#local-6989586621682687335"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682687336"><span class="annot"><span class="annottext">Maybe [(Id, GenStgRhs 'Vanilla)] -&gt; LiftM a
-</span><a href="#local-6989586621682687336"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-169"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682687337"><span class="annot"><span class="annottext">[BinderInfo]
-</span><a href="#local-6989586621682687337"><span class="hs-identifier hs-var hs-var">infos</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682687338"><span class="annot"><span class="annottext">[LlStgRhs]
-</span><a href="#local-6989586621682687338"><span class="hs-identifier hs-var hs-var">rhss</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(BinderInfo, LlStgRhs)] -&gt; ([BinderInfo], [LlStgRhs])
+</span><a href="GHC.Stg.Lift.html#withLiftedBindPairs"><span class="hs-identifier hs-var hs-var">withLiftedBindPairs</span></a></span></span><span> </span><span id="local-6989586621682890845"><span class="annot"><span class="annottext">TopLevelFlag
+</span><a href="#local-6989586621682890845"><span class="hs-identifier hs-var">top</span></a></span></span><span> </span><span id="local-6989586621682890846"><span class="annot"><span class="annottext">RecFlag
+</span><a href="#local-6989586621682890846"><span class="hs-identifier hs-var">rec</span></a></span></span><span> </span><span id="local-6989586621682890847"><span class="annot"><span class="annottext">[(BinderInfo, LlStgRhs)]
+</span><a href="#local-6989586621682890847"><span class="hs-identifier hs-var">pairs</span></a></span></span><span> </span><span id="local-6989586621682890848"><span class="annot"><span class="annottext">Skeleton
+</span><a href="#local-6989586621682890848"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682890849"><span class="annot"><span class="annottext">Maybe [(Id, GenStgRhs 'Vanilla)] -&gt; LiftM a
+</span><a href="#local-6989586621682890849"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-169"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682890850"><span class="annot"><span class="annottext">[BinderInfo]
+</span><a href="#local-6989586621682890850"><span class="hs-identifier hs-var hs-var">infos</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682890851"><span class="annot"><span class="annottext">[LlStgRhs]
+</span><a href="#local-6989586621682890851"><span class="hs-identifier hs-var hs-var">rhss</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(BinderInfo, LlStgRhs)] -&gt; ([BinderInfo], [LlStgRhs])
 forall a b. [(a, b)] -&gt; ([a], [b])
 </span><span class="hs-identifier hs-var">unzip</span></span><span> </span><span class="annot"><span class="annottext">[(BinderInfo, LlStgRhs)]
-</span><a href="#local-6989586621682687334"><span class="hs-identifier hs-var">pairs</span></a></span><span>
-</span><span id="line-170"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682687340"><span class="annot"><span class="annottext">bndrs :: [Id]
-</span><a href="#local-6989586621682687340"><span class="hs-identifier hs-var hs-var hs-var">bndrs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(BinderInfo -&gt; Id) -&gt; [BinderInfo] -&gt; [Id]
+</span><a href="#local-6989586621682890847"><span class="hs-identifier hs-var">pairs</span></a></span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682890853"><span class="annot"><span class="annottext">bndrs :: [Id]
+</span><a href="#local-6989586621682890853"><span class="hs-identifier hs-var hs-var hs-var">bndrs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(BinderInfo -&gt; Id) -&gt; [BinderInfo] -&gt; [Id]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">BinderInfo -&gt; Id
 </span><a href="GHC.Stg.Lift.Types.html#binderInfoBndr"><span class="hs-identifier hs-var">binderInfoBndr</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderInfo]
-</span><a href="#local-6989586621682687337"><span class="hs-identifier hs-var">infos</span></a></span><span>
-</span><span id="line-171"></span><span>  </span><span id="local-6989586621682687342"><span class="annot"><a href="#local-6989586621682687342"><span class="hs-identifier hs-var">expander</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">LiftM (DIdSet -&gt; DIdSet)
+</span><a href="#local-6989586621682890850"><span class="hs-identifier hs-var">infos</span></a></span><span>
+</span><span id="line-171"></span><span>  </span><span id="local-6989586621682890855"><span class="annot"><a href="#local-6989586621682890855"><span class="hs-identifier hs-var">expander</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">LiftM (DIdSet -&gt; DIdSet)
 </span><a href="GHC.Stg.Lift.Monad.html#liftedIdsExpander"><span class="hs-identifier hs-var">liftedIdsExpander</span></a></span><span>
-</span><span id="line-172"></span><span>  </span><span id="local-6989586621682687344"><span class="annot"><a href="#local-6989586621682687344"><span class="hs-identifier hs-var">cfg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#getConfig"><span class="hs-identifier hs-type">getConfig</span></a></span><span>
-</span><span id="line-173"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Analysis.html#goodToLift"><span class="hs-identifier hs-type">goodToLift</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687344"><span class="hs-identifier hs-type">cfg</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687332"><span class="hs-identifier hs-type">top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687333"><span class="hs-identifier hs-type">rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687342"><span class="hs-identifier hs-type">expander</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687334"><span class="hs-identifier hs-type">pairs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687335"><span class="hs-identifier hs-type">scope</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-172"></span><span>  </span><span id="local-6989586621682890857"><span class="annot"><a href="#local-6989586621682890857"><span class="hs-identifier hs-var">cfg</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#getConfig"><span class="hs-identifier hs-type">getConfig</span></a></span><span>
+</span><span id="line-173"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Analysis.html#goodToLift"><span class="hs-identifier hs-type">goodToLift</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890857"><span class="hs-identifier hs-type">cfg</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890845"><span class="hs-identifier hs-type">top</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890846"><span class="hs-identifier hs-type">rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890855"><span class="hs-identifier hs-type">expander</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890847"><span class="hs-identifier hs-type">pairs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890848"><span class="hs-identifier hs-type">scope</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-174"></span><span>    </span><span class="hs-comment">-- @abs_ids@ is the set of all variables that need to become parameters.</span><span>
-</span><span id="line-175"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682687346"><span class="annot"><span class="annottext">DIdSet
-</span><a href="#local-6989586621682687346"><span class="hs-identifier hs-var">abs_ids</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DIdSet -&gt; [Id] -&gt; ([Id] -&gt; LiftM a) -&gt; LiftM a
+</span><span id="line-175"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682890859"><span class="annot"><span class="annottext">DIdSet
+</span><a href="#local-6989586621682890859"><span class="hs-identifier hs-var">abs_ids</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DIdSet -&gt; [Id] -&gt; ([Id] -&gt; LiftM a) -&gt; LiftM a
 forall (f :: * -&gt; *) a.
 Traversable f =&gt;
 DIdSet -&gt; f Id -&gt; (f Id -&gt; LiftM a) -&gt; LiftM a
 </span><a href="GHC.Stg.Lift.Monad.html#withLiftedBndrs"><span class="hs-identifier hs-var">withLiftedBndrs</span></a></span><span> </span><span class="annot"><span class="annottext">DIdSet
-</span><a href="#local-6989586621682687346"><span class="hs-identifier hs-var">abs_ids</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687340"><span class="hs-identifier hs-var">bndrs</span></a></span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM a) -&gt; LiftM a) -&gt; ([Id] -&gt; LiftM a) -&gt; LiftM a
+</span><a href="#local-6989586621682890859"><span class="hs-identifier hs-var">abs_ids</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890853"><span class="hs-identifier hs-var">bndrs</span></a></span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM a) -&gt; LiftM a) -&gt; ([Id] -&gt; LiftM a) -&gt; LiftM a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687348"><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687348"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890861"><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890861"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-176"></span><span>      </span><span class="hs-comment">-- Within this block, all binders in @bndrs@ will be noted as lifted, so</span><span>
 </span><span id="line-177"></span><span>      </span><span class="hs-comment">-- that the return value of @liftedIdsExpander@ in this context will also</span><span>
 </span><span id="line-178"></span><span>      </span><span class="hs-comment">-- expand the bindings in @bndrs@ to their free variables.</span><span>
@@ -370,9 +370,9 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RecFlag -&gt; Bool
 </span><a href="GHC.Types.Basic.html#isRec"><span class="hs-identifier hs-var">isRec</span></a></span><span> </span><span class="annot"><span class="annottext">RecFlag
-</span><a href="#local-6989586621682687333"><span class="hs-identifier hs-var">rec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LiftM ()
+</span><a href="#local-6989586621682890846"><span class="hs-identifier hs-var">rec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LiftM ()
 </span><a href="GHC.Stg.Lift.Monad.html#startBindingGroup"><span class="hs-identifier hs-var">startBindingGroup</span></a></span><span>
-</span><span id="line-183"></span><span>      </span><span id="local-6989586621682687349"><span class="annot"><a href="#local-6989586621682687349"><span class="hs-identifier hs-var">rhss'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(LlStgRhs -&gt; LiftM (GenStgRhs 'Vanilla))
+</span><span id="line-183"></span><span>      </span><span id="local-6989586621682890862"><span class="annot"><a href="#local-6989586621682890862"><span class="hs-identifier hs-var">rhss'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(LlStgRhs -&gt; LiftM (GenStgRhs 'Vanilla))
 -&gt; [LlStgRhs] -&gt; LiftM [GenStgRhs 'Vanilla]
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
@@ -384,29 +384,29 @@ Applicative f =&gt;
 </span><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-var">liftRhs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DIdSet -&gt; Maybe DIdSet
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">DIdSet
-</span><a href="#local-6989586621682687346"><span class="hs-identifier hs-var">abs_ids</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[LlStgRhs]
-</span><a href="#local-6989586621682687338"><span class="hs-identifier hs-var">rhss</span></a></span><span>
-</span><span id="line-184"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682687352"><span class="annot"><a href="#local-6989586621682687352"><span class="hs-identifier hs-var hs-var">pairs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [GenStgRhs 'Vanilla] -&gt; [(Id, GenStgRhs 'Vanilla)]
+</span><a href="#local-6989586621682890859"><span class="hs-identifier hs-var">abs_ids</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[LlStgRhs]
+</span><a href="#local-6989586621682890851"><span class="hs-identifier hs-var">rhss</span></a></span><span>
+</span><span id="line-184"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682890865"><span class="annot"><a href="#local-6989586621682890865"><span class="hs-identifier hs-var hs-var">pairs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [GenStgRhs 'Vanilla] -&gt; [(Id, GenStgRhs 'Vanilla)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687348"><span class="hs-identifier hs-var">bndrs'</span></a></span><span> </span><span class="annot"><span class="annottext">[GenStgRhs 'Vanilla]
-</span><a href="#local-6989586621682687349"><span class="hs-identifier hs-var">rhss'</span></a></span><span>
-</span><span id="line-185"></span><span>      </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#addLiftedBinding"><span class="hs-identifier hs-type">addLiftedBinding</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#mkStgBinding"><span class="hs-identifier hs-type">mkStgBinding</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687333"><span class="hs-identifier hs-type">rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687352"><span class="hs-identifier hs-type">pairs'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-186"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Basic.html#isRec"><span class="hs-identifier hs-type">isRec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687333"><span class="hs-identifier hs-type">rec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#endBindingGroup"><span class="hs-identifier hs-type">endBindingGroup</span></a></span><span>
-</span><span id="line-187"></span><span>      </span><span class="annot"><a href="#local-6989586621682687336"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>
+</span><a href="#local-6989586621682890861"><span class="hs-identifier hs-var">bndrs'</span></a></span><span> </span><span class="annot"><span class="annottext">[GenStgRhs 'Vanilla]
+</span><a href="#local-6989586621682890862"><span class="hs-identifier hs-var">rhss'</span></a></span><span>
+</span><span id="line-185"></span><span>      </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#addLiftedBinding"><span class="hs-identifier hs-type">addLiftedBinding</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#mkStgBinding"><span class="hs-identifier hs-type">mkStgBinding</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890846"><span class="hs-identifier hs-type">rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890865"><span class="hs-identifier hs-type">pairs'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-186"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Basic.html#isRec"><span class="hs-identifier hs-type">isRec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890846"><span class="hs-identifier hs-type">rec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#endBindingGroup"><span class="hs-identifier hs-type">endBindingGroup</span></a></span><span>
+</span><span id="line-187"></span><span>      </span><span class="annot"><a href="#local-6989586621682890849"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nothing</span></span><span>
 </span><span id="line-188"></span><span>    </span><span class="annot"><span class="annottext">Maybe DIdSet
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; ([Id] -&gt; LiftM a) -&gt; LiftM a
 forall (f :: * -&gt; *) a.
 Traversable f =&gt;
 f Id -&gt; (f Id -&gt; LiftM a) -&gt; LiftM a
 </span><a href="GHC.Stg.Lift.Monad.html#withSubstBndrs"><span class="hs-identifier hs-var">withSubstBndrs</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687340"><span class="hs-identifier hs-var">bndrs</span></a></span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM a) -&gt; LiftM a) -&gt; ([Id] -&gt; LiftM a) -&gt; LiftM a
+</span><a href="#local-6989586621682890853"><span class="hs-identifier hs-var">bndrs</span></a></span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM a) -&gt; LiftM a) -&gt; ([Id] -&gt; LiftM a) -&gt; LiftM a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687354"><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687354"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890867"><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890867"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-189"></span><span>      </span><span class="hs-comment">-- Don't lift the current binding, but possibly some bindings in their</span><span>
 </span><span id="line-190"></span><span>      </span><span class="hs-comment">-- RHSs.</span><span>
-</span><span id="line-191"></span><span>      </span><span id="local-6989586621682687355"><span class="annot"><a href="#local-6989586621682687355"><span class="hs-identifier hs-var">rhss'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(LlStgRhs -&gt; LiftM (GenStgRhs 'Vanilla))
+</span><span id="line-191"></span><span>      </span><span id="local-6989586621682890868"><span class="annot"><a href="#local-6989586621682890868"><span class="hs-identifier hs-var">rhss'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(LlStgRhs -&gt; LiftM (GenStgRhs 'Vanilla))
 -&gt; [LlStgRhs] -&gt; LiftM [GenStgRhs 'Vanilla]
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
@@ -418,13 +418,13 @@ Applicative f =&gt;
 </span><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-var">liftRhs</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DIdSet
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[LlStgRhs]
-</span><a href="#local-6989586621682687338"><span class="hs-identifier hs-var">rhss</span></a></span><span>
-</span><span id="line-192"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682687356"><span class="annot"><a href="#local-6989586621682687356"><span class="hs-identifier hs-var hs-var">pairs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [GenStgRhs 'Vanilla] -&gt; [(Id, GenStgRhs 'Vanilla)]
+</span><a href="#local-6989586621682890851"><span class="hs-identifier hs-var">rhss</span></a></span><span>
+</span><span id="line-192"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682890869"><span class="annot"><a href="#local-6989586621682890869"><span class="hs-identifier hs-var hs-var">pairs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [GenStgRhs 'Vanilla] -&gt; [(Id, GenStgRhs 'Vanilla)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687354"><span class="hs-identifier hs-var">bndrs'</span></a></span><span> </span><span class="annot"><span class="annottext">[GenStgRhs 'Vanilla]
-</span><a href="#local-6989586621682687355"><span class="hs-identifier hs-var">rhss'</span></a></span><span>
-</span><span id="line-193"></span><span>      </span><span class="annot"><a href="#local-6989586621682687336"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><a href="#local-6989586621682687356"><span class="hs-identifier hs-type">pairs'</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682890867"><span class="hs-identifier hs-var">bndrs'</span></a></span><span> </span><span class="annot"><span class="annottext">[GenStgRhs 'Vanilla]
+</span><a href="#local-6989586621682890868"><span class="hs-identifier hs-var">rhss'</span></a></span><span>
+</span><span id="line-193"></span><span>      </span><span class="annot"><a href="#local-6989586621682890849"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><a href="#local-6989586621682890869"><span class="hs-identifier hs-type">pairs'</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-194"></span><span>
 </span><span id="line-195"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-type">liftRhs</span></a></span><span>
 </span><span id="line-196"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Var.Set.html#DIdSet"><span class="hs-identifier hs-type">DIdSet</span></a></span><span class="hs-special">)</span><span>
@@ -433,22 +433,22 @@ forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span id="line-199"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#LlStgRhs"><span class="hs-identifier hs-type">LlStgRhs</span></a></span><span>
 </span><span id="line-200"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgRhs"><span class="hs-identifier hs-type">OutStgRhs</span></a></span><span>
 </span><span id="line-201"></span><span id="liftRhs"><span class="annot"><span class="annottext">liftRhs :: Maybe DIdSet -&gt; LlStgRhs -&gt; LiftM (GenStgRhs 'Vanilla)
-</span><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-var hs-var">liftRhs</span></a></span></span><span> </span><span id="local-6989586621682687357"><span class="annot"><span class="annottext">Maybe DIdSet
-</span><a href="#local-6989586621682687357"><span class="hs-identifier hs-var">mb_former_fvs</span></a></span></span><span> </span><span id="local-6989586621682687358"><span class="annot"><span class="annottext">rhs :: LlStgRhs
-</span><a href="#local-6989586621682687358"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsCon"><span class="hs-identifier hs-type">StgRhsCon</span></a></span><span> </span><span id="local-6989586621682687360"><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682687360"><span class="hs-identifier hs-var">ccs</span></a></span></span><span> </span><span id="local-6989586621682687361"><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682687361"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621682687362"><span class="annot"><span class="annottext">ConstructorNumber
-</span><a href="#local-6989586621682687362"><span class="hs-identifier hs-var">mn</span></a></span></span><span> </span><span id="local-6989586621682687363"><span class="annot"><span class="annottext">[StgTickish]
-</span><a href="#local-6989586621682687363"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span id="local-6989586621682687364"><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687364"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682687365"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687365"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-var hs-var">liftRhs</span></a></span></span><span> </span><span id="local-6989586621682890870"><span class="annot"><span class="annottext">Maybe DIdSet
+</span><a href="#local-6989586621682890870"><span class="hs-identifier hs-var">mb_former_fvs</span></a></span></span><span> </span><span id="local-6989586621682890871"><span class="annot"><span class="annottext">rhs :: LlStgRhs
+</span><a href="#local-6989586621682890871"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsCon"><span class="hs-identifier hs-type">StgRhsCon</span></a></span><span> </span><span id="local-6989586621682890873"><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682890873"><span class="hs-identifier hs-var">ccs</span></a></span></span><span> </span><span id="local-6989586621682890874"><span class="annot"><span class="annottext">DataCon
+</span><a href="#local-6989586621682890874"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621682890875"><span class="annot"><span class="annottext">ConstructorNumber
+</span><a href="#local-6989586621682890875"><span class="hs-identifier hs-var">mn</span></a></span></span><span> </span><span id="local-6989586621682890876"><span class="annot"><span class="annottext">[StgTickish]
+</span><a href="#local-6989586621682890876"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span id="local-6989586621682890877"><span class="annot"><span class="annottext">[StgArg]
+</span><a href="#local-6989586621682890877"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682890878"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682890878"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-202"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 -&gt; SDoc -&gt; LiftM (GenStgRhs 'Vanilla) -&gt; LiftM (GenStgRhs 'Vanilla)
 forall a. HasCallStack =&gt; Bool -&gt; SDoc -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.html#assertPpr"><span class="hs-identifier hs-var">assertPpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe DIdSet -&gt; Bool
 forall a. Maybe a -&gt; Bool
 </span><span class="hs-identifier hs-var">isNothing</span></span><span> </span><span class="annot"><span class="annottext">Maybe DIdSet
-</span><a href="#local-6989586621682687357"><span class="hs-identifier hs-var">mb_former_fvs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682890870"><span class="hs-identifier hs-var">mb_former_fvs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-203"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -461,7 +461,7 @@ OutputablePass pass =&gt;
 StgPprOpts -&gt; GenStgRhs pass -&gt; SDoc
 </span><a href="GHC.Stg.Syntax.html#pprStgRhs"><span class="hs-identifier hs-var">pprStgRhs</span></a></span><span> </span><span class="annot"><span class="annottext">StgPprOpts
 </span><a href="GHC.Stg.Syntax.html#panicStgPprOpts"><span class="hs-identifier hs-var">panicStgPprOpts</span></a></span><span> </span><span class="annot"><span class="annottext">LlStgRhs
-</span><a href="#local-6989586621682687358"><span class="hs-identifier hs-var">rhs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(LiftM (GenStgRhs 'Vanilla) -&gt; LiftM (GenStgRhs 'Vanilla))
+</span><a href="#local-6989586621682890871"><span class="hs-identifier hs-var">rhs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(LiftM (GenStgRhs 'Vanilla) -&gt; LiftM (GenStgRhs 'Vanilla))
 -&gt; LiftM (GenStgRhs 'Vanilla) -&gt; LiftM (GenStgRhs 'Vanilla)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
@@ -481,10 +481,10 @@ CostCentreStack
 -&gt; Type
 -&gt; GenStgRhs pass
 </span><a href="GHC.Stg.Syntax.html#StgRhsCon"><span class="hs-identifier hs-var">StgRhsCon</span></a></span><span> </span><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682687360"><span class="hs-identifier hs-var">ccs</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682687361"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">ConstructorNumber
-</span><a href="#local-6989586621682687362"><span class="hs-identifier hs-var">mn</span></a></span><span> </span><span class="annot"><span class="annottext">[StgTickish]
-</span><a href="#local-6989586621682687363"><span class="hs-identifier hs-var">ts</span></a></span><span> </span><span class="annot"><span class="annottext">([StgArg] -&gt; Type -&gt; GenStgRhs 'Vanilla)
+</span><a href="#local-6989586621682890873"><span class="hs-identifier hs-var">ccs</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
+</span><a href="#local-6989586621682890874"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">ConstructorNumber
+</span><a href="#local-6989586621682890875"><span class="hs-identifier hs-var">mn</span></a></span><span> </span><span class="annot"><span class="annottext">[StgTickish]
+</span><a href="#local-6989586621682890876"><span class="hs-identifier hs-var">ts</span></a></span><span> </span><span class="annot"><span class="annottext">([StgArg] -&gt; Type -&gt; GenStgRhs 'Vanilla)
 -&gt; LiftM [StgArg] -&gt; LiftM (Type -&gt; GenStgRhs 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(StgArg -&gt; LiftM StgArg) -&gt; [StgArg] -&gt; LiftM [StgArg]
@@ -496,7 +496,7 @@ Applicative f =&gt;
 (a -&gt; f b) -&gt; [a] -&gt; f [b]
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">StgArg -&gt; LiftM StgArg
 </span><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-var">liftArgs</span></a></span><span> </span><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687364"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgRhs 'Vanilla)
+</span><a href="#local-6989586621682890877"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgRhs 'Vanilla)
 -&gt; LiftM Type -&gt; LiftM (GenStgRhs 'Vanilla)
 forall a b. LiftM (a -&gt; b) -&gt; LiftM a -&gt; LiftM b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
@@ -504,15 +504,15 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687365"><span class="hs-identifier hs-var">typ</span></a></span><span>
+</span><a href="#local-6989586621682890878"><span class="hs-identifier hs-var">typ</span></a></span><span>
 </span><span id="line-206"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-var">liftRhs</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe DIdSet
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'LiftLams
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682687373"><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682687373"><span class="hs-identifier hs-var">ccs</span></a></span></span><span> </span><span id="local-6989586621682687374"><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682687374"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682687375"><span class="annot"><span class="annottext">[BinderP 'LiftLams]
-</span><a href="#local-6989586621682687375"><span class="hs-identifier hs-var">infos</span></a></span></span><span> </span><span id="local-6989586621682687376"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687376"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621682687377"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687377"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682890886"><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682890886"><span class="hs-identifier hs-var">ccs</span></a></span></span><span> </span><span id="local-6989586621682890887"><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682890887"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682890888"><span class="annot"><span class="annottext">[BinderP 'LiftLams]
+</span><a href="#local-6989586621682890888"><span class="hs-identifier hs-var">infos</span></a></span></span><span> </span><span id="local-6989586621682890889"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
+</span><a href="#local-6989586621682890889"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621682890890"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682890890"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-207"></span><span>  </span><span class="hs-comment">-- This RHS wasn't lifted.</span><span>
 </span><span id="line-208"></span><span>  </span><span class="annot"><span class="annottext">[Id]
 -&gt; ([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
@@ -525,13 +525,13 @@ forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">BinderInfo -&gt; Id
 </span><a href="GHC.Stg.Lift.Types.html#binderInfoBndr"><span class="hs-identifier hs-var">binderInfoBndr</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderInfo]
 [BinderP 'LiftLams]
-</span><a href="#local-6989586621682687375"><span class="hs-identifier hs-var">infos</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
+</span><a href="#local-6989586621682890888"><span class="hs-identifier hs-var">infos</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
  -&gt; LiftM (GenStgRhs 'Vanilla))
 -&gt; ([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
 -&gt; LiftM (GenStgRhs 'Vanilla)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687378"><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687378"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890891"><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890891"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-209"></span><span>    </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 -&gt; CostCentreStack
 -&gt; UpdateFlag
@@ -550,16 +550,16 @@ XRhsClosure pass
 </span><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-var">StgRhsClosure</span></a></span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 NoExtFieldSilent
 </span><a href="GHC.Stg.Syntax.html#noExtFieldSilent"><span class="hs-identifier hs-var">noExtFieldSilent</span></a></span><span> </span><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682687373"><span class="hs-identifier hs-var">ccs</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682687374"><span class="hs-identifier hs-var">upd</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890886"><span class="hs-identifier hs-var">ccs</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682890887"><span class="hs-identifier hs-var">upd</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
 [BinderP 'Vanilla]
-</span><a href="#local-6989586621682687378"><span class="hs-identifier hs-var">bndrs'</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; Type -&gt; GenStgRhs 'Vanilla)
+</span><a href="#local-6989586621682890891"><span class="hs-identifier hs-var">bndrs'</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; Type -&gt; GenStgRhs 'Vanilla)
 -&gt; LiftM (GenStgExpr 'Vanilla)
 -&gt; LiftM (Type -&gt; GenStgRhs 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687376"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgRhs 'Vanilla)
+</span><a href="#local-6989586621682890889"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgRhs 'Vanilla)
 -&gt; LiftM Type -&gt; LiftM (GenStgRhs 'Vanilla)
 forall a b. LiftM (a -&gt; b) -&gt; LiftM a -&gt; LiftM b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
@@ -567,15 +567,15 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687377"><span class="hs-identifier hs-var">typ</span></a></span><span>
-</span><span id="line-210"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-var">liftRhs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682687381"><span class="annot"><span class="annottext">DIdSet
-</span><a href="#local-6989586621682687381"><span class="hs-identifier hs-var">former_fvs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'LiftLams
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682687382"><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682687382"><span class="hs-identifier hs-var">ccs</span></a></span></span><span> </span><span id="local-6989586621682687383"><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682687383"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682687384"><span class="annot"><span class="annottext">[BinderP 'LiftLams]
-</span><a href="#local-6989586621682687384"><span class="hs-identifier hs-var">infos</span></a></span></span><span> </span><span id="local-6989586621682687385"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687385"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621682687386"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687386"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682890890"><span class="hs-identifier hs-var">typ</span></a></span><span>
+</span><span id="line-210"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftRhs"><span class="hs-identifier hs-var">liftRhs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682890894"><span class="annot"><span class="annottext">DIdSet
+</span><a href="#local-6989586621682890894"><span class="hs-identifier hs-var">former_fvs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'LiftLams
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682890895"><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682890895"><span class="hs-identifier hs-var">ccs</span></a></span></span><span> </span><span id="local-6989586621682890896"><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682890896"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682890897"><span class="annot"><span class="annottext">[BinderP 'LiftLams]
+</span><a href="#local-6989586621682890897"><span class="hs-identifier hs-var">infos</span></a></span></span><span> </span><span id="local-6989586621682890898"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
+</span><a href="#local-6989586621682890898"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621682890899"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682890899"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-211"></span><span>  </span><span class="hs-comment">-- This RHS was lifted. Insert extra binders for @former_fvs@.</span><span>
 </span><span id="line-212"></span><span>  </span><span class="annot"><span class="annottext">[Id]
 -&gt; ([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
@@ -588,20 +588,20 @@ forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">BinderInfo -&gt; Id
 </span><a href="GHC.Stg.Lift.Types.html#binderInfoBndr"><span class="hs-identifier hs-var">binderInfoBndr</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderInfo]
 [BinderP 'LiftLams]
-</span><a href="#local-6989586621682687384"><span class="hs-identifier hs-var">infos</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
+</span><a href="#local-6989586621682890897"><span class="hs-identifier hs-var">infos</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
  -&gt; LiftM (GenStgRhs 'Vanilla))
 -&gt; ([Id] -&gt; LiftM (GenStgRhs 'Vanilla))
 -&gt; LiftM (GenStgRhs 'Vanilla)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687387"><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687387"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-213"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682687388"><span class="annot"><span class="annottext">bndrs'' :: [Id]
-</span><a href="#local-6989586621682687388"><span class="hs-identifier hs-var hs-var">bndrs''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DIdSet -&gt; [Id]
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890900"><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890900"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-213"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682890901"><span class="annot"><span class="annottext">bndrs'' :: [Id]
+</span><a href="#local-6989586621682890901"><span class="hs-identifier hs-var hs-var">bndrs''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DIdSet -&gt; [Id]
 </span><a href="GHC.Types.Var.Set.html#dVarSetElems"><span class="hs-identifier hs-var">dVarSetElems</span></a></span><span> </span><span class="annot"><span class="annottext">DIdSet
-</span><a href="#local-6989586621682687381"><span class="hs-identifier hs-var">former_fvs</span></a></span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [Id] -&gt; [Id]
+</span><a href="#local-6989586621682890894"><span class="hs-identifier hs-var">former_fvs</span></a></span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [Id] -&gt; [Id]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687387"><span class="hs-identifier hs-var">bndrs'</span></a></span><span>
+</span><a href="#local-6989586621682890900"><span class="hs-identifier hs-var">bndrs'</span></a></span><span>
 </span><span id="line-214"></span><span>    </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 -&gt; CostCentreStack
 -&gt; UpdateFlag
@@ -620,16 +620,16 @@ XRhsClosure pass
 </span><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-var">StgRhsClosure</span></a></span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 NoExtFieldSilent
 </span><a href="GHC.Stg.Syntax.html#noExtFieldSilent"><span class="hs-identifier hs-var">noExtFieldSilent</span></a></span><span> </span><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682687382"><span class="hs-identifier hs-var">ccs</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682687383"><span class="hs-identifier hs-var">upd</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890895"><span class="hs-identifier hs-var">ccs</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682890896"><span class="hs-identifier hs-var">upd</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
 [BinderP 'Vanilla]
-</span><a href="#local-6989586621682687388"><span class="hs-identifier hs-var">bndrs''</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; Type -&gt; GenStgRhs 'Vanilla)
+</span><a href="#local-6989586621682890901"><span class="hs-identifier hs-var">bndrs''</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; Type -&gt; GenStgRhs 'Vanilla)
 -&gt; LiftM (GenStgExpr 'Vanilla)
 -&gt; LiftM (Type -&gt; GenStgRhs 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687385"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgRhs 'Vanilla)
+</span><a href="#local-6989586621682890898"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgRhs 'Vanilla)
 -&gt; LiftM Type -&gt; LiftM (GenStgRhs 'Vanilla)
 forall a b. LiftM (a -&gt; b) -&gt; LiftM a -&gt; LiftM b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
@@ -637,19 +637,19 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687386"><span class="hs-identifier hs-var">typ</span></a></span><span>
+</span><a href="#local-6989586621682890899"><span class="hs-identifier hs-var">typ</span></a></span><span>
 </span><span id="line-215"></span><span>
 </span><span id="line-216"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-type">liftArgs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#InStgArg"><span class="hs-identifier hs-type">InStgArg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgArg"><span class="hs-identifier hs-type">OutStgArg</span></a></span><span>
 </span><span id="line-217"></span><span id="liftArgs"><span class="annot"><span class="annottext">liftArgs :: StgArg -&gt; LiftM StgArg
-</span><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-var hs-var">liftArgs</span></a></span></span><span> </span><span id="local-6989586621682687392"><span class="annot"><span class="annottext">a :: StgArg
-</span><a href="#local-6989586621682687392"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLitArg"><span class="hs-identifier hs-type">StgLitArg</span></a></span><span> </span><span class="annot"><span class="annottext">Literal
+</span><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-var hs-var">liftArgs</span></a></span></span><span> </span><span id="local-6989586621682890905"><span class="annot"><span class="annottext">a :: StgArg
+</span><a href="#local-6989586621682890905"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLitArg"><span class="hs-identifier hs-type">StgLitArg</span></a></span><span> </span><span class="annot"><span class="annottext">Literal
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgArg -&gt; LiftM StgArg
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">StgArg
-</span><a href="#local-6989586621682687392"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-218"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-var">liftArgs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgVarArg"><span class="hs-identifier hs-type">StgVarArg</span></a></span><span> </span><span id="local-6989586621682687395"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687395"><span class="hs-identifier hs-var">occ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="#local-6989586621682890905"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-218"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-var">liftArgs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgVarArg"><span class="hs-identifier hs-type">StgVarArg</span></a></span><span> </span><span id="local-6989586621682890908"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682890908"><span class="hs-identifier hs-var">occ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-219"></span><span>  </span><span class="annot"><span class="annottext">LiftM Bool -&gt; SDoc -&gt; LiftM ()
 forall (m :: * -&gt; *).
 (HasCallStack, Monad m) =&gt;
@@ -659,7 +659,7 @@ m Bool -&gt; SDoc -&gt; m ()
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Id -&gt; LiftM Bool
 </span><a href="GHC.Stg.Lift.Monad.html#isLifted"><span class="hs-identifier hs-var">isLifted</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687395"><span class="hs-identifier hs-var">occ</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><a href="#local-6989586621682890908"><span class="hs-identifier hs-var">occ</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;StgArgs should never be lifted&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -667,58 +667,58 @@ forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">Id -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687395"><span class="hs-identifier hs-var">occ</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682890908"><span class="hs-identifier hs-var">occ</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-220"></span><span>  </span><span class="annot"><span class="annottext">Id -&gt; StgArg
 </span><a href="GHC.Stg.Syntax.html#StgVarArg"><span class="hs-identifier hs-var">StgVarArg</span></a></span><span> </span><span class="annot"><span class="annottext">(Id -&gt; StgArg) -&gt; LiftM Id -&gt; LiftM StgArg
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Id -&gt; LiftM Id
 </span><a href="GHC.Stg.Lift.Monad.html#substOcc"><span class="hs-identifier hs-var">substOcc</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687395"><span class="hs-identifier hs-var">occ</span></a></span><span>
+</span><a href="#local-6989586621682890908"><span class="hs-identifier hs-var">occ</span></a></span><span>
 </span><span id="line-221"></span><span>
 </span><span id="line-222"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-type">liftExpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#LlStgExpr"><span class="hs-identifier hs-type">LlStgExpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgExpr"><span class="hs-identifier hs-type">OutStgExpr</span></a></span><span>
 </span><span id="line-223"></span><span id="liftExpr"><span class="annot"><span class="annottext">liftExpr :: GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
-</span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var hs-var">liftExpr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLit"><span class="hs-identifier hs-type">StgLit</span></a></span><span> </span><span id="local-6989586621682687404"><span class="annot"><span class="annottext">Literal
-</span><a href="#local-6989586621682687404"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; LiftM (GenStgExpr 'Vanilla)
+</span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var hs-var">liftExpr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLit"><span class="hs-identifier hs-type">StgLit</span></a></span><span> </span><span id="local-6989586621682890917"><span class="annot"><span class="annottext">Literal
+</span><a href="#local-6989586621682890917"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Literal -&gt; GenStgExpr 'Vanilla
 forall (pass :: StgPass). Literal -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgLit"><span class="hs-identifier hs-var">StgLit</span></a></span><span> </span><span class="annot"><span class="annottext">Literal
-</span><a href="#local-6989586621682687404"><span class="hs-identifier hs-var">lit</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-224"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682687406"><span class="annot"><span class="annottext">StgTickish
-</span><a href="#local-6989586621682687406"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621682687407"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687407"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTickish -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682890917"><span class="hs-identifier hs-var">lit</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-224"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682890919"><span class="annot"><span class="annottext">StgTickish
+</span><a href="#local-6989586621682890919"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621682890920"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
+</span><a href="#local-6989586621682890920"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTickish -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla
 forall (pass :: StgPass).
 StgTickish -&gt; GenStgExpr pass -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-var">StgTick</span></a></span><span> </span><span class="annot"><span class="annottext">StgTickish
-</span><a href="#local-6989586621682687406"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682890919"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
 -&gt; LiftM (GenStgExpr 'Vanilla) -&gt; LiftM (GenStgExpr 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687407"><span class="hs-identifier hs-var">e</span></a></span><span>
-</span><span id="line-225"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span id="local-6989586621682687409"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687409"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621682687410"><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687410"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-226"></span><span>  </span><span id="local-6989586621682687411"><span class="annot"><a href="#local-6989586621682687411"><span class="hs-identifier hs-var">f'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Id -&gt; LiftM Id
+</span><a href="#local-6989586621682890920"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-225"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span id="local-6989586621682890922"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682890922"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621682890923"><span class="annot"><span class="annottext">[StgArg]
+</span><a href="#local-6989586621682890923"><span class="hs-identifier hs-var">args</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-226"></span><span>  </span><span id="local-6989586621682890924"><span class="annot"><a href="#local-6989586621682890924"><span class="hs-identifier hs-var">f'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Id -&gt; LiftM Id
 </span><a href="GHC.Stg.Lift.Monad.html#substOcc"><span class="hs-identifier hs-var">substOcc</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687409"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-227"></span><span>  </span><span id="local-6989586621682687412"><span class="annot"><a href="#local-6989586621682687412"><span class="hs-identifier hs-var">args'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="annot"><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-type">liftArgs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687410"><span class="hs-identifier hs-type">args</span></a></span><span>
-</span><span id="line-228"></span><span>  </span><span id="local-6989586621682687413"><span class="annot"><a href="#local-6989586621682687413"><span class="hs-identifier hs-var">fvs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#formerFreeVars"><span class="hs-identifier hs-type">formerFreeVars</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687409"><span class="hs-identifier hs-type">f</span></a></span><span>
-</span><span id="line-229"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682687415"><span class="annot"><a href="#local-6989586621682687415"><span class="hs-identifier hs-var hs-var">top_lvl_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Id -&gt; StgArg) -&gt; [Id] -&gt; [StgArg]
+</span><a href="#local-6989586621682890922"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-227"></span><span>  </span><span id="local-6989586621682890925"><span class="annot"><a href="#local-6989586621682890925"><span class="hs-identifier hs-var">args'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="annot"><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-type">liftArgs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890923"><span class="hs-identifier hs-type">args</span></a></span><span>
+</span><span id="line-228"></span><span>  </span><span id="local-6989586621682890926"><span class="annot"><a href="#local-6989586621682890926"><span class="hs-identifier hs-var">fvs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#formerFreeVars"><span class="hs-identifier hs-type">formerFreeVars</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890922"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-229"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682890928"><span class="annot"><a href="#local-6989586621682890928"><span class="hs-identifier hs-var hs-var">top_lvl_args</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Id -&gt; StgArg) -&gt; [Id] -&gt; [StgArg]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Id -&gt; StgArg
 </span><a href="GHC.Stg.Syntax.html#StgVarArg"><span class="hs-identifier hs-var">StgVarArg</span></a></span><span> </span><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687413"><span class="hs-identifier hs-var">fvs'</span></a></span><span> </span><span class="annot"><span class="annottext">[StgArg] -&gt; [StgArg] -&gt; [StgArg]
+</span><a href="#local-6989586621682890926"><span class="hs-identifier hs-var">fvs'</span></a></span><span> </span><span class="annot"><span class="annottext">[StgArg] -&gt; [StgArg] -&gt; [StgArg]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687412"><span class="hs-identifier hs-var">args'</span></a></span><span>
-</span><span id="line-230"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687411"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687415"><span class="hs-identifier hs-type">top_lvl_args</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-231"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgConApp"><span class="hs-identifier hs-type">StgConApp</span></a></span><span> </span><span id="local-6989586621682687417"><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682687417"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621682687418"><span class="annot"><span class="annottext">ConstructorNumber
-</span><a href="#local-6989586621682687418"><span class="hs-identifier hs-var">mn</span></a></span></span><span> </span><span id="local-6989586621682687419"><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687419"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682687420"><span class="annot"><span class="annottext">[[PrimRep]]
-</span><a href="#local-6989586621682687420"><span class="hs-identifier hs-var">tys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DataCon
+</span><a href="#local-6989586621682890925"><span class="hs-identifier hs-var">args'</span></a></span><span>
+</span><span id="line-230"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890924"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890928"><span class="hs-identifier hs-type">top_lvl_args</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-231"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgConApp"><span class="hs-identifier hs-type">StgConApp</span></a></span><span> </span><span id="local-6989586621682890930"><span class="annot"><span class="annottext">DataCon
+</span><a href="#local-6989586621682890930"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621682890931"><span class="annot"><span class="annottext">ConstructorNumber
+</span><a href="#local-6989586621682890931"><span class="hs-identifier hs-var">mn</span></a></span></span><span> </span><span id="local-6989586621682890932"><span class="annot"><span class="annottext">[StgArg]
+</span><a href="#local-6989586621682890932"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682890933"><span class="annot"><span class="annottext">[[PrimRep]]
+</span><a href="#local-6989586621682890933"><span class="hs-identifier hs-var">tys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DataCon
 -&gt; ConstructorNumber
 -&gt; [StgArg]
 -&gt; [[PrimRep]]
@@ -727,8 +727,8 @@ forall (pass :: StgPass).
 DataCon
 -&gt; ConstructorNumber -&gt; [StgArg] -&gt; [[PrimRep]] -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgConApp"><span class="hs-identifier hs-var">StgConApp</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621682687417"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">ConstructorNumber
-</span><a href="#local-6989586621682687418"><span class="hs-identifier hs-var">mn</span></a></span><span> </span><span class="annot"><span class="annottext">([StgArg] -&gt; [[PrimRep]] -&gt; GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682890930"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">ConstructorNumber
+</span><a href="#local-6989586621682890931"><span class="hs-identifier hs-var">mn</span></a></span><span> </span><span class="annot"><span class="annottext">([StgArg] -&gt; [[PrimRep]] -&gt; GenStgExpr 'Vanilla)
 -&gt; LiftM [StgArg] -&gt; LiftM ([[PrimRep]] -&gt; GenStgExpr 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(StgArg -&gt; LiftM StgArg) -&gt; [StgArg] -&gt; LiftM [StgArg]
@@ -740,7 +740,7 @@ Applicative f =&gt;
 (a -&gt; f b) -&gt; [a] -&gt; f [b]
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">StgArg -&gt; LiftM StgArg
 </span><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-var">liftArgs</span></a></span><span> </span><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687419"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM ([[PrimRep]] -&gt; GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682890932"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM ([[PrimRep]] -&gt; GenStgExpr 'Vanilla)
 -&gt; LiftM [[PrimRep]] -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a b. LiftM (a -&gt; b) -&gt; LiftM a -&gt; LiftM b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
@@ -748,15 +748,15 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">[[PrimRep]]
-</span><a href="#local-6989586621682687420"><span class="hs-identifier hs-var">tys</span></a></span><span>
-</span><span id="line-232"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgOpApp"><span class="hs-identifier hs-type">StgOpApp</span></a></span><span> </span><span id="local-6989586621682687422"><span class="annot"><span class="annottext">StgOp
-</span><a href="#local-6989586621682687422"><span class="hs-identifier hs-var">op</span></a></span></span><span> </span><span id="local-6989586621682687423"><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687423"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682687424"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687424"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgOp -&gt; [StgArg] -&gt; Type -&gt; GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682890933"><span class="hs-identifier hs-var">tys</span></a></span><span>
+</span><span id="line-232"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgOpApp"><span class="hs-identifier hs-type">StgOpApp</span></a></span><span> </span><span id="local-6989586621682890935"><span class="annot"><span class="annottext">StgOp
+</span><a href="#local-6989586621682890935"><span class="hs-identifier hs-var">op</span></a></span></span><span> </span><span id="local-6989586621682890936"><span class="annot"><span class="annottext">[StgArg]
+</span><a href="#local-6989586621682890936"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682890937"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682890937"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgOp -&gt; [StgArg] -&gt; Type -&gt; GenStgExpr 'Vanilla
 forall (pass :: StgPass).
 StgOp -&gt; [StgArg] -&gt; Type -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgOpApp"><span class="hs-identifier hs-var">StgOpApp</span></a></span><span> </span><span class="annot"><span class="annottext">StgOp
-</span><a href="#local-6989586621682687422"><span class="hs-identifier hs-var">op</span></a></span><span> </span><span class="annot"><span class="annottext">([StgArg] -&gt; Type -&gt; GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682890935"><span class="hs-identifier hs-var">op</span></a></span><span> </span><span class="annot"><span class="annottext">([StgArg] -&gt; Type -&gt; GenStgExpr 'Vanilla)
 -&gt; LiftM [StgArg] -&gt; LiftM (Type -&gt; GenStgExpr 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(StgArg -&gt; LiftM StgArg) -&gt; [StgArg] -&gt; LiftM [StgArg]
@@ -768,7 +768,7 @@ Applicative f =&gt;
 (a -&gt; f b) -&gt; [a] -&gt; f [b]
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">StgArg -&gt; LiftM StgArg
 </span><a href="GHC.Stg.Lift.html#liftArgs"><span class="hs-identifier hs-var">liftArgs</span></a></span><span> </span><span class="annot"><span class="annottext">[StgArg]
-</span><a href="#local-6989586621682687423"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682890936"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">LiftM (Type -&gt; GenStgExpr 'Vanilla)
 -&gt; LiftM Type -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a b. LiftM (a -&gt; b) -&gt; LiftM a -&gt; LiftM b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
@@ -776,18 +776,18 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682687424"><span class="hs-identifier hs-var">ty</span></a></span><span>
-</span><span id="line-233"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgCase"><span class="hs-identifier hs-type">StgCase</span></a></span><span> </span><span id="local-6989586621682687426"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687426"><span class="hs-identifier hs-var">scrut</span></a></span></span><span> </span><span id="local-6989586621682687427"><span class="annot"><span class="annottext">BinderP 'LiftLams
-</span><a href="#local-6989586621682687427"><span class="hs-identifier hs-var">info</span></a></span></span><span> </span><span id="local-6989586621682687428"><span class="annot"><span class="annottext">AltType
-</span><a href="#local-6989586621682687428"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621682687429"><span class="annot"><span class="annottext">[GenStgAlt 'LiftLams]
-</span><a href="#local-6989586621682687429"><span class="hs-identifier hs-var">alts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-234"></span><span>  </span><span id="local-6989586621682687430"><span class="annot"><a href="#local-6989586621682687430"><span class="hs-identifier hs-var">scrut'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682890937"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span id="line-233"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgCase"><span class="hs-identifier hs-type">StgCase</span></a></span><span> </span><span id="local-6989586621682890939"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
+</span><a href="#local-6989586621682890939"><span class="hs-identifier hs-var">scrut</span></a></span></span><span> </span><span id="local-6989586621682890940"><span class="annot"><span class="annottext">BinderP 'LiftLams
+</span><a href="#local-6989586621682890940"><span class="hs-identifier hs-var">info</span></a></span></span><span> </span><span id="local-6989586621682890941"><span class="annot"><span class="annottext">AltType
+</span><a href="#local-6989586621682890941"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span id="local-6989586621682890942"><span class="annot"><span class="annottext">[GenStgAlt 'LiftLams]
+</span><a href="#local-6989586621682890942"><span class="hs-identifier hs-var">alts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-234"></span><span>  </span><span id="local-6989586621682890943"><span class="annot"><a href="#local-6989586621682890943"><span class="hs-identifier hs-var">scrut'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687426"><span class="hs-identifier hs-var">scrut</span></a></span><span>
-</span><span id="line-235"></span><span>  </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#withSubstBndr"><span class="hs-identifier hs-type">withSubstBndr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Lift.Types.html#binderInfoBndr"><span class="hs-identifier hs-type">binderInfoBndr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687427"><span class="hs-identifier hs-type">info</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687431"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682687431"><span class="hs-identifier hs-var">bndr'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-236"></span><span>    </span><span id="local-6989586621682687432"><span class="annot"><a href="#local-6989586621682687432"><span class="hs-identifier hs-var">alts'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(GenStgAlt 'LiftLams -&gt; LiftM OutStgAlt)
+</span><a href="#local-6989586621682890939"><span class="hs-identifier hs-var">scrut</span></a></span><span>
+</span><span id="line-235"></span><span>  </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#withSubstBndr"><span class="hs-identifier hs-type">withSubstBndr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Lift.Types.html#binderInfoBndr"><span class="hs-identifier hs-type">binderInfoBndr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890940"><span class="hs-identifier hs-type">info</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890944"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682890944"><span class="hs-identifier hs-var">bndr'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-236"></span><span>    </span><span id="local-6989586621682890945"><span class="annot"><a href="#local-6989586621682890945"><span class="hs-identifier hs-var">alts'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(GenStgAlt 'LiftLams -&gt; LiftM OutStgAlt)
 -&gt; [GenStgAlt 'LiftLams] -&gt; LiftM [OutStgAlt]
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
@@ -797,12 +797,12 @@ Applicative f =&gt;
 (a -&gt; f b) -&gt; [a] -&gt; f [b]
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">GenStgAlt 'LiftLams -&gt; LiftM OutStgAlt
 </span><a href="GHC.Stg.Lift.html#liftAlt"><span class="hs-identifier hs-var">liftAlt</span></a></span><span> </span><span class="annot"><span class="annottext">[GenStgAlt 'LiftLams]
-</span><a href="#local-6989586621682687429"><span class="hs-identifier hs-var">alts</span></a></span><span>
-</span><span id="line-237"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgCase"><span class="hs-identifier hs-type">StgCase</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687430"><span class="hs-identifier hs-type">scrut'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687431"><span class="hs-identifier hs-type">bndr'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687428"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682687432"><span class="hs-identifier hs-type">alts'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-238"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-type">StgLet</span></a></span><span> </span><span id="local-6989586621682687435"><span class="annot"><span class="annottext">XLet 'LiftLams
-</span><a href="#local-6989586621682687435"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682687436"><span class="annot"><span class="annottext">LlStgBinding
-</span><a href="#local-6989586621682687436"><span class="hs-identifier hs-var">bind</span></a></span></span><span> </span><span id="local-6989586621682687437"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687437"><span class="hs-identifier hs-var">body</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682890942"><span class="hs-identifier hs-var">alts</span></a></span><span>
+</span><span id="line-237"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgCase"><span class="hs-identifier hs-type">StgCase</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890943"><span class="hs-identifier hs-type">scrut'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890944"><span class="hs-identifier hs-type">bndr'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890941"><span class="hs-identifier hs-type">ty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682890945"><span class="hs-identifier hs-type">alts'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-238"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-type">StgLet</span></a></span><span> </span><span id="local-6989586621682890948"><span class="annot"><span class="annottext">XLet 'LiftLams
+</span><a href="#local-6989586621682890948"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682890949"><span class="annot"><span class="annottext">LlStgBinding
+</span><a href="#local-6989586621682890949"><span class="hs-identifier hs-var">bind</span></a></span></span><span> </span><span id="local-6989586621682890950"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
+</span><a href="#local-6989586621682890950"><span class="hs-identifier hs-var">body</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-239"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TopLevelFlag
 -&gt; LlStgBinding
 -&gt; Skeleton
@@ -816,27 +816,27 @@ TopLevelFlag
 -&gt; LiftM a
 </span><a href="GHC.Stg.Lift.html#withLiftedBind"><span class="hs-identifier hs-var">withLiftedBind</span></a></span><span> </span><span class="annot"><span class="annottext">TopLevelFlag
 </span><a href="GHC.Types.Basic.html#NotTopLevel"><span class="hs-identifier hs-var">NotTopLevel</span></a></span><span> </span><span class="annot"><span class="annottext">LlStgBinding
-</span><a href="#local-6989586621682687436"><span class="hs-identifier hs-var">bind</span></a></span><span> </span><span class="annot"><span class="annottext">Skeleton
+</span><a href="#local-6989586621682890949"><span class="hs-identifier hs-var">bind</span></a></span><span> </span><span class="annot"><span class="annottext">Skeleton
 XLet 'LiftLams
-</span><a href="#local-6989586621682687435"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (GenStgBinding 'Vanilla) -&gt; LiftM (GenStgExpr 'Vanilla))
+</span><a href="#local-6989586621682890948"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (GenStgBinding 'Vanilla) -&gt; LiftM (GenStgExpr 'Vanilla))
  -&gt; LiftM (GenStgExpr 'Vanilla))
 -&gt; (Maybe (GenStgBinding 'Vanilla) -&gt; LiftM (GenStgExpr 'Vanilla))
 -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687439"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
-</span><a href="#local-6989586621682687439"><span class="hs-identifier hs-var">mb_bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-240"></span><span>      </span><span id="local-6989586621682687440"><span class="annot"><a href="#local-6989586621682687440"><span class="hs-identifier hs-var">body'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890952"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
+</span><a href="#local-6989586621682890952"><span class="hs-identifier hs-var">mb_bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-240"></span><span>      </span><span id="local-6989586621682890953"><span class="annot"><a href="#local-6989586621682890953"><span class="hs-identifier hs-var">body'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687437"><span class="hs-identifier hs-var">body</span></a></span><span>
-</span><span id="line-241"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682687439"><span class="hs-identifier hs-type">mb_bind'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682890950"><span class="hs-identifier hs-var">body</span></a></span><span>
+</span><span id="line-241"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682890952"><span class="hs-identifier hs-type">mb_bind'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-242"></span><span>        </span><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682687440"><span class="hs-identifier hs-var">body'</span></a></span><span> </span><span class="hs-comment">-- withLiftedBindPairs decided to lift it and already added floats</span><span>
-</span><span id="line-243"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682687441"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687441"><span class="hs-identifier hs-var">bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; LiftM (GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682890953"><span class="hs-identifier hs-var">body'</span></a></span><span> </span><span class="hs-comment">-- withLiftedBindPairs decided to lift it and already added floats</span><span>
+</span><span id="line-243"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682890954"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682890954"><span class="hs-identifier hs-var">bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">XLet 'Vanilla
@@ -849,12 +849,12 @@ XLet pass
 </span><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-var">StgLet</span></a></span><span> </span><span class="annot"><span class="annottext">XLet 'Vanilla
 NoExtFieldSilent
 </span><a href="GHC.Stg.Syntax.html#noExtFieldSilent"><span class="hs-identifier hs-var">noExtFieldSilent</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687441"><span class="hs-identifier hs-var">bind'</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682687440"><span class="hs-identifier hs-var">body'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-244"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLetNoEscape"><span class="hs-identifier hs-type">StgLetNoEscape</span></a></span><span> </span><span id="local-6989586621682687443"><span class="annot"><span class="annottext">XLetNoEscape 'LiftLams
-</span><a href="#local-6989586621682687443"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682687444"><span class="annot"><span class="annottext">LlStgBinding
-</span><a href="#local-6989586621682687444"><span class="hs-identifier hs-var">bind</span></a></span></span><span> </span><span id="local-6989586621682687445"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687445"><span class="hs-identifier hs-var">body</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682890954"><span class="hs-identifier hs-var">bind'</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682890953"><span class="hs-identifier hs-var">body'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-244"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLetNoEscape"><span class="hs-identifier hs-type">StgLetNoEscape</span></a></span><span> </span><span id="local-6989586621682890956"><span class="annot"><span class="annottext">XLetNoEscape 'LiftLams
+</span><a href="#local-6989586621682890956"><span class="hs-identifier hs-var">scope</span></a></span></span><span> </span><span id="local-6989586621682890957"><span class="annot"><span class="annottext">LlStgBinding
+</span><a href="#local-6989586621682890957"><span class="hs-identifier hs-var">bind</span></a></span></span><span> </span><span id="local-6989586621682890958"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
+</span><a href="#local-6989586621682890958"><span class="hs-identifier hs-var">body</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-245"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TopLevelFlag
 -&gt; LlStgBinding
 -&gt; Skeleton
@@ -868,19 +868,19 @@ TopLevelFlag
 -&gt; LiftM a
 </span><a href="GHC.Stg.Lift.html#withLiftedBind"><span class="hs-identifier hs-var">withLiftedBind</span></a></span><span> </span><span class="annot"><span class="annottext">TopLevelFlag
 </span><a href="GHC.Types.Basic.html#NotTopLevel"><span class="hs-identifier hs-var">NotTopLevel</span></a></span><span> </span><span class="annot"><span class="annottext">LlStgBinding
-</span><a href="#local-6989586621682687444"><span class="hs-identifier hs-var">bind</span></a></span><span> </span><span class="annot"><span class="annottext">Skeleton
+</span><a href="#local-6989586621682890957"><span class="hs-identifier hs-var">bind</span></a></span><span> </span><span class="annot"><span class="annottext">Skeleton
 XLetNoEscape 'LiftLams
-</span><a href="#local-6989586621682687443"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (GenStgBinding 'Vanilla) -&gt; LiftM (GenStgExpr 'Vanilla))
+</span><a href="#local-6989586621682890956"><span class="hs-identifier hs-var">scope</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (GenStgBinding 'Vanilla) -&gt; LiftM (GenStgExpr 'Vanilla))
  -&gt; LiftM (GenStgExpr 'Vanilla))
 -&gt; (Maybe (GenStgBinding 'Vanilla) -&gt; LiftM (GenStgExpr 'Vanilla))
 -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687446"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
-</span><a href="#local-6989586621682687446"><span class="hs-identifier hs-var">mb_bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-246"></span><span>      </span><span id="local-6989586621682687447"><span class="annot"><a href="#local-6989586621682687447"><span class="hs-identifier hs-var">body'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890959"><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
+</span><a href="#local-6989586621682890959"><span class="hs-identifier hs-var">mb_bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-246"></span><span>      </span><span id="local-6989586621682890960"><span class="annot"><a href="#local-6989586621682890960"><span class="hs-identifier hs-var">body'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687445"><span class="hs-identifier hs-var">body</span></a></span><span>
-</span><span id="line-247"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682687446"><span class="hs-identifier hs-type">mb_bind'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682890958"><span class="hs-identifier hs-var">body</span></a></span><span>
+</span><span id="line-247"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682890959"><span class="hs-identifier hs-type">mb_bind'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-248"></span><span>        </span><span class="annot"><span class="annottext">Maybe (GenStgBinding 'Vanilla)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
@@ -889,8 +889,8 @@ forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Should never decide to lift LNEs&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-249"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682687448"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687448"><span class="hs-identifier hs-var">bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; LiftM (GenStgExpr 'Vanilla)
+</span><span id="line-249"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682890961"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682890961"><span class="hs-identifier hs-var">bind'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; LiftM (GenStgExpr 'Vanilla)
 forall a. a -&gt; LiftM a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">XLetNoEscape 'Vanilla
@@ -903,19 +903,19 @@ XLetNoEscape pass
 </span><a href="GHC.Stg.Syntax.html#StgLetNoEscape"><span class="hs-identifier hs-var">StgLetNoEscape</span></a></span><span> </span><span class="annot"><span class="annottext">XLetNoEscape 'Vanilla
 NoExtFieldSilent
 </span><a href="GHC.Stg.Syntax.html#noExtFieldSilent"><span class="hs-identifier hs-var">noExtFieldSilent</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682687448"><span class="hs-identifier hs-var">bind'</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682687447"><span class="hs-identifier hs-var">body'</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682890961"><span class="hs-identifier hs-var">bind'</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682890960"><span class="hs-identifier hs-var">body'</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-250"></span><span>
 </span><span id="line-251"></span><span class="annot"><a href="GHC.Stg.Lift.html#liftAlt"><span class="hs-identifier hs-type">liftAlt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#LlStgAlt"><span class="hs-identifier hs-type">LlStgAlt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.Lift.Monad.html#LiftM"><span class="hs-identifier hs-type">LiftM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgAlt"><span class="hs-identifier hs-type">OutStgAlt</span></a></span><span>
 </span><span id="line-252"></span><span id="liftAlt"><span class="annot"><span class="annottext">liftAlt :: GenStgAlt 'LiftLams -&gt; LiftM OutStgAlt
-</span><a href="GHC.Stg.Lift.html#liftAlt"><span class="hs-identifier hs-var hs-var">liftAlt</span></a></span></span><span> </span><span id="local-6989586621682687450"><span class="annot"><span class="annottext">alt :: GenStgAlt 'LiftLams
-</span><a href="#local-6989586621682687450"><span class="hs-identifier hs-var">alt</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#GenStgAlt"><span class="hs-identifier hs-type">GenStgAlt</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">alt_con :: forall (pass :: StgPass). GenStgAlt pass -&gt; AltCon
+</span><a href="GHC.Stg.Lift.html#liftAlt"><span class="hs-identifier hs-var hs-var">liftAlt</span></a></span></span><span> </span><span id="local-6989586621682890963"><span class="annot"><span class="annottext">alt :: GenStgAlt 'LiftLams
+</span><a href="#local-6989586621682890963"><span class="hs-identifier hs-var">alt</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#GenStgAlt"><span class="hs-identifier hs-type">GenStgAlt</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">alt_con :: forall (pass :: StgPass). GenStgAlt pass -&gt; AltCon
 </span><a href="GHC.Stg.Syntax.html#alt_con"><span class="hs-identifier hs-var">alt_con</span></a></span><span class="hs-glyph">=</span><span class="annot"><span class="annottext">AltCon
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">alt_bndrs :: forall (pass :: StgPass). GenStgAlt pass -&gt; [BinderP pass]
-</span><a href="GHC.Stg.Syntax.html#alt_bndrs"><span class="hs-identifier hs-var">alt_bndrs</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621682687454"><span class="annot"><span class="annottext">[BinderP 'LiftLams]
-</span><a href="#local-6989586621682687454"><span class="hs-identifier hs-var">infos</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">alt_rhs :: forall (pass :: StgPass). GenStgAlt pass -&gt; GenStgExpr pass
-</span><a href="GHC.Stg.Syntax.html#alt_rhs"><span class="hs-identifier hs-var">alt_rhs</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621682687456"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687456"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Stg.Syntax.html#alt_bndrs"><span class="hs-identifier hs-var">alt_bndrs</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621682890967"><span class="annot"><span class="annottext">[BinderP 'LiftLams]
+</span><a href="#local-6989586621682890967"><span class="hs-identifier hs-var">infos</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">alt_rhs :: forall (pass :: StgPass). GenStgAlt pass -&gt; GenStgExpr pass
+</span><a href="GHC.Stg.Syntax.html#alt_rhs"><span class="hs-identifier hs-var">alt_rhs</span></a></span><span class="hs-glyph">=</span><span id="local-6989586621682890969"><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
+</span><a href="#local-6989586621682890969"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-253"></span><span>  </span><span class="annot"><span class="annottext">[Id] -&gt; ([Id] -&gt; LiftM OutStgAlt) -&gt; LiftM OutStgAlt
 forall (f :: * -&gt; *) a.
 Traversable f =&gt;
@@ -925,13 +925,13 @@ forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">BinderInfo -&gt; Id
 </span><a href="GHC.Stg.Lift.Types.html#binderInfoBndr"><span class="hs-identifier hs-var">binderInfoBndr</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderInfo]
 [BinderP 'LiftLams]
-</span><a href="#local-6989586621682687454"><span class="hs-identifier hs-var">infos</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM OutStgAlt) -&gt; LiftM OutStgAlt)
+</span><a href="#local-6989586621682890967"><span class="hs-identifier hs-var">infos</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([Id] -&gt; LiftM OutStgAlt) -&gt; LiftM OutStgAlt)
 -&gt; ([Id] -&gt; LiftM OutStgAlt) -&gt; LiftM OutStgAlt
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682687457"><span class="annot"><span class="annottext">[Id]
-</span><a href="#local-6989586621682687457"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-254"></span><span>    </span><span class="hs-keyword">do</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682687458"><span class="annot"><a href="#local-6989586621682687458"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682890970"><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682890970"><span class="hs-identifier hs-var">bndrs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-254"></span><span>    </span><span class="hs-keyword">do</span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682890971"><span class="annot"><a href="#local-6989586621682890971"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams -&gt; LiftM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.Lift.html#liftExpr"><span class="hs-identifier hs-var">liftExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'LiftLams
-</span><a href="#local-6989586621682687456"><span class="hs-identifier hs-var">rhs</span></a></span><span>
-</span><span id="line-255"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$!</span></span><span> </span><span class="annot"><a href="#local-6989586621682687450"><span class="hs-identifier hs-type">alt</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="GHC.Stg.Syntax.html#alt_bndrs"><span class="hs-identifier hs-var">alt_bndrs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682687457"><span class="hs-identifier hs-type">bndrs'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#alt_rhs"><span class="hs-identifier hs-var">alt_rhs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682687458"><span class="hs-identifier hs-type">rhs'</span></a></span><span class="hs-special">}</span><span>
+</span><a href="#local-6989586621682890969"><span class="hs-identifier hs-var">rhs</span></a></span><span>
+</span><span id="line-255"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$!</span></span><span> </span><span class="annot"><a href="#local-6989586621682890963"><span class="hs-identifier hs-type">alt</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><a href="GHC.Stg.Syntax.html#alt_bndrs"><span class="hs-identifier hs-var">alt_bndrs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682890970"><span class="hs-identifier hs-type">bndrs'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#alt_rhs"><span class="hs-identifier hs-var">alt_rhs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682890971"><span class="hs-identifier hs-type">rhs'</span></a></span><span class="hs-special">}</span><span>
 </span><span id="line-256"></span></pre></body></html>

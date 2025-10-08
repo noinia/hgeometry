@@ -40,9 +40,9 @@
 </span><span id="line-40"></span><span>
 </span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html"><span class="hs-identifier">Language.Haskell.Syntax.Basic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier">FieldLabelString</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Data.html/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data</span></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Function.html/Data.Function.html"><span class="hs-identifier">Data.Function</span></a></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.html/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">find</span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Data</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Function.html"><span class="hs-identifier">Data.Function</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">find</span></span><span class="hs-special">)</span><span>
 </span><span id="line-46"></span><span>
 </span><span id="line-47"></span><span class="hs-comment">{-
 ************************************************************************
@@ -358,7 +358,7 @@ We cannot in general represent this by a value of type Type:
 -}</span><span>
 </span><span id="line-346"></span><span>
 </span><span id="line-347"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-348"></span><span>    </span><span id="local-6989586621682414795"><span class="annot"><span class="annottext">== :: PatSyn -&gt; PatSyn -&gt; Bool
+</span><span id="line-348"></span><span>    </span><span id="local-6989586621682576333"><span class="annot"><span class="annottext">== :: PatSyn -&gt; PatSyn -&gt; Bool
 </span><span class="hs-operator hs-var hs-var hs-var">(==)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Unique -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">(==)</span></span><span> </span><span class="annot"><span class="annottext">(Unique -&gt; Unique -&gt; Bool)
@@ -367,8 +367,8 @@ forall b c a. (b -&gt; b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">`on`</span></span><span> </span><span class="annot"><span class="annottext">PatSyn -&gt; Unique
 forall a. Uniquable a =&gt; a -&gt; Unique
 </span><a href="GHC.Types.Unique.html#getUnique"><span class="hs-identifier hs-var">getUnique</span></a></span><span>
-</span><span id="line-349"></span><span>    </span><span id="local-6989586621682414800"><span class="annot"><span class="annottext">/= :: PatSyn -&gt; PatSyn -&gt; Bool
-</span><a href="#local-6989586621682414800"><span class="hs-operator hs-var hs-var hs-var">(/=)</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Unique -&gt; Bool
+</span><span id="line-349"></span><span>    </span><span id="local-6989586621682576338"><span class="annot"><span class="annottext">/= :: PatSyn -&gt; PatSyn -&gt; Bool
+</span><a href="#local-6989586621682576338"><span class="hs-operator hs-var hs-var hs-var">(/=)</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Unique -&gt; Unique -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">(/=)</span></span><span> </span><span class="annot"><span class="annottext">(Unique -&gt; Unique -&gt; Bool)
 -&gt; (PatSyn -&gt; Unique) -&gt; PatSyn -&gt; PatSyn -&gt; Bool
@@ -378,18 +378,18 @@ forall a. Uniquable a =&gt; a -&gt; Unique
 </span><a href="GHC.Types.Unique.html#getUnique"><span class="hs-identifier hs-var">getUnique</span></a></span><span>
 </span><span id="line-350"></span><span>
 </span><span id="line-351"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Uniquable"><span class="hs-identifier hs-type">Uniquable</span></a></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-352"></span><span>    </span><span id="local-6989586621682414804"><span class="annot"><span class="annottext">getUnique :: PatSyn -&gt; Unique
+</span><span id="line-352"></span><span>    </span><span id="local-6989586621682576342"><span class="annot"><span class="annottext">getUnique :: PatSyn -&gt; Unique
 </span><a href="GHC.Types.Unique.html#getUnique"><span class="hs-identifier hs-var hs-var hs-var">getUnique</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PatSyn -&gt; Unique
 </span><a href="GHC.Core.PatSyn.html#psUnique"><span class="hs-identifier hs-var">psUnique</span></a></span><span>
 </span><span id="line-353"></span><span>
-</span><span id="line-354"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682414806"><span class="annot"><a href="GHC.Types.Name.html#NamedThing"><span class="hs-identifier hs-type">NamedThing</span></a></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-355"></span><span>    </span><span id="local-6989586621682414811"><span class="annot"><span class="annottext">getName :: PatSyn -&gt; Name
-</span><a href="#local-6989586621682414811"><span class="hs-identifier hs-var hs-var hs-var">getName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PatSyn -&gt; Name
+</span><span id="line-354"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682576344"><span class="annot"><a href="GHC.Types.Name.html#NamedThing"><span class="hs-identifier hs-type">NamedThing</span></a></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-355"></span><span>    </span><span id="local-6989586621682576349"><span class="annot"><span class="annottext">getName :: PatSyn -&gt; Name
+</span><a href="#local-6989586621682576349"><span class="hs-identifier hs-var hs-var hs-var">getName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PatSyn -&gt; Name
 </span><a href="GHC.Core.PatSyn.html#patSynName"><span class="hs-identifier hs-var">patSynName</span></a></span><span>
 </span><span id="line-356"></span><span>
 </span><span id="line-357"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-358"></span><span>    </span><span id="local-6989586621682414817"><span class="annot"><span class="annottext">ppr :: PatSyn -&gt; SDoc
-</span><a href="#local-6989586621682414817"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
+</span><span id="line-358"></span><span>    </span><span id="local-6989586621682576355"><span class="annot"><span class="annottext">ppr :: PatSyn -&gt; SDoc
+</span><a href="#local-6989586621682576355"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; SDoc) -&gt; (PatSyn -&gt; Name) -&gt; PatSyn -&gt; SDoc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
@@ -397,17 +397,17 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall a. NamedThing a =&gt; a -&gt; Name
 </span><a href="GHC.Types.Name.html#getName"><span class="hs-identifier hs-var">getName</span></a></span><span>
 </span><span id="line-359"></span><span>
-</span><span id="line-360"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682414823"><span id="local-6989586621682414829"><span class="annot"><a href="GHC.Utils.Outputable.html#OutputableBndr"><span class="hs-identifier hs-type">OutputableBndr</span></a></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-361"></span><span>    </span><span id="local-6989586621682414836"><span class="annot"><span class="annottext">pprInfixOcc :: PatSyn -&gt; SDoc
-</span><a href="#local-6989586621682414836"><span class="hs-identifier hs-var hs-var hs-var">pprInfixOcc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
+</span><span id="line-360"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682576361"><span id="local-6989586621682576367"><span class="annot"><a href="GHC.Utils.Outputable.html#OutputableBndr"><span class="hs-identifier hs-type">OutputableBndr</span></a></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-361"></span><span>    </span><span id="local-6989586621682576374"><span class="annot"><span class="annottext">pprInfixOcc :: PatSyn -&gt; SDoc
+</span><a href="#local-6989586621682576374"><span class="hs-identifier hs-var hs-var hs-var">pprInfixOcc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. (Outputable a, NamedThing a) =&gt; a -&gt; SDoc
 </span><a href="GHC.Types.Name.html#pprInfixName"><span class="hs-identifier hs-var">pprInfixName</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; SDoc) -&gt; (PatSyn -&gt; Name) -&gt; PatSyn -&gt; SDoc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PatSyn -&gt; Name
 forall a. NamedThing a =&gt; a -&gt; Name
 </span><a href="GHC.Types.Name.html#getName"><span class="hs-identifier hs-var">getName</span></a></span><span>
-</span><span id="line-362"></span><span>    </span><span id="local-6989586621682414841"><span class="annot"><span class="annottext">pprPrefixOcc :: PatSyn -&gt; SDoc
-</span><a href="#local-6989586621682414841"><span class="hs-identifier hs-var hs-var hs-var">pprPrefixOcc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
+</span><span id="line-362"></span><span>    </span><span id="local-6989586621682576379"><span class="annot"><span class="annottext">pprPrefixOcc :: PatSyn -&gt; SDoc
+</span><a href="#local-6989586621682576379"><span class="hs-identifier hs-var hs-var hs-var">pprPrefixOcc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. NamedThing a =&gt; a -&gt; SDoc
 </span><a href="GHC.Types.Name.html#pprPrefixName"><span class="hs-identifier hs-var">pprPrefixName</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; SDoc) -&gt; (PatSyn -&gt; Name) -&gt; PatSyn -&gt; SDoc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
@@ -415,24 +415,24 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall a. NamedThing a =&gt; a -&gt; Name
 </span><a href="GHC.Types.Name.html#getName"><span class="hs-identifier hs-var">getName</span></a></span><span>
 </span><span id="line-363"></span><span>
-</span><span id="line-364"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682414847"><span id="local-6989586621682414854"><span id="local-6989586621682414859"><span id="local-6989586621682414864"><span id="local-6989586621682414867"><span id="local-6989586621682414870"><span id="local-6989586621682414873"><span id="local-6989586621682414876"><span id="local-6989586621682414879"><span id="local-6989586621682414884"><span id="local-6989586621682414889"><span class="annot"><span class="hs-identifier hs-type">Data.Data</span></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-364"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682576385"><span id="local-6989586621682576392"><span id="local-6989586621682576397"><span id="local-6989586621682576402"><span id="local-6989586621682576405"><span id="local-6989586621682576408"><span id="local-6989586621682576411"><span id="local-6989586621682576414"><span id="local-6989586621682576417"><span id="local-6989586621682576422"><span id="local-6989586621682576427"><span class="annot"><span class="hs-identifier hs-type">Data.Data</span></span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-365"></span><span>    </span><span class="hs-comment">-- don't traverse?</span><span>
-</span><span id="line-366"></span><span>    </span><span id="local-6989586621682414894"><span class="annot"><span class="annottext">toConstr :: PatSyn -&gt; Constr
-</span><a href="#local-6989586621682414894"><span class="hs-identifier hs-var hs-var hs-var">toConstr</span></a></span></span><span> </span><span class="annot"><span class="annottext">PatSyn
+</span><span id="line-366"></span><span>    </span><span id="local-6989586621682576432"><span class="annot"><span class="annottext">toConstr :: PatSyn -&gt; Constr
+</span><a href="#local-6989586621682576432"><span class="hs-identifier hs-var hs-var hs-var">toConstr</span></a></span></span><span> </span><span class="annot"><span class="annottext">PatSyn
 </span><span class="hs-identifier">_</span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Constr
 </span><a href="GHC.Utils.Misc.html#abstractConstr"><span class="hs-identifier hs-var">abstractConstr</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;PatSyn&quot;</span></span><span>
-</span><span id="line-367"></span><span>    </span><span id="local-6989586621682414899"><span class="annot"><span class="annottext">gunfold :: forall (c :: * -&gt; *).
+</span><span id="line-367"></span><span>    </span><span id="local-6989586621682576437"><span class="annot"><span class="annottext">gunfold :: forall (c :: * -&gt; *).
 (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
 -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c PatSyn
-</span><a href="#local-6989586621682414899"><span class="hs-identifier hs-var hs-var hs-var">gunfold</span></a></span></span><span> </span><span class="annot"><span class="annottext">forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r
+</span><a href="#local-6989586621682576437"><span class="hs-identifier hs-var hs-var hs-var">gunfold</span></a></span></span><span> </span><span class="annot"><span class="annottext">forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">forall r. r -&gt; c r
 </span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Constr -&gt; c PatSyn
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;gunfold&quot;</span></span><span>
-</span><span id="line-368"></span><span>    </span><span id="local-6989586621682414902"><span class="annot"><span class="annottext">dataTypeOf :: PatSyn -&gt; DataType
-</span><a href="#local-6989586621682414902"><span class="hs-identifier hs-var hs-var hs-var">dataTypeOf</span></a></span></span><span> </span><span class="annot"><span class="annottext">PatSyn
+</span><span id="line-368"></span><span>    </span><span id="local-6989586621682576440"><span class="annot"><span class="annottext">dataTypeOf :: PatSyn -&gt; DataType
+</span><a href="#local-6989586621682576440"><span class="hs-identifier hs-var hs-var hs-var">dataTypeOf</span></a></span></span><span> </span><span class="annot"><span class="annottext">PatSyn
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; DataType
 </span><span class="hs-identifier hs-var">mkNoRepType</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;PatSyn&quot;</span></span><span>
@@ -471,65 +471,65 @@ forall a. HasCallStack =&gt; String -&gt; a
 -&gt; PatSynBuilder
 -&gt; [FieldLabel]
 -&gt; PatSyn
-</span><a href="GHC.Core.PatSyn.html#mkPatSyn"><span class="hs-identifier hs-var hs-var">mkPatSyn</span></a></span></span><span> </span><span id="local-6989586621682414905"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682414905"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621682414906"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682414906"><span class="hs-identifier hs-var">declared_infix</span></a></span></span><span>
-</span><span id="line-395"></span><span>         </span><span class="hs-special">(</span><span id="local-6989586621682414907"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414907"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414908"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414908"><span class="hs-identifier hs-var">req_theta</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-396"></span><span>         </span><span class="hs-special">(</span><span id="local-6989586621682414909"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414909"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414910"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414910"><span class="hs-identifier hs-var">prov_theta</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-397"></span><span>         </span><span id="local-6989586621682414911"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414911"><span class="hs-identifier hs-var">orig_args</span></a></span></span><span>
-</span><span id="line-398"></span><span>         </span><span id="local-6989586621682414912"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414912"><span class="hs-identifier hs-var">orig_res_ty</span></a></span></span><span>
-</span><span id="line-399"></span><span>         </span><span id="local-6989586621682414913"><span class="annot"><span class="annottext">PatSynMatcher
-</span><a href="#local-6989586621682414913"><span class="hs-identifier hs-var">matcher</span></a></span></span><span> </span><span id="local-6989586621682414914"><span class="annot"><span class="annottext">PatSynBuilder
-</span><a href="#local-6989586621682414914"><span class="hs-identifier hs-var">builder</span></a></span></span><span> </span><span id="local-6989586621682414915"><span class="annot"><span class="annottext">[FieldLabel]
-</span><a href="#local-6989586621682414915"><span class="hs-identifier hs-var">field_labels</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#mkPatSyn"><span class="hs-identifier hs-var hs-var">mkPatSyn</span></a></span></span><span> </span><span id="local-6989586621682576443"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682576443"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621682576444"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682576444"><span class="hs-identifier hs-var">declared_infix</span></a></span></span><span>
+</span><span id="line-395"></span><span>         </span><span class="hs-special">(</span><span id="local-6989586621682576445"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576445"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576446"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576446"><span class="hs-identifier hs-var">req_theta</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-396"></span><span>         </span><span class="hs-special">(</span><span id="local-6989586621682576447"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576447"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576448"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576448"><span class="hs-identifier hs-var">prov_theta</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-397"></span><span>         </span><span id="local-6989586621682576449"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576449"><span class="hs-identifier hs-var">orig_args</span></a></span></span><span>
+</span><span id="line-398"></span><span>         </span><span id="local-6989586621682576450"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576450"><span class="hs-identifier hs-var">orig_res_ty</span></a></span></span><span>
+</span><span id="line-399"></span><span>         </span><span id="local-6989586621682576451"><span class="annot"><span class="annottext">PatSynMatcher
+</span><a href="#local-6989586621682576451"><span class="hs-identifier hs-var">matcher</span></a></span></span><span> </span><span id="local-6989586621682576452"><span class="annot"><span class="annottext">PatSynBuilder
+</span><a href="#local-6989586621682576452"><span class="hs-identifier hs-var">builder</span></a></span></span><span> </span><span id="local-6989586621682576453"><span class="annot"><span class="annottext">[FieldLabel]
+</span><a href="#local-6989586621682576453"><span class="hs-identifier hs-var">field_labels</span></a></span></span><span>
 </span><span id="line-400"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#MkPatSyn"><span class="hs-identifier hs-type">MkPatSyn</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">psName :: Name
 </span><a href="GHC.Core.PatSyn.html#psName"><span class="hs-identifier hs-var">psName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682414905"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psUnique :: Unique
+</span><a href="#local-6989586621682576443"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psUnique :: Unique
 </span><a href="GHC.Core.PatSyn.html#psUnique"><span class="hs-identifier hs-var">psUnique</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; Unique
 forall a. Uniquable a =&gt; a -&gt; Unique
 </span><a href="GHC.Types.Unique.html#getUnique"><span class="hs-identifier hs-var">getUnique</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682414905"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576443"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-401"></span><span>                </span><span class="annot"><span class="annottext">psUnivTyVars :: [InvisTVBinder]
 </span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414907"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576445"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-402"></span><span>                </span><span class="annot"><span class="annottext">psExTyVars :: [InvisTVBinder]
 </span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414909"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576447"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-403"></span><span>                </span><span class="annot"><span class="annottext">psProvTheta :: [Type]
 </span><a href="GHC.Core.PatSyn.html#psProvTheta"><span class="hs-identifier hs-var">psProvTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414910"><span class="hs-identifier hs-var">prov_theta</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psReqTheta :: [Type]
+</span><a href="#local-6989586621682576448"><span class="hs-identifier hs-var">prov_theta</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psReqTheta :: [Type]
 </span><a href="GHC.Core.PatSyn.html#psReqTheta"><span class="hs-identifier hs-var">psReqTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414908"><span class="hs-identifier hs-var">req_theta</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576446"><span class="hs-identifier hs-var">req_theta</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-404"></span><span>                </span><span class="annot"><span class="annottext">psInfix :: Bool
 </span><a href="GHC.Core.PatSyn.html#psInfix"><span class="hs-identifier hs-var">psInfix</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682414906"><span class="hs-identifier hs-var">declared_infix</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576444"><span class="hs-identifier hs-var">declared_infix</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-405"></span><span>                </span><span class="annot"><span class="annottext">psArgs :: [Type]
 </span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414911"><span class="hs-identifier hs-var">orig_args</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576449"><span class="hs-identifier hs-var">orig_args</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-406"></span><span>                </span><span class="annot"><span class="annottext">psArity :: Arity
 </span><a href="GHC.Core.PatSyn.html#psArity"><span class="hs-identifier hs-var">psArity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; Arity
 forall a. [a] -&gt; Arity
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Arity
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414911"><span class="hs-identifier hs-var">orig_args</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576449"><span class="hs-identifier hs-var">orig_args</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-407"></span><span>                </span><span class="annot"><span class="annottext">psResultTy :: Type
 </span><a href="GHC.Core.PatSyn.html#psResultTy"><span class="hs-identifier hs-var">psResultTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414912"><span class="hs-identifier hs-var">orig_res_ty</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576450"><span class="hs-identifier hs-var">orig_res_ty</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-408"></span><span>                </span><span class="annot"><span class="annottext">psMatcher :: PatSynMatcher
 </span><a href="GHC.Core.PatSyn.html#psMatcher"><span class="hs-identifier hs-var">psMatcher</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PatSynMatcher
-</span><a href="#local-6989586621682414913"><span class="hs-identifier hs-var">matcher</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576451"><span class="hs-identifier hs-var">matcher</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-409"></span><span>                </span><span class="annot"><span class="annottext">psBuilder :: PatSynBuilder
 </span><a href="GHC.Core.PatSyn.html#psBuilder"><span class="hs-identifier hs-var">psBuilder</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PatSynBuilder
-</span><a href="#local-6989586621682414914"><span class="hs-identifier hs-var">builder</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621682576452"><span class="hs-identifier hs-var">builder</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-410"></span><span>                </span><span class="annot"><span class="annottext">psFieldLabels :: [FieldLabel]
 </span><a href="GHC.Core.PatSyn.html#psFieldLabels"><span class="hs-identifier hs-var">psFieldLabels</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[FieldLabel]
-</span><a href="#local-6989586621682414915"><span class="hs-identifier hs-var">field_labels</span></a></span><span>
+</span><a href="#local-6989586621682576453"><span class="hs-identifier hs-var">field_labels</span></a></span><span>
 </span><span id="line-411"></span><span>                </span><span class="hs-special">}</span><span>
 </span><span id="line-412"></span><span>
 </span><span id="line-413"></span><span class="annot"><span class="hs-comment">-- | The 'Name' of the 'PatSyn', giving it a unique, rooted identification</span></span><span>
@@ -553,19 +553,19 @@ forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Arity
 </span><span id="line-425"></span><span class="annot"><span class="hs-comment">-- | Is this a \'vanilla\' pattern synonym (no existentials, no provided constraints)?</span></span><span>
 </span><span id="line-426"></span><span class="annot"><a href="GHC.Core.PatSyn.html#isVanillaPatSyn"><span class="hs-identifier hs-type">isVanillaPatSyn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-427"></span><span id="isVanillaPatSyn"><span class="annot"><span class="annottext">isVanillaPatSyn :: PatSyn -&gt; Bool
-</span><a href="GHC.Core.PatSyn.html#isVanillaPatSyn"><span class="hs-identifier hs-var hs-var">isVanillaPatSyn</span></a></span></span><span> </span><span id="local-6989586621682414917"><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414917"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; Bool
+</span><a href="GHC.Core.PatSyn.html#isVanillaPatSyn"><span class="hs-identifier hs-var hs-var">isVanillaPatSyn</span></a></span></span><span> </span><span id="local-6989586621682576455"><span class="annot"><span class="annottext">PatSyn
+</span><a href="#local-6989586621682576455"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PatSyn -&gt; [InvisTVBinder]
 </span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span> </span><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414917"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682576455"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PatSyn -&gt; [Type]
 </span><a href="GHC.Core.PatSyn.html#psProvTheta"><span class="hs-identifier hs-var">psProvTheta</span></a></span><span> </span><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414917"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576455"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-428"></span><span>
 </span><span id="line-429"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynArgs"><span class="hs-identifier hs-type">patSynArgs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-430"></span><span id="patSynArgs"><span class="annot"><span class="annottext">patSynArgs :: PatSyn -&gt; [Type]
@@ -580,16 +580,16 @@ forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span id="line-435"></span><span class="annot"><span class="hs-comment">-- | Extract the type for any given labelled field of the 'DataCon'</span></span><span>
 </span><span id="line-436"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynFieldType"><span class="hs-identifier hs-type">patSynFieldType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier hs-type">FieldLabelString</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span>
 </span><span id="line-437"></span><span id="patSynFieldType"><span class="annot"><span class="annottext">patSynFieldType :: PatSyn -&gt; FieldLabelString -&gt; Type
-</span><a href="GHC.Core.PatSyn.html#patSynFieldType"><span class="hs-identifier hs-var hs-var">patSynFieldType</span></a></span></span><span> </span><span id="local-6989586621682414920"><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414920"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span id="local-6989586621682414921"><span class="annot"><span class="annottext">FieldLabelString
-</span><a href="#local-6989586621682414921"><span class="hs-keyword hs-var">label</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#patSynFieldType"><span class="hs-identifier hs-var hs-var">patSynFieldType</span></a></span></span><span> </span><span id="local-6989586621682576458"><span class="annot"><span class="annottext">PatSyn
+</span><a href="#local-6989586621682576458"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span id="local-6989586621682576459"><span class="annot"><span class="annottext">FieldLabelString
+</span><a href="#local-6989586621682576459"><span class="hs-keyword hs-var">label</span></a></span></span><span>
 </span><span id="line-438"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">((FieldLabel, Type) -&gt; Bool)
 -&gt; [(FieldLabel, Type)] -&gt; Maybe (FieldLabel, Type)
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">find</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldLabelString -&gt; FieldLabelString -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">FieldLabelString
-</span><a href="#local-6989586621682414921"><span class="hs-keyword hs-var">label</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(FieldLabelString -&gt; Bool)
+</span><a href="#local-6989586621682576459"><span class="hs-keyword hs-var">label</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(FieldLabelString -&gt; Bool)
 -&gt; ((FieldLabel, Type) -&gt; FieldLabelString)
 -&gt; (FieldLabel, Type)
 -&gt; Bool
@@ -604,15 +604,15 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall a b. (a, b) -&gt; a
 </span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PatSyn -&gt; [FieldLabel]
 </span><a href="GHC.Core.PatSyn.html#psFieldLabels"><span class="hs-identifier hs-var">psFieldLabels</span></a></span><span> </span><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414920"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="annot"><span class="annottext">[FieldLabel] -&gt; [Type] -&gt; [(FieldLabel, Type)]
+</span><a href="#local-6989586621682576458"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="annot"><span class="annottext">[FieldLabel] -&gt; [Type] -&gt; [(FieldLabel, Type)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-operator hs-var">`zip`</span></span><span> </span><span class="annot"><span class="annottext">PatSyn -&gt; [Type]
 </span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span> </span><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414920"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682576458"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-439"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldLabel
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414924"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414924"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414924"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576462"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576462"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576462"><span class="hs-identifier hs-var">ty</span></a></span><span>
 </span><span id="line-440"></span><span>      </span><span class="annot"><span class="annottext">Maybe (FieldLabel, Type)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; Type
 forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
@@ -620,12 +620,12 @@ forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 </span><span class="hs-string">&quot;dataConFieldType&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PatSyn -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414920"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682576458"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabelString -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabelString
-</span><a href="#local-6989586621682414921"><span class="hs-keyword hs-var">label</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576459"><span class="hs-keyword hs-var">label</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-441"></span><span>
 </span><span id="line-442"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynUnivTyVarBinders"><span class="hs-identifier hs-type">patSynUnivTyVarBinders</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Var.html#InvisTVBinder"><span class="hs-identifier hs-type">InvisTVBinder</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-443"></span><span id="patSynUnivTyVarBinders"><span class="annot"><span class="annottext">patSynUnivTyVarBinders :: PatSyn -&gt; [InvisTVBinder]
@@ -634,12 +634,12 @@ forall a. Outputable a =&gt; a -&gt; SDoc
 </span><span id="line-444"></span><span>
 </span><span id="line-445"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynExTyVars"><span class="hs-identifier hs-type">patSynExTyVars</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Var.html#TyVar"><span class="hs-identifier hs-type">TyVar</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-446"></span><span id="patSynExTyVars"><span class="annot"><span class="annottext">patSynExTyVars :: PatSyn -&gt; [TyVar]
-</span><a href="GHC.Core.PatSyn.html#patSynExTyVars"><span class="hs-identifier hs-var hs-var">patSynExTyVars</span></a></span></span><span> </span><span id="local-6989586621682414927"><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414927"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
+</span><a href="GHC.Core.PatSyn.html#patSynExTyVars"><span class="hs-identifier hs-var hs-var">patSynExTyVars</span></a></span></span><span> </span><span id="local-6989586621682576465"><span class="annot"><span class="annottext">PatSyn
+</span><a href="#local-6989586621682576465"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
 forall tv argf. [VarBndr tv argf] -&gt; [tv]
 </span><a href="GHC.Types.Var.html#binderVars"><span class="hs-identifier hs-var">binderVars</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PatSyn -&gt; [InvisTVBinder]
 </span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span> </span><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414927"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576465"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-447"></span><span>
 </span><span id="line-448"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynExTyVarBinders"><span class="hs-identifier hs-type">patSynExTyVarBinders</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Var.html#InvisTVBinder"><span class="hs-identifier hs-type">InvisTVBinder</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-449"></span><span id="patSynExTyVarBinders"><span class="annot"><span class="annottext">patSynExTyVarBinders :: PatSyn -&gt; [InvisTVBinder]
@@ -651,57 +651,57 @@ forall tv argf. [VarBndr tv argf] -&gt; [tv]
 -&gt; ([InvisTVBinder], [Type], [InvisTVBinder], [Type],
     [Scaled Type], Type)
 </span><a href="GHC.Core.PatSyn.html#patSynSigBndr"><span class="hs-identifier hs-var hs-var">patSynSigBndr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.PatSyn.html#MkPatSyn"><span class="hs-identifier hs-type">MkPatSyn</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">psUnivTyVars :: PatSyn -&gt; [InvisTVBinder]
-</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414929"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414929"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psExTyVars :: PatSyn -&gt; [InvisTVBinder]
-</span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414930"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414930"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576467"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576467"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psExTyVars :: PatSyn -&gt; [InvisTVBinder]
+</span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576468"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576468"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span>
 </span><span id="line-453"></span><span>                        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psProvTheta :: PatSyn -&gt; [Type]
-</span><a href="GHC.Core.PatSyn.html#psProvTheta"><span class="hs-identifier hs-var">psProvTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414931"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414931"><span class="hs-identifier hs-var">prov</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psReqTheta :: PatSyn -&gt; [Type]
-</span><a href="GHC.Core.PatSyn.html#psReqTheta"><span class="hs-identifier hs-var">psReqTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414932"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414932"><span class="hs-identifier hs-var">req</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psProvTheta"><span class="hs-identifier hs-var">psProvTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576469"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576469"><span class="hs-identifier hs-var">prov</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psReqTheta :: PatSyn -&gt; [Type]
+</span><a href="GHC.Core.PatSyn.html#psReqTheta"><span class="hs-identifier hs-var">psReqTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576470"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576470"><span class="hs-identifier hs-var">req</span></a></span></span><span>
 </span><span id="line-454"></span><span>                        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psArgs :: PatSyn -&gt; [Type]
-</span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414933"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414933"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psResultTy :: PatSyn -&gt; Type
-</span><a href="GHC.Core.PatSyn.html#psResultTy"><span class="hs-identifier hs-var">psResultTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414934"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414934"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576471"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576471"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psResultTy :: PatSyn -&gt; Type
+</span><a href="GHC.Core.PatSyn.html#psResultTy"><span class="hs-identifier hs-var">psResultTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576472"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576472"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-455"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414929"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414932"><span class="hs-identifier hs-var">req</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414930"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414931"><span class="hs-identifier hs-var">prov</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Scaled Type) -&gt; [Type] -&gt; [Scaled Type]
+</span><a href="#local-6989586621682576467"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576470"><span class="hs-identifier hs-var">req</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576468"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576469"><span class="hs-identifier hs-var">prov</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Scaled Type) -&gt; [Type] -&gt; [Scaled Type]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Type -&gt; Scaled Type
 forall a. a -&gt; Scaled a
 </span><a href="GHC.Core.Type.html#unrestricted"><span class="hs-identifier hs-var">unrestricted</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414933"><span class="hs-identifier hs-var">arg_tys</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414934"><span class="hs-identifier hs-var">res_ty</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576471"><span class="hs-identifier hs-var">arg_tys</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576472"><span class="hs-identifier hs-var">res_ty</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-456"></span><span>
 </span><span id="line-457"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynSig"><span class="hs-identifier hs-type">patSynSig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Var.html#TyVar"><span class="hs-identifier hs-type">TyVar</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#ThetaType"><span class="hs-identifier hs-type">ThetaType</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Var.html#TyVar"><span class="hs-identifier hs-type">TyVar</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#ThetaType"><span class="hs-identifier hs-type">ThetaType</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-type">Scaled</span></a></span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-458"></span><span id="patSynSig"><span class="annot"><span class="annottext">patSynSig :: PatSyn -&gt; ([TyVar], [Type], [TyVar], [Type], [Scaled Type], Type)
-</span><a href="GHC.Core.PatSyn.html#patSynSig"><span class="hs-identifier hs-var hs-var">patSynSig</span></a></span></span><span> </span><span id="local-6989586621682414936"><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414936"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682414937"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414937"><span class="hs-identifier hs-var">u_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414938"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414938"><span class="hs-identifier hs-var">req</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414939"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414939"><span class="hs-identifier hs-var">e_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414940"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414940"><span class="hs-identifier hs-var">prov</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414941"><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682414941"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682414942"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414942"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PatSyn
+</span><a href="GHC.Core.PatSyn.html#patSynSig"><span class="hs-identifier hs-var hs-var">patSynSig</span></a></span></span><span> </span><span id="local-6989586621682576474"><span class="annot"><span class="annottext">PatSyn
+</span><a href="#local-6989586621682576474"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682576475"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576475"><span class="hs-identifier hs-var">u_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576476"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576476"><span class="hs-identifier hs-var">req</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576477"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576477"><span class="hs-identifier hs-var">e_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576478"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576478"><span class="hs-identifier hs-var">prov</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576479"><span class="annot"><span class="annottext">[Scaled Type]
+</span><a href="#local-6989586621682576479"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682576480"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576480"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PatSyn
 -&gt; ([InvisTVBinder], [Type], [InvisTVBinder], [Type],
     [Scaled Type], Type)
 </span><a href="GHC.Core.PatSyn.html#patSynSigBndr"><span class="hs-identifier hs-var">patSynSigBndr</span></a></span><span> </span><span class="annot"><span class="annottext">PatSyn
-</span><a href="#local-6989586621682414936"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><a href="#local-6989586621682576474"><span class="hs-identifier hs-var">ps</span></a></span><span>
 </span><span id="line-459"></span><span>               </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
 forall tv argf. [VarBndr tv argf] -&gt; [tv]
 </span><a href="GHC.Types.Var.html#binderVars"><span class="hs-identifier hs-var">binderVars</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414937"><span class="hs-identifier hs-var">u_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414938"><span class="hs-identifier hs-var">req</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
+</span><a href="#local-6989586621682576475"><span class="hs-identifier hs-var">u_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576476"><span class="hs-identifier hs-var">req</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
 forall tv argf. [VarBndr tv argf] -&gt; [tv]
 </span><a href="GHC.Types.Var.html#binderVars"><span class="hs-identifier hs-var">binderVars</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414939"><span class="hs-identifier hs-var">e_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414940"><span class="hs-identifier hs-var">prov</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Scaled Type]
-</span><a href="#local-6989586621682414941"><span class="hs-identifier hs-var">arg_tys</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414942"><span class="hs-identifier hs-var">res_ty</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576477"><span class="hs-identifier hs-var">e_tvs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576478"><span class="hs-identifier hs-var">prov</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Scaled Type]
+</span><a href="#local-6989586621682576479"><span class="hs-identifier hs-var">arg_tys</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576480"><span class="hs-identifier hs-var">res_ty</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-460"></span><span>
 </span><span id="line-461"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynMatcher"><span class="hs-identifier hs-type">patSynMatcher</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSynMatcher"><span class="hs-identifier hs-type">PatSynMatcher</span></a></span><span>
 </span><span id="line-462"></span><span id="patSynMatcher"><span class="annot"><span class="annottext">patSynMatcher :: PatSyn -&gt; PatSynMatcher
@@ -728,24 +728,24 @@ forall tv argf. [VarBndr tv argf] -&gt; [tv]
 </span><span id="line-477"></span><span class="hs-comment">-- NB: the inst_tys should be both universal and existential</span><span>
 </span><span id="line-478"></span><span id="patSynInstArgTys"><span class="annot"><span class="annottext">patSynInstArgTys :: PatSyn -&gt; [Type] -&gt; [Type]
 </span><a href="GHC.Core.PatSyn.html#patSynInstArgTys"><span class="hs-identifier hs-var hs-var">patSynInstArgTys</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.PatSyn.html#MkPatSyn"><span class="hs-identifier hs-type">MkPatSyn</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">psName :: PatSyn -&gt; Name
-</span><a href="GHC.Core.PatSyn.html#psName"><span class="hs-identifier hs-var">psName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414943"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682414943"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psUnivTyVars :: PatSyn -&gt; [InvisTVBinder]
-</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414944"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414944"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psName"><span class="hs-identifier hs-var">psName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576481"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682576481"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psUnivTyVars :: PatSyn -&gt; [InvisTVBinder]
+</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576482"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576482"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span>
 </span><span id="line-479"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psExTyVars :: PatSyn -&gt; [InvisTVBinder]
-</span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414945"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414945"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psArgs :: PatSyn -&gt; [Type]
-</span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414946"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414946"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-480"></span><span>                 </span><span id="local-6989586621682414947"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414947"><span class="hs-identifier hs-var">inst_tys</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576483"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576483"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psArgs :: PatSyn -&gt; [Type]
+</span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576484"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576484"><span class="hs-identifier hs-var">arg_tys</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-480"></span><span>                 </span><span id="local-6989586621682576485"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576485"><span class="hs-identifier hs-var">inst_tys</span></a></span></span><span>
 </span><span id="line-481"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SDoc -&gt; [Type] -&gt; [Type]
 forall a. HasCallStack =&gt; Bool -&gt; SDoc -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.html#assertPpr"><span class="hs-identifier hs-var">assertPpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[TyVar]
-</span><a href="#local-6989586621682414949"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVar] -&gt; [Type] -&gt; Bool
+</span><a href="#local-6989586621682576487"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVar] -&gt; [Type] -&gt; Bool
 forall a b. [a] -&gt; [b] -&gt; Bool
 </span><a href="GHC.Utils.Misc.html#equalLength"><span class="hs-operator hs-var">`equalLength`</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414947"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576485"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-482"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -754,17 +754,17 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682414943"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682576481"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVar] -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVar]
-</span><a href="#local-6989586621682414949"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682576487"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414947"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Type] -&gt; [Type]) -&gt; [Type] -&gt; [Type]
+</span><a href="#local-6989586621682576485"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Type] -&gt; [Type]) -&gt; [Type] -&gt; [Type]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-483"></span><span>    </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; [Type] -&gt; [Type]
@@ -772,18 +772,18 @@ forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[TyVar] -&gt; [Type] -&gt; Type -&gt; Type
 HasDebugCallStack =&gt; [TyVar] -&gt; [Type] -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Subst.html#substTyWith"><span class="hs-identifier hs-var">substTyWith</span></a></span><span> </span><span class="annot"><span class="annottext">[TyVar]
-</span><a href="#local-6989586621682414949"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414947"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414946"><span class="hs-identifier hs-var">arg_tys</span></a></span><span>
+</span><a href="#local-6989586621682576487"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576485"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576484"><span class="hs-identifier hs-var">arg_tys</span></a></span><span>
 </span><span id="line-484"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-485"></span><span>    </span><span id="local-6989586621682414949"><span class="annot"><span class="annottext">tyvars :: [TyVar]
-</span><a href="#local-6989586621682414949"><span class="hs-identifier hs-var hs-var">tyvars</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
+</span><span id="line-485"></span><span>    </span><span id="local-6989586621682576487"><span class="annot"><span class="annottext">tyvars :: [TyVar]
+</span><a href="#local-6989586621682576487"><span class="hs-identifier hs-var hs-var">tyvars</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
 forall tv argf. [VarBndr tv argf] -&gt; [tv]
 </span><a href="GHC.Types.Var.html#binderVars"><span class="hs-identifier hs-var">binderVars</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414944"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [InvisTVBinder] -&gt; [InvisTVBinder]
+</span><a href="#local-6989586621682576482"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [InvisTVBinder] -&gt; [InvisTVBinder]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414945"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576483"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-486"></span><span>
 </span><span id="line-487"></span><span class="annot"><a href="GHC.Core.PatSyn.html#patSynInstResTy"><span class="hs-identifier hs-type">patSynInstResTy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span>
 </span><span id="line-488"></span><span class="hs-comment">-- Return the type of whole pattern</span><span>
@@ -793,22 +793,22 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span id="line-492"></span><span class="hs-comment">-- NB: unlike patSynInstArgTys, the inst_tys should be just the *universal* tyvars</span><span>
 </span><span id="line-493"></span><span id="patSynInstResTy"><span class="annot"><span class="annottext">patSynInstResTy :: PatSyn -&gt; [Type] -&gt; Type
 </span><a href="GHC.Core.PatSyn.html#patSynInstResTy"><span class="hs-identifier hs-var hs-var">patSynInstResTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.PatSyn.html#MkPatSyn"><span class="hs-identifier hs-type">MkPatSyn</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">psName :: PatSyn -&gt; Name
-</span><a href="GHC.Core.PatSyn.html#psName"><span class="hs-identifier hs-var">psName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414954"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682414954"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psUnivTyVars :: PatSyn -&gt; [InvisTVBinder]
-</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414955"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414955"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psName"><span class="hs-identifier hs-var">psName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576492"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682576492"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psUnivTyVars :: PatSyn -&gt; [InvisTVBinder]
+</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576493"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576493"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span>
 </span><span id="line-494"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psResultTy :: PatSyn -&gt; Type
-</span><a href="GHC.Core.PatSyn.html#psResultTy"><span class="hs-identifier hs-var">psResultTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414956"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414956"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-495"></span><span>                </span><span id="local-6989586621682414957"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414957"><span class="hs-identifier hs-var">inst_tys</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psResultTy"><span class="hs-identifier hs-var">psResultTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576494"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576494"><span class="hs-identifier hs-var">res_ty</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-495"></span><span>                </span><span id="local-6989586621682576495"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576495"><span class="hs-identifier hs-var">inst_tys</span></a></span></span><span>
 </span><span id="line-496"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SDoc -&gt; Type -&gt; Type
 forall a. HasCallStack =&gt; Bool -&gt; SDoc -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.html#assertPpr"><span class="hs-identifier hs-var">assertPpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414955"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [Type] -&gt; Bool
+</span><a href="#local-6989586621682576493"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [Type] -&gt; Bool
 forall a b. [a] -&gt; [b] -&gt; Bool
 </span><a href="GHC.Utils.Misc.html#equalLength"><span class="hs-operator hs-var">`equalLength`</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414957"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576495"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-497"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -817,17 +817,17 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682414954"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682576492"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414955"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682576493"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414957"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
+</span><a href="#local-6989586621682576495"><span class="hs-identifier hs-var">inst_tys</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-498"></span><span>    </span><span class="annot"><span class="annottext">[TyVar] -&gt; [Type] -&gt; Type -&gt; Type
@@ -835,28 +835,28 @@ HasDebugCallStack =&gt; [TyVar] -&gt; [Type] -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Subst.html#substTyWith"><span class="hs-identifier hs-var">substTyWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [TyVar]
 forall tv argf. [VarBndr tv argf] -&gt; [tv]
 </span><a href="GHC.Types.Var.html#binderVars"><span class="hs-identifier hs-var">binderVars</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414955"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414957"><span class="hs-identifier hs-var">inst_tys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414956"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
+</span><a href="#local-6989586621682576493"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576495"><span class="hs-identifier hs-var">inst_tys</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576494"><span class="hs-identifier hs-var">res_ty</span></a></span><span>
 </span><span id="line-499"></span><span>
 </span><span id="line-500"></span><span class="annot"><span class="hs-comment">-- | Print the type of a pattern synonym. The foralls are printed explicitly</span></span><span>
 </span><span id="line-501"></span><span class="annot"><a href="GHC.Core.PatSyn.html#pprPatSynType"><span class="hs-identifier hs-type">pprPatSynType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.PatSyn.html#PatSyn"><span class="hs-identifier hs-type">PatSyn</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span>
 </span><span id="line-502"></span><span id="pprPatSynType"><span class="annot"><span class="annottext">pprPatSynType :: PatSyn -&gt; SDoc
 </span><a href="GHC.Core.PatSyn.html#pprPatSynType"><span class="hs-identifier hs-var hs-var">pprPatSynType</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.PatSyn.html#MkPatSyn"><span class="hs-identifier hs-type">MkPatSyn</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">psUnivTyVars :: PatSyn -&gt; [InvisTVBinder]
-</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414958"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414958"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">psReqTheta :: PatSyn -&gt; [Type]
-</span><a href="GHC.Core.PatSyn.html#psReqTheta"><span class="hs-identifier hs-var">psReqTheta</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414959"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414959"><span class="hs-identifier hs-var">req_theta</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psUnivTyVars"><span class="hs-identifier hs-var">psUnivTyVars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576496"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576496"><span class="hs-identifier hs-var">univ_tvs</span></a></span></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">psReqTheta :: PatSyn -&gt; [Type]
+</span><a href="GHC.Core.PatSyn.html#psReqTheta"><span class="hs-identifier hs-var">psReqTheta</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576497"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576497"><span class="hs-identifier hs-var">req_theta</span></a></span></span><span>
 </span><span id="line-503"></span><span>                        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psExTyVars :: PatSyn -&gt; [InvisTVBinder]
-</span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414960"><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414960"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="annottext">psProvTheta :: PatSyn -&gt; [Type]
-</span><a href="GHC.Core.PatSyn.html#psProvTheta"><span class="hs-identifier hs-var">psProvTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414961"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414961"><span class="hs-identifier hs-var">prov_theta</span></a></span></span><span>
+</span><a href="GHC.Core.PatSyn.html#psExTyVars"><span class="hs-identifier hs-var">psExTyVars</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576498"><span class="annot"><span class="annottext">[InvisTVBinder]
+</span><a href="#local-6989586621682576498"><span class="hs-identifier hs-var">ex_tvs</span></a></span></span><span class="hs-special">,</span><span>    </span><span class="annot"><span class="annottext">psProvTheta :: PatSyn -&gt; [Type]
+</span><a href="GHC.Core.PatSyn.html#psProvTheta"><span class="hs-identifier hs-var">psProvTheta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576499"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576499"><span class="hs-identifier hs-var">prov_theta</span></a></span></span><span>
 </span><span id="line-504"></span><span>                        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psArgs :: PatSyn -&gt; [Type]
-</span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414962"><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414962"><span class="hs-identifier hs-var">orig_args</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psResultTy :: PatSyn -&gt; Type
-</span><a href="GHC.Core.PatSyn.html#psResultTy"><span class="hs-identifier hs-var">psResultTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682414963"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414963"><span class="hs-identifier hs-var">orig_res_ty</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="GHC.Core.PatSyn.html#psArgs"><span class="hs-identifier hs-var">psArgs</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576500"><span class="annot"><span class="annottext">[Type]
+</span><a href="#local-6989586621682576500"><span class="hs-identifier hs-var">orig_args</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">psResultTy :: PatSyn -&gt; Type
+</span><a href="GHC.Core.PatSyn.html#psResultTy"><span class="hs-identifier hs-var">psResultTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682576501"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576501"><span class="hs-identifier hs-var">orig_res_ty</span></a></span></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-505"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsLine doc =&gt; [doc] -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#sep"><span class="hs-identifier hs-var">sep</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">[ForAllTyBinder] -&gt; SDoc
@@ -865,14 +865,14 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; [ForAllTyBinder]
 forall a. [VarBndr a Specificity] -&gt; [VarBndr a ForAllTyFlag]
 </span><a href="GHC.Types.Var.html#tyVarSpecToBinders"><span class="hs-identifier hs-var">tyVarSpecToBinders</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414958"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span>
+</span><a href="#local-6989586621682576496"><span class="hs-identifier hs-var">univ_tvs</span></a></span><span>
 </span><span id="line-506"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; SDoc
 </span><a href="GHC.Core.TyCo.Ppr.html#pprThetaArrowTy"><span class="hs-identifier hs-var">pprThetaArrowTy</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414959"><span class="hs-identifier hs-var">req_theta</span></a></span><span>
+</span><a href="#local-6989586621682576497"><span class="hs-identifier hs-var">req_theta</span></a></span><span>
 </span><span id="line-507"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SDoc -&gt; SDoc
 forall doc. IsOutput doc =&gt; Bool -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#ppWhen"><span class="hs-identifier hs-var">ppWhen</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682414969"><span class="hs-identifier hs-var">insert_empty_ctxt</span></a></span><span> </span><span class="annot"><span class="annottext">(SDoc -&gt; SDoc) -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682576507"><span class="hs-identifier hs-var">insert_empty_ctxt</span></a></span><span> </span><span class="annot"><span class="annottext">(SDoc -&gt; SDoc) -&gt; SDoc -&gt; SDoc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc
@@ -884,39 +884,39 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#darrow"><span class="hs-identifier hs-var">darrow</span></a></span><span>
 </span><span id="line-508"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Type -&gt; SDoc
 </span><a href="GHC.Core.TyCo.Ppr.html#pprType"><span class="hs-identifier hs-var">pprType</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414974"><span class="hs-identifier hs-var">sigma_ty</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682576512"><span class="hs-identifier hs-var">sigma_ty</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-509"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-510"></span><span>    </span><span id="local-6989586621682414974"><span class="annot"><span class="annottext">sigma_ty :: Type
-</span><a href="#local-6989586621682414974"><span class="hs-identifier hs-var hs-var">sigma_ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; Type -&gt; Type
+</span><span id="line-510"></span><span>    </span><span id="local-6989586621682576512"><span class="annot"><span class="annottext">sigma_ty :: Type
+</span><a href="#local-6989586621682576512"><span class="hs-identifier hs-var hs-var">sigma_ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkInvisForAllTys"><span class="hs-identifier hs-var">mkInvisForAllTys</span></a></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414960"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
+</span><a href="#local-6989586621682576498"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-511"></span><span>               </span><span class="annot"><span class="annottext">[Type] -&gt; Type -&gt; Type
 HasDebugCallStack =&gt; [Type] -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkInvisFunTys"><span class="hs-identifier hs-var">mkInvisFunTys</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414961"><span class="hs-identifier hs-var">prov_theta</span></a></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
+</span><a href="#local-6989586621682576499"><span class="hs-identifier hs-var">prov_theta</span></a></span><span> </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Type -&gt; Type
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-512"></span><span>               </span><span class="annot"><span class="annottext">[Type] -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkVisFunTysMany"><span class="hs-identifier hs-var">mkVisFunTysMany</span></a></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414962"><span class="hs-identifier hs-var">orig_args</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682414963"><span class="hs-identifier hs-var">orig_res_ty</span></a></span><span>
-</span><span id="line-513"></span><span>    </span><span id="local-6989586621682414969"><span class="annot"><span class="annottext">insert_empty_ctxt :: Bool
-</span><a href="#local-6989586621682414969"><span class="hs-identifier hs-var hs-var">insert_empty_ctxt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; Bool
+</span><a href="#local-6989586621682576500"><span class="hs-identifier hs-var">orig_args</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682576501"><span class="hs-identifier hs-var">orig_res_ty</span></a></span><span>
+</span><span id="line-513"></span><span>    </span><span id="local-6989586621682576507"><span class="annot"><span class="annottext">insert_empty_ctxt :: Bool
+</span><a href="#local-6989586621682576507"><span class="hs-identifier hs-var hs-var">insert_empty_ctxt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414959"><span class="hs-identifier hs-var">req_theta</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682576497"><span class="hs-identifier hs-var">req_theta</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Type] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Type]
-</span><a href="#local-6989586621682414961"><span class="hs-identifier hs-var">prov_theta</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682576499"><span class="hs-identifier hs-var">prov_theta</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[InvisTVBinder]
-</span><a href="#local-6989586621682414960"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682576498"><span class="hs-identifier hs-var">ex_tvs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-514"></span></pre></body></html>

@@ -46,11 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -}</span><s
 </span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.CCompiler.html#filenameCDialect"><span class="hs-identifier">filenameCDialect</span></a></span><span>
 </span><span id="line-47"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-48"></span><span>
-</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
-</span><span id="line-53"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier">takeExtension</span></a></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier">takeExtension</span></a></span><span>
 </span><span id="line-54"></span><span>  </span><span class="hs-special">)</span><span>
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span class="hs-comment">-- | Represents a dialect of C.  The Monoid instance expresses backward</span><span>
@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -}</span><s
 </span><span id="line-61"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ObjectiveC"><span class="annot"><a href="Distribution.Simple.CCompiler.html#ObjectiveC"><span class="hs-identifier hs-var">ObjectiveC</span></a></span></span><span>
 </span><span id="line-62"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="CPlusPlus"><span class="annot"><a href="Distribution.Simple.CCompiler.html#CPlusPlus"><span class="hs-identifier hs-var">CPlusPlus</span></a></span></span><span>
 </span><span id="line-63"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ObjectiveCPlusPlus"><span class="annot"><a href="Distribution.Simple.CCompiler.html#ObjectiveCPlusPlus"><span class="hs-identifier hs-var">ObjectiveCPlusPlus</span></a></span></span><span>
-</span><span id="line-64"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679443120"><span id="local-6989586621679443125"><span class="annot"><span class="annottext">CDialect -&gt; CDialect -&gt; Bool
+</span><span id="line-64"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679494842"><span id="local-6989586621679494847"><span class="annot"><span class="annottext">CDialect -&gt; CDialect -&gt; Bool
 (CDialect -&gt; CDialect -&gt; Bool)
 -&gt; (CDialect -&gt; CDialect -&gt; Bool) -&gt; Eq CDialect
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -69,7 +69,7 @@ $c== :: CDialect -&gt; CDialect -&gt; Bool
 == :: CDialect -&gt; CDialect -&gt; Bool
 $c/= :: CDialect -&gt; CDialect -&gt; Bool
 /= :: CDialect -&gt; CDialect -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679443130"><span id="local-6989586621679443132"><span id="local-6989586621679443136"><span class="annot"><span class="annottext">Int -&gt; CDialect -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494852"><span id="local-6989586621679494854"><span id="local-6989586621679494858"><span class="annot"><span class="annottext">Int -&gt; CDialect -&gt; ShowS
 [CDialect] -&gt; ShowS
 CDialect -&gt; String
 (Int -&gt; CDialect -&gt; ShowS)
@@ -84,21 +84,21 @@ $cshowList :: [CDialect] -&gt; ShowS
 showList :: [CDialect] -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679443146"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.CCompiler.html#CDialect"><span class="hs-identifier hs-type">CDialect</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-67"></span><span>  </span><span id="local-6989586621679443150"><span class="annot"><span class="annottext">mempty :: CDialect
+</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679494868"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.CCompiler.html#CDialect"><span class="hs-identifier hs-type">CDialect</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679494872"><span class="annot"><span class="annottext">mempty :: CDialect
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CDialect
 </span><a href="Distribution.Simple.CCompiler.html#C"><span class="hs-identifier hs-var">C</span></a></span><span>
-</span><span id="line-68"></span><span>  </span><span id="local-6989586621679443152"><span class="annot"><span class="annottext">mappend :: CDialect -&gt; CDialect -&gt; CDialect
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679494874"><span class="annot"><span class="annottext">mappend :: CDialect -&gt; CDialect -&gt; CDialect
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CDialect -&gt; CDialect -&gt; CDialect
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
 </span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679443155"><span id="local-6989586621679443158"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.CCompiler.html#CDialect"><span class="hs-identifier hs-type">CDialect</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679494877"><span id="local-6989586621679494880"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.CCompiler.html#CDialect"><span class="hs-identifier hs-type">CDialect</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-71"></span><span>  </span><span class="annot"><span class="annottext">CDialect
-</span><a href="Distribution.Simple.CCompiler.html#C"><span class="hs-identifier hs-var">C</span></a></span><span> </span><span id="local-6989586621679443163"><span class="annot"><span class="annottext">&lt;&gt; :: CDialect -&gt; CDialect -&gt; CDialect
-</span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621679443164"><span class="annot"><span class="annottext">CDialect
-</span><a href="#local-6989586621679443164"><span class="hs-identifier hs-var">anything</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CDialect
-</span><a href="#local-6989586621679443164"><span class="hs-identifier hs-var">anything</span></a></span><span>
+</span><a href="Distribution.Simple.CCompiler.html#C"><span class="hs-identifier hs-var">C</span></a></span><span> </span><span id="local-6989586621679494885"><span class="annot"><span class="annottext">&lt;&gt; :: CDialect -&gt; CDialect -&gt; CDialect
+</span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621679494886"><span class="annot"><span class="annottext">CDialect
+</span><a href="#local-6989586621679494886"><span class="hs-identifier hs-var">anything</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CDialect
+</span><a href="#local-6989586621679494886"><span class="hs-identifier hs-var">anything</span></a></span><span>
 </span><span id="line-72"></span><span>  </span><span class="annot"><span class="annottext">CDialect
 </span><a href="Distribution.Simple.CCompiler.html#ObjectiveC"><span class="hs-identifier hs-var">ObjectiveC</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">CDialect
 </span><a href="Distribution.Simple.CCompiler.html#CPlusPlus"><span class="hs-identifier hs-var">CPlusPlus</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CDialect
@@ -204,22 +204,22 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span id="line-115"></span><span class="hs-comment">--   and whether it is intended to be passed through the preprocessor.</span><span>
 </span><span id="line-116"></span><span class="annot"><a href="Distribution.Simple.CCompiler.html#filenameCDialect"><span class="hs-identifier hs-type">filenameCDialect</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.CCompiler.html#CDialect"><span class="hs-identifier hs-type">CDialect</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
 </span><span id="line-117"></span><span id="filenameCDialect"><span class="annot"><span class="annottext">filenameCDialect :: String -&gt; Maybe (CDialect, Bool)
-</span><a href="Distribution.Simple.CCompiler.html#filenameCDialect"><span class="hs-identifier hs-var hs-var">filenameCDialect</span></a></span></span><span> </span><span id="local-6989586621679443165"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679443165"><span class="hs-identifier hs-var">filename</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-118"></span><span>  </span><span id="local-6989586621679443166"><span class="annot"><a href="#local-6989586621679443166"><span class="hs-identifier hs-var">extension</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679443165"><span class="hs-identifier hs-var">filename</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="Distribution.Simple.CCompiler.html#filenameCDialect"><span class="hs-identifier hs-var hs-var">filenameCDialect</span></a></span></span><span> </span><span id="local-6989586621679494887"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679494887"><span class="hs-identifier hs-var">filename</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-118"></span><span>  </span><span id="local-6989586621679494888"><span class="annot"><a href="#local-6989586621679494888"><span class="hs-identifier hs-var">extension</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ShowS
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679494887"><span class="hs-identifier hs-var">filename</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-119"></span><span>    </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'.'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679443167"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679443167"><span class="hs-identifier hs-var">ext</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe String
+</span><span class="hs-char">'.'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679494889"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679494889"><span class="hs-identifier hs-var">ext</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe String
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679443167"><span class="hs-identifier hs-var">ext</span></a></span><span>
+</span><a href="#local-6989586621679494889"><span class="hs-identifier hs-var">ext</span></a></span><span>
 </span><span id="line-120"></span><span>    </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe String
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-121"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679443166"><span class="hs-identifier hs-type">extension</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-121"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679494888"><span class="hs-identifier hs-type">extension</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-122"></span><span>    </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;c&quot;</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(CDialect, Bool) -&gt; Maybe (CDialect, Bool)
 forall a. a -&gt; Maybe a

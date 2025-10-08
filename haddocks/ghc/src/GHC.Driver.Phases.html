@@ -43,7 +43,7 @@
 </span><span id="line-43"></span><span>
 </span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.html"><span class="hs-identifier">GHC.Platform</span></a></span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-boot-9.10.1-5e10/src//GHC.ForeignSrcLang.html/GHC.ForeignSrcLang.html"><span class="hs-identifier">GHC.ForeignSrcLang</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-boot-9.12.2-1a37/src/GHC.ForeignSrcLang.html"><span class="hs-identifier">GHC.ForeignSrcLang</span></a></span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.SourceFile.html"><span class="hs-identifier">GHC.Types.SourceFile</span></a></span><span>
 </span><span id="line-49"></span><span>
@@ -51,7 +51,7 @@
 </span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.html"><span class="hs-identifier">GHC.Utils.Panic</span></a></span><span>
 </span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Misc.html"><span class="hs-identifier">GHC.Utils.Misc</span></a></span><span>
 </span><span id="line-53"></span><span>
-</span><span id="line-54"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../template-haskell-2.22.0.0-0c48/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
 </span><span id="line-57"></span><span class="hs-comment">-- Phases</span><span>
@@ -113,14 +113,14 @@
 </span><span id="line-103"></span><span>
 </span><span id="line-104"></span><span>        </span><span class="hs-comment">-- The final phase is a pseudo-phase that tells the pipeline to stop.</span><span>
 </span><span id="line-105"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span id="StopLn"><span class="annot"><a href="GHC.Driver.Phases.html#StopLn"><span class="hs-identifier hs-var">StopLn</span></a></span></span><span>        </span><span class="hs-comment">-- Stop, but linking will follow, so generate .o file</span><span>
-</span><span id="line-106"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682370479"><span id="local-6989586621682370490"><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
+</span><span id="line-106"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682519998"><span id="local-6989586621682520009"><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
 (Phase -&gt; Phase -&gt; Bool) -&gt; (Phase -&gt; Phase -&gt; Bool) -&gt; Eq Phase
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c== :: Phase -&gt; Phase -&gt; Bool
 == :: Phase -&gt; Phase -&gt; Bool
 $c/= :: Phase -&gt; Phase -&gt; Bool
 /= :: Phase -&gt; Phase -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682370494"><span id="local-6989586621682370509"><span id="local-6989586621682370513"><span class="annot"><span class="annottext">Int -&gt; Phase -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682520013"><span id="local-6989586621682520028"><span id="local-6989586621682520032"><span class="annot"><span class="annottext">Int -&gt; Phase -&gt; ShowS
 [Phase] -&gt; ShowS
 Phase -&gt; String
 (Int -&gt; Phase -&gt; ShowS)
@@ -136,14 +136,14 @@ showList :: [Phase] -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-107"></span><span>
 </span><span id="line-108"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-109"></span><span>    </span><span id="local-6989586621682370523"><span class="annot"><span class="annottext">ppr :: Phase -&gt; SDoc
-</span><a href="#local-6989586621682370523"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span id="local-6989586621682370525"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370525"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621682520042"><span class="annot"><span class="annottext">ppr :: Phase -&gt; SDoc
+</span><a href="#local-6989586621682520042"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span id="local-6989586621682520044"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520044"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Phase -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370525"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682520044"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-110"></span><span>
 </span><span id="line-111"></span><span class="annot"><a href="GHC.Driver.Phases.html#anyHsc"><span class="hs-identifier hs-type">anyHsc</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span>
 </span><span id="line-112"></span><span id="anyHsc"><span class="annot"><span class="annottext">anyHsc :: Phase
@@ -194,13 +194,13 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><a href="GHC.Driver.Phases.html#HCc"><span class="hs-identifier hs-var">HCc</span></a></span><span>         </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#HCc"><span class="hs-identifier hs-var">HCc</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-128"></span><span class="annot"><a href="GHC.Driver.Phases.html#eqPhase"><span class="hs-identifier hs-var">eqPhase</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Driver.Phases.html#As"><span class="hs-identifier hs-type">As</span></a></span><span> </span><span id="local-6989586621682370529"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682370529"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Driver.Phases.html#As"><span class="hs-identifier hs-type">As</span></a></span><span> </span><span id="local-6989586621682370530"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682370530"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682370529"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span id="line-128"></span><span class="annot"><a href="GHC.Driver.Phases.html#eqPhase"><span class="hs-identifier hs-var">eqPhase</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Driver.Phases.html#As"><span class="hs-identifier hs-type">As</span></a></span><span> </span><span id="local-6989586621682520048"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682520048"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Driver.Phases.html#As"><span class="hs-identifier hs-type">As</span></a></span><span> </span><span id="local-6989586621682520049"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682520049"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682520048"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682370530"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621682520049"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-129"></span><span class="annot"><a href="GHC.Driver.Phases.html#eqPhase"><span class="hs-identifier hs-var">eqPhase</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#LlvmOpt"><span class="hs-identifier hs-var">LlvmOpt</span></a></span><span>     </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#LlvmOpt"><span class="hs-identifier hs-var">LlvmOpt</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -250,58 +250,58 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-142"></span><span class="hs-comment">-- be refactored and this usage removed.</span><span>
 </span><span id="line-143"></span><span class="annot"><a href="GHC.Driver.Phases.html#happensBefore"><span class="hs-identifier hs-type">happensBefore</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-144"></span><span id="happensBefore"><span class="annot"><span class="annottext">happensBefore :: Platform -&gt; Phase -&gt; Phase -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#happensBefore"><span class="hs-identifier hs-var hs-var">happensBefore</span></a></span></span><span> </span><span id="local-6989586621682370531"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370531"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370532"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370532"><span class="hs-identifier hs-var">p1</span></a></span></span><span> </span><span id="local-6989586621682370533"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370533"><span class="hs-identifier hs-var">p2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370532"><span class="hs-identifier hs-var">p1</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
-</span><a href="#local-6989586621682370534"><span class="hs-operator hs-var">`happensBefore'`</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370533"><span class="hs-identifier hs-var">p2</span></a></span><span>
+</span><a href="GHC.Driver.Phases.html#happensBefore"><span class="hs-identifier hs-var hs-var">happensBefore</span></a></span></span><span> </span><span id="local-6989586621682520050"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520050"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520051"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520051"><span class="hs-identifier hs-var">p1</span></a></span></span><span> </span><span id="local-6989586621682520052"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520052"><span class="hs-identifier hs-var">p2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520051"><span class="hs-identifier hs-var">p1</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
+</span><a href="#local-6989586621682520053"><span class="hs-operator hs-var">`happensBefore'`</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520052"><span class="hs-identifier hs-var">p2</span></a></span><span>
 </span><span id="line-145"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="GHC.Driver.Phases.html#StopLn"><span class="hs-identifier hs-var">StopLn</span></a></span><span> </span><span id="local-6989586621682370534"><span class="annot"><span class="annottext">happensBefore' :: Phase -&gt; Phase -&gt; Bool
-</span><a href="#local-6989586621682370534"><span class="hs-operator hs-var hs-var">`happensBefore'`</span></a></span></span><span> </span><span class="annot"><span class="annottext">Phase
+</span><a href="GHC.Driver.Phases.html#StopLn"><span class="hs-identifier hs-var">StopLn</span></a></span><span> </span><span id="local-6989586621682520053"><span class="annot"><span class="annottext">happensBefore' :: Phase -&gt; Phase -&gt; Bool
+</span><a href="#local-6989586621682520053"><span class="hs-operator hs-var hs-var">`happensBefore'`</span></a></span></span><span> </span><span class="annot"><span class="annottext">Phase
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-146"></span><span>          </span><span id="local-6989586621682370535"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370535"><span class="hs-identifier hs-var">x</span></a></span></span><span>      </span><span class="annot"><a href="#local-6989586621682370534"><span class="hs-operator hs-var">`happensBefore'`</span></a></span><span> </span><span id="local-6989586621682370536"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370536"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370537"><span class="hs-identifier hs-var">after_x</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
+</span><span id="line-146"></span><span>          </span><span id="local-6989586621682520054"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520054"><span class="hs-identifier hs-var">x</span></a></span></span><span>      </span><span class="annot"><a href="#local-6989586621682520053"><span class="hs-operator hs-var">`happensBefore'`</span></a></span><span> </span><span id="local-6989586621682520055"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520055"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520056"><span class="hs-identifier hs-var">after_x</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#eqPhase"><span class="hs-operator hs-var">`eqPhase`</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370536"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621682520055"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-147"></span><span>                                   </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370537"><span class="hs-identifier hs-var">after_x</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
-</span><a href="#local-6989586621682370534"><span class="hs-operator hs-var">`happensBefore'`</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370536"><span class="hs-identifier hs-var">y</span></a></span><span>
-</span><span id="line-148"></span><span>              </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682370537"><span class="annot"><span class="annottext">after_x :: Phase
-</span><a href="#local-6989586621682370537"><span class="hs-identifier hs-var hs-var">after_x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Phase -&gt; Phase
+</span><a href="#local-6989586621682520056"><span class="hs-identifier hs-var">after_x</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; Phase -&gt; Bool
+</span><a href="#local-6989586621682520053"><span class="hs-operator hs-var">`happensBefore'`</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520055"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-148"></span><span>              </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682520056"><span class="annot"><span class="annottext">after_x :: Phase
+</span><a href="#local-6989586621682520056"><span class="hs-identifier hs-var hs-var">after_x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Phase -&gt; Phase
 </span><a href="GHC.Driver.Phases.html#nextPhase"><span class="hs-identifier hs-var">nextPhase</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370531"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370535"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621682520050"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520054"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-149"></span><span>
 </span><span id="line-150"></span><span class="annot"><a href="GHC.Driver.Phases.html#nextPhase"><span class="hs-identifier hs-type">nextPhase</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span>
 </span><span id="line-151"></span><span id="nextPhase"><span class="annot"><span class="annottext">nextPhase :: Platform -&gt; Phase -&gt; Phase
-</span><a href="GHC.Driver.Phases.html#nextPhase"><span class="hs-identifier hs-var hs-var">nextPhase</span></a></span></span><span> </span><span id="local-6989586621682370540"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370540"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370541"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370541"><span class="hs-identifier hs-var">p</span></a></span></span><span>
+</span><a href="GHC.Driver.Phases.html#nextPhase"><span class="hs-identifier hs-var hs-var">nextPhase</span></a></span></span><span> </span><span id="local-6989586621682520059"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520059"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520060"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520060"><span class="hs-identifier hs-var">p</span></a></span></span><span>
 </span><span id="line-152"></span><span>    </span><span class="hs-comment">-- A conservative approximation to the next phase, used in happensBefore</span><span>
 </span><span id="line-153"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370541"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-154"></span><span>      </span><span class="annot"><a href="GHC.Driver.Phases.html#Unlit"><span class="hs-identifier hs-type">Unlit</span></a></span><span> </span><span id="local-6989586621682370542"><span class="annot"><span class="annottext">HscSource
-</span><a href="#local-6989586621682370542"><span class="hs-identifier hs-var">sf</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscSource -&gt; Phase
+</span><a href="#local-6989586621682520060"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-154"></span><span>      </span><span class="annot"><a href="GHC.Driver.Phases.html#Unlit"><span class="hs-identifier hs-type">Unlit</span></a></span><span> </span><span id="local-6989586621682520061"><span class="annot"><span class="annottext">HscSource
+</span><a href="#local-6989586621682520061"><span class="hs-identifier hs-var">sf</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscSource -&gt; Phase
 </span><a href="GHC.Driver.Phases.html#Cpp"><span class="hs-identifier hs-var">Cpp</span></a></span><span>  </span><span class="annot"><span class="annottext">HscSource
-</span><a href="#local-6989586621682370542"><span class="hs-identifier hs-var">sf</span></a></span><span>
-</span><span id="line-155"></span><span>      </span><span class="annot"><a href="GHC.Driver.Phases.html#Cpp"><span class="hs-identifier hs-type">Cpp</span></a></span><span>   </span><span id="local-6989586621682370543"><span class="annot"><span class="annottext">HscSource
-</span><a href="#local-6989586621682370543"><span class="hs-identifier hs-var">sf</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscSource -&gt; Phase
+</span><a href="#local-6989586621682520061"><span class="hs-identifier hs-var">sf</span></a></span><span>
+</span><span id="line-155"></span><span>      </span><span class="annot"><a href="GHC.Driver.Phases.html#Cpp"><span class="hs-identifier hs-type">Cpp</span></a></span><span>   </span><span id="local-6989586621682520062"><span class="annot"><span class="annottext">HscSource
+</span><a href="#local-6989586621682520062"><span class="hs-identifier hs-var">sf</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscSource -&gt; Phase
 </span><a href="GHC.Driver.Phases.html#HsPp"><span class="hs-identifier hs-var">HsPp</span></a></span><span> </span><span class="annot"><span class="annottext">HscSource
-</span><a href="#local-6989586621682370543"><span class="hs-identifier hs-var">sf</span></a></span><span>
-</span><span id="line-156"></span><span>      </span><span class="annot"><a href="GHC.Driver.Phases.html#HsPp"><span class="hs-identifier hs-type">HsPp</span></a></span><span>  </span><span id="local-6989586621682370544"><span class="annot"><span class="annottext">HscSource
-</span><a href="#local-6989586621682370544"><span class="hs-identifier hs-var">sf</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscSource -&gt; Phase
+</span><a href="#local-6989586621682520062"><span class="hs-identifier hs-var">sf</span></a></span><span>
+</span><span id="line-156"></span><span>      </span><span class="annot"><a href="GHC.Driver.Phases.html#HsPp"><span class="hs-identifier hs-type">HsPp</span></a></span><span>  </span><span id="local-6989586621682520063"><span class="annot"><span class="annottext">HscSource
+</span><a href="#local-6989586621682520063"><span class="hs-identifier hs-var">sf</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscSource -&gt; Phase
 </span><a href="GHC.Driver.Phases.html#Hsc"><span class="hs-identifier hs-var">Hsc</span></a></span><span>  </span><span class="annot"><span class="annottext">HscSource
-</span><a href="#local-6989586621682370544"><span class="hs-identifier hs-var">sf</span></a></span><span>
+</span><a href="#local-6989586621682520063"><span class="hs-identifier hs-var">sf</span></a></span><span>
 </span><span id="line-157"></span><span>      </span><span class="annot"><a href="GHC.Driver.Phases.html#Hsc"><span class="hs-identifier hs-type">Hsc</span></a></span><span>   </span><span class="annot"><span class="annottext">HscSource
 </span><span class="hs-identifier">_</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370545"><span class="hs-identifier hs-var">maybeHCc</span></a></span><span>
+</span><a href="#local-6989586621682520064"><span class="hs-identifier hs-var">maybeHCc</span></a></span><span>
 </span><span id="line-158"></span><span>      </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#LlvmOpt"><span class="hs-identifier hs-var">LlvmOpt</span></a></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#LlvmLlc"><span class="hs-identifier hs-var">LlvmLlc</span></a></span><span>
@@ -332,7 +332,7 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#Cmm"><span class="hs-identifier hs-var">Cmm</span></a></span><span>
 </span><span id="line-167"></span><span>      </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#Cmm"><span class="hs-identifier hs-var">Cmm</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370545"><span class="hs-identifier hs-var">maybeHCc</span></a></span><span>
+</span><a href="#local-6989586621682520064"><span class="hs-identifier hs-var">maybeHCc</span></a></span><span>
 </span><span id="line-168"></span><span>      </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#HCc"><span class="hs-identifier hs-var">HCc</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#MergeForeign"><span class="hs-identifier hs-var">MergeForeign</span></a></span><span>
@@ -347,10 +347,10 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 forall a. HasCallStack =&gt; String -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-var">panic</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;nextPhase: nothing after StopLn&quot;</span></span><span>
-</span><span id="line-172"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682370545"><span class="annot"><span class="annottext">maybeHCc :: Phase
-</span><a href="#local-6989586621682370545"><span class="hs-identifier hs-var hs-var">maybeHCc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Bool
+</span><span id="line-172"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682520064"><span class="annot"><span class="annottext">maybeHCc :: Phase
+</span><a href="#local-6989586621682520064"><span class="hs-identifier hs-var hs-var">maybeHCc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Bool
 </span><a href="GHC.Platform.html#platformUnregisterised"><span class="hs-identifier hs-var">platformUnregisterised</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370540"><span class="hs-identifier hs-var">platform</span></a></span><span>
+</span><a href="#local-6989586621682520059"><span class="hs-identifier hs-var">platform</span></a></span><span>
 </span><span id="line-173"></span><span>                     </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#HCc"><span class="hs-identifier hs-var">HCc</span></a></span><span>
 </span><span id="line-174"></span><span>                     </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Phase
@@ -589,10 +589,10 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span id="line-255"></span><span class="hs-comment">-- Use the appropriate suffix for the system on which</span><span>
 </span><span id="line-256"></span><span class="hs-comment">-- the GHC-compiled code will run</span><span>
 </span><span id="line-257"></span><span id="objish_suffixes"><span class="annot"><span class="annottext">objish_suffixes :: Platform -&gt; [String]
-</span><a href="GHC.Driver.Phases.html#objish_suffixes"><span class="hs-identifier hs-var hs-var">objish_suffixes</span></a></span></span><span> </span><span id="local-6989586621682370558"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370558"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; OS
+</span><a href="GHC.Driver.Phases.html#objish_suffixes"><span class="hs-identifier hs-var hs-var">objish_suffixes</span></a></span></span><span> </span><span id="local-6989586621682520077"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520077"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; OS
 </span><a href="GHC.Platform.html#platformOS"><span class="hs-identifier hs-var">platformOS</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370558"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682520077"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-258"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><span class="hs-identifier hs-var">OSMinGW32</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;o&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
@@ -605,10 +605,10 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span id="line-260"></span><span>
 </span><span id="line-261"></span><span class="annot"><a href="GHC.Driver.Phases.html#dynlib_suffixes"><span class="hs-identifier hs-type">dynlib_suffixes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
 </span><span id="line-262"></span><span id="dynlib_suffixes"><span class="annot"><span class="annottext">dynlib_suffixes :: Platform -&gt; [String]
-</span><a href="GHC.Driver.Phases.html#dynlib_suffixes"><span class="hs-identifier hs-var hs-var">dynlib_suffixes</span></a></span></span><span> </span><span id="local-6989586621682370562"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370562"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; OS
+</span><a href="GHC.Driver.Phases.html#dynlib_suffixes"><span class="hs-identifier hs-var hs-var">dynlib_suffixes</span></a></span></span><span> </span><span id="local-6989586621682520081"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520081"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; OS
 </span><a href="GHC.Platform.html#platformOS"><span class="hs-identifier hs-var">platformOS</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370562"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682520081"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-263"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><span class="hs-identifier hs-var">OSMinGW32</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;dll&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
@@ -625,57 +625,57 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span id="line-268"></span><span>    </span><span class="annot"><a href="GHC.Driver.Phases.html#isHaskellUserSrcSuffix"><span class="hs-identifier hs-type">isHaskellUserSrcSuffix</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#isJsSuffix"><span class="hs-identifier hs-type">isJsSuffix</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#isHaskellSigSuffix"><span class="hs-identifier hs-type">isHaskellSigSuffix</span></a></span><span>
 </span><span id="line-269"></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-270"></span><span id="isHaskellishSuffix"><span class="annot"><span class="annottext">isHaskellishSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellishSuffix"><span class="hs-identifier hs-var hs-var">isHaskellishSuffix</span></a></span></span><span>     </span><span id="local-6989586621682370565"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370565"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370565"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellishSuffix"><span class="hs-identifier hs-var hs-var">isHaskellishSuffix</span></a></span></span><span>     </span><span id="local-6989586621682520084"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520084"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520084"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[String]
 </span><a href="GHC.Driver.Phases.html#haskellish_suffixes"><span class="hs-identifier hs-var">haskellish_suffixes</span></a></span><span>
 </span><span id="line-271"></span><span id="isBackpackishSuffix"><span class="annot"><span class="annottext">isBackpackishSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isBackpackishSuffix"><span class="hs-identifier hs-var hs-var">isBackpackishSuffix</span></a></span></span><span>    </span><span id="local-6989586621682370567"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370567"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370567"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isBackpackishSuffix"><span class="hs-identifier hs-var hs-var">isBackpackishSuffix</span></a></span></span><span>    </span><span id="local-6989586621682520086"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520086"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520086"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[String]
 </span><a href="GHC.Driver.Phases.html#backpackish_suffixes"><span class="hs-identifier hs-var">backpackish_suffixes</span></a></span><span>
 </span><span id="line-272"></span><span id="isHaskellSigSuffix"><span class="annot"><span class="annottext">isHaskellSigSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellSigSuffix"><span class="hs-identifier hs-var hs-var">isHaskellSigSuffix</span></a></span></span><span>     </span><span id="local-6989586621682370568"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370568"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370568"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellSigSuffix"><span class="hs-identifier hs-var hs-var">isHaskellSigSuffix</span></a></span></span><span>     </span><span id="local-6989586621682520087"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520087"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520087"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[String]
 </span><a href="GHC.Driver.Phases.html#haskellish_sig_suffixes"><span class="hs-identifier hs-var">haskellish_sig_suffixes</span></a></span><span>
 </span><span id="line-273"></span><span id="isHaskellSrcSuffix"><span class="annot"><span class="annottext">isHaskellSrcSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellSrcSuffix"><span class="hs-identifier hs-var hs-var">isHaskellSrcSuffix</span></a></span></span><span>     </span><span id="local-6989586621682370569"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370569"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370569"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellSrcSuffix"><span class="hs-identifier hs-var hs-var">isHaskellSrcSuffix</span></a></span></span><span>     </span><span id="local-6989586621682520088"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520088"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520088"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[String]
 </span><a href="GHC.Driver.Phases.html#haskellish_src_suffixes"><span class="hs-identifier hs-var">haskellish_src_suffixes</span></a></span><span>
 </span><span id="line-274"></span><span id="isCishSuffix"><span class="annot"><span class="annottext">isCishSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isCishSuffix"><span class="hs-identifier hs-var hs-var">isCishSuffix</span></a></span></span><span>           </span><span id="local-6989586621682370570"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370570"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370570"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isCishSuffix"><span class="hs-identifier hs-var hs-var">isCishSuffix</span></a></span></span><span>           </span><span id="local-6989586621682520089"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520089"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520089"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[String]
 </span><a href="GHC.Driver.Phases.html#cish_suffixes"><span class="hs-identifier hs-var">cish_suffixes</span></a></span><span>
 </span><span id="line-275"></span><span id="isJsSuffix"><span class="annot"><span class="annottext">isJsSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isJsSuffix"><span class="hs-identifier hs-var hs-var">isJsSuffix</span></a></span></span><span>             </span><span id="local-6989586621682370571"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370571"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370571"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isJsSuffix"><span class="hs-identifier hs-var hs-var">isJsSuffix</span></a></span></span><span>             </span><span id="local-6989586621682520090"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520090"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520090"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[String]
 </span><a href="GHC.Driver.Phases.html#js_suffixes"><span class="hs-identifier hs-var">js_suffixes</span></a></span><span>
 </span><span id="line-276"></span><span id="isHaskellUserSrcSuffix"><span class="annot"><span class="annottext">isHaskellUserSrcSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellUserSrcSuffix"><span class="hs-identifier hs-var hs-var">isHaskellUserSrcSuffix</span></a></span></span><span> </span><span id="local-6989586621682370572"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370572"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370572"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellUserSrcSuffix"><span class="hs-identifier hs-var hs-var">isHaskellUserSrcSuffix</span></a></span></span><span> </span><span id="local-6989586621682520091"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520091"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520091"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[String]
@@ -683,44 +683,44 @@ forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span id="line-277"></span><span>
 </span><span id="line-278"></span><span class="annot"><a href="GHC.Driver.Phases.html#isObjectSuffix"><span class="hs-identifier hs-type">isObjectSuffix</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#isDynLibSuffix"><span class="hs-identifier hs-type">isDynLibSuffix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-279"></span><span id="isObjectSuffix"><span class="annot"><span class="annottext">isObjectSuffix :: Platform -&gt; String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isObjectSuffix"><span class="hs-identifier hs-var hs-var">isObjectSuffix</span></a></span></span><span> </span><span id="local-6989586621682370573"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370573"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370574"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370574"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370574"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isObjectSuffix"><span class="hs-identifier hs-var hs-var">isObjectSuffix</span></a></span></span><span> </span><span id="local-6989586621682520092"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520092"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520093"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520093"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520093"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">Platform -&gt; [String]
 </span><a href="GHC.Driver.Phases.html#objish_suffixes"><span class="hs-identifier hs-var">objish_suffixes</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370573"><span class="hs-identifier hs-var">platform</span></a></span><span>
+</span><a href="#local-6989586621682520092"><span class="hs-identifier hs-var">platform</span></a></span><span>
 </span><span id="line-280"></span><span id="isDynLibSuffix"><span class="annot"><span class="annottext">isDynLibSuffix :: Platform -&gt; String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isDynLibSuffix"><span class="hs-identifier hs-var hs-var">isDynLibSuffix</span></a></span></span><span> </span><span id="local-6989586621682370575"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370575"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370576"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370576"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370576"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isDynLibSuffix"><span class="hs-identifier hs-var hs-var">isDynLibSuffix</span></a></span></span><span> </span><span id="local-6989586621682520094"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520094"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520095"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520095"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520095"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">Platform -&gt; [String]
 </span><a href="GHC.Driver.Phases.html#dynlib_suffixes"><span class="hs-identifier hs-var">dynlib_suffixes</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370575"><span class="hs-identifier hs-var">platform</span></a></span><span>
+</span><a href="#local-6989586621682520094"><span class="hs-identifier hs-var">platform</span></a></span><span>
 </span><span id="line-281"></span><span>
 </span><span id="line-282"></span><span class="annot"><a href="GHC.Driver.Phases.html#isSourceSuffix"><span class="hs-identifier hs-type">isSourceSuffix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-283"></span><span id="isSourceSuffix"><span class="annot"><span class="annottext">isSourceSuffix :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isSourceSuffix"><span class="hs-identifier hs-var hs-var">isSourceSuffix</span></a></span></span><span> </span><span id="local-6989586621682370577"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370577"><span class="hs-identifier hs-var">suff</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isSourceSuffix"><span class="hs-identifier hs-var hs-var">isSourceSuffix</span></a></span></span><span> </span><span id="local-6989586621682520096"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520096"><span class="hs-identifier hs-var">suff</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isHaskellishSuffix"><span class="hs-identifier hs-var">isHaskellishSuffix</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370577"><span class="hs-identifier hs-var">suff</span></a></span><span>
+</span><a href="#local-6989586621682520096"><span class="hs-identifier hs-var">suff</span></a></span><span>
 </span><span id="line-284"></span><span>                    </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isCishSuffix"><span class="hs-identifier hs-var">isCishSuffix</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370577"><span class="hs-identifier hs-var">suff</span></a></span><span>
+</span><a href="#local-6989586621682520096"><span class="hs-identifier hs-var">suff</span></a></span><span>
 </span><span id="line-285"></span><span>                    </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isJsSuffix"><span class="hs-identifier hs-var">isJsSuffix</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370577"><span class="hs-identifier hs-var">suff</span></a></span><span>
+</span><a href="#local-6989586621682520096"><span class="hs-identifier hs-var">suff</span></a></span><span>
 </span><span id="line-286"></span><span>                    </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isBackpackishSuffix"><span class="hs-identifier hs-var">isBackpackishSuffix</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370577"><span class="hs-identifier hs-var">suff</span></a></span><span>
+</span><a href="#local-6989586621682520096"><span class="hs-identifier hs-var">suff</span></a></span><span>
 </span><span id="line-287"></span><span>
 </span><span id="line-288"></span><span class="hs-comment">-- | When we are given files (modified by -x arguments) we need</span><span>
 </span><span id="line-289"></span><span class="hs-comment">-- to determine if they are Haskellish or not to figure out</span><span>
@@ -734,24 +734,24 @@ forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span id="line-297"></span><span class="hs-comment">--         specified suffix is a Haskell one.</span><span>
 </span><span id="line-298"></span><span class="annot"><a href="GHC.Driver.Phases.html#isHaskellishTarget"><span class="hs-identifier hs-type">isHaskellishTarget</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-299"></span><span id="isHaskellishTarget"><span class="annot"><span class="annottext">isHaskellishTarget :: (String, Maybe Phase) -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellishTarget"><span class="hs-identifier hs-var hs-var">isHaskellishTarget</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682370578"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370578"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Maybe Phase
+</span><a href="GHC.Driver.Phases.html#isHaskellishTarget"><span class="hs-identifier hs-var hs-var">isHaskellishTarget</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682520097"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520097"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Maybe Phase
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-300"></span><span>  </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Utils.Misc.html#looksLikeModuleName"><span class="hs-identifier hs-var">looksLikeModuleName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370578"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682520097"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isHaskellSrcFilename"><span class="hs-identifier hs-var">isHaskellSrcFilename</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370578"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682520097"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Bool
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#hasExtension"><span class="hs-identifier hs-var">hasExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370578"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#hasExtension"><span class="hs-identifier hs-var">hasExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520097"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-301"></span><span class="annot"><a href="GHC.Driver.Phases.html#isHaskellishTarget"><span class="hs-identifier hs-var">isHaskellishTarget</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682370582"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370582"><span class="hs-identifier hs-var">phase</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682520101"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520101"><span class="hs-identifier hs-var">phase</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-302"></span><span>  </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370582"><span class="hs-identifier hs-var">phase</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; [Phase] -&gt; Bool
+</span><a href="#local-6989586621682520101"><span class="hs-identifier hs-var">phase</span></a></span><span> </span><span class="annot"><span class="annottext">Phase -&gt; [Phase] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`notElem`</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Phase
 </span><a href="GHC.Driver.Phases.html#As"><span class="hs-identifier hs-var">As</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
@@ -772,106 +772,106 @@ forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span id="line-307"></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-308"></span><span class="hs-comment">-- takeExtension return .foo, so we drop 1 to get rid of the .</span><span>
 </span><span id="line-309"></span><span id="isHaskellishFilename"><span class="annot"><span class="annottext">isHaskellishFilename :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellishFilename"><span class="hs-identifier hs-var hs-var">isHaskellishFilename</span></a></span></span><span>     </span><span id="local-6989586621682370585"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370585"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellishFilename"><span class="hs-identifier hs-var hs-var">isHaskellishFilename</span></a></span></span><span>     </span><span id="local-6989586621682520104"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520104"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isHaskellishSuffix"><span class="hs-identifier hs-var">isHaskellishSuffix</span></a></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370585"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520104"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-310"></span><span id="isHaskellSrcFilename"><span class="annot"><span class="annottext">isHaskellSrcFilename :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellSrcFilename"><span class="hs-identifier hs-var hs-var">isHaskellSrcFilename</span></a></span></span><span>     </span><span id="local-6989586621682370588"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370588"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellSrcFilename"><span class="hs-identifier hs-var hs-var">isHaskellSrcFilename</span></a></span></span><span>     </span><span id="local-6989586621682520107"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520107"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isHaskellSrcSuffix"><span class="hs-identifier hs-var">isHaskellSrcSuffix</span></a></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370588"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520107"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-311"></span><span id="isCishFilename"><span class="annot"><span class="annottext">isCishFilename :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isCishFilename"><span class="hs-identifier hs-var hs-var">isCishFilename</span></a></span></span><span>           </span><span id="local-6989586621682370589"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370589"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isCishFilename"><span class="hs-identifier hs-var hs-var">isCishFilename</span></a></span></span><span>           </span><span id="local-6989586621682520108"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520108"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isCishSuffix"><span class="hs-identifier hs-var">isCishSuffix</span></a></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370589"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520108"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-312"></span><span id="isHaskellUserSrcFilename"><span class="annot"><span class="annottext">isHaskellUserSrcFilename :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellUserSrcFilename"><span class="hs-identifier hs-var hs-var">isHaskellUserSrcFilename</span></a></span></span><span> </span><span id="local-6989586621682370590"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370590"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellUserSrcFilename"><span class="hs-identifier hs-var hs-var">isHaskellUserSrcFilename</span></a></span></span><span> </span><span id="local-6989586621682520109"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520109"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isHaskellUserSrcSuffix"><span class="hs-identifier hs-var">isHaskellUserSrcSuffix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370590"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520109"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-313"></span><span id="isSourceFilename"><span class="annot"><span class="annottext">isSourceFilename :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isSourceFilename"><span class="hs-identifier hs-var hs-var">isSourceFilename</span></a></span></span><span>         </span><span id="local-6989586621682370591"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370591"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isSourceFilename"><span class="hs-identifier hs-var hs-var">isSourceFilename</span></a></span></span><span>         </span><span id="local-6989586621682520110"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520110"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isSourceSuffix"><span class="hs-identifier hs-var">isSourceSuffix</span></a></span><span>         </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370591"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520110"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-314"></span><span id="isHaskellSigFilename"><span class="annot"><span class="annottext">isHaskellSigFilename :: String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isHaskellSigFilename"><span class="hs-identifier hs-var hs-var">isHaskellSigFilename</span></a></span></span><span>     </span><span id="local-6989586621682370592"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370592"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isHaskellSigFilename"><span class="hs-identifier hs-var hs-var">isHaskellSigFilename</span></a></span></span><span>     </span><span id="local-6989586621682520111"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520111"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isHaskellSigSuffix"><span class="hs-identifier hs-var">isHaskellSigSuffix</span></a></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370592"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520111"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-315"></span><span>
 </span><span id="line-316"></span><span class="annot"><a href="GHC.Driver.Phases.html#isObjectFilename"><span class="hs-identifier hs-type">isObjectFilename</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#isDynLibFilename"><span class="hs-identifier hs-type">isDynLibFilename</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-317"></span><span id="isObjectFilename"><span class="annot"><span class="annottext">isObjectFilename :: Platform -&gt; String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isObjectFilename"><span class="hs-identifier hs-var hs-var">isObjectFilename</span></a></span></span><span> </span><span id="local-6989586621682370593"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370593"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370594"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370594"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isObjectFilename"><span class="hs-identifier hs-var hs-var">isObjectFilename</span></a></span></span><span> </span><span id="local-6989586621682520112"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520112"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520113"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520113"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isObjectSuffix"><span class="hs-identifier hs-var">isObjectSuffix</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370593"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
+</span><a href="#local-6989586621682520112"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370594"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520113"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-318"></span><span id="isDynLibFilename"><span class="annot"><span class="annottext">isDynLibFilename :: Platform -&gt; String -&gt; Bool
-</span><a href="GHC.Driver.Phases.html#isDynLibFilename"><span class="hs-identifier hs-var hs-var">isDynLibFilename</span></a></span></span><span> </span><span id="local-6989586621682370595"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370595"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370596"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370596"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; String -&gt; Bool
+</span><a href="GHC.Driver.Phases.html#isDynLibFilename"><span class="hs-identifier hs-var hs-var">isDynLibFilename</span></a></span></span><span> </span><span id="local-6989586621682520114"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520114"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520115"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520115"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; String -&gt; Bool
 </span><a href="GHC.Driver.Phases.html#isDynLibSuffix"><span class="hs-identifier hs-var">isDynLibSuffix</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370595"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
+</span><a href="#local-6989586621682520114"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Int -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682370596"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#takeExtension"><span class="hs-identifier hs-var">takeExtension</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682520115"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-319"></span><span>
 </span><span id="line-320"></span><span class="annot"><span class="hs-comment">-- | Foreign language of the phase if the phase deals with a foreign code</span></span><span>
 </span><span id="line-321"></span><span class="annot"><a href="GHC.Driver.Phases.html#phaseForeignLanguage"><span class="hs-identifier hs-type">phaseForeignLanguage</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Driver.Phases.html#Phase"><span class="hs-identifier hs-type">Phase</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">ForeignSrcLang</span></span><span>
 </span><span id="line-322"></span><span id="phaseForeignLanguage"><span class="annot"><span class="annottext">phaseForeignLanguage :: Phase -&gt; Maybe ForeignSrcLang
-</span><a href="GHC.Driver.Phases.html#phaseForeignLanguage"><span class="hs-identifier hs-var hs-var">phaseForeignLanguage</span></a></span></span><span> </span><span id="local-6989586621682370597"><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370597"><span class="hs-identifier hs-var">phase</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Phase
-</span><a href="#local-6989586621682370597"><span class="hs-identifier hs-var">phase</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="GHC.Driver.Phases.html#phaseForeignLanguage"><span class="hs-identifier hs-var hs-var">phaseForeignLanguage</span></a></span></span><span> </span><span id="local-6989586621682520116"><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520116"><span class="hs-identifier hs-var">phase</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Phase
+</span><a href="#local-6989586621682520116"><span class="hs-identifier hs-var">phase</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-323"></span><span>  </span><span class="annot"><span class="annottext">Phase
 </span><a href="GHC.Driver.Phases.html#Cc"><span class="hs-identifier hs-var">Cc</span></a></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ForeignSrcLang -&gt; Maybe ForeignSrcLang
 forall a. a -&gt; Maybe a

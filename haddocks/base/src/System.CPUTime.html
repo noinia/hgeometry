@@ -32,7 +32,7 @@
 </span><span id="line-29"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-30"></span><span>
 </span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="System.IO.Unsafe.html"><span class="hs-identifier">System.IO.Unsafe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.IO.Unsafe.html/GHC.Internal.IO.Unsafe.html#unsafePerformIO"><span class="hs-identifier">unsafePerformIO</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="System.IO.Unsafe.html"><span class="hs-identifier">System.IO.Unsafe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.IO.Unsafe.html#unsafePerformIO"><span class="hs-identifier">unsafePerformIO</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-33"></span><span>
 </span><span id="line-34"></span><span class="hs-comment">-- Here is where we decide which backend to use</span><span>
 </span><span id="line-35"></span><span>
@@ -49,14 +49,14 @@
 </span><span id="line-64"></span><span id="cpuTimePrecision"><span class="annot"><span class="annottext">cpuTimePrecision :: Integer
 </span><a href="System.CPUTime.html#cpuTimePrecision"><span class="hs-identifier hs-var hs-var">cpuTimePrecision</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Integer -&gt; Integer
 forall a. IO a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.IO.Unsafe.html/GHC.Internal.IO.Unsafe.html#unsafePerformIO"><span class="hs-identifier hs-var">unsafePerformIO</span></a></span><span> </span><span class="annot"><span class="annottext">IO Integer
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.IO.Unsafe.html#unsafePerformIO"><span class="hs-identifier hs-var">unsafePerformIO</span></a></span><span> </span><span class="annot"><span class="annottext">IO Integer
 </span><a href="System.CPUTime.Posix.ClockGetTime.html#getCpuTimePrecision"><span class="hs-identifier hs-var">I.getCpuTimePrecision</span></a></span><span>
 </span><span id="line-65"></span><span class="hs-pragma">{-# NOINLINE</span><span> </span><span class="annot"><a href="System.CPUTime.html#cpuTimePrecision"><span class="hs-pragma hs-type">cpuTimePrecision</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-66"></span><span>
 </span><span id="line-67"></span><span class="hs-comment">-- | Computation 'getCPUTime' returns the number of picoseconds CPU time</span><span>
 </span><span id="line-68"></span><span class="hs-comment">-- used by the current program.  The precision of this result is</span><span>
 </span><span id="line-69"></span><span class="hs-comment">-- implementation-dependent.</span><span>
-</span><span id="line-70"></span><span class="annot"><a href="System.CPUTime.html#getCPUTime"><span class="hs-identifier hs-type">getCPUTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-70"></span><span class="annot"><a href="System.CPUTime.html#getCPUTime"><span class="hs-identifier hs-type">getCPUTime</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
 </span><span id="line-71"></span><span id="getCPUTime"><span class="annot"><span class="annottext">getCPUTime :: IO Integer
 </span><a href="System.CPUTime.html#getCPUTime"><span class="hs-identifier hs-var hs-var">getCPUTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Integer
 </span><a href="System.CPUTime.Posix.ClockGetTime.html#getCPUTime"><span class="hs-identifier hs-var">I.getCPUTime</span></a></span><span>

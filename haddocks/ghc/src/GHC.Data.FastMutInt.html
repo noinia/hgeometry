@@ -15,29 +15,29 @@
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.Basic.html"><span class="hs-identifier">GHC.Prelude.Basic</span></a></span><span>
 </span><span id="line-17"></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//GHC.Base.html/GHC.Base.html"><span class="hs-identifier">GHC.Base</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/GHC.Base.html"><span class="hs-identifier">GHC.Base</span></a></span><span>
 </span><span id="line-19"></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="FastMutInt"><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-var">FastMutInt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FastMutInt"><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-var">FastMutInt</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MutableByteArray#</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealWorld</span></span><span class="hs-special">)</span><span>
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span class="annot"><a href="GHC.Data.FastMutInt.html#newFastMutInt"><span class="hs-identifier hs-type">newFastMutInt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span>
 </span><span id="line-23"></span><span id="newFastMutInt"><span class="annot"><span class="annottext">newFastMutInt :: Int -&gt; IO FastMutInt
-</span><a href="GHC.Data.FastMutInt.html#newFastMutInt"><span class="hs-identifier hs-var hs-var">newFastMutInt</span></a></span></span><span> </span><span id="local-6989586621682306577"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682306577"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-24"></span><span>    </span><span id="local-6989586621682306578"><span class="annot"><a href="#local-6989586621682306578"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO FastMutInt
-</span><a href="#local-6989586621682306579"><span class="hs-identifier hs-var">create</span></a></span><span>
-</span><span id="line-25"></span><span>    </span><span class="annot"><a href="GHC.Data.FastMutInt.html#writeFastMutInt"><span class="hs-identifier hs-type">writeFastMutInt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682306578"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682306577"><span class="hs-identifier hs-type">n</span></a></span><span>
-</span><span id="line-26"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><a href="#local-6989586621682306578"><span class="hs-identifier hs-type">x</span></a></span><span>
+</span><a href="GHC.Data.FastMutInt.html#newFastMutInt"><span class="hs-identifier hs-var hs-var">newFastMutInt</span></a></span></span><span> </span><span id="local-6989586621682441240"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682441240"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-24"></span><span>    </span><span id="local-6989586621682441241"><span class="annot"><a href="#local-6989586621682441241"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO FastMutInt
+</span><a href="#local-6989586621682441242"><span class="hs-identifier hs-var">create</span></a></span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><a href="GHC.Data.FastMutInt.html#writeFastMutInt"><span class="hs-identifier hs-type">writeFastMutInt</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682441241"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682441240"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><a href="#local-6989586621682441241"><span class="hs-identifier hs-type">x</span></a></span><span>
 </span><span id="line-27"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-28"></span><span>    </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">I#</span></span><span> </span><span id="local-6989586621682306584"><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306584"><span class="hs-identifier hs-var">size</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><span id="line-28"></span><span>    </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">I#</span></span><span> </span><span id="local-6989586621682441247"><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441247"><span class="hs-identifier hs-var">size</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
 forall b. FiniteBits b =&gt; b -&gt; Int
 </span><span class="hs-identifier hs-var">finiteBitSize</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">`unsafeShiftR`</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span>
-</span><span id="line-29"></span><span>    </span><span id="local-6989586621682306579"><span class="annot"><span class="annottext">create :: IO FastMutInt
-</span><a href="#local-6989586621682306579"><span class="hs-identifier hs-var hs-var">create</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, FastMutInt #))
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621682441242"><span class="annot"><span class="annottext">create :: IO FastMutInt
+</span><a href="#local-6989586621682441242"><span class="hs-identifier hs-var hs-var">create</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, FastMutInt #))
 -&gt; IO FastMutInt
 forall a. (State# RealWorld -&gt; (# State# RealWorld, a #)) -&gt; IO a
 </span><span class="hs-identifier hs-var">IO</span></span><span> </span><span class="annot"><span class="annottext">((State# RealWorld -&gt; (# State# RealWorld, FastMutInt #))
@@ -45,96 +45,96 @@ forall a. (State# RealWorld -&gt; (# State# RealWorld, a #)) -&gt; IO a
 -&gt; (State# RealWorld -&gt; (# State# RealWorld, FastMutInt #))
 -&gt; IO FastMutInt
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682306587"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306587"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682441250"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441250"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-30"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int#
 -&gt; State# RealWorld
 -&gt; (# State# RealWorld, MutableByteArray# RealWorld #)
 forall d. Int# -&gt; State# d -&gt; (# State# d, MutableByteArray# d #)
 </span><span class="hs-identifier hs-var">newByteArray#</span></span><span> </span><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306584"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306587"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-31"></span><span>        </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682306588"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306588"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682306589"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306589"><span class="hs-identifier hs-var">arr</span></a></span></span><span> </span><span class="hs-special">#)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306588"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld -&gt; FastMutInt
+</span><a href="#local-6989586621682441247"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441250"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-31"></span><span>        </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682441251"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441251"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682441252"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
+</span><a href="#local-6989586621682441252"><span class="hs-identifier hs-var">arr</span></a></span></span><span> </span><span class="hs-special">#)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441251"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld -&gt; FastMutInt
 </span><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-var">FastMutInt</span></a></span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306589"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="hs-special">#)</span><span>
+</span><a href="#local-6989586621682441252"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-32"></span><span>
 </span><span id="line-33"></span><span class="annot"><a href="GHC.Data.FastMutInt.html#readFastMutInt"><span class="hs-identifier hs-type">readFastMutInt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-34"></span><span id="readFastMutInt"><span class="annot"><span class="annottext">readFastMutInt :: FastMutInt -&gt; IO Int
-</span><a href="GHC.Data.FastMutInt.html#readFastMutInt"><span class="hs-identifier hs-var hs-var">readFastMutInt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span id="local-6989586621682306590"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306590"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int
+</span><a href="GHC.Data.FastMutInt.html#readFastMutInt"><span class="hs-identifier hs-var hs-var">readFastMutInt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span id="local-6989586621682441253"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
+</span><a href="#local-6989586621682441253"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int
 forall a. (State# RealWorld -&gt; (# State# RealWorld, a #)) -&gt; IO a
 </span><span class="hs-identifier hs-var">IO</span></span><span> </span><span class="annot"><span class="annottext">((State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int)
 -&gt; (State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682306591"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306591"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682441254"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441254"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-35"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld
 -&gt; Int# -&gt; State# RealWorld -&gt; (# State# RealWorld, Int# #)
 forall d.
 MutableByteArray# d -&gt; Int# -&gt; State# d -&gt; (# State# d, Int# #)
 </span><span class="hs-identifier hs-var">readIntArray#</span></span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306590"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441253"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="annot"><span class="annottext">Int#
 </span><span class="hs-number">0#</span></span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306591"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-36"></span><span>    </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682306592"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306592"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682306593"><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306593"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">#)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306592"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int# -&gt; Int
+</span><a href="#local-6989586621682441254"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682441255"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441255"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682441256"><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441256"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-special">#)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441255"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int# -&gt; Int
 </span><span class="hs-identifier hs-var">I#</span></span><span> </span><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306593"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">#)</span><span>
+</span><a href="#local-6989586621682441256"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-37"></span><span>
 </span><span id="line-38"></span><span class="annot"><a href="GHC.Data.FastMutInt.html#writeFastMutInt"><span class="hs-identifier hs-type">writeFastMutInt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-39"></span><span id="writeFastMutInt"><span class="annot"><span class="annottext">writeFastMutInt :: FastMutInt -&gt; Int -&gt; IO ()
-</span><a href="GHC.Data.FastMutInt.html#writeFastMutInt"><span class="hs-identifier hs-var hs-var">writeFastMutInt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span id="local-6989586621682306594"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306594"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">I#</span></span><span> </span><span id="local-6989586621682306595"><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306595"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, () #)) -&gt; IO ()
+</span><a href="GHC.Data.FastMutInt.html#writeFastMutInt"><span class="hs-identifier hs-var hs-var">writeFastMutInt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span id="local-6989586621682441257"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
+</span><a href="#local-6989586621682441257"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">I#</span></span><span> </span><span id="local-6989586621682441258"><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441258"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, () #)) -&gt; IO ()
 forall a. (State# RealWorld -&gt; (# State# RealWorld, a #)) -&gt; IO a
 </span><span class="hs-identifier hs-var">IO</span></span><span> </span><span class="annot"><span class="annottext">((State# RealWorld -&gt; (# State# RealWorld, () #)) -&gt; IO ())
 -&gt; (State# RealWorld -&gt; (# State# RealWorld, () #)) -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682306596"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306596"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682441259"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441259"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-40"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld
 -&gt; Int# -&gt; Int# -&gt; State# RealWorld -&gt; State# RealWorld
 forall d.
 MutableByteArray# d -&gt; Int# -&gt; Int# -&gt; State# d -&gt; State# d
 </span><span class="hs-identifier hs-var">writeIntArray#</span></span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306594"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441257"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="annot"><span class="annottext">Int#
 </span><span class="hs-number">0#</span></span><span> </span><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306595"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306596"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-41"></span><span>    </span><span id="local-6989586621682306597"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306597"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306597"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">#)</span><span>
+</span><a href="#local-6989586621682441258"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441259"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-41"></span><span>    </span><span id="local-6989586621682441260"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441260"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441260"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-42"></span><span>
 </span><span id="line-43"></span><span class="annot"><a href="GHC.Data.FastMutInt.html#atomicFetchAddFastMut"><span class="hs-identifier hs-type">atomicFetchAddFastMut</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-44"></span><span id="atomicFetchAddFastMut"><span class="annot"><span class="annottext">atomicFetchAddFastMut :: FastMutInt -&gt; Int -&gt; IO Int
-</span><a href="GHC.Data.FastMutInt.html#atomicFetchAddFastMut"><span class="hs-identifier hs-var hs-var">atomicFetchAddFastMut</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span id="local-6989586621682306598"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306598"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">I#</span></span><span> </span><span id="local-6989586621682306599"><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306599"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int
+</span><a href="GHC.Data.FastMutInt.html#atomicFetchAddFastMut"><span class="hs-identifier hs-var hs-var">atomicFetchAddFastMut</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Data.FastMutInt.html#FastMutInt"><span class="hs-identifier hs-type">FastMutInt</span></a></span><span> </span><span id="local-6989586621682441261"><span class="annot"><span class="annottext">MutableByteArray# RealWorld
+</span><a href="#local-6989586621682441261"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">I#</span></span><span> </span><span id="local-6989586621682441262"><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441262"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int
 forall a. (State# RealWorld -&gt; (# State# RealWorld, a #)) -&gt; IO a
 </span><span class="hs-identifier hs-var">IO</span></span><span> </span><span class="annot"><span class="annottext">((State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int)
 -&gt; (State# RealWorld -&gt; (# State# RealWorld, Int #)) -&gt; IO Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682306600"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306600"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682441263"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441263"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-45"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld
 -&gt; Int# -&gt; Int# -&gt; State# RealWorld -&gt; (# State# RealWorld, Int# #)
 forall d.
 MutableByteArray# d
 -&gt; Int# -&gt; Int# -&gt; State# d -&gt; (# State# d, Int# #)
 </span><span class="hs-identifier hs-var">fetchAddIntArray#</span></span><span> </span><span class="annot"><span class="annottext">MutableByteArray# RealWorld
-</span><a href="#local-6989586621682306598"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441261"><span class="hs-identifier hs-var">arr</span></a></span><span> </span><span class="annot"><span class="annottext">Int#
 </span><span class="hs-number">0#</span></span><span> </span><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306599"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306600"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-46"></span><span>    </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682306601"><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306601"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682306602"><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306602"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">#)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
-</span><a href="#local-6989586621682306601"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int# -&gt; Int
+</span><a href="#local-6989586621682441262"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441263"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-46"></span><span>    </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682441264"><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441264"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682441265"><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621682441265"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">#)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><span class="annottext">State# RealWorld
+</span><a href="#local-6989586621682441264"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int# -&gt; Int
 </span><span class="hs-identifier hs-var">I#</span></span><span> </span><span class="annot"><span class="annottext">Int#
-</span><a href="#local-6989586621682306602"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">#)</span><span>
+</span><a href="#local-6989586621682441265"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-47"></span></pre></body></html>

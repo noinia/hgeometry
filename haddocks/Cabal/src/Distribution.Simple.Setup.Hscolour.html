@@ -1,63 +1,70 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
-</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
-</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
-</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
-</span><span id="line-6"></span><span>
-</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
-</span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Hscolour</span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
-</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
-</span><span id="line-14"></span><span class="hs-comment">--</span><span>
-</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE PatternSynonyms #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ViewPatterns #-}</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Hscolour</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- License     :  BSD3</span><span>
 </span><span id="line-17"></span><span class="hs-comment">--</span><span>
-</span><span id="line-18"></span><span class="hs-comment">-- Definition of the hscolour command-line options.</span><span>
-</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html"><span class="hs-identifier">Distribution.Simple.Setup.Hscolour</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier">HscolourFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#emptyHscolourFlags"><span class="hs-identifier">emptyHscolourFlags</span></a></span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#defaultHscolourFlags"><span class="hs-identifier">defaultHscolourFlags</span></a></span><span>
-</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommand"><span class="hs-identifier">hscolourCommand</span></a></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
-</span><span id="line-33"></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
-</span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Definition of the hscolour command-line options.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html"><span class="hs-identifier">Distribution.Simple.Setup.Hscolour</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier">HscolourFlags</span></a></span><span>
+</span><span id="line-25"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourCommonFlags"><span class="hs-identifier">HscolourCommonFlags</span></a></span><span>
+</span><span id="line-26"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourVerbosity"><span class="hs-identifier">hscolourVerbosity</span></a></span><span>
+</span><span id="line-27"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourDistPref"><span class="hs-identifier">hscolourDistPref</span></a></span><span>
+</span><span id="line-28"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCabalFilePath"><span class="hs-identifier">hscolourCabalFilePath</span></a></span><span>
+</span><span id="line-29"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourWorkingDir"><span class="hs-identifier">hscolourWorkingDir</span></a></span><span>
+</span><span id="line-30"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTargets"><span class="hs-identifier">hscolourTargets</span></a></span><span>
+</span><span id="line-31"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="hs-glyph">..</span><span>
+</span><span id="line-32"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#emptyHscolourFlags"><span class="hs-identifier">emptyHscolourFlags</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#defaultHscolourFlags"><span class="hs-identifier">defaultHscolourFlags</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommand"><span class="hs-identifier">hscolourCommand</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-37"></span><span>
-</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- * HsColour flags</span></span><span>
-</span><span id="line-39"></span><span>
-</span><span id="line-40"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
-</span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span class="hs-keyword">data</span><span> </span><span id="HscolourFlags"><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-var">HscolourFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HscolourFlags"><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-var">HscolourFlags</span></a></span></span><span>
-</span><span id="line-43"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="hscolourCSS"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag FilePath
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html"><span class="hs-identifier">Distribution.Utils.Path</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="annot"><span class="hs-comment">-- * HsColour flags</span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">data</span><span> </span><span id="HscolourFlags"><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-var">HscolourFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HscolourFlags"><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-var">HscolourFlags</span></a></span></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="hscolourCommonFlags"><span class="annot"><span class="annottext">HscolourFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommonFlags"><span class="hs-identifier hs-var hs-var">hscolourCommonFlags</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#CommonSetupFlags"><span class="hs-identifier hs-type">CommonSetupFlags</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourCSS"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag FilePath
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCSS"><span class="hs-identifier hs-var hs-var">hscolourCSS</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourExecutables"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourExecutables"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var hs-var">hscolourExecutables</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-45"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourTestSuites"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourTestSuites"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var hs-var">hscolourTestSuites</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourBenchmarks"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-58"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourBenchmarks"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var hs-var">hscolourBenchmarks</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourForeignLibs"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourForeignLibs"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var hs-var">hscolourForeignLibs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourDistPref"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourDistPref"><span class="hs-identifier hs-var hs-var">hscolourDistPref</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourVerbosity"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourVerbosity"><span class="hs-identifier hs-var hs-var">hscolourVerbosity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
-</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourCabalFilePath"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCabalFilePath"><span class="hs-identifier hs-var hs-var">hscolourCabalFilePath</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-51"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-52"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679468222"><span id="local-6989586621679468238"><span id="local-6989586621679468242"><span class="annot"><span class="annottext">Int -&gt; HscolourFlags -&gt; ShowS
+</span><span id="line-60"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679528839"><span id="local-6989586621679528853"><span id="local-6989586621679528857"><span class="annot"><span class="annottext">Int -&gt; HscolourFlags -&gt; ShowS
 [HscolourFlags] -&gt; ShowS
 HscolourFlags -&gt; FilePath
 (Int -&gt; HscolourFlags -&gt; ShowS)
@@ -72,7 +79,7 @@ $cshow :: HscolourFlags -&gt; FilePath
 show :: HscolourFlags -&gt; FilePath
 $cshowList :: [HscolourFlags] -&gt; ShowS
 showList :: [HscolourFlags] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679468252"><span id="local-6989586621679468254"><span class="annot"><span class="annottext">(forall x. HscolourFlags -&gt; Rep HscolourFlags x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679528866"><span id="local-6989586621679528868"><span class="annot"><span class="annottext">(forall x. HscolourFlags -&gt; Rep HscolourFlags x)
 -&gt; (forall x. Rep HscolourFlags x -&gt; HscolourFlags)
 -&gt; Generic HscolourFlags
 forall x. Rep HscolourFlags x -&gt; HscolourFlags
@@ -84,151 +91,169 @@ from :: forall x. HscolourFlags -&gt; Rep HscolourFlags x
 $cto :: forall x. Rep HscolourFlags x -&gt; HscolourFlags
 to :: forall x. Rep HscolourFlags x -&gt; HscolourFlags
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
-</span><span id="line-53"></span><span>
-</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468260"><span id="local-6989586621679468267"><span id="local-6989586621679468273"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span></span></span><span>
-</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468342"><span id="local-6989586621679468349"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span></span><span>
-</span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#emptyHscolourFlags"><span class="hs-identifier hs-type">emptyHscolourFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
-</span><span id="line-58"></span><span id="emptyHscolourFlags"><span class="annot"><span class="annottext">emptyHscolourFlags :: HscolourFlags
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourCommonFlags"><span class="hs-identifier hs-type">HscolourCommonFlags</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dist"><span class="hs-identifier hs-type">Dist</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#CWD"><span class="hs-identifier hs-type">CWD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#File"><span class="hs-identifier hs-type">File</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">pattern</span><span> </span><span id="HscolourCommonFlags"><span id="%24mHscolourCommonFlags"><span class="annot"><span class="annottext">$mHscolourCommonFlags :: forall {r}.
+HscolourFlags
+-&gt; (Flag Verbosity
+    -&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+    -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+    -&gt; Flag (SymbolicPath Pkg 'File)
+    -&gt; [FilePath]
+    -&gt; r)
+-&gt; ((# #) -&gt; r)
+-&gt; r
+</span><a href="Distribution.Simple.Setup.Hscolour.html#HscolourCommonFlags"><span class="hs-identifier hs-var hs-var">HscolourCommonFlags</span></a></span></span></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="hscolourVerbosity"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourVerbosity"><span class="hs-identifier hs-var hs-var hs-var">hscolourVerbosity</span></a></span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourDistPref"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourDistPref"><span class="hs-identifier hs-var hs-var hs-var">hscolourDistPref</span></a></span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourWorkingDir"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourWorkingDir"><span class="hs-identifier hs-var hs-var hs-var">hscolourWorkingDir</span></a></span></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourCabalFilePath"><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag (SymbolicPath Pkg 'File)
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCabalFilePath"><span class="hs-identifier hs-var hs-var hs-var">hscolourCabalFilePath</span></a></span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="hscolourTargets"><span class="annot"><span class="annottext">HscolourFlags -&gt; [FilePath]
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTargets"><span class="hs-identifier hs-var hs-var hs-var">hscolourTargets</span></a></span></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommonFlags"><span class="hs-identifier hs-var">hscolourCommonFlags</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-78"></span><span>      </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#CommonSetupFlags"><span class="hs-identifier hs-type">CommonSetupFlags</span></a></span><span>
+</span><span id="line-79"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupVerbosity"><span class="hs-identifier hs-var">setupVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528874"><span class="annot"><a href="#local-6989586621679528874"><span class="hs-identifier hs-var">hscolourVerbosity</span></a></span></span><span>
+</span><span id="line-80"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupDistPref"><span class="hs-identifier hs-var">setupDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528875"><span class="annot"><a href="#local-6989586621679528875"><span class="hs-identifier hs-var">hscolourDistPref</span></a></span></span><span>
+</span><span id="line-81"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupWorkingDir"><span class="hs-identifier hs-var">setupWorkingDir</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528876"><span class="annot"><a href="#local-6989586621679528876"><span class="hs-identifier hs-var">hscolourWorkingDir</span></a></span></span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupCabalFilePath"><span class="hs-identifier hs-var">setupCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528877"><span class="annot"><a href="#local-6989586621679528877"><span class="hs-identifier hs-var">hscolourCabalFilePath</span></a></span></span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupTargets"><span class="hs-identifier hs-var">setupTargets</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528878"><span class="annot"><a href="#local-6989586621679528878"><span class="hs-identifier hs-var">hscolourTargets</span></a></span></span><span>
+</span><span id="line-84"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679528886"><span id="local-6989586621679528893"><span id="local-6989586621679528899"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span></span></span><span>
+</span><span id="line-88"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679528958"><span id="local-6989586621679528965"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#emptyHscolourFlags"><span class="hs-identifier hs-type">emptyHscolourFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
+</span><span id="line-91"></span><span id="emptyHscolourFlags"><span class="annot"><span class="annottext">emptyHscolourFlags :: HscolourFlags
 </span><a href="Distribution.Simple.Setup.Hscolour.html#emptyHscolourFlags"><span class="hs-identifier hs-var hs-var">emptyHscolourFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#defaultHscolourFlags"><span class="hs-identifier hs-type">defaultHscolourFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
-</span><span id="line-61"></span><span id="defaultHscolourFlags"><span class="annot"><span class="annottext">defaultHscolourFlags :: HscolourFlags
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#defaultHscolourFlags"><span class="hs-identifier hs-type">defaultHscolourFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
+</span><span id="line-94"></span><span id="defaultHscolourFlags"><span class="annot"><span class="annottext">defaultHscolourFlags :: HscolourFlags
 </span><a href="Distribution.Simple.Setup.Hscolour.html#defaultHscolourFlags"><span class="hs-identifier hs-var hs-var">defaultHscolourFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-62"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
-</span><span id="line-63"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">hscolourCSS :: Flag FilePath
+</span><span id="line-95"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">hscolourCommonFlags :: CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommonFlags"><span class="hs-identifier hs-var">hscolourCommonFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Common.html#defaultCommonSetupFlags"><span class="hs-identifier hs-var">defaultCommonSetupFlags</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourCSS :: Flag FilePath
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCSS"><span class="hs-identifier hs-var">hscolourCSS</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
 forall a. Flag a
 </span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
-</span><span id="line-64"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourExecutables :: Flag Bool
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourExecutables :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var">hscolourExecutables</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-65"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourTestSuites :: Flag Bool
+</span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourTestSuites :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var">hscolourTestSuites</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-66"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourBenchmarks :: Flag Bool
+</span><span id="line-100"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourBenchmarks :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var">hscolourBenchmarks</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-67"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourDistPref :: Flag FilePath
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourDistPref"><span class="hs-identifier hs-var">hscolourDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
-forall a. Flag a
-</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
-</span><span id="line-68"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourForeignLibs :: Flag Bool
+</span><span id="line-101"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourForeignLibs :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var">hscolourForeignLibs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourVerbosity :: Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourVerbosity"><span class="hs-identifier hs-var">hscolourVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; Flag Verbosity
-forall a. a -&gt; Flag a
-</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="Distribution.Verbosity.html#normal"><span class="hs-identifier hs-var">normal</span></a></span><span>
-</span><span id="line-70"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">hscolourCabalFilePath :: Flag FilePath
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCabalFilePath"><span class="hs-identifier hs-var">hscolourCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
-forall a. Monoid a =&gt; a
-</span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-71"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468420"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>  </span><span id="local-6989586621679468454"><span class="annot"><span class="annottext">mempty :: HscolourFlags
+</span><span id="line-102"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679529029"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>  </span><span id="local-6989586621679529063"><span class="annot"><span class="annottext">mempty :: HscolourFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
 forall a. (Generic a, GMonoid (Rep a)) =&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
-</span><span id="line-75"></span><span>  </span><span id="local-6989586621679468457"><span class="annot"><span class="annottext">mappend :: HscolourFlags -&gt; HscolourFlags -&gt; HscolourFlags
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621679529066"><span class="annot"><span class="annottext">mappend :: HscolourFlags -&gt; HscolourFlags -&gt; HscolourFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; HscolourFlags -&gt; HscolourFlags
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
-</span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468460"><span id="local-6989586621679468463"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-78"></span><span>  </span><span id="local-6989586621679468496"><span class="annot"><span class="annottext">&lt;&gt; :: HscolourFlags -&gt; HscolourFlags -&gt; HscolourFlags
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679529069"><span id="local-6989586621679529072"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-109"></span><span>  </span><span id="local-6989586621679529101"><span class="annot"><span class="annottext">&lt;&gt; :: HscolourFlags -&gt; HscolourFlags -&gt; HscolourFlags
 </span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; HscolourFlags -&gt; HscolourFlags
 forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
-</span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommand"><span class="hs-identifier hs-type">hscolourCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
-</span><span id="line-81"></span><span id="hscolourCommand"><span class="annot"><span class="annottext">hscolourCommand :: CommandUI HscolourFlags
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommand"><span class="hs-identifier hs-type">hscolourCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#HscolourFlags"><span class="hs-identifier hs-type">HscolourFlags</span></a></span><span>
+</span><span id="line-112"></span><span id="hscolourCommand"><span class="annot"><span class="annottext">hscolourCommand :: CommandUI HscolourFlags
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommand"><span class="hs-identifier hs-var hs-var">hscolourCommand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-82"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
-</span><span id="line-83"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: FilePath
+</span><span id="line-113"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: FilePath
 </span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;hscolour&quot;</span></span><span>
-</span><span id="line-84"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: FilePath
+</span><span id="line-115"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: FilePath
 </span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-85"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-116"></span><span>        </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Generate HsColour colourised code, in HTML format.&quot;</span></span><span>
-</span><span id="line-86"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><span id="line-117"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
 </span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Requires the hscolour program.\n&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-87"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><span id="line-118"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
 </span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-88"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-119"></span><span>        </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Deprecated in favour of 'cabal haddock --hyperlink-source'.&quot;</span></span><span>
-</span><span id="line-89"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
-</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679468504"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679468504"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-90"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-120"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679529109"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679529109"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-121"></span><span>        </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679468504"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><a href="#local-6989586621679529109"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot; hscolour [FLAGS]\n&quot;</span></span><span>
-</span><span id="line-91"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: HscolourFlags
+</span><span id="line-122"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: HscolourFlags
 </span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
 </span><a href="Distribution.Simple.Setup.Hscolour.html#defaultHscolourFlags"><span class="hs-identifier hs-var">defaultHscolourFlags</span></a></span><span>
-</span><span id="line-92"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField HscolourFlags]
-</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679468507"><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679468507"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-93"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(HscolourFlags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; HscolourFlags -&gt; HscolourFlags)
--&gt; OptionField HscolourFlags
-forall flags.
-(flags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span>
-</span><span id="line-94"></span><span>            </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourVerbosity"><span class="hs-identifier hs-var">hscolourVerbosity</span></a></span><span>
-</span><span id="line-95"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679468509"><span class="annot"><span class="annottext">Flag Verbosity
-</span><a href="#local-6989586621679468509"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679468510"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468510"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468510"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourVerbosity"><span class="hs-identifier hs-var">hscolourVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468509"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-96"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(HscolourFlags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; HscolourFlags -&gt; HscolourFlags)
+</span><span id="line-123"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField HscolourFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679529112"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679529112"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-124"></span><span>        </span><span class="annot"><span class="annottext">(HscolourFlags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; HscolourFlags -&gt; HscolourFlags)
 -&gt; ShowOrParseArgs
--&gt; OptionField HscolourFlags
+-&gt; [OptionField HscolourFlags]
+-&gt; [OptionField HscolourFlags]
 forall flags.
-(flags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; flags -&gt; flags)
+(flags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; flags -&gt; flags)
 -&gt; ShowOrParseArgs
--&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
-</span><span id="line-97"></span><span>            </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourDistPref"><span class="hs-identifier hs-var">hscolourDistPref</span></a></span><span>
-</span><span id="line-98"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679468512"><span class="annot"><span class="annottext">Flag FilePath
-</span><a href="#local-6989586621679468512"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679468513"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468513"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468513"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourDistPref"><span class="hs-identifier hs-var">hscolourDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468512"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-99"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679468507"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
-</span><span id="line-100"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; LFlags
+-&gt; [OptionField flags]
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#withCommonSetupOptions"><span class="hs-identifier hs-var">withCommonSetupOptions</span></a></span><span>
+</span><span id="line-125"></span><span>          </span><span class="annot"><span class="annottext">HscolourFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommonFlags"><span class="hs-identifier hs-var">hscolourCommonFlags</span></a></span><span>
+</span><span id="line-126"></span><span>          </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679529114"><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="#local-6989586621679529114"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679529115"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529115"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529115"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCommonFlags"><span class="hs-identifier hs-var">hscolourCommonFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529114"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>          </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679529112"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-128"></span><span>          </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; (HscolourFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
@@ -239,33 +264,33 @@ forall flags.
 -&gt; OptionField HscolourFlags
 forall get set a.
 FilePath
--&gt; LFlags
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-101"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-129"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-102"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-130"></span><span>              </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;executables&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-103"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-131"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Run hscolour for Executables targets&quot;</span></span><span>
-</span><span id="line-104"></span><span>            </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-132"></span><span>              </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var">hscolourExecutables</span></a></span><span>
-</span><span id="line-105"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679468515"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679468515"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679468516"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468516"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468516"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var">hscolourExecutables</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468515"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-106"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-133"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679529117"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679529117"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679529118"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529118"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529118"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var">hscolourExecutables</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529117"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>              </span><span class="annot"><span class="annottext">MkOptDescr
   (HscolourFlags -&gt; Flag Bool)
   (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
   HscolourFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-107"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; LFlags
+</span><span id="line-135"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; (HscolourFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
@@ -276,33 +301,33 @@ forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 -&gt; OptionField HscolourFlags
 forall get set a.
 FilePath
--&gt; LFlags
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-108"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-136"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-109"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-137"></span><span>              </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;tests&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-110"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-138"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Run hscolour for Test Suite targets&quot;</span></span><span>
-</span><span id="line-111"></span><span>            </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-139"></span><span>              </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var">hscolourTestSuites</span></a></span><span>
-</span><span id="line-112"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679468518"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679468518"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679468519"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468519"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468519"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var">hscolourTestSuites</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468518"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-113"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-140"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679529120"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679529120"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679529121"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529121"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529121"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var">hscolourTestSuites</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529120"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>              </span><span class="annot"><span class="annottext">MkOptDescr
   (HscolourFlags -&gt; Flag Bool)
   (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
   HscolourFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-114"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; LFlags
+</span><span id="line-142"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; (HscolourFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
@@ -313,33 +338,33 @@ forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 -&gt; OptionField HscolourFlags
 forall get set a.
 FilePath
--&gt; LFlags
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-115"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-143"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-116"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-144"></span><span>              </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;benchmarks&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-117"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-145"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Run hscolour for Benchmark targets&quot;</span></span><span>
-</span><span id="line-118"></span><span>            </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-146"></span><span>              </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var">hscolourBenchmarks</span></a></span><span>
-</span><span id="line-119"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679468520"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679468520"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679468521"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468521"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468521"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var">hscolourBenchmarks</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468520"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-120"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-147"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679529122"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679529122"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679529123"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529123"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529123"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var">hscolourBenchmarks</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529122"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>              </span><span class="annot"><span class="annottext">MkOptDescr
   (HscolourFlags -&gt; Flag Bool)
   (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
   HscolourFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-121"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; LFlags
+</span><span id="line-149"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; (HscolourFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
@@ -350,33 +375,33 @@ forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 -&gt; OptionField HscolourFlags
 forall get set a.
 FilePath
--&gt; LFlags
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-122"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-150"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-123"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-151"></span><span>              </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;foreign-libraries&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-124"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-152"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Run hscolour for Foreign Library targets&quot;</span></span><span>
-</span><span id="line-125"></span><span>            </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-153"></span><span>              </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var">hscolourForeignLibs</span></a></span><span>
-</span><span id="line-126"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679468522"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679468522"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679468523"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468523"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468523"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var">hscolourForeignLibs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468522"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-127"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-154"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679529124"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679529124"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679529125"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529125"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529125"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var">hscolourForeignLibs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529124"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>              </span><span class="annot"><span class="annottext">MkOptDescr
   (HscolourFlags -&gt; Flag Bool)
   (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
   HscolourFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-128"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; LFlags
+</span><span id="line-156"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; (HscolourFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
@@ -387,56 +412,56 @@ forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 -&gt; OptionField HscolourFlags
 forall get set a.
 FilePath
--&gt; LFlags
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-129"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-157"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-130"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-158"></span><span>              </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;all&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-131"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-159"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Run hscolour for all targets&quot;</span></span><span>
-</span><span id="line-132"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679468524"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468524"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-133"></span><span>                </span><span class="annot"><span class="annottext">[Flag Bool] -&gt; Flag Bool
+</span><span id="line-160"></span><span>              </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679529126"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529126"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-161"></span><span>                  </span><span class="annot"><span class="annottext">[Flag Bool] -&gt; Flag Bool
 </span><a href="Distribution.Simple.Flag.html#allFlags"><span class="hs-identifier hs-var">allFlags</span></a></span><span>
-</span><span id="line-134"></span><span>                  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><span id="line-162"></span><span>                    </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var">hscolourExecutables</span></a></span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468524"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-135"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><a href="#local-6989586621679529126"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-163"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var">hscolourTestSuites</span></a></span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468524"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-136"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><a href="#local-6989586621679529126"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-164"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var">hscolourBenchmarks</span></a></span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468524"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-137"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
+</span><a href="#local-6989586621679529126"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-165"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var">hscolourForeignLibs</span></a></span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468524"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-138"></span><span>                  </span><span class="hs-special">]</span><span>
-</span><span id="line-139"></span><span>            </span><span class="hs-special">)</span><span>
-</span><span id="line-140"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679468526"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679468526"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679468527"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468527"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-141"></span><span>                </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468527"><span class="hs-identifier hs-var">flags</span></a></span><span>
-</span><span id="line-142"></span><span>                  </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var">hscolourExecutables</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468526"><span class="hs-identifier hs-type">v</span></a></span><span>
-</span><span id="line-143"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var">hscolourTestSuites</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468526"><span class="hs-identifier hs-type">v</span></a></span><span>
-</span><span id="line-144"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var">hscolourBenchmarks</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468526"><span class="hs-identifier hs-type">v</span></a></span><span>
-</span><span id="line-145"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var">hscolourForeignLibs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468526"><span class="hs-identifier hs-type">v</span></a></span><span>
-</span><span id="line-146"></span><span>                  </span><span class="hs-special">}</span><span>
-</span><span id="line-147"></span><span>            </span><span class="hs-special">)</span><span>
-</span><span id="line-148"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><a href="#local-6989586621679529126"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-166"></span><span>                    </span><span class="hs-special">]</span><span>
+</span><span id="line-167"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-168"></span><span>              </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679529128"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679529128"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679529129"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529129"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-169"></span><span>                  </span><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529129"><span class="hs-identifier hs-var">flags</span></a></span><span>
+</span><span id="line-170"></span><span>                    </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourExecutables"><span class="hs-identifier hs-var">hscolourExecutables</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529128"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-171"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourTestSuites"><span class="hs-identifier hs-var">hscolourTestSuites</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529128"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-172"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourBenchmarks"><span class="hs-identifier hs-var">hscolourBenchmarks</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529128"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-173"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourForeignLibs"><span class="hs-identifier hs-var">hscolourForeignLibs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529128"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-174"></span><span>                    </span><span class="hs-special">}</span><span>
+</span><span id="line-175"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-176"></span><span>              </span><span class="annot"><span class="annottext">MkOptDescr
   (HscolourFlags -&gt; Flag Bool)
   (Flag Bool -&gt; HscolourFlags -&gt; HscolourFlags)
   HscolourFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-149"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; LFlags
+</span><span id="line-177"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; (HscolourFlags -&gt; Flag FilePath)
 -&gt; (Flag FilePath -&gt; HscolourFlags -&gt; HscolourFlags)
@@ -447,26 +472,26 @@ forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 -&gt; OptionField HscolourFlags
 forall get set a.
 FilePath
--&gt; LFlags
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-150"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-178"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-151"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-179"></span><span>              </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;css&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-152"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-180"></span><span>              </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Use a cascading style sheet&quot;</span></span><span>
-</span><span id="line-153"></span><span>            </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag FilePath
+</span><span id="line-181"></span><span>              </span><span class="annot"><span class="annottext">HscolourFlags -&gt; Flag FilePath
 </span><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCSS"><span class="hs-identifier hs-var">hscolourCSS</span></a></span><span>
-</span><span id="line-154"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679468528"><span class="annot"><span class="annottext">Flag FilePath
-</span><a href="#local-6989586621679468528"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679468529"><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468529"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
-</span><a href="#local-6989586621679468529"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCSS"><span class="hs-identifier hs-var">hscolourCSS</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679468528"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-155"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-182"></span><span>              </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679529130"><span class="annot"><span class="annottext">Flag FilePath
+</span><a href="#local-6989586621679529130"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679529131"><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529131"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscolourFlags
+</span><a href="#local-6989586621679529131"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Hscolour.html#hscolourCSS"><span class="hs-identifier hs-var">hscolourCSS</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679529130"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath
 -&gt; MkOptDescr
      (HscolourFlags -&gt; Flag FilePath)
      (Flag FilePath -&gt; HscolourFlags -&gt; HscolourFlags)
@@ -474,13 +499,13 @@ FilePath
 forall b.
 FilePath
 -&gt; FilePath
--&gt; LFlags
+-&gt; [FilePath]
 -&gt; FilePath
 -&gt; (b -&gt; Flag FilePath)
 -&gt; (Flag FilePath -&gt; b -&gt; b)
 -&gt; OptDescr b
 </span><a href="Distribution.Simple.Setup.Common.html#reqArgFlag"><span class="hs-identifier hs-var">reqArgFlag</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;PATH&quot;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-156"></span><span>        </span><span class="hs-special">]</span><span>
-</span><span id="line-157"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-158"></span></pre></body></html>
+</span><span id="line-184"></span><span>          </span><span class="hs-special">]</span><span>
+</span><span id="line-185"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-186"></span></pre></body></html>

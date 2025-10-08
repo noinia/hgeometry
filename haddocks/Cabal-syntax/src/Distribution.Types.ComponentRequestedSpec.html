@@ -12,7 +12,7 @@
 </span><span id="line-12"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-13"></span><span>
 </span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.Component.html"><span class="hs-identifier">Distribution.Types.Component</span></a></span><span> </span><span class="hs-comment">-- TODO: maybe remove me?</span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html"><span class="hs-identifier">Distribution.Types.ComponentName</span></a></span><span>
@@ -69,7 +69,7 @@
 </span><a href="Distribution.Types.ComponentRequestedSpec.html#benchmarksRequested"><span class="hs-identifier hs-var hs-var">benchmarksRequested</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-68"></span><span>      </span><span class="hs-special">}</span><span>
 </span><span id="line-69"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="OneComponentRequestedSpec"><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#OneComponentRequestedSpec"><span class="hs-identifier hs-var">OneComponentRequestedSpec</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html#ComponentName"><span class="hs-identifier hs-type">ComponentName</span></a></span><span>
-</span><span id="line-70"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679521422"><span id="local-6989586621679521424"><span class="annot"><span class="annottext">(forall x. ComponentRequestedSpec -&gt; Rep ComponentRequestedSpec x)
+</span><span id="line-70"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679542633"><span id="local-6989586621679542635"><span class="annot"><span class="annottext">(forall x. ComponentRequestedSpec -&gt; Rep ComponentRequestedSpec x)
 -&gt; (forall x.
     Rep ComponentRequestedSpec x -&gt; ComponentRequestedSpec)
 -&gt; Generic ComponentRequestedSpec
@@ -81,7 +81,7 @@ $cfrom :: forall x. ComponentRequestedSpec -&gt; Rep ComponentRequestedSpec x
 from :: forall x. ComponentRequestedSpec -&gt; Rep ComponentRequestedSpec x
 $cto :: forall x. Rep ComponentRequestedSpec x -&gt; ComponentRequestedSpec
 to :: forall x. Rep ComponentRequestedSpec x -&gt; ComponentRequestedSpec
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679521430"><span id="local-6989586621679521434"><span id="local-6989586621679521437"><span id="local-6989586621679521455"><span class="annot"><span class="annottext">ReadPrec [ComponentRequestedSpec]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679542641"><span id="local-6989586621679542645"><span id="local-6989586621679542648"><span id="local-6989586621679542666"><span class="annot"><span class="annottext">ReadPrec [ComponentRequestedSpec]
 ReadPrec ComponentRequestedSpec
 Int -&gt; ReadS ComponentRequestedSpec
 ReadS [ComponentRequestedSpec]
@@ -101,7 +101,7 @@ $creadPrec :: ReadPrec ComponentRequestedSpec
 readPrec :: ReadPrec ComponentRequestedSpec
 $creadListPrec :: ReadPrec [ComponentRequestedSpec]
 readListPrec :: ReadPrec [ComponentRequestedSpec]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679521462"><span id="local-6989586621679521472"><span id="local-6989586621679521476"><span class="annot"><span class="annottext">Int -&gt; ComponentRequestedSpec -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679542673"><span id="local-6989586621679542683"><span id="local-6989586621679542687"><span class="annot"><span class="annottext">Int -&gt; ComponentRequestedSpec -&gt; ShowS
 [ComponentRequestedSpec] -&gt; ShowS
 ComponentRequestedSpec -&gt; String
 (Int -&gt; ComponentRequestedSpec -&gt; ShowS)
@@ -116,7 +116,7 @@ $cshow :: ComponentRequestedSpec -&gt; String
 show :: ComponentRequestedSpec -&gt; String
 $cshowList :: [ComponentRequestedSpec] -&gt; ShowS
 showList :: [ComponentRequestedSpec] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679521481"><span id="local-6989586621679521490"><span class="annot"><span class="annottext">ComponentRequestedSpec -&gt; ComponentRequestedSpec -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679542692"><span id="local-6989586621679542701"><span class="annot"><span class="annottext">ComponentRequestedSpec -&gt; ComponentRequestedSpec -&gt; Bool
 (ComponentRequestedSpec -&gt; ComponentRequestedSpec -&gt; Bool)
 -&gt; (ComponentRequestedSpec -&gt; ComponentRequestedSpec -&gt; Bool)
 -&gt; Eq ComponentRequestedSpec
@@ -127,8 +127,8 @@ $c/= :: ComponentRequestedSpec -&gt; ComponentRequestedSpec -&gt; Bool
 /= :: ComponentRequestedSpec -&gt; ComponentRequestedSpec -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679521495"><span id="local-6989586621679521502"><span id="local-6989586621679521508"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#ComponentRequestedSpec"><span class="hs-identifier hs-type">ComponentRequestedSpec</span></a></span></span></span></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679521553"><span id="local-6989586621679521560"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#ComponentRequestedSpec"><span class="hs-identifier hs-type">ComponentRequestedSpec</span></a></span></span></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679542706"><span id="local-6989586621679542713"><span id="local-6989586621679542719"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#ComponentRequestedSpec"><span class="hs-identifier hs-type">ComponentRequestedSpec</span></a></span></span></span></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679542764"><span id="local-6989586621679542771"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#ComponentRequestedSpec"><span class="hs-identifier hs-type">ComponentRequestedSpec</span></a></span></span></span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="hs-comment">-- | The default set of enabled components.  Historically tests and</span><span>
 </span><span id="line-76"></span><span class="hs-comment">-- benchmarks are NOT enabled by default.</span><span>
@@ -147,8 +147,8 @@ $c/= :: ComponentRequestedSpec -&gt; ComponentRequestedSpec -&gt; Bool
 </span><span id="line-85"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-86"></span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#componentEnabled"><span class="hs-identifier hs-type">componentEnabled</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#ComponentRequestedSpec"><span class="hs-identifier hs-type">ComponentRequestedSpec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Component.html#Component"><span class="hs-identifier hs-type">Component</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-87"></span><span id="componentEnabled"><span class="annot"><span class="annottext">componentEnabled :: ComponentRequestedSpec -&gt; Component -&gt; Bool
-</span><a href="Distribution.Types.ComponentRequestedSpec.html#componentEnabled"><span class="hs-identifier hs-var hs-var">componentEnabled</span></a></span></span><span> </span><span id="local-6989586621679521603"><span class="annot"><span class="annottext">ComponentRequestedSpec
-</span><a href="#local-6989586621679521603"><span class="hs-identifier hs-var">enabled</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ComponentDisabledReason -&gt; Bool
+</span><a href="Distribution.Types.ComponentRequestedSpec.html#componentEnabled"><span class="hs-identifier hs-var hs-var">componentEnabled</span></a></span></span><span> </span><span id="local-6989586621679542814"><span class="annot"><span class="annottext">ComponentRequestedSpec
+</span><a href="#local-6989586621679542814"><span class="hs-identifier hs-var">enabled</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ComponentDisabledReason -&gt; Bool
 forall a. Maybe a -&gt; Bool
 </span><span class="hs-identifier hs-var">isNothing</span></span><span> </span><span class="annot"><span class="annottext">(Maybe ComponentDisabledReason -&gt; Bool)
 -&gt; (Component -&gt; Maybe ComponentDisabledReason)
@@ -158,7 +158,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ComponentRequestedSpec
 -&gt; Component -&gt; Maybe ComponentDisabledReason
 </span><a href="Distribution.Types.ComponentRequestedSpec.html#componentDisabledReason"><span class="hs-identifier hs-var">componentDisabledReason</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentRequestedSpec
-</span><a href="#local-6989586621679521603"><span class="hs-identifier hs-var">enabled</span></a></span><span>
+</span><a href="#local-6989586621679542814"><span class="hs-identifier hs-var">enabled</span></a></span><span>
 </span><span id="line-88"></span><span>
 </span><span id="line-89"></span><span class="hs-comment">-- | Is this component name enabled?  See also this note in</span><span>
 </span><span id="line-90"></span><span class="hs-comment">-- &quot;Distribution.Types.ComponentRequestedSpec#buildable_vs_enabled_components&quot;.</span><span>
@@ -166,8 +166,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-92"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-93"></span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#componentNameRequested"><span class="hs-identifier hs-type">componentNameRequested</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#ComponentRequestedSpec"><span class="hs-identifier hs-type">ComponentRequestedSpec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html#ComponentName"><span class="hs-identifier hs-type">ComponentName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-94"></span><span id="componentNameRequested"><span class="annot"><span class="annottext">componentNameRequested :: ComponentRequestedSpec -&gt; ComponentName -&gt; Bool
-</span><a href="Distribution.Types.ComponentRequestedSpec.html#componentNameRequested"><span class="hs-identifier hs-var hs-var">componentNameRequested</span></a></span></span><span> </span><span id="local-6989586621679521606"><span class="annot"><span class="annottext">ComponentRequestedSpec
-</span><a href="#local-6989586621679521606"><span class="hs-identifier hs-var">enabled</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ComponentDisabledReason -&gt; Bool
+</span><a href="Distribution.Types.ComponentRequestedSpec.html#componentNameRequested"><span class="hs-identifier hs-var hs-var">componentNameRequested</span></a></span></span><span> </span><span id="local-6989586621679542817"><span class="annot"><span class="annottext">ComponentRequestedSpec
+</span><a href="#local-6989586621679542817"><span class="hs-identifier hs-var">enabled</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ComponentDisabledReason -&gt; Bool
 forall a. Maybe a -&gt; Bool
 </span><span class="hs-identifier hs-var">isNothing</span></span><span> </span><span class="annot"><span class="annottext">(Maybe ComponentDisabledReason -&gt; Bool)
 -&gt; (ComponentName -&gt; Maybe ComponentDisabledReason)
@@ -177,7 +177,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ComponentRequestedSpec
 -&gt; ComponentName -&gt; Maybe ComponentDisabledReason
 </span><a href="Distribution.Types.ComponentRequestedSpec.html#componentNameNotRequestedReason"><span class="hs-identifier hs-var">componentNameNotRequestedReason</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentRequestedSpec
-</span><a href="#local-6989586621679521606"><span class="hs-identifier hs-var">enabled</span></a></span><span>
+</span><a href="#local-6989586621679542817"><span class="hs-identifier hs-var">enabled</span></a></span><span>
 </span><span id="line-95"></span><span>
 </span><span id="line-96"></span><span class="hs-comment">-- | Is this component disabled, and if so, why?</span><span>
 </span><span id="line-97"></span><span class="hs-comment">--</span><span>
@@ -188,13 +188,13 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-102"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#ComponentDisabledReason"><span class="hs-identifier hs-type">ComponentDisabledReason</span></a></span><span>
 </span><span id="line-103"></span><span id="componentDisabledReason"><span class="annot"><span class="annottext">componentDisabledReason :: ComponentRequestedSpec
 -&gt; Component -&gt; Maybe ComponentDisabledReason
-</span><a href="Distribution.Types.ComponentRequestedSpec.html#componentDisabledReason"><span class="hs-identifier hs-var hs-var">componentDisabledReason</span></a></span></span><span> </span><span id="local-6989586621679521608"><span class="annot"><span class="annottext">ComponentRequestedSpec
-</span><a href="#local-6989586621679521608"><span class="hs-identifier hs-var">enabled</span></a></span></span><span> </span><span id="local-6989586621679521609"><span class="annot"><span class="annottext">Component
-</span><a href="#local-6989586621679521609"><span class="hs-identifier hs-var">comp</span></a></span></span><span>
+</span><a href="Distribution.Types.ComponentRequestedSpec.html#componentDisabledReason"><span class="hs-identifier hs-var hs-var">componentDisabledReason</span></a></span></span><span> </span><span id="local-6989586621679542819"><span class="annot"><span class="annottext">ComponentRequestedSpec
+</span><a href="#local-6989586621679542819"><span class="hs-identifier hs-var">enabled</span></a></span></span><span> </span><span id="local-6989586621679542820"><span class="annot"><span class="annottext">Component
+</span><a href="#local-6989586621679542820"><span class="hs-identifier hs-var">comp</span></a></span></span><span>
 </span><span id="line-104"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Component -&gt; Bool
 </span><a href="Distribution.Types.Component.html#componentBuildable"><span class="hs-identifier hs-var">componentBuildable</span></a></span><span> </span><span class="annot"><span class="annottext">Component
-</span><a href="#local-6989586621679521609"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ComponentDisabledReason -&gt; Maybe ComponentDisabledReason
+</span><a href="#local-6989586621679542820"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ComponentDisabledReason -&gt; Maybe ComponentDisabledReason
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">ComponentDisabledReason
 </span><a href="Distribution.Types.ComponentRequestedSpec.html#DisabledComponent"><span class="hs-identifier hs-var">DisabledComponent</span></a></span><span>
@@ -202,9 +202,9 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ComponentRequestedSpec
 -&gt; ComponentName -&gt; Maybe ComponentDisabledReason
 </span><a href="Distribution.Types.ComponentRequestedSpec.html#componentNameNotRequestedReason"><span class="hs-identifier hs-var">componentNameNotRequestedReason</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentRequestedSpec
-</span><a href="#local-6989586621679521608"><span class="hs-identifier hs-var">enabled</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Component -&gt; ComponentName
+</span><a href="#local-6989586621679542819"><span class="hs-identifier hs-var">enabled</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Component -&gt; ComponentName
 </span><a href="Distribution.Types.Component.html#componentName"><span class="hs-identifier hs-var">componentName</span></a></span><span> </span><span class="annot"><span class="annottext">Component
-</span><a href="#local-6989586621679521609"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679542820"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-106"></span><span>
 </span><span id="line-107"></span><span class="hs-comment">-- | Is this component name disabled, and if so, why?</span><span>
 </span><span id="line-108"></span><span class="hs-comment">--</span><span>
@@ -239,14 +239,14 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ComponentDisabledReason
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-123"></span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#componentNameNotRequestedReason"><span class="hs-identifier hs-var">componentNameNotRequestedReason</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#OneComponentRequestedSpec"><span class="hs-identifier hs-type">OneComponentRequestedSpec</span></a></span><span> </span><span id="local-6989586621679521617"><span class="annot"><span class="annottext">ComponentName
-</span><a href="#local-6989586621679521617"><span class="hs-identifier hs-var">cname</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679521618"><span class="annot"><span class="annottext">ComponentName
-</span><a href="#local-6989586621679521618"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><span id="line-123"></span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#componentNameNotRequestedReason"><span class="hs-identifier hs-var">componentNameNotRequestedReason</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.ComponentRequestedSpec.html#OneComponentRequestedSpec"><span class="hs-identifier hs-type">OneComponentRequestedSpec</span></a></span><span> </span><span id="local-6989586621679542828"><span class="annot"><span class="annottext">ComponentName
+</span><a href="#local-6989586621679542828"><span class="hs-identifier hs-var">cname</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679542829"><span class="annot"><span class="annottext">ComponentName
+</span><a href="#local-6989586621679542829"><span class="hs-identifier hs-var">c</span></a></span></span><span>
 </span><span id="line-124"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ComponentName
-</span><a href="#local-6989586621679521618"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentName -&gt; ComponentName -&gt; Bool
+</span><a href="#local-6989586621679542829"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentName -&gt; ComponentName -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">ComponentName
-</span><a href="#local-6989586621679521617"><span class="hs-identifier hs-var">cname</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ComponentDisabledReason
+</span><a href="#local-6989586621679542828"><span class="hs-identifier hs-var">cname</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ComponentDisabledReason
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-125"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -256,7 +256,7 @@ forall a. a -&gt; Maybe a
 </span><a href="Distribution.Types.ComponentRequestedSpec.html#DisabledAllButOne"><span class="hs-identifier hs-var">DisabledAllButOne</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ComponentName -&gt; String
 forall a. Pretty a =&gt; a -&gt; String
 </span><a href="Distribution.Pretty.html#prettyShow"><span class="hs-identifier hs-var">prettyShow</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentName
-</span><a href="#local-6989586621679521617"><span class="hs-identifier hs-var">cname</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679542828"><span class="hs-identifier hs-var">cname</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-126"></span><span>
 </span><span id="line-127"></span><span class="hs-comment">-- | A reason explaining why a component is disabled.</span><span>
 </span><span id="line-128"></span><span class="hs-comment">--</span><span>

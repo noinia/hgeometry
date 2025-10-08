@@ -10,7 +10,7 @@
 --   
 --   The package is not supported under Windows.
 @package unix
-@version 2.8.5.1
+@version 2.8.6.0
 
 
 -- | Internal stuff: support for ByteString FilePaths
@@ -53,81 +53,6 @@ throwErrnoPathIfMinus1_ :: (Eq a, Num a) => String -> RawFilePath -> IO a -> IO 
 -- | as <a>throwErrnoTwoPathsIfMinus1_</a>, but exceptions include two
 --   paths when appropriate.
 throwErrnoTwoPathsIfMinus1_ :: (Eq a, Num a) => String -> RawFilePath -> RawFilePath -> IO a -> IO ()
-
-
--- | String-based POSIX directory support
-module System.Posix.Directory.ByteString
-
--- | <tt>createDirectory dir mode</tt> calls <tt>mkdir</tt> to create a new
---   directory, <tt>dir</tt>, with permissions based on <tt>mode</tt>.
-createDirectory :: RawFilePath -> FileMode -> IO ()
-removeDirectory :: RawFilePath -> IO ()
-data DirStream
-
--- | <tt>openDirStream dir</tt> calls <tt>opendir</tt> to obtain a
---   directory stream for <tt>dir</tt>.
-openDirStream :: RawFilePath -> IO DirStream
-
--- | <tt>readDirStream dp</tt> calls <tt>readdir</tt> to obtain the next
---   directory entry (<tt>struct dirent</tt>) for the open directory stream
---   <tt>dp</tt>, and returns the <tt>d_name</tt> member of that structure.
---   
---   Note that this function returns an empty filepath if the end of the
---   directory stream is reached. For a safer alternative use
---   <a>readDirStreamMaybe</a>.
-readDirStream :: DirStream -> IO RawFilePath
-
--- | <tt>readDirStreamMaybe dp</tt> calls <tt>readdir</tt> to obtain the
---   next directory entry (<tt>struct dirent</tt>) for the open directory
---   stream <tt>dp</tt>. It returns the <tt>d_name</tt> member of that
---   structure wrapped in a <tt>Just d_name</tt> if an entry was read and
---   <tt>Nothing</tt> if the end of the directory stream was reached.
-readDirStreamMaybe :: DirStream -> IO (Maybe RawFilePath)
-
--- | <tt>rewindDirStream dp</tt> calls <tt>rewinddir</tt> to reposition the
---   directory stream <tt>dp</tt> at the beginning of the directory.
-rewindDirStream :: DirStream -> IO ()
-
--- | <tt>closeDirStream dp</tt> calls <tt>closedir</tt> to close the
---   directory stream <tt>dp</tt>.
-closeDirStream :: DirStream -> IO ()
-data DirStreamOffset
-tellDirStream :: DirStream -> IO DirStreamOffset
-seekDirStream :: DirStream -> DirStreamOffset -> IO ()
-
--- | <tt>getWorkingDirectory</tt> calls <tt>getcwd</tt> to obtain the name
---   of the current working directory.
-getWorkingDirectory :: IO RawFilePath
-
--- | <tt>changeWorkingDirectory dir</tt> calls <tt>chdir</tt> to change the
---   current working directory to <tt>dir</tt>.
-changeWorkingDirectory :: RawFilePath -> IO ()
-changeWorkingDirectoryFd :: Fd -> IO ()
-
-module System.Posix.Directory.Fd
-
--- | Call <tt>fdopendir</tt> to obtain a directory stream for <tt>fd</tt>.
---   <tt>fd</tt> must not be otherwise used after this.
---   
---   On success, it is owned by the returned <a>DirStream</a>, which should
---   be closed via <a>closeDirStream</a> when no longer needed. On error,
---   the file descriptor is automatically closed and then an exception is
---   thrown. There is no code path in which the file descriptor remains
---   open and yet not owned by a returned <a>DirStream</a>.
---   
---   The input file descriptor must not have been used with
---   <tt>threadWaitRead</tt> or <tt>threadWaitWrite</tt>.
-unsafeOpenDirStreamFd :: Fd -> IO DirStream
-
-
--- | POSIX directory support (internal module, no PVP guarantees)
-module System.Posix.Directory.Internals
-newtype DirStream
-DirStream :: Ptr CDir -> DirStream
-data CDir
-data CDirent
-newtype DirStreamOffset
-DirStreamOffset :: COff -> DirStreamOffset
 
 
 -- | <tt>dlopen(3)</tt> and friends Derived from <tt>GModule.chs</tt> by
@@ -397,56 +322,6 @@ throwErrnoPathIfMinus1 :: (Eq a, Num a) => String -> FilePath -> IO a -> IO a
 throwErrnoPathIfMinus1_ :: (Eq a, Num a) => String -> FilePath -> IO a -> IO ()
 throwErrnoPathIfMinus1Retry :: (Eq a, Num a) => String -> FilePath -> IO a -> IO a
 throwErrnoPathIfMinus1Retry_ :: (Eq a, Num a) => String -> FilePath -> IO a -> IO ()
-
-
--- | String-based POSIX directory support
-module System.Posix.Directory
-
--- | <tt>createDirectory dir mode</tt> calls <tt>mkdir</tt> to create a new
---   directory, <tt>dir</tt>, with permissions based on <tt>mode</tt>.
-createDirectory :: FilePath -> FileMode -> IO ()
-removeDirectory :: FilePath -> IO ()
-data DirStream
-
--- | <tt>openDirStream dir</tt> calls <tt>opendir</tt> to obtain a
---   directory stream for <tt>dir</tt>.
-openDirStream :: FilePath -> IO DirStream
-
--- | <tt>readDirStream dp</tt> calls <tt>readdir</tt> to obtain the next
---   directory entry (<tt>struct dirent</tt>) for the open directory stream
---   <tt>dp</tt>, and returns the <tt>d_name</tt> member of that structure.
---   
---   Note that this function returns an empty filepath if the end of the
---   directory stream is reached. For a safer alternative use
---   <a>readDirStreamMaybe</a>.
-readDirStream :: DirStream -> IO FilePath
-
--- | <tt>readDirStreamMaybe dp</tt> calls <tt>readdir</tt> to obtain the
---   next directory entry (<tt>struct dirent</tt>) for the open directory
---   stream <tt>dp</tt>. It returns the <tt>d_name</tt> member of that
---   structure wrapped in a <tt>Just d_name</tt> if an entry was read and
---   <tt>Nothing</tt> if the end of the directory stream was reached.
-readDirStreamMaybe :: DirStream -> IO (Maybe FilePath)
-
--- | <tt>rewindDirStream dp</tt> calls <tt>rewinddir</tt> to reposition the
---   directory stream <tt>dp</tt> at the beginning of the directory.
-rewindDirStream :: DirStream -> IO ()
-
--- | <tt>closeDirStream dp</tt> calls <tt>closedir</tt> to close the
---   directory stream <tt>dp</tt>.
-closeDirStream :: DirStream -> IO ()
-data DirStreamOffset
-tellDirStream :: DirStream -> IO DirStreamOffset
-seekDirStream :: DirStream -> DirStreamOffset -> IO ()
-
--- | <tt>getWorkingDirectory</tt> calls <tt>getcwd</tt> to obtain the name
---   of the current working directory.
-getWorkingDirectory :: IO FilePath
-
--- | <tt>changeWorkingDirectory dir</tt> calls <tt>chdir</tt> to change the
---   current working directory to <tt>dir</tt>.
-changeWorkingDirectory :: FilePath -> IO ()
-changeWorkingDirectoryFd :: Fd -> IO ()
 
 
 -- | POSIX file control support
@@ -908,9 +783,6 @@ specialDeviceIDX :: ExtendedFileStatus -> DeviceID
 -- | The mount ID of the mount containing the file. This is the same number
 --   reported by name_to_handle_at(2) and corresponds to the number in the
 --   first field in one of the records in <i>proc</i>self/mountinfo.
-
--- | <i>Warning: mountIDX: not available on this platform, will throw error
---   (CPP guard: <tt>#if HAVE_STATX_MNT_ID</tt>)</i>
 mountIDX :: ExtendedFileStatus -> Word64
 
 -- | The file is compressed by the filesystem and may take extra resources
@@ -940,16 +812,10 @@ fileEncryptedX :: ExtendedFileStatus -> Bool
 --   from it will be verified against a cryptographic hash that covers the
 --   entire file (e.g., via a Merkle tree). This is an extended attribute.
 --   Since Linux 5.5.
-
--- | <i>Warning: fileVerityX: not available on this platform, will default
---   to <a>False</a> (CPP guard: <tt>#if STATX_ATTR_VERITY</tt>)</i>
 fileVerityX :: ExtendedFileStatus -> Bool
 
 -- | The file is in the DAX (cpu direct access) state. This is an extended
 --   attribute. Since Linux 5.8.
-
--- | <i>Warning: fileDaxX: not available on this platform, will default to
---   <a>False</a> (CPP guard: <tt>#if STATX_ATTR_DAX</tt>)</i>
 fileDaxX :: ExtendedFileStatus -> Bool
 
 -- | Checks if this file is a block device.
@@ -1592,9 +1458,6 @@ specialDeviceIDX :: ExtendedFileStatus -> DeviceID
 -- | The mount ID of the mount containing the file. This is the same number
 --   reported by name_to_handle_at(2) and corresponds to the number in the
 --   first field in one of the records in <i>proc</i>self/mountinfo.
-
--- | <i>Warning: mountIDX: not available on this platform, will throw error
---   (CPP guard: <tt>#if HAVE_STATX_MNT_ID</tt>)</i>
 mountIDX :: ExtendedFileStatus -> Word64
 
 -- | The file is compressed by the filesystem and may take extra resources
@@ -1624,16 +1487,10 @@ fileEncryptedX :: ExtendedFileStatus -> Bool
 --   from it will be verified against a cryptographic hash that covers the
 --   entire file (e.g., via a Merkle tree). This is an extended attribute.
 --   Since Linux 5.5.
-
--- | <i>Warning: fileVerityX: not available on this platform, will default
---   to <a>False</a> (CPP guard: <tt>#if STATX_ATTR_VERITY</tt>)</i>
 fileVerityX :: ExtendedFileStatus -> Bool
 
 -- | The file is in the DAX (cpu direct access) state. This is an extended
 --   attribute. Since Linux 5.8.
-
--- | <i>Warning: fileDaxX: not available on this platform, will default to
---   <a>False</a> (CPP guard: <tt>#if STATX_ATTR_DAX</tt>)</i>
 fileDaxX :: ExtendedFileStatus -> Bool
 
 -- | Checks if this file is a block device.
@@ -1845,6 +1702,256 @@ getPathVar :: FilePath -> PathVar -> IO Limit
 --   
 --   Note: calls <tt>fpathconf</tt>.
 getFdPathVar :: Fd -> PathVar -> IO Limit
+
+
+-- | POSIX directory support (internal module, no PVP guarantees)
+module System.Posix.Directory.Internals
+newtype DirStream
+DirStream :: Ptr CDir -> DirStream
+data CDir
+data CDirent
+newtype DirStreamOffset
+DirStreamOffset :: COff -> DirStreamOffset
+
+newtype DirStreamWithPath a
+DirStreamWithPath :: (a, Ptr CDir) -> DirStreamWithPath a
+
+-- | Convert a <a>DirStreamWithPath</a> to a <a>DirStream</a>. Note that
+--   the underlying pointer is shared by both values, hence any
+--   modification to the resulting <a>DirStream</a> will also modify the
+--   original <a>DirStreamWithPath</a>.
+fromDirStreamWithPath :: DirStreamWithPath a -> DirStream
+
+-- | Construct a <a>DirStreamWithPath</a> from a <a>DirStream</a>. Note
+--   that the underlying pointer is shared by both values, hence any
+--   modification to the pointer of the resulting <a>DirStreamWithPath</a>
+--   will also modify the original <a>DirStream</a>.
+toDirStreamWithPath :: a -> DirStream -> DirStreamWithPath a
+
+newtype DirEnt
+DirEnt :: Ptr CDirent -> DirEnt
+
+dirEntName :: DirEnt -> IO CString
+
+dirEntType :: DirEnt -> IO DirType
+
+-- | The value of the <tt>d_type</tt> field of a <tt>dirent</tt> struct.
+--   Note that the possible values of that type depend on the filesystem
+--   that is queried. From <tt>readdir(3)</tt>:
+--   
+--   <pre>
+--   Currently, only some filesystems (among them: Btrfs, ext2, ext3, and ext4)
+--   have full support for returning the file type in d_type. All applications
+--   must properly handle a return of DT_UNKNOWN.
+--   </pre>
+--   
+--   For example, JFS is a filesystem that does not support
+--   <tt>d_type</tt>; See
+--   <a>https://github.com/haskell/ghcup-hs/issues/766</a>
+--   
+--   Furthermore, <tt>dirent</tt> or the constants represented by the
+--   associated pattern synonyms of this type may not be provided by the
+--   underlying platform. In that case none of those patterns will match
+--   and the application must handle that case accordingly.
+newtype DirType
+DirType :: CChar -> DirType
+
+-- | The <a>DirType</a> refers to an entry of unknown type.
+pattern UnknownType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a named pipe.
+pattern NamedPipeType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a character device.
+pattern CharacterDeviceType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a directory.
+pattern DirectoryType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a block device.
+pattern BlockDeviceType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a regular file.
+pattern RegularFileType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a symbolic link.
+pattern SymbolicLinkType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a socket.
+pattern SocketType :: DirType
+
+-- | The <a>DirType</a> refers to an entry that is a whiteout.
+pattern WhiteoutType :: DirType
+
+-- | Checks if this <a>DirType</a> refers to an entry of unknown type.
+isUnknownType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a named pipe entry.
+isNamedPipeType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a character device entry.
+isCharacterDeviceType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a directory entry.
+isDirectoryType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a block device entry.
+isBlockDeviceType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a regular file entry.
+isRegularFileType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a symbolic link entry.
+isSymbolicLinkType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a socket entry.
+isSocketType :: DirType -> Bool
+
+-- | Checks if this <a>DirType</a> refers to a whiteout entry.
+isWhiteoutType :: DirType -> Bool
+
+getRealDirType :: IO FileStatus -> DirType -> IO DirType
+
+-- | <tt>readDirStreamWith f dp</tt> calls <tt>readdir</tt> to obtain the
+--   next directory entry (<tt>struct dirent</tt>) for the open directory
+--   stream <tt>dp</tt>. If an entry is read, it passes the pointer to that
+--   structure to the provided function <tt>f</tt> for processing. It
+--   returns the result of that function call wrapped in a <tt>Just</tt> if
+--   an entry was read and <tt>Nothing</tt> if the end of the directory
+--   stream was reached.
+--   
+--   <b>NOTE:</b> The lifetime of the pointer wrapped in the <a>DirEnt</a>
+--   is limited to invocation of the callback and it will be freed
+--   automatically after. Do not pass it to the outside world!
+readDirStreamWith :: (DirEnt -> IO a) -> DirStream -> IO (Maybe a)
+
+-- | A version of <a>readDirStreamWith</a> that takes a pre-allocated
+--   pointer in addition to the other arguments. This pointer is used to
+--   store the pointer to the next directory entry, if there is any. This
+--   function is intended for use cases where you need to read a lot of
+--   directory entries and want to reuse the pointer for each of them.
+--   Using for example <tt>readDirStream</tt> or <a>readDirStreamWith</a>
+--   in this scenario would allocate a new pointer for each call of these
+--   functions.
+--   
+--   <b>NOTE</b>: You are responsible for releasing the pointer after you
+--   are done.
+readDirStreamWithPtr :: Ptr DirEnt -> (DirEnt -> IO a) -> DirStream -> IO (Maybe a)
+
+module System.Posix.Directory.Fd
+
+-- | Call <tt>fdopendir</tt> to obtain a directory stream for <tt>fd</tt>.
+--   <tt>fd</tt> must not be otherwise used after this.
+--   
+--   On success, it is owned by the returned <a>DirStream</a>, which should
+--   be closed via <a>closeDirStream</a> when no longer needed. On error,
+--   the file descriptor is automatically closed and then an exception is
+--   thrown. There is no code path in which the file descriptor remains
+--   open and yet not owned by a returned <a>DirStream</a>.
+--   
+--   The input file descriptor must not have been used with
+--   <tt>threadWaitRead</tt> or <tt>threadWaitWrite</tt>.
+unsafeOpenDirStreamFd :: Fd -> IO DirStream
+
+
+-- | String-based POSIX directory support
+module System.Posix.Directory.ByteString
+
+-- | <tt>createDirectory dir mode</tt> calls <tt>mkdir</tt> to create a new
+--   directory, <tt>dir</tt>, with permissions based on <tt>mode</tt>.
+createDirectory :: RawFilePath -> FileMode -> IO ()
+removeDirectory :: RawFilePath -> IO ()
+data DirStream
+
+-- | <tt>openDirStream dir</tt> calls <tt>opendir</tt> to obtain a
+--   directory stream for <tt>dir</tt>.
+openDirStream :: RawFilePath -> IO DirStream
+
+-- | <tt>readDirStream dp</tt> calls <tt>readdir</tt> to obtain the next
+--   directory entry (<tt>struct dirent</tt>) for the open directory stream
+--   <tt>dp</tt>, and returns the <tt>d_name</tt> member of that structure.
+--   
+--   Note that this function returns an empty filepath if the end of the
+--   directory stream is reached. For a safer alternative use
+--   <a>readDirStreamMaybe</a>.
+readDirStream :: DirStream -> IO RawFilePath
+
+-- | <tt>readDirStreamMaybe dp</tt> calls <tt>readdir</tt> to obtain the
+--   next directory entry (<tt>struct dirent</tt>) for the open directory
+--   stream <tt>dp</tt>. It returns the <tt>d_name</tt> member of that
+--   structure wrapped in a <tt>Just d_name</tt> if an entry was read and
+--   <tt>Nothing</tt> if the end of the directory stream was reached.
+readDirStreamMaybe :: DirStream -> IO (Maybe RawFilePath)
+
+-- | <tt>rewindDirStream dp</tt> calls <tt>rewinddir</tt> to reposition the
+--   directory stream <tt>dp</tt> at the beginning of the directory.
+rewindDirStream :: DirStream -> IO ()
+
+-- | <tt>closeDirStream dp</tt> calls <tt>closedir</tt> to close the
+--   directory stream <tt>dp</tt>.
+closeDirStream :: DirStream -> IO ()
+data DirStreamOffset
+tellDirStream :: DirStream -> IO DirStreamOffset
+seekDirStream :: DirStream -> DirStreamOffset -> IO ()
+
+-- | <tt>getWorkingDirectory</tt> calls <tt>getcwd</tt> to obtain the name
+--   of the current working directory.
+getWorkingDirectory :: IO RawFilePath
+
+-- | <tt>changeWorkingDirectory dir</tt> calls <tt>chdir</tt> to change the
+--   current working directory to <tt>dir</tt>.
+changeWorkingDirectory :: RawFilePath -> IO ()
+changeWorkingDirectoryFd :: Fd -> IO ()
+
+
+-- | String-based POSIX directory support
+module System.Posix.Directory
+
+-- | <tt>createDirectory dir mode</tt> calls <tt>mkdir</tt> to create a new
+--   directory, <tt>dir</tt>, with permissions based on <tt>mode</tt>.
+createDirectory :: FilePath -> FileMode -> IO ()
+removeDirectory :: FilePath -> IO ()
+data DirStream
+
+-- | <tt>openDirStream dir</tt> calls <tt>opendir</tt> to obtain a
+--   directory stream for <tt>dir</tt>.
+openDirStream :: FilePath -> IO DirStream
+
+-- | <tt>readDirStream dp</tt> calls <tt>readdir</tt> to obtain the next
+--   directory entry (<tt>struct dirent</tt>) for the open directory stream
+--   <tt>dp</tt>, and returns the <tt>d_name</tt> member of that structure.
+--   
+--   Note that this function returns an empty filepath if the end of the
+--   directory stream is reached. For a safer alternative use
+--   <a>readDirStreamMaybe</a>.
+readDirStream :: DirStream -> IO FilePath
+
+-- | <tt>readDirStreamMaybe dp</tt> calls <tt>readdir</tt> to obtain the
+--   next directory entry (<tt>struct dirent</tt>) for the open directory
+--   stream <tt>dp</tt>. It returns the <tt>d_name</tt> member of that
+--   structure wrapped in a <tt>Just d_name</tt> if an entry was read and
+--   <tt>Nothing</tt> if the end of the directory stream was reached.
+readDirStreamMaybe :: DirStream -> IO (Maybe FilePath)
+
+-- | <tt>rewindDirStream dp</tt> calls <tt>rewinddir</tt> to reposition the
+--   directory stream <tt>dp</tt> at the beginning of the directory.
+rewindDirStream :: DirStream -> IO ()
+
+-- | <tt>closeDirStream dp</tt> calls <tt>closedir</tt> to close the
+--   directory stream <tt>dp</tt>.
+closeDirStream :: DirStream -> IO ()
+data DirStreamOffset
+tellDirStream :: DirStream -> IO DirStreamOffset
+seekDirStream :: DirStream -> DirStreamOffset -> IO ()
+
+-- | <tt>getWorkingDirectory</tt> calls <tt>getcwd</tt> to obtain the name
+--   of the current working directory.
+getWorkingDirectory :: IO FilePath
+
+-- | <tt>changeWorkingDirectory dir</tt> calls <tt>chdir</tt> to change the
+--   current working directory to <tt>dir</tt>.
+changeWorkingDirectory :: FilePath -> IO ()
+changeWorkingDirectoryFd :: Fd -> IO ()
 
 
 -- | POSIX IO support. These types and functions correspond to the unix
@@ -2804,9 +2911,6 @@ specialDeviceIDX :: ExtendedFileStatus -> DeviceID
 -- | The mount ID of the mount containing the file. This is the same number
 --   reported by name_to_handle_at(2) and corresponds to the number in the
 --   first field in one of the records in <i>proc</i>self/mountinfo.
-
--- | <i>Warning: mountIDX: not available on this platform, will throw error
---   (CPP guard: <tt>#if HAVE_STATX_MNT_ID</tt>)</i>
 mountIDX :: ExtendedFileStatus -> Word64
 
 -- | The file is compressed by the filesystem and may take extra resources
@@ -2836,16 +2940,10 @@ fileEncryptedX :: ExtendedFileStatus -> Bool
 --   from it will be verified against a cryptographic hash that covers the
 --   entire file (e.g., via a Merkle tree). This is an extended attribute.
 --   Since Linux 5.5.
-
--- | <i>Warning: fileVerityX: not available on this platform, will default
---   to <a>False</a> (CPP guard: <tt>#if STATX_ATTR_VERITY</tt>)</i>
 fileVerityX :: ExtendedFileStatus -> Bool
 
 -- | The file is in the DAX (cpu direct access) state. This is an extended
 --   attribute. Since Linux 5.8.
-
--- | <i>Warning: fileDaxX: not available on this platform, will default to
---   <a>False</a> (CPP guard: <tt>#if STATX_ATTR_DAX</tt>)</i>
 fileDaxX :: ExtendedFileStatus -> Bool
 
 -- | Checks if this file is a block device.
@@ -3061,7 +3159,18 @@ openDirStream :: PosixPath -> IO DirStream
 -- | <tt>readDirStream dp</tt> calls <tt>readdir</tt> to obtain the next
 --   directory entry (<tt>struct dirent</tt>) for the open directory stream
 --   <tt>dp</tt>, and returns the <tt>d_name</tt> member of that structure.
+--   
+--   Note that this function returns an empty filepath if the end of the
+--   directory stream is reached. For a safer alternative use
+--   <a>readDirStreamMaybe</a>.
 readDirStream :: DirStream -> IO PosixPath
+
+-- | <tt>readDirStreamMaybe dp</tt> calls <tt>readdir</tt> to obtain the
+--   next directory entry (<tt>struct dirent</tt>) for the open directory
+--   stream <tt>dp</tt>. It returns the <tt>d_name</tt> member of that
+--   structure wrapped in a <tt>Just d_name</tt> if an entry was read and
+--   <tt>Nothing</tt> if the end of the directory stream was reached.
+readDirStreamMaybe :: DirStream -> IO (Maybe PosixPath)
 
 -- | <tt>rewindDirStream dp</tt> calls <tt>rewinddir</tt> to reposition the
 --   directory stream <tt>dp</tt> at the beginning of the directory.
@@ -4286,14 +4395,20 @@ BaudRate :: CSpeed -> BaudRate
 -- | Hang up
 pattern B0 :: BaudRate
 
--- | 50 baud
-pattern B50 :: BaudRate
-
--- | 75 baud
-pattern B75 :: BaudRate
+-- | 1000000 baud, non-POSIX system-dependent extension
+pattern B1000000 :: BaudRate
 
 -- | 110 baud
 pattern B110 :: BaudRate
+
+-- | 115200 baud, non-POSIX system-dependent extension
+pattern B115200 :: BaudRate
+
+-- | 1152000 baud, non-POSIX system-dependent extension
+pattern B1152000 :: BaudRate
+
+-- | 1200 baud
+pattern B1200 :: BaudRate
 
 -- | <ol>
 --   <li>5 baud</li>
@@ -4303,71 +4418,32 @@ pattern B134 :: BaudRate
 -- | 150 baud
 pattern B150 :: BaudRate
 
--- | 200 baud
-pattern B200 :: BaudRate
-
--- | 300 baud
-pattern B300 :: BaudRate
-
--- | 600 baud
-pattern B600 :: BaudRate
-
--- | 1200 baud
-pattern B1200 :: BaudRate
+-- | 1500000 baud, non-POSIX system-dependent extension
+pattern B1500000 :: BaudRate
 
 -- | 1800 baud
 pattern B1800 :: BaudRate
 
--- | 2400 baud
-pattern B2400 :: BaudRate
-
--- | 4800 baud
-pattern B4800 :: BaudRate
-
--- | 9600 baud
-pattern B9600 :: BaudRate
-
 -- | 19200 baud
 pattern B19200 :: BaudRate
 
--- | 38400 baud
-pattern B38400 :: BaudRate
-
--- | 57600 baud, non-POSIX system-dependent extension
-pattern B57600 :: BaudRate
-
--- | 115200 baud, non-POSIX system-dependent extension
-pattern B115200 :: BaudRate
-
--- | 230400 baud, non-POSIX system-dependent extension
-pattern B230400 :: BaudRate
-
--- | 460800 baud, non-POSIX system-dependent extension
-pattern B460800 :: BaudRate
-
--- | 500000 baud, non-POSIX system-dependent extension
-pattern B500000 :: BaudRate
-
--- | 576000 baud, non-POSIX system-dependent extension
-pattern B576000 :: BaudRate
-
--- | 921600 baud, non-POSIX system-dependent extension
-pattern B921600 :: BaudRate
-
--- | 1000000 baud, non-POSIX system-dependent extension
-pattern B1000000 :: BaudRate
-
--- | 1152000 baud, non-POSIX system-dependent extension
-pattern B1152000 :: BaudRate
-
--- | 1500000 baud, non-POSIX system-dependent extension
-pattern B1500000 :: BaudRate
+-- | 200 baud
+pattern B200 :: BaudRate
 
 -- | 2000000 baud, non-POSIX system-dependent extension
 pattern B2000000 :: BaudRate
 
+-- | 230400 baud, non-POSIX system-dependent extension
+pattern B230400 :: BaudRate
+
+-- | 2400 baud
+pattern B2400 :: BaudRate
+
 -- | 2500000 baud, non-POSIX system-dependent extension
 pattern B2500000 :: BaudRate
+
+-- | 300 baud
+pattern B300 :: BaudRate
 
 -- | 3000000 baud, non-POSIX system-dependent extension
 pattern B3000000 :: BaudRate
@@ -4375,8 +4451,41 @@ pattern B3000000 :: BaudRate
 -- | 3500000 baud, non-POSIX system-dependent extension
 pattern B3500000 :: BaudRate
 
+-- | 38400 baud
+pattern B38400 :: BaudRate
+
 -- | 4000000 baud, non-POSIX system-dependent extension
 pattern B4000000 :: BaudRate
+
+-- | 460800 baud, non-POSIX system-dependent extension
+pattern B460800 :: BaudRate
+
+-- | 4800 baud
+pattern B4800 :: BaudRate
+
+-- | 50 baud
+pattern B50 :: BaudRate
+
+-- | 500000 baud, non-POSIX system-dependent extension
+pattern B500000 :: BaudRate
+
+-- | 57600 baud, non-POSIX system-dependent extension
+pattern B57600 :: BaudRate
+
+-- | 576000 baud, non-POSIX system-dependent extension
+pattern B576000 :: BaudRate
+
+-- | 600 baud
+pattern B600 :: BaudRate
+
+-- | 75 baud
+pattern B75 :: BaudRate
+
+-- | 921600 baud, non-POSIX system-dependent extension
+pattern B921600 :: BaudRate
+
+-- | 9600 baud
+pattern B9600 :: BaudRate
 inputSpeed :: TerminalAttributes -> BaudRate
 withInputSpeed :: TerminalAttributes -> BaudRate -> TerminalAttributes
 outputSpeed :: TerminalAttributes -> BaudRate
@@ -4627,14 +4736,20 @@ BaudRate :: CSpeed -> BaudRate
 -- | Hang up
 pattern B0 :: BaudRate
 
--- | 50 baud
-pattern B50 :: BaudRate
-
--- | 75 baud
-pattern B75 :: BaudRate
+-- | 1000000 baud, non-POSIX system-dependent extension
+pattern B1000000 :: BaudRate
 
 -- | 110 baud
 pattern B110 :: BaudRate
+
+-- | 115200 baud, non-POSIX system-dependent extension
+pattern B115200 :: BaudRate
+
+-- | 1152000 baud, non-POSIX system-dependent extension
+pattern B1152000 :: BaudRate
+
+-- | 1200 baud
+pattern B1200 :: BaudRate
 
 -- | <ol>
 --   <li>5 baud</li>
@@ -4644,71 +4759,32 @@ pattern B134 :: BaudRate
 -- | 150 baud
 pattern B150 :: BaudRate
 
--- | 200 baud
-pattern B200 :: BaudRate
-
--- | 300 baud
-pattern B300 :: BaudRate
-
--- | 600 baud
-pattern B600 :: BaudRate
-
--- | 1200 baud
-pattern B1200 :: BaudRate
+-- | 1500000 baud, non-POSIX system-dependent extension
+pattern B1500000 :: BaudRate
 
 -- | 1800 baud
 pattern B1800 :: BaudRate
 
--- | 2400 baud
-pattern B2400 :: BaudRate
-
--- | 4800 baud
-pattern B4800 :: BaudRate
-
--- | 9600 baud
-pattern B9600 :: BaudRate
-
 -- | 19200 baud
 pattern B19200 :: BaudRate
 
--- | 38400 baud
-pattern B38400 :: BaudRate
-
--- | 57600 baud, non-POSIX system-dependent extension
-pattern B57600 :: BaudRate
-
--- | 115200 baud, non-POSIX system-dependent extension
-pattern B115200 :: BaudRate
-
--- | 230400 baud, non-POSIX system-dependent extension
-pattern B230400 :: BaudRate
-
--- | 460800 baud, non-POSIX system-dependent extension
-pattern B460800 :: BaudRate
-
--- | 500000 baud, non-POSIX system-dependent extension
-pattern B500000 :: BaudRate
-
--- | 576000 baud, non-POSIX system-dependent extension
-pattern B576000 :: BaudRate
-
--- | 921600 baud, non-POSIX system-dependent extension
-pattern B921600 :: BaudRate
-
--- | 1000000 baud, non-POSIX system-dependent extension
-pattern B1000000 :: BaudRate
-
--- | 1152000 baud, non-POSIX system-dependent extension
-pattern B1152000 :: BaudRate
-
--- | 1500000 baud, non-POSIX system-dependent extension
-pattern B1500000 :: BaudRate
+-- | 200 baud
+pattern B200 :: BaudRate
 
 -- | 2000000 baud, non-POSIX system-dependent extension
 pattern B2000000 :: BaudRate
 
+-- | 230400 baud, non-POSIX system-dependent extension
+pattern B230400 :: BaudRate
+
+-- | 2400 baud
+pattern B2400 :: BaudRate
+
 -- | 2500000 baud, non-POSIX system-dependent extension
 pattern B2500000 :: BaudRate
+
+-- | 300 baud
+pattern B300 :: BaudRate
 
 -- | 3000000 baud, non-POSIX system-dependent extension
 pattern B3000000 :: BaudRate
@@ -4716,8 +4792,41 @@ pattern B3000000 :: BaudRate
 -- | 3500000 baud, non-POSIX system-dependent extension
 pattern B3500000 :: BaudRate
 
+-- | 38400 baud
+pattern B38400 :: BaudRate
+
 -- | 4000000 baud, non-POSIX system-dependent extension
 pattern B4000000 :: BaudRate
+
+-- | 460800 baud, non-POSIX system-dependent extension
+pattern B460800 :: BaudRate
+
+-- | 4800 baud
+pattern B4800 :: BaudRate
+
+-- | 50 baud
+pattern B50 :: BaudRate
+
+-- | 500000 baud, non-POSIX system-dependent extension
+pattern B500000 :: BaudRate
+
+-- | 57600 baud, non-POSIX system-dependent extension
+pattern B57600 :: BaudRate
+
+-- | 576000 baud, non-POSIX system-dependent extension
+pattern B576000 :: BaudRate
+
+-- | 600 baud
+pattern B600 :: BaudRate
+
+-- | 75 baud
+pattern B75 :: BaudRate
+
+-- | 921600 baud, non-POSIX system-dependent extension
+pattern B921600 :: BaudRate
+
+-- | 9600 baud
+pattern B9600 :: BaudRate
 inputSpeed :: TerminalAttributes -> BaudRate
 withInputSpeed :: TerminalAttributes -> BaudRate -> TerminalAttributes
 outputSpeed :: TerminalAttributes -> BaudRate
@@ -4968,14 +5077,20 @@ BaudRate :: CSpeed -> BaudRate
 -- | Hang up
 pattern B0 :: BaudRate
 
--- | 50 baud
-pattern B50 :: BaudRate
-
--- | 75 baud
-pattern B75 :: BaudRate
+-- | 1000000 baud, non-POSIX system-dependent extension
+pattern B1000000 :: BaudRate
 
 -- | 110 baud
 pattern B110 :: BaudRate
+
+-- | 115200 baud, non-POSIX system-dependent extension
+pattern B115200 :: BaudRate
+
+-- | 1152000 baud, non-POSIX system-dependent extension
+pattern B1152000 :: BaudRate
+
+-- | 1200 baud
+pattern B1200 :: BaudRate
 
 -- | <ol>
 --   <li>5 baud</li>
@@ -4985,71 +5100,32 @@ pattern B134 :: BaudRate
 -- | 150 baud
 pattern B150 :: BaudRate
 
--- | 200 baud
-pattern B200 :: BaudRate
-
--- | 300 baud
-pattern B300 :: BaudRate
-
--- | 600 baud
-pattern B600 :: BaudRate
-
--- | 1200 baud
-pattern B1200 :: BaudRate
+-- | 1500000 baud, non-POSIX system-dependent extension
+pattern B1500000 :: BaudRate
 
 -- | 1800 baud
 pattern B1800 :: BaudRate
 
--- | 2400 baud
-pattern B2400 :: BaudRate
-
--- | 4800 baud
-pattern B4800 :: BaudRate
-
--- | 9600 baud
-pattern B9600 :: BaudRate
-
 -- | 19200 baud
 pattern B19200 :: BaudRate
 
--- | 38400 baud
-pattern B38400 :: BaudRate
-
--- | 57600 baud, non-POSIX system-dependent extension
-pattern B57600 :: BaudRate
-
--- | 115200 baud, non-POSIX system-dependent extension
-pattern B115200 :: BaudRate
-
--- | 230400 baud, non-POSIX system-dependent extension
-pattern B230400 :: BaudRate
-
--- | 460800 baud, non-POSIX system-dependent extension
-pattern B460800 :: BaudRate
-
--- | 500000 baud, non-POSIX system-dependent extension
-pattern B500000 :: BaudRate
-
--- | 576000 baud, non-POSIX system-dependent extension
-pattern B576000 :: BaudRate
-
--- | 921600 baud, non-POSIX system-dependent extension
-pattern B921600 :: BaudRate
-
--- | 1000000 baud, non-POSIX system-dependent extension
-pattern B1000000 :: BaudRate
-
--- | 1152000 baud, non-POSIX system-dependent extension
-pattern B1152000 :: BaudRate
-
--- | 1500000 baud, non-POSIX system-dependent extension
-pattern B1500000 :: BaudRate
+-- | 200 baud
+pattern B200 :: BaudRate
 
 -- | 2000000 baud, non-POSIX system-dependent extension
 pattern B2000000 :: BaudRate
 
+-- | 230400 baud, non-POSIX system-dependent extension
+pattern B230400 :: BaudRate
+
+-- | 2400 baud
+pattern B2400 :: BaudRate
+
 -- | 2500000 baud, non-POSIX system-dependent extension
 pattern B2500000 :: BaudRate
+
+-- | 300 baud
+pattern B300 :: BaudRate
 
 -- | 3000000 baud, non-POSIX system-dependent extension
 pattern B3000000 :: BaudRate
@@ -5057,8 +5133,41 @@ pattern B3000000 :: BaudRate
 -- | 3500000 baud, non-POSIX system-dependent extension
 pattern B3500000 :: BaudRate
 
+-- | 38400 baud
+pattern B38400 :: BaudRate
+
 -- | 4000000 baud, non-POSIX system-dependent extension
 pattern B4000000 :: BaudRate
+
+-- | 460800 baud, non-POSIX system-dependent extension
+pattern B460800 :: BaudRate
+
+-- | 4800 baud
+pattern B4800 :: BaudRate
+
+-- | 50 baud
+pattern B50 :: BaudRate
+
+-- | 500000 baud, non-POSIX system-dependent extension
+pattern B500000 :: BaudRate
+
+-- | 57600 baud, non-POSIX system-dependent extension
+pattern B57600 :: BaudRate
+
+-- | 576000 baud, non-POSIX system-dependent extension
+pattern B576000 :: BaudRate
+
+-- | 600 baud
+pattern B600 :: BaudRate
+
+-- | 75 baud
+pattern B75 :: BaudRate
+
+-- | 921600 baud, non-POSIX system-dependent extension
+pattern B921600 :: BaudRate
+
+-- | 9600 baud
+pattern B9600 :: BaudRate
 inputSpeed :: TerminalAttributes -> BaudRate
 withInputSpeed :: TerminalAttributes -> BaudRate -> TerminalAttributes
 outputSpeed :: TerminalAttributes -> BaudRate
@@ -5494,34 +5603,27 @@ module System.Posix.ByteString
 
 -- | A literal POSIX file path
 type RawFilePath = ByteString
-
--- | Flags for <a>dlsym</a>. Notice that <a>Next</a> might not be available
---   on your particular platform! Use <a>haveRtldNext</a>.
---   
---   If <tt>RTLD_DEFAULT</tt> is not defined on your platform,
---   <a>packDL</a> <a>Default</a> reduces to <a>nullPtr</a>.
-data DL
-Null :: DL
-Next :: DL
-DLHandle :: Ptr () -> DL
 dlopen :: RawFilePath -> [RTLDFlags] -> IO DL
+withDL :: RawFilePath -> [RTLDFlags] -> (DL -> IO a) -> IO a
+withDL_ :: RawFilePath -> [RTLDFlags] -> (DL -> IO a) -> IO ()
+dlclose :: DL -> IO ()
+dlerror :: IO String
 
 -- | <a>dlsym</a> returns the address binding of the symbol described in
 --   <tt>symbol</tt>, as it occurs in the shared object identified by
 --   <tt>source</tt>.
 dlsym :: DL -> String -> IO (FunPtr a)
-dlerror :: IO String
-dlclose :: DL -> IO ()
-withDL :: RawFilePath -> [RTLDFlags] -> (DL -> IO a) -> IO a
-withDL_ :: RawFilePath -> [RTLDFlags] -> (DL -> IO a) -> IO ()
 
 -- | <a>undl</a> obtains the raw handle. You mustn't do something like
 --   <tt>withDL mod flags $ liftM undl &gt;&gt;= p -&gt; use p</tt>
 undl :: DL -> Ptr ()
+c_dlclose :: Ptr () -> IO CInt
+c_dlerror :: IO CString
 c_dlopen :: CString -> CInt -> IO (Ptr ())
 c_dlsym :: Ptr () -> CString -> IO (FunPtr a)
-c_dlerror :: IO CString
-c_dlclose :: Ptr () -> IO CInt
+
+-- | <i>Deprecated: defaults to True</i>
+haveRtldLocal :: Bool
 
 -- | On some hosts (e.g. SuSe and Ubuntu Linux) <tt>RTLD_NEXT</tt> (and
 --   <tt>RTLD_DEFAULT</tt>) are not visible without setting the macro
@@ -5533,10 +5635,18 @@ c_dlclose :: Ptr () -> IO CInt
 --   If you fail to test the flag and use it although it is undefined,
 --   <a>packDL</a> will throw an error.
 haveRtldNext :: Bool
-
--- | <i>Deprecated: defaults to True</i>
-haveRtldLocal :: Bool
+packDL :: DL -> Ptr ()
 packRTLDFlags :: [RTLDFlags] -> CInt
+
+-- | Flags for <a>dlsym</a>. Notice that <a>Next</a> might not be available
+--   on your particular platform! Use <a>haveRtldNext</a>.
+--   
+--   If <tt>RTLD_DEFAULT</tt> is not defined on your platform,
+--   <a>packDL</a> <a>Default</a> reduces to <a>nullPtr</a>.
+data DL
+Null :: DL
+Next :: DL
+DLHandle :: Ptr () -> DL
 
 -- | Flags for <a>dlopen</a>.
 data RTLDFlags
@@ -5544,39 +5654,31 @@ RTLD_LAZY :: RTLDFlags
 RTLD_NOW :: RTLDFlags
 RTLD_GLOBAL :: RTLDFlags
 RTLD_LOCAL :: RTLDFlags
-packDL :: DL -> Ptr ()
 
 
 -- | <a>POSIX.1-2008</a> support
 module System.Posix
-
--- | Flags for <a>dlsym</a>. Notice that <a>Next</a> might not be available
---   on your particular platform! Use <a>haveRtldNext</a>.
---   
---   If <tt>RTLD_DEFAULT</tt> is not defined on your platform,
---   <a>packDL</a> <a>Default</a> reduces to <a>nullPtr</a>.
-data DL
-Null :: DL
-Next :: DL
-DLHandle :: Ptr () -> DL
 dlopen :: FilePath -> [RTLDFlags] -> IO DL
+withDL :: FilePath -> [RTLDFlags] -> (DL -> IO a) -> IO a
+withDL_ :: FilePath -> [RTLDFlags] -> (DL -> IO a) -> IO ()
+dlclose :: DL -> IO ()
+dlerror :: IO String
 
 -- | <a>dlsym</a> returns the address binding of the symbol described in
 --   <tt>symbol</tt>, as it occurs in the shared object identified by
 --   <tt>source</tt>.
 dlsym :: DL -> String -> IO (FunPtr a)
-dlerror :: IO String
-dlclose :: DL -> IO ()
-withDL :: FilePath -> [RTLDFlags] -> (DL -> IO a) -> IO a
-withDL_ :: FilePath -> [RTLDFlags] -> (DL -> IO a) -> IO ()
 
 -- | <a>undl</a> obtains the raw handle. You mustn't do something like
 --   <tt>withDL mod flags $ liftM undl &gt;&gt;= p -&gt; use p</tt>
 undl :: DL -> Ptr ()
+c_dlclose :: Ptr () -> IO CInt
+c_dlerror :: IO CString
 c_dlopen :: CString -> CInt -> IO (Ptr ())
 c_dlsym :: Ptr () -> CString -> IO (FunPtr a)
-c_dlerror :: IO CString
-c_dlclose :: Ptr () -> IO CInt
+
+-- | <i>Deprecated: defaults to True</i>
+haveRtldLocal :: Bool
 
 -- | On some hosts (e.g. SuSe and Ubuntu Linux) <tt>RTLD_NEXT</tt> (and
 --   <tt>RTLD_DEFAULT</tt>) are not visible without setting the macro
@@ -5588,10 +5690,18 @@ c_dlclose :: Ptr () -> IO CInt
 --   If you fail to test the flag and use it although it is undefined,
 --   <a>packDL</a> will throw an error.
 haveRtldNext :: Bool
-
--- | <i>Deprecated: defaults to True</i>
-haveRtldLocal :: Bool
+packDL :: DL -> Ptr ()
 packRTLDFlags :: [RTLDFlags] -> CInt
+
+-- | Flags for <a>dlsym</a>. Notice that <a>Next</a> might not be available
+--   on your particular platform! Use <a>haveRtldNext</a>.
+--   
+--   If <tt>RTLD_DEFAULT</tt> is not defined on your platform,
+--   <a>packDL</a> <a>Default</a> reduces to <a>nullPtr</a>.
+data DL
+Null :: DL
+Next :: DL
+DLHandle :: Ptr () -> DL
 
 -- | Flags for <a>dlopen</a>.
 data RTLDFlags
@@ -5599,4 +5709,3 @@ RTLD_LAZY :: RTLDFlags
 RTLD_NOW :: RTLDFlags
 RTLD_GLOBAL :: RTLDFlags
 RTLD_LOCAL :: RTLDFlags
-packDL :: DL -> Ptr ()

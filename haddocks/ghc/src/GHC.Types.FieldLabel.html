@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621682353803"><span id="local-6989586621682353804"><span id="local-6989586621682353805"><span id="local-6989586621682353806"><span id="local-6989586621682353807"><span id="local-6989586621682353808"><span id="local-6989586621682353809"><span id="local-6989586621682353810"></span></span></span></span></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621682503962"><span id="local-6989586621682503963"><span id="local-6989586621682503964"><span id="local-6989586621682503965"><span id="local-6989586621682503966"><span id="local-6989586621682503967"><span id="local-6989586621682503968"><span id="local-6989586621682503969"></span></span></span></span></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts   #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
 </span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span> </span><span class="hs-comment">-- Outputable FieldLabelString</span><span>
@@ -57,9 +57,9 @@ and Note [Reporting duplicate local declarations] in GHC.Rename.Names.
 </span><span id="line-57"></span><span>
 </span><span id="line-58"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html"><span class="hs-identifier">Language.Haskell.Syntax.Basic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier">FieldLabelString</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html"><span class="hs-identifier">Control.DeepSeq</span></a></span><span>
-</span><span id="line-61"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Bool.html/Data.Bool.html"><span class="hs-identifier">Data.Bool</span></a></span><span>
-</span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Data.html/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html"><span class="hs-identifier">Control.DeepSeq</span></a></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Bool.html"><span class="hs-identifier">Data.Bool</span></a></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span>
 </span><span id="line-63"></span><span>
 </span><span id="line-64"></span><span class="annot"><span class="hs-comment">-- | A map from labels to all the auxiliary information</span></span><span>
 </span><span id="line-65"></span><span class="hs-keyword">type</span><span> </span><span id="FieldLabelEnv"><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabelEnv"><span class="hs-identifier hs-var">FieldLabelEnv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Data.FastString.Env.html#DFastStringEnv"><span class="hs-identifier hs-type">DFastStringEnv</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span>
@@ -78,7 +78,7 @@ and Note [Reporting duplicate local declarations] in GHC.Rename.Names.
 </span><span id="line-75"></span><span>      </span><span class="hs-comment">-- ^ The 'Name' of the selector function, which uniquely identifies</span><span>
 </span><span id="line-76"></span><span>      </span><span class="hs-comment">-- the field label.</span><span>
 </span><span id="line-77"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-78"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682353826"><span id="local-6989586621682353834"><span id="local-6989586621682353839"><span id="local-6989586621682353841"><span id="local-6989586621682353843"><span id="local-6989586621682353849"><span id="local-6989586621682353854"><span id="local-6989586621682353857"><span id="local-6989586621682353860"><span id="local-6989586621682353863"><span id="local-6989586621682353866"><span id="local-6989586621682353869"><span id="local-6989586621682353874"><span id="local-6989586621682353879"><span class="annot"><span class="annottext">Typeable FieldLabel
+</span><span id="line-78"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682503985"><span id="local-6989586621682503993"><span id="local-6989586621682503998"><span id="local-6989586621682504000"><span id="local-6989586621682504002"><span id="local-6989586621682504008"><span id="local-6989586621682504013"><span id="local-6989586621682504016"><span id="local-6989586621682504019"><span id="local-6989586621682504022"><span id="local-6989586621682504025"><span id="local-6989586621682504028"><span id="local-6989586621682504033"><span id="local-6989586621682504038"><span class="annot"><span class="annottext">Typeable FieldLabel
 Typeable FieldLabel =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -241,7 +241,7 @@ MonadPlus m =&gt;
 gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d) -&gt; FieldLabel -&gt; m FieldLabel
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682353889"><span id="local-6989586621682353895"><span class="annot"><span class="annottext">FieldLabel -&gt; FieldLabel -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682504048"><span id="local-6989586621682504054"><span class="annot"><span class="annottext">FieldLabel -&gt; FieldLabel -&gt; Bool
 (FieldLabel -&gt; FieldLabel -&gt; Bool)
 -&gt; (FieldLabel -&gt; FieldLabel -&gt; Bool) -&gt; Eq FieldLabel
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -269,21 +269,21 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><a href="GHC.Types.FieldLabel.html#flSelector"><span class="hs-identifier hs-var">flSelector</span></a></span><span>
 </span><span id="line-83"></span><span>
 </span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Types.Name.Occurrence.html#HasOccName"><span class="hs-identifier hs-type">HasOccName</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-85"></span><span>  </span><span id="local-6989586621682353906"><span class="annot"><span class="annottext">occName :: FieldLabel -&gt; OccName
-</span><a href="#local-6989586621682353906"><span class="hs-identifier hs-var hs-var hs-var">occName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OccName
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621682504065"><span class="annot"><span class="annottext">occName :: FieldLabel -&gt; OccName
+</span><a href="#local-6989586621682504065"><span class="hs-identifier hs-var hs-var hs-var">occName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name -&gt; OccName
 </span><a href="GHC.Types.Name.html#nameOccName"><span class="hs-identifier hs-var">nameOccName</span></a></span><span> </span><span class="annot"><span class="annottext">(Name -&gt; OccName) -&gt; (FieldLabel -&gt; Name) -&gt; FieldLabel -&gt; OccName
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FieldLabel -&gt; Name
 </span><a href="GHC.Types.FieldLabel.html#flSelector"><span class="hs-identifier hs-var">flSelector</span></a></span><span>
 </span><span id="line-86"></span><span>
 </span><span id="line-87"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-88"></span><span>    </span><span id="local-6989586621682353926"><span class="annot"><span class="annottext">ppr :: FieldLabel -&gt; SDoc
-</span><a href="#local-6989586621682353926"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span id="local-6989586621682353928"><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682353928"><span class="hs-identifier hs-var">fl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FieldLabelString -&gt; SDoc
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621682504085"><span class="annot"><span class="annottext">ppr :: FieldLabel -&gt; SDoc
+</span><a href="#local-6989586621682504085"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span id="local-6989586621682504087"><span class="annot"><span class="annottext">FieldLabel
+</span><a href="#local-6989586621682504087"><span class="hs-identifier hs-var">fl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FieldLabelString -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldLabel -&gt; FieldLabelString
 </span><a href="GHC.Types.FieldLabel.html#flLabel"><span class="hs-identifier hs-var">flLabel</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682353928"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682504087"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsOutput doc =&gt; doc -&gt; doc
@@ -293,43 +293,43 @@ forall doc. IsLine doc =&gt; doc -&gt; doc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldLabel -&gt; Name
 </span><a href="GHC.Types.FieldLabel.html#flSelector"><span class="hs-identifier hs-var">flSelector</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682353928"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682504087"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-89"></span><span>                                                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldLabel -&gt; DuplicateRecordFields
 </span><a href="GHC.Types.FieldLabel.html#flHasDuplicateRecordFields"><span class="hs-identifier hs-var">flHasDuplicateRecordFields</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682353928"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682504087"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-90"></span><span>                                                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldLabel -&gt; FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#flHasFieldSelector"><span class="hs-identifier hs-var">flHasFieldSelector</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682353928"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682504087"><span class="hs-identifier hs-var">fl</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-91"></span><span>
 </span><span id="line-92"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier hs-type">FieldLabelString</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-93"></span><span>  </span><span id="local-6989586621682353935"><span class="annot"><span class="annottext">ppr :: FieldLabelString -&gt; SDoc
-</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier hs-type">FieldLabelString</span></a></span><span> </span><span id="local-6989586621682353936"><span class="annot"><span class="annottext">FastString
-</span><a href="#local-6989586621682353936"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FastString -&gt; SDoc
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621682504094"><span class="annot"><span class="annottext">ppr :: FieldLabelString -&gt; SDoc
+</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier hs-type">FieldLabelString</span></a></span><span> </span><span id="local-6989586621682504095"><span class="annot"><span class="annottext">FastString
+</span><a href="#local-6989586621682504095"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FastString -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">FastString
-</span><a href="#local-6989586621682353936"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><a href="#local-6989586621682504095"><span class="hs-identifier hs-var">l</span></a></span><span>
 </span><span id="line-94"></span><span>
 </span><span id="line-95"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Uniquable"><span class="hs-identifier hs-type">Uniquable</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier hs-type">FieldLabelString</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-96"></span><span>  </span><span id="local-6989586621682353942"><span class="annot"><span class="annottext">getUnique :: FieldLabelString -&gt; Unique
-</span><a href="#local-6989586621682353942"><span class="hs-identifier hs-var hs-var hs-var">getUnique</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier hs-type">FieldLabelString</span></a></span><span> </span><span id="local-6989586621682353944"><span class="annot"><span class="annottext">FastString
-</span><a href="#local-6989586621682353944"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FastString -&gt; Unique
+</span><span id="line-96"></span><span>  </span><span id="local-6989586621682504101"><span class="annot"><span class="annottext">getUnique :: FieldLabelString -&gt; Unique
+</span><a href="#local-6989586621682504101"><span class="hs-identifier hs-var hs-var hs-var">getUnique</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#FieldLabelString"><span class="hs-identifier hs-type">FieldLabelString</span></a></span><span> </span><span id="local-6989586621682504103"><span class="annot"><span class="annottext">FastString
+</span><a href="#local-6989586621682504103"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FastString -&gt; Unique
 forall a. Uniquable a =&gt; a -&gt; Unique
 </span><a href="GHC.Types.Unique.html#getUnique"><span class="hs-identifier hs-var">getUnique</span></a></span><span> </span><span class="annot"><span class="annottext">FastString
-</span><a href="#local-6989586621682353944"><span class="hs-identifier hs-var">fs</span></a></span><span>
+</span><a href="#local-6989586621682504103"><span class="hs-identifier hs-var">fs</span></a></span><span>
 </span><span id="line-97"></span><span>
 </span><span id="line-98"></span><span class="annot"><span class="hs-comment">-- | Flag to indicate whether the DuplicateRecordFields extension is enabled.</span></span><span>
 </span><span id="line-99"></span><span class="hs-keyword">data</span><span> </span><span id="DuplicateRecordFields"><span class="annot"><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-var">DuplicateRecordFields</span></a></span></span><span>
 </span><span id="line-100"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="DuplicateRecordFields"><span class="annot"><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-var">DuplicateRecordFields</span></a></span></span><span>   </span><span class="annot"><span class="hs-comment">-- ^ Fields may be duplicated in a single module</span></span><span>
 </span><span id="line-101"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="NoDuplicateRecordFields"><span class="annot"><a href="GHC.Types.FieldLabel.html#NoDuplicateRecordFields"><span class="hs-identifier hs-var">NoDuplicateRecordFields</span></a></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Fields must be unique within a module (the default)</span></span><span>
-</span><span id="line-102"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682353948"><span id="local-6989586621682353950"><span id="local-6989586621682353954"><span class="annot"><span class="annottext">Int -&gt; DuplicateRecordFields -&gt; ShowS
+</span><span id="line-102"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682504107"><span id="local-6989586621682504109"><span id="local-6989586621682504113"><span class="annot"><span class="annottext">Int -&gt; DuplicateRecordFields -&gt; ShowS
 [DuplicateRecordFields] -&gt; ShowS
 DuplicateRecordFields -&gt; String
 (Int -&gt; DuplicateRecordFields -&gt; ShowS)
@@ -344,7 +344,7 @@ $cshow :: DuplicateRecordFields -&gt; String
 show :: DuplicateRecordFields -&gt; String
 $cshowList :: [DuplicateRecordFields] -&gt; ShowS
 showList :: [DuplicateRecordFields] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682353959"><span id="local-6989586621682353964"><span class="annot"><span class="annottext">DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682504118"><span id="local-6989586621682504123"><span class="annot"><span class="annottext">DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
 (DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool)
 -&gt; (DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool)
 -&gt; Eq DuplicateRecordFields
@@ -353,7 +353,7 @@ $c== :: DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
 == :: DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
 $c/= :: DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
 /= :: DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682353969"><span id="local-6989586621682353971"><span id="local-6989586621682353973"><span id="local-6989586621682353975"><span id="local-6989586621682353977"><span id="local-6989586621682353982"><span id="local-6989586621682353987"><span id="local-6989586621682353990"><span id="local-6989586621682353993"><span id="local-6989586621682353996"><span id="local-6989586621682353999"><span id="local-6989586621682354002"><span id="local-6989586621682354007"><span id="local-6989586621682354012"><span class="annot"><span class="annottext">Typeable DuplicateRecordFields
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682504128"><span id="local-6989586621682504130"><span id="local-6989586621682504132"><span id="local-6989586621682504134"><span id="local-6989586621682504136"><span id="local-6989586621682504141"><span id="local-6989586621682504146"><span id="local-6989586621682504149"><span id="local-6989586621682504152"><span id="local-6989586621682504155"><span id="local-6989586621682504158"><span id="local-6989586621682504161"><span id="local-6989586621682504166"><span id="local-6989586621682504171"><span class="annot"><span class="annottext">Typeable DuplicateRecordFields
 Typeable DuplicateRecordFields =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -557,21 +557,21 @@ MonadPlus m =&gt;
 -&gt; DuplicateRecordFields -&gt; m DuplicateRecordFields
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-103"></span><span>
-</span><span id="line-104"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682354018"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-type">DuplicateRecordFields</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-105"></span><span>    </span><span id="local-6989586621682354026"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; DuplicateRecordFields -&gt; IO ()
-</span><a href="#local-6989586621682354026"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682354028"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354028"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span id="local-6989586621682354029"><span class="annot"><span class="annottext">DuplicateRecordFields
-</span><a href="#local-6989586621682354029"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Bool -&gt; IO ()
-forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354028"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DuplicateRecordFields
-</span><a href="#local-6989586621682354029"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
+</span><span id="line-104"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682504177"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-type">DuplicateRecordFields</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621682504185"><span class="annot"><span class="annottext">put_ :: WriteBinHandle -&gt; DuplicateRecordFields -&gt; IO ()
+</span><a href="#local-6989586621682504185"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682504187"><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504187"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span id="local-6989586621682504188"><span class="annot"><span class="annottext">DuplicateRecordFields
+</span><a href="#local-6989586621682504188"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; Bool -&gt; IO ()
+forall a. Binary a =&gt; WriteBinHandle -&gt; a -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504187"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DuplicateRecordFields
+</span><a href="#local-6989586621682504188"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
 </span><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-var">DuplicateRecordFields</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-106"></span><span>    </span><span id="local-6989586621682354033"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO DuplicateRecordFields
-</span><a href="#local-6989586621682354033"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682354035"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354035"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621682504192"><span class="annot"><span class="annottext">get :: ReadBinHandle -&gt; IO DuplicateRecordFields
+</span><a href="#local-6989586621682504192"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682504194"><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682504194"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
 -&gt; DuplicateRecordFields -&gt; Bool -&gt; DuplicateRecordFields
 forall a. a -&gt; a -&gt; Bool -&gt; a
 </span><span class="hs-identifier hs-var">bool</span></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
@@ -579,13 +579,13 @@ forall a. a -&gt; a -&gt; Bool -&gt; a
 </span><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-var">DuplicateRecordFields</span></a></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; DuplicateRecordFields)
 -&gt; IO Bool -&gt; IO DuplicateRecordFields
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Bool
-forall a. Binary a =&gt; BinHandle -&gt; IO a
-</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354035"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ReadBinHandle -&gt; IO Bool
+forall a. Binary a =&gt; ReadBinHandle -&gt; IO a
+</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682504194"><span class="hs-identifier hs-var">bh</span></a></span><span>
 </span><span id="line-107"></span><span>
 </span><span id="line-108"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-type">DuplicateRecordFields</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-109"></span><span>    </span><span id="local-6989586621682354041"><span class="annot"><span class="annottext">ppr :: DuplicateRecordFields -&gt; SDoc
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621682504200"><span class="annot"><span class="annottext">ppr :: DuplicateRecordFields -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
 </span><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-var">DuplicateRecordFields</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -597,11 +597,11 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-dup&quot;</span></span><span>
 </span><span id="line-111"></span><span>
-</span><span id="line-112"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-type">DuplicateRecordFields</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-113"></span><span>  </span><span id="local-6989586621682354046"><span class="annot"><span class="annottext">rnf :: DuplicateRecordFields -&gt; ()
-</span><a href="#local-6989586621682354046"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
+</span><span id="line-112"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-type">DuplicateRecordFields</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-113"></span><span>  </span><span id="local-6989586621682504205"><span class="annot"><span class="annottext">rnf :: DuplicateRecordFields -&gt; ()
+</span><a href="#local-6989586621682504205"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
 </span><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-var">DuplicateRecordFields</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-114"></span><span>  </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
+</span><span id="line-114"></span><span>  </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
 </span><a href="GHC.Types.FieldLabel.html#NoDuplicateRecordFields"><span class="hs-identifier hs-var">NoDuplicateRecordFields</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-115"></span><span>
 </span><span id="line-116"></span><span>
@@ -609,7 +609,7 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><span id="line-118"></span><span class="hs-keyword">data</span><span> </span><span id="FieldSelectors"><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-var">FieldSelectors</span></a></span></span><span>
 </span><span id="line-119"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="FieldSelectors"><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-var">FieldSelectors</span></a></span></span><span>   </span><span class="annot"><span class="hs-comment">-- ^ Selector functions are available (the default)</span></span><span>
 </span><span id="line-120"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="NoFieldSelectors"><span class="annot"><a href="GHC.Types.FieldLabel.html#NoFieldSelectors"><span class="hs-identifier hs-var">NoFieldSelectors</span></a></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Selector functions are not available</span></span><span>
-</span><span id="line-121"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682354051"><span id="local-6989586621682354053"><span id="local-6989586621682354057"><span class="annot"><span class="annottext">Int -&gt; FieldSelectors -&gt; ShowS
+</span><span id="line-121"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682504210"><span id="local-6989586621682504212"><span id="local-6989586621682504216"><span class="annot"><span class="annottext">Int -&gt; FieldSelectors -&gt; ShowS
 [FieldSelectors] -&gt; ShowS
 FieldSelectors -&gt; String
 (Int -&gt; FieldSelectors -&gt; ShowS)
@@ -624,7 +624,7 @@ $cshow :: FieldSelectors -&gt; String
 show :: FieldSelectors -&gt; String
 $cshowList :: [FieldSelectors] -&gt; ShowS
 showList :: [FieldSelectors] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682354060"><span id="local-6989586621682354064"><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682504219"><span id="local-6989586621682504223"><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool
 (FieldSelectors -&gt; FieldSelectors -&gt; Bool)
 -&gt; (FieldSelectors -&gt; FieldSelectors -&gt; Bool) -&gt; Eq FieldSelectors
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -632,7 +632,7 @@ $c== :: FieldSelectors -&gt; FieldSelectors -&gt; Bool
 == :: FieldSelectors -&gt; FieldSelectors -&gt; Bool
 $c/= :: FieldSelectors -&gt; FieldSelectors -&gt; Bool
 /= :: FieldSelectors -&gt; FieldSelectors -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682354069"><span id="local-6989586621682354071"><span id="local-6989586621682354073"><span id="local-6989586621682354075"><span id="local-6989586621682354077"><span id="local-6989586621682354082"><span id="local-6989586621682354087"><span id="local-6989586621682354090"><span id="local-6989586621682354093"><span id="local-6989586621682354096"><span id="local-6989586621682354099"><span id="local-6989586621682354102"><span id="local-6989586621682354107"><span id="local-6989586621682354112"><span class="annot"><span class="annottext">Typeable FieldSelectors
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682504228"><span id="local-6989586621682504230"><span id="local-6989586621682504232"><span id="local-6989586621682504234"><span id="local-6989586621682504236"><span id="local-6989586621682504241"><span id="local-6989586621682504246"><span id="local-6989586621682504249"><span id="local-6989586621682504252"><span id="local-6989586621682504255"><span id="local-6989586621682504258"><span id="local-6989586621682504261"><span id="local-6989586621682504266"><span id="local-6989586621682504271"><span class="annot"><span class="annottext">Typeable FieldSelectors
 Typeable FieldSelectors =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -816,33 +816,33 @@ MonadPlus m =&gt;
 -&gt; FieldSelectors -&gt; m FieldSelectors
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-122"></span><span>
-</span><span id="line-123"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682354118"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-type">FieldSelectors</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-124"></span><span>    </span><span id="local-6989586621682354124"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; FieldSelectors -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682354125"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354125"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span id="local-6989586621682354126"><span class="annot"><span class="annottext">FieldSelectors
-</span><a href="#local-6989586621682354126"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Bool -&gt; IO ()
-forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354125"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldSelectors
-</span><a href="#local-6989586621682354126"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool
+</span><span id="line-123"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682504277"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-type">FieldSelectors</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-124"></span><span>    </span><span id="local-6989586621682504283"><span class="annot"><span class="annottext">put_ :: WriteBinHandle -&gt; FieldSelectors -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682504284"><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504284"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span id="local-6989586621682504285"><span class="annot"><span class="annottext">FieldSelectors
+</span><a href="#local-6989586621682504285"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; Bool -&gt; IO ()
+forall a. Binary a =&gt; WriteBinHandle -&gt; a -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504284"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FieldSelectors
+</span><a href="#local-6989586621682504285"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-var">FieldSelectors</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-125"></span><span>    </span><span id="local-6989586621682354129"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO FieldSelectors
-</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682354130"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354130"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool -&gt; FieldSelectors
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621682504288"><span class="annot"><span class="annottext">get :: ReadBinHandle -&gt; IO FieldSelectors
+</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682504289"><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682504289"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool -&gt; FieldSelectors
 forall a. a -&gt; a -&gt; Bool -&gt; a
 </span><span class="hs-identifier hs-var">bool</span></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#NoFieldSelectors"><span class="hs-identifier hs-var">NoFieldSelectors</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-var">FieldSelectors</span></a></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; FieldSelectors) -&gt; IO Bool -&gt; IO FieldSelectors
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Bool
-forall a. Binary a =&gt; BinHandle -&gt; IO a
-</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354130"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ReadBinHandle -&gt; IO Bool
+forall a. Binary a =&gt; ReadBinHandle -&gt; IO a
+</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682504289"><span class="hs-identifier hs-var">bh</span></a></span><span>
 </span><span id="line-126"></span><span>
 </span><span id="line-127"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-type">FieldSelectors</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-128"></span><span>    </span><span id="local-6989586621682354134"><span class="annot"><span class="annottext">ppr :: FieldSelectors -&gt; SDoc
+</span><span id="line-128"></span><span>    </span><span id="local-6989586621682504293"><span class="annot"><span class="annottext">ppr :: FieldSelectors -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-var">FieldSelectors</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -854,70 +854,65 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-sel&quot;</span></span><span>
 </span><span id="line-130"></span><span>
-</span><span id="line-131"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-type">FieldSelectors</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-132"></span><span>  </span><span id="local-6989586621682354137"><span class="annot"><span class="annottext">rnf :: FieldSelectors -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
+</span><span id="line-131"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-type">FieldSelectors</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-132"></span><span>  </span><span id="local-6989586621682504296"><span class="annot"><span class="annottext">rnf :: FieldSelectors -&gt; ()
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#FieldSelectors"><span class="hs-identifier hs-var">FieldSelectors</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-133"></span><span>  </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
+</span><span id="line-133"></span><span>  </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#NoFieldSelectors"><span class="hs-identifier hs-var">NoFieldSelectors</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-134"></span><span>
 </span><span id="line-135"></span><span class="hs-comment">-- | We need the @Binary Name@ constraint here even though there is an instance</span><span>
 </span><span id="line-136"></span><span class="hs-comment">-- defined in &quot;GHC.Types.Name&quot;, because the we have a SOURCE import, so the</span><span>
 </span><span id="line-137"></span><span class="hs-comment">-- instance is not in scope.  And the instance cannot be added to Name.hs-boot</span><span>
 </span><span id="line-138"></span><span class="hs-comment">-- because &quot;GHC.Utils.Binary&quot; itself depends on &quot;GHC.Types.Name&quot;.</span><span>
-</span><span id="line-139"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682354141"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-140"></span><span>    </span><span id="local-6989586621682354150"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; FieldLabel -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682354151"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354151"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span id="local-6989586621682354152"><span class="annot"><span class="annottext">DuplicateRecordFields
-</span><a href="#local-6989586621682354152"><span class="hs-identifier hs-var">aa</span></a></span></span><span> </span><span id="local-6989586621682354153"><span class="annot"><span class="annottext">FieldSelectors
-</span><a href="#local-6989586621682354153"><span class="hs-identifier hs-var">ab</span></a></span></span><span> </span><span id="local-6989586621682354154"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682354154"><span class="hs-identifier hs-var">ac</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-141"></span><span>        </span><span class="annot"><span class="annottext">BinHandle -&gt; DuplicateRecordFields -&gt; IO ()
-forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354151"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
-</span><a href="#local-6989586621682354152"><span class="hs-identifier hs-var">aa</span></a></span><span>
-</span><span id="line-142"></span><span>        </span><span class="annot"><span class="annottext">BinHandle -&gt; FieldSelectors -&gt; IO ()
-forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354151"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
-</span><a href="#local-6989586621682354153"><span class="hs-identifier hs-var">ab</span></a></span><span>
-</span><span id="line-143"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; UserData
-</span><a href="GHC.Utils.Binary.html#getUserData"><span class="hs-identifier hs-var">getUserData</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354151"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-144"></span><span>          </span><span class="annot"><a href="GHC.Utils.Binary.html#UserData"><span class="hs-identifier hs-type">UserData</span></a></span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ud_put_binding_name :: UserData -&gt; BinHandle -&gt; Name -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#ud_put_binding_name"><span class="hs-identifier hs-var">ud_put_binding_name</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682354158"><span class="annot"><span class="annottext">BinHandle -&gt; Name -&gt; IO ()
-</span><a href="#local-6989586621682354158"><span class="hs-identifier hs-var">put_binding_name</span></a></span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-145"></span><span>              </span><span class="annot"><span class="annottext">BinHandle -&gt; Name -&gt; IO ()
-</span><a href="#local-6989586621682354158"><span class="hs-identifier hs-var">put_binding_name</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354151"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682354154"><span class="hs-identifier hs-var">ac</span></a></span><span>
-</span><span id="line-146"></span><span>    </span><span id="local-6989586621682354166"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO FieldLabel
-</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682354167"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354167"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-147"></span><span>        </span><span id="local-6989586621682354168"><span class="annot"><a href="#local-6989586621682354168"><span class="hs-identifier hs-var">aa</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO DuplicateRecordFields
-forall a. Binary a =&gt; BinHandle -&gt; IO a
-</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682354167"><span class="hs-identifier hs-var">bh</span></a></span><span>
-</span><span id="line-148"></span><span>        </span><span id="local-6989586621682354169"><span class="annot"><a href="#local-6989586621682354169"><span class="hs-identifier hs-var">ab</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-type">get</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682354167"><span class="hs-identifier hs-type">bh</span></a></span><span>
-</span><span id="line-149"></span><span>        </span><span id="local-6989586621682354170"><span class="annot"><a href="#local-6989586621682354170"><span class="hs-identifier hs-var">ac</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-type">get</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682354167"><span class="hs-identifier hs-type">bh</span></a></span><span>
-</span><span id="line-150"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682354168"><span class="hs-identifier hs-type">aa</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682354169"><span class="hs-identifier hs-type">ab</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682354170"><span class="hs-identifier hs-type">ac</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-151"></span><span>
-</span><span id="line-152"></span><span class="annot"><a href="GHC.Types.FieldLabel.html#flIsOverloaded"><span class="hs-identifier hs-type">flIsOverloaded</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-153"></span><span id="flIsOverloaded"><span class="annot"><span class="annottext">flIsOverloaded :: FieldLabel -&gt; Bool
-</span><a href="GHC.Types.FieldLabel.html#flIsOverloaded"><span class="hs-identifier hs-var hs-var">flIsOverloaded</span></a></span></span><span> </span><span id="local-6989586621682354171"><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682354171"><span class="hs-identifier hs-var">fl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-154"></span><span> </span><span class="annot"><span class="annottext">FieldLabel -&gt; DuplicateRecordFields
+</span><span id="line-139"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682504300"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-140"></span><span>    </span><span id="local-6989586621682504310"><span class="annot"><span class="annottext">put_ :: WriteBinHandle -&gt; FieldLabel -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682504311"><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504311"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span id="local-6989586621682504312"><span class="annot"><span class="annottext">DuplicateRecordFields
+</span><a href="#local-6989586621682504312"><span class="hs-identifier hs-var">aa</span></a></span></span><span> </span><span id="local-6989586621682504313"><span class="annot"><span class="annottext">FieldSelectors
+</span><a href="#local-6989586621682504313"><span class="hs-identifier hs-var">ab</span></a></span></span><span> </span><span id="local-6989586621682504314"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682504314"><span class="hs-identifier hs-var">ac</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-141"></span><span>        </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; DuplicateRecordFields -&gt; IO ()
+forall a. Binary a =&gt; WriteBinHandle -&gt; a -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504311"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
+</span><a href="#local-6989586621682504312"><span class="hs-identifier hs-var">aa</span></a></span><span>
+</span><span id="line-142"></span><span>        </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; FieldSelectors -&gt; IO ()
+forall a. Binary a =&gt; WriteBinHandle -&gt; a -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504311"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
+</span><a href="#local-6989586621682504313"><span class="hs-identifier hs-var">ab</span></a></span><span>
+</span><span id="line-143"></span><span>        </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; Name -&gt; IO ()
+forall a. Binary a =&gt; WriteBinHandle -&gt; a -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682504311"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682504314"><span class="hs-identifier hs-var">ac</span></a></span><span>
+</span><span id="line-144"></span><span>    </span><span id="local-6989586621682504322"><span class="annot"><span class="annottext">get :: ReadBinHandle -&gt; IO FieldLabel
+</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682504323"><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682504323"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-145"></span><span>        </span><span id="local-6989586621682504324"><span class="annot"><a href="#local-6989586621682504324"><span class="hs-identifier hs-var">aa</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadBinHandle -&gt; IO DuplicateRecordFields
+forall a. Binary a =&gt; ReadBinHandle -&gt; IO a
+</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682504323"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><span id="line-146"></span><span>        </span><span id="local-6989586621682504325"><span class="annot"><a href="#local-6989586621682504325"><span class="hs-identifier hs-var">ab</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-type">get</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682504323"><span class="hs-identifier hs-type">bh</span></a></span><span>
+</span><span id="line-147"></span><span>        </span><span id="local-6989586621682504326"><span class="annot"><a href="#local-6989586621682504326"><span class="hs-identifier hs-var">ac</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-type">get</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682504323"><span class="hs-identifier hs-type">bh</span></a></span><span>
+</span><span id="line-148"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682504324"><span class="hs-identifier hs-type">aa</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682504325"><span class="hs-identifier hs-type">ab</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682504326"><span class="hs-identifier hs-type">ac</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="annot"><a href="GHC.Types.FieldLabel.html#flIsOverloaded"><span class="hs-identifier hs-type">flIsOverloaded</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.FieldLabel.html#FieldLabel"><span class="hs-identifier hs-type">FieldLabel</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-151"></span><span id="flIsOverloaded"><span class="annot"><span class="annottext">flIsOverloaded :: FieldLabel -&gt; Bool
+</span><a href="GHC.Types.FieldLabel.html#flIsOverloaded"><span class="hs-identifier hs-var hs-var">flIsOverloaded</span></a></span></span><span> </span><span id="local-6989586621682504327"><span class="annot"><span class="annottext">FieldLabel
+</span><a href="#local-6989586621682504327"><span class="hs-identifier hs-var">fl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-152"></span><span> </span><span class="annot"><span class="annottext">FieldLabel -&gt; DuplicateRecordFields
 </span><a href="GHC.Types.FieldLabel.html#flHasDuplicateRecordFields"><span class="hs-identifier hs-var">flHasDuplicateRecordFields</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682354171"><span class="hs-identifier hs-var">fl</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
+</span><a href="#local-6989586621682504327"><span class="hs-identifier hs-var">fl</span></a></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields -&gt; DuplicateRecordFields -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">DuplicateRecordFields
 </span><a href="GHC.Types.FieldLabel.html#DuplicateRecordFields"><span class="hs-identifier hs-var">DuplicateRecordFields</span></a></span><span>
-</span><span id="line-155"></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span id="line-153"></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">FieldLabel -&gt; FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#flHasFieldSelector"><span class="hs-identifier hs-var">flHasFieldSelector</span></a></span><span> </span><span class="annot"><span class="annottext">FieldLabel
-</span><a href="#local-6989586621682354171"><span class="hs-identifier hs-var">fl</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool
+</span><a href="#local-6989586621682504327"><span class="hs-identifier hs-var">fl</span></a></span><span> </span><span class="annot"><span class="annottext">FieldSelectors -&gt; FieldSelectors -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">FieldSelectors
 </span><a href="GHC.Types.FieldLabel.html#NoFieldSelectors"><span class="hs-identifier hs-var">NoFieldSelectors</span></a></span><span>
-</span><span id="line-156"></span></pre></body></html>
+</span><span id="line-154"></span></pre></body></html>

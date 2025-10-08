@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679474838"><span id="local-6989586621679474839"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679489582"><span id="local-6989586621679489583"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
 </span><span id="line-4"></span><span>
@@ -28,7 +28,7 @@
 </span><span id="line-28"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-29"></span><span class="hs-keyword">newtype</span><span> </span><span id="UnqualComponentName"><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-var">UnqualComponentName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UnqualComponentName"><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-var">UnqualComponentName</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html#ShortText"><span class="hs-identifier hs-type">ShortText</span></a></span><span>
 </span><span id="line-30"></span><span>  </span><span class="hs-keyword">deriving</span><span>
-</span><span id="line-31"></span><span>    </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679474848"><span id="local-6989586621679474850"><span class="annot"><span class="annottext">(forall x. UnqualComponentName -&gt; Rep UnqualComponentName x)
+</span><span id="line-31"></span><span>    </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679489592"><span id="local-6989586621679489594"><span class="annot"><span class="annottext">(forall x. UnqualComponentName -&gt; Rep UnqualComponentName x)
 -&gt; (forall x. Rep UnqualComponentName x -&gt; UnqualComponentName)
 -&gt; Generic UnqualComponentName
 forall x. Rep UnqualComponentName x -&gt; UnqualComponentName
@@ -40,7 +40,7 @@ from :: forall x. UnqualComponentName -&gt; Rep UnqualComponentName x
 $cto :: forall x. Rep UnqualComponentName x -&gt; UnqualComponentName
 to :: forall x. Rep UnqualComponentName x -&gt; UnqualComponentName
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span>
-</span><span id="line-32"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474856"><span id="local-6989586621679474860"><span id="local-6989586621679474863"><span id="local-6989586621679474871"><span class="annot"><span class="annottext">ReadPrec [UnqualComponentName]
+</span><span id="line-32"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489600"><span id="local-6989586621679489604"><span id="local-6989586621679489607"><span id="local-6989586621679489615"><span class="annot"><span class="annottext">ReadPrec [UnqualComponentName]
 ReadPrec UnqualComponentName
 Int -&gt; ReadS UnqualComponentName
 ReadS [UnqualComponentName]
@@ -61,7 +61,7 @@ readPrec :: ReadPrec UnqualComponentName
 $creadListPrec :: ReadPrec [UnqualComponentName]
 readListPrec :: ReadPrec [UnqualComponentName]
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span>
-</span><span id="line-33"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474878"><span id="local-6989586621679474884"><span id="local-6989586621679474888"><span class="annot"><span class="annottext">Int -&gt; UnqualComponentName -&gt; ShowS
+</span><span id="line-33"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489622"><span id="local-6989586621679489628"><span id="local-6989586621679489632"><span class="annot"><span class="annottext">Int -&gt; UnqualComponentName -&gt; ShowS
 [UnqualComponentName] -&gt; ShowS
 UnqualComponentName -&gt; String
 (Int -&gt; UnqualComponentName -&gt; ShowS)
@@ -77,7 +77,7 @@ show :: UnqualComponentName -&gt; String
 $cshowList :: [UnqualComponentName] -&gt; ShowS
 showList :: [UnqualComponentName] -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span>
-</span><span id="line-34"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474893"><span id="local-6989586621679474898"><span class="annot"><span class="annottext">UnqualComponentName -&gt; UnqualComponentName -&gt; Bool
+</span><span id="line-34"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489637"><span id="local-6989586621679489642"><span class="annot"><span class="annottext">UnqualComponentName -&gt; UnqualComponentName -&gt; Bool
 (UnqualComponentName -&gt; UnqualComponentName -&gt; Bool)
 -&gt; (UnqualComponentName -&gt; UnqualComponentName -&gt; Bool)
 -&gt; Eq UnqualComponentName
@@ -87,7 +87,7 @@ $c== :: UnqualComponentName -&gt; UnqualComponentName -&gt; Bool
 $c/= :: UnqualComponentName -&gt; UnqualComponentName -&gt; Bool
 /= :: UnqualComponentName -&gt; UnqualComponentName -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span>
-</span><span id="line-35"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474907"><span id="local-6989586621679474912"><span id="local-6989586621679474916"><span id="local-6989586621679474920"><span id="local-6989586621679474924"><span id="local-6989586621679474928"><span id="local-6989586621679474932"><span class="annot"><span class="annottext">Eq UnqualComponentName
+</span><span id="line-35"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489651"><span id="local-6989586621679489656"><span id="local-6989586621679489660"><span id="local-6989586621679489664"><span id="local-6989586621679489668"><span id="local-6989586621679489672"><span id="local-6989586621679489676"><span class="annot"><span class="annottext">Eq UnqualComponentName
 Eq UnqualComponentName =&gt;
 (UnqualComponentName -&gt; UnqualComponentName -&gt; Ordering)
 -&gt; (UnqualComponentName -&gt; UnqualComponentName -&gt; Bool)
@@ -128,7 +128,7 @@ $cmin :: UnqualComponentName -&gt; UnqualComponentName -&gt; UnqualComponentName
 min :: UnqualComponentName -&gt; UnqualComponentName -&gt; UnqualComponentName
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span>
 </span><span id="line-36"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span>
-</span><span id="line-37"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474946"><span id="local-6989586621679474950"><span id="local-6989586621679474953"><span id="local-6989586621679474955"><span id="local-6989586621679474957"><span id="local-6989586621679474963"><span id="local-6989586621679474968"><span id="local-6989586621679474971"><span id="local-6989586621679474974"><span id="local-6989586621679474977"><span id="local-6989586621679474980"><span id="local-6989586621679474983"><span id="local-6989586621679474988"><span id="local-6989586621679474993"><span class="annot"><span class="annottext">Typeable UnqualComponentName
+</span><span id="line-37"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489690"><span id="local-6989586621679489694"><span id="local-6989586621679489697"><span id="local-6989586621679489699"><span id="local-6989586621679489701"><span id="local-6989586621679489707"><span id="local-6989586621679489712"><span id="local-6989586621679489715"><span id="local-6989586621679489718"><span id="local-6989586621679489721"><span id="local-6989586621679489724"><span id="local-6989586621679489727"><span id="local-6989586621679489732"><span id="local-6989586621679489737"><span class="annot"><span class="annottext">Typeable UnqualComponentName
 Typeable UnqualComponentName =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -325,7 +325,7 @@ MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d)
 -&gt; UnqualComponentName -&gt; m UnqualComponentName
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span>
-</span><span id="line-38"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679475003"><span id="local-6989586621679475008"><span id="local-6989586621679475014"><span class="annot"><span class="annottext">NonEmpty UnqualComponentName -&gt; UnqualComponentName
+</span><span id="line-38"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489747"><span id="local-6989586621679489752"><span id="local-6989586621679489756"><span class="annot"><span class="annottext">NonEmpty UnqualComponentName -&gt; UnqualComponentName
 UnqualComponentName -&gt; UnqualComponentName -&gt; UnqualComponentName
 (UnqualComponentName -&gt; UnqualComponentName -&gt; UnqualComponentName)
 -&gt; (NonEmpty UnqualComponentName -&gt; UnqualComponentName)
@@ -352,7 +352,7 @@ stimes :: forall b.
 Integral b =&gt;
 b -&gt; UnqualComponentName -&gt; UnqualComponentName
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Semigroup</span></span></span></span></span><span>
-</span><span id="line-39"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679475026"><span id="local-6989586621679475031"><span id="local-6989586621679475035"><span class="annot"><span class="annottext">Semigroup UnqualComponentName
+</span><span id="line-39"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489768"><span id="local-6989586621679489773"><span id="local-6989586621679489777"><span class="annot"><span class="annottext">Semigroup UnqualComponentName
 UnqualComponentName
 Semigroup UnqualComponentName =&gt;
 UnqualComponentName
@@ -379,17 +379,17 @@ mconcat :: [UnqualComponentName] -&gt; UnqualComponentName
 </span><span id="line-44"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-45"></span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-type">unUnqualComponentName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-46"></span><span id="unUnqualComponentName"><span class="annot"><span class="annottext">unUnqualComponentName :: UnqualComponentName -&gt; String
-</span><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-var hs-var">unUnqualComponentName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span id="local-6989586621679475040"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679475040"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
+</span><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-var hs-var">unUnqualComponentName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span id="local-6989586621679489782"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489782"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
 </span><a href="Distribution.Utils.ShortText.html#fromShortText"><span class="hs-identifier hs-var">fromShortText</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679475040"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679489782"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | @since 3.4.0.0</span></span><span>
 </span><span id="line-49"></span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentNameST"><span class="hs-identifier hs-type">unUnqualComponentNameST</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html#ShortText"><span class="hs-identifier hs-type">ShortText</span></a></span><span>
 </span><span id="line-50"></span><span id="unUnqualComponentNameST"><span class="annot"><span class="annottext">unUnqualComponentNameST :: UnqualComponentName -&gt; ShortText
-</span><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentNameST"><span class="hs-identifier hs-var hs-var">unUnqualComponentNameST</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span id="local-6989586621679475042"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679475042"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679475042"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentNameST"><span class="hs-identifier hs-var hs-var">unUnqualComponentNameST</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span id="local-6989586621679489784"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489784"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489784"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span class="hs-comment">-- | Construct a 'UnqualComponentName' from a 'String'</span><span>
 </span><span id="line-53"></span><span class="hs-comment">--</span><span>
@@ -412,16 +412,16 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-64"></span><span class="hs-comment">--</span><span>
 </span><span id="line-65"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-67"></span><span>  </span><span id="local-6989586621679475048"><span class="annot"><span class="annottext">fromString :: String -&gt; UnqualComponentName
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679489790"><span class="annot"><span class="annottext">fromString :: String -&gt; UnqualComponentName
 </span><span class="hs-identifier hs-var hs-var hs-var">fromString</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UnqualComponentName
 </span><a href="Distribution.Types.UnqualComponentName.html#mkUnqualComponentName"><span class="hs-identifier hs-var">mkUnqualComponentName</span></a></span><span>
 </span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679475050"><span id="local-6989586621679475057"><span id="local-6989586621679475063"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span></span></span></span><span>
-</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679475082"><span id="local-6989586621679475089"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span></span></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679489792"><span id="local-6989586621679489799"><span id="local-6989586621679489805"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span></span></span></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679489824"><span id="local-6989586621679489831"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span></span></span><span>
 </span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679475119"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>  </span><span id="local-6989586621679475123"><span class="annot"><span class="annottext">pretty :: UnqualComponentName -&gt; Doc
-</span><a href="#local-6989586621679475123"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679489861"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679489865"><span class="annot"><span class="annottext">pretty :: UnqualComponentName -&gt; Doc
+</span><a href="#local-6989586621679489865"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
 </span><a href="Distribution.Pretty.html#showToken"><span class="hs-identifier hs-var">showToken</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc)
 -&gt; (UnqualComponentName -&gt; String) -&gt; UnqualComponentName -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
@@ -429,8 +429,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-var">unUnqualComponentName</span></a></span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-76"></span><span>  </span><span id="local-6989586621679475140"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m UnqualComponentName
-</span><a href="#local-6989586621679475140"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UnqualComponentName
+</span><span id="line-76"></span><span>  </span><span id="local-6989586621679489882"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m UnqualComponentName
+</span><a href="#local-6989586621679489882"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; UnqualComponentName
 </span><a href="Distribution.Types.UnqualComponentName.html#mkUnqualComponentName"><span class="hs-identifier hs-var">mkUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; UnqualComponentName)
 -&gt; m String -&gt; m UnqualComponentName
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -438,13 +438,13 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall (m :: * -&gt; *). CabalParsing m =&gt; m String
 </span><a href="Distribution.Parsec.html#parsecUnqualComponentName"><span class="hs-identifier hs-var">parsecUnqualComponentName</span></a></span><span>
 </span><span id="line-77"></span><span>
-</span><span id="line-78"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-79"></span><span>  </span><span id="local-6989586621679475149"><span class="annot"><span class="annottext">rnf :: UnqualComponentName -&gt; ()
-</span><a href="#local-6989586621679475149"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span id="local-6989586621679475151"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679475151"><span class="hs-identifier hs-var">pkg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; ()
+</span><span id="line-78"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621679489891"><span class="annot"><span class="annottext">rnf :: UnqualComponentName -&gt; ()
+</span><a href="#local-6989586621679489891"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span id="local-6989586621679489893"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489893"><span class="hs-identifier hs-var">pkg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679475151"><span class="hs-identifier hs-var">pkg</span></a></span><span>
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489893"><span class="hs-identifier hs-var">pkg</span></a></span><span>
 </span><span id="line-80"></span><span>
 </span><span id="line-81"></span><span class="hs-comment">-- TODO avoid String round trip with these PackageName &lt;-&gt;</span><span>
 </span><span id="line-82"></span><span class="hs-comment">-- UnqualComponentName converters.</span><span>
@@ -491,44 +491,44 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-109"></span><span class="hs-comment">-- | Combine names in targets if one name is empty or both names are equal</span><span>
 </span><span id="line-110"></span><span class="hs-comment">-- (partial function).</span><span>
 </span><span id="line-111"></span><span class="hs-comment">-- Useful in 'Semigroup' and similar instances.</span><span>
-</span><span id="line-112"></span><span id="local-6989586621679474804"><span id="local-6989586621679474805"><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#combineNames"><span class="hs-identifier hs-type">combineNames</span></a></span><span>
-</span><span id="line-113"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679474804"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679474804"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679474804"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-114"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679474805"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-115"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679474805"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-116"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679474805"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679474804"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span id="local-6989586621679489548"><span id="local-6989586621679489549"><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#combineNames"><span class="hs-identifier hs-type">combineNames</span></a></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679489548"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679489548"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679489548"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679489549"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679489549"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-116"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679489549"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679489548"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-117"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-118"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679474804"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679489548"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
 </span><span id="line-119"></span><span id="combineNames"><span class="annot"><span class="annottext">combineNames :: forall b a.
 (Monoid b, Eq b, Show b) =&gt;
 a -&gt; a -&gt; (a -&gt; b) -&gt; String -&gt; b
-</span><a href="Distribution.Types.UnqualComponentName.html#combineNames"><span class="hs-identifier hs-var hs-var">combineNames</span></a></span></span><span> </span><span id="local-6989586621679475166"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679475166"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679475167"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679475167"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679475168"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679475168"><span class="hs-identifier hs-var">tacc</span></a></span></span><span> </span><span id="local-6989586621679475169"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679475169"><span class="hs-identifier hs-var">tt</span></a></span></span><span>
+</span><a href="Distribution.Types.UnqualComponentName.html#combineNames"><span class="hs-identifier hs-var hs-var">combineNames</span></a></span></span><span> </span><span id="local-6989586621679489908"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679489908"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679489909"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679489909"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679489910"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679489910"><span class="hs-identifier hs-var">tacc</span></a></span></span><span> </span><span id="local-6989586621679489911"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679489911"><span class="hs-identifier hs-var">tt</span></a></span></span><span>
 </span><span id="line-120"></span><span>  </span><span class="hs-comment">-- One empty or the same.</span><span>
 </span><span id="line-121"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475170"><span class="hs-identifier hs-var">nb</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679489912"><span class="hs-identifier hs-var">nb</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">b
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
 </span><span id="line-122"></span><span>      </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475172"><span class="hs-identifier hs-var">na</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679489914"><span class="hs-identifier hs-var">na</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475170"><span class="hs-identifier hs-var">nb</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679489912"><span class="hs-identifier hs-var">nb</span></a></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-123"></span><span>      </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475172"><span class="hs-identifier hs-var">na</span></a></span><span>
+</span><a href="#local-6989586621679489914"><span class="hs-identifier hs-var">na</span></a></span><span>
 </span><span id="line-124"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475172"><span class="hs-identifier hs-var">na</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679489914"><span class="hs-identifier hs-var">na</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">b
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-125"></span><span>      </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475170"><span class="hs-identifier hs-var">nb</span></a></span><span>
+</span><a href="#local-6989586621679489912"><span class="hs-identifier hs-var">nb</span></a></span><span>
 </span><span id="line-126"></span><span>  </span><span class="hs-comment">-- Both non-empty, different.</span><span>
 </span><span id="line-127"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
@@ -542,7 +542,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-130"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679475169"><span class="hs-identifier hs-var">tt</span></a></span><span>
+</span><a href="#local-6989586621679489911"><span class="hs-identifier hs-var">tt</span></a></span><span>
 </span><span id="line-131"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -552,7 +552,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475172"><span class="hs-identifier hs-var">na</span></a></span><span>
+</span><a href="#local-6989586621679489914"><span class="hs-identifier hs-var">na</span></a></span><span>
 </span><span id="line-133"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -562,18 +562,18 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475170"><span class="hs-identifier hs-var">nb</span></a></span><span>
+</span><a href="#local-6989586621679489912"><span class="hs-identifier hs-var">nb</span></a></span><span>
 </span><span id="line-135"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;'&quot;</span></span><span>
 </span><span id="line-136"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-137"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679475172"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475172"><span class="hs-identifier hs-var">na</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679475170"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679475170"><span class="hs-identifier hs-var">nb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679475168"><span class="hs-identifier hs-var">tacc</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679475166"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679475168"><span class="hs-identifier hs-var">tacc</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679475167"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679489914"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679489914"><span class="hs-identifier hs-var">na</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489912"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679489912"><span class="hs-identifier hs-var">nb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679489910"><span class="hs-identifier hs-var">tacc</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679489908"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679489910"><span class="hs-identifier hs-var">tacc</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679489909"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-138"></span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#combineNames"><span class="hs-pragma hs-type">combineNames</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-139"></span></pre></body></html>

@@ -24,8 +24,8 @@
 </span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.TestSuite.html#testGroup"><span class="hs-identifier">testGroup</span></a></span><span>
 </span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span class="hs-keyword">data</span><span> </span><span id="TestInstance"><span class="annot"><a href="Distribution.TestSuite.html#TestInstance"><span class="hs-identifier hs-var">TestInstance</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TestInstance"><span class="annot"><a href="Distribution.TestSuite.html#TestInstance"><span class="hs-identifier hs-var">TestInstance</span></a></span></span><span>
 </span><span id="line-31"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="run"><span class="annot"><span class="annottext">TestInstance -&gt; IO Progress
@@ -63,7 +63,7 @@
 </span><span id="line-55"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="optionDefault"><span class="annot"><span class="annottext">OptionDescr -&gt; Maybe String
 </span><a href="Distribution.TestSuite.html#optionDefault"><span class="hs-identifier hs-var hs-var">optionDefault</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-56"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-57"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679445784"><span id="local-6989586621679445794"><span class="annot"><span class="annottext">OptionDescr -&gt; OptionDescr -&gt; Bool
+</span><span id="line-57"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499445"><span id="local-6989586621679499455"><span class="annot"><span class="annottext">OptionDescr -&gt; OptionDescr -&gt; Bool
 (OptionDescr -&gt; OptionDescr -&gt; Bool)
 -&gt; (OptionDescr -&gt; OptionDescr -&gt; Bool) -&gt; Eq OptionDescr
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -71,7 +71,7 @@ $c== :: OptionDescr -&gt; OptionDescr -&gt; Bool
 == :: OptionDescr -&gt; OptionDescr -&gt; Bool
 $c/= :: OptionDescr -&gt; OptionDescr -&gt; Bool
 /= :: OptionDescr -&gt; OptionDescr -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679445800"><span id="local-6989586621679445804"><span id="local-6989586621679445807"><span id="local-6989586621679445829"><span class="annot"><span class="annottext">ReadPrec [OptionDescr]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499461"><span id="local-6989586621679499465"><span id="local-6989586621679499468"><span id="local-6989586621679499490"><span class="annot"><span class="annottext">ReadPrec [OptionDescr]
 ReadPrec OptionDescr
 Int -&gt; ReadS OptionDescr
 ReadS [OptionDescr]
@@ -91,7 +91,7 @@ $creadPrec :: ReadPrec OptionDescr
 readPrec :: ReadPrec OptionDescr
 $creadListPrec :: ReadPrec [OptionDescr]
 readListPrec :: ReadPrec [OptionDescr]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679445837"><span id="local-6989586621679445849"><span id="local-6989586621679445853"><span class="annot"><span class="annottext">Int -&gt; OptionDescr -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499498"><span id="local-6989586621679499510"><span id="local-6989586621679499514"><span class="annot"><span class="annottext">Int -&gt; OptionDescr -&gt; ShowS
 [OptionDescr] -&gt; ShowS
 OptionDescr -&gt; String
 (Int -&gt; OptionDescr -&gt; ShowS)
@@ -131,7 +131,7 @@ showList :: [OptionDescr] -&gt; ShowS
 </span><span id="line-73"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="OptionEnum"><span class="annot"><a href="Distribution.TestSuite.html#OptionEnum"><span class="hs-identifier hs-var">OptionEnum</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
 </span><span id="line-74"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="OptionSet"><span class="annot"><a href="Distribution.TestSuite.html#OptionSet"><span class="hs-identifier hs-var">OptionSet</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
 </span><span id="line-75"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="OptionRngSeed"><span class="annot"><a href="Distribution.TestSuite.html#OptionRngSeed"><span class="hs-identifier hs-var">OptionRngSeed</span></a></span></span><span>
-</span><span id="line-76"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679445872"><span id="local-6989586621679445890"><span class="annot"><span class="annottext">OptionType -&gt; OptionType -&gt; Bool
+</span><span id="line-76"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499533"><span id="local-6989586621679499551"><span class="annot"><span class="annottext">OptionType -&gt; OptionType -&gt; Bool
 (OptionType -&gt; OptionType -&gt; Bool)
 -&gt; (OptionType -&gt; OptionType -&gt; Bool) -&gt; Eq OptionType
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -139,7 +139,7 @@ $c== :: OptionType -&gt; OptionType -&gt; Bool
 == :: OptionType -&gt; OptionType -&gt; Bool
 $c/= :: OptionType -&gt; OptionType -&gt; Bool
 /= :: OptionType -&gt; OptionType -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679445894"><span id="local-6989586621679445897"><span id="local-6989586621679445900"><span id="local-6989586621679445944"><span class="annot"><span class="annottext">ReadPrec [OptionType]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499555"><span id="local-6989586621679499558"><span id="local-6989586621679499561"><span id="local-6989586621679499605"><span class="annot"><span class="annottext">ReadPrec [OptionType]
 ReadPrec OptionType
 Int -&gt; ReadS OptionType
 ReadS [OptionType]
@@ -159,7 +159,7 @@ $creadPrec :: ReadPrec OptionType
 readPrec :: ReadPrec OptionType
 $creadListPrec :: ReadPrec [OptionType]
 readListPrec :: ReadPrec [OptionType]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679445948"><span id="local-6989586621679445968"><span id="local-6989586621679445971"><span class="annot"><span class="annottext">Int -&gt; OptionType -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499609"><span id="local-6989586621679499629"><span id="local-6989586621679499632"><span class="annot"><span class="annottext">Int -&gt; OptionType -&gt; ShowS
 [OptionType] -&gt; ShowS
 OptionType -&gt; String
 (Int -&gt; OptionType -&gt; ShowS)
@@ -205,7 +205,7 @@ showList :: [OptionType] -&gt; ShowS
 </span><span id="line-101"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Pass"><span class="annot"><a href="Distribution.TestSuite.html#Pass"><span class="hs-identifier hs-var">Pass</span></a></span></span><span>
 </span><span id="line-102"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Fail"><span class="annot"><a href="Distribution.TestSuite.html#Fail"><span class="hs-identifier hs-var">Fail</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-103"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Error"><span class="annot"><a href="Distribution.TestSuite.html#Error"><span class="hs-identifier hs-var">Error</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-104"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679445986"><span id="local-6989586621679445993"><span class="annot"><span class="annottext">Result -&gt; Result -&gt; Bool
+</span><span id="line-104"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499647"><span id="local-6989586621679499654"><span class="annot"><span class="annottext">Result -&gt; Result -&gt; Bool
 (Result -&gt; Result -&gt; Bool)
 -&gt; (Result -&gt; Result -&gt; Bool) -&gt; Eq Result
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -213,7 +213,7 @@ $c== :: Result -&gt; Result -&gt; Bool
 == :: Result -&gt; Result -&gt; Bool
 $c/= :: Result -&gt; Result -&gt; Bool
 /= :: Result -&gt; Result -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679445997"><span id="local-6989586621679446001"><span id="local-6989586621679446004"><span id="local-6989586621679446017"><span class="annot"><span class="annottext">ReadPrec [Result]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499658"><span id="local-6989586621679499662"><span id="local-6989586621679499665"><span id="local-6989586621679499678"><span class="annot"><span class="annottext">ReadPrec [Result]
 ReadPrec Result
 Int -&gt; ReadS Result
 ReadS [Result]
@@ -233,7 +233,7 @@ $creadPrec :: ReadPrec Result
 readPrec :: ReadPrec Result
 $creadListPrec :: ReadPrec [Result]
 readListPrec :: ReadPrec [Result]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679446020"><span id="local-6989586621679446027"><span id="local-6989586621679446031"><span class="annot"><span class="annottext">Int -&gt; Result -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499681"><span id="local-6989586621679499688"><span id="local-6989586621679499692"><span class="annot"><span class="annottext">Int -&gt; Result -&gt; ShowS
 [Result] -&gt; ShowS
 Result -&gt; String
 (Int -&gt; Result -&gt; ShowS)
@@ -252,13 +252,13 @@ showList :: [Result] -&gt; ShowS
 </span><span id="line-107"></span><span class="hs-comment">-- parallel.</span><span>
 </span><span id="line-108"></span><span class="annot"><a href="Distribution.TestSuite.html#testGroup"><span class="hs-identifier hs-type">testGroup</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.TestSuite.html#Test"><span class="hs-identifier hs-type">Test</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.TestSuite.html#Test"><span class="hs-identifier hs-type">Test</span></a></span><span>
 </span><span id="line-109"></span><span id="testGroup"><span class="annot"><span class="annottext">testGroup :: String -&gt; [Test] -&gt; Test
-</span><a href="Distribution.TestSuite.html#testGroup"><span class="hs-identifier hs-var hs-var">testGroup</span></a></span></span><span> </span><span id="local-6989586621679446033"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679446033"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679446034"><span class="annot"><span class="annottext">[Test]
-</span><a href="#local-6989586621679446034"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.TestSuite.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">groupName :: String
+</span><a href="Distribution.TestSuite.html#testGroup"><span class="hs-identifier hs-var hs-var">testGroup</span></a></span></span><span> </span><span id="local-6989586621679499694"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499694"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679499695"><span class="annot"><span class="annottext">[Test]
+</span><a href="#local-6989586621679499695"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.TestSuite.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">groupName :: String
 </span><a href="Distribution.TestSuite.html#groupName"><span class="hs-identifier hs-var">groupName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679446033"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">concurrently :: Bool
+</span><a href="#local-6989586621679499694"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">concurrently :: Bool
 </span><a href="Distribution.TestSuite.html#concurrently"><span class="hs-identifier hs-var">concurrently</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">groupTests :: [Test]
 </span><a href="Distribution.TestSuite.html#groupTests"><span class="hs-identifier hs-var">groupTests</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Test]
-</span><a href="#local-6989586621679446034"><span class="hs-identifier hs-var">ts</span></a></span><span class="hs-special">}</span><span>
+</span><a href="#local-6989586621679499695"><span class="hs-identifier hs-var">ts</span></a></span><span class="hs-special">}</span><span>
 </span><span id="line-110"></span></pre></body></html>

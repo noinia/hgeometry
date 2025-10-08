@@ -39,15 +39,15 @@
 </span><span id="line-39"></span><span>                        </span><span class="hs-comment">-- foreign call or allocating primOp)</span><span>
 </span><span id="line-40"></span><span>
 </span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.StgToCmm.Sequel.html#Sequel"><span class="hs-identifier hs-type">Sequel</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-42"></span><span>    </span><span id="local-6989586621682619637"><span class="annot"><span class="annottext">ppr :: Sequel -&gt; SDoc
-</span><a href="#local-6989586621682619637"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="annot"><span class="annottext">Sequel
+</span><span id="line-42"></span><span>    </span><span id="local-6989586621682807779"><span class="annot"><span class="annottext">ppr :: Sequel -&gt; SDoc
+</span><a href="#local-6989586621682807779"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="annot"><span class="annottext">Sequel
 </span><a href="GHC.StgToCmm.Sequel.html#Return"><span class="hs-identifier hs-var">Return</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Return&quot;</span></span><span>
-</span><span id="line-43"></span><span>    </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.StgToCmm.Sequel.html#AssignTo"><span class="hs-identifier hs-type">AssignTo</span></a></span><span> </span><span id="local-6989586621682619640"><span class="annot"><span class="annottext">[LocalReg]
-</span><a href="#local-6989586621682619640"><span class="hs-identifier hs-var">regs</span></a></span></span><span> </span><span id="local-6989586621682619641"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682619641"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-43"></span><span>    </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.StgToCmm.Sequel.html#AssignTo"><span class="hs-identifier hs-type">AssignTo</span></a></span><span> </span><span id="local-6989586621682807782"><span class="annot"><span class="annottext">[LocalReg]
+</span><a href="#local-6989586621682807782"><span class="hs-identifier hs-var">regs</span></a></span></span><span> </span><span id="local-6989586621682807783"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682807783"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;AssignTo&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -55,12 +55,12 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">[LocalReg] -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">[LocalReg]
-</span><a href="#local-6989586621682619640"><span class="hs-identifier hs-var">regs</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682807782"><span class="hs-identifier hs-var">regs</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682619641"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621682807783"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="hs-keyword">data</span><span> </span><span id="SelfLoopInfo"><span class="annot"><a href="GHC.StgToCmm.Sequel.html#SelfLoopInfo"><span class="hs-identifier hs-var">SelfLoopInfo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MkSelfLoopInfo"><span class="annot"><a href="GHC.StgToCmm.Sequel.html#MkSelfLoopInfo"><span class="hs-identifier hs-var">MkSelfLoopInfo</span></a></span></span><span>
 </span><span id="line-46"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="sli_id"><span class="annot"><span class="annottext">SelfLoopInfo -&gt; Id

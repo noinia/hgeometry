@@ -6,7 +6,7 @@
 --   
 --   Time, clocks and calendars
 @package time
-@version 1.12.2
+@version 1.14
 
 
 -- | ISO 8601 Ordinal Date format
@@ -27,40 +27,10 @@ type DayOfYear = Int
 --   on reckoning.
 type WeekOfYear = Int
 
--- | Is this year a leap year according to the proleptic Gregorian
---   calendar?
-isLeapYear :: Year -> Bool
-
--- | Convert to ISO 8601 Ordinal Date format.
-toOrdinalDate :: Day -> (Year, DayOfYear)
-
--- | Convert from ISO 8601 Ordinal Date format. Invalid day numbers will be
---   clipped to the correct range (1 to 365 or 366).
-fromOrdinalDate :: Year -> DayOfYear -> Day
-
 -- | Bidirectional abstract constructor for ISO 8601 Ordinal Date format.
 --   Invalid day numbers will be clipped to the correct range (1 to 365 or
 --   366).
 pattern YearDay :: Year -> DayOfYear -> Day
-
--- | Convert from ISO 8601 Ordinal Date format. Invalid day numbers return
---   <a>Nothing</a>
-fromOrdinalDateValid :: Year -> DayOfYear -> Maybe Day
-
--- | Show in ISO 8601 Ordinal Date format (yyyy-ddd)
-showOrdinalDate :: Day -> String
-
--- | Get the number of the Monday-starting week in the year and the day of
---   the week. The first Monday is the first day of week 1, any earlier
---   days in the year are week 0 (as <tt>%W</tt> in <a>formatTime</a>).
---   Monday is 1, Sunday is 7 (as <tt>%u</tt> in <a>formatTime</a>).
-mondayStartWeek :: Day -> (WeekOfYear, Int)
-
--- | Get the number of the Sunday-starting week in the year and the day of
---   the week. The first Sunday is the first day of week 1, any earlier
---   days in the year are week 0 (as <tt>%U</tt> in <a>formatTime</a>).
---   Sunday is 0, Saturday is 6 (as <tt>%w</tt> in <a>formatTime</a>).
-sundayStartWeek :: Day -> (WeekOfYear, Int)
 
 -- | The inverse of <a>mondayStartWeek</a>. Get a <a>Day</a> given the
 --   year, the number of the Monday-starting week, and the day of the week.
@@ -69,12 +39,42 @@ sundayStartWeek :: Day -> (WeekOfYear, Int)
 fromMondayStartWeek :: Year -> WeekOfYear -> Int -> Day
 fromMondayStartWeekValid :: Year -> WeekOfYear -> Int -> Maybe Day
 
+-- | Convert from ISO 8601 Ordinal Date format. Invalid day numbers will be
+--   clipped to the correct range (1 to 365 or 366).
+fromOrdinalDate :: Year -> DayOfYear -> Day
+
+-- | Convert from ISO 8601 Ordinal Date format. Invalid day numbers return
+--   <a>Nothing</a>
+fromOrdinalDateValid :: Year -> DayOfYear -> Maybe Day
+
 -- | The inverse of <a>sundayStartWeek</a>. Get a <a>Day</a> given the year
 --   and the number of the day of a Sunday-starting week. The first Sunday
 --   is the first day of week 1, any earlier days in the year are week 0
 --   (as <tt>%U</tt> in <a>formatTime</a>).
 fromSundayStartWeek :: Year -> WeekOfYear -> Int -> Day
 fromSundayStartWeekValid :: Year -> WeekOfYear -> Int -> Maybe Day
+
+-- | Is this year a leap year according to the proleptic Gregorian
+--   calendar?
+isLeapYear :: Year -> Bool
+
+-- | Get the number of the Monday-starting week in the year and the day of
+--   the week. The first Monday is the first day of week 1, any earlier
+--   days in the year are week 0 (as <tt>%W</tt> in <a>formatTime</a>).
+--   Monday is 1, Sunday is 7 (as <tt>%u</tt> in <a>formatTime</a>).
+mondayStartWeek :: Day -> (WeekOfYear, Int)
+
+-- | Show in ISO 8601 Ordinal Date format (yyyy-ddd)
+showOrdinalDate :: Day -> String
+
+-- | Get the number of the Sunday-starting week in the year and the day of
+--   the week. The first Sunday is the first day of week 1, any earlier
+--   days in the year are week 0 (as <tt>%U</tt> in <a>formatTime</a>).
+--   Sunday is 0, Saturday is 6 (as <tt>%w</tt> in <a>formatTime</a>).
+sundayStartWeek :: Day -> (WeekOfYear, Int)
+
+-- | Convert to ISO 8601 Ordinal Date format.
+toOrdinalDate :: Day -> (Year, DayOfYear)
 
 module Data.Time.Calendar.MonthDay
 
@@ -147,22 +147,22 @@ type DayOfMonth = Int
 --   a common year, 366 in a leap year.
 type DayOfYear = Int
 
--- | Convert to proleptic Julian year and day format.
-toJulianYearAndDay :: Day -> (Year, DayOfYear)
-
 -- | Convert from proleptic Julian year and day format. Invalid day numbers
 --   will be clipped to the correct range (1 to 365 or 366).
 fromJulianYearAndDay :: Year -> DayOfYear -> Day
-
--- | Is this year a leap year according to the proleptic Julian calendar?
-isJulianLeapYear :: Year -> Bool
 
 -- | Convert from proleptic Julian year and day format. Invalid day numbers
 --   will return Nothing
 fromJulianYearAndDayValid :: Year -> DayOfYear -> Maybe Day
 
+-- | Is this year a leap year according to the proleptic Julian calendar?
+isJulianLeapYear :: Year -> Bool
+
 -- | Show in proleptic Julian year and day format (yyyy-ddd)
 showJulianYearAndDay :: Day -> String
+
+-- | Convert to proleptic Julian year and day format.
+toJulianYearAndDay :: Day -> (Year, DayOfYear)
 
 -- | Convert to proleptic Julian calendar.
 toJulian :: Day -> (Year, MonthOfYear, DayOfMonth)
@@ -212,8 +212,7 @@ addJulianDurationRollOver :: CalendarDiffDays -> Day -> Day
 -- | Calendrical difference, with as many whole months as possible
 diffJulianDurationClip :: Day -> Day -> CalendarDiffDays
 
--- | Calendrical difference, with as many whole months as possible. Same as
---   <a>diffJulianDurationClip</a> for positive durations.
+-- | Calendrical difference, with as many whole months as possible.
 diffJulianDurationRollOver :: Day -> Day -> CalendarDiffDays
 
 
@@ -240,7 +239,9 @@ instance GHC.Internal.Data.Data.Data Data.Time.Calendar.Month.Month
 instance Data.Time.Calendar.Days.DayPeriod Data.Time.Calendar.Month.Month
 instance GHC.Internal.Enum.Enum Data.Time.Calendar.Month.Month
 instance GHC.Classes.Eq Data.Time.Calendar.Month.Month
+instance GHC.Internal.Generics.Generic Data.Time.Calendar.Month.Month
 instance GHC.Internal.Ix.Ix Data.Time.Calendar.Month.Month
+instance GHC.Internal.TH.Lift.Lift Data.Time.Calendar.Month.Month
 instance Control.DeepSeq.NFData Data.Time.Calendar.Month.Month
 instance GHC.Classes.Ord Data.Time.Calendar.Month.Month
 instance GHC.Internal.Read.Read Data.Time.Calendar.Month.Month
@@ -290,8 +291,11 @@ instance GHC.Internal.Enum.Enum Data.Time.Calendar.Quarter.Quarter
 instance GHC.Internal.Enum.Enum Data.Time.Calendar.Quarter.QuarterOfYear
 instance GHC.Classes.Eq Data.Time.Calendar.Quarter.Quarter
 instance GHC.Classes.Eq Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Internal.Generics.Generic Data.Time.Calendar.Quarter.Quarter
+instance GHC.Internal.Generics.Generic Data.Time.Calendar.Quarter.QuarterOfYear
 instance GHC.Internal.Ix.Ix Data.Time.Calendar.Quarter.Quarter
 instance GHC.Internal.Ix.Ix Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Internal.TH.Lift.Lift Data.Time.Calendar.Quarter.QuarterOfYear
 instance Control.DeepSeq.NFData Data.Time.Calendar.Quarter.Quarter
 instance Control.DeepSeq.NFData Data.Time.Calendar.Quarter.QuarterOfYear
 instance GHC.Classes.Ord Data.Time.Calendar.Quarter.Quarter
@@ -367,6 +371,7 @@ fromWeekDateValid :: Year -> WeekOfYear -> Int -> Maybe Day
 -- | Show in ISO 8601 Week Date format as yyyy-Www-d (e.g. "2006-W46-3").
 showWeekDate :: Day -> String
 instance GHC.Classes.Eq Data.Time.Calendar.WeekDate.FirstWeekType
+instance GHC.Internal.TH.Lift.Lift Data.Time.Calendar.WeekDate.FirstWeekType
 
 
 -- | Fast access to the system clock.
@@ -461,11 +466,12 @@ MkFormat :: (t -> Maybe String) -> ReadP t -> Format t
 
 -- | Read a value in the format
 [formatReadP] :: Format t -> ReadP t
+quotBy :: (Real a, Integral b) => a -> a -> b
+remBy :: Real a => a -> a -> a
+formatGeneral :: Bool -> Bool -> Int -> Char -> (TimeLocale -> PadOption -> t -> String) -> FormatOptions -> t -> String
+formatNumber :: ShowPadded i => Bool -> Int -> Char -> (t -> i) -> FormatOptions -> t -> String
+formatNumberStd :: Int -> (t -> Integer) -> FormatOptions -> t -> String
 formatString :: (TimeLocale -> t -> String) -> FormatOptions -> t -> String
-data PadOption
-class FormatTime t
-
-formatCharacter :: FormatTime t => Bool -> Char -> Maybe (FormatOptions -> t -> String)
 
 -- | Substitute various time-related information for each %-code in the
 --   string, as per <a>formatCharacter</a>.
@@ -738,20 +744,27 @@ formatCharacter :: FormatTime t => Bool -> Char -> Maybe (FormatOptions -> t -> 
 --   point and &lt;width&gt; (default 12) decimal places.</li>
 --   </ul>
 formatTime :: FormatTime t => TimeLocale -> String -> t -> String
+showPaddedFixed :: HasResolution a => PadOption -> PadOption -> Fixed a -> String
+showPaddedFixedFraction :: HasResolution a => PadOption -> Fixed a -> String
+data PadOption
+class (Num t, Ord t, Show t) => ShowPadded t
 type FormatNumericPadding = Maybe Char
 data FormatOptions
 MkFormatOptions :: TimeLocale -> Maybe FormatNumericPadding -> Maybe Int -> FormatOptions
 [foLocale] :: FormatOptions -> TimeLocale
 [foPadding] :: FormatOptions -> Maybe FormatNumericPadding
 [foWidth] :: FormatOptions -> Maybe Int
-class (Num t, Ord t, Show t) => ShowPadded t
-formatGeneral :: Bool -> Bool -> Int -> Char -> (TimeLocale -> PadOption -> t -> String) -> FormatOptions -> t -> String
-formatNumber :: ShowPadded i => Bool -> Int -> Char -> (t -> i) -> FormatOptions -> t -> String
-formatNumberStd :: Int -> (t -> Integer) -> FormatOptions -> t -> String
-showPaddedFixed :: HasResolution a => PadOption -> PadOption -> Fixed a -> String
-showPaddedFixedFraction :: HasResolution a => PadOption -> Fixed a -> String
-quotBy :: (Real a, Integral b) => a -> a -> b
-remBy :: Real a => a -> a -> a
+class FormatTime t
+
+formatCharacter :: FormatTime t => Bool -> Char -> Maybe (FormatOptions -> t -> String)
+durationParseTimeSpecifier :: TimeLocale -> Maybe ParseNumericPadding -> Char -> ReadP String
+parseSpecifiers :: ParseTime t => Proxy t -> TimeLocale -> String -> ReadP [(Char, String)]
+timeParseTimeSpecifier :: TimeLocale -> Maybe ParseNumericPadding -> Char -> ReadP String
+timeSubstituteTimeSpecifier :: TimeLocale -> Char -> Maybe String
+data ParseNumericPadding
+NoPadding :: ParseNumericPadding
+SpacePadding :: ParseNumericPadding
+ZeroPadding :: ParseNumericPadding
 
 -- | The class of types which can be parsed given a UNIX-style time format
 --   string.
@@ -768,14 +781,178 @@ parseTimeSpecifier :: ParseTime t => Proxy t -> TimeLocale -> Maybe ParseNumeric
 --   was a Thursday). In the absence of <tt>%C</tt> or <tt>%Y</tt>, century
 --   is 1969 - 2068.
 buildTime :: ParseTime t => TimeLocale -> [(Char, String)] -> Maybe t
-data ParseNumericPadding
-NoPadding :: ParseNumericPadding
-SpacePadding :: ParseNumericPadding
-ZeroPadding :: ParseNumericPadding
-parseSpecifiers :: ParseTime t => Proxy t -> TimeLocale -> String -> ReadP [(Char, String)]
-timeSubstituteTimeSpecifier :: TimeLocale -> Char -> Maybe String
-timeParseTimeSpecifier :: TimeLocale -> Maybe ParseNumericPadding -> Char -> ReadP String
-durationParseTimeSpecifier :: TimeLocale -> Maybe ParseNumericPadding -> Char -> ReadP String
+
+module Data.Time.Format.ISO8601
+
+-- | A text format for a type
+data Format t
+
+-- | Show a value in the format, if representable
+formatShowM :: Format t -> t -> Maybe String
+
+-- | Show a value in the format, or error if unrepresentable
+formatShow :: Format t -> t -> String
+
+-- | Read a value in the format
+formatReadP :: Format t -> ReadP t
+
+-- | Parse a value in the format
+formatParseM :: MonadFail m => Format t -> String -> m t
+class ISO8601 t
+
+-- | The most commonly used ISO 8601 format for this type.
+iso8601Format :: ISO8601 t => Format t
+
+-- | Show in the most commonly used ISO 8601 format.
+iso8601Show :: ISO8601 t => t -> String
+
+-- | Parse the most commonly used ISO 8601 format.
+iso8601ParseM :: (MonadFail m, ISO8601 t) => String -> m t
+data FormatExtension
+
+-- | Use hyphens and colons. [ISO 8601:2004(E) sec. 2.3.4]
+ExtendedFormat :: FormatExtension
+
+-- | Omit hyphens and colons. "The basic format should be avoided in plain
+--   text." [ISO 8601:2004(E) sec. 2.3.3]
+BasicFormat :: FormatExtension
+
+-- | Read a value in either extended or basic format
+formatReadPExtension :: (FormatExtension -> Format t) -> ReadP t
+
+-- | Parse a value in either extended or basic format
+parseFormatExtension :: MonadFail m => (FormatExtension -> Format t) -> String -> m t
+
+-- | <tt>yyyy-mm-dd</tt> (extended), <tt>yyyymmdd</tt> (basic) [ISO
+--   8601:2004(E) sec. 4.1.2.2]
+calendarFormat :: FormatExtension -> Format Day
+
+-- | <tt>yyyy-mm</tt> [ISO 8601:2004(E) sec. 4.1.2.3(a)]
+yearMonthFormat :: Format (Integer, Int)
+
+-- | <tt>yyyy</tt> [ISO 8601:2004(E) sec. 4.1.2.3(b)]
+yearFormat :: Format Integer
+
+-- | <tt>yy</tt> [ISO 8601:2004(E) sec. 4.1.2.3(c)]
+centuryFormat :: Format Integer
+
+-- | <tt>±<b>y</b>yyyy-mm-dd</tt> (extended), <tt>±<b>y</b>yyyymmdd</tt>
+--   (basic) [ISO 8601:2004(E) sec. 4.1.2.4(a)]
+expandedCalendarFormat :: Int -> FormatExtension -> Format Day
+
+-- | <tt>±<b>y</b>yyyy-mm</tt> [ISO 8601:2004(E) sec. 4.1.2.4(b)]
+expandedYearMonthFormat :: Int -> Format (Integer, Int)
+
+-- | <tt>±<b>y</b>yyyy</tt> [ISO 8601:2004(E) sec. 4.1.2.4(c)]
+expandedYearFormat :: Int -> Format Integer
+
+-- | <tt>±<b>y</b>yy</tt> [ISO 8601:2004(E) sec. 4.1.2.4(d)]
+expandedCenturyFormat :: Int -> Format Integer
+
+-- | <tt>yyyy-ddd</tt> (extended), <tt>yyyyddd</tt> (basic) [ISO
+--   8601:2004(E) sec. 4.1.3.2]
+ordinalDateFormat :: FormatExtension -> Format Day
+
+-- | <tt><b>y</b>yyyy-ddd</tt> (extended), <tt><b>y</b>yyyyddd</tt> (basic)
+--   [ISO 8601:2004(E) sec. 4.1.3.3]
+expandedOrdinalDateFormat :: Int -> FormatExtension -> Format Day
+
+-- | <tt>yyyy-Www-D</tt> (extended), <tt>yyyyWwwd</tt> (basic) [ISO
+--   8601:2004(E) sec. 4.1.4.2]
+weekDateFormat :: FormatExtension -> Format Day
+
+-- | <tt>yyyy-Www</tt> (extended), <tt>yyyyWww</tt> (basic) [ISO
+--   8601:2004(E) sec. 4.1.4.3]
+yearWeekFormat :: FormatExtension -> Format (Integer, Int)
+
+-- | <tt>±<b>y</b>yyyy-Www-d</tt> (extended), <tt>±<b>y</b>yyyyWwwD</tt>
+--   (basic) [ISO 8601:2004(E) sec. 4.1.4.4]
+expandedWeekDateFormat :: Int -> FormatExtension -> Format Day
+
+-- | <tt>±<b>y</b>yyyy-Www</tt> (extended), <tt>±<b>y</b>yyyyWww</tt>
+--   (basic) [ISO 8601:2004(E) sec. 4.1.4.4]
+expandedYearWeekFormat :: Int -> FormatExtension -> Format (Integer, Int)
+
+-- | <tt>hh:mm:ss[.s<b>s</b>]</tt> (extended), <tt>hhmmss[.s<b>s</b>]</tt>
+--   (basic) [ISO 8601:2004(E) sec. 4.2.2.2, 4.2.2.4(a)]
+timeOfDayFormat :: FormatExtension -> Format TimeOfDay
+
+-- | <tt>hh:mm[.m<b>m</b>]</tt> (extended), <tt>hhmm[.m<b>m</b>]</tt>
+--   (basic) [ISO 8601:2004(E) sec. 4.2.2.3(a), 4.2.2.4(b)]
+hourMinuteFormat :: FormatExtension -> Format TimeOfDay
+
+-- | <tt>hh[.h<b>h</b>]</tt> [ISO 8601:2004(E) sec. 4.2.2.3(b), 4.2.2.4(c)]
+hourFormat :: Format TimeOfDay
+
+-- | <tt>Tx</tt> [ISO 8601:2004(E) sec. 4.2.2.5]
+withTimeDesignator :: Format t -> Format t
+
+-- | <tt>xZ</tt> [ISO 8601:2004(E) sec. 4.2.4]
+withUTCDesignator :: Format t -> Format t
+
+-- | <tt>±hh:mm</tt> (extended), <tt>±hhmm</tt> (basic) [ISO 8601:2004(E)
+--   sec. 4.2.5.1]
+timeOffsetFormat :: FormatExtension -> Format TimeZone
+
+-- | <tt>hh:mm:ss±hh:mm</tt> (extended), <tt>hhmmss±hhmm</tt> (basic) [ISO
+--   8601:2004(E) sec. 4.2.5.2]
+timeOfDayAndOffsetFormat :: FormatExtension -> Format (TimeOfDay, TimeZone)
+
+-- | <tt>xTy</tt> [ISO 8601:2004(E) sec. 4.3.2]
+localTimeFormat :: Format Day -> Format TimeOfDay -> Format LocalTime
+
+-- | <tt>xTy±hh:mm</tt> (extended), <tt>xTy±hhmm</tt> (basic) [ISO
+--   8601:2004(E) sec. 4.3.2]
+zonedTimeFormat :: Format Day -> Format TimeOfDay -> FormatExtension -> Format ZonedTime
+
+-- | <tt>xTyZ</tt> [ISO 8601:2004(E) sec. 4.3.2]
+utcTimeFormat :: Format Day -> Format TimeOfDay -> Format UTCTime
+
+-- | <tt>xTy</tt> [ISO 8601:2004(E) sec. 4.3.3]
+dayAndTimeFormat :: Format Day -> Format time -> Format (Day, time)
+
+-- | <tt>x±hh:mm</tt> (extended), <tt>x±hhmm</tt> (basic) [ISO 8601:2004(E)
+--   sec. 4.3.3]
+timeAndOffsetFormat :: Format t -> FormatExtension -> Format (t, TimeZone)
+
+-- | <tt>PyyYmmMddD</tt> [ISO 8601:2004(E) sec. 4.4.3.2]
+durationDaysFormat :: Format CalendarDiffDays
+
+-- | <tt>PyyYmmMddDThhHmmMss[.s<b>s</b>]S</tt> [ISO 8601:2004(E) sec.
+--   4.4.3.2]
+durationTimeFormat :: Format CalendarDiffTime
+
+-- | <tt>Pyyyy-mm-dd</tt> (extended), <tt>Pyyyymmdd</tt> (basic) [ISO
+--   8601:2004(E) sec. 4.4.3.3]
+alternativeDurationDaysFormat :: FormatExtension -> Format CalendarDiffDays
+
+-- | <tt>Pyyyy-mm-ddThh:mm:ss</tt> (extended), <tt>PyyyymmddThhmmss</tt>
+--   (basic) [ISO 8601:2004(E) sec. 4.4.3.3]
+alternativeDurationTimeFormat :: FormatExtension -> Format CalendarDiffTime
+
+-- | <tt>x/y</tt> [ISO 8601:2004(E) sec. 4.4.4.1]
+intervalFormat :: Format a -> Format b -> Format (a, b)
+
+-- | <tt>Rn/x/y</tt> [ISO 8601:2004(E) sec. 4.5]
+recurringIntervalFormat :: Format a -> Format b -> Format (Int, a, b)
+
+-- | Like <a>makeTimeOfDayValid</a>, but accepts <tt>24 0 0</tt> per ISO
+--   8601:2004(E) sec. 4.2.3
+isoMakeTimeOfDayValid :: Int -> Int -> Pico -> Maybe TimeOfDay
+instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E14
+instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E16
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Calendar.CalendarDiffDays.CalendarDiffDays
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.CalendarDiffTime.CalendarDiffTime
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Calendar.Days.Day
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.LocalTime.LocalTime
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeOfDay.TimeOfDay
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeZone.TimeZone
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Clock.Internal.UTCTime.UTCTime
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.ZonedTime.ZonedTime
+instance GHC.Internal.Read.Read Data.Time.Calendar.CalendarDiffDays.CalendarDiffDays
+instance GHC.Internal.Read.Read Data.Time.LocalTime.Internal.CalendarDiffTime.CalendarDiffTime
+instance GHC.Internal.Show.Show Data.Time.Calendar.CalendarDiffDays.CalendarDiffDays
+instance GHC.Internal.Show.Show Data.Time.LocalTime.Internal.CalendarDiffTime.CalendarDiffTime
 
 module Data.Time.Format
 class FormatTime t
@@ -1051,32 +1228,6 @@ class FormatTime t
 --   point and &lt;width&gt; (default 12) decimal places.</li>
 --   </ul>
 formatTime :: FormatTime t => TimeLocale -> String -> t -> String
-data TimeLocale
-TimeLocale :: [(String, String)] -> [(String, String)] -> (String, String) -> String -> String -> String -> String -> [TimeZone] -> TimeLocale
-
--- | full and abbreviated week days, starting with Sunday
-[wDays] :: TimeLocale -> [(String, String)]
-
--- | full and abbreviated months
-[months] :: TimeLocale -> [(String, String)]
-
--- | AM/PM symbols
-[amPm] :: TimeLocale -> (String, String)
-
--- | formatting strings
-[dateTimeFmt] :: TimeLocale -> String
-
--- | formatting strings
-[dateFmt] :: TimeLocale -> String
-
--- | formatting strings
-[timeFmt] :: TimeLocale -> String
-
--- | formatting strings
-[time12Fmt] :: TimeLocale -> String
-
--- | time zones known by name
-[knownTimeZones] :: TimeLocale -> [TimeZone]
 
 -- | Locale representing American usage.
 --   
@@ -1141,11 +1292,37 @@ parseTimeOrError :: ParseTime t => Bool -> TimeLocale -> String -> String -> t
 
 -- | Parse a time value given a format string. See <a>parseTimeM</a> for
 --   details.
-readSTime :: ParseTime t => Bool -> TimeLocale -> String -> ReadS t
+readPTime :: ParseTime t => Bool -> TimeLocale -> String -> ReadP t
 
 -- | Parse a time value given a format string. See <a>parseTimeM</a> for
 --   details.
-readPTime :: ParseTime t => Bool -> TimeLocale -> String -> ReadP t
+readSTime :: ParseTime t => Bool -> TimeLocale -> String -> ReadS t
+data TimeLocale
+TimeLocale :: [(String, String)] -> [(String, String)] -> (String, String) -> String -> String -> String -> String -> [TimeZone] -> TimeLocale
+
+-- | full and abbreviated week days, starting with Sunday
+[wDays] :: TimeLocale -> [(String, String)]
+
+-- | full and abbreviated months
+[months] :: TimeLocale -> [(String, String)]
+
+-- | AM/PM symbols
+[amPm] :: TimeLocale -> (String, String)
+
+-- | formatting strings
+[dateTimeFmt] :: TimeLocale -> String
+
+-- | formatting strings
+[dateFmt] :: TimeLocale -> String
+
+-- | formatting strings
+[timeFmt] :: TimeLocale -> String
+
+-- | formatting strings
+[time12Fmt] :: TimeLocale -> String
+
+-- | time zones known by name
+[knownTimeZones] :: TimeLocale -> [TimeZone]
 
 -- | The class of types which can be parsed given a UNIX-style time format
 --   string.
@@ -1222,6 +1399,48 @@ getTimeZone :: UTCTime -> IO TimeZone
 -- | Get the configured time-zone for the current time.
 getCurrentTimeZone :: IO TimeZone
 
+-- | Get the time of day given the fraction of a day since midnight.
+dayFractionToTimeOfDay :: Rational -> TimeOfDay
+
+-- | Convert a count of days and a time of day since midnight into a period
+--   of time.
+daysAndTimeOfDayToTime :: Integer -> TimeOfDay -> NominalDiffTime
+
+-- | Convert a time of day in some timezone to a time of day in UTC,
+--   together with a day adjustment.
+localToUTCTimeOfDay :: TimeZone -> TimeOfDay -> (Integer, TimeOfDay)
+makeTimeOfDayValid :: Int -> Int -> Pico -> Maybe TimeOfDay
+
+-- | Hour twelve
+midday :: TimeOfDay
+
+-- | Hour zero
+midnight :: TimeOfDay
+
+-- | Same as <a>timeToTimeOfDay</a>.
+pastMidnight :: DiffTime -> TimeOfDay
+
+-- | Same as <a>timeOfDayToTime</a>.
+sinceMidnight :: TimeOfDay -> DiffTime
+
+-- | Get the fraction of a day since midnight given a time of day.
+timeOfDayToDayFraction :: TimeOfDay -> Rational
+
+-- | Get the time since midnight for a given time of day.
+timeOfDayToTime :: TimeOfDay -> DiffTime
+
+-- | Convert a period of time into a count of days and a time of day since
+--   midnight. The time of day will never have a leap second.
+timeToDaysAndTimeOfDay :: NominalDiffTime -> (Integer, TimeOfDay)
+
+-- | Get the time of day given a time since midnight. Time more than 24h
+--   will be converted to leap-seconds.
+timeToTimeOfDay :: DiffTime -> TimeOfDay
+
+-- | Convert a time of day in UTC to a time of day in some timezone,
+--   together with a day adjustment.
+utcToLocalTimeOfDay :: TimeZone -> TimeOfDay -> (Integer, TimeOfDay)
+
 -- | Time of day as represented in hour, minute and second (with
 --   picoseconds), typically used to express local time of day.
 --   
@@ -1241,58 +1460,36 @@ TimeOfDay :: Int -> Int -> Pico -> TimeOfDay
 --   Any local minute may have a leap second, since leap seconds happen in
 --   all zones simultaneously
 [todSec] :: TimeOfDay -> Pico
-
--- | Hour zero
-midnight :: TimeOfDay
-
--- | Hour twelve
-midday :: TimeOfDay
-makeTimeOfDayValid :: Int -> Int -> Pico -> Maybe TimeOfDay
-
--- | Convert a period of time into a count of days and a time of day since
---   midnight. The time of day will never have a leap second.
-timeToDaysAndTimeOfDay :: NominalDiffTime -> (Integer, TimeOfDay)
-
--- | Convert a count of days and a time of day since midnight into a period
---   of time.
-daysAndTimeOfDayToTime :: Integer -> TimeOfDay -> NominalDiffTime
-
--- | Convert a time of day in UTC to a time of day in some timezone,
---   together with a day adjustment.
-utcToLocalTimeOfDay :: TimeZone -> TimeOfDay -> (Integer, TimeOfDay)
-
--- | Convert a time of day in some timezone to a time of day in UTC,
---   together with a day adjustment.
-localToUTCTimeOfDay :: TimeZone -> TimeOfDay -> (Integer, TimeOfDay)
-
--- | Get the time of day given a time since midnight. Time more than 24h
---   will be converted to leap-seconds.
-timeToTimeOfDay :: DiffTime -> TimeOfDay
-
--- | Same as <a>timeToTimeOfDay</a>.
-pastMidnight :: DiffTime -> TimeOfDay
-
--- | Get the time since midnight for a given time of day.
-timeOfDayToTime :: TimeOfDay -> DiffTime
-
--- | Same as <a>timeOfDayToTime</a>.
-sinceMidnight :: TimeOfDay -> DiffTime
-
--- | Get the time of day given the fraction of a day since midnight.
-dayFractionToTimeOfDay :: Rational -> TimeOfDay
-
--- | Get the fraction of a day since midnight given a time of day.
-timeOfDayToDayFraction :: TimeOfDay -> Rational
-data CalendarDiffTime
-CalendarDiffTime :: Integer -> NominalDiffTime -> CalendarDiffTime
-[ctMonths] :: CalendarDiffTime -> Integer
-[ctTime] :: CalendarDiffTime -> NominalDiffTime
 calendarTimeDays :: CalendarDiffDays -> CalendarDiffTime
 calendarTimeTime :: NominalDiffTime -> CalendarDiffTime
 
 -- | Scale by a factor. Note that <tt>scaleCalendarDiffTime (-1)</tt> will
 --   not perfectly invert a duration, due to variable month lengths.
 scaleCalendarDiffTime :: Integer -> CalendarDiffTime -> CalendarDiffTime
+data CalendarDiffTime
+CalendarDiffTime :: Integer -> NominalDiffTime -> CalendarDiffTime
+[ctMonths] :: CalendarDiffTime -> Integer
+[ctTime] :: CalendarDiffTime -> NominalDiffTime
+
+-- | addLocalTime a b = a + b
+addLocalTime :: NominalDiffTime -> LocalTime -> LocalTime
+
+-- | diffLocalTime a b = a - b
+diffLocalTime :: LocalTime -> LocalTime -> NominalDiffTime
+
+-- | Get the UT1 time of a local time on a particular meridian (in degrees,
+--   positive is East).
+localTimeToUT1 :: Rational -> LocalTime -> UniversalTime
+
+-- | Get the UTC time of a local time in a time zone.
+localTimeToUTC :: TimeZone -> LocalTime -> UTCTime
+
+-- | Get the local time of a UT1 time on a particular meridian (in degrees,
+--   positive is East).
+ut1ToLocalTime :: Rational -> UniversalTime -> LocalTime
+
+-- | Get the local time of a UTC time in a time zone.
+utcToLocalTime :: TimeZone -> UTCTime -> LocalTime
 
 -- | A simple day and time aggregate, where the day is of the specified
 --   parameter, and the time is a TimeOfDay. Conversion of this (as local
@@ -1302,26 +1499,10 @@ data LocalTime
 LocalTime :: Day -> TimeOfDay -> LocalTime
 [localDay] :: LocalTime -> Day
 [localTimeOfDay] :: LocalTime -> TimeOfDay
-
--- | addLocalTime a b = a + b
-addLocalTime :: NominalDiffTime -> LocalTime -> LocalTime
-
--- | diffLocalTime a b = a - b
-diffLocalTime :: LocalTime -> LocalTime -> NominalDiffTime
-
--- | Get the local time of a UTC time in a time zone.
-utcToLocalTime :: TimeZone -> UTCTime -> LocalTime
-
--- | Get the UTC time of a local time in a time zone.
-localTimeToUTC :: TimeZone -> LocalTime -> UTCTime
-
--- | Get the local time of a UT1 time on a particular meridian (in degrees,
---   positive is East).
-ut1ToLocalTime :: Rational -> UniversalTime -> LocalTime
-
--- | Get the UT1 time of a local time on a particular meridian (in degrees,
---   positive is East).
-localTimeToUT1 :: Rational -> LocalTime -> UniversalTime
+getZonedTime :: IO ZonedTime
+utcToLocalZonedTime :: UTCTime -> IO ZonedTime
+utcToZonedTime :: TimeZone -> UTCTime -> ZonedTime
+zonedTimeToUTC :: ZonedTime -> UTCTime
 
 -- | A local time together with a time zone.
 --   
@@ -1332,10 +1513,6 @@ data ZonedTime
 ZonedTime :: LocalTime -> TimeZone -> ZonedTime
 [zonedTimeToLocalTime] :: ZonedTime -> LocalTime
 [zonedTimeZone] :: ZonedTime -> TimeZone
-utcToZonedTime :: TimeZone -> UTCTime -> ZonedTime
-zonedTimeToUTC :: ZonedTime -> UTCTime
-getZonedTime :: IO ZonedTime
-utcToLocalZonedTime :: UTCTime -> IO ZonedTime
 
 
 -- | Types and functions for UTC and UT1
@@ -1348,6 +1525,16 @@ newtype UniversalTime
 ModJulianDate :: Rational -> UniversalTime
 [getModJulianDate] :: UniversalTime -> Rational
 
+-- | Get the number of picoseconds in a <a>DiffTime</a>.
+diffTimeToPicoseconds :: DiffTime -> Integer
+
+-- | Create a <a>DiffTime</a> from a number of picoseconds.
+picosecondsToDiffTime :: Integer -> DiffTime
+
+-- | Create a <a>DiffTime</a> which represents an integral number of
+--   seconds.
+secondsToDiffTime :: Integer -> DiffTime
+
 -- | This is a length of time, as measured by a clock. Conversion functions
 --   such as <a>fromInteger</a> and <a>realToFrac</a> will treat it as
 --   seconds. For example, <tt>(0.010 :: DiffTime)</tt> corresponds to 10
@@ -1356,16 +1543,6 @@ ModJulianDate :: Rational -> UniversalTime
 --   It has a precision of one picosecond (= 10^-12 s). Enumeration
 --   functions will treat it as picoseconds.
 data DiffTime
-
--- | Create a <a>DiffTime</a> which represents an integral number of
---   seconds.
-secondsToDiffTime :: Integer -> DiffTime
-
--- | Create a <a>DiffTime</a> from a number of picoseconds.
-picosecondsToDiffTime :: Integer -> DiffTime
-
--- | Get the number of picoseconds in a <a>DiffTime</a>.
-diffTimeToPicoseconds :: DiffTime -> Integer
 
 -- | This is the simplest representation of UTC. It consists of the day
 --   number, and a time offset from midnight. Note that if a day has a leap
@@ -1379,6 +1556,15 @@ UTCTime :: Day -> DiffTime -> UTCTime
 -- | the time from midnight, 0 &lt;= t &lt; 86401s (because of
 --   leap-seconds)
 [utctDayTime] :: UTCTime -> DiffTime
+
+-- | One day in <a>NominalDiffTime</a>.
+nominalDay :: NominalDiffTime
+
+-- | Get the seconds in a <a>NominalDiffTime</a>.
+nominalDiffTimeToSeconds :: NominalDiffTime -> Pico
+
+-- | Create a <a>NominalDiffTime</a> from a number of seconds.
+secondsToNominalDiffTime :: Pico -> NominalDiffTime
 
 -- | This is a length of time, as measured by UTC. It has a precision of
 --   10^-12 s.
@@ -1394,15 +1580,6 @@ UTCTime :: Day -> DiffTime -> UTCTime
 --   clock time. For instance, 23:00 UTC + 2 hours of NominalDiffTime =
 --   01:00 UTC (+ 1 day), regardless of whether a leap-second intervened.
 data NominalDiffTime
-
--- | Create a <a>NominalDiffTime</a> from a number of seconds.
-secondsToNominalDiffTime :: Pico -> NominalDiffTime
-
--- | Get the seconds in a <a>NominalDiffTime</a>.
-nominalDiffTimeToSeconds :: NominalDiffTime -> Pico
-
--- | One day in <a>NominalDiffTime</a>.
-nominalDay :: NominalDiffTime
 
 -- | addUTCTime a b = a + b
 addUTCTime :: NominalDiffTime -> UTCTime -> UTCTime
@@ -1423,18 +1600,18 @@ getTime_resolution :: DiffTime
 --   this module.
 module Data.Time.Clock.TAI
 
--- | AbsoluteTime is TAI, time as measured by a clock.
-data AbsoluteTime
-
--- | The epoch of TAI, which is 1858-11-17 00:00:00 TAI.
-taiEpoch :: AbsoluteTime
-
 -- | addAbsoluteTime a b = a + b
 addAbsoluteTime :: DiffTime -> AbsoluteTime -> AbsoluteTime
 
 -- | diffAbsoluteTime a b = a - b
 diffAbsoluteTime :: AbsoluteTime -> AbsoluteTime -> DiffTime
+
+-- | The epoch of TAI, which is 1858-11-17 00:00:00 TAI.
+taiEpoch :: AbsoluteTime
 taiNominalDayStart :: Day -> AbsoluteTime
+
+-- | AbsoluteTime is TAI, time as measured by a clock.
+data AbsoluteTime
 
 -- | TAI - UTC during this day. No table is provided, as any program
 --   compiled with it would become out of date in six months.
@@ -1449,14 +1626,34 @@ taiClock :: Maybe (DiffTime, IO AbsoluteTime)
 instance GHC.Internal.Show.Show Data.Time.Clock.Internal.AbsoluteTime.AbsoluteTime
 
 module Data.Time.Calendar
+addDays :: Integer -> Day -> Day
+diffDays :: Day -> Day -> Integer
+
+-- | A list of all the days in this period.
+periodAllDays :: DayPeriod p => p -> [Day]
+
+-- | Get the period this day is in, with the 1-based day number within the
+--   period.
+--   
+--   <pre>
+--   periodFromDay (periodFirstDay p) = (p,1)
+--   </pre>
+periodFromDay :: DayPeriod p => Day -> (p, Int)
+
+-- | The number of days in this period.
+periodLength :: DayPeriod p => p -> Int
+
+-- | Inverse of <a>periodFromDay</a>.
+periodToDay :: DayPeriod p => p -> Int -> Day
+
+-- | Validating inverse of <a>periodFromDay</a>.
+periodToDayValid :: DayPeriod p => p -> Int -> Maybe Day
 
 -- | The Modified Julian Day is a standard count of days, with zero being
 --   the day 1858-11-17.
 newtype Day
 ModifiedJulianDay :: Integer -> Day
 [toModifiedJulianDay] :: Day -> Integer
-addDays :: Integer -> Day -> Day
-diffDays :: Day -> Day -> Integer
 
 -- | The class of types which can be represented as a period of days.
 class Ord p => DayPeriod p
@@ -1469,92 +1666,29 @@ periodLastDay :: DayPeriod p => p -> Day
 
 -- | Get the period this day is in.
 dayPeriod :: DayPeriod p => Day -> p
-
--- | A list of all the days in this period.
-periodAllDays :: DayPeriod p => p -> [Day]
-
--- | The number of days in this period.
-periodLength :: DayPeriod p => p -> Int
-
--- | Get the period this day is in, with the 1-based day number within the
---   period.
---   
---   <pre>
---   periodFromDay (periodFirstDay p) = (p,1)
---   </pre>
-periodFromDay :: DayPeriod p => Day -> (p, Int)
-
--- | Inverse of <a>periodFromDay</a>.
-periodToDay :: DayPeriod p => p -> Int -> Day
-
--- | Validating inverse of <a>periodFromDay</a>.
-periodToDayValid :: DayPeriod p => p -> Int -> Maybe Day
-data CalendarDiffDays
-CalendarDiffDays :: Integer -> Integer -> CalendarDiffDays
-[cdMonths] :: CalendarDiffDays -> Integer
-[cdDays] :: CalendarDiffDays -> Integer
 calendarDay :: CalendarDiffDays
-calendarWeek :: CalendarDiffDays
 calendarMonth :: CalendarDiffDays
+calendarWeek :: CalendarDiffDays
 calendarYear :: CalendarDiffDays
 
 -- | Scale by a factor. Note that <tt>scaleCalendarDiffDays (-1)</tt> will
 --   not perfectly invert a duration, due to variable month lengths.
 scaleCalendarDiffDays :: Integer -> CalendarDiffDays -> CalendarDiffDays
-
--- | Year of Common Era (when positive).
-type Year = Integer
-
--- | Also known as Anno Domini.
-pattern CommonEra :: Integer -> Year
-
--- | Also known as Before Christ. Note that Year 1 = 1 CE, and the previous
---   Year 0 = 1 BCE. <a>CommonEra</a> and <a>BeforeCommonEra</a> form a
---   <tt>COMPLETE</tt> set.
-pattern BeforeCommonEra :: Integer -> Year
-
--- | Month of year, in range 1 (January) to 12 (December).
-type MonthOfYear = Int
-pattern January :: MonthOfYear
-pattern February :: MonthOfYear
-pattern March :: MonthOfYear
-pattern April :: MonthOfYear
-pattern May :: MonthOfYear
-pattern June :: MonthOfYear
-pattern July :: MonthOfYear
-pattern August :: MonthOfYear
-pattern September :: MonthOfYear
-pattern October :: MonthOfYear
-pattern November :: MonthOfYear
-
--- | The twelve <a>MonthOfYear</a> patterns form a <tt>COMPLETE</tt> set.
-pattern December :: MonthOfYear
-
--- | Day of month, in range 1 to 31.
-type DayOfMonth = Int
-
--- | Convert to proleptic Gregorian calendar.
-toGregorian :: Day -> (Year, MonthOfYear, DayOfMonth)
-
--- | Convert from proleptic Gregorian calendar. Invalid values will be
---   clipped to the correct range, month first, then day.
-fromGregorian :: Year -> MonthOfYear -> DayOfMonth -> Day
+data CalendarDiffDays
+CalendarDiffDays :: Integer -> Integer -> CalendarDiffDays
+[cdMonths] :: CalendarDiffDays -> Integer
+[cdDays] :: CalendarDiffDays -> Integer
 
 -- | Bidirectional abstract constructor for the proleptic Gregorian
 --   calendar. Invalid values will be clipped to the correct range, month
 --   first, then day.
 pattern YearMonthDay :: Year -> MonthOfYear -> DayOfMonth -> Day
 
--- | Convert from proleptic Gregorian calendar. Invalid values will return
---   Nothing
-fromGregorianValid :: Year -> MonthOfYear -> DayOfMonth -> Maybe Day
+-- | Add months (clipped to last day), then add days
+addGregorianDurationClip :: CalendarDiffDays -> Day -> Day
 
--- | Show in ISO 8601 format (yyyy-mm-dd)
-showGregorian :: Day -> String
-
--- | The number of days in a given month according to the proleptic
---   Gregorian calendar.
-gregorianMonthLength :: Year -> MonthOfYear -> DayOfMonth
+-- | Add months (rolling over to next month), then add days
+addGregorianDurationRollOver :: CalendarDiffDays -> Day -> Day
 
 -- | Add months, with days past the last day of the month clipped to the
 --   last day. For instance, 2005-01-30 + 1 month = 2005-02-28.
@@ -1572,30 +1706,64 @@ addGregorianYearsClip :: Integer -> Day -> Day
 --   1st if necessary. For instance, 2004-02-29 + 2 years = 2006-03-01.
 addGregorianYearsRollOver :: Integer -> Day -> Day
 
--- | Add months (clipped to last day), then add days
-addGregorianDurationClip :: CalendarDiffDays -> Day -> Day
-
--- | Add months (rolling over to next month), then add days
-addGregorianDurationRollOver :: CalendarDiffDays -> Day -> Day
-
 -- | Calendrical difference, with as many whole months as possible
 diffGregorianDurationClip :: Day -> Day -> CalendarDiffDays
 
--- | Calendrical difference, with as many whole months as possible. Same as
---   <a>diffGregorianDurationClip</a> for positive durations.
+-- | Calendrical difference, with as many whole months as possible.
 diffGregorianDurationRollOver :: Day -> Day -> CalendarDiffDays
+
+-- | Convert from proleptic Gregorian calendar. Invalid values will be
+--   clipped to the correct range, month first, then day.
+fromGregorian :: Year -> MonthOfYear -> DayOfMonth -> Day
+
+-- | Convert from proleptic Gregorian calendar. Invalid values will return
+--   Nothing
+fromGregorianValid :: Year -> MonthOfYear -> DayOfMonth -> Maybe Day
+
+-- | The number of days in a given month according to the proleptic
+--   Gregorian calendar.
+gregorianMonthLength :: Year -> MonthOfYear -> DayOfMonth
+
+-- | Show in ISO 8601 format (yyyy-mm-dd)
+showGregorian :: Day -> String
+
+-- | Convert to proleptic Gregorian calendar.
+toGregorian :: Day -> (Year, MonthOfYear, DayOfMonth)
 
 -- | Is this year a leap year according to the proleptic Gregorian
 --   calendar?
 isLeapYear :: Year -> Bool
-data DayOfWeek
-Monday :: DayOfWeek
-Tuesday :: DayOfWeek
-Wednesday :: DayOfWeek
-Thursday :: DayOfWeek
-Friday :: DayOfWeek
-Saturday :: DayOfWeek
-Sunday :: DayOfWeek
+pattern April :: MonthOfYear
+pattern August :: MonthOfYear
+
+-- | Also known as Before Christ. Note that Year 1 = 1 CE, and the previous
+--   Year 0 = 1 BCE. <a>CommonEra</a> and <a>BeforeCommonEra</a> form a
+--   <tt>COMPLETE</tt> set.
+pattern BeforeCommonEra :: Integer -> Year
+
+-- | Also known as Anno Domini.
+pattern CommonEra :: Integer -> Year
+
+-- | The twelve <a>MonthOfYear</a> patterns form a <tt>COMPLETE</tt> set.
+pattern December :: MonthOfYear
+pattern February :: MonthOfYear
+pattern January :: MonthOfYear
+pattern July :: MonthOfYear
+pattern June :: MonthOfYear
+pattern March :: MonthOfYear
+pattern May :: MonthOfYear
+pattern November :: MonthOfYear
+pattern October :: MonthOfYear
+pattern September :: MonthOfYear
+
+-- | Day of month, in range 1 to 31.
+type DayOfMonth = Int
+
+-- | Month of year, in range 1 (January) to 12 (December).
+type MonthOfYear = Int
+
+-- | Year of Common Era (when positive).
+type Year = Integer
 dayOfWeek :: Day -> DayOfWeek
 
 -- | <tt>dayOfWeekDiff a b = a - b</tt> in range 0 to 6. The number of days
@@ -1665,6 +1833,14 @@ weekFirstDay :: DayOfWeek -> Day -> Day
 --   YearMonthDay 2022 2 21
 --   </pre>
 weekLastDay :: DayOfWeek -> Day -> Day
+data DayOfWeek
+Monday :: DayOfWeek
+Tuesday :: DayOfWeek
+Wednesday :: DayOfWeek
+Thursday :: DayOfWeek
+Friday :: DayOfWeek
+Saturday :: DayOfWeek
+Sunday :: DayOfWeek
 
 module Data.Time.Calendar.Easter
 
@@ -1733,154 +1909,3 @@ gregorianEaster :: Year -> Day
 --   <li><a>UniversalTime</a> for time based on Earth rotation</li>
 --   </ul>
 module Data.Time
-
-module Data.Time.Format.ISO8601
-
--- | A text format for a type
-data Format t
-
--- | Show a value in the format, if representable
-formatShowM :: Format t -> t -> Maybe String
-
--- | Show a value in the format, or error if unrepresentable
-formatShow :: Format t -> t -> String
-
--- | Read a value in the format
-formatReadP :: Format t -> ReadP t
-
--- | Parse a value in the format
-formatParseM :: MonadFail m => Format t -> String -> m t
-class ISO8601 t
-
--- | The most commonly used ISO 8601 format for this type.
-iso8601Format :: ISO8601 t => Format t
-
--- | Show in the most commonly used ISO 8601 format.
-iso8601Show :: ISO8601 t => t -> String
-
--- | Parse the most commonly used ISO 8601 format.
-iso8601ParseM :: (MonadFail m, ISO8601 t) => String -> m t
-data FormatExtension
-
--- | ISO 8601:2004(E) sec. 2.3.4. Use hyphens and colons.
-ExtendedFormat :: FormatExtension
-
--- | ISO 8601:2004(E) sec. 2.3.3. Omit hyphens and colons. "The basic
---   format should be avoided in plain text."
-BasicFormat :: FormatExtension
-
--- | Read a value in either extended or basic format
-formatReadPExtension :: (FormatExtension -> Format t) -> ReadP t
-
--- | Parse a value in either extended or basic format
-parseFormatExtension :: MonadFail m => (FormatExtension -> Format t) -> String -> m t
-
--- | ISO 8601:2004(E) sec. 4.1.2.2
-calendarFormat :: FormatExtension -> Format Day
-
--- | ISO 8601:2004(E) sec. 4.1.2.3(a)
-yearMonthFormat :: Format (Integer, Int)
-
--- | ISO 8601:2004(E) sec. 4.1.2.3(b)
-yearFormat :: Format Integer
-
--- | ISO 8601:2004(E) sec. 4.1.2.3(c)
-centuryFormat :: Format Integer
-
--- | ISO 8601:2004(E) sec. 4.1.2.4(a)
-expandedCalendarFormat :: Int -> FormatExtension -> Format Day
-
--- | ISO 8601:2004(E) sec. 4.1.2.4(b)
-expandedYearMonthFormat :: Int -> Format (Integer, Int)
-
--- | ISO 8601:2004(E) sec. 4.1.2.4(c)
-expandedYearFormat :: Int -> Format Integer
-
--- | ISO 8601:2004(E) sec. 4.1.2.4(d)
-expandedCenturyFormat :: Int -> Format Integer
-
--- | ISO 8601:2004(E) sec. 4.1.3.2
-ordinalDateFormat :: FormatExtension -> Format Day
-
--- | ISO 8601:2004(E) sec. 4.1.3.3
-expandedOrdinalDateFormat :: Int -> FormatExtension -> Format Day
-
--- | ISO 8601:2004(E) sec. 4.1.4.2
-weekDateFormat :: FormatExtension -> Format Day
-
--- | ISO 8601:2004(E) sec. 4.1.4.3
-yearWeekFormat :: FormatExtension -> Format (Integer, Int)
-
--- | ISO 8601:2004(E) sec. 4.1.4.2
-expandedWeekDateFormat :: Int -> FormatExtension -> Format Day
-
--- | ISO 8601:2004(E) sec. 4.1.4.3
-expandedYearWeekFormat :: Int -> FormatExtension -> Format (Integer, Int)
-
--- | ISO 8601:2004(E) sec. 4.2.2.2, 4.2.2.4(a)
-timeOfDayFormat :: FormatExtension -> Format TimeOfDay
-
--- | ISO 8601:2004(E) sec. 4.2.2.3(a), 4.2.2.4(b)
-hourMinuteFormat :: FormatExtension -> Format TimeOfDay
-
--- | ISO 8601:2004(E) sec. 4.2.2.3(b), 4.2.2.4(c)
-hourFormat :: Format TimeOfDay
-
--- | ISO 8601:2004(E) sec. 4.2.2.5
-withTimeDesignator :: Format t -> Format t
-
--- | ISO 8601:2004(E) sec. 4.2.4
-withUTCDesignator :: Format t -> Format t
-
--- | ISO 8601:2004(E) sec. 4.2.5.1
-timeOffsetFormat :: FormatExtension -> Format TimeZone
-
--- | ISO 8601:2004(E) sec. 4.2.5.2
-timeOfDayAndOffsetFormat :: FormatExtension -> Format (TimeOfDay, TimeZone)
-
--- | ISO 8601:2004(E) sec. 4.3.2
-localTimeFormat :: Format Day -> Format TimeOfDay -> Format LocalTime
-
--- | ISO 8601:2004(E) sec. 4.3.2
-zonedTimeFormat :: Format Day -> Format TimeOfDay -> FormatExtension -> Format ZonedTime
-
--- | ISO 8601:2004(E) sec. 4.3.2
-utcTimeFormat :: Format Day -> Format TimeOfDay -> Format UTCTime
-
--- | ISO 8601:2004(E) sec. 4.3.3
-dayAndTimeFormat :: Format Day -> Format time -> Format (Day, time)
-
--- | ISO 8601:2004(E) sec. 4.3.3
-timeAndOffsetFormat :: Format t -> FormatExtension -> Format (t, TimeZone)
-
--- | ISO 8601:2004(E) sec. 4.4.3.2
-durationDaysFormat :: Format CalendarDiffDays
-
--- | ISO 8601:2004(E) sec. 4.4.3.2
-durationTimeFormat :: Format CalendarDiffTime
-
--- | ISO 8601:2004(E) sec. 4.4.3.3
-alternativeDurationDaysFormat :: FormatExtension -> Format CalendarDiffDays
-
--- | ISO 8601:2004(E) sec. 4.4.3.3
-alternativeDurationTimeFormat :: FormatExtension -> Format CalendarDiffTime
-
--- | ISO 8601:2004(E) sec. 4.4.4.1
-intervalFormat :: Format a -> Format b -> Format (a, b)
-
--- | ISO 8601:2004(E) sec. 4.5
-recurringIntervalFormat :: Format a -> Format b -> Format (Int, a, b)
-
--- | Like <a>makeTimeOfDayValid</a>, but accepts <tt>24 0 0</tt> per ISO
---   8601:2004(E) sec. 4.2.3
-isoMakeTimeOfDayValid :: Int -> Int -> Pico -> Maybe TimeOfDay
-instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E14
-instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E16
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Calendar.CalendarDiffDays.CalendarDiffDays
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.CalendarDiffTime.CalendarDiffTime
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Calendar.Days.Day
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.LocalTime.LocalTime
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeOfDay.TimeOfDay
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeZone.TimeZone
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Clock.Internal.UTCTime.UTCTime
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.ZonedTime.ZonedTime

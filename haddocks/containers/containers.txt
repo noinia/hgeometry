@@ -704,7 +704,7 @@ instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Set.Internal.Intersection a)
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Set.Internal.Set a)
 instance GHC.Internal.Data.Foldable.Foldable Data.Set.Internal.Set
 instance GHC.Classes.Ord a => GHC.Internal.IsList.IsList (Data.Set.Internal.Set a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Set.Internal.Set a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Set.Internal.Set a)
 instance GHC.Internal.Base.Monoid (Data.Set.Internal.MergeSet a)
 instance GHC.Classes.Ord a => GHC.Internal.Base.Monoid (Data.Set.Internal.Set a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Set.Internal.Set a)
@@ -1911,19 +1911,19 @@ instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.ViewL a)
 instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.ViewR a)
 instance GHC.Internal.IsList.IsList (Data.Sequence.Internal.Seq a)
 instance (a GHC.Types.~ GHC.Types.Char) => GHC.Internal.Data.String.IsString (Data.Sequence.Internal.Seq a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Digit a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.FingerTree a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Node a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Seq a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.ViewL a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.ViewR a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Sequence.Internal.Digit a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Sequence.Internal.FingerTree a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Sequence.Internal.Node a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Sequence.Internal.Seq a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Sequence.Internal.ViewL a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Sequence.Internal.ViewR a)
 instance Data.Sequence.Internal.MaybeForce (Data.Sequence.Internal.Elem a)
 instance Data.Sequence.Internal.MaybeForce (Data.Sequence.Internal.ForceBox a)
 instance Data.Sequence.Internal.MaybeForce (Data.Sequence.Internal.Node a)
 instance GHC.Internal.Control.Monad.Fix.MonadFix Data.Sequence.Internal.Seq
 instance GHC.Internal.Base.MonadPlus Data.Sequence.Internal.Seq
 instance GHC.Internal.Base.Monad Data.Sequence.Internal.Seq
-instance Control.Monad.Zip.MonadZip Data.Sequence.Internal.Seq
+instance GHC.Internal.Control.Monad.Zip.MonadZip Data.Sequence.Internal.Seq
 instance GHC.Internal.Base.Monoid (Data.Sequence.Internal.Seq a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Digit a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Elem a)
@@ -3027,10 +3027,10 @@ instance GHC.Internal.Data.Foldable.Foldable Data.Tree.Tree
 instance GHC.Internal.Base.Functor Data.Tree.Tree
 instance GHC.Internal.Generics.Generic1 Data.Tree.Tree
 instance GHC.Internal.Generics.Generic (Data.Tree.Tree a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Tree.Tree a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.Tree.Tree a)
 instance GHC.Internal.Control.Monad.Fix.MonadFix Data.Tree.Tree
 instance GHC.Internal.Base.Monad Data.Tree.Tree
-instance Control.Monad.Zip.MonadZip Data.Tree.Tree
+instance GHC.Internal.Control.Monad.Zip.MonadZip Data.Tree.Tree
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Tree.Tree a)
 instance Data.Functor.Classes.Ord1 Data.Tree.Tree
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Tree.Tree a)
@@ -3359,13 +3359,13 @@ flattenSCC :: SCC vertex -> [vertex]
 -- | The vertices of a list of strongly connected components.
 flattenSCCs :: [SCC a] -> [a]
 
+-- | This type synonym exists primarily for historical reasons.
+type Forest a = [Tree a]
+
 -- | Non-empty, possibly infinite, multi-way trees; also known as <i>rose
 --   trees</i>.
 data Tree a
 Node :: a -> [Tree a] -> Tree a
-
--- | This type synonym exists primarily for historical reasons.
-type Forest a = [Tree a]
 instance GHC.Internal.Base.Applicative (Data.Graph.SetM s)
 instance GHC.Internal.Data.Data.Data vertex => GHC.Internal.Data.Data.Data (Data.Graph.SCC vertex)
 instance Data.Functor.Classes.Eq1 Data.Graph.SCC
@@ -3376,7 +3376,7 @@ instance GHC.Internal.Base.Functor Data.Graph.SCC
 instance GHC.Internal.Base.Functor (Data.Graph.SetM s)
 instance GHC.Internal.Generics.Generic1 Data.Graph.SCC
 instance GHC.Internal.Generics.Generic (Data.Graph.SCC vertex)
-instance Language.Haskell.TH.Syntax.Lift vertex => Language.Haskell.TH.Syntax.Lift (Data.Graph.SCC vertex)
+instance GHC.Internal.TH.Lift.Lift vertex => GHC.Internal.TH.Lift.Lift (Data.Graph.SCC vertex)
 instance GHC.Internal.Base.Monad (Data.Graph.SetM s)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Graph.SCC a)
 instance Data.Functor.Classes.Read1 Data.Graph.SCC
@@ -5328,7 +5328,7 @@ instance GHC.Internal.Base.Functor (Data.Map.Internal.Map k)
 instance GHC.Internal.Base.Functor f => GHC.Internal.Base.Functor (Data.Map.Internal.WhenMatched f k x y)
 instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Functor (Data.Map.Internal.WhenMissing f k x)
 instance GHC.Classes.Ord k => GHC.Internal.IsList.IsList (Data.Map.Internal.Map k v)
-instance (Language.Haskell.TH.Syntax.Lift k, Language.Haskell.TH.Syntax.Lift a) => Language.Haskell.TH.Syntax.Lift (Data.Map.Internal.Map k a)
+instance (GHC.Internal.TH.Lift.Lift k, GHC.Internal.TH.Lift.Lift a) => GHC.Internal.TH.Lift.Lift (Data.Map.Internal.Map k a)
 instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Base.Monad (Data.Map.Internal.WhenMatched f k x y)
 instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Monad (Data.Map.Internal.WhenMissing f k x)
 instance GHC.Classes.Ord k => GHC.Internal.Base.Monoid (Data.Map.Internal.Map k v)
@@ -6164,7 +6164,7 @@ zero :: Int -> Mask -> Bool
 instance GHC.Internal.Data.Data.Data Data.IntSet.Internal.IntSet
 instance GHC.Classes.Eq Data.IntSet.Internal.IntSet
 instance GHC.Internal.IsList.IsList Data.IntSet.Internal.IntSet
-instance Language.Haskell.TH.Syntax.Lift Data.IntSet.Internal.IntSet
+instance GHC.Internal.TH.Lift.Lift Data.IntSet.Internal.IntSet
 instance GHC.Internal.Base.Monoid Data.IntSet.Internal.IntSet
 instance Control.DeepSeq.NFData Data.IntSet.Internal.IntSet
 instance GHC.Classes.Ord Data.IntSet.Internal.IntSet
@@ -8239,7 +8239,7 @@ instance GHC.Internal.Base.Functor Data.IntMap.Internal.IntMap
 instance GHC.Internal.Base.Functor f => GHC.Internal.Base.Functor (Data.IntMap.Internal.WhenMatched f x y)
 instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Functor (Data.IntMap.Internal.WhenMissing f x)
 instance GHC.Internal.IsList.IsList (Data.IntMap.Internal.IntMap a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.IntMap.Internal.IntMap a)
+instance GHC.Internal.TH.Lift.Lift a => GHC.Internal.TH.Lift.Lift (Data.IntMap.Internal.IntMap a)
 instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Base.Monad (Data.IntMap.Internal.WhenMatched f x y)
 instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Monad (Data.IntMap.Internal.WhenMissing f x)
 instance GHC.Internal.Base.Monoid (Data.IntMap.Internal.IntMap a)

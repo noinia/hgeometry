@@ -20,20 +20,20 @@
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html"><span class="hs-identifier">GHC.CmmToAsm.Reg.Graph.Base</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier">Reg</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier">RegSub</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegClass"><span class="hs-identifier">RegClass</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Set.html"><span class="hs-identifier">GHC.Types.Unique.Set</span></a></span><span>
 </span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../array-0.5.7.0-c916/src//Data.Array.html/Data.Array.html"><span class="hs-identifier">Data.Array</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../array-0.5.8.0-9044/src/Data.Array.html"><span class="hs-identifier">Data.Array</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span>
 </span><span id="line-26"></span><span class="annot"><span class="hs-comment">-- | Determine the class of a register</span></span><span>
 </span><span id="line-27"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.X86.html#classOfReg"><span class="hs-identifier hs-type">classOfReg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegClass"><span class="hs-identifier hs-type">RegClass</span></a></span><span>
 </span><span id="line-28"></span><span id="classOfReg"><span class="annot"><span class="annottext">classOfReg :: Reg -&gt; RegClass
-</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#classOfReg"><span class="hs-identifier hs-var hs-var">classOfReg</span></a></span></span><span> </span><span id="local-6989586621682394182"><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394182"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#classOfReg"><span class="hs-identifier hs-var hs-var">classOfReg</span></a></span></span><span> </span><span id="local-6989586621682550592"><span class="annot"><span class="annottext">Reg
+</span><a href="#local-6989586621682550592"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
 </span><span id="line-29"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394182"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-30"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span id="local-6989586621682394184"><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394184"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550592"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-30"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span id="local-6989586621682550594"><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550594"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394184"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621682550594"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-31"></span><span>
 </span><span id="line-32"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-type">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
@@ -52,10 +52,10 @@
 </span><span id="line-37"></span><span class="annot"><span class="hs-comment">-- | Determine all the regs that make up a certain class.</span></span><span>
 </span><span id="line-38"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regsOfClass"><span class="hs-identifier hs-type">regsOfClass</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegClass"><span class="hs-identifier hs-type">RegClass</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Set.html#UniqSet"><span class="hs-identifier hs-type">UniqSet</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span>
 </span><span id="line-39"></span><span id="regsOfClass"><span class="annot"><span class="annottext">regsOfClass :: RegClass -&gt; UniqSet Reg
-</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regsOfClass"><span class="hs-identifier hs-var hs-var">regsOfClass</span></a></span></span><span> </span><span id="local-6989586621682394191"><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394191"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regsOfClass"><span class="hs-identifier hs-var hs-var">regsOfClass</span></a></span></span><span> </span><span id="local-6989586621682550601"><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550601"><span class="hs-identifier hs-var">c</span></a></span></span><span>
 </span><span id="line-40"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394191"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550601"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-41"></span><span>        </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span>
 </span><span id="line-42"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Reg] -&gt; UniqSet Reg
@@ -63,9 +63,9 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#mkUniqSet"><span class="hs-identifier hs-var">mkUniqSet</span></a></span><span>   </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">RegClass -&gt; Int -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-var">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span>  </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394194"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-43"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682394194"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394194"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550604"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-43"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682550604"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550604"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">]</span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-44"></span><span>
@@ -78,9 +78,9 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RegClass -&gt; Int -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-var">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394195"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682394195"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394195"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550605"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682550605"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550605"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">]</span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-48"></span><span>
@@ -96,8 +96,8 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8"><span class="hs-identifier hs-var">SubL8</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RegClass -&gt; Int -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-var">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394197"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682394197"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394197"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550607"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682550607"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550607"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="hs-special">]</span><span> </span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-52"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Reg] -&gt; UniqSet Reg
@@ -107,8 +107,8 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8H"><span class="hs-identifier hs-var">SubL8H</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RegClass -&gt; Int -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-var">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394198"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682394198"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394198"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550608"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682550608"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550608"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span class="hs-special">]</span><span> </span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-53"></span><span>
@@ -119,9 +119,9 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#mkUniqSet"><span class="hs-identifier hs-var">mkUniqSet</span></a></span><span>   </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">RegClass -&gt; Int -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-var">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassF64"><span class="hs-identifier hs-var">ClassF64</span></a></span><span>  </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394200"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-56"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682394200"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394200"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550610"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-56"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621682550610"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550610"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">5</span></span><span class="hs-special">]</span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-57"></span><span>
@@ -130,20 +130,20 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><span id="line-60"></span><span class="hs-comment">--      returns Nothing if this reg is not part of the machine.</span><span>
 </span><span id="line-61"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regName"><span class="hs-identifier hs-type">regName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-62"></span><span id="regName"><span class="annot"><span class="annottext">regName :: Reg -&gt; Maybe String
-</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regName"><span class="hs-identifier hs-var hs-var">regName</span></a></span></span><span> </span><span id="local-6989586621682394201"><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394201"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regName"><span class="hs-identifier hs-var hs-var">regName</span></a></span></span><span> </span><span id="local-6989586621682550611"><span class="annot"><span class="annottext">Reg
+</span><a href="#local-6989586621682550611"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
 </span><span id="line-63"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394201"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550611"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-64"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682394202"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394202"><span class="hs-identifier hs-var">i</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682550612"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550612"><span class="hs-identifier hs-var">i</span></a></span></span><span>
 </span><span id="line-65"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394202"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682550612"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-66"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682394210"><span class="annot"><span class="annottext">names :: Array Int String
-</span><a href="#local-6989586621682394210"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
+</span><span id="line-66"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682550620"><span class="annot"><span class="annottext">names :: Array Int String
+</span><a href="#local-6989586621682550620"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
 forall i e. Ix i =&gt; (i, i) -&gt; [e] -&gt; Array i e
 </span><span class="hs-identifier hs-var">A.listArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
@@ -163,22 +163,22 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Maybe String) -&gt; String -&gt; Maybe String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Array Int String
-</span><a href="#local-6989586621682394210"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
+</span><a href="#local-6989586621682550620"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
 forall i e. Ix i =&gt; Array i e -&gt; i -&gt; e
 </span><span class="hs-operator hs-var">A.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394202"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682550612"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-type">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682394213"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394213"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682550623"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550623"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-72"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394213"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682550623"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-73"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682394219"><span class="annot"><span class="annottext">names :: Array Int String
-</span><a href="#local-6989586621682394219"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
+</span><span id="line-73"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682550629"><span class="annot"><span class="annottext">names :: Array Int String
+</span><a href="#local-6989586621682550629"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
 forall i e. Ix i =&gt; (i, i) -&gt; [e] -&gt; Array i e
 </span><span class="hs-identifier hs-var">A.listArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
@@ -198,22 +198,22 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Maybe String) -&gt; String -&gt; Maybe String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Array Int String
-</span><a href="#local-6989586621682394219"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
+</span><a href="#local-6989586621682550629"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
 forall i e. Ix i =&gt; Array i e -&gt; i -&gt; e
 </span><span class="hs-operator hs-var">A.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394213"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682550623"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-77"></span><span>
 </span><span id="line-78"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-type">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8"><span class="hs-identifier hs-var">SubL8</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682394220"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394220"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682550630"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550630"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-79"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394220"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682550630"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-80"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682394226"><span class="annot"><span class="annottext">names :: Array Int String
-</span><a href="#local-6989586621682394226"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
+</span><span id="line-80"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682550636"><span class="annot"><span class="annottext">names :: Array Int String
+</span><a href="#local-6989586621682550636"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
 forall i e. Ix i =&gt; (i, i) -&gt; [e] -&gt; Array i e
 </span><span class="hs-identifier hs-var">A.listArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
@@ -227,22 +227,22 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Maybe String) -&gt; String -&gt; Maybe String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Array Int String
-</span><a href="#local-6989586621682394226"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
+</span><a href="#local-6989586621682550636"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
 forall i e. Ix i =&gt; Array i e -&gt; i -&gt; e
 </span><span class="hs-operator hs-var">A.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394220"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682550630"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-82"></span><span>
 </span><span id="line-83"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-type">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8H"><span class="hs-identifier hs-var">SubL8H</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682394227"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394227"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682550637"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550637"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-84"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394227"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682550637"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-85"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682394233"><span class="annot"><span class="annottext">names :: Array Int String
-</span><a href="#local-6989586621682394233"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
+</span><span id="line-85"></span><span>           </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682550643"><span class="annot"><span class="annottext">names :: Array Int String
+</span><a href="#local-6989586621682550643"><span class="hs-identifier hs-var hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [String] -&gt; Array Int String
 forall i e. Ix i =&gt; (i, i) -&gt; [e] -&gt; Array i e
 </span><span class="hs-identifier hs-var">A.listArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
@@ -256,10 +256,10 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Maybe String) -&gt; String -&gt; Maybe String
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Array Int String
-</span><a href="#local-6989586621682394233"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
+</span><a href="#local-6989586621682550643"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">Array Int String -&gt; Int -&gt; String
 forall i e. Ix i =&gt; Array i e -&gt; i -&gt; e
 </span><span class="hs-operator hs-var">A.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394227"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682550637"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-87"></span><span>
 </span><span id="line-88"></span><span>        </span><span class="annot"><span class="annottext">Reg
 </span><span class="hs-identifier">_</span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe String
@@ -270,19 +270,19 @@ forall a. Maybe a
 </span><span id="line-91"></span><span class="annot"><span class="hs-comment">-- | Which regs alias what other regs.</span></span><span>
 </span><span id="line-92"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regAlias"><span class="hs-identifier hs-type">regAlias</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Set.html#UniqSet"><span class="hs-identifier hs-type">UniqSet</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span>
 </span><span id="line-93"></span><span id="regAlias"><span class="annot"><span class="annottext">regAlias :: Reg -&gt; UniqSet Reg
-</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regAlias"><span class="hs-identifier hs-var hs-var">regAlias</span></a></span></span><span> </span><span id="local-6989586621682394234"><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394234"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regAlias"><span class="hs-identifier hs-var hs-var">regAlias</span></a></span></span><span> </span><span id="local-6989586621682550644"><span class="annot"><span class="annottext">Reg
+</span><a href="#local-6989586621682550644"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
 </span><span id="line-94"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394234"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550644"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-95"></span><span>
 </span><span id="line-96"></span><span>        </span><span class="hs-comment">-- 32 bit regs alias all of the subregs</span><span>
 </span><span id="line-97"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682394235"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394235"><span class="hs-identifier hs-var">i</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span id="local-6989586621682550645"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550645"><span class="hs-identifier hs-var">i</span></a></span></span><span>
 </span><span id="line-98"></span><span>
 </span><span id="line-99"></span><span>         </span><span class="hs-comment">-- for eax, ebx, ecx, eds</span><span>
 </span><span id="line-100"></span><span>         </span><span class="hs-glyph">|</span><span>  </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394235"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682550645"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span>
@@ -294,26 +294,26 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">RegClass -&gt; Int -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-var">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394235"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
+</span><a href="#local-6989586621682550645"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394234"><span class="hs-identifier hs-var">reg</span></a></span><span>
+</span><a href="#local-6989586621682550644"><span class="hs-identifier hs-var">reg</span></a></span><span>
 </span><span id="line-103"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8"><span class="hs-identifier hs-var">SubL8</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394234"><span class="hs-identifier hs-var">reg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
+</span><a href="#local-6989586621682550644"><span class="hs-identifier hs-var">reg</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8H"><span class="hs-identifier hs-var">SubL8H</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394234"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682550644"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-104"></span><span>
 </span><span id="line-105"></span><span>         </span><span class="hs-comment">-- for esi, edi, esp, ebp</span><span>
 </span><span id="line-106"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394235"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682550645"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394235"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682550645"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span>
@@ -325,25 +325,25 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">RegClass -&gt; Int -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-var">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394235"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
+</span><a href="#local-6989586621682550645"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394234"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682550644"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-109"></span><span>
 </span><span id="line-110"></span><span>        </span><span class="hs-comment">-- 16 bit subregs alias the whole reg</span><span>
 </span><span id="line-111"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-type">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span id="local-6989586621682394237"><span class="annot"><span class="annottext">r :: Reg
-</span><a href="#local-6989586621682394237"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span id="local-6989586621682550647"><span class="annot"><span class="annottext">r :: Reg
+</span><a href="#local-6989586621682550647"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
 </span><span id="line-112"></span><span>         </span><span class="hs-glyph">-&gt;</span><span>     </span><span class="annot"><span class="annottext">Reg -&gt; UniqSet Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#regAlias"><span class="hs-identifier hs-var">regAlias</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394237"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><a href="#local-6989586621682550647"><span class="hs-identifier hs-var">r</span></a></span><span>
 </span><span id="line-113"></span><span>
 </span><span id="line-114"></span><span>        </span><span class="hs-comment">-- 8 bit subregs alias the 32 and 16, but not the other 8 bit subreg</span><span>
 </span><span id="line-115"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-type">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8"><span class="hs-identifier hs-var">SubL8</span></a></span><span>  </span><span id="local-6989586621682394238"><span class="annot"><span class="annottext">r :: Reg
-</span><a href="#local-6989586621682394238"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8"><span class="hs-identifier hs-var">SubL8</span></a></span><span>  </span><span id="local-6989586621682550648"><span class="annot"><span class="annottext">r :: Reg
+</span><a href="#local-6989586621682550648"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
 </span><span id="line-116"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Reg] -&gt; UniqSet Reg
@@ -351,17 +351,17 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#mkUniqSet"><span class="hs-identifier hs-var">mkUniqSet</span></a></span><span> </span><span class="annot"><span class="annottext">([Reg] -&gt; UniqSet Reg) -&gt; [Reg] -&gt; UniqSet Reg
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394238"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
+</span><a href="#local-6989586621682550648"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394238"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
+</span><a href="#local-6989586621682550648"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8"><span class="hs-identifier hs-var">SubL8</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394238"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682550648"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-117"></span><span>
 </span><span id="line-118"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-type">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
-</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8H"><span class="hs-identifier hs-var">SubL8H</span></a></span><span> </span><span id="local-6989586621682394239"><span class="annot"><span class="annottext">r :: Reg
-</span><a href="#local-6989586621682394239"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
+</span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8H"><span class="hs-identifier hs-var">SubL8H</span></a></span><span> </span><span id="local-6989586621682550649"><span class="annot"><span class="annottext">r :: Reg
+</span><a href="#local-6989586621682550649"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
 </span><span id="line-119"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Reg] -&gt; UniqSet Reg
@@ -369,13 +369,13 @@ forall a. Uniquable a =&gt; [a] -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#mkUniqSet"><span class="hs-identifier hs-var">mkUniqSet</span></a></span><span> </span><span class="annot"><span class="annottext">([Reg] -&gt; UniqSet Reg) -&gt; [Reg] -&gt; UniqSet Reg
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394239"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
+</span><a href="#local-6989586621682550649"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL16"><span class="hs-identifier hs-var">SubL16</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394239"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
+</span><a href="#local-6989586621682550649"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RegSub -&gt; Reg -&gt; Reg
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegSub"><span class="hs-identifier hs-var">RegSub</span></a></span><span> </span><span class="annot"><span class="annottext">RegSub
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#SubL8H"><span class="hs-identifier hs-var">SubL8H</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394239"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682550649"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-120"></span><span>
 </span><span id="line-121"></span><span>        </span><span class="hs-comment">-- fp</span><span>
 </span><span id="line-122"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
@@ -384,7 +384,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-123"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Reg -&gt; UniqSet Reg
 forall a. Uniquable a =&gt; a -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#unitUniqSet"><span class="hs-identifier hs-var">unitUniqSet</span></a></span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682394234"><span class="hs-identifier hs-var">reg</span></a></span><span>
+</span><a href="#local-6989586621682550644"><span class="hs-identifier hs-var">reg</span></a></span><span>
 </span><span id="line-124"></span><span>
 </span><span id="line-125"></span><span>        </span><span class="annot"><span class="annottext">Reg
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; UniqSet Reg
@@ -396,33 +396,33 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><span id="line-128"></span><span class="annot"><span class="hs-comment">-- | Optimised versions of RegColorBase.{worst, squeese} specific to x86</span></span><span>
 </span><span id="line-129"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.X86.html#worst"><span class="hs-identifier hs-type">worst</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegClass"><span class="hs-identifier hs-type">RegClass</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegClass"><span class="hs-identifier hs-type">RegClass</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-130"></span><span id="worst"><span class="annot"><span class="annottext">worst :: Int -&gt; RegClass -&gt; RegClass -&gt; Int
-</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#worst"><span class="hs-identifier hs-var hs-var">worst</span></a></span></span><span> </span><span id="local-6989586621682394242"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682394243"><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394243"><span class="hs-identifier hs-var">classN</span></a></span></span><span> </span><span id="local-6989586621682394244"><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394244"><span class="hs-identifier hs-var">classC</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#worst"><span class="hs-identifier hs-var hs-var">worst</span></a></span></span><span> </span><span id="local-6989586621682550652"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682550653"><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550653"><span class="hs-identifier hs-var">classN</span></a></span></span><span> </span><span id="local-6989586621682550654"><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550654"><span class="hs-identifier hs-var">classC</span></a></span></span><span>
 </span><span id="line-131"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394243"><span class="hs-identifier hs-var">classN</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550653"><span class="hs-identifier hs-var">classN</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-132"></span><span>        </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span>
 </span><span id="line-133"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394244"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550654"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-134"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span>
 </span><span id="line-135"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG16"><span class="hs-identifier hs-var">ClassG16</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span>
 </span><span id="line-136"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG8"><span class="hs-identifier hs-var">ClassG8</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span>
 </span><span id="line-137"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassF64"><span class="hs-identifier hs-var">ClassF64</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
@@ -431,24 +431,24 @@ forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span id="line-139"></span><span>        </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG16"><span class="hs-identifier hs-var">ClassG16</span></a></span><span>
 </span><span id="line-140"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394244"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550654"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-141"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span>
 </span><span id="line-142"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG16"><span class="hs-identifier hs-var">ClassG16</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span>
 </span><span id="line-143"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG8"><span class="hs-identifier hs-var">ClassG8</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span>
 </span><span id="line-144"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassF64"><span class="hs-identifier hs-var">ClassF64</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
@@ -457,12 +457,12 @@ forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span id="line-146"></span><span>        </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG8"><span class="hs-identifier hs-var">ClassG8</span></a></span><span>
 </span><span id="line-147"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394244"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550654"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-148"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG32"><span class="hs-identifier hs-var">ClassG32</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
@@ -471,7 +471,7 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG16"><span class="hs-identifier hs-var">ClassG16</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
@@ -480,7 +480,7 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassG8"><span class="hs-identifier hs-var">ClassG8</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span>
 </span><span id="line-151"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassF64"><span class="hs-identifier hs-var">ClassF64</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
@@ -489,12 +489,12 @@ forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span id="line-153"></span><span>        </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassF64"><span class="hs-identifier hs-var">ClassF64</span></a></span><span>
 </span><span id="line-154"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394244"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682550654"><span class="hs-identifier hs-var">classC</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-155"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><a href="GHC.CmmToAsm.Reg.Graph.Base.html#ClassF64"><span class="hs-identifier hs-var">ClassF64</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394242"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550652"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">6</span></span><span>
 </span><span id="line-156"></span><span>                </span><span class="annot"><span class="annottext">RegClass
 </span><span class="hs-identifier">_</span></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
@@ -502,21 +502,21 @@ forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span id="line-157"></span><span>
 </span><span id="line-158"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.X86.html#squeese"><span class="hs-identifier hs-type">squeese</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegClass"><span class="hs-identifier hs-type">RegClass</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Graph.Base.html#RegClass"><span class="hs-identifier hs-type">RegClass</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-159"></span><span id="squeese"><span class="annot"><span class="annottext">squeese :: RegClass -&gt; [(Int, RegClass)] -&gt; Int
-</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#squeese"><span class="hs-identifier hs-var hs-var">squeese</span></a></span></span><span> </span><span id="local-6989586621682394247"><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394247"><span class="hs-identifier hs-var">classN</span></a></span></span><span> </span><span id="local-6989586621682394248"><span class="annot"><span class="annottext">[(Int, RegClass)]
-</span><a href="#local-6989586621682394248"><span class="hs-identifier hs-var">countCs</span></a></span></span><span>
+</span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#squeese"><span class="hs-identifier hs-var hs-var">squeese</span></a></span></span><span> </span><span id="local-6989586621682550657"><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550657"><span class="hs-identifier hs-var">classN</span></a></span></span><span> </span><span id="local-6989586621682550658"><span class="annot"><span class="annottext">[(Int, RegClass)]
+</span><a href="#local-6989586621682550658"><span class="hs-identifier hs-var">countCs</span></a></span></span><span>
 </span><span id="line-160"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int
 forall a. Num a =&gt; [a] -&gt; a
 forall (t :: * -&gt; *) a. (Foldable t, Num a) =&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">sum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, RegClass) -&gt; Int) -&gt; [(Int, RegClass)] -&gt; [Int]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621682394250"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394250"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682394251"><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394251"><span class="hs-identifier hs-var">classC</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; RegClass -&gt; RegClass -&gt; Int
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621682550660"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682550660"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682550661"><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550661"><span class="hs-identifier hs-var">classC</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; RegClass -&gt; RegClass -&gt; Int
 </span><a href="GHC.CmmToAsm.Reg.Graph.X86.html#worst"><span class="hs-identifier hs-var">worst</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682394250"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394247"><span class="hs-identifier hs-var">classN</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682394251"><span class="hs-identifier hs-var">classC</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, RegClass)]
-</span><a href="#local-6989586621682394248"><span class="hs-identifier hs-var">countCs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682550660"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550657"><span class="hs-identifier hs-var">classN</span></a></span><span> </span><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682550661"><span class="hs-identifier hs-var">classC</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, RegClass)]
+</span><a href="#local-6989586621682550658"><span class="hs-identifier hs-var">countCs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-161"></span><span>
 </span><span id="line-162"></span></pre></body></html>

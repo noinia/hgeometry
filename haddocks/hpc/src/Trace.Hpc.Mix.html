@@ -16,13 +16,13 @@
 </span><span id="line-16"></span><span>        </span><span class="hs-special">)</span><span>
 </span><span id="line-17"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.html/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">intercalate</span></span><span class="hs-special">)</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Maybe.html/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">)</span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../time-1.12.2-ab16/src//Data.Time.html/Data.Time.html"><span class="hs-identifier">Data.Time</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../time-1.12.2-ab16/src//Data.Time.Clock.Internal.UTCTime.html/Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier">UTCTime</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html"><span class="hs-identifier">Data.Tree</span></a></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Text.Read.html/Text.Read.html"><span class="hs-identifier">Text.Read</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">readMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">intercalate</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../time-1.14-9bf8/src/Data.Time.html"><span class="hs-identifier">Data.Time</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../time-1.14-9bf8/src/Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier">UTCTime</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html"><span class="hs-identifier">Data.Tree</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Text.Read.html"><span class="hs-identifier">Text.Read</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">readMaybe</span></span><span class="hs-special">)</span><span>
 </span><span id="line-24"></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
 </span><span id="line-26"></span><span>
 </span><span id="line-27"></span><span class="hs-comment">-- a module index records the attributes of each tick-box that has</span><span>
 </span><span id="line-28"></span><span class="hs-comment">-- been introduced in that module, accessed by tick-number position</span><span>
@@ -40,11 +40,11 @@
 </span><span id="line-40"></span><span class="hs-comment">--  * With @hpc-tracer@, this is 8 (a tab represents several spaces).</span><span>
 </span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="Mix"><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-var">Mix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Mix"><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-var">Mix</span></a></span></span><span>
 </span><span id="line-42"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>           </span><span class="hs-comment">-- location of original file</span><span>
-</span><span id="line-43"></span><span>             </span><span class="annot"><a href="../../time-1.12.2-ab16/src//Data.Time.Clock.Internal.UTCTime.html/Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span>            </span><span class="hs-comment">-- time of original file's last update</span><span>
+</span><span id="line-43"></span><span>             </span><span class="annot"><a href="../../time-1.14-9bf8/src/Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span>            </span><span class="hs-comment">-- time of original file's last update</span><span>
 </span><span id="line-44"></span><span>             </span><span class="annot"><a href="Trace.Hpc.Util.html#Hash"><span class="hs-identifier hs-type">Hash</span></a></span><span>               </span><span class="hs-comment">-- hash of mix entry + timestamp</span><span>
 </span><span id="line-45"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>                </span><span class="hs-comment">-- tab stop value.</span><span>
 </span><span id="line-46"></span><span>             </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntry"><span class="hs-identifier hs-type">MixEntry</span></a></span><span class="hs-special">]</span><span>         </span><span class="hs-comment">-- entries</span><span>
-</span><span id="line-47"></span><span>        </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064342"><span id="local-6989586621679064355"><span id="local-6989586621679064358"><span class="annot"><span class="annottext">Int -&gt; Mix -&gt; ShowS
+</span><span id="line-47"></span><span>        </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066216"><span id="local-6989586621679066229"><span id="local-6989586621679066232"><span class="annot"><span class="annottext">Int -&gt; Mix -&gt; ShowS
 [Mix] -&gt; ShowS
 Mix -&gt; String
 (Int -&gt; Mix -&gt; ShowS)
@@ -57,7 +57,7 @@ $cshow :: Mix -&gt; String
 show :: Mix -&gt; String
 $cshowList :: [Mix] -&gt; ShowS
 showList :: [Mix] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679064369"><span id="local-6989586621679064373"><span id="local-6989586621679064376"><span id="local-6989586621679064397"><span class="annot"><span class="annottext">ReadPrec [Mix]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679066243"><span id="local-6989586621679066247"><span id="local-6989586621679066250"><span id="local-6989586621679066271"><span class="annot"><span class="annottext">ReadPrec [Mix]
 ReadPrec Mix
 Int -&gt; ReadS Mix
 ReadS [Mix]
@@ -74,7 +74,7 @@ $creadPrec :: ReadPrec Mix
 readPrec :: ReadPrec Mix
 $creadListPrec :: ReadPrec [Mix]
 readListPrec :: ReadPrec [Mix]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679064410"><span id="local-6989586621679064422"><span class="annot"><span class="annottext">Mix -&gt; Mix -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679066284"><span id="local-6989586621679066296"><span class="annot"><span class="annottext">Mix -&gt; Mix -&gt; Bool
 (Mix -&gt; Mix -&gt; Bool) -&gt; (Mix -&gt; Mix -&gt; Bool) -&gt; Eq Mix
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c== :: Mix -&gt; Mix -&gt; Bool
@@ -89,7 +89,7 @@ $c/= :: Mix -&gt; Mix -&gt; Bool
 </span><span id="line-52"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span id="TopLevelBox"><span class="annot"><a href="Trace.Hpc.Mix.html#TopLevelBox"><span class="hs-identifier hs-var">TopLevelBox</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
 </span><span id="line-53"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span id="LocalBox"><span class="annot"><a href="Trace.Hpc.Mix.html#LocalBox"><span class="hs-identifier hs-var">LocalBox</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
 </span><span id="line-54"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span id="BinBox"><span class="annot"><a href="Trace.Hpc.Mix.html#BinBox"><span class="hs-identifier hs-var">BinBox</span></a></span></span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#CondBox"><span class="hs-identifier hs-type">CondBox</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-55"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064436"><span id="local-6989586621679064439"><span id="local-6989586621679064442"><span id="local-6989586621679064465"><span class="annot"><span class="annottext">ReadPrec [BoxLabel]
+</span><span id="line-55"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066310"><span id="local-6989586621679066313"><span id="local-6989586621679066316"><span id="local-6989586621679066339"><span class="annot"><span class="annottext">ReadPrec [BoxLabel]
 ReadPrec BoxLabel
 Int -&gt; ReadS BoxLabel
 ReadS [BoxLabel]
@@ -109,7 +109,7 @@ $creadPrec :: ReadPrec BoxLabel
 readPrec :: ReadPrec BoxLabel
 $creadListPrec :: ReadPrec [BoxLabel]
 readListPrec :: ReadPrec [BoxLabel]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679064469"><span id="local-6989586621679064483"><span id="local-6989586621679064486"><span class="annot"><span class="annottext">Int -&gt; BoxLabel -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066343"><span id="local-6989586621679066357"><span id="local-6989586621679066360"><span class="annot"><span class="annottext">Int -&gt; BoxLabel -&gt; ShowS
 [BoxLabel] -&gt; ShowS
 BoxLabel -&gt; String
 (Int -&gt; BoxLabel -&gt; ShowS)
@@ -122,7 +122,7 @@ $cshow :: BoxLabel -&gt; String
 show :: BoxLabel -&gt; String
 $cshowList :: [BoxLabel] -&gt; ShowS
 showList :: [BoxLabel] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679064490"><span id="local-6989586621679064503"><span class="annot"><span class="annottext">BoxLabel -&gt; BoxLabel -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066364"><span id="local-6989586621679066377"><span class="annot"><span class="annottext">BoxLabel -&gt; BoxLabel -&gt; Bool
 (BoxLabel -&gt; BoxLabel -&gt; Bool)
 -&gt; (BoxLabel -&gt; BoxLabel -&gt; Bool) -&gt; Eq BoxLabel
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -130,7 +130,7 @@ $c== :: BoxLabel -&gt; BoxLabel -&gt; Bool
 == :: BoxLabel -&gt; BoxLabel -&gt; Bool
 $c/= :: BoxLabel -&gt; BoxLabel -&gt; Bool
 /= :: BoxLabel -&gt; BoxLabel -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679064509"><span id="local-6989586621679064520"><span id="local-6989586621679064524"><span id="local-6989586621679064527"><span id="local-6989586621679064530"><span id="local-6989586621679064533"><span id="local-6989586621679064536"><span class="annot"><span class="annottext">Eq BoxLabel
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066383"><span id="local-6989586621679066394"><span id="local-6989586621679066398"><span id="local-6989586621679066401"><span id="local-6989586621679066404"><span id="local-6989586621679066407"><span id="local-6989586621679066410"><span class="annot"><span class="annottext">Eq BoxLabel
 Eq BoxLabel =&gt;
 (BoxLabel -&gt; BoxLabel -&gt; Ordering)
 -&gt; (BoxLabel -&gt; BoxLabel -&gt; Bool)
@@ -172,7 +172,7 @@ min :: BoxLabel -&gt; BoxLabel -&gt; BoxLabel
 </span><span id="line-57"></span><span class="hs-keyword">data</span><span> </span><span id="CondBox"><span class="annot"><a href="Trace.Hpc.Mix.html#CondBox"><span class="hs-identifier hs-var">CondBox</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="GuardBinBox"><span class="annot"><a href="Trace.Hpc.Mix.html#GuardBinBox"><span class="hs-identifier hs-var">GuardBinBox</span></a></span></span><span>
 </span><span id="line-58"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span id="CondBinBox"><span class="annot"><a href="Trace.Hpc.Mix.html#CondBinBox"><span class="hs-identifier hs-var">CondBinBox</span></a></span></span><span>
 </span><span id="line-59"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span id="QualBinBox"><span class="annot"><a href="Trace.Hpc.Mix.html#QualBinBox"><span class="hs-identifier hs-var">QualBinBox</span></a></span></span><span>
-</span><span id="line-60"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064546"><span id="local-6989586621679064549"><span id="local-6989586621679064552"><span id="local-6989586621679064557"><span class="annot"><span class="annottext">ReadPrec [CondBox]
+</span><span id="line-60"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066420"><span id="local-6989586621679066423"><span id="local-6989586621679066426"><span id="local-6989586621679066431"><span class="annot"><span class="annottext">ReadPrec [CondBox]
 ReadPrec CondBox
 Int -&gt; ReadS CondBox
 ReadS [CondBox]
@@ -192,7 +192,7 @@ $creadPrec :: ReadPrec CondBox
 readPrec :: ReadPrec CondBox
 $creadListPrec :: ReadPrec [CondBox]
 readListPrec :: ReadPrec [CondBox]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679064560"><span id="local-6989586621679064562"><span id="local-6989586621679064565"><span class="annot"><span class="annottext">Int -&gt; CondBox -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066434"><span id="local-6989586621679066436"><span id="local-6989586621679066439"><span class="annot"><span class="annottext">Int -&gt; CondBox -&gt; ShowS
 [CondBox] -&gt; ShowS
 CondBox -&gt; String
 (Int -&gt; CondBox -&gt; ShowS)
@@ -205,7 +205,7 @@ $cshow :: CondBox -&gt; String
 show :: CondBox -&gt; String
 $cshowList :: [CondBox] -&gt; ShowS
 showList :: [CondBox] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679064568"><span id="local-6989586621679064572"><span class="annot"><span class="annottext">CondBox -&gt; CondBox -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066442"><span id="local-6989586621679066446"><span class="annot"><span class="annottext">CondBox -&gt; CondBox -&gt; Bool
 (CondBox -&gt; CondBox -&gt; Bool)
 -&gt; (CondBox -&gt; CondBox -&gt; Bool) -&gt; Eq CondBox
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -213,7 +213,7 @@ $c== :: CondBox -&gt; CondBox -&gt; Bool
 == :: CondBox -&gt; CondBox -&gt; Bool
 $c/= :: CondBox -&gt; CondBox -&gt; Bool
 /= :: CondBox -&gt; CondBox -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679064577"><span id="local-6989586621679064581"><span id="local-6989586621679064585"><span id="local-6989586621679064588"><span id="local-6989586621679064591"><span id="local-6989586621679064594"><span id="local-6989586621679064597"><span class="annot"><span class="annottext">Eq CondBox
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066451"><span id="local-6989586621679066455"><span id="local-6989586621679066459"><span id="local-6989586621679066462"><span id="local-6989586621679066465"><span id="local-6989586621679066468"><span id="local-6989586621679066471"><span class="annot"><span class="annottext">Eq CondBox
 Eq CondBox =&gt;
 (CondBox -&gt; CondBox -&gt; Ordering)
 -&gt; (CondBox -&gt; CondBox -&gt; Bool)
@@ -253,44 +253,44 @@ min :: CondBox -&gt; CondBox -&gt; CondBox
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span>
 </span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Trace.Hpc.Util.html#HpcHash"><span class="hs-identifier hs-type">HpcHash</span></a></span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#BoxLabel"><span class="hs-identifier hs-type">BoxLabel</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-63"></span><span>   </span><span id="local-6989586621679064626"><span class="annot"><span class="annottext">toHash :: BoxLabel -&gt; Hash
-</span><a href="#local-6989586621679064626"><span class="hs-identifier hs-var hs-var hs-var">toHash</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#ExpBox"><span class="hs-identifier hs-type">ExpBox</span></a></span><span> </span><span id="local-6989586621679064628"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064628"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
+</span><span id="line-63"></span><span>   </span><span id="local-6989586621679066500"><span class="annot"><span class="annottext">toHash :: BoxLabel -&gt; Hash
+</span><a href="#local-6989586621679066500"><span class="hs-identifier hs-var hs-var hs-var">toHash</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#ExpBox"><span class="hs-identifier hs-type">ExpBox</span></a></span><span> </span><span id="local-6989586621679066502"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066502"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
 </span><span class="hs-number">0x100</span></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; Hash -&gt; Hash
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Hash
 forall a. HpcHash a =&gt; a -&gt; Hash
 </span><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064628"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-64"></span><span>   </span><span class="annot"><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#TopLevelBox"><span class="hs-identifier hs-type">TopLevelBox</span></a></span><span> </span><span id="local-6989586621679064630"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064630"><span class="hs-identifier hs-var">nm</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
+</span><a href="#local-6989586621679066502"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-64"></span><span>   </span><span class="annot"><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#TopLevelBox"><span class="hs-identifier hs-type">TopLevelBox</span></a></span><span> </span><span id="local-6989586621679066504"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679066504"><span class="hs-identifier hs-var">nm</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
 </span><span class="hs-number">0x200</span></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; Hash -&gt; Hash
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; Hash
 forall a. HpcHash a =&gt; a -&gt; Hash
 </span><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064630"><span class="hs-identifier hs-var">nm</span></a></span><span>
-</span><span id="line-65"></span><span>   </span><span class="annot"><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#LocalBox"><span class="hs-identifier hs-type">LocalBox</span></a></span><span> </span><span id="local-6989586621679064631"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064631"><span class="hs-identifier hs-var">nm</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
+</span><a href="#local-6989586621679066504"><span class="hs-identifier hs-var">nm</span></a></span><span>
+</span><span id="line-65"></span><span>   </span><span class="annot"><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#LocalBox"><span class="hs-identifier hs-type">LocalBox</span></a></span><span> </span><span id="local-6989586621679066505"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679066505"><span class="hs-identifier hs-var">nm</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
 </span><span class="hs-number">0x300</span></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; Hash -&gt; Hash
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; Hash
 forall a. HpcHash a =&gt; a -&gt; Hash
 </span><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064631"><span class="hs-identifier hs-var">nm</span></a></span><span>
-</span><span id="line-66"></span><span>   </span><span class="annot"><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#BinBox"><span class="hs-identifier hs-type">BinBox</span></a></span><span> </span><span id="local-6989586621679064632"><span class="annot"><span class="annottext">CondBox
-</span><a href="#local-6989586621679064632"><span class="hs-identifier hs-var">cond</span></a></span></span><span> </span><span id="local-6989586621679064633"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064633"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
+</span><a href="#local-6989586621679066505"><span class="hs-identifier hs-var">nm</span></a></span><span>
+</span><span id="line-66"></span><span>   </span><span class="annot"><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#BinBox"><span class="hs-identifier hs-type">BinBox</span></a></span><span> </span><span id="local-6989586621679066506"><span class="annot"><span class="annottext">CondBox
+</span><a href="#local-6989586621679066506"><span class="hs-identifier hs-var">cond</span></a></span></span><span> </span><span id="local-6989586621679066507"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066507"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
 </span><span class="hs-number">0x400</span></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; Hash -&gt; Hash
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">(CondBox, Bool) -&gt; Hash
 forall a. HpcHash a =&gt; a -&gt; Hash
 </span><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var">toHash</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CondBox
-</span><a href="#local-6989586621679064632"><span class="hs-identifier hs-var">cond</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064633"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679066506"><span class="hs-identifier hs-var">cond</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066507"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-67"></span><span>
 </span><span id="line-68"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Trace.Hpc.Util.html#HpcHash"><span class="hs-identifier hs-type">HpcHash</span></a></span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#CondBox"><span class="hs-identifier hs-type">CondBox</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-69"></span><span>   </span><span id="local-6989586621679064638"><span class="annot"><span class="annottext">toHash :: CondBox -&gt; Hash
+</span><span id="line-69"></span><span>   </span><span id="local-6989586621679066512"><span class="annot"><span class="annottext">toHash :: CondBox -&gt; Hash
 </span><a href="Trace.Hpc.Util.html#toHash"><span class="hs-identifier hs-var hs-var hs-var">toHash</span></a></span></span><span> </span><span class="annot"><span class="annottext">CondBox
 </span><a href="Trace.Hpc.Mix.html#GuardBinBox"><span class="hs-identifier hs-var">GuardBinBox</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Hash
 </span><span class="hs-number">0x10</span></span><span>
@@ -313,71 +313,71 @@ forall a. HpcHash a =&gt; a -&gt; Hash
 </span><span id="line-82"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-type">Mix</span></a></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ The Mix data structure.</span></span><span>
 </span><span id="line-83"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-84"></span><span id="mixCreate"><span class="annot"><span class="annottext">mixCreate :: String -&gt; String -&gt; Mix -&gt; IO ()
-</span><a href="Trace.Hpc.Mix.html#mixCreate"><span class="hs-identifier hs-var hs-var">mixCreate</span></a></span></span><span> </span><span id="local-6989586621679064639"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064639"><span class="hs-identifier hs-var">dirName</span></a></span></span><span> </span><span id="local-6989586621679064640"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064640"><span class="hs-identifier hs-var">modName</span></a></span></span><span> </span><span id="local-6989586621679064641"><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064641"><span class="hs-identifier hs-var">mix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Trace.Hpc.Mix.html#mixCreate"><span class="hs-identifier hs-var hs-var">mixCreate</span></a></span></span><span> </span><span id="local-6989586621679066513"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066513"><span class="hs-identifier hs-var">dirName</span></a></span></span><span> </span><span id="local-6989586621679066514"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066514"><span class="hs-identifier hs-var">modName</span></a></span></span><span> </span><span id="local-6989586621679066515"><span class="annot"><span class="annottext">Mix
+</span><a href="#local-6989586621679066515"><span class="hs-identifier hs-var">mix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-85"></span><span>   </span><span class="annot"><span class="annottext">String -&gt; String -&gt; IO ()
 </span><span class="hs-identifier hs-var">writeFile</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><a href="Trace.Hpc.Mix.html#mixName"><span class="hs-identifier hs-var">mixName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064639"><span class="hs-identifier hs-var">dirName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064640"><span class="hs-identifier hs-var">modName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mix -&gt; String
+</span><a href="#local-6989586621679066513"><span class="hs-identifier hs-var">dirName</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066514"><span class="hs-identifier hs-var">modName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mix -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064641"><span class="hs-identifier hs-var">mix</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679066515"><span class="hs-identifier hs-var">mix</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-86"></span><span>
 </span><span id="line-87"></span><span class="annot"><span class="hs-comment">-- | Read a mix file.</span></span><span>
 </span><span id="line-88"></span><span class="annot"><a href="Trace.Hpc.Mix.html#readMix"><span class="hs-identifier hs-type">readMix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">]</span><span>                 </span><span class="annot"><span class="hs-comment">-- ^ Dir Names</span></span><span>
 </span><span id="line-89"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="Trace.Hpc.Tix.html#TixModule"><span class="hs-identifier hs-type">TixModule</span></a></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ module wanted</span></span><span>
 </span><span id="line-90"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-type">Mix</span></a></span><span>
 </span><span id="line-91"></span><span id="readMix"><span class="annot"><span class="annottext">readMix :: [String] -&gt; Either String TixModule -&gt; IO Mix
-</span><a href="Trace.Hpc.Mix.html#readMix"><span class="hs-identifier hs-var hs-var">readMix</span></a></span></span><span> </span><span id="local-6989586621679064645"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064645"><span class="hs-identifier hs-var">dirNames</span></a></span></span><span> </span><span id="local-6989586621679064646"><span class="annot"><span class="annottext">Either String TixModule
-</span><a href="#local-6989586621679064646"><span class="hs-identifier hs-var">mod'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-92"></span><span>   </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679064647"><span class="annot"><span class="annottext">modName :: String
-</span><a href="#local-6989586621679064647"><span class="hs-identifier hs-var hs-var hs-var">modName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; (TixModule -&gt; String) -&gt; Either String TixModule -&gt; String
+</span><a href="Trace.Hpc.Mix.html#readMix"><span class="hs-identifier hs-var hs-var">readMix</span></a></span></span><span> </span><span id="local-6989586621679066519"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679066519"><span class="hs-identifier hs-var">dirNames</span></a></span></span><span> </span><span id="local-6989586621679066520"><span class="annot"><span class="annottext">Either String TixModule
+</span><a href="#local-6989586621679066520"><span class="hs-identifier hs-var">mod'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-92"></span><span>   </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679066521"><span class="annot"><span class="annottext">modName :: String
+</span><a href="#local-6989586621679066521"><span class="hs-identifier hs-var hs-var hs-var">modName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; (TixModule -&gt; String) -&gt; Either String TixModule -&gt; String
 forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
 </span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="annot"><span class="annottext">ShowS
 forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="annot"><span class="annottext">TixModule -&gt; String
 </span><a href="Trace.Hpc.Tix.html#tixModuleName"><span class="hs-identifier hs-var">tixModuleName</span></a></span><span> </span><span class="annot"><span class="annottext">Either String TixModule
-</span><a href="#local-6989586621679064646"><span class="hs-identifier hs-var">mod'</span></a></span><span>
-</span><span id="line-93"></span><span>   </span><span id="local-6989586621679064651"><span class="annot"><a href="#local-6989586621679064651"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[IO (Maybe Mix)] -&gt; IO [Maybe Mix]
+</span><a href="#local-6989586621679066520"><span class="hs-identifier hs-var">mod'</span></a></span><span>
+</span><span id="line-93"></span><span>   </span><span id="local-6989586621679066525"><span class="annot"><a href="#local-6989586621679066525"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[IO (Maybe Mix)] -&gt; IO [Maybe Mix]
 forall (t :: * -&gt; *) (m :: * -&gt; *) a.
 (Traversable t, Monad m) =&gt;
 t (m a) -&gt; m (t a)
 forall (m :: * -&gt; *) a. Monad m =&gt; [m a] -&gt; m [a]
-</span><span class="hs-identifier hs-var">sequence</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679064653"><span class="annot"><span class="annottext">mixPath :: String
-</span><a href="#local-6989586621679064653"><span class="hs-identifier hs-var hs-var hs-var">mixPath</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">sequence</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">do</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679066527"><span class="annot"><span class="annottext">mixPath :: String
+</span><a href="#local-6989586621679066527"><span class="hs-identifier hs-var hs-var hs-var">mixPath</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><a href="Trace.Hpc.Mix.html#mixName"><span class="hs-identifier hs-var">mixName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064654"><span class="hs-identifier hs-var">dirName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064647"><span class="hs-identifier hs-var">modName</span></a></span><span>
-</span><span id="line-94"></span><span>                             </span><span id="local-6989586621679064657"><span class="annot"><span class="annottext">parseError :: a
-</span><a href="#local-6989586621679064657"><span class="hs-identifier hs-var hs-var hs-var">parseError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; a
+</span><a href="#local-6989586621679066528"><span class="hs-identifier hs-var">dirName</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066521"><span class="hs-identifier hs-var">modName</span></a></span><span>
+</span><span id="line-94"></span><span>                             </span><span id="local-6989586621679066531"><span class="annot"><span class="annottext">parseError :: a
+</span><a href="#local-6989586621679066531"><span class="hs-identifier hs-var hs-var hs-var">parseError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; a
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;can not parse &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064653"><span class="hs-identifier hs-var">mixPath</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-95"></span><span>                             </span><span id="local-6989586621679064660"><span class="annot"><span class="annottext">parse :: String -&gt; Mix
-</span><a href="#local-6989586621679064660"><span class="hs-identifier hs-var hs-var hs-var">parse</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mix -&gt; Maybe Mix -&gt; Mix
+</span><a href="#local-6989586621679066527"><span class="hs-identifier hs-var">mixPath</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>                             </span><span id="local-6989586621679066534"><span class="annot"><span class="annottext">parse :: String -&gt; Mix
+</span><a href="#local-6989586621679066534"><span class="hs-identifier hs-var hs-var hs-var">parse</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mix -&gt; Maybe Mix -&gt; Mix
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Mix
 forall {a}. a
-</span><a href="#local-6989586621679064657"><span class="hs-identifier hs-var">parseError</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe Mix -&gt; Mix) -&gt; (String -&gt; Maybe Mix) -&gt; String -&gt; Mix
+</span><a href="#local-6989586621679066531"><span class="hs-identifier hs-var">parseError</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe Mix -&gt; Mix) -&gt; (String -&gt; Maybe Mix) -&gt; String -&gt; Mix
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe Mix
 forall a. Read a =&gt; String -&gt; Maybe a
 </span><span class="hs-identifier hs-var">readMaybe</span></span><span>
-</span><span id="line-96"></span><span>                         </span><span id="local-6989586621679064662"><span class="annot"><a href="#local-6989586621679064662"><span class="hs-identifier hs-var">mix</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; Mix
-</span><a href="#local-6989586621679064660"><span class="hs-identifier hs-var">parse</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Mix) -&gt; IO String -&gt; IO Mix
+</span><span id="line-96"></span><span>                         </span><span id="local-6989586621679066536"><span class="annot"><a href="#local-6989586621679066536"><span class="hs-identifier hs-var">mix</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; Mix
+</span><a href="#local-6989586621679066534"><span class="hs-identifier hs-var">parse</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Mix) -&gt; IO String -&gt; IO Mix
 forall a b. (a -&gt; b) -&gt; IO a -&gt; IO b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">`fmap`</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; IO String
 </span><a href="Trace.Hpc.Util.html#readFileUtf8"><span class="hs-identifier hs-var">readFileUtf8</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064653"><span class="hs-identifier hs-var">mixPath</span></a></span><span>
-</span><span id="line-97"></span><span>                         </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679064646"><span class="hs-identifier hs-type">mod'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679066527"><span class="hs-identifier hs-var">mixPath</span></a></span><span>
+</span><span id="line-97"></span><span>                         </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679066520"><span class="hs-identifier hs-type">mod'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-98"></span><span>                            </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span>  </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Mix -&gt; IO (Maybe Mix)
 forall a. a -&gt; IO a
@@ -387,18 +387,18 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Mix -&gt; Maybe Mix
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064662"><span class="hs-identifier hs-var">mix</span></a></span><span> </span><span class="hs-comment">-- Bypass hash check</span><span>
-</span><span id="line-99"></span><span>                            </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679064663"><span class="annot"><span class="annottext">TixModule
-</span><a href="#local-6989586621679064663"><span class="hs-identifier hs-var">tix</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Mix -&gt; IO (Maybe Mix)
+</span><a href="#local-6989586621679066536"><span class="hs-identifier hs-var">mix</span></a></span><span> </span><span class="hs-comment">-- Bypass hash check</span><span>
+</span><span id="line-99"></span><span>                            </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679066537"><span class="annot"><span class="annottext">TixModule
+</span><a href="#local-6989586621679066537"><span class="hs-identifier hs-var">tix</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Mix -&gt; IO (Maybe Mix)
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Mix -&gt; IO (Maybe Mix)) -&gt; Maybe Mix -&gt; IO (Maybe Mix)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TixModule -&gt; Mix -&gt; String -&gt; Maybe Mix
 </span><a href="Trace.Hpc.Mix.html#checkHash"><span class="hs-identifier hs-var">checkHash</span></a></span><span> </span><span class="annot"><span class="annottext">TixModule
-</span><a href="#local-6989586621679064663"><span class="hs-identifier hs-var">tix</span></a></span><span> </span><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064662"><span class="hs-identifier hs-var">mix</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064653"><span class="hs-identifier hs-var">mixPath</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679066537"><span class="hs-identifier hs-var">tix</span></a></span><span> </span><span class="annot"><span class="annottext">Mix
+</span><a href="#local-6989586621679066536"><span class="hs-identifier hs-var">mix</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066527"><span class="hs-identifier hs-var">mixPath</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-100"></span><span>                     </span><span class="annot"><span class="annottext">IO (Maybe Mix) -&gt; (IOException -&gt; IO (Maybe Mix)) -&gt; IO (Maybe Mix)
 forall a. IO a -&gt; (IOException -&gt; IO a) -&gt; IO a
 </span><a href="Trace.Hpc.Util.html#catchIO"><span class="hs-operator hs-var">`catchIO`</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span> </span><span class="annot"><span class="annottext">IOException
@@ -410,23 +410,23 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Maybe Mix
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>
-</span><span id="line-101"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679064654"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064654"><span class="hs-identifier hs-var">dirName</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064645"><span class="hs-identifier hs-var">dirNames</span></a></span><span>
+</span><span id="line-101"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679066528"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066528"><span class="hs-identifier hs-var">dirName</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679066519"><span class="hs-identifier hs-var">dirNames</span></a></span><span>
 </span><span id="line-102"></span><span>                   </span><span class="hs-special">]</span><span>
-</span><span id="line-103"></span><span>   </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="hs-identifier hs-type">catMaybes</span></span><span> </span><span class="annot"><a href="#local-6989586621679064651"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-104"></span><span>     </span><span id="local-6989586621679064665"><span class="annot"><span class="annottext">xs :: [Mix]
-</span><a href="#local-6989586621679064665"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679064666"><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064666"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679064667"><span class="annot"><span class="annottext">tl :: [Mix]
-</span><a href="#local-6989586621679064667"><span class="hs-identifier hs-var">tl</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mix
+</span><span id="line-103"></span><span>   </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="hs-identifier hs-type">catMaybes</span></span><span> </span><span class="annot"><a href="#local-6989586621679066525"><span class="hs-identifier hs-type">res</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-104"></span><span>     </span><span id="local-6989586621679066539"><span class="annot"><span class="annottext">xs :: [Mix]
+</span><a href="#local-6989586621679066539"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679066540"><span class="annot"><span class="annottext">Mix
+</span><a href="#local-6989586621679066540"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679066541"><span class="annot"><span class="annottext">tl :: [Mix]
+</span><a href="#local-6989586621679066541"><span class="hs-identifier hs-var">tl</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mix
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">[Mix]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(Mix -&gt; Bool) -&gt; [Mix] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">any</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mix -&gt; Mix -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064666"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Mix]
-</span><a href="#local-6989586621679064667"><span class="hs-identifier hs-var">tl</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679066540"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Mix]
+</span><a href="#local-6989586621679066541"><span class="hs-identifier hs-var">tl</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-105"></span><span>              </span><span class="hs-comment">-- Only complain if multiple *different* `Mix` files with the</span><span>
 </span><span id="line-106"></span><span>              </span><span class="hs-comment">-- same name are found (#9619).</span><span>
 </span><span id="line-107"></span><span>              </span><span class="annot"><span class="annottext">String -&gt; IO Mix
@@ -442,14 +442,14 @@ forall a. Show a =&gt; a -&gt; String
 forall a. [a] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[Mix]
-</span><a href="#local-6989586621679064665"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679066539"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; different instances of &quot;</span></span><span>
 </span><span id="line-108"></span><span>                      </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064647"><span class="hs-identifier hs-var">modName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679066521"><span class="hs-identifier hs-var">modName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; in &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
@@ -458,14 +458,14 @@ forall a. [a] -&gt; [a] -&gt; [a]
 forall a. [a] -&gt; [[a]] -&gt; [a]
 </span><span class="hs-identifier hs-var">intercalate</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;, &quot;</span></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064645"><span class="hs-identifier hs-var">dirNames</span></a></span><span>
-</span><span id="line-109"></span><span>     </span><span class="hs-special">(</span><span id="local-6989586621679064671"><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064671"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[Mix]
+</span><a href="#local-6989586621679066519"><span class="hs-identifier hs-var">dirNames</span></a></span><span>
+</span><span id="line-109"></span><span>     </span><span class="hs-special">(</span><span id="local-6989586621679066545"><span class="annot"><span class="annottext">Mix
+</span><a href="#local-6989586621679066545"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[Mix]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Mix -&gt; IO Mix
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064671"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679066545"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-110"></span><span>     </span><span class="annot"><span class="annottext">[Mix]
 </span><span class="hs-identifier">_</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; IO Mix
 forall a. HasCallStack =&gt; String -&gt; a
@@ -476,7 +476,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span id="line-111"></span><span>                      </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064647"><span class="hs-identifier hs-var">modName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679066521"><span class="hs-identifier hs-var">modName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; in &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
@@ -485,39 +485,39 @@ forall a. [a] -&gt; [a] -&gt; [a]
 forall a. [a] -&gt; [[a]] -&gt; [a]
 </span><span class="hs-identifier hs-var">intercalate</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;, &quot;</span></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679064645"><span class="hs-identifier hs-var">dirNames</span></a></span><span>
+</span><a href="#local-6989586621679066519"><span class="hs-identifier hs-var">dirNames</span></a></span><span>
 </span><span id="line-112"></span><span>
 </span><span id="line-113"></span><span class="annot"><a href="Trace.Hpc.Mix.html#mixName"><span class="hs-identifier hs-type">mixName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-114"></span><span id="mixName"><span class="annot"><span class="annottext">mixName :: String -&gt; ShowS
-</span><a href="Trace.Hpc.Mix.html#mixName"><span class="hs-identifier hs-var hs-var">mixName</span></a></span></span><span> </span><span id="local-6989586621679064672"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064672"><span class="hs-identifier hs-var">dirName</span></a></span></span><span> </span><span id="local-6989586621679064673"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064673"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064672"><span class="hs-identifier hs-var">dirName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064673"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C.%3E"><span class="hs-operator hs-var">&lt;.&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="Trace.Hpc.Mix.html#mixName"><span class="hs-identifier hs-var hs-var">mixName</span></a></span></span><span> </span><span id="local-6989586621679066546"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066546"><span class="hs-identifier hs-var">dirName</span></a></span></span><span> </span><span id="local-6989586621679066547"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066547"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066546"><span class="hs-identifier hs-var">dirName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066547"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="../../filepath-1.5.4.0-e69b/src/System.FilePath.Posix.html#%3C.%3E"><span class="hs-operator hs-var">&lt;.&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;mix&quot;</span></span><span>
 </span><span id="line-115"></span><span>
 </span><span id="line-116"></span><span class="annot"><span class="hs-comment">-- | Check that hash in .tix and .mix file match.</span></span><span>
 </span><span id="line-117"></span><span class="annot"><a href="Trace.Hpc.Mix.html#checkHash"><span class="hs-identifier hs-type">checkHash</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Trace.Hpc.Tix.html#TixModule"><span class="hs-identifier hs-type">TixModule</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-type">Mix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-type">Mix</span></a></span><span>
 </span><span id="line-118"></span><span id="checkHash"><span class="annot"><span class="annottext">checkHash :: TixModule -&gt; Mix -&gt; String -&gt; Maybe Mix
-</span><a href="Trace.Hpc.Mix.html#checkHash"><span class="hs-identifier hs-var hs-var">checkHash</span></a></span></span><span> </span><span id="local-6989586621679064676"><span class="annot"><span class="annottext">TixModule
-</span><a href="#local-6989586621679064676"><span class="hs-identifier hs-var">tix</span></a></span></span><span> </span><span id="local-6989586621679064677"><span class="annot"><span class="annottext">mix :: Mix
-</span><a href="#local-6989586621679064677"><span class="hs-identifier hs-var">mix</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-type">Mix</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="Trace.Hpc.Mix.html#checkHash"><span class="hs-identifier hs-var hs-var">checkHash</span></a></span></span><span> </span><span id="local-6989586621679066550"><span class="annot"><span class="annottext">TixModule
+</span><a href="#local-6989586621679066550"><span class="hs-identifier hs-var">tix</span></a></span></span><span> </span><span id="local-6989586621679066551"><span class="annot"><span class="annottext">mix :: Mix
+</span><a href="#local-6989586621679066551"><span class="hs-identifier hs-var">mix</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Mix.html#Mix"><span class="hs-identifier hs-type">Mix</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">UTCTime
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679064678"><span class="annot"><span class="annottext">Hash
-</span><a href="#local-6989586621679064678"><span class="hs-identifier hs-var">mixHash</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679066552"><span class="annot"><span class="annottext">Hash
+</span><a href="#local-6989586621679066552"><span class="hs-identifier hs-var">mixHash</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">[MixEntry]
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679064679"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064679"><span class="hs-identifier hs-var">mixPath</span></a></span></span><span>
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679066553"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679066553"><span class="hs-identifier hs-var">mixPath</span></a></span></span><span>
 </span><span id="line-119"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Hash
-</span><a href="#local-6989586621679064680"><span class="hs-identifier hs-var">modHash</span></a></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; Hash -&gt; Bool
+</span><a href="#local-6989586621679066554"><span class="hs-identifier hs-var">modHash</span></a></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; Hash -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Hash
-</span><a href="#local-6989586621679064678"><span class="hs-identifier hs-var">mixHash</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mix -&gt; Maybe Mix
+</span><a href="#local-6989586621679066552"><span class="hs-identifier hs-var">mixHash</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mix -&gt; Maybe Mix
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Mix
-</span><a href="#local-6989586621679064677"><span class="hs-identifier hs-var">mix</span></a></span><span>
+</span><a href="#local-6989586621679066551"><span class="hs-identifier hs-var">mix</span></a></span><span>
 </span><span id="line-120"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe Mix
 forall a. HasCallStack =&gt; String -&gt; a
@@ -528,7 +528,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-string">&quot;hash in tix file for module &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064681"><span class="hs-identifier hs-var">modName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679066555"><span class="hs-identifier hs-var">modName</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; (&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
@@ -536,7 +536,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Hash
-</span><a href="#local-6989586621679064680"><span class="hs-identifier hs-var">modHash</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679066554"><span class="hs-identifier hs-var">modHash</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;)\n&quot;</span></span><span>
@@ -546,7 +546,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-string">&quot;does not match hash in &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679064679"><span class="hs-identifier hs-var">mixPath</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679066553"><span class="hs-identifier hs-var">mixPath</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; (&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
@@ -554,153 +554,153 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Hash -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Hash
-</span><a href="#local-6989586621679064678"><span class="hs-identifier hs-var">mixHash</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621679066552"><span class="hs-identifier hs-var">mixHash</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;)&quot;</span></span><span>
 </span><span id="line-123"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-124"></span><span>    </span><span id="local-6989586621679064681"><span class="annot"><span class="annottext">modName :: String
-</span><a href="#local-6989586621679064681"><span class="hs-identifier hs-var hs-var">modName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TixModule -&gt; String
+</span><span id="line-124"></span><span>    </span><span id="local-6989586621679066555"><span class="annot"><span class="annottext">modName :: String
+</span><a href="#local-6989586621679066555"><span class="hs-identifier hs-var hs-var">modName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TixModule -&gt; String
 </span><a href="Trace.Hpc.Tix.html#tixModuleName"><span class="hs-identifier hs-var">tixModuleName</span></a></span><span> </span><span class="annot"><span class="annottext">TixModule
-</span><a href="#local-6989586621679064676"><span class="hs-identifier hs-var">tix</span></a></span><span>
-</span><span id="line-125"></span><span>    </span><span id="local-6989586621679064680"><span class="annot"><span class="annottext">modHash :: Hash
-</span><a href="#local-6989586621679064680"><span class="hs-identifier hs-var hs-var">modHash</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TixModule -&gt; Hash
+</span><a href="#local-6989586621679066550"><span class="hs-identifier hs-var">tix</span></a></span><span>
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621679066554"><span class="annot"><span class="annottext">modHash :: Hash
+</span><a href="#local-6989586621679066554"><span class="hs-identifier hs-var hs-var">modHash</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TixModule -&gt; Hash
 </span><a href="Trace.Hpc.Tix.html#tixModuleHash"><span class="hs-identifier hs-var">tixModuleHash</span></a></span><span> </span><span class="annot"><span class="annottext">TixModule
-</span><a href="#local-6989586621679064676"><span class="hs-identifier hs-var">tix</span></a></span><span>
+</span><a href="#local-6989586621679066550"><span class="hs-identifier hs-var">tix</span></a></span><span>
 </span><span id="line-126"></span><span>
 </span><span id="line-127"></span><span class="hs-comment">------------------------------------------------------------------------------</span><span>
 </span><span id="line-128"></span><span>
-</span><span id="line-129"></span><span class="hs-keyword">type</span><span> </span><span id="MixEntryDom"><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-var">MixEntryDom</span></a></span></span><span> </span><span id="local-6989586621679064683"><span class="annot"><a href="#local-6989586621679064683"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Tree"><span class="hs-identifier hs-type">Tree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679064683"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span class="hs-keyword">type</span><span> </span><span id="MixEntryDom"><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-var">MixEntryDom</span></a></span></span><span> </span><span id="local-6989586621679066557"><span class="annot"><a href="#local-6989586621679066557"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Tree"><span class="hs-identifier hs-type">Tree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679066557"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-130"></span><span>
 </span><span id="line-131"></span><span class="hs-comment">-- A good tree has all its children fully inside its parents HpcPos.</span><span>
 </span><span id="line-132"></span><span class="hs-comment">-- No child should have the *same* HpcPos.</span><span>
 </span><span id="line-133"></span><span class="hs-comment">-- There is no ordering to the children</span><span>
 </span><span id="line-134"></span><span>
-</span><span id="line-135"></span><span id="local-6989586621679064278"><span class="annot"><a href="Trace.Hpc.Mix.html#isGoodNode"><span class="hs-identifier hs-type">isGoodNode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679064278"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-135"></span><span id="local-6989586621679066152"><span class="annot"><a href="Trace.Hpc.Mix.html#isGoodNode"><span class="hs-identifier hs-type">isGoodNode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679066152"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
 </span><span id="line-136"></span><span id="isGoodNode"><span class="annot"><span class="annottext">isGoodNode :: forall a. MixEntryDom a -&gt; Bool
-</span><a href="Trace.Hpc.Mix.html#isGoodNode"><span class="hs-identifier hs-var hs-var">isGoodNode</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064689"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064689"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679064690"><span class="annot"><span class="annottext">[Tree (HpcPos, a)]
-</span><a href="#local-6989586621679064690"><span class="hs-identifier hs-var">sub_nodes</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Trace.Hpc.Mix.html#isGoodNode"><span class="hs-identifier hs-var hs-var">isGoodNode</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066563"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066563"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679066564"><span class="annot"><span class="annottext">[Tree (HpcPos, a)]
+</span><a href="#local-6989586621679066564"><span class="hs-identifier hs-var">sub_nodes</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-137"></span><span>      </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
 forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">and</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064692"><span class="hs-identifier hs-var">pos'</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066566"><span class="hs-identifier hs-var">pos'</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 </span><a href="Trace.Hpc.Util.html#insideHpcPos"><span class="hs-operator hs-var">`insideHpcPos`</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064689"><span class="hs-identifier hs-var">pos</span></a></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span class="hs-special">(</span><span id="local-6989586621679064692"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064692"><span class="hs-identifier hs-var">pos'</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066563"><span class="hs-identifier hs-var">pos</span></a></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span class="hs-special">(</span><span id="local-6989586621679066566"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066566"><span class="hs-identifier hs-var">pos'</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">[Tree (HpcPos, a)]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, a)]
-</span><a href="#local-6989586621679064690"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679066564"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-138"></span><span>   </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
 forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">and</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064694"><span class="hs-identifier hs-var">pos'</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066568"><span class="hs-identifier hs-var">pos'</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064689"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span class="hs-special">(</span><span id="local-6989586621679064694"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064694"><span class="hs-identifier hs-var">pos'</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066563"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span class="hs-special">(</span><span id="local-6989586621679066568"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066568"><span class="hs-identifier hs-var">pos'</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, a)]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, a)]
-</span><a href="#local-6989586621679064690"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679066564"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-139"></span><span>   </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, a)] -&gt; Bool
 forall a. [MixEntryDom a] -&gt; Bool
 </span><a href="Trace.Hpc.Mix.html#isGoodForest"><span class="hs-identifier hs-var">isGoodForest</span></a></span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, a)]
-</span><a href="#local-6989586621679064690"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span>
+</span><a href="#local-6989586621679066564"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span>
 </span><span id="line-140"></span><span>
 </span><span id="line-141"></span><span class="hs-comment">-- all sub-trees are good trees, and no two HpcPos are inside each other.</span><span>
-</span><span id="line-142"></span><span id="local-6989586621679064283"><span class="annot"><a href="Trace.Hpc.Mix.html#isGoodForest"><span class="hs-identifier hs-type">isGoodForest</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679064283"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-142"></span><span id="local-6989586621679066157"><span class="annot"><a href="Trace.Hpc.Mix.html#isGoodForest"><span class="hs-identifier hs-type">isGoodForest</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679066157"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
 </span><span id="line-143"></span><span id="isGoodForest"><span class="annot"><span class="annottext">isGoodForest :: forall a. [MixEntryDom a] -&gt; Bool
-</span><a href="Trace.Hpc.Mix.html#isGoodForest"><span class="hs-identifier hs-var hs-var">isGoodForest</span></a></span></span><span> </span><span id="local-6989586621679064705"><span class="annot"><span class="annottext">[MixEntryDom a]
-</span><a href="#local-6989586621679064705"><span class="hs-identifier hs-var">sub_nodes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Trace.Hpc.Mix.html#isGoodForest"><span class="hs-identifier hs-var hs-var">isGoodForest</span></a></span></span><span> </span><span id="local-6989586621679066579"><span class="annot"><span class="annottext">[MixEntryDom a]
+</span><a href="#local-6989586621679066579"><span class="hs-identifier hs-var">sub_nodes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-144"></span><span>   </span><span class="annot"><span class="annottext">(MixEntryDom a -&gt; Bool) -&gt; [MixEntryDom a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="annot"><span class="annottext">MixEntryDom a -&gt; Bool
 forall a. MixEntryDom a -&gt; Bool
 </span><a href="Trace.Hpc.Mix.html#isGoodNode"><span class="hs-identifier hs-var">isGoodNode</span></a></span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a]
-</span><a href="#local-6989586621679064705"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span>
+</span><a href="#local-6989586621679066579"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span>
 </span><span id="line-145"></span><span>   </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
 forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">and</span></span><span> </span><span class="hs-special">[</span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064708"><span class="hs-identifier hs-var">pos1</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066582"><span class="hs-identifier hs-var">pos1</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 </span><a href="Trace.Hpc.Util.html#insideHpcPos"><span class="hs-operator hs-var">`insideHpcPos`</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064709"><span class="hs-identifier hs-var">pos2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679066583"><span class="hs-identifier hs-var">pos2</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span>
 </span><span id="line-146"></span><span>                  </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064709"><span class="hs-identifier hs-var">pos2</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066583"><span class="hs-identifier hs-var">pos2</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 </span><a href="Trace.Hpc.Util.html#insideHpcPos"><span class="hs-operator hs-var">`insideHpcPos`</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064708"><span class="hs-identifier hs-var">pos1</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-147"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064708"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064708"><span class="hs-identifier hs-var">pos1</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066582"><span class="hs-identifier hs-var">pos1</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066582"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066582"><span class="hs-identifier hs-var">pos1</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a]
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679064711"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679064711"><span class="hs-identifier hs-var">n1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a] -&gt; [Int] -&gt; [(MixEntryDom a, Int)]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679066585"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679066585"><span class="hs-identifier hs-var">n1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a] -&gt; [Int] -&gt; [(MixEntryDom a, Int)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a]
-</span><a href="#local-6989586621679064705"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679066579"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
-</span><span id="line-148"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064709"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064709"><span class="hs-identifier hs-var">pos2</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><span id="line-148"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066583"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066583"><span class="hs-identifier hs-var">pos2</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a]
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679064712"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679064712"><span class="hs-identifier hs-var">n2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a] -&gt; [Int] -&gt; [(MixEntryDom a, Int)]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679066586"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679066586"><span class="hs-identifier hs-var">n2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a] -&gt; [Int] -&gt; [(MixEntryDom a, Int)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[MixEntryDom a]
-</span><a href="#local-6989586621679064705"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679066579"><span class="hs-identifier hs-var">sub_nodes</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
 </span><span id="line-149"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679064711"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679066585"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679064712"><span class="hs-identifier hs-var">n2</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679066586"><span class="hs-identifier hs-var">n2</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-150"></span><span>
-</span><span id="line-151"></span><span id="local-6989586621679064288"><span class="annot"><a href="Trace.Hpc.Mix.html#addNodeToTree"><span class="hs-identifier hs-type">addNodeToTree</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679064288"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679064288"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679064288"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679064288"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-151"></span><span id="local-6989586621679066162"><span class="annot"><a href="Trace.Hpc.Mix.html#addNodeToTree"><span class="hs-identifier hs-type">addNodeToTree</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679066162"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679066162"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679066162"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679066162"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
 </span><span id="line-152"></span><span id="addNodeToTree"><span class="annot"><span class="annottext">addNodeToTree :: forall a.
 Show a =&gt;
 (HpcPos, a) -&gt; MixEntryDom [a] -&gt; MixEntryDom [a]
-</span><a href="Trace.Hpc.Mix.html#addNodeToTree"><span class="hs-identifier hs-var hs-var">addNodeToTree</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064721"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064721"><span class="hs-identifier hs-var">new_pos</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679064722"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679064722"><span class="hs-identifier hs-var">new_a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064723"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064723"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679064724"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679064724"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679064725"><span class="annot"><span class="annottext">[Tree (HpcPos, [a])]
-</span><a href="#local-6989586621679064725"><span class="hs-identifier hs-var">children</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="Trace.Hpc.Mix.html#addNodeToTree"><span class="hs-identifier hs-var hs-var">addNodeToTree</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066595"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066595"><span class="hs-identifier hs-var">new_pos</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679066596"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066596"><span class="hs-identifier hs-var">new_a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066597"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066597"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679066598"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679066598"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679066599"><span class="annot"><span class="annottext">[Tree (HpcPos, [a])]
+</span><a href="#local-6989586621679066599"><span class="hs-identifier hs-var">children</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-153"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064723"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066597"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064721"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HpcPos, [a]) -&gt; [Tree (HpcPos, [a])] -&gt; Tree (HpcPos, [a])
+</span><a href="#local-6989586621679066595"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HpcPos, [a]) -&gt; [Tree (HpcPos, [a])] -&gt; Tree (HpcPos, [a])
 forall a. a -&gt; [Tree a] -&gt; Tree a
-</span><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064723"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679064722"><span class="hs-identifier hs-var">new_a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066597"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066596"><span class="hs-identifier hs-var">new_a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679064724"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, [a])]
-</span><a href="#local-6989586621679064725"><span class="hs-identifier hs-var">children</span></a></span><span>
+</span><a href="#local-6989586621679066598"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, [a])]
+</span><a href="#local-6989586621679066599"><span class="hs-identifier hs-var">children</span></a></span><span>
 </span><span id="line-154"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064721"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066595"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 </span><a href="Trace.Hpc.Util.html#insideHpcPos"><span class="hs-operator hs-var">`insideHpcPos`</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064723"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679066597"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-155"></span><span>       </span><span class="annot"><span class="annottext">(HpcPos, [a]) -&gt; [Tree (HpcPos, [a])] -&gt; Tree (HpcPos, [a])
 forall a. a -&gt; [Tree a] -&gt; Tree a
-</span><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064723"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679064724"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(HpcPos, a) -&gt; [Tree (HpcPos, [a])] -&gt; [Tree (HpcPos, [a])]
+</span><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066597"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679066598"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(HpcPos, a) -&gt; [Tree (HpcPos, [a])] -&gt; [Tree (HpcPos, [a])]
 forall a.
 Show a =&gt;
 (HpcPos, a) -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]]
 </span><a href="Trace.Hpc.Mix.html#addNodeToList"><span class="hs-identifier hs-var">addNodeToList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064721"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679064722"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, [a])]
-</span><a href="#local-6989586621679064725"><span class="hs-identifier hs-var">children</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679066595"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066596"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Tree (HpcPos, [a])]
+</span><a href="#local-6989586621679066599"><span class="hs-identifier hs-var">children</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-156"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064723"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066597"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 </span><a href="Trace.Hpc.Util.html#insideHpcPos"><span class="hs-operator hs-var">`insideHpcPos`</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064721"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679066595"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-157"></span><span>       </span><span class="annot"><span class="annottext">String -&gt; Tree (HpcPos, [a])
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -711,29 +711,29 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;something impossible happened in addNodeToTree&quot;</span></span><span>
 </span><span id="line-159"></span><span>
-</span><span id="line-160"></span><span id="local-6989586621679064291"><span class="annot"><a href="Trace.Hpc.Mix.html#addNodeToList"><span class="hs-identifier hs-type">addNodeToList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679064291"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679064291"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679064291"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679064291"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span><span>
+</span><span id="line-160"></span><span id="local-6989586621679066165"><span class="annot"><a href="Trace.Hpc.Mix.html#addNodeToList"><span class="hs-identifier hs-type">addNodeToList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679066165"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679066165"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679066165"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679066165"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span><span>
 </span><span id="line-161"></span><span id="addNodeToList"><span class="annot"><span class="annottext">addNodeToList :: forall a.
 Show a =&gt;
 (HpcPos, a) -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]]
-</span><a href="Trace.Hpc.Mix.html#addNodeToList"><span class="hs-identifier hs-var hs-var">addNodeToList</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064735"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064735"><span class="hs-identifier hs-var">new_pos</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679064736"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679064736"><span class="hs-identifier hs-var">new_a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679064737"><span class="annot"><span class="annottext">[MixEntryDom [a]]
-</span><a href="#local-6989586621679064737"><span class="hs-identifier hs-var">entries</span></a></span></span><span>
+</span><a href="Trace.Hpc.Mix.html#addNodeToList"><span class="hs-identifier hs-var hs-var">addNodeToList</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066609"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066609"><span class="hs-identifier hs-var">new_pos</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679066610"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066610"><span class="hs-identifier hs-var">new_a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679066611"><span class="annot"><span class="annottext">[MixEntryDom [a]]
+</span><a href="#local-6989586621679066611"><span class="hs-identifier hs-var">entries</span></a></span></span><span>
 </span><span id="line-162"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-163"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[()] -&gt; Int
 forall a. [a] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-164"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064738"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064738"><span class="hs-identifier hs-var">am_inside</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679064739"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064739"><span class="hs-identifier hs-var">am_outside</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">MixEntryDom [a]
+</span><span id="line-164"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066612"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066612"><span class="hs-identifier hs-var">am_inside</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679066613"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066613"><span class="hs-identifier hs-var">am_outside</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">MixEntryDom [a]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
-</span><a href="#local-6989586621679064740"><span class="hs-identifier hs-var">entries'</span></a></span><span>
+</span><a href="#local-6989586621679066614"><span class="hs-identifier hs-var">entries'</span></a></span><span>
 </span><span id="line-165"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064738"><span class="hs-identifier hs-var">am_inside</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679066612"><span class="hs-identifier hs-var">am_inside</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064739"><span class="hs-identifier hs-var">am_outside</span></a></span><span>
+</span><a href="#local-6989586621679066613"><span class="hs-identifier hs-var">am_outside</span></a></span><span>
 </span><span id="line-166"></span><span>          </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
@@ -741,23 +741,23 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-167"></span><span>     </span><span class="hs-comment">-- The case where we have a new HpcPos range</span><span>
 </span><span id="line-168"></span><span>     </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(HpcPos, [a]) -&gt; [MixEntryDom [a]] -&gt; MixEntryDom [a]
 forall a. a -&gt; [Tree a] -&gt; Tree a
-</span><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064735"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679064736"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a] -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]]
+</span><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066609"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066610"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a] -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[MixEntryDom [a]]
-</span><a href="#local-6989586621679064737"><span class="hs-identifier hs-var">entries</span></a></span><span> </span><span class="hs-keyword">else</span><span>
+</span><a href="#local-6989586621679066611"><span class="hs-identifier hs-var">entries</span></a></span><span> </span><span class="hs-keyword">else</span><span>
 </span><span id="line-169"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[()] -&gt; Int
 forall a. [a] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-170"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064741"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064741"><span class="hs-identifier hs-var">am_inside</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
+</span><span id="line-170"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066615"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066615"><span class="hs-identifier hs-var">am_inside</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">MixEntryDom [a]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
-</span><a href="#local-6989586621679064740"><span class="hs-identifier hs-var">entries'</span></a></span><span>
+</span><a href="#local-6989586621679066614"><span class="hs-identifier hs-var">entries'</span></a></span><span>
 </span><span id="line-171"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064741"><span class="hs-identifier hs-var">am_inside</span></a></span><span>
+</span><a href="#local-6989586621679066615"><span class="hs-identifier hs-var">am_inside</span></a></span><span>
 </span><span id="line-172"></span><span>            </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
@@ -768,80 +768,80 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-176"></span><span>     </span><span class="hs-comment">-- Assumes we have captures the new HpcPos</span><span>
 </span><span id="line-177"></span><span>     </span><span class="hs-comment">-- (or the above conditional would be true)</span><span>
 </span><span id="line-178"></span><span>     </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064742"><span class="hs-identifier hs-var">i_am_inside</span></a></span><span>  </span><span class="hs-comment">-- or the same as</span><span>
+</span><a href="#local-6989586621679066616"><span class="hs-identifier hs-var">i_am_inside</span></a></span><span>  </span><span class="hs-comment">-- or the same as</span><span>
 </span><span id="line-179"></span><span>            </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(HpcPos, a) -&gt; MixEntryDom [a] -&gt; MixEntryDom [a]
 forall a.
 Show a =&gt;
 (HpcPos, a) -&gt; MixEntryDom [a] -&gt; MixEntryDom [a]
 </span><a href="Trace.Hpc.Mix.html#addNodeToTree"><span class="hs-identifier hs-var">addNodeToTree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064735"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679064736"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064743"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><a href="#local-6989586621679066609"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066610"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a]
+</span><a href="#local-6989586621679066617"><span class="hs-identifier hs-var">node</span></a></span><span>
 </span><span id="line-180"></span><span>            </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064743"><span class="hs-identifier hs-var">node</span></a></span><span>
-</span><span id="line-181"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064742"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679064742"><span class="hs-identifier hs-var">i_am_inside</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679064743"><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064743"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
-</span><a href="#local-6989586621679064740"><span class="hs-identifier hs-var">entries'</span></a></span><span>
+</span><a href="#local-6989586621679066617"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><span id="line-181"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066616"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066616"><span class="hs-identifier hs-var">i_am_inside</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679066617"><span class="annot"><span class="annottext">MixEntryDom [a]
+</span><a href="#local-6989586621679066617"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
+</span><a href="#local-6989586621679066614"><span class="hs-identifier hs-var">entries'</span></a></span><span>
 </span><span id="line-182"></span><span>          </span><span class="hs-special">]</span><span> </span><span class="hs-keyword">else</span><span>
 </span><span id="line-183"></span><span>     </span><span class="hs-comment">-- The case of a super-range.</span><span>
 </span><span id="line-184"></span><span>     </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">(HpcPos, [a]) -&gt; [MixEntryDom [a]] -&gt; MixEntryDom [a]
 forall a. a -&gt; [Tree a] -&gt; Tree a
-</span><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064735"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679064736"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066609"><span class="hs-identifier hs-var">new_pos</span></a></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066610"><span class="hs-identifier hs-var">new_a</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-185"></span><span>             </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064744"><span class="hs-identifier hs-var">node</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066618"><span class="hs-identifier hs-var">node</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span id="local-6989586621679064744"><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064744"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
-</span><a href="#local-6989586621679064740"><span class="hs-identifier hs-var">entries'</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a] -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]]
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span id="local-6989586621679066618"><span class="annot"><span class="annottext">MixEntryDom [a]
+</span><a href="#local-6989586621679066618"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
+</span><a href="#local-6989586621679066614"><span class="hs-identifier hs-var">entries'</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a] -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span>
 </span><span id="line-186"></span><span>       </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064745"><span class="hs-identifier hs-var">node</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679066619"><span class="hs-identifier hs-var">node</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">,</span><span id="local-6989586621679064745"><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064745"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
-</span><a href="#local-6989586621679064740"><span class="hs-identifier hs-var">entries'</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">,</span><span id="local-6989586621679066619"><span class="annot"><span class="annottext">MixEntryDom [a]
+</span><a href="#local-6989586621679066619"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(Bool, Bool, MixEntryDom [a])]
+</span><a href="#local-6989586621679066614"><span class="hs-identifier hs-var">entries'</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-187"></span><span>     </span><span class="hs-special">)</span><span>
 </span><span id="line-188"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-189"></span><span>    </span><span id="local-6989586621679064740"><span class="annot"><span class="annottext">entries' :: [(Bool, Bool, MixEntryDom [a])]
-</span><a href="#local-6989586621679064740"><span class="hs-identifier hs-var hs-var">entries'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064735"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><span id="line-189"></span><span>    </span><span id="local-6989586621679066614"><span class="annot"><span class="annottext">entries' :: [(Bool, Bool, MixEntryDom [a])]
+</span><a href="#local-6989586621679066614"><span class="hs-identifier hs-var hs-var">entries'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066609"><span class="hs-identifier hs-var">new_pos</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 </span><a href="Trace.Hpc.Util.html#insideHpcPos"><span class="hs-operator hs-var">`insideHpcPos`</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064746"><span class="hs-identifier hs-var">pos</span></a></span><span>
+</span><a href="#local-6989586621679066620"><span class="hs-identifier hs-var">pos</span></a></span><span>
 </span><span id="line-190"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064746"><span class="hs-identifier hs-var">pos</span></a></span><span>  </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
+</span><a href="#local-6989586621679066620"><span class="hs-identifier hs-var">pos</span></a></span><span>  </span><span class="annot"><span class="annottext">HpcPos -&gt; HpcPos -&gt; Bool
 </span><a href="Trace.Hpc.Util.html#insideHpcPos"><span class="hs-operator hs-var">`insideHpcPos`</span></a></span><span> </span><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064735"><span class="hs-identifier hs-var">new_pos</span></a></span><span>
+</span><a href="#local-6989586621679066609"><span class="hs-identifier hs-var">new_pos</span></a></span><span>
 </span><span id="line-191"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MixEntryDom [a]
-</span><a href="#local-6989586621679064747"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-192"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679064747"><span class="annot"><span class="annottext">node :: MixEntryDom [a]
-</span><a href="#local-6989586621679064747"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Tree.html/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679064746"><span class="annot"><span class="annottext">HpcPos
-</span><a href="#local-6989586621679064746"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679066621"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-192"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679066621"><span class="annot"><span class="annottext">node :: MixEntryDom [a]
+</span><a href="#local-6989586621679066621"><span class="hs-identifier hs-var">node</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Tree.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066620"><span class="annot"><span class="annottext">HpcPos
+</span><a href="#local-6989586621679066620"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">[a]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom [a]]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom [a]]
-</span><a href="#local-6989586621679064737"><span class="hs-identifier hs-var">entries</span></a></span><span>
+</span><a href="#local-6989586621679066611"><span class="hs-identifier hs-var">entries</span></a></span><span>
 </span><span id="line-193"></span><span>               </span><span class="hs-special">]</span><span>
 </span><span id="line-194"></span><span>
-</span><span id="line-195"></span><span id="local-6989586621679064293"><span class="annot"><a href="Trace.Hpc.Mix.html#createMixEntryDom"><span class="hs-identifier hs-type">createMixEntryDom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679064293"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679064293"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679064293"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span><span>
+</span><span id="line-195"></span><span id="local-6989586621679066167"><span class="annot"><a href="Trace.Hpc.Mix.html#createMixEntryDom"><span class="hs-identifier hs-type">createMixEntryDom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679066167"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Trace.Hpc.Util.html#HpcPos"><span class="hs-identifier hs-type">HpcPos</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679066167"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Trace.Hpc.Mix.html#MixEntryDom"><span class="hs-identifier hs-type">MixEntryDom</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679066167"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span><span>
 </span><span id="line-196"></span><span id="createMixEntryDom"><span class="annot"><span class="annottext">createMixEntryDom :: forall a. Show a =&gt; [(HpcPos, a)] -&gt; [MixEntryDom [a]]
-</span><a href="Trace.Hpc.Mix.html#createMixEntryDom"><span class="hs-identifier hs-var hs-var">createMixEntryDom</span></a></span></span><span> </span><span id="local-6989586621679064751"><span class="annot"><span class="annottext">[(HpcPos, a)]
-</span><a href="#local-6989586621679064751"><span class="hs-identifier hs-var">entries</span></a></span></span><span>
+</span><a href="Trace.Hpc.Mix.html#createMixEntryDom"><span class="hs-identifier hs-var hs-var">createMixEntryDom</span></a></span></span><span> </span><span id="local-6989586621679066625"><span class="annot"><span class="annottext">[(HpcPos, a)]
+</span><a href="#local-6989586621679066625"><span class="hs-identifier hs-var">entries</span></a></span></span><span>
 </span><span id="line-197"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom [a]] -&gt; Bool
 forall a. [MixEntryDom a] -&gt; Bool
 </span><a href="Trace.Hpc.Mix.html#isGoodForest"><span class="hs-identifier hs-var">isGoodForest</span></a></span><span> </span><span class="annot"><span class="annottext">[MixEntryDom [a]]
-</span><a href="#local-6989586621679064752"><span class="hs-identifier hs-var">forest</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom [a]]
-</span><a href="#local-6989586621679064752"><span class="hs-identifier hs-var">forest</span></a></span><span>
+</span><a href="#local-6989586621679066626"><span class="hs-identifier hs-var">forest</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[MixEntryDom [a]]
+</span><a href="#local-6989586621679066626"><span class="hs-identifier hs-var">forest</span></a></span><span>
 </span><span id="line-198"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; [MixEntryDom [a]]
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;createMixEntryDom: bad forest&quot;</span></span><span>
-</span><span id="line-199"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679064752"><span class="annot"><span class="annottext">forest :: [MixEntryDom [a]]
-</span><a href="#local-6989586621679064752"><span class="hs-identifier hs-var hs-var">forest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((HpcPos, a) -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]])
+</span><span id="line-199"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679066626"><span class="annot"><span class="annottext">forest :: [MixEntryDom [a]]
+</span><a href="#local-6989586621679066626"><span class="hs-identifier hs-var hs-var">forest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((HpcPos, a) -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]])
 -&gt; [MixEntryDom [a]] -&gt; [(HpcPos, a)] -&gt; [MixEntryDom [a]]
 forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) a b.
@@ -852,5 +852,5 @@ forall a.
 Show a =&gt;
 (HpcPos, a) -&gt; [MixEntryDom [a]] -&gt; [MixEntryDom [a]]
 </span><a href="Trace.Hpc.Mix.html#addNodeToList"><span class="hs-identifier hs-var">addNodeToList</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[(HpcPos, a)]
-</span><a href="#local-6989586621679064751"><span class="hs-identifier hs-var">entries</span></a></span><span>
+</span><a href="#local-6989586621679066625"><span class="hs-identifier hs-var">entries</span></a></span><span>
 </span><span id="line-200"></span></pre></body></html>

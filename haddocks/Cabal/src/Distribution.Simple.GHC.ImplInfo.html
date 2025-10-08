@@ -16,11 +16,11 @@
 </span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#ghcjsVersionImplInfo"><span class="hs-identifier">ghcjsVersionImplInfo</span></a></span><span>
 </span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html"><span class="hs-identifier">Distribution.Simple.Compiler</span></a></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Version.html/Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span class="hs-comment">-- |</span><span>
 </span><span id="line-26"></span><span class="hs-comment">--      Information about features and quirks of a GHC-based implementation.</span><span>
@@ -83,27 +83,27 @@
 </span><span id="line-68"></span><span>
 </span><span id="line-69"></span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#getImplInfo"><span class="hs-identifier hs-type">getImplInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html#Compiler"><span class="hs-identifier hs-type">Compiler</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#GhcImplInfo"><span class="hs-identifier hs-type">GhcImplInfo</span></a></span><span>
 </span><span id="line-70"></span><span id="getImplInfo"><span class="annot"><span class="annottext">getImplInfo :: Compiler -&gt; GhcImplInfo
-</span><a href="Distribution.Simple.GHC.ImplInfo.html#getImplInfo"><span class="hs-identifier hs-var hs-var">getImplInfo</span></a></span></span><span> </span><span id="local-6989586621679462194"><span class="annot"><span class="annottext">Compiler
-</span><a href="#local-6989586621679462194"><span class="hs-identifier hs-var">comp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Simple.GHC.ImplInfo.html#getImplInfo"><span class="hs-identifier hs-var hs-var">getImplInfo</span></a></span></span><span> </span><span id="local-6989586621679521333"><span class="annot"><span class="annottext">Compiler
+</span><a href="#local-6989586621679521333"><span class="hs-identifier hs-var">comp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-71"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Compiler -&gt; CompilerFlavor
 </span><a href="Distribution.Simple.Compiler.html#compilerFlavor"><span class="hs-identifier hs-var">compilerFlavor</span></a></span><span> </span><span class="annot"><span class="annottext">Compiler
-</span><a href="#local-6989586621679462194"><span class="hs-identifier hs-var">comp</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679521333"><span class="hs-identifier hs-var">comp</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-72"></span><span>    </span><span class="annot"><span class="annottext">CompilerFlavor
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compiler.html/Distribution.Compiler.html#GHC"><span class="hs-identifier hs-var">GHC</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Version -&gt; GhcImplInfo
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compiler.html#GHC"><span class="hs-identifier hs-var">GHC</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Version -&gt; GhcImplInfo
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#ghcVersionImplInfo"><span class="hs-identifier hs-var">ghcVersionImplInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Compiler -&gt; Version
 </span><a href="Distribution.Simple.Compiler.html#compilerVersion"><span class="hs-identifier hs-var">compilerVersion</span></a></span><span> </span><span class="annot"><span class="annottext">Compiler
-</span><a href="#local-6989586621679462194"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679521333"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-73"></span><span>    </span><span class="annot"><span class="annottext">CompilerFlavor
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compiler.html/Distribution.Compiler.html#GHCJS"><span class="hs-identifier hs-var">GHCJS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">CompilerFlavor -&gt; Compiler -&gt; Maybe Version
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compiler.html#GHCJS"><span class="hs-identifier hs-var">GHCJS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">CompilerFlavor -&gt; Compiler -&gt; Maybe Version
 </span><a href="Distribution.Simple.Compiler.html#compilerCompatVersion"><span class="hs-identifier hs-var">compilerCompatVersion</span></a></span><span> </span><span class="annot"><span class="annottext">CompilerFlavor
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compiler.html/Distribution.Compiler.html#GHC"><span class="hs-identifier hs-var">GHC</span></a></span><span> </span><span class="annot"><span class="annottext">Compiler
-</span><a href="#local-6989586621679462194"><span class="hs-identifier hs-var">comp</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-74"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679462200"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679462200"><span class="hs-identifier hs-var">ghcVer</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Version -&gt; Version -&gt; GhcImplInfo
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compiler.html#GHC"><span class="hs-identifier hs-var">GHC</span></a></span><span> </span><span class="annot"><span class="annottext">Compiler
+</span><a href="#local-6989586621679521333"><span class="hs-identifier hs-var">comp</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-74"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679521339"><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679521339"><span class="hs-identifier hs-var">ghcVer</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Version -&gt; Version -&gt; GhcImplInfo
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#ghcjsVersionImplInfo"><span class="hs-identifier hs-var">ghcjsVersionImplInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Compiler -&gt; Version
 </span><a href="Distribution.Simple.Compiler.html#compilerVersion"><span class="hs-identifier hs-var">compilerVersion</span></a></span><span> </span><span class="annot"><span class="annottext">Compiler
-</span><a href="#local-6989586621679462194"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679462200"><span class="hs-identifier hs-var">ghcVer</span></a></span><span>
+</span><a href="#local-6989586621679521333"><span class="hs-identifier hs-var">comp</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679521339"><span class="hs-identifier hs-var">ghcVer</span></a></span><span>
 </span><span id="line-75"></span><span>      </span><span class="annot"><span class="annottext">Maybe Version
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-76"></span><span>        </span><span class="annot"><span class="annottext">[Char] -&gt; GhcImplInfo
@@ -116,8 +116,8 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Char]
 </span><span class="hs-string">&quot;could not find GHC version for GHCJS compiler&quot;</span></span><span>
 </span><span id="line-79"></span><span>          </span><span class="hs-special">)</span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679462202"><span class="annot"><span class="annottext">CompilerFlavor
-</span><a href="#local-6989586621679462202"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679521341"><span class="annot"><span class="annottext">CompilerFlavor
+</span><a href="#local-6989586621679521341"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-81"></span><span>      </span><span class="annot"><span class="annottext">[Char] -&gt; GhcImplInfo
 forall a. HasCallStack =&gt; [Char] -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span>
@@ -136,99 +136,99 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">CompilerFlavor -&gt; [Char]
 forall a. Show a =&gt; a -&gt; [Char]
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">CompilerFlavor
-</span><a href="#local-6989586621679462202"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679521341"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-86"></span><span>        </span><span class="hs-special">)</span><span>
 </span><span id="line-87"></span><span>
-</span><span id="line-88"></span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#ghcVersionImplInfo"><span class="hs-identifier hs-type">ghcVersionImplInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#GhcImplInfo"><span class="hs-identifier hs-type">GhcImplInfo</span></a></span><span>
+</span><span id="line-88"></span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#ghcVersionImplInfo"><span class="hs-identifier hs-type">ghcVersionImplInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#GhcImplInfo"><span class="hs-identifier hs-type">GhcImplInfo</span></a></span><span>
 </span><span id="line-89"></span><span id="ghcVersionImplInfo"><span class="annot"><span class="annottext">ghcVersionImplInfo :: Version -&gt; GhcImplInfo
-</span><a href="Distribution.Simple.GHC.ImplInfo.html#ghcVersionImplInfo"><span class="hs-identifier hs-var hs-var">ghcVersionImplInfo</span></a></span></span><span> </span><span id="local-6989586621679462204"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679462204"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Simple.GHC.ImplInfo.html#ghcVersionImplInfo"><span class="hs-identifier hs-var hs-var">ghcVersionImplInfo</span></a></span></span><span> </span><span id="local-6989586621679521343"><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679521343"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-90"></span><span>  </span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#GhcImplInfo"><span class="hs-identifier hs-type">GhcImplInfo</span></a></span><span>
 </span><span id="line-91"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">supportsHaskell2010 :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsHaskell2010"><span class="hs-identifier hs-var">supportsHaskell2010</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">]</span><span>
 </span><span id="line-92"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">supportsGHC2021 :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsGHC2021"><span class="hs-identifier hs-var">supportsGHC2021</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
 </span><span id="line-93"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">supportsGHC2024 :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsGHC2024"><span class="hs-identifier hs-var">supportsGHC2024</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">]</span><span>
 </span><span id="line-94"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">reportsNoExt :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#reportsNoExt"><span class="hs-identifier hs-var">reportsNoExt</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">]</span><span>
 </span><span id="line-95"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">alwaysNondecIndent :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#alwaysNondecIndent"><span class="hs-identifier hs-var">alwaysNondecIndent</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">]</span><span>
 </span><span id="line-96"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagGhciScript :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagGhciScript"><span class="hs-identifier hs-var">flagGhciScript</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">]</span><span>
 </span><span id="line-97"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagProfAuto :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagProfAuto"><span class="hs-identifier hs-var">flagProfAuto</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span class="hs-special">]</span><span>
 </span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagProfLate :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagProfLate"><span class="hs-identifier hs-var">flagProfLate</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">4</span></span><span class="hs-special">]</span><span>
 </span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagPackageConf :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagPackageConf"><span class="hs-identifier hs-var">flagPackageConf</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">5</span></span><span class="hs-special">]</span><span>
 </span><span id="line-100"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagDebugInfo :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagDebugInfo"><span class="hs-identifier hs-var">flagDebugInfo</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">7</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span class="hs-special">]</span><span>
 </span><span id="line-101"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagHie :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagHie"><span class="hs-identifier hs-var">flagHie</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">]</span><span>
 </span><span id="line-102"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">supportsDebugLevels :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsDebugLevels"><span class="hs-identifier hs-var">supportsDebugLevels</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">]</span><span>
 </span><span id="line-103"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">supportsPkgEnvFiles :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsPkgEnvFiles"><span class="hs-identifier hs-var">supportsPkgEnvFiles</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
@@ -237,35 +237,35 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-number">20160901</span></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- broken in 8.0.1, fixed in 8.0.2</span><span>
 </span><span id="line-104"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagWarnMissingHomeModules :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagWarnMissingHomeModules"><span class="hs-identifier hs-var">flagWarnMissingHomeModules</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">]</span><span>
 </span><span id="line-105"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">unitIdForExes :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#unitIdForExes"><span class="hs-identifier hs-var">unitIdForExes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">]</span><span>
 </span><span id="line-106"></span><span>    </span><span class="hs-special">}</span><span>
 </span><span id="line-107"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-108"></span><span>    </span><span id="local-6989586621679462205"><span class="annot"><span class="annottext">v :: [Int]
-</span><a href="#local-6989586621679462205"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Version -&gt; [Int]
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#versionNumbers"><span class="hs-identifier hs-var">versionNumbers</span></a></span><span> </span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679462204"><span class="hs-identifier hs-var">ver</span></a></span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621679521344"><span class="annot"><span class="annottext">v :: [Int]
+</span><a href="#local-6989586621679521344"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Version -&gt; [Int]
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#versionNumbers"><span class="hs-identifier hs-var">versionNumbers</span></a></span><span> </span><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679521343"><span class="hs-identifier hs-var">ver</span></a></span><span>
 </span><span id="line-109"></span><span>
 </span><span id="line-110"></span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#ghcjsVersionImplInfo"><span class="hs-identifier hs-type">ghcjsVersionImplInfo</span></a></span><span>
-</span><span id="line-111"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span>
 </span><span id="line-112"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The GHCJS version</span></span><span>
-</span><span id="line-113"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span>
 </span><span id="line-114"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The GHC version</span></span><span>
 </span><span id="line-115"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#GhcImplInfo"><span class="hs-identifier hs-type">GhcImplInfo</span></a></span><span>
 </span><span id="line-116"></span><span id="ghcjsVersionImplInfo"><span class="annot"><span class="annottext">ghcjsVersionImplInfo :: Version -&gt; Version -&gt; GhcImplInfo
-</span><a href="Distribution.Simple.GHC.ImplInfo.html#ghcjsVersionImplInfo"><span class="hs-identifier hs-var hs-var">ghcjsVersionImplInfo</span></a></span></span><span> </span><span id="local-6989586621679462208"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679462208"><span class="hs-identifier hs-var">_ghcjsver</span></a></span></span><span> </span><span id="local-6989586621679462209"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679462209"><span class="hs-identifier hs-var">ghcver</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Simple.GHC.ImplInfo.html#ghcjsVersionImplInfo"><span class="hs-identifier hs-var hs-var">ghcjsVersionImplInfo</span></a></span></span><span> </span><span id="local-6989586621679521347"><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679521347"><span class="hs-identifier hs-var">_ghcjsver</span></a></span></span><span> </span><span id="local-6989586621679521348"><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679521348"><span class="hs-identifier hs-var">ghcver</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-117"></span><span>  </span><span class="annot"><a href="Distribution.Simple.GHC.ImplInfo.html#GhcImplInfo"><span class="hs-identifier hs-type">GhcImplInfo</span></a></span><span>
 </span><span id="line-118"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">supportsHaskell2010 :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsHaskell2010"><span class="hs-identifier hs-var">supportsHaskell2010</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -275,7 +275,7 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
 </span><span id="line-120"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">supportsGHC2024 :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsGHC2024"><span class="hs-identifier hs-var">supportsGHC2024</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462210"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521349"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
@@ -303,21 +303,21 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
 </span><span id="line-128"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagHie :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagHie"><span class="hs-identifier hs-var">flagHie</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462210"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521349"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">]</span><span>
 </span><span id="line-129"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">supportsDebugLevels :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsDebugLevels"><span class="hs-identifier hs-var">supportsDebugLevels</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462210"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521349"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">]</span><span>
 </span><span id="line-130"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">supportsPkgEnvFiles :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#supportsPkgEnvFiles"><span class="hs-identifier hs-var">supportsPkgEnvFiles</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462210"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521349"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
@@ -325,22 +325,22 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-number">2</span></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- TODO: check this works in ghcjs</span><span>
 </span><span id="line-131"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">flagWarnMissingHomeModules :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#flagWarnMissingHomeModules"><span class="hs-identifier hs-var">flagWarnMissingHomeModules</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462210"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521349"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">]</span><span>
 </span><span id="line-132"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">unitIdForExes :: Bool
 </span><a href="Distribution.Simple.GHC.ImplInfo.html#unitIdForExes"><span class="hs-identifier hs-var">unitIdForExes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679462210"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
+</span><a href="#local-6989586621679521349"><span class="hs-identifier hs-var">ghcv</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="hs-special">]</span><span>
 </span><span id="line-133"></span><span>    </span><span class="hs-special">}</span><span>
 </span><span id="line-134"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-135"></span><span>    </span><span id="local-6989586621679462210"><span class="annot"><span class="annottext">ghcv :: [Int]
-</span><a href="#local-6989586621679462210"><span class="hs-identifier hs-var hs-var">ghcv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Version -&gt; [Int]
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#versionNumbers"><span class="hs-identifier hs-var">versionNumbers</span></a></span><span> </span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679462209"><span class="hs-identifier hs-var">ghcver</span></a></span><span>
+</span><span id="line-135"></span><span>    </span><span id="local-6989586621679521349"><span class="annot"><span class="annottext">ghcv :: [Int]
+</span><a href="#local-6989586621679521349"><span class="hs-identifier hs-var hs-var">ghcv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Version -&gt; [Int]
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#versionNumbers"><span class="hs-identifier hs-var">versionNumbers</span></a></span><span> </span><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679521348"><span class="hs-identifier hs-var">ghcver</span></a></span><span>
 </span><span id="line-136"></span></pre></body></html>

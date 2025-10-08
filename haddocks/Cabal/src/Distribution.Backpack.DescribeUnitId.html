@@ -3,18 +3,18 @@
 </span><span id="line-3"></span><span>
 </span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Backpack.DescribeUnitId.html"><span class="hs-identifier">Distribution.Backpack.DescribeUnitId</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-5"></span><span>
-</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-8"></span><span>
 </span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Stack.html"><span class="hs-identifier">Distribution.Compat.Stack</span></a></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.ModuleName.html/Distribution.ModuleName.html"><span class="hs-identifier">Distribution.ModuleName</span></a></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.ModuleName.html"><span class="hs-identifier">Distribution.ModuleName</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
 </span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.ComponentName.html/Distribution.Types.ComponentName.html"><span class="hs-identifier">Distribution.Types.ComponentName</span></a></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageId.html/Distribution.Types.PackageId.html"><span class="hs-identifier">Distribution.Types.PackageId</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ComponentName.html"><span class="hs-identifier">Distribution.Types.ComponentName</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageId.html"><span class="hs-identifier">Distribution.Types.PackageId</span></a></span><span>
 </span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
 </span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span>
 </span><span id="line-18"></span><span>
 </span><span id="line-19"></span><span class="hs-comment">-- Unit identifiers have a well defined, machine-readable format,</span><span>
 </span><span id="line-20"></span><span class="hs-comment">-- but this format isn't very user-friendly for users.  This</span><span>
@@ -37,16 +37,16 @@
 </span><span id="line-37"></span><span class="hs-comment">-- | Print a Setup message stating (1) what operation we are doing,</span><span>
 </span><span id="line-38"></span><span class="hs-comment">-- for (2) which component (with enough details to uniquely identify</span><span>
 </span><span id="line-39"></span><span class="hs-comment">-- the build in question.)</span><span>
-</span><span id="line-40"></span><span id="local-6989586621679493754"><span class="annot"><a href="Distribution.Backpack.DescribeUnitId.html#setupMessage%27"><span class="hs-identifier hs-type">setupMessage'</span></a></span><span>
-</span><span id="line-41"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679493754"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679561491"><span class="annot"><a href="Distribution.Backpack.DescribeUnitId.html#setupMessage%27"><span class="hs-identifier hs-type">setupMessage'</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679561491"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-42"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
 </span><span id="line-43"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-44"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Operation being done (capitalized), on:</span></span><span>
-</span><span id="line-45"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageId.html/Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span>
 </span><span id="line-46"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Package</span></span><span>
-</span><span id="line-47"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.ComponentName.html/Distribution.Types.ComponentName.html#ComponentName"><span class="hs-identifier hs-type">ComponentName</span></a></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ComponentName.html#ComponentName"><span class="hs-identifier hs-type">ComponentName</span></a></span><span>
 </span><span id="line-48"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Component name</span></span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.ModuleName.html/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679493754"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679561491"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-50"></span><span>  </span><span class="hs-comment">-- ^ Instantiation, if available.</span><span>
 </span><span id="line-51"></span><span>  </span><span class="hs-comment">-- Polymorphic to take</span><span>
 </span><span id="line-52"></span><span>  </span><span class="hs-comment">-- 'OpenModule' or 'Module'</span><span>
@@ -59,12 +59,12 @@ Verbosity
 -&gt; ComponentName
 -&gt; Maybe [(ModuleName, a)]
 -&gt; IO ()
-</span><a href="Distribution.Backpack.DescribeUnitId.html#setupMessage%27"><span class="hs-identifier hs-var hs-var">setupMessage'</span></a></span></span><span> </span><span id="local-6989586621679493775"><span class="annot"><span class="annottext">Verbosity
-</span><a href="#local-6989586621679493775"><span class="hs-identifier hs-var">verbosity</span></a></span></span><span> </span><span id="local-6989586621679493776"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679493776"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span id="local-6989586621679493777"><span class="annot"><span class="annottext">PackageIdentifier
-</span><a href="#local-6989586621679493777"><span class="hs-identifier hs-var">pkgid</span></a></span></span><span> </span><span id="local-6989586621679493778"><span class="annot"><span class="annottext">ComponentName
-</span><a href="#local-6989586621679493778"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span id="local-6989586621679493779"><span class="annot"><span class="annottext">Maybe [(ModuleName, a)]
-</span><a href="#local-6989586621679493779"><span class="hs-identifier hs-var">mb_insts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HasCallStack =&gt; IO ()) -&gt; IO ()
+</span><a href="Distribution.Backpack.DescribeUnitId.html#setupMessage%27"><span class="hs-identifier hs-var hs-var">setupMessage'</span></a></span></span><span> </span><span id="local-6989586621679561512"><span class="annot"><span class="annottext">Verbosity
+</span><a href="#local-6989586621679561512"><span class="hs-identifier hs-var">verbosity</span></a></span></span><span> </span><span id="local-6989586621679561513"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679561513"><span class="hs-identifier hs-var">msg</span></a></span></span><span> </span><span id="local-6989586621679561514"><span class="annot"><span class="annottext">PackageIdentifier
+</span><a href="#local-6989586621679561514"><span class="hs-identifier hs-var">pkgid</span></a></span></span><span> </span><span id="local-6989586621679561515"><span class="annot"><span class="annottext">ComponentName
+</span><a href="#local-6989586621679561515"><span class="hs-identifier hs-var">cname</span></a></span></span><span> </span><span id="local-6989586621679561516"><span class="annot"><span class="annottext">Maybe [(ModuleName, a)]
+</span><a href="#local-6989586621679561516"><span class="hs-identifier hs-var">mb_insts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HasCallStack =&gt; IO ()) -&gt; IO ()
 forall a. HasCallStack =&gt; (HasCallStack =&gt; a) -&gt; a
 </span><span class="hs-identifier hs-var">withFrozenCallStack</span></span><span> </span><span class="annot"><span class="annottext">((HasCallStack =&gt; IO ()) -&gt; IO ())
 -&gt; (HasCallStack =&gt; IO ()) -&gt; IO ()
@@ -72,74 +72,74 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-55"></span><span>  </span><span class="annot"><span class="annottext">Verbosity -&gt; Doc -&gt; IO ()
 </span><a href="Distribution.Simple.Utils.html#noticeDoc"><span class="hs-identifier hs-var">noticeDoc</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="#local-6989586621679493775"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; IO ()) -&gt; Doc -&gt; IO ()
+</span><a href="#local-6989586621679561512"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">(Doc -&gt; IO ()) -&gt; Doc -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-56"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe [(ModuleName, a)]
-</span><a href="#local-6989586621679493779"><span class="hs-identifier hs-var">mb_insts</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-57"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679493788"><span class="annot"><span class="annottext">[(ModuleName, a)]
-</span><a href="#local-6989586621679493788"><span class="hs-identifier hs-var">insts</span></a></span></span><span>
+</span><a href="#local-6989586621679561516"><span class="hs-identifier hs-var">mb_insts</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-57"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679561528"><span class="annot"><span class="annottext">[(ModuleName, a)]
+</span><a href="#local-6989586621679561528"><span class="hs-identifier hs-var">insts</span></a></span></span><span>
 </span><span id="line-58"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(ModuleName, a)] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[(ModuleName, a)]
-</span><a href="#local-6989586621679493788"><span class="hs-identifier hs-var">insts</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679561528"><span class="hs-identifier hs-var">insts</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-59"></span><span>            </span><span class="annot"><span class="annottext">Doc -&gt; Int -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#hang"><span class="hs-identifier hs-var">hang</span></a></span><span>
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#hang"><span class="hs-identifier hs-var">hang</span></a></span><span>
 </span><span id="line-60"></span><span>              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679493792"><span class="hs-identifier hs-var">msg_doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679561532"><span class="hs-identifier hs-var">msg_doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;instantiated with&quot;</span></span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span>              </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span>
 </span><span id="line-62"></span><span>              </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[Doc] -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#vcat"><span class="hs-identifier hs-var">vcat</span></a></span><span>
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#vcat"><span class="hs-identifier hs-var">vcat</span></a></span><span>
 </span><span id="line-63"></span><span>                  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">ModuleName -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">ModuleName
-</span><a href="#local-6989586621679493797"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">ModuleName
+</span><a href="#local-6989586621679561537"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;=&quot;</span></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679493798"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-64"></span><span>                  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493797"><span class="annot"><span class="annottext">ModuleName
-</span><a href="#local-6989586621679493797"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493798"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679493798"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(ModuleName, a)]
-</span><a href="#local-6989586621679493788"><span class="hs-identifier hs-var">insts</span></a></span><span>
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679561538"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-64"></span><span>                  </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679561537"><span class="annot"><span class="annottext">ModuleName
+</span><a href="#local-6989586621679561537"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679561538"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679561538"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(ModuleName, a)]
+</span><a href="#local-6989586621679561528"><span class="hs-identifier hs-var">insts</span></a></span><span>
 </span><span id="line-65"></span><span>                  </span><span class="hs-special">]</span><span>
 </span><span id="line-66"></span><span>              </span><span class="hs-special">)</span><span>
 </span><span id="line-67"></span><span>              </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679493800"><span class="hs-identifier hs-var">for_doc</span></a></span><span>
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679561540"><span class="hs-identifier hs-var">for_doc</span></a></span><span>
 </span><span id="line-68"></span><span>      </span><span class="annot"><span class="annottext">Maybe [(ModuleName, a)]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-69"></span><span>        </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679493792"><span class="hs-identifier hs-var">msg_doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679493800"><span class="hs-identifier hs-var">for_doc</span></a></span><span>
+</span><a href="#local-6989586621679561532"><span class="hs-identifier hs-var">msg_doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679561540"><span class="hs-identifier hs-var">for_doc</span></a></span><span>
 </span><span id="line-70"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-71"></span><span>    </span><span id="local-6989586621679493792"><span class="annot"><span class="annottext">msg_doc :: Doc
-</span><a href="#local-6989586621679493792"><span class="hs-identifier hs-var hs-var">msg_doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679493776"><span class="hs-identifier hs-var">msg</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ComponentName -&gt; String
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.ComponentName.html/Distribution.Types.ComponentName.html#showComponentName"><span class="hs-identifier hs-var">showComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentName
-</span><a href="#local-6989586621679493778"><span class="hs-identifier hs-var">cname</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-72"></span><span>    </span><span id="local-6989586621679493800"><span class="annot"><span class="annottext">for_doc :: Doc
-</span><a href="#local-6989586621679493800"><span class="hs-identifier hs-var hs-var">for_doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679561532"><span class="annot"><span class="annottext">msg_doc :: Doc
+</span><a href="#local-6989586621679561532"><span class="hs-identifier hs-var hs-var">msg_doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679561513"><span class="hs-identifier hs-var">msg</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ComponentName -&gt; String
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ComponentName.html#showComponentName"><span class="hs-identifier hs-var">showComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentName
+</span><a href="#local-6989586621679561515"><span class="hs-identifier hs-var">cname</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679561540"><span class="annot"><span class="annottext">for_doc :: Doc
+</span><a href="#local-6989586621679561540"><span class="hs-identifier hs-var hs-var">for_doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;for&quot;</span></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">PackageIdentifier -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">PackageIdentifier -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">PackageIdentifier
-</span><a href="#local-6989586621679493777"><span class="hs-identifier hs-var">pkgid</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">PackageIdentifier
+</span><a href="#local-6989586621679561514"><span class="hs-identifier hs-var">pkgid</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;...&quot;</span></span><span>
 </span><span id="line-73"></span></pre></body></html>

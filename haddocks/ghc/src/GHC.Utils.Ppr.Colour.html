@@ -1,47 +1,47 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html"><span class="hs-identifier">GHC.Utils.Ppr.Colour</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-2"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.Basic.html"><span class="hs-identifier">GHC.Prelude.Basic</span></a></span><span>
 </span><span id="line-3"></span><span>
-</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Maybe.html/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">)</span><span>
 </span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Data.Bool.html"><span class="hs-identifier">GHC.Data.Bool</span></a></span><span>
-</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Semigroup.html/Data.Semigroup.html"><span class="hs-identifier">Data.Semigroup</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Semi</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Semigroup.html"><span class="hs-identifier">Data.Semigroup</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Semi</span></span><span>
 </span><span id="line-7"></span><span>
 </span><span id="line-8"></span><span class="annot"><span class="hs-comment">-- | A colour\/style for use with 'coloured'.</span></span><span>
 </span><span id="line-9"></span><span class="hs-keyword">newtype</span><span> </span><span id="PprColour"><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-var">PprColour</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PprColour"><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-var">PprColour</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="renderColour"><span class="annot"><span class="annottext">PprColour -&gt; String
 </span><a href="GHC.Utils.Ppr.Colour.html#renderColour"><span class="hs-identifier hs-var hs-var">renderColour</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-special">}</span><span>
 </span><span id="line-10"></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682317791"><span id="local-6989586621682317795"><span class="annot"><span class="hs-identifier hs-type">Semi.Semigroup</span></span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-12"></span><span>  </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span><span> </span><span id="local-6989586621682317802"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317802"><span class="hs-identifier hs-var">s1</span></a></span></span><span> </span><span id="local-6989586621682317803"><span class="annot"><span class="annottext">&lt;&gt; :: PprColour -&gt; PprColour -&gt; PprColour
-</span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span><span> </span><span id="local-6989586621682317804"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317804"><span class="hs-identifier hs-var">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PprColour
+</span><span id="line-11"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682453514"><span id="local-6989586621682453518"><span class="annot"><span class="hs-identifier hs-type">Semi.Semigroup</span></span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>  </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span><span> </span><span id="local-6989586621682453525"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453525"><span class="hs-identifier hs-var">s1</span></a></span></span><span> </span><span id="local-6989586621682453526"><span class="annot"><span class="annottext">&lt;&gt; :: PprColour -&gt; PprColour -&gt; PprColour
+</span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span><span> </span><span id="local-6989586621682453527"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453527"><span class="hs-identifier hs-var">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-var">PprColour</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317802"><span class="hs-identifier hs-var">s1</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621682453525"><span class="hs-identifier hs-var">s1</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317804"><span class="hs-identifier hs-var">s2</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453527"><span class="hs-identifier hs-var">s2</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-13"></span><span>
 </span><span id="line-14"></span><span class="hs-comment">-- | Allow colours to be combined (e.g. bold + red);</span><span>
 </span><span id="line-15"></span><span class="hs-comment">--   In case of conflict, right side takes precedence.</span><span>
-</span><span id="line-16"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682317810"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-17"></span><span>  </span><span id="local-6989586621682317815"><span class="annot"><span class="annottext">mempty :: PprColour
+</span><span id="line-16"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682453533"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>  </span><span id="local-6989586621682453538"><span class="annot"><span class="annottext">mempty :: PprColour
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-var">PprColour</span></a></span><span> </span><span class="annot"><span class="annottext">String
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-18"></span><span>  </span><span id="local-6989586621682317817"><span class="annot"><span class="annottext">mappend :: PprColour -&gt; PprColour -&gt; PprColour
+</span><span id="line-18"></span><span>  </span><span id="local-6989586621682453540"><span class="annot"><span class="annottext">mappend :: PprColour -&gt; PprColour -&gt; PprColour
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; PprColour -&gt; PprColour
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
 </span><span id="line-19"></span><span>
 </span><span id="line-20"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#renderColourAfresh"><span class="hs-identifier hs-type">renderColourAfresh</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-21"></span><span id="renderColourAfresh"><span class="annot"><span class="annottext">renderColourAfresh :: PprColour -&gt; String
-</span><a href="GHC.Utils.Ppr.Colour.html#renderColourAfresh"><span class="hs-identifier hs-var hs-var">renderColourAfresh</span></a></span></span><span> </span><span id="local-6989586621682317819"><span class="annot"><span class="annottext">PprColour
-</span><a href="#local-6989586621682317819"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; String
+</span><a href="GHC.Utils.Ppr.Colour.html#renderColourAfresh"><span class="hs-identifier hs-var hs-var">renderColourAfresh</span></a></span></span><span> </span><span id="local-6989586621682453542"><span class="annot"><span class="annottext">PprColour
+</span><a href="#local-6989586621682453542"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; String
 </span><a href="GHC.Utils.Ppr.Colour.html#renderColour"><span class="hs-identifier hs-var">renderColour</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#colReset"><span class="hs-identifier hs-var">colReset</span></a></span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; PprColour -&gt; PprColour
 forall a. Monoid a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mappend`</span></span><span> </span><span class="annot"><span class="annottext">PprColour
-</span><a href="#local-6989586621682317819"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453542"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-22"></span><span>
 </span><span id="line-23"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#colCustom"><span class="hs-identifier hs-type">colCustom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-type">PprColour</span></a></span><span>
 </span><span id="line-24"></span><span id="colCustom"><span class="annot"><span class="annottext">colCustom :: String -&gt; PprColour
@@ -49,13 +49,13 @@ forall a. Monoid a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-25"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#colCustom"><span class="hs-identifier hs-var">colCustom</span></a></span><span> </span><span id="local-6989586621682317822"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317822"><span class="hs-identifier hs-var">s</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PprColour
+</span><span id="line-25"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#colCustom"><span class="hs-identifier hs-var">colCustom</span></a></span><span> </span><span id="local-6989586621682453545"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453545"><span class="hs-identifier hs-var">s</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#PprColour"><span class="hs-identifier hs-var">PprColour</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;\27[&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317822"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621682453545"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;m&quot;</span></span><span class="hs-special">)</span><span>
@@ -179,134 +179,134 @@ forall a. Monoid a =&gt; a -&gt; a -&gt; a
 </span><span id="line-81"></span><span id="parseScheme"><span class="annot"><span class="annottext">parseScheme :: String -&gt; (OverridingBool, Scheme) -&gt; (OverridingBool, Scheme)
 </span><a href="GHC.Utils.Ppr.Colour.html#parseScheme"><span class="hs-identifier hs-var hs-var">parseScheme</span></a></span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;always&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682317841"><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317841"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682453564"><span class="annot"><span class="annottext">Scheme
+</span><a href="#local-6989586621682453564"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
 </span><a href="GHC.Data.Bool.html#Always"><span class="hs-identifier hs-var">Always</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317841"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453564"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-82"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#parseScheme"><span class="hs-identifier hs-var">parseScheme</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;auto&quot;</span></span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682317843"><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317843"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682453566"><span class="annot"><span class="annottext">Scheme
+</span><a href="#local-6989586621682453566"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
 </span><a href="GHC.Data.Bool.html#Auto"><span class="hs-identifier hs-var">Auto</span></a></span><span class="hs-special">,</span><span>   </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317843"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453566"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-83"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#parseScheme"><span class="hs-identifier hs-var">parseScheme</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;never&quot;</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682317845"><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317845"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682453568"><span class="annot"><span class="annottext">Scheme
+</span><a href="#local-6989586621682453568"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OverridingBool
 </span><a href="GHC.Data.Bool.html#Never"><span class="hs-identifier hs-var">Never</span></a></span><span class="hs-special">,</span><span>  </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317845"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-84"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#parseScheme"><span class="hs-identifier hs-var">parseScheme</span></a></span><span> </span><span id="local-6989586621682317847"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317847"><span class="hs-identifier hs-var">input</span></a></span></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682317848"><span class="annot"><span class="annottext">OverridingBool
-</span><a href="#local-6989586621682317848"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682317849"><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317849"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682453568"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#parseScheme"><span class="hs-identifier hs-var">parseScheme</span></a></span><span> </span><span id="local-6989586621682453570"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453570"><span class="hs-identifier hs-var">input</span></a></span></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682453571"><span class="annot"><span class="annottext">OverridingBool
+</span><a href="#local-6989586621682453571"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682453572"><span class="annot"><span class="annottext">Scheme
+</span><a href="#local-6989586621682453572"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-85"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">OverridingBool
-</span><a href="#local-6989586621682317848"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621682453571"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-86"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Ppr.Colour.html#Scheme"><span class="hs-identifier hs-type">Scheme</span></a></span><span>
 </span><span id="line-87"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sHeader :: PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sHeader"><span class="hs-identifier hs-var">sHeader</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; Maybe PprColour -&gt; PprColour
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scheme -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sHeader"><span class="hs-identifier hs-var">sHeader</span></a></span><span> </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317849"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
+</span><a href="#local-6989586621682453572"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;header&quot;</span></span><span> </span><span class="annot"><span class="annottext">[(String, PprColour)]
-</span><a href="#local-6989586621682317851"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453574"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-88"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sMessage :: PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sMessage"><span class="hs-identifier hs-var">sMessage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; Maybe PprColour -&gt; PprColour
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scheme -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sMessage"><span class="hs-identifier hs-var">sMessage</span></a></span><span> </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317849"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
+</span><a href="#local-6989586621682453572"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;message&quot;</span></span><span> </span><span class="annot"><span class="annottext">[(String, PprColour)]
-</span><a href="#local-6989586621682317851"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453574"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-89"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sWarning :: PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sWarning"><span class="hs-identifier hs-var">sWarning</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; Maybe PprColour -&gt; PprColour
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scheme -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sWarning"><span class="hs-identifier hs-var">sWarning</span></a></span><span> </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317849"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
+</span><a href="#local-6989586621682453572"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;warning&quot;</span></span><span> </span><span class="annot"><span class="annottext">[(String, PprColour)]
-</span><a href="#local-6989586621682317851"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453574"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-90"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sError :: PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sError"><span class="hs-identifier hs-var">sError</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; Maybe PprColour -&gt; PprColour
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scheme -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sError"><span class="hs-identifier hs-var">sError</span></a></span><span> </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317849"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
+</span><a href="#local-6989586621682453572"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;error&quot;</span></span><span>   </span><span class="annot"><span class="annottext">[(String, PprColour)]
-</span><a href="#local-6989586621682317851"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453574"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-91"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sFatal :: PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sFatal"><span class="hs-identifier hs-var">sFatal</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; Maybe PprColour -&gt; PprColour
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scheme -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sFatal"><span class="hs-identifier hs-var">sFatal</span></a></span><span> </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317849"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
+</span><a href="#local-6989586621682453572"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;fatal&quot;</span></span><span>   </span><span class="annot"><span class="annottext">[(String, PprColour)]
-</span><a href="#local-6989586621682317851"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453574"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-92"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">sMargin :: PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sMargin"><span class="hs-identifier hs-var">sMargin</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PprColour -&gt; Maybe PprColour -&gt; PprColour
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Scheme -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#sMargin"><span class="hs-identifier hs-var">sMargin</span></a></span><span> </span><span class="annot"><span class="annottext">Scheme
-</span><a href="#local-6989586621682317849"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
+</span><a href="#local-6989586621682453572"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [(String, PprColour)] -&gt; Maybe PprColour
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;margin&quot;</span></span><span>  </span><span class="annot"><span class="annottext">[(String, PprColour)]
-</span><a href="#local-6989586621682317851"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453574"><span class="hs-identifier hs-var">table</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-93"></span><span>    </span><span class="hs-special">}</span><span>
 </span><span id="line-94"></span><span>  </span><span class="hs-special">)</span><span>
 </span><span id="line-95"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-96"></span><span>    </span><span class="annot"><a href="#local-6989586621682317852"><span class="hs-identifier hs-type">split</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
-</span><span id="line-97"></span><span>    </span><span id="local-6989586621682317852"><span class="annot"><span class="annottext">split :: Char -&gt; String -&gt; [String]
-</span><a href="#local-6989586621682317852"><span class="hs-identifier hs-var hs-var">split</span></a></span></span><span> </span><span id="local-6989586621682317853"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682317853"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621682317854"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317854"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
+</span><span id="line-96"></span><span>    </span><span class="annot"><a href="#local-6989586621682453575"><span class="hs-identifier hs-type">split</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621682453575"><span class="annot"><span class="annottext">split :: Char -&gt; String -&gt; [String]
+</span><a href="#local-6989586621682453575"><span class="hs-identifier hs-var hs-var">split</span></a></span></span><span> </span><span id="local-6989586621682453576"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682453576"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621682453577"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453577"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">break</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682317853"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317854"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-98"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682317856"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317856"><span class="hs-identifier hs-var">chunk</span></a></span></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317856"><span class="hs-identifier hs-var">chunk</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-99"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682317857"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317857"><span class="hs-identifier hs-var">chunk</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
-</span><span class="hs-identifier">_</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621682317858"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317858"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317857"><span class="hs-identifier hs-var">chunk</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621682453576"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453577"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-98"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682453579"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453579"><span class="hs-identifier hs-var">chunk</span></a></span></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453579"><span class="hs-identifier hs-var">chunk</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-99"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682453580"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453580"><span class="hs-identifier hs-var">chunk</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-identifier">_</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621682453581"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453581"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453580"><span class="hs-identifier hs-var">chunk</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; [String]
-</span><a href="#local-6989586621682317852"><span class="hs-identifier hs-var">split</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682317853"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317858"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><a href="#local-6989586621682453575"><span class="hs-identifier hs-var">split</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682453576"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453581"><span class="hs-identifier hs-var">rest</span></a></span><span>
 </span><span id="line-100"></span><span>
-</span><span id="line-101"></span><span>    </span><span id="local-6989586621682317851"><span class="annot"><span class="annottext">table :: [(String, PprColour)]
-</span><a href="#local-6989586621682317851"><span class="hs-identifier hs-var hs-var">table</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-102"></span><span>      </span><span id="local-6989586621682317859"><span class="annot"><a href="#local-6989586621682317859"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; [String]
-</span><a href="#local-6989586621682317852"><span class="hs-identifier hs-var">split</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621682453574"><span class="annot"><span class="annottext">table :: [(String, PprColour)]
+</span><a href="#local-6989586621682453574"><span class="hs-identifier hs-var hs-var">table</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-102"></span><span>      </span><span id="local-6989586621682453582"><span class="annot"><a href="#local-6989586621682453582"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; [String]
+</span><a href="#local-6989586621682453575"><span class="hs-identifier hs-var">split</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">':'</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317847"><span class="hs-identifier hs-var">input</span></a></span><span>
-</span><span id="line-103"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682317860"><span class="annot"><a href="#local-6989586621682317860"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682317861"><span class="annot"><a href="#local-6989586621682317861"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">break</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">==</span></span><span> </span><span class="annot"><span class="hs-char">'='</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621682317859"><span class="hs-identifier hs-type">w</span></a></span><span>
-</span><span id="line-104"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682317861"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682453570"><span class="hs-identifier hs-var">input</span></a></span><span>
+</span><span id="line-103"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682453583"><span class="annot"><a href="#local-6989586621682453583"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682453584"><span class="annot"><a href="#local-6989586621682453584"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">break</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">==</span></span><span> </span><span class="annot"><span class="hs-char">'='</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621682453582"><span class="hs-identifier hs-type">w</span></a></span><span>
+</span><span id="line-104"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682453584"><span class="hs-identifier hs-type">v'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-105"></span><span>        </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'='</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621682317862"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317862"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(String, PprColour) -&gt; [(String, PprColour)]
+</span><span class="hs-char">'='</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621682453585"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682453585"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(String, PprColour) -&gt; [(String, PprColour)]
 forall a. a -&gt; [a]
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317860"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String -&gt; PprColour
+</span><a href="#local-6989586621682453583"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String -&gt; PprColour
 </span><a href="GHC.Utils.Ppr.Colour.html#colCustom"><span class="hs-identifier hs-var">colCustom</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682317862"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682453585"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-106"></span><span>        </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-107"></span></pre></body></html>

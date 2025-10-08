@@ -371,6 +371,72 @@ module GHC.Num.Backend.Selected
 
 -- | ghc-bignum backend name
 backendName :: [Char]
+bignat_add :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_add_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+bignat_and :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_and_not :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_compare :: WordArray# -> WordArray# -> Int#
+bignat_encode_double :: WordArray# -> Int# -> Double#
+bignat_gcd :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_gcd_word :: WordArray# -> Word# -> Word#
+bignat_gcd_word_word :: Word# -> Word# -> Word#
+bignat_mul :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_mul_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+bignat_or :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_popcount :: WordArray# -> Word#
+bignat_powmod :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_powmod_word :: WordArray# -> WordArray# -> Word# -> Word#
+bignat_powmod_words :: Word# -> Word# -> Word# -> Word#
+bignat_quot :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_quot_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+bignat_quotrem :: MutableWordArray# RealWorld -> MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_quotrem_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> (# State# RealWorld, Word# #)
+bignat_rem :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+bignat_rem_word :: WordArray# -> Word# -> Word#
+bignat_shiftl :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+bignat_shiftr :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+bignat_shiftr_neg :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+bignat_sub :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> (# State# RealWorld, Bool# #)
+bignat_sub_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> (# State# RealWorld, Bool# #)
+bignat_xor :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_add :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
+c_mpn_add_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
+c_mpn_and_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
+c_mpn_andn_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
+c_mpn_cmp :: ByteArray# -> ByteArray# -> GmpSize# -> Int#
+c_mpn_divrem_1 :: MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
+c_mpn_gcd# :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
+c_mpn_gcd_1# :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
+c_mpn_get_d :: ByteArray# -> GmpSize# -> Int# -> Double#
+c_mpn_ior_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
+c_mpn_lshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
+c_mpn_mod_1 :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
+c_mpn_mul :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
+c_mpn_mul_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
+c_mpn_popcount :: ByteArray# -> GmpSize# -> Word#
+c_mpn_rshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
+c_mpn_rshift_2c :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
+c_mpn_sub :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
+c_mpn_sub_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
+c_mpn_tdiv_q :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
+c_mpn_tdiv_qr :: MutableByteArray# s -> MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
+c_mpn_tdiv_r :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
+c_mpn_xor_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
+integer_gcde :: Integer -> Integer -> (# Integer, Integer, Integer #)
+integer_gmp_gcd_word :: GmpLimb# -> GmpLimb# -> GmpLimb#
+integer_gmp_gcdext# :: MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
+integer_gmp_invert# :: MutableByteArray# RealWorld -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
+integer_gmp_powm# :: MutableByteArray# RealWorld -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
+integer_gmp_powm1# :: ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
+integer_gmp_powm_word :: GmpLimb# -> GmpLimb# -> GmpLimb# -> GmpLimb#
+integer_powmod :: Integer -> Natural -> Natural -> Natural
+integer_recip_mod :: Integer -> Natural -> (# Natural | () #)
+narrowCInt# :: Int# -> Int#
+narrowGmpSize# :: Int# -> Int#
+sbignat_powmod :: MutableWordArray# RealWorld -> Int# -> WordArray# -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+
+-- | Return 0 for invalid inputs
+sbignat_recip_mod :: Int# -> BigNat# -> BigNat# -> BigNat#
 
 -- | Type representing a GMP Limb
 type GmpLimb = Word
@@ -380,72 +446,6 @@ type GmpLimb# = Word#
 --   otherwise).
 type GmpSize = Int
 type GmpSize# = Int#
-narrowGmpSize# :: Int# -> Int#
-narrowCInt# :: Int# -> Int#
-bignat_compare :: WordArray# -> WordArray# -> Int#
-c_mpn_cmp :: ByteArray# -> ByteArray# -> GmpSize# -> Int#
-bignat_add :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_add :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
-bignat_add_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
-c_mpn_add_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-bignat_sub :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> (# State# RealWorld, Bool# #)
-c_mpn_sub :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
-bignat_sub_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> (# State# RealWorld, Bool# #)
-c_mpn_sub_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-bignat_mul :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_mul :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
-bignat_mul_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
-c_mpn_mul_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-bignat_popcount :: WordArray# -> Word#
-c_mpn_popcount :: ByteArray# -> GmpSize# -> Word#
-bignat_shiftl :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
-c_mpn_lshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
-bignat_shiftr :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
-c_mpn_rshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
-bignat_or :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_ior_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-bignat_xor :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_xor_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-bignat_and :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_and_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-bignat_and_not :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_andn_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-bignat_quotrem :: MutableWordArray# RealWorld -> MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_tdiv_qr :: MutableByteArray# s -> MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
-bignat_quot :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_tdiv_q :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
-bignat_rem :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_tdiv_r :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
-bignat_quotrem_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> (# State# RealWorld, Word# #)
-c_mpn_divrem_1 :: MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-bignat_quot_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
-bignat_rem_word :: WordArray# -> Word# -> Word#
-c_mpn_mod_1 :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
-bignat_gcd :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-c_mpn_gcd# :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
-bignat_gcd_word :: WordArray# -> Word# -> Word#
-c_mpn_gcd_1# :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
-bignat_gcd_word_word :: Word# -> Word# -> Word#
-integer_gmp_gcd_word :: GmpLimb# -> GmpLimb# -> GmpLimb#
-bignat_encode_double :: WordArray# -> Int# -> Double#
-c_mpn_get_d :: ByteArray# -> GmpSize# -> Int# -> Double#
-bignat_shiftr_neg :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
-c_mpn_rshift_2c :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
-bignat_powmod_word :: WordArray# -> WordArray# -> Word# -> Word#
-integer_gmp_powm1# :: ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
-bignat_powmod_words :: Word# -> Word# -> Word# -> Word#
-integer_gmp_powm_word :: GmpLimb# -> GmpLimb# -> GmpLimb# -> GmpLimb#
-bignat_powmod :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-sbignat_powmod :: MutableWordArray# RealWorld -> Int# -> WordArray# -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-integer_powmod :: Integer -> Natural -> Natural -> Natural
-integer_gmp_powm# :: MutableByteArray# RealWorld -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
-integer_gcde :: Integer -> Integer -> (# Integer, Integer, Integer #)
-integer_gmp_gcdext# :: MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
-integer_recip_mod :: Integer -> Natural -> (# Natural | () #)
-
--- | Return 0 for invalid inputs
-sbignat_recip_mod :: Int# -> BigNat# -> BigNat# -> BigNat#
-integer_gmp_invert# :: MutableByteArray# RealWorld -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
 
 
 -- | Selected backend

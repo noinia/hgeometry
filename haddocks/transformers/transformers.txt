@@ -32,7 +32,7 @@
 --   lift operations introduced by monad transformers through other
 --   transformers.
 @package transformers
-@version 0.6.1.1
+@version 0.6.1.2
 
 
 -- | Making functors with an <a>Applicative</a> instance that performs
@@ -71,39 +71,42 @@ module Control.Monad.Signatures
 --   <a>Control.Monad.Trans.Cont</a>. Any lifting function
 --   <tt>liftCallCC</tt> should satisfy
 --   
---   <ul>
---   <li><pre><a>lift</a> (f k) = f' (<a>lift</a> . k) =&gt; <a>lift</a>
---   (cf f) = liftCallCC cf f'</pre></li>
---   </ul>
+--   <pre>
+--   <a>lift</a> (f k) = f' (<a>lift</a> . k) =&gt; <a>lift</a> (cf f) = liftCallCC cf f'
+--   </pre>
+--   
+--   This implies that on entry to the continuation any outer monad
+--   transformer effect inside <tt>callCC</tt> will have been rolled back.
 type CallCC (m :: Type -> Type) a b = a -> m b -> m a -> m a
 
 -- | Signature of the <tt>catchE</tt> operation, introduced in
 --   <a>Control.Monad.Trans.Except</a>. Any lifting function
 --   <tt>liftCatch</tt> should satisfy
 --   
---   <ul>
---   <li><pre><a>lift</a> (cf m f) = liftCatch (<a>lift</a> . cf)
---   (<a>lift</a> f)</pre></li>
---   </ul>
+--   <pre>
+--   <a>lift</a> (cf m h) = liftCatch cf (<a>lift</a> m) (<a>lift</a> . h)
+--   </pre>
+--   
+--   This implies that on entry to the handler function any outer monad
+--   transformer effect inside <tt>catchE</tt> will have been rolled back.
 type Catch e (m :: k -> Type) (a :: k) = m a -> e -> m a -> m a
 
 -- | Signature of the <tt>listen</tt> operation, introduced in
 --   <a>Control.Monad.Trans.Writer</a>. Any lifting function
 --   <tt>liftListen</tt> should satisfy
 --   
---   <ul>
---   <li><pre><a>lift</a> . liftListen = liftListen .
---   <a>lift</a></pre></li>
---   </ul>
+--   <pre>
+--   <a>lift</a> . liftListen = liftListen . <a>lift</a>
+--   </pre>
 type Listen w (m :: Type -> Type) a = m a -> m (a, w)
 
 -- | Signature of the <tt>pass</tt> operation, introduced in
 --   <a>Control.Monad.Trans.Writer</a>. Any lifting function
 --   <tt>liftPass</tt> should satisfy
 --   
---   <ul>
---   <li><pre><a>lift</a> . liftPass = liftPass . <a>lift</a></pre></li>
---   </ul>
+--   <pre>
+--   <a>lift</a> . liftPass = liftPass . <a>lift</a>
+--   </pre>
 type Pass w (m :: Type -> Type) a = m (a, w -> w) -> m a
 
 
@@ -301,12 +304,12 @@ instance forall k (r :: k) (m :: k -> *). GHC.Internal.Base.Functor (Control.Mon
 instance forall k (r :: k) (m :: k -> *) a. GHC.Internal.Generics.Generic (Control.Monad.Trans.Cont.ContT r m a)
 instance forall k (r :: k) (m :: k -> *). GHC.Internal.Base.Monad (Control.Monad.Trans.Cont.ContT r m)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Cont.ContT r m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Cont.ContT r m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Cont.ContT r m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Cont.ContT r)
 
 
--- | This monad transformer extends a monad with the ability to throw
---   exceptions.
+-- | This monad transformer extends a monad with the ability to throw and
+--   catch exceptions.
 --   
 --   A sequence of actions terminates normally, producing a value, only if
 --   none of the actions in the sequence throws an exception. If one throws
@@ -319,7 +322,10 @@ module Control.Monad.Trans.Except
 
 -- | The parameterizable exception monad.
 --   
---   Computations are either exceptions or normal values.
+--   Computations are either exceptions (of any type) or normal values.
+--   These computations are plain values, and are unrelated to the
+--   <a>Control.Exception</a> mechanism, which is tied to the <a>IO</a>
+--   monad.
 --   
 --   The <a>return</a> function returns a normal value, while
 --   <tt>&gt;&gt;=</tt> exits on the first exception. For a variant that
@@ -352,9 +358,13 @@ withExcept :: (e -> e') -> Except e a -> Except e' a
 --   <tt>ExceptT</tt> constructs a monad parameterized over two things:
 --   
 --   <ul>
---   <li>e - The exception type.</li>
+--   <li>e - An arbitrary exception type.</li>
 --   <li>m - The inner monad.</li>
 --   </ul>
+--   
+--   The monadic computations are a plain values. They are unrelated to the
+--   <a>Control.Exception</a> mechanism, which is tied to the <a>IO</a>
+--   monad.
 --   
 --   The <a>return</a> function yields a computation that produces the
 --   given value, while <tt>&gt;&gt;=</tt> sequences two subcomputations,
@@ -429,10 +439,10 @@ instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Except.ExceptT e m a
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Except.ExceptT e m)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Except.ExceptT e m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Except.ExceptT e m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Except.ExceptT e m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Except.ExceptT e m)
 instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid e) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Except.ExceptT e)
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Except.ExceptT e m)
+instance GHC.Internal.Control.Monad.Zip.MonadZip m => GHC.Internal.Control.Monad.Zip.MonadZip (Control.Monad.Trans.Except.ExceptT e m)
 instance (GHC.Classes.Ord e, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Except.ExceptT e m)
 instance (GHC.Classes.Ord e, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Except.ExceptT e m a)
 instance (GHC.Internal.Read.Read e, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Except.ExceptT e m)
@@ -473,11 +483,11 @@ instance forall k (f :: k -> *). GHC.Internal.Generics.Generic1 (Control.Monad.T
 instance forall k (f :: k -> *) (a :: k). GHC.Internal.Generics.Generic (Control.Monad.Trans.Identity.IdentityT f a)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Identity.IdentityT m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Identity.IdentityT m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Identity.IdentityT m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Identity.IdentityT m)
 instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Identity.IdentityT m)
 instance Control.Monad.Trans.Class.MonadTrans Control.Monad.Trans.Identity.IdentityT
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Identity.IdentityT m)
+instance GHC.Internal.Control.Monad.Zip.MonadZip m => GHC.Internal.Control.Monad.Zip.MonadZip (Control.Monad.Trans.Identity.IdentityT m)
 instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Identity.IdentityT f)
 instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Identity.IdentityT f a)
 instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Control.Monad.Trans.Identity.IdentityT f)
@@ -551,11 +561,11 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Generics.Generic1 (Control.
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Maybe.MaybeT m a)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Maybe.MaybeT m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Maybe.MaybeT m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Maybe.MaybeT m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Maybe.MaybeT m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Maybe.MaybeT m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Maybe.MaybeT m)
 instance Control.Monad.Trans.Class.MonadTrans Control.Monad.Trans.Maybe.MaybeT
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Maybe.MaybeT m)
+instance GHC.Internal.Control.Monad.Zip.MonadZip m => GHC.Internal.Control.Monad.Zip.MonadZip (Control.Monad.Trans.Maybe.MaybeT m)
 instance Data.Functor.Classes.Ord1 m => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Maybe.MaybeT m)
 instance (Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Maybe.MaybeT m a)
 instance Data.Functor.Classes.Read1 m => Data.Functor.Classes.Read1 (Control.Monad.Trans.Maybe.MaybeT m)
@@ -753,7 +763,10 @@ liftCallCC :: CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m) a b
 --   version uses the current state on entering the continuation.
 liftCallCC' :: CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> discards any output or changes to the state from the
+--   body on entering the handler.
 liftCatch :: Catch e m (a, s, w) -> Catch e (RWST r w s m) a
 instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.RWS.CPS.RWST r w s m)
@@ -761,7 +774,7 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.RWS.CPS.RWST r w s m a)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.CPS.RWST r w s)
@@ -947,7 +960,10 @@ liftCallCC :: Monoid w => CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m) 
 --   version uses the current state on entering the continuation.
 liftCallCC' :: Monoid w => CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> discards any output or changes to the state from the
+--   body on entering the handler.
 liftCatch :: Catch e m (a, s, w) -> Catch e (RWST r w s m) a
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
@@ -956,7 +972,7 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.RWS.Lazy.RWST r w s m a)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.IO.Class.MonadIO m) => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.Lazy.RWST r w s)
@@ -1151,7 +1167,10 @@ liftCallCC :: Monoid w => CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m) 
 --   version uses the current state on entering the continuation.
 liftCallCC' :: Monoid w => CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> discards any output or changes to the state from the
+--   body on entering the handler.
 liftCatch :: Catch e m (a, s, w) -> Catch e (RWST r w s m) a
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.RWS.Strict.RWST r w s m)
@@ -1160,7 +1179,7 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.RWS.Strict.RWST r w s m a)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.IO.Class.MonadIO m) => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.Strict.RWST r w s)
@@ -1268,11 +1287,11 @@ instance GHC.Internal.Generics.Generic1 (Control.Monad.Trans.Reader.ReaderT r m)
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Reader.ReaderT r m a)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Reader.ReaderT r m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Reader.ReaderT r m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Reader.ReaderT r m)
 instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Reader.ReaderT r m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Reader.ReaderT r m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Reader.ReaderT r)
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Control.Monad.Zip.MonadZip m => GHC.Internal.Control.Monad.Zip.MonadZip (Control.Monad.Trans.Reader.ReaderT r m)
 
 
 -- | Selection monad transformer, modelling search algorithms.
@@ -1335,7 +1354,7 @@ instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Interna
 instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Select.SelectT r m)
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Select.SelectT r m a)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Select.SelectT r m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Select.SelectT r m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Select.SelectT r m)
 instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Select.SelectT r m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Select.SelectT r m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Select.SelectT r)
@@ -1510,7 +1529,10 @@ liftCallCC :: CallCC m (a, s) (b, s) -> CallCC (StateT s m) a b
 --   <a>Control.Monad.Signatures</a>).
 liftCallCC' :: CallCC m (a, s) (b, s) -> CallCC (StateT s m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> rolls back to the original state on entering the
+--   handler.
 liftCatch :: Catch e m (a, s) -> Catch e (StateT s m) a
 
 -- | Lift a <tt>listen</tt> operation to the new monad.
@@ -1525,7 +1547,7 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.State.Lazy.StateT s m a)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.State.Lazy.StateT s m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.State.Lazy.StateT s m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Lazy.StateT s m)
 instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.State.Lazy.StateT s m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.State.Lazy.StateT s m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.State.Lazy.StateT s)
@@ -1715,7 +1737,10 @@ liftCallCC :: CallCC m (a, s) (b, s) -> CallCC (StateT s m) a b
 --   <a>Control.Monad.Signatures</a>).
 liftCallCC' :: CallCC m (a, s) (b, s) -> CallCC (StateT s m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> rolls back to the original state on entering the
+--   handler.
 liftCatch :: Catch e m (a, s) -> Catch e (StateT s m) a
 
 -- | Lift a <tt>listen</tt> operation to the new monad.
@@ -1730,7 +1755,7 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.State.Strict.StateT s m a)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.State.Strict.StateT s m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.State.Strict.StateT s m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Strict.StateT s m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Strict.StateT s m)
 instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.State.Strict.StateT s m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.State.Strict.StateT s m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.State.Strict.StateT s)
@@ -1869,11 +1894,16 @@ pass :: forall w w' (m :: Type -> Type) a. (Monoid w, Monoid w', Monad m) => Wri
 --   </ul>
 censor :: forall w (m :: Type -> Type) a. (Monoid w, Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
 
--- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
---   version rolls back to the original state on entering the continuation.
+-- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. The
+--   uniformity property (see <a>Control.Monad.Signatures</a>) implies that
+--   the lifted <tt>callCC</tt> discards any output from the body on
+--   entering the saved continuation.
 liftCallCC :: CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> discards any output from the body on entering the
+--   handler.
 liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a
 instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Writer.CPS.WriterT w m)
 instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Writer.CPS.WriterT w m)
@@ -1881,7 +1911,7 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Writer.CPS.WriterT w m a)
 instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.CPS.WriterT w m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.CPS.WriterT w m)
 instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Writer.CPS.WriterT w m)
 instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.CPS.WriterT w)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Writer.CPS.WriterT w m)
@@ -2014,10 +2044,16 @@ pass :: forall (m :: Type -> Type) w a. Monad m => WriterT w m (a, w -> w) -> Wr
 --   </ul>
 censor :: forall (m :: Type -> Type) w a. Monad m => (w -> w) -> WriterT w m a -> WriterT w m a
 
--- | Lift a <tt>callCC</tt> operation to the new monad.
+-- | Lift a <tt>callCC</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>callCC</tt> discards any output from the body on entering the
+--   saved condinuation.
 liftCallCC :: Monoid w => CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> discards any output from the body on entering the
+--   handler.
 liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Alternative m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Applicative m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Writer.Lazy.WriterT w m)
@@ -2029,11 +2065,11 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.IO.Class.MonadIO m) => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.Lazy.WriterT w)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Internal.Base.Monoid w, Control.Monad.Zip.MonadZip m) => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Zip.MonadZip m) => GHC.Internal.Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
 instance (GHC.Internal.Read.Read w, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
@@ -2188,7 +2224,10 @@ liftCallCC :: CallCC m (a, w) (b, w) -> CallCC (AccumT w m) a b
 --   <a>Control.Monad.Signatures</a>).
 liftCallCC' :: CallCC m (a, w) (b, w) -> CallCC (AccumT w m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> discards any output from the body on entering the
+--   handler.
 liftCatch :: Catch e m (a, w) -> Catch e (AccumT w m) a
 
 -- | Lift a <tt>listen</tt> operation to the new monad.
@@ -2213,7 +2252,7 @@ instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Accum.AccumT w m a)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.Accum.AccumT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Accum.AccumT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Accum.AccumT w m)
-instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Accum.AccumT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Control.Monad.IO.Class.MonadIO m) => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Accum.AccumT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Accum.AccumT w m)
 instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Accum.AccumT w)
 
@@ -2347,10 +2386,16 @@ pass :: forall (m :: Type -> Type) w a. Monad m => WriterT w m (a, w -> w) -> Wr
 --   </ul>
 censor :: forall (m :: Type -> Type) w a. Monad m => (w -> w) -> WriterT w m a -> WriterT w m a
 
--- | Lift a <tt>callCC</tt> operation to the new monad.
+-- | Lift a <tt>callCC</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>callCC</tt> discards any output from the body on entering the
+--   saved continuation.
 liftCallCC :: Monoid w => CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
 
--- | Lift a <tt>catchE</tt> operation to the new monad.
+-- | Lift a <tt>catchE</tt> operation to the new monad. The uniformity
+--   property (see <a>Control.Monad.Signatures</a>) implies that the lifted
+--   <tt>catchE</tt> discards any output from the body on entering the
+--   handler.
 liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Alternative m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Applicative m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Writer.Strict.WriterT w m)
@@ -2362,11 +2407,11 @@ instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad
 instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Writer.Strict.WriterT w m a)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.IO.Class.MonadIO m) => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.Strict.WriterT w)
 instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Internal.Base.Monoid w, Control.Monad.Zip.MonadZip m) => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Zip.MonadZip m) => GHC.Internal.Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Writer.Strict.WriterT w m a)
 instance (GHC.Internal.Read.Read w, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Writer.Strict.WriterT w m)

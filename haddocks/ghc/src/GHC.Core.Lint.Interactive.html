@@ -38,49 +38,49 @@ See Note [Core Lint guarantee].
 </span><span id="line-38"></span><span class="hs-comment">--</span><span>
 </span><span id="line-39"></span><span class="hs-comment">-- See #8215 for an example</span><span>
 </span><span id="line-40"></span><span id="interactiveInScope"><span class="annot"><span class="annottext">interactiveInScope :: InteractiveContext -&gt; [Var]
-</span><a href="GHC.Core.Lint.Interactive.html#interactiveInScope"><span class="hs-identifier hs-var hs-var">interactiveInScope</span></a></span></span><span> </span><span id="local-6989586621682728511"><span class="annot"><span class="annottext">InteractiveContext
-</span><a href="#local-6989586621682728511"><span class="hs-identifier hs-var">ictxt</span></a></span></span><span>
+</span><a href="GHC.Core.Lint.Interactive.html#interactiveInScope"><span class="hs-identifier hs-var hs-var">interactiveInScope</span></a></span></span><span> </span><span id="local-6989586621682935521"><span class="annot"><span class="annottext">InteractiveContext
+</span><a href="#local-6989586621682935521"><span class="hs-identifier hs-var">ictxt</span></a></span></span><span>
 </span><span id="line-41"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Var]
-</span><a href="#local-6989586621682728512"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[Var] -&gt; [Var] -&gt; [Var]
+</span><a href="#local-6989586621682935522"><span class="hs-identifier hs-var">tyvars</span></a></span><span> </span><span class="annot"><span class="annottext">[Var] -&gt; [Var] -&gt; [Var]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[Var]
-</span><a href="#local-6989586621682728513"><span class="hs-identifier hs-var">ids</span></a></span><span>
+</span><a href="#local-6989586621682935523"><span class="hs-identifier hs-var">ids</span></a></span><span>
 </span><span id="line-42"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-43"></span><span>    </span><span class="hs-comment">-- C.f. GHC.Tc.Module.setInteractiveContext, Desugar.deSugarExpr</span><span>
-</span><span id="line-44"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682728514"><span class="annot"><span class="annottext">InstEnv
-</span><a href="#local-6989586621682728514"><span class="hs-identifier hs-var">cls_insts</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682728515"><span class="annot"><span class="annottext">[FamInst]
-</span><a href="#local-6989586621682728515"><span class="hs-identifier hs-var">_fam_insts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InteractiveContext -&gt; (InstEnv, [FamInst])
+</span><span id="line-44"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682935524"><span class="annot"><span class="annottext">InstEnv
+</span><a href="#local-6989586621682935524"><span class="hs-identifier hs-var">cls_insts</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682935525"><span class="annot"><span class="annottext">[FamInst]
+</span><a href="#local-6989586621682935525"><span class="hs-identifier hs-var">_fam_insts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InteractiveContext -&gt; (InstEnv, [FamInst])
 </span><a href="GHC.Runtime.Context.html#ic_instances"><span class="hs-identifier hs-var">ic_instances</span></a></span><span> </span><span class="annot"><span class="annottext">InteractiveContext
-</span><a href="#local-6989586621682728511"><span class="hs-identifier hs-var">ictxt</span></a></span><span>
-</span><span id="line-45"></span><span>    </span><span id="local-6989586621682728517"><span class="annot"><span class="annottext">te1 :: TypeEnv
-</span><a href="#local-6989586621682728517"><span class="hs-identifier hs-var hs-var">te1</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[TyThing] -&gt; TypeEnv
+</span><a href="#local-6989586621682935521"><span class="hs-identifier hs-var">ictxt</span></a></span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621682935527"><span class="annot"><span class="annottext">te1 :: TypeEnv
+</span><a href="#local-6989586621682935527"><span class="hs-identifier hs-var hs-var">te1</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[TyThing] -&gt; TypeEnv
 </span><a href="GHC.Types.TypeEnv.html#mkTypeEnvWithImplicits"><span class="hs-identifier hs-var">mkTypeEnvWithImplicits</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InteractiveContext -&gt; [TyThing]
 </span><a href="GHC.Runtime.Context.html#ic_tythings"><span class="hs-identifier hs-var">ic_tythings</span></a></span><span> </span><span class="annot"><span class="annottext">InteractiveContext
-</span><a href="#local-6989586621682728511"><span class="hs-identifier hs-var">ictxt</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-46"></span><span>    </span><span id="local-6989586621682728520"><span class="annot"><span class="annottext">te :: TypeEnv
-</span><a href="#local-6989586621682728520"><span class="hs-identifier hs-var hs-var">te</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TypeEnv -&gt; [Var] -&gt; TypeEnv
+</span><a href="#local-6989586621682935521"><span class="hs-identifier hs-var">ictxt</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621682935530"><span class="annot"><span class="annottext">te :: TypeEnv
+</span><a href="#local-6989586621682935530"><span class="hs-identifier hs-var hs-var">te</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TypeEnv -&gt; [Var] -&gt; TypeEnv
 </span><a href="GHC.Types.TypeEnv.html#extendTypeEnvWithIds"><span class="hs-identifier hs-var">extendTypeEnvWithIds</span></a></span><span> </span><span class="annot"><span class="annottext">TypeEnv
-</span><a href="#local-6989586621682728517"><span class="hs-identifier hs-var">te1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ClsInst -&gt; Var) -&gt; [ClsInst] -&gt; [Var]
+</span><a href="#local-6989586621682935527"><span class="hs-identifier hs-var">te1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ClsInst -&gt; Var) -&gt; [ClsInst] -&gt; [Var]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">ClsInst -&gt; Var
 </span><a href="GHC.Core.InstEnv.html#instanceDFunId"><span class="hs-identifier hs-var">instanceDFunId</span></a></span><span> </span><span class="annot"><span class="annottext">([ClsInst] -&gt; [Var]) -&gt; [ClsInst] -&gt; [Var]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InstEnv -&gt; [ClsInst]
 </span><a href="GHC.Core.InstEnv.html#instEnvElts"><span class="hs-identifier hs-var">instEnvElts</span></a></span><span> </span><span class="annot"><span class="annottext">InstEnv
-</span><a href="#local-6989586621682728514"><span class="hs-identifier hs-var">cls_insts</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>    </span><span id="local-6989586621682728513"><span class="annot"><span class="annottext">ids :: [Var]
-</span><a href="#local-6989586621682728513"><span class="hs-identifier hs-var hs-var">ids</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TypeEnv -&gt; [Var]
+</span><a href="#local-6989586621682935524"><span class="hs-identifier hs-var">cls_insts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621682935523"><span class="annot"><span class="annottext">ids :: [Var]
+</span><a href="#local-6989586621682935523"><span class="hs-identifier hs-var hs-var">ids</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TypeEnv -&gt; [Var]
 </span><a href="GHC.Types.TypeEnv.html#typeEnvIds"><span class="hs-identifier hs-var">typeEnvIds</span></a></span><span> </span><span class="annot"><span class="annottext">TypeEnv
-</span><a href="#local-6989586621682728520"><span class="hs-identifier hs-var">te</span></a></span><span>
-</span><span id="line-48"></span><span>    </span><span id="local-6989586621682728512"><span class="annot"><span class="annottext">tyvars :: [Var]
-</span><a href="#local-6989586621682728512"><span class="hs-identifier hs-var hs-var">tyvars</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; [Var]
+</span><a href="#local-6989586621682935530"><span class="hs-identifier hs-var">te</span></a></span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621682935522"><span class="annot"><span class="annottext">tyvars :: [Var]
+</span><a href="#local-6989586621682935522"><span class="hs-identifier hs-var hs-var">tyvars</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Type] -&gt; [Var]
 </span><a href="GHC.Core.TyCo.FVs.html#tyCoVarsOfTypesList"><span class="hs-identifier hs-var">tyCoVarsOfTypesList</span></a></span><span> </span><span class="annot"><span class="annottext">([Type] -&gt; [Var]) -&gt; [Type] -&gt; [Var]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Var -&gt; Type) -&gt; [Var] -&gt; [Type]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Var -&gt; Type
 </span><a href="GHC.Types.Id.html#idType"><span class="hs-identifier hs-var">idType</span></a></span><span> </span><span class="annot"><span class="annottext">[Var]
-</span><a href="#local-6989586621682728513"><span class="hs-identifier hs-var">ids</span></a></span><span>
+</span><a href="#local-6989586621682935523"><span class="hs-identifier hs-var">ids</span></a></span><span>
 </span><span id="line-49"></span><span>              </span><span class="hs-comment">-- Why the type variables?  How can the top level envt have free tyvars?</span><span>
 </span><span id="line-50"></span><span>              </span><span class="hs-comment">-- I think it's because of the GHCi debugger, which can bind variables</span><span>
 </span><span id="line-51"></span><span>              </span><span class="hs-comment">--   f :: [t] -&gt; [t]</span><span>

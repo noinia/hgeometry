@@ -34,33 +34,33 @@
 </span><a href="GHC.Stg.BcPrep.html#prepUniqSupply"><span class="hs-identifier hs-var hs-var">prepUniqSupply</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="GHC.Types.Unique.Supply.html#UniqSupply"><span class="hs-identifier hs-type">UniqSupply</span></a></span><span>      </span><span class="hs-comment">-- for generating fresh variable names</span><span>
 </span><span id="line-34"></span><span>        </span><span class="hs-special">}</span><span>
 </span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">type</span><span> </span><span id="BcPrepM"><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-var">BcPrepM</span></a></span></span><span> </span><span id="local-6989586621682606596"><span class="annot"><a href="#local-6989586621682606596"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Utils.Monad.State.Strict.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM_State"><span class="hs-identifier hs-type">BcPrepM_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606596"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">type</span><span> </span><span id="BcPrepM"><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-var">BcPrepM</span></a></span></span><span> </span><span id="local-6989586621682746279"><span class="annot"><a href="#local-6989586621682746279"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Utils.Monad.State.Strict.html#State"><span class="hs-identifier hs-type">State</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM_State"><span class="hs-identifier hs-type">BcPrepM_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746279"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-37"></span><span>
 </span><span id="line-38"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-type">bcPrepRHS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhs"><span class="hs-identifier hs-type">StgRhs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-type">BcPrepM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhs"><span class="hs-identifier hs-type">StgRhs</span></a></span><span>
 </span><span id="line-39"></span><span class="hs-comment">-- explicitly match all constructors so we get a warning if we miss any</span><span>
 </span><span id="line-40"></span><span id="bcPrepRHS"><span class="annot"><span class="annottext">bcPrepRHS :: StgRhs -&gt; BcPrepM StgRhs
-</span><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var hs-var">bcPrepRHS</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span id="local-6989586621682606599"><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
-</span><a href="#local-6989586621682606599"><span class="hs-identifier hs-var">fvs</span></a></span></span><span> </span><span id="local-6989586621682606600"><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682606600"><span class="hs-identifier hs-var">cc</span></a></span></span><span> </span><span id="local-6989586621682606601"><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682606601"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682606602"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
-</span><a href="#local-6989586621682606602"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682606604"><span class="annot"><span class="annottext">bp :: StgTickish
-</span><a href="#local-6989586621682606604"><span class="hs-identifier hs-var">bp</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Types.Tickish.html#Breakpoint"><span class="hs-identifier hs-type">Breakpoint</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span id="local-6989586621682606606"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606606"><span class="hs-identifier hs-var">expr</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682606607"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682606607"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var hs-var">bcPrepRHS</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span id="local-6989586621682746282"><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
+</span><a href="#local-6989586621682746282"><span class="hs-identifier hs-var">fvs</span></a></span></span><span> </span><span id="local-6989586621682746283"><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682746283"><span class="hs-identifier hs-var">cc</span></a></span></span><span> </span><span id="local-6989586621682746284"><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682746284"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682746285"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
+</span><a href="#local-6989586621682746285"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682746287"><span class="annot"><span class="annottext">bp :: StgTickish
+</span><a href="#local-6989586621682746287"><span class="hs-identifier hs-var">bp</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Types.Tickish.html#Breakpoint"><span class="hs-identifier hs-type">Breakpoint</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span id="local-6989586621682746289"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746289"><span class="hs-identifier hs-var">expr</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682746290"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682746290"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-41"></span><span>  </span><span class="hs-comment">{- If we have a breakpoint directly under an StgRhsClosure we don't
      need to introduce a new binding for it.
    -}</span><span>
-</span><span id="line-44"></span><span>  </span><span id="local-6989586621682606608"><span class="annot"><a href="#local-6989586621682606608"><span class="hs-identifier hs-var">expr'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
+</span><span id="line-44"></span><span>  </span><span id="local-6989586621682746291"><span class="annot"><a href="#local-6989586621682746291"><span class="hs-identifier hs-var">expr'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606606"><span class="hs-identifier hs-var">expr</span></a></span><span>
-</span><span id="line-45"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606599"><span class="hs-identifier hs-type">fvs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606600"><span class="hs-identifier hs-type">cc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606601"><span class="hs-identifier hs-type">upd</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606602"><span class="hs-identifier hs-type">args</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606604"><span class="hs-identifier hs-type">bp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606608"><span class="hs-identifier hs-type">expr'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621682606607"><span class="hs-identifier hs-type">typ</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-46"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var">bcPrepRHS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span id="local-6989586621682606610"><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
-</span><a href="#local-6989586621682606610"><span class="hs-identifier hs-var">fvs</span></a></span></span><span> </span><span id="local-6989586621682606611"><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682606611"><span class="hs-identifier hs-var">cc</span></a></span></span><span> </span><span id="local-6989586621682606612"><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682606612"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682606613"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
-</span><a href="#local-6989586621682606613"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682606614"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606614"><span class="hs-identifier hs-var">expr</span></a></span></span><span> </span><span id="local-6989586621682606615"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682606615"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682746289"><span class="hs-identifier hs-var">expr</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746282"><span class="hs-identifier hs-type">fvs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746283"><span class="hs-identifier hs-type">cc</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746284"><span class="hs-identifier hs-type">upd</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746285"><span class="hs-identifier hs-type">args</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746287"><span class="hs-identifier hs-type">bp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746291"><span class="hs-identifier hs-type">expr'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621682746290"><span class="hs-identifier hs-type">typ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var">bcPrepRHS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span id="local-6989586621682746293"><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
+</span><a href="#local-6989586621682746293"><span class="hs-identifier hs-var">fvs</span></a></span></span><span> </span><span id="local-6989586621682746294"><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682746294"><span class="hs-identifier hs-var">cc</span></a></span></span><span> </span><span id="local-6989586621682746295"><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682746295"><span class="hs-identifier hs-var">upd</span></a></span></span><span> </span><span id="local-6989586621682746296"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
+</span><a href="#local-6989586621682746296"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682746297"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746297"><span class="hs-identifier hs-var">expr</span></a></span></span><span> </span><span id="local-6989586621682746298"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682746298"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-47"></span><span>  </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 -&gt; CostCentreStack
 -&gt; UpdateFlag
@@ -77,16 +77,16 @@ XRhsClosure pass
 -&gt; Type
 -&gt; GenStgRhs pass
 </span><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-var">StgRhsClosure</span></a></span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
-</span><a href="#local-6989586621682606610"><span class="hs-identifier hs-var">fvs</span></a></span><span> </span><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682606611"><span class="hs-identifier hs-var">cc</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682606612"><span class="hs-identifier hs-var">upd</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderP 'Vanilla]
-</span><a href="#local-6989586621682606613"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; Type -&gt; StgRhs)
+</span><a href="#local-6989586621682746293"><span class="hs-identifier hs-var">fvs</span></a></span><span> </span><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682746294"><span class="hs-identifier hs-var">cc</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682746295"><span class="hs-identifier hs-var">upd</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderP 'Vanilla]
+</span><a href="#local-6989586621682746296"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; Type -&gt; StgRhs)
 -&gt; BcPrepM (GenStgExpr 'Vanilla)
 -&gt; State BcPrepM_State (Type -&gt; StgRhs)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606614"><span class="hs-identifier hs-var">expr</span></a></span><span> </span><span class="annot"><span class="annottext">State BcPrepM_State (Type -&gt; StgRhs)
+</span><a href="#local-6989586621682746297"><span class="hs-identifier hs-var">expr</span></a></span><span> </span><span class="annot"><span class="annottext">State BcPrepM_State (Type -&gt; StgRhs)
 -&gt; State BcPrepM_State Type -&gt; BcPrepM StgRhs
 forall a b.
 State BcPrepM_State (a -&gt; b)
@@ -96,47 +96,47 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682606615"><span class="hs-identifier hs-var">typ</span></a></span><span>
-</span><span id="line-48"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var">bcPrepRHS</span></a></span><span> </span><span id="local-6989586621682606617"><span class="annot"><span class="annottext">con :: StgRhs
-</span><a href="#local-6989586621682606617"><span class="hs-identifier hs-var">con</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsCon"><span class="hs-identifier hs-type">StgRhsCon</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgRhs -&gt; BcPrepM StgRhs
+</span><a href="#local-6989586621682746298"><span class="hs-identifier hs-var">typ</span></a></span><span>
+</span><span id="line-48"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var">bcPrepRHS</span></a></span><span> </span><span id="local-6989586621682746300"><span class="annot"><span class="annottext">con :: StgRhs
+</span><a href="#local-6989586621682746300"><span class="hs-identifier hs-var">con</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsCon"><span class="hs-identifier hs-type">StgRhsCon</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgRhs -&gt; BcPrepM StgRhs
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">StgRhs
-</span><a href="#local-6989586621682606617"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><a href="#local-6989586621682746300"><span class="hs-identifier hs-var">con</span></a></span><span>
 </span><span id="line-49"></span><span>
 </span><span id="line-50"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-type">bcPrepExpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgExpr"><span class="hs-identifier hs-type">StgExpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-type">BcPrepM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgExpr"><span class="hs-identifier hs-type">StgExpr</span></a></span><span>
 </span><span id="line-51"></span><span class="hs-comment">-- explicitly match all constructors so we get a warning if we miss any</span><span>
 </span><span id="line-52"></span><span id="bcPrepExpr"><span class="annot"><span class="annottext">bcPrepExpr :: GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
-</span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var hs-var">bcPrepExpr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682606620"><span class="annot"><span class="annottext">bp :: StgTickish
-</span><a href="#local-6989586621682606620"><span class="hs-identifier hs-var">bp</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Tickish.html#Breakpoint"><span class="hs-identifier hs-type">Breakpoint</span></a></span><span> </span><span id="local-6989586621682606621"><span class="annot"><span class="annottext">XBreakpoint 'TickishPassStg
-</span><a href="#local-6989586621682606621"><span class="hs-identifier hs-var">tick_ty</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var hs-var">bcPrepExpr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682746303"><span class="annot"><span class="annottext">bp :: StgTickish
+</span><a href="#local-6989586621682746303"><span class="hs-identifier hs-var">bp</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Tickish.html#Breakpoint"><span class="hs-identifier hs-type">Breakpoint</span></a></span><span> </span><span id="local-6989586621682746304"><span class="annot"><span class="annottext">XBreakpoint 'TickishPassStg
+</span><a href="#local-6989586621682746304"><span class="hs-identifier hs-var">tick_ty</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">[XTickishId 'TickishPassStg]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Module
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682606622"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606622"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682746305"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746305"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-53"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Type -&gt; Bool
 </span><a href="GHC.Core.Type.html#isLiftedTypeKind"><span class="hs-identifier hs-var">isLiftedTypeKind</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Type -&gt; Type
 Type -&gt; Type
 </span><a href="GHC.Core.Type.html#typeKind"><span class="hs-identifier hs-var">typeKind</span></a></span><span> </span><span class="annot"><span class="annottext">Type
 XBreakpoint 'TickishPassStg
-</span><a href="#local-6989586621682606621"><span class="hs-identifier hs-var">tick_ty</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-54"></span><span>      </span><span id="local-6989586621682606625"><span class="annot"><a href="#local-6989586621682606625"><span class="hs-identifier hs-var">id</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; BcPrepM Id
+</span><a href="#local-6989586621682746304"><span class="hs-identifier hs-var">tick_ty</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-54"></span><span>      </span><span id="local-6989586621682746308"><span class="annot"><a href="#local-6989586621682746308"><span class="hs-identifier hs-var">id</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; BcPrepM Id
 </span><a href="GHC.Stg.BcPrep.html#newId"><span class="hs-identifier hs-var">newId</span></a></span><span> </span><span class="annot"><span class="annottext">Type
 XBreakpoint 'TickishPassStg
-</span><a href="#local-6989586621682606621"><span class="hs-identifier hs-var">tick_ty</span></a></span><span>
-</span><span id="line-55"></span><span>      </span><span id="local-6989586621682606627"><span class="annot"><a href="#local-6989586621682606627"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-type">bcPrepExpr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606622"><span class="hs-identifier hs-type">rhs</span></a></span><span>
-</span><span id="line-56"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682606628"><span class="annot"><a href="#local-6989586621682606628"><span class="hs-identifier hs-var hs-var">expr'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTickish -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746304"><span class="hs-identifier hs-var">tick_ty</span></a></span><span>
+</span><span id="line-55"></span><span>      </span><span id="local-6989586621682746310"><span class="annot"><a href="#local-6989586621682746310"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-type">bcPrepExpr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746305"><span class="hs-identifier hs-type">rhs</span></a></span><span>
+</span><span id="line-56"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682746311"><span class="annot"><a href="#local-6989586621682746311"><span class="hs-identifier hs-var hs-var">expr'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTickish -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla
 forall (pass :: StgPass).
 StgTickish -&gt; GenStgExpr pass -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-var">StgTick</span></a></span><span> </span><span class="annot"><span class="annottext">StgTickish
-</span><a href="#local-6989586621682606620"><span class="hs-identifier hs-var">bp</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606627"><span class="hs-identifier hs-var">rhs'</span></a></span><span>
-</span><span id="line-57"></span><span>          </span><span id="local-6989586621682606629"><span class="annot"><a href="#local-6989586621682606629"><span class="hs-identifier hs-var hs-var">bnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinderP 'Vanilla -&gt; StgRhs -&gt; GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682746303"><span class="hs-identifier hs-var">bp</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746310"><span class="hs-identifier hs-var">rhs'</span></a></span><span>
+</span><span id="line-57"></span><span>          </span><span id="local-6989586621682746312"><span class="annot"><a href="#local-6989586621682746312"><span class="hs-identifier hs-var hs-var">bnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinderP 'Vanilla -&gt; StgRhs -&gt; GenStgBinding 'Vanilla
 forall (pass :: StgPass).
 BinderP pass -&gt; GenStgRhs pass -&gt; GenStgBinding pass
 </span><a href="GHC.Stg.Syntax.html#StgNonRec"><span class="hs-identifier hs-var">StgNonRec</span></a></span><span> </span><span class="annot"><span class="annottext">Id
 BinderP 'Vanilla
-</span><a href="#local-6989586621682606625"><span class="hs-identifier hs-var">id</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
+</span><a href="#local-6989586621682746308"><span class="hs-identifier hs-var">id</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 -&gt; CostCentreStack
 -&gt; UpdateFlag
 -&gt; [BinderP 'Vanilla]
@@ -160,12 +160,12 @@ NoExtFieldSilent
 </span><a href="GHC.Stg.Syntax.html#ReEntrant"><span class="hs-identifier hs-var">ReEntrant</span></a></span><span>
 </span><span id="line-60"></span><span>                                            </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-61"></span><span>                                            </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606628"><span class="hs-identifier hs-var">expr'</span></a></span><span>
+</span><a href="#local-6989586621682746311"><span class="hs-identifier hs-var">expr'</span></a></span><span>
 </span><span id="line-62"></span><span>                                            </span><span class="annot"><span class="annottext">Type
 XBreakpoint 'TickishPassStg
-</span><a href="#local-6989586621682606621"><span class="hs-identifier hs-var">tick_ty</span></a></span><span>
+</span><a href="#local-6989586621682746304"><span class="hs-identifier hs-var">tick_ty</span></a></span><span>
 </span><span id="line-63"></span><span>                             </span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>          </span><span id="local-6989586621682606634"><span class="annot"><a href="#local-6989586621682606634"><span class="hs-identifier hs-var hs-var">letExp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">XLet 'Vanilla
+</span><span id="line-64"></span><span>          </span><span id="local-6989586621682746317"><span class="annot"><a href="#local-6989586621682746317"><span class="hs-identifier hs-var hs-var">letExp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">XLet 'Vanilla
 -&gt; GenStgBinding 'Vanilla
 -&gt; GenStgExpr 'Vanilla
 -&gt; GenStgExpr 'Vanilla
@@ -175,33 +175,33 @@ XLet pass
 </span><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-var">StgLet</span></a></span><span> </span><span class="annot"><span class="annottext">XLet 'Vanilla
 NoExtFieldSilent
 </span><a href="GHC.Stg.Syntax.html#noExtFieldSilent"><span class="hs-identifier hs-var">noExtFieldSilent</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682606629"><span class="hs-identifier hs-var">bnd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Id -&gt; [StgArg] -&gt; GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746312"><span class="hs-identifier hs-var">bnd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Id -&gt; [StgArg] -&gt; GenStgExpr 'Vanilla
 forall (pass :: StgPass). Id -&gt; [StgArg] -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-var">StgApp</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606625"><span class="hs-identifier hs-var">id</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-65"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621682606634"><span class="hs-identifier hs-type">letExp</span></a></span><span>
+</span><a href="#local-6989586621682746308"><span class="hs-identifier hs-var">id</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621682746317"><span class="hs-identifier hs-type">letExp</span></a></span><span>
 </span><span id="line-66"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-67"></span><span>      </span><span id="local-6989586621682606637"><span class="annot"><a href="#local-6989586621682606637"><span class="hs-identifier hs-var">id</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; BcPrepM Id
+</span><span id="line-67"></span><span>      </span><span id="local-6989586621682746320"><span class="annot"><a href="#local-6989586621682746320"><span class="hs-identifier hs-var">id</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Type -&gt; BcPrepM Id
 </span><a href="GHC.Stg.BcPrep.html#newId"><span class="hs-identifier hs-var">newId</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Type -&gt; Type -&gt; Type
 Type -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkVisFunTyMany"><span class="hs-identifier hs-var">mkVisFunTyMany</span></a></span><span> </span><span class="annot"><span class="annottext">Type
 </span><a href="GHC.Builtin.Types.Prim.html#realWorldStatePrimTy"><span class="hs-identifier hs-var">realWorldStatePrimTy</span></a></span><span> </span><span class="annot"><span class="annottext">Type
 XBreakpoint 'TickishPassStg
-</span><a href="#local-6989586621682606621"><span class="hs-identifier hs-var">tick_ty</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-68"></span><span>      </span><span id="local-6989586621682606640"><span class="annot"><a href="#local-6989586621682606640"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-type">bcPrepExpr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606622"><span class="hs-identifier hs-type">rhs</span></a></span><span>
-</span><span id="line-69"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682606641"><span class="annot"><a href="#local-6989586621682606641"><span class="hs-identifier hs-var hs-var">expr'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTickish -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746304"><span class="hs-identifier hs-var">tick_ty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>      </span><span id="local-6989586621682746323"><span class="annot"><a href="#local-6989586621682746323"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-type">bcPrepExpr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746305"><span class="hs-identifier hs-type">rhs</span></a></span><span>
+</span><span id="line-69"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682746324"><span class="annot"><a href="#local-6989586621682746324"><span class="hs-identifier hs-var hs-var">expr'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTickish -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla
 forall (pass :: StgPass).
 StgTickish -&gt; GenStgExpr pass -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-var">StgTick</span></a></span><span> </span><span class="annot"><span class="annottext">StgTickish
-</span><a href="#local-6989586621682606620"><span class="hs-identifier hs-var">bp</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606640"><span class="hs-identifier hs-var">rhs'</span></a></span><span>
-</span><span id="line-70"></span><span>          </span><span id="local-6989586621682606642"><span class="annot"><a href="#local-6989586621682606642"><span class="hs-identifier hs-var hs-var">bnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinderP 'Vanilla -&gt; StgRhs -&gt; GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682746303"><span class="hs-identifier hs-var">bp</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746323"><span class="hs-identifier hs-var">rhs'</span></a></span><span>
+</span><span id="line-70"></span><span>          </span><span id="local-6989586621682746325"><span class="annot"><a href="#local-6989586621682746325"><span class="hs-identifier hs-var hs-var">bnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinderP 'Vanilla -&gt; StgRhs -&gt; GenStgBinding 'Vanilla
 forall (pass :: StgPass).
 BinderP pass -&gt; GenStgRhs pass -&gt; GenStgBinding pass
 </span><a href="GHC.Stg.Syntax.html#StgNonRec"><span class="hs-identifier hs-var">StgNonRec</span></a></span><span> </span><span class="annot"><span class="annottext">Id
 BinderP 'Vanilla
-</span><a href="#local-6989586621682606637"><span class="hs-identifier hs-var">id</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
+</span><a href="#local-6989586621682746320"><span class="hs-identifier hs-var">id</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 -&gt; CostCentreStack
 -&gt; UpdateFlag
 -&gt; [BinderP 'Vanilla]
@@ -227,29 +227,29 @@ NoExtFieldSilent
 BinderP 'Vanilla
 </span><a href="GHC.Types.Id.Make.html#voidArgId"><span class="hs-identifier hs-var">voidArgId</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-74"></span><span>                                            </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606641"><span class="hs-identifier hs-var">expr'</span></a></span><span>
+</span><a href="#local-6989586621682746324"><span class="hs-identifier hs-var">expr'</span></a></span><span>
 </span><span id="line-75"></span><span>                                            </span><span class="annot"><span class="annottext">Type
 XBreakpoint 'TickishPassStg
-</span><a href="#local-6989586621682606621"><span class="hs-identifier hs-var">tick_ty</span></a></span><span>
+</span><a href="#local-6989586621682746304"><span class="hs-identifier hs-var">tick_ty</span></a></span><span>
 </span><span id="line-76"></span><span>                             </span><span class="hs-special">)</span><span>
-</span><span id="line-77"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-type">StgLet</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#noExtFieldSilent"><span class="hs-identifier hs-type">noExtFieldSilent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606642"><span class="hs-identifier hs-type">bnd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606637"><span class="hs-identifier hs-type">id</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgVarArg"><span class="hs-identifier hs-type">StgVarArg</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Id.Make.html#realWorldPrimId"><span class="hs-identifier hs-type">realWorldPrimId</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-78"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682606646"><span class="annot"><span class="annottext">StgTickish
-</span><a href="#local-6989586621682606646"><span class="hs-identifier hs-var">tick</span></a></span></span><span> </span><span id="local-6989586621682606647"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606647"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-77"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-type">StgLet</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#noExtFieldSilent"><span class="hs-identifier hs-type">noExtFieldSilent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746325"><span class="hs-identifier hs-type">bnd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746320"><span class="hs-identifier hs-type">id</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgVarArg"><span class="hs-identifier hs-type">StgVarArg</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Id.Make.html#realWorldPrimId"><span class="hs-identifier hs-type">realWorldPrimId</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-type">StgTick</span></a></span><span> </span><span id="local-6989586621682746329"><span class="annot"><span class="annottext">StgTickish
+</span><a href="#local-6989586621682746329"><span class="hs-identifier hs-var">tick</span></a></span></span><span> </span><span id="local-6989586621682746330"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746330"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-79"></span><span>  </span><span class="annot"><span class="annottext">StgTickish -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla
 forall (pass :: StgPass).
 StgTickish -&gt; GenStgExpr pass -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgTick"><span class="hs-identifier hs-var">StgTick</span></a></span><span> </span><span class="annot"><span class="annottext">StgTickish
-</span><a href="#local-6989586621682606646"><span class="hs-identifier hs-var">tick</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682746329"><span class="hs-identifier hs-var">tick</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
 -&gt; BcPrepM (GenStgExpr 'Vanilla) -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606647"><span class="hs-identifier hs-var">rhs</span></a></span><span>
-</span><span id="line-80"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-type">StgLet</span></a></span><span> </span><span id="local-6989586621682606648"><span class="annot"><span class="annottext">XLet 'Vanilla
-</span><a href="#local-6989586621682606648"><span class="hs-identifier hs-var">xlet</span></a></span></span><span> </span><span id="local-6989586621682606649"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682606649"><span class="hs-identifier hs-var">bnds</span></a></span></span><span> </span><span id="local-6989586621682606650"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606650"><span class="hs-identifier hs-var">expr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682746330"><span class="hs-identifier hs-var">rhs</span></a></span><span>
+</span><span id="line-80"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-type">StgLet</span></a></span><span> </span><span id="local-6989586621682746331"><span class="annot"><span class="annottext">XLet 'Vanilla
+</span><a href="#local-6989586621682746331"><span class="hs-identifier hs-var">xlet</span></a></span></span><span> </span><span id="local-6989586621682746332"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682746332"><span class="hs-identifier hs-var">bnds</span></a></span></span><span> </span><span id="local-6989586621682746333"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746333"><span class="hs-identifier hs-var">expr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-81"></span><span>  </span><span class="annot"><span class="annottext">XLet 'Vanilla
 -&gt; GenStgBinding 'Vanilla
 -&gt; GenStgExpr 'Vanilla
@@ -258,7 +258,7 @@ forall (pass :: StgPass).
 XLet pass
 -&gt; GenStgBinding pass -&gt; GenStgExpr pass -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-var">StgLet</span></a></span><span> </span><span class="annot"><span class="annottext">XLet 'Vanilla
-</span><a href="#local-6989586621682606648"><span class="hs-identifier hs-var">xlet</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682746331"><span class="hs-identifier hs-var">xlet</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgBinding 'Vanilla
  -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
 -&gt; State BcPrepM_State (GenStgBinding 'Vanilla)
 -&gt; State BcPrepM_State (GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
@@ -266,7 +266,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
 -&gt; State BcPrepM_State (GenStgBinding 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-var">bcPrepBind</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682606649"><span class="hs-identifier hs-var">bnds</span></a></span><span>
+</span><a href="#local-6989586621682746332"><span class="hs-identifier hs-var">bnds</span></a></span><span>
 </span><span id="line-82"></span><span>              </span><span class="annot"><span class="annottext">State BcPrepM_State (GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
 -&gt; BcPrepM (GenStgExpr 'Vanilla) -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall a b.
@@ -275,11 +275,11 @@ State BcPrepM_State (a -&gt; b)
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606650"><span class="hs-identifier hs-var">expr</span></a></span><span>
-</span><span id="line-83"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLetNoEscape"><span class="hs-identifier hs-type">StgLetNoEscape</span></a></span><span> </span><span id="local-6989586621682606653"><span class="annot"><span class="annottext">XLetNoEscape 'Vanilla
-</span><a href="#local-6989586621682606653"><span class="hs-identifier hs-var">xlne</span></a></span></span><span> </span><span id="local-6989586621682606654"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682606654"><span class="hs-identifier hs-var">bnds</span></a></span></span><span> </span><span id="local-6989586621682606655"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606655"><span class="hs-identifier hs-var">expr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682746333"><span class="hs-identifier hs-var">expr</span></a></span><span>
+</span><span id="line-83"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLetNoEscape"><span class="hs-identifier hs-type">StgLetNoEscape</span></a></span><span> </span><span id="local-6989586621682746336"><span class="annot"><span class="annottext">XLetNoEscape 'Vanilla
+</span><a href="#local-6989586621682746336"><span class="hs-identifier hs-var">xlne</span></a></span></span><span> </span><span id="local-6989586621682746337"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682746337"><span class="hs-identifier hs-var">bnds</span></a></span></span><span> </span><span id="local-6989586621682746338"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746338"><span class="hs-identifier hs-var">expr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-84"></span><span>  </span><span class="annot"><span class="annottext">XLet 'Vanilla
 -&gt; GenStgBinding 'Vanilla
 -&gt; GenStgExpr 'Vanilla
@@ -289,7 +289,7 @@ XLet pass
 -&gt; GenStgBinding pass -&gt; GenStgExpr pass -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgLet"><span class="hs-identifier hs-var">StgLet</span></a></span><span> </span><span class="annot"><span class="annottext">XLetNoEscape 'Vanilla
 XLet 'Vanilla
-</span><a href="#local-6989586621682606653"><span class="hs-identifier hs-var">xlne</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682746336"><span class="hs-identifier hs-var">xlne</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgBinding 'Vanilla
  -&gt; GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
 -&gt; State BcPrepM_State (GenStgBinding 'Vanilla)
 -&gt; State BcPrepM_State (GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
@@ -297,7 +297,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
 -&gt; State BcPrepM_State (GenStgBinding 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-var">bcPrepBind</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682606654"><span class="hs-identifier hs-var">bnds</span></a></span><span>
+</span><a href="#local-6989586621682746337"><span class="hs-identifier hs-var">bnds</span></a></span><span>
 </span><span id="line-85"></span><span>              </span><span class="annot"><span class="annottext">State BcPrepM_State (GenStgExpr 'Vanilla -&gt; GenStgExpr 'Vanilla)
 -&gt; BcPrepM (GenStgExpr 'Vanilla) -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall a b.
@@ -306,12 +306,12 @@ State BcPrepM_State (a -&gt; b)
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606655"><span class="hs-identifier hs-var">expr</span></a></span><span>
-</span><span id="line-86"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgCase"><span class="hs-identifier hs-type">StgCase</span></a></span><span> </span><span id="local-6989586621682606657"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606657"><span class="hs-identifier hs-var">expr</span></a></span></span><span> </span><span id="local-6989586621682606658"><span class="annot"><span class="annottext">BinderP 'Vanilla
-</span><a href="#local-6989586621682606658"><span class="hs-identifier hs-var">bndr</span></a></span></span><span> </span><span id="local-6989586621682606659"><span class="annot"><span class="annottext">AltType
-</span><a href="#local-6989586621682606659"><span class="hs-identifier hs-var">alt_type</span></a></span></span><span> </span><span id="local-6989586621682606660"><span class="annot"><span class="annottext">[GenStgAlt 'Vanilla]
-</span><a href="#local-6989586621682606660"><span class="hs-identifier hs-var">alts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682746338"><span class="hs-identifier hs-var">expr</span></a></span><span>
+</span><span id="line-86"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgCase"><span class="hs-identifier hs-type">StgCase</span></a></span><span> </span><span id="local-6989586621682746340"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746340"><span class="hs-identifier hs-var">expr</span></a></span></span><span> </span><span id="local-6989586621682746341"><span class="annot"><span class="annottext">BinderP 'Vanilla
+</span><a href="#local-6989586621682746341"><span class="hs-identifier hs-var">bndr</span></a></span></span><span> </span><span id="local-6989586621682746342"><span class="annot"><span class="annottext">AltType
+</span><a href="#local-6989586621682746342"><span class="hs-identifier hs-var">alt_type</span></a></span></span><span> </span><span id="local-6989586621682746343"><span class="annot"><span class="annottext">[GenStgAlt 'Vanilla]
+</span><a href="#local-6989586621682746343"><span class="hs-identifier hs-var">alts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-87"></span><span>  </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
 -&gt; Id -&gt; AltType -&gt; [GenStgAlt 'Vanilla] -&gt; GenStgExpr 'Vanilla
 GenStgExpr 'Vanilla
@@ -331,7 +331,7 @@ GenStgExpr pass
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606657"><span class="hs-identifier hs-var">expr</span></a></span><span>
+</span><a href="#local-6989586621682746340"><span class="hs-identifier hs-var">expr</span></a></span><span>
 </span><span id="line-88"></span><span>          </span><span class="annot"><span class="annottext">State
   BcPrepM_State
   (Id -&gt; AltType -&gt; [GenStgAlt 'Vanilla] -&gt; GenStgExpr 'Vanilla)
@@ -348,7 +348,7 @@ forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Id
 BinderP 'Vanilla
-</span><a href="#local-6989586621682606658"><span class="hs-identifier hs-var">bndr</span></a></span><span>
+</span><a href="#local-6989586621682746341"><span class="hs-identifier hs-var">bndr</span></a></span><span>
 </span><span id="line-89"></span><span>          </span><span class="annot"><span class="annottext">State
   BcPrepM_State
   (AltType -&gt; [GenStgAlt 'Vanilla] -&gt; GenStgExpr 'Vanilla)
@@ -363,7 +363,7 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">AltType
-</span><a href="#local-6989586621682606659"><span class="hs-identifier hs-var">alt_type</span></a></span><span>
+</span><a href="#local-6989586621682746342"><span class="hs-identifier hs-var">alt_type</span></a></span><span>
 </span><span id="line-90"></span><span>          </span><span class="annot"><span class="annottext">State BcPrepM_State ([GenStgAlt 'Vanilla] -&gt; GenStgExpr 'Vanilla)
 -&gt; State BcPrepM_State [GenStgAlt 'Vanilla]
 -&gt; BcPrepM (GenStgExpr 'Vanilla)
@@ -379,19 +379,19 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; [a] -&gt; m [b]
 </span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">GenStgAlt 'Vanilla -&gt; State BcPrepM_State (GenStgAlt 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepAlt"><span class="hs-identifier hs-var">bcPrepAlt</span></a></span><span> </span><span class="annot"><span class="annottext">[GenStgAlt 'Vanilla]
-</span><a href="#local-6989586621682606660"><span class="hs-identifier hs-var">alts</span></a></span><span>
-</span><span id="line-91"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682606663"><span class="annot"><span class="annottext">lit :: GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606663"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLit"><span class="hs-identifier hs-type">StgLit</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682746343"><span class="hs-identifier hs-var">alts</span></a></span><span>
+</span><span id="line-91"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682746346"><span class="annot"><span class="annottext">lit :: GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746346"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgLit"><span class="hs-identifier hs-type">StgLit</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606663"><span class="hs-identifier hs-var">lit</span></a></span><span>
+</span><a href="#local-6989586621682746346"><span class="hs-identifier hs-var">lit</span></a></span><span>
 </span><span id="line-92"></span><span class="hs-comment">-- See Note [Not-necessarily-lifted join points], step 3.</span><span>
-</span><span id="line-93"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span id="local-6989586621682606665"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606665"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span> </span><span id="local-6989586621682746348"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682746348"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-94"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Bool
 </span><a href="GHC.Stg.BcPrep.html#isNNLJoinPoint"><span class="hs-identifier hs-var">isNNLJoinPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606665"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682746348"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla))
@@ -402,74 +402,74 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall (pass :: StgPass). Id -&gt; [StgArg] -&gt; GenStgExpr pass
 </span><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-var">StgApp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Id -&gt; Id
 </span><a href="GHC.Stg.BcPrep.html#protectNNLJoinPointId"><span class="hs-identifier hs-var">protectNNLJoinPointId</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606665"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Id -&gt; StgArg
+</span><a href="#local-6989586621682746348"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Id -&gt; StgArg
 </span><a href="GHC.Stg.Syntax.html#StgVarArg"><span class="hs-identifier hs-var">StgVarArg</span></a></span><span> </span><span class="annot"><span class="annottext">Id
 </span><a href="GHC.Types.Id.Make.html#voidPrimId"><span class="hs-identifier hs-var">voidPrimId</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-96"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682606669"><span class="annot"><span class="annottext">app :: GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606669"><span class="hs-identifier hs-var">app</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
+</span><span id="line-96"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682746352"><span class="annot"><span class="annottext">app :: GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746352"><span class="hs-identifier hs-var">app</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgApp"><span class="hs-identifier hs-type">StgApp</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606669"><span class="hs-identifier hs-var">app</span></a></span><span>
-</span><span id="line-97"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682606670"><span class="annot"><span class="annottext">app :: GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606670"><span class="hs-identifier hs-var">app</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgConApp"><span class="hs-identifier hs-type">StgConApp</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682746352"><span class="hs-identifier hs-var">app</span></a></span><span>
+</span><span id="line-97"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682746353"><span class="annot"><span class="annottext">app :: GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746353"><span class="hs-identifier hs-var">app</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgConApp"><span class="hs-identifier hs-type">StgConApp</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606670"><span class="hs-identifier hs-var">app</span></a></span><span>
-</span><span id="line-98"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682606672"><span class="annot"><span class="annottext">app :: GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606672"><span class="hs-identifier hs-var">app</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgOpApp"><span class="hs-identifier hs-type">StgOpApp</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
+</span><a href="#local-6989586621682746353"><span class="hs-identifier hs-var">app</span></a></span><span>
+</span><span id="line-98"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span id="local-6989586621682746355"><span class="annot"><span class="annottext">app :: GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746355"><span class="hs-identifier hs-var">app</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgOpApp"><span class="hs-identifier hs-type">StgOpApp</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606672"><span class="hs-identifier hs-var">app</span></a></span><span>
+</span><a href="#local-6989586621682746355"><span class="hs-identifier hs-var">app</span></a></span><span>
 </span><span id="line-99"></span><span>
 </span><span id="line-100"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepAlt"><span class="hs-identifier hs-type">bcPrepAlt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgAlt"><span class="hs-identifier hs-type">StgAlt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-type">BcPrepM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgAlt"><span class="hs-identifier hs-type">StgAlt</span></a></span><span>
 </span><span id="line-101"></span><span id="bcPrepAlt"><span class="annot"><span class="annottext">bcPrepAlt :: GenStgAlt 'Vanilla -&gt; State BcPrepM_State (GenStgAlt 'Vanilla)
-</span><a href="GHC.Stg.BcPrep.html#bcPrepAlt"><span class="hs-identifier hs-var hs-var">bcPrepAlt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#GenStgAlt"><span class="hs-identifier hs-type">GenStgAlt</span></a></span><span> </span><span id="local-6989586621682606676"><span class="annot"><span class="annottext">AltCon
-</span><a href="#local-6989586621682606676"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621682606677"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
-</span><a href="#local-6989586621682606677"><span class="hs-identifier hs-var">bndrs</span></a></span></span><span> </span><span id="local-6989586621682606678"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606678"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AltCon
+</span><a href="GHC.Stg.BcPrep.html#bcPrepAlt"><span class="hs-identifier hs-var hs-var">bcPrepAlt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#GenStgAlt"><span class="hs-identifier hs-type">GenStgAlt</span></a></span><span> </span><span id="local-6989586621682746359"><span class="annot"><span class="annottext">AltCon
+</span><a href="#local-6989586621682746359"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621682746360"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
+</span><a href="#local-6989586621682746360"><span class="hs-identifier hs-var">bndrs</span></a></span></span><span> </span><span id="local-6989586621682746361"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746361"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AltCon
 -&gt; [BinderP 'Vanilla] -&gt; GenStgExpr 'Vanilla -&gt; GenStgAlt 'Vanilla
 forall (pass :: StgPass).
 AltCon -&gt; [BinderP pass] -&gt; GenStgExpr pass -&gt; GenStgAlt pass
 </span><a href="GHC.Stg.Syntax.html#GenStgAlt"><span class="hs-identifier hs-var">GenStgAlt</span></a></span><span> </span><span class="annot"><span class="annottext">AltCon
-</span><a href="#local-6989586621682606676"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderP 'Vanilla]
-</span><a href="#local-6989586621682606677"><span class="hs-identifier hs-var">bndrs</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; GenStgAlt 'Vanilla)
+</span><a href="#local-6989586621682746359"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">[BinderP 'Vanilla]
+</span><a href="#local-6989586621682746360"><span class="hs-identifier hs-var">bndrs</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgExpr 'Vanilla -&gt; GenStgAlt 'Vanilla)
 -&gt; BcPrepM (GenStgExpr 'Vanilla)
 -&gt; State BcPrepM_State (GenStgAlt 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla -&gt; BcPrepM (GenStgExpr 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepExpr"><span class="hs-identifier hs-var">bcPrepExpr</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606678"><span class="hs-identifier hs-var">rhs</span></a></span><span>
+</span><a href="#local-6989586621682746361"><span class="hs-identifier hs-var">rhs</span></a></span><span>
 </span><span id="line-102"></span><span>
 </span><span id="line-103"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-type">bcPrepBind</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgBinding"><span class="hs-identifier hs-type">StgBinding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-type">BcPrepM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgBinding"><span class="hs-identifier hs-type">StgBinding</span></a></span><span>
 </span><span id="line-104"></span><span class="hs-comment">-- explicitly match all constructors so we get a warning if we miss any</span><span>
 </span><span id="line-105"></span><span id="bcPrepBind"><span class="annot"><span class="annottext">bcPrepBind :: GenStgBinding 'Vanilla
 -&gt; State BcPrepM_State (GenStgBinding 'Vanilla)
-</span><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-var hs-var">bcPrepBind</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgNonRec"><span class="hs-identifier hs-type">StgNonRec</span></a></span><span> </span><span id="local-6989586621682606680"><span class="annot"><span class="annottext">BinderP 'Vanilla
-</span><a href="#local-6989586621682606680"><span class="hs-identifier hs-var">bndr</span></a></span></span><span> </span><span id="local-6989586621682606681"><span class="annot"><span class="annottext">StgRhs
-</span><a href="#local-6989586621682606681"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-106"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682606682"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606682"><span class="hs-identifier hs-var">bndr'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682606683"><span class="annot"><span class="annottext">StgRhs
-</span><a href="#local-6989586621682606683"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Id, StgRhs) -&gt; (Id, StgRhs)
+</span><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-var hs-var">bcPrepBind</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgNonRec"><span class="hs-identifier hs-type">StgNonRec</span></a></span><span> </span><span id="local-6989586621682746363"><span class="annot"><span class="annottext">BinderP 'Vanilla
+</span><a href="#local-6989586621682746363"><span class="hs-identifier hs-var">bndr</span></a></span></span><span> </span><span id="local-6989586621682746364"><span class="annot"><span class="annottext">StgRhs
+</span><a href="#local-6989586621682746364"><span class="hs-identifier hs-var">rhs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682746365"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682746365"><span class="hs-identifier hs-var">bndr'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682746366"><span class="annot"><span class="annottext">StgRhs
+</span><a href="#local-6989586621682746366"><span class="hs-identifier hs-var">rhs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Id, StgRhs) -&gt; (Id, StgRhs)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepSingleBind"><span class="hs-identifier hs-var">bcPrepSingleBind</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Id
 BinderP 'Vanilla
-</span><a href="#local-6989586621682606680"><span class="hs-identifier hs-var">bndr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">StgRhs
-</span><a href="#local-6989586621682606681"><span class="hs-identifier hs-var">rhs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682746363"><span class="hs-identifier hs-var">bndr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">StgRhs
+</span><a href="#local-6989586621682746364"><span class="hs-identifier hs-var">rhs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-107"></span><span>  </span><span class="hs-keyword">in</span><span>  </span><span class="annot"><span class="annottext">BinderP 'Vanilla -&gt; StgRhs -&gt; GenStgBinding 'Vanilla
 forall (pass :: StgPass).
 BinderP pass -&gt; GenStgRhs pass -&gt; GenStgBinding pass
 </span><a href="GHC.Stg.Syntax.html#StgNonRec"><span class="hs-identifier hs-var">StgNonRec</span></a></span><span> </span><span class="annot"><span class="annottext">Id
 BinderP 'Vanilla
-</span><a href="#local-6989586621682606682"><span class="hs-identifier hs-var">bndr'</span></a></span><span> </span><span class="annot"><span class="annottext">(StgRhs -&gt; GenStgBinding 'Vanilla)
+</span><a href="#local-6989586621682746365"><span class="hs-identifier hs-var">bndr'</span></a></span><span> </span><span class="annot"><span class="annottext">(StgRhs -&gt; GenStgBinding 'Vanilla)
 -&gt; BcPrepM StgRhs -&gt; State BcPrepM_State (GenStgBinding 'Vanilla)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">StgRhs -&gt; BcPrepM StgRhs
 </span><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var">bcPrepRHS</span></a></span><span> </span><span class="annot"><span class="annottext">StgRhs
-</span><a href="#local-6989586621682606683"><span class="hs-identifier hs-var">rhs'</span></a></span><span>
-</span><span id="line-108"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-var">bcPrepBind</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRec"><span class="hs-identifier hs-type">StgRec</span></a></span><span> </span><span id="local-6989586621682606686"><span class="annot"><span class="annottext">[(BinderP 'Vanilla, StgRhs)]
-</span><a href="#local-6989586621682606686"><span class="hs-identifier hs-var">bnds</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621682746366"><span class="hs-identifier hs-var">rhs'</span></a></span><span>
+</span><span id="line-108"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-var">bcPrepBind</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRec"><span class="hs-identifier hs-type">StgRec</span></a></span><span> </span><span id="local-6989586621682746369"><span class="annot"><span class="annottext">[(BinderP 'Vanilla, StgRhs)]
+</span><a href="#local-6989586621682746369"><span class="hs-identifier hs-var">bnds</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-109"></span><span>  </span><span class="annot"><span class="annottext">[(Id, StgRhs)] -&gt; GenStgBinding 'Vanilla
 [(BinderP 'Vanilla, StgRhs)] -&gt; GenStgBinding 'Vanilla
 forall (pass :: StgPass).
@@ -484,15 +484,15 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Traversable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m (t b)
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; [a] -&gt; m [b]
-</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621682606687"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606687"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682606688"><span class="annot"><span class="annottext">StgRhs
-</span><a href="#local-6989586621682606688"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606687"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">(StgRhs -&gt; (Id, StgRhs))
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621682746370"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682746370"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682746371"><span class="annot"><span class="annottext">StgRhs
+</span><a href="#local-6989586621682746371"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682746370"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">(StgRhs -&gt; (Id, StgRhs))
 -&gt; BcPrepM StgRhs -&gt; State BcPrepM_State (Id, StgRhs)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">StgRhs -&gt; BcPrepM StgRhs
 </span><a href="GHC.Stg.BcPrep.html#bcPrepRHS"><span class="hs-identifier hs-var">bcPrepRHS</span></a></span><span> </span><span class="annot"><span class="annottext">StgRhs
-</span><a href="#local-6989586621682606688"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Id, StgRhs) -&gt; State BcPrepM_State (Id, StgRhs))
+</span><a href="#local-6989586621682746371"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Id, StgRhs) -&gt; State BcPrepM_State (Id, StgRhs))
 -&gt; ((Id, StgRhs) -&gt; (Id, StgRhs))
 -&gt; (Id, StgRhs)
 -&gt; State BcPrepM_State (Id, StgRhs)
@@ -501,26 +501,26 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><a href="GHC.Stg.BcPrep.html#bcPrepSingleBind"><span class="hs-identifier hs-var">bcPrepSingleBind</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-110"></span><span>                  </span><span class="annot"><span class="annottext">[(Id, StgRhs)]
 [(BinderP 'Vanilla, StgRhs)]
-</span><a href="#local-6989586621682606686"><span class="hs-identifier hs-var">bnds</span></a></span><span>
+</span><a href="#local-6989586621682746369"><span class="hs-identifier hs-var">bnds</span></a></span><span>
 </span><span id="line-111"></span><span>
 </span><span id="line-112"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepSingleBind"><span class="hs-identifier hs-type">bcPrepSingleBind</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhs"><span class="hs-identifier hs-type">StgRhs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhs"><span class="hs-identifier hs-type">StgRhs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-113"></span><span class="hs-comment">-- If necessary, modify this Id and body to protect not-necessarily-lifted join points.</span><span>
 </span><span id="line-114"></span><span class="hs-comment">-- See Note [Not-necessarily-lifted join points], step 2.</span><span>
 </span><span id="line-115"></span><span id="bcPrepSingleBind"><span class="annot"><span class="annottext">bcPrepSingleBind :: (Id, StgRhs) -&gt; (Id, StgRhs)
-</span><a href="GHC.Stg.BcPrep.html#bcPrepSingleBind"><span class="hs-identifier hs-var hs-var">bcPrepSingleBind</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682606690"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606690"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span id="local-6989586621682606691"><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
-</span><a href="#local-6989586621682606691"><span class="hs-identifier hs-var">ext</span></a></span></span><span> </span><span id="local-6989586621682606692"><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682606692"><span class="hs-identifier hs-var">cc</span></a></span></span><span> </span><span id="local-6989586621682606693"><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682606693"><span class="hs-identifier hs-var">upd_flag</span></a></span></span><span> </span><span id="local-6989586621682606694"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
-</span><a href="#local-6989586621682606694"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682606695"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606695"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621682606696"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682606696"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.Stg.BcPrep.html#bcPrepSingleBind"><span class="hs-identifier hs-var hs-var">bcPrepSingleBind</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682746373"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682746373"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-type">StgRhsClosure</span></a></span><span> </span><span id="local-6989586621682746374"><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
+</span><a href="#local-6989586621682746374"><span class="hs-identifier hs-var">ext</span></a></span></span><span> </span><span id="local-6989586621682746375"><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682746375"><span class="hs-identifier hs-var">cc</span></a></span></span><span> </span><span id="local-6989586621682746376"><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682746376"><span class="hs-identifier hs-var">upd_flag</span></a></span></span><span> </span><span id="local-6989586621682746377"><span class="annot"><span class="annottext">[BinderP 'Vanilla]
+</span><a href="#local-6989586621682746377"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621682746378"><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
+</span><a href="#local-6989586621682746378"><span class="hs-identifier hs-var">body</span></a></span></span><span> </span><span id="local-6989586621682746379"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682746379"><span class="hs-identifier hs-var">typ</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-116"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Bool
 </span><a href="GHC.Stg.BcPrep.html#isNNLJoinPoint"><span class="hs-identifier hs-var">isNNLJoinPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606690"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621682746373"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-117"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Id
 </span><a href="GHC.Stg.BcPrep.html#protectNNLJoinPointId"><span class="hs-identifier hs-var">protectNNLJoinPointId</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606690"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621682746373"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-118"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
 -&gt; CostCentreStack
 -&gt; UpdateFlag
@@ -537,30 +537,30 @@ XRhsClosure pass
 -&gt; Type
 -&gt; GenStgRhs pass
 </span><a href="GHC.Stg.Syntax.html#StgRhsClosure"><span class="hs-identifier hs-var">StgRhsClosure</span></a></span><span> </span><span class="annot"><span class="annottext">XRhsClosure 'Vanilla
-</span><a href="#local-6989586621682606691"><span class="hs-identifier hs-var">ext</span></a></span><span> </span><span class="annot"><span class="annottext">CostCentreStack
-</span><a href="#local-6989586621682606692"><span class="hs-identifier hs-var">cc</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
-</span><a href="#local-6989586621682606693"><span class="hs-identifier hs-var">upd_flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Id]
+</span><a href="#local-6989586621682746374"><span class="hs-identifier hs-var">ext</span></a></span><span> </span><span class="annot"><span class="annottext">CostCentreStack
+</span><a href="#local-6989586621682746375"><span class="hs-identifier hs-var">cc</span></a></span><span> </span><span class="annot"><span class="annottext">UpdateFlag
+</span><a href="#local-6989586621682746376"><span class="hs-identifier hs-var">upd_flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Id]
 [BinderP 'Vanilla]
-</span><a href="#local-6989586621682606694"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [Id] -&gt; [Id]
+</span><a href="#local-6989586621682746377"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="annot"><span class="annottext">[Id] -&gt; [Id] -&gt; [Id]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Id
 </span><a href="GHC.Types.Id.Make.html#voidArgId"><span class="hs-identifier hs-var">voidArgId</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">GenStgExpr 'Vanilla
-</span><a href="#local-6989586621682606695"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682606696"><span class="hs-identifier hs-var">typ</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-119"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepSingleBind"><span class="hs-identifier hs-var">bcPrepSingleBind</span></a></span><span> </span><span id="local-6989586621682606697"><span class="annot"><span class="annottext">(Id, StgRhs)
-</span><a href="#local-6989586621682606697"><span class="hs-identifier hs-var">bnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Id, StgRhs)
-</span><a href="#local-6989586621682606697"><span class="hs-identifier hs-var">bnd</span></a></span><span>
+</span><a href="#local-6989586621682746378"><span class="hs-identifier hs-var">body</span></a></span><span> </span><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682746379"><span class="hs-identifier hs-var">typ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepSingleBind"><span class="hs-identifier hs-var">bcPrepSingleBind</span></a></span><span> </span><span id="local-6989586621682746380"><span class="annot"><span class="annottext">(Id, StgRhs)
+</span><a href="#local-6989586621682746380"><span class="hs-identifier hs-var">bnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Id, StgRhs)
+</span><a href="#local-6989586621682746380"><span class="hs-identifier hs-var">bnd</span></a></span><span>
 </span><span id="line-120"></span><span>
 </span><span id="line-121"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepTopLvl"><span class="hs-identifier hs-type">bcPrepTopLvl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopBinding"><span class="hs-identifier hs-type">StgTopBinding</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-type">BcPrepM</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopBinding"><span class="hs-identifier hs-type">StgTopBinding</span></a></span><span>
 </span><span id="line-122"></span><span id="bcPrepTopLvl"><span class="annot"><span class="annottext">bcPrepTopLvl :: StgTopBinding -&gt; BcPrepM StgTopBinding
-</span><a href="GHC.Stg.BcPrep.html#bcPrepTopLvl"><span class="hs-identifier hs-var hs-var">bcPrepTopLvl</span></a></span></span><span> </span><span id="local-6989586621682606699"><span class="annot"><span class="annottext">lit :: StgTopBinding
-</span><a href="#local-6989586621682606699"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopStringLit"><span class="hs-identifier hs-type">StgTopStringLit</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTopBinding -&gt; BcPrepM StgTopBinding
+</span><a href="GHC.Stg.BcPrep.html#bcPrepTopLvl"><span class="hs-identifier hs-var hs-var">bcPrepTopLvl</span></a></span></span><span> </span><span id="local-6989586621682746382"><span class="annot"><span class="annottext">lit :: StgTopBinding
+</span><a href="#local-6989586621682746382"><span class="hs-identifier hs-var">lit</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopStringLit"><span class="hs-identifier hs-type">StgTopStringLit</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StgTopBinding -&gt; BcPrepM StgTopBinding
 forall a. a -&gt; State BcPrepM_State a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">StgTopBinding
-</span><a href="#local-6989586621682606699"><span class="hs-identifier hs-var">lit</span></a></span><span>
-</span><span id="line-123"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepTopLvl"><span class="hs-identifier hs-var">bcPrepTopLvl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopLifted"><span class="hs-identifier hs-type">StgTopLifted</span></a></span><span> </span><span id="local-6989586621682606702"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682606702"><span class="hs-identifier hs-var">bnd</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla -&gt; StgTopBinding
+</span><a href="#local-6989586621682746382"><span class="hs-identifier hs-var">lit</span></a></span><span>
+</span><span id="line-123"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrepTopLvl"><span class="hs-identifier hs-var">bcPrepTopLvl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Stg.Syntax.html#StgTopLifted"><span class="hs-identifier hs-type">StgTopLifted</span></a></span><span> </span><span id="local-6989586621682746385"><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
+</span><a href="#local-6989586621682746385"><span class="hs-identifier hs-var">bnd</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla -&gt; StgTopBinding
 forall (pass :: StgPass).
 GenStgBinding pass -&gt; GenStgTopBinding pass
 </span><a href="GHC.Stg.Syntax.html#StgTopLifted"><span class="hs-identifier hs-var">StgTopLifted</span></a></span><span> </span><span class="annot"><span class="annottext">(GenStgBinding 'Vanilla -&gt; StgTopBinding)
@@ -570,13 +570,13 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
 -&gt; State BcPrepM_State (GenStgBinding 'Vanilla)
 </span><a href="GHC.Stg.BcPrep.html#bcPrepBind"><span class="hs-identifier hs-var">bcPrepBind</span></a></span><span> </span><span class="annot"><span class="annottext">GenStgBinding 'Vanilla
-</span><a href="#local-6989586621682606702"><span class="hs-identifier hs-var">bnd</span></a></span><span>
+</span><a href="#local-6989586621682746385"><span class="hs-identifier hs-var">bnd</span></a></span><span>
 </span><span id="line-124"></span><span>
 </span><span id="line-125"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#bcPrep"><span class="hs-identifier hs-type">bcPrep</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Supply.html#UniqSupply"><span class="hs-identifier hs-type">UniqSupply</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Stg.Syntax.html#InStgTopBinding"><span class="hs-identifier hs-type">InStgTopBinding</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Stg.Syntax.html#OutStgTopBinding"><span class="hs-identifier hs-type">OutStgTopBinding</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-126"></span><span id="bcPrep"><span class="annot"><span class="annottext">bcPrep :: UniqSupply -&gt; [StgTopBinding] -&gt; [StgTopBinding]
-</span><a href="GHC.Stg.BcPrep.html#bcPrep"><span class="hs-identifier hs-var hs-var">bcPrep</span></a></span></span><span> </span><span id="local-6989586621682606705"><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682606705"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span id="local-6989586621682606706"><span class="annot"><span class="annottext">[StgTopBinding]
-</span><a href="#local-6989586621682606706"><span class="hs-identifier hs-var">bnds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State BcPrepM_State [StgTopBinding]
+</span><a href="GHC.Stg.BcPrep.html#bcPrep"><span class="hs-identifier hs-var hs-var">bcPrep</span></a></span></span><span> </span><span id="local-6989586621682746388"><span class="annot"><span class="annottext">UniqSupply
+</span><a href="#local-6989586621682746388"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span id="local-6989586621682746389"><span class="annot"><span class="annottext">[StgTopBinding]
+</span><a href="#local-6989586621682746389"><span class="hs-identifier hs-var">bnds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State BcPrepM_State [StgTopBinding]
 -&gt; BcPrepM_State -&gt; [StgTopBinding]
 forall s a. State s a -&gt; s -&gt; a
 </span><a href="GHC.Utils.Monad.State.Strict.html#evalState"><span class="hs-identifier hs-var">evalState</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(StgTopBinding -&gt; BcPrepM StgTopBinding)
@@ -587,41 +587,41 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; [a] -&gt; m [b]
 </span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="annot"><span class="annottext">StgTopBinding -&gt; BcPrepM StgTopBinding
 </span><a href="GHC.Stg.BcPrep.html#bcPrepTopLvl"><span class="hs-identifier hs-var">bcPrepTopLvl</span></a></span><span> </span><span class="annot"><span class="annottext">[StgTopBinding]
-</span><a href="#local-6989586621682606706"><span class="hs-identifier hs-var">bnds</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UniqSupply -&gt; BcPrepM_State
+</span><a href="#local-6989586621682746389"><span class="hs-identifier hs-var">bnds</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UniqSupply -&gt; BcPrepM_State
 </span><a href="GHC.Stg.BcPrep.html#BcPrepM_State"><span class="hs-identifier hs-var">BcPrepM_State</span></a></span><span> </span><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682606705"><span class="hs-identifier hs-var">us</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682746388"><span class="hs-identifier hs-var">us</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-127"></span><span>
 </span><span id="line-128"></span><span class="hs-comment">-- Is this Id a not-necessarily-lifted join point?</span><span>
 </span><span id="line-129"></span><span class="hs-comment">-- See Note [Not-necessarily-lifted join points], step 1</span><span>
 </span><span id="line-130"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#isNNLJoinPoint"><span class="hs-identifier hs-type">isNNLJoinPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-131"></span><span id="isNNLJoinPoint"><span class="annot"><span class="annottext">isNNLJoinPoint :: Id -&gt; Bool
-</span><a href="GHC.Stg.BcPrep.html#isNNLJoinPoint"><span class="hs-identifier hs-var hs-var">isNNLJoinPoint</span></a></span></span><span> </span><span id="local-6989586621682606708"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606708"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Bool
+</span><a href="GHC.Stg.BcPrep.html#isNNLJoinPoint"><span class="hs-identifier hs-var hs-var">isNNLJoinPoint</span></a></span></span><span> </span><span id="local-6989586621682746391"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682746391"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Id -&gt; Bool
 </span><a href="GHC.Types.Id.html#isJoinId"><span class="hs-identifier hs-var">isJoinId</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606708"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682746391"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Type -&gt; Bool
 </span><a href="GHC.Core.Type.html#mightBeUnliftedType"><span class="hs-identifier hs-var">mightBeUnliftedType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Id -&gt; Type
 </span><a href="GHC.Types.Id.html#idType"><span class="hs-identifier hs-var">idType</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606708"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682746391"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-132"></span><span>
 </span><span id="line-133"></span><span class="hs-comment">-- Update an Id's type to take a (# #) argument.</span><span>
 </span><span id="line-134"></span><span class="hs-comment">-- Precondition: the Id is a not-necessarily-lifted join point.</span><span>
 </span><span id="line-135"></span><span class="hs-comment">-- See Note [Not-necessarily-lifted join points]</span><span>
 </span><span id="line-136"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#protectNNLJoinPointId"><span class="hs-identifier hs-type">protectNNLJoinPointId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span>
 </span><span id="line-137"></span><span id="protectNNLJoinPointId"><span class="annot"><span class="annottext">protectNNLJoinPointId :: Id -&gt; Id
-</span><a href="GHC.Stg.BcPrep.html#protectNNLJoinPointId"><span class="hs-identifier hs-var hs-var">protectNNLJoinPointId</span></a></span></span><span> </span><span id="local-6989586621682606713"><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606713"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><a href="GHC.Stg.BcPrep.html#protectNNLJoinPointId"><span class="hs-identifier hs-var hs-var">protectNNLJoinPointId</span></a></span></span><span> </span><span id="local-6989586621682746396"><span class="annot"><span class="annottext">Id
+</span><a href="#local-6989586621682746396"><span class="hs-identifier hs-var">x</span></a></span></span><span>
 </span><span id="line-138"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ((Type -&gt; Type) -&gt; Id -&gt; Id) -&gt; (Type -&gt; Type) -&gt; Id -&gt; Id
 forall a. HasCallStack =&gt; Bool -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-identifier hs-var">assert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Id -&gt; Bool
 </span><a href="GHC.Stg.BcPrep.html#isNNLJoinPoint"><span class="hs-identifier hs-var">isNNLJoinPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606713"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682746396"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-139"></span><span>    </span><span class="annot"><span class="annottext">(Type -&gt; Type) -&gt; Id -&gt; Id
 </span><a href="GHC.Types.Var.html#updateIdTypeButNotMult"><span class="hs-identifier hs-var">updateIdTypeButNotMult</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Type
 </span><a href="GHC.Builtin.Types.html#unboxedUnitTy"><span class="hs-identifier hs-var">unboxedUnitTy</span></a></span><span> </span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Type -&gt; Type -&gt; Type
 Type -&gt; Type -&gt; Type
 </span><a href="GHC.Core.TyCo.Rep.html#mkVisFunTyMany"><span class="hs-operator hs-var">`mkVisFunTyMany`</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Id
-</span><a href="#local-6989586621682606713"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621682746396"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-140"></span><span>
 </span><span id="line-141"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#newUnique"><span class="hs-identifier hs-type">newUnique</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-type">BcPrepM</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-142"></span><span id="newUnique"><span class="annot"><span class="annottext">newUnique :: BcPrepM Unique
@@ -631,24 +631,24 @@ forall s a. (s -&gt; (a, s)) -&gt; State s a
 -&gt; (BcPrepM_State -&gt; (Unique, BcPrepM_State)) -&gt; BcPrepM Unique
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-143"></span><span>  </span><span class="hs-glyph">\</span><span id="local-6989586621682606718"><span class="annot"><span class="annottext">BcPrepM_State
-</span><a href="#local-6989586621682606718"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UniqSupply -&gt; (Unique, UniqSupply)
+</span><span id="line-143"></span><span>  </span><span class="hs-glyph">\</span><span id="local-6989586621682746401"><span class="annot"><span class="annottext">BcPrepM_State
+</span><a href="#local-6989586621682746401"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UniqSupply -&gt; (Unique, UniqSupply)
 </span><a href="GHC.Types.Unique.Supply.html#takeUniqFromSupply"><span class="hs-identifier hs-var">takeUniqFromSupply</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BcPrepM_State -&gt; UniqSupply
 </span><a href="GHC.Stg.BcPrep.html#prepUniqSupply"><span class="hs-identifier hs-var">prepUniqSupply</span></a></span><span> </span><span class="annot"><span class="annottext">BcPrepM_State
-</span><a href="#local-6989586621682606718"><span class="hs-identifier hs-var">st</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-144"></span><span>            </span><span class="hs-special">(</span><span id="local-6989586621682606720"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682606720"><span class="hs-identifier hs-var">uniq</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682606721"><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682606721"><span class="hs-identifier hs-var">us</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682606720"><span class="hs-identifier hs-var">uniq</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">BcPrepM_State
-</span><a href="#local-6989586621682606718"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#prepUniqSupply"><span class="hs-identifier hs-var">prepUniqSupply</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682606721"><span class="hs-identifier hs-type">us</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682746401"><span class="hs-identifier hs-var">st</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-144"></span><span>            </span><span class="hs-special">(</span><span id="local-6989586621682746403"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682746403"><span class="hs-identifier hs-var">uniq</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682746404"><span class="annot"><span class="annottext">UniqSupply
+</span><a href="#local-6989586621682746404"><span class="hs-identifier hs-var">us</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682746403"><span class="hs-identifier hs-var">uniq</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">BcPrepM_State
+</span><a href="#local-6989586621682746401"><span class="hs-identifier hs-var">st</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#prepUniqSupply"><span class="hs-identifier hs-var">prepUniqSupply</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682746404"><span class="hs-identifier hs-type">us</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-145"></span><span>
 </span><span id="line-146"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#newId"><span class="hs-identifier hs-type">newId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#BcPrepM"><span class="hs-identifier hs-type">BcPrepM</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Var.html#Id"><span class="hs-identifier hs-type">Id</span></a></span><span>
 </span><span id="line-147"></span><span id="newId"><span class="annot"><span class="annottext">newId :: Type -&gt; BcPrepM Id
-</span><a href="GHC.Stg.BcPrep.html#newId"><span class="hs-identifier hs-var hs-var">newId</span></a></span></span><span> </span><span id="local-6989586621682606722"><span class="annot"><span class="annottext">Type
-</span><a href="#local-6989586621682606722"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-148"></span><span>    </span><span id="local-6989586621682606723"><span class="annot"><a href="#local-6989586621682606723"><span class="hs-identifier hs-var">uniq</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">BcPrepM Unique
+</span><a href="GHC.Stg.BcPrep.html#newId"><span class="hs-identifier hs-var hs-var">newId</span></a></span></span><span> </span><span id="local-6989586621682746405"><span class="annot"><span class="annottext">Type
+</span><a href="#local-6989586621682746405"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-148"></span><span>    </span><span id="local-6989586621682746406"><span class="annot"><a href="#local-6989586621682746406"><span class="hs-identifier hs-var">uniq</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">BcPrepM Unique
 </span><a href="GHC.Stg.BcPrep.html#newUnique"><span class="hs-identifier hs-var">newUnique</span></a></span><span>
-</span><span id="line-149"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="GHC.Types.Id.html#mkSysLocal"><span class="hs-identifier hs-type">mkSysLocal</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#prepFS"><span class="hs-identifier hs-type">prepFS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606723"><span class="hs-identifier hs-type">uniq</span></a></span><span> </span><span class="annot"><a href="GHC.Core.Type.html#ManyTy"><span class="hs-identifier hs-type">ManyTy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682606722"><span class="hs-identifier hs-type">ty</span></a></span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="GHC.Types.Id.html#mkSysLocal"><span class="hs-identifier hs-type">mkSysLocal</span></a></span><span> </span><span class="annot"><a href="GHC.Stg.BcPrep.html#prepFS"><span class="hs-identifier hs-type">prepFS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746406"><span class="hs-identifier hs-type">uniq</span></a></span><span> </span><span class="annot"><a href="GHC.Core.Type.html#ManyTy"><span class="hs-identifier hs-type">ManyTy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682746405"><span class="hs-identifier hs-type">ty</span></a></span><span>
 </span><span id="line-150"></span><span>
 </span><span id="line-151"></span><span class="annot"><a href="GHC.Stg.BcPrep.html#prepFS"><span class="hs-identifier hs-type">prepFS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Data.FastString.html#FastString"><span class="hs-identifier hs-type">FastString</span></a></span><span>
 </span><span id="line-152"></span><span id="prepFS"><span class="annot"><span class="annottext">prepFS :: FastString

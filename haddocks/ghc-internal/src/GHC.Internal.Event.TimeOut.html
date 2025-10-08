@@ -40,14 +40,14 @@
 </span><span id="line-40"></span><span class="hs-comment">-- be wary of 'GHC.Internal.Control.Exception.throwTo' and 'Control.Concurrent.killThread':</span><span>
 </span><span id="line-41"></span><span class="hs-comment">-- if the target thread is making a foreign call, these functions will block</span><span>
 </span><span id="line-42"></span><span class="hs-comment">-- until the call completes.</span><span>
-</span><span id="line-43"></span><span class="hs-keyword">type</span><span> </span><span id="TimeoutCallback"><span class="annot"><a href="GHC.Internal.Event.TimeOut.html#TimeoutCallback"><span class="hs-identifier hs-var">TimeoutCallback</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span class="hs-keyword">type</span><span> </span><span id="TimeoutCallback"><span class="annot"><a href="GHC.Internal.Event.TimeOut.html#TimeoutCallback"><span class="hs-identifier hs-var">TimeoutCallback</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | An edit to apply to a 'TimeoutQueue'.</span></span><span>
 </span><span id="line-46"></span><span class="hs-keyword">type</span><span> </span><span id="TimeoutEdit"><span class="annot"><a href="GHC.Internal.Event.TimeOut.html#TimeoutEdit"><span class="hs-identifier hs-var">TimeoutEdit</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Internal.Event.TimeOut.html#TimeoutQueue"><span class="hs-identifier hs-type">TimeoutQueue</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Internal.Event.TimeOut.html#TimeoutQueue"><span class="hs-identifier hs-type">TimeoutQueue</span></a></span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | A timeout registration cookie.</span></span><span>
 </span><span id="line-49"></span><span class="hs-keyword">newtype</span><span> </span><span id="TimeoutKey"><span class="annot"><a href="GHC.Internal.Event.TimeOut.html#TimeoutKey"><span class="hs-identifier hs-var">TimeoutKey</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TK"><span class="annot"><a href="GHC.Internal.Event.TimeOut.html#TK"><span class="hs-identifier hs-var">TK</span></a></span></span><span> </span><span class="annot"><a href="GHC.Internal.Event.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
-</span><span id="line-50"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679661306"><span id="local-6989586621679661311"><span class="annot"><span class="annottext">TimeoutKey -&gt; TimeoutKey -&gt; Bool
+</span><span id="line-50"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679810148"><span id="local-6989586621679810153"><span class="annot"><span class="annottext">TimeoutKey -&gt; TimeoutKey -&gt; Bool
 (TimeoutKey -&gt; TimeoutKey -&gt; Bool)
 -&gt; (TimeoutKey -&gt; TimeoutKey -&gt; Bool) -&gt; Eq TimeoutKey
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -55,7 +55,7 @@ $c== :: TimeoutKey -&gt; TimeoutKey -&gt; Bool
 == :: TimeoutKey -&gt; TimeoutKey -&gt; Bool
 $c/= :: TimeoutKey -&gt; TimeoutKey -&gt; Bool
 /= :: TimeoutKey -&gt; TimeoutKey -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679661320"><span id="local-6989586621679661325"><span id="local-6989586621679661329"><span id="local-6989586621679661333"><span id="local-6989586621679661337"><span id="local-6989586621679661341"><span id="local-6989586621679661345"><span class="annot"><span class="annottext">Eq TimeoutKey
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679810162"><span id="local-6989586621679810167"><span id="local-6989586621679810171"><span id="local-6989586621679810175"><span id="local-6989586621679810179"><span id="local-6989586621679810183"><span id="local-6989586621679810187"><span class="annot"><span class="annottext">Eq TimeoutKey
 Eq TimeoutKey =&gt;
 (TimeoutKey -&gt; TimeoutKey -&gt; Ordering)
 -&gt; (TimeoutKey -&gt; TimeoutKey -&gt; Bool)
@@ -92,5 +92,5 @@ $cmax :: TimeoutKey -&gt; TimeoutKey -&gt; TimeoutKey
 max :: TimeoutKey -&gt; TimeoutKey -&gt; TimeoutKey
 $cmin :: TimeoutKey -&gt; TimeoutKey -&gt; TimeoutKey
 min :: TimeoutKey -&gt; TimeoutKey -&gt; TimeoutKey
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-51"></span></pre></body></html>

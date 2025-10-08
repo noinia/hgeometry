@@ -9,18 +9,18 @@
 </span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplifyWith"><span class="hs-identifier">simplifyWith</span></a></span><span>
 </span><span id="line-10"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-11"></span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Array</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Array</span></span><span>
 </span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
 </span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Graph</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Graph</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">buildG</span></span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-vector-0.2.4-35b277dd8fff524486dc8302cf5c123530ebecd0662a66c97dfadfce0cb0b290/share/doc/html/src/Data.Vector.NonEmpty.html/Data.Vector.NonEmpty.html"><span class="hs-identifier">Data.Vector.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmptyVector</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.html"><span class="hs-identifier">Data.Vector.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmptyVector</span></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.PolyLine</span></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.BFS.html/Hiraffe.BFS.html"><span class="hs-identifier">Hiraffe.BFS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.BFS.html/Hiraffe.BFS.html#bfs"><span class="hs-identifier">bfs</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.html/Hiraffe.Graph.html"><span class="hs-identifier">Hiraffe.Graph</span></a></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Tree.html/Hiraffe.Tree.html"><span class="hs-identifier">Hiraffe.Tree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Tree.html/Hiraffe.Tree.html#pathsTo"><span class="hs-identifier">pathsTo</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.BFS.html"><span class="hs-identifier">Hiraffe.BFS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.BFS.html#bfs"><span class="hs-identifier">bfs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.html"><span class="hs-identifier">Hiraffe.Graph</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Tree.html"><span class="hs-identifier">Hiraffe.Tree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Tree.html#pathsTo"><span class="hs-identifier">pathsTo</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-26"></span><span>
@@ -30,18 +30,18 @@
 </span><span id="line-30"></span><span class="hs-comment">-- dist eps to the original polyline.</span><span>
 </span><span id="line-31"></span><span class="hs-comment">--</span><span>
 </span><span id="line-32"></span><span class="hs-comment">-- Running time: \( O(n^2) \) time.</span><span>
-</span><span id="line-33"></span><span id="local-6989586621679476022"><span id="local-6989586621679476023"><span id="local-6989586621679476025"><span id="local-6989586621679476026"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplify"><span class="hs-identifier hs-type">simplify</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476022"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476023"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-34"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476023"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476025"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476026"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-35"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679476026"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679476026"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-36"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasSquaredEuclideanDistance</span></span><span> </span><span class="annot"><a href="#local-6989586621679476023"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679476893"><span id="local-6989586621679476894"><span id="local-6989586621679476896"><span id="local-6989586621679476897"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplify"><span class="hs-identifier hs-type">simplify</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476893"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476894"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-34"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476894"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476896"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476897"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-35"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679476897"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679476897"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-36"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasSquaredEuclideanDistance</span></span><span> </span><span class="annot"><a href="#local-6989586621679476894"><span class="hs-identifier hs-type">point</span></a></span><span>
 </span><span id="line-37"></span><span>                </span><span class="hs-special">)</span><span>
-</span><span id="line-38"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679476026"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679476022"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476023"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span>
+</span><span id="line-38"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679476897"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679476893"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476894"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span>
 </span><span id="line-39"></span><span id="simplify"><span class="annot"><span class="annottext">simplify :: forall polyLine point (d :: Nat) r.
 (PolyLine_ polyLine point, Point_ point d r, Ord r, Fractional r,
  HasSquaredEuclideanDistance point) =&gt;
 r -&gt; polyLine -&gt; PolyLine point
-</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplify"><span class="hs-identifier hs-var hs-var">simplify</span></a></span></span><span> </span><span id="local-6989586621679476369"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679476369"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplify"><span class="hs-identifier hs-var hs-var">simplify</span></a></span></span><span> </span><span id="local-6989586621679477240"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679477240"><span class="hs-identifier hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-40"></span><span>    </span><span class="annot"><span class="annottext">(ClosedLineSegment point -&gt; PolyLine point -&gt; Bool)
 -&gt; polyLine -&gt; PolyLine point
 forall polyLine point (d :: Nat) r.
@@ -55,12 +55,12 @@ forall polyLine point (d :: Nat) r.
 -&gt; polyLine
 -&gt; PolyLine point
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679476370"><span class="annot"><span class="annottext">ClosedLineSegment point
-</span><a href="#local-6989586621679476370"><span class="hs-identifier hs-var">shortcut</span></a></span></span><span> </span><span id="local-6989586621679476371"><span class="annot"><span class="annottext">PolyLine point
-</span><a href="#local-6989586621679476371"><span class="hs-identifier hs-var">subPoly</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Getting All (PolyLine point) point
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679477241"><span class="annot"><span class="annottext">ClosedLineSegment point
+</span><a href="#local-6989586621679477241"><span class="hs-identifier hs-var">shortcut</span></a></span></span><span> </span><span id="local-6989586621679477242"><span class="annot"><span class="annottext">PolyLine point
+</span><a href="#local-6989586621679477242"><span class="hs-identifier hs-var">subPoly</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Getting All (PolyLine point) point
 -&gt; (point -&gt; Bool) -&gt; PolyLine point -&gt; Bool
 forall s a. Getting All s a -&gt; (a -&gt; Bool) -&gt; s -&gt; Bool
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#allOf"><span class="hs-identifier hs-var">allOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting All (PolyLine point) point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Fold.html#allOf"><span class="hs-identifier hs-var">allOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting All (PolyLine point) point
 (Vertex (PolyLine point) -&gt; Const All (Vertex (PolyLine point)))
 -&gt; PolyLine point -&gt; Const All (PolyLine point)
 forall graph graph'.
@@ -73,15 +73,15 @@ IndexedTraversal1
   (PolyLine point)
   (Vertex (PolyLine point))
   (Vertex (PolyLine point))
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; point -&gt; Bool
-</span><a href="#local-6989586621679476374"><span class="hs-identifier hs-var">closeTo</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
-</span><a href="#local-6989586621679476370"><span class="hs-identifier hs-var">shortcut</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">PolyLine point
-</span><a href="#local-6989586621679476371"><span class="hs-identifier hs-var">subPoly</span></a></span><span>
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; point -&gt; Bool
+</span><a href="#local-6989586621679477245"><span class="hs-identifier hs-var">closeTo</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
+</span><a href="#local-6989586621679477241"><span class="hs-identifier hs-var">shortcut</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">PolyLine point
+</span><a href="#local-6989586621679477242"><span class="hs-identifier hs-var">subPoly</span></a></span><span>
 </span><span id="line-41"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-42"></span><span>    </span><span id="local-6989586621679476374"><span class="annot"><span class="annottext">closeTo :: ClosedLineSegment point -&gt; point -&gt; Bool
-</span><a href="#local-6989586621679476374"><span class="hs-identifier hs-var hs-var">closeTo</span></a></span></span><span> </span><span id="local-6989586621679476375"><span class="annot"><span class="annottext">ClosedLineSegment point
-</span><a href="#local-6989586621679476375"><span class="hs-identifier hs-var">seg</span></a></span></span><span> </span><span id="local-6989586621679476376"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679476376"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; ClosedLineSegment point -&gt; r
+</span><span id="line-42"></span><span>    </span><span id="local-6989586621679477245"><span class="annot"><span class="annottext">closeTo :: ClosedLineSegment point -&gt; point -&gt; Bool
+</span><a href="#local-6989586621679477245"><span class="hs-identifier hs-var hs-var">closeTo</span></a></span></span><span> </span><span id="local-6989586621679477246"><span class="annot"><span class="annottext">ClosedLineSegment point
+</span><a href="#local-6989586621679477246"><span class="hs-identifier hs-var">seg</span></a></span></span><span> </span><span id="local-6989586621679477247"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679477247"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; ClosedLineSegment point -&gt; r
 forall g r (d :: Nat) point.
 (HasSquaredEuclideanDistance g, r ~ NumType g, d ~ Dimension g,
  Num r, Point_ point d r) =&gt;
@@ -92,37 +92,37 @@ forall r (d :: Nat) point.
  Point_ point d r) =&gt;
 point -&gt; ClosedLineSegment point -&gt; r
 </span><span class="hs-identifier hs-var">squaredEuclideanDistTo</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679476376"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
-</span><a href="#local-6989586621679476375"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+</span><a href="#local-6989586621679477247"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
+</span><a href="#local-6989586621679477246"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679476379"><span class="hs-identifier hs-var">epsSq</span></a></span><span>
-</span><span id="line-43"></span><span>    </span><span id="local-6989586621679476379"><span class="annot"><span class="annottext">epsSq :: r
-</span><a href="#local-6989586621679476379"><span class="hs-identifier hs-var hs-var">epsSq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679476369"><span class="hs-identifier hs-var">eps</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+</span><a href="#local-6989586621679477250"><span class="hs-identifier hs-var">epsSq</span></a></span><span>
+</span><span id="line-43"></span><span>    </span><span id="local-6989586621679477250"><span class="annot"><span class="annottext">epsSq :: r
+</span><a href="#local-6989586621679477250"><span class="hs-identifier hs-var hs-var">epsSq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679477240"><span class="hs-identifier hs-var">eps</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679476369"><span class="hs-identifier hs-var">eps</span></a></span><span>
+</span><a href="#local-6989586621679477240"><span class="hs-identifier hs-var">eps</span></a></span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="hs-comment">-- | Given a function that tests if the shortcut is valid, compute a</span><span>
 </span><span id="line-46"></span><span class="hs-comment">-- simplification using the Imai-Iri algorithm.</span><span>
 </span><span id="line-47"></span><span class="hs-comment">--</span><span>
 </span><span id="line-48"></span><span class="hs-comment">-- Running time: \( O(Tn^2 \) time, where \(T\) is the time to</span><span>
 </span><span id="line-49"></span><span class="hs-comment">-- evaluate the predicate.</span><span>
-</span><span id="line-50"></span><span id="local-6989586621679476087"><span id="local-6989586621679476088"><span id="local-6989586621679476089"><span id="local-6989586621679476090"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplifyWith"><span class="hs-identifier hs-type">simplifyWith</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476087"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476088"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-51"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476088"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476089"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476090"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-52"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679476090"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679476090"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679476958"><span id="local-6989586621679476959"><span id="local-6989586621679476960"><span id="local-6989586621679476961"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplifyWith"><span class="hs-identifier hs-type">simplifyWith</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476958"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476959"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-51"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476959"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476960"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476961"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679476961"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679476961"><span class="hs-identifier hs-type">r</span></a></span><span>
 </span><span id="line-53"></span><span>                           </span><span class="hs-special">)</span><span>
-</span><span id="line-54"></span><span>                        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679476088"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476088"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
-</span><span id="line-55"></span><span>                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679476087"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476088"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span>
+</span><span id="line-54"></span><span>                        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679476959"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476959"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679476958"><span class="hs-identifier hs-type">polyLine</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476959"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span>
 </span><span id="line-56"></span><span id="simplifyWith"><span class="annot"><span class="annottext">simplifyWith :: forall polyLine point (d :: Nat) r.
 (PolyLine_ polyLine point, Point_ point d r, Ord r,
  Fractional r) =&gt;
 (ClosedLineSegment point -&gt; PolyLine point -&gt; Bool)
 -&gt; polyLine -&gt; PolyLine point
-</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplifyWith"><span class="hs-identifier hs-var hs-var">simplifyWith</span></a></span></span><span> </span><span id="local-6989586621679476509"><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; PolyLine point -&gt; Bool
-</span><a href="#local-6989586621679476509"><span class="hs-identifier hs-var">isValid</span></a></span></span><span> </span><span id="local-6989586621679476510"><span class="annot"><span class="annottext">polyLine
-</span><a href="#local-6989586621679476510"><span class="hs-identifier hs-var">pl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector point -&gt; PolyLine point
+</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#simplifyWith"><span class="hs-identifier hs-var hs-var">simplifyWith</span></a></span></span><span> </span><span id="local-6989586621679477378"><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; PolyLine point -&gt; Bool
+</span><a href="#local-6989586621679477378"><span class="hs-identifier hs-var">isValid</span></a></span></span><span> </span><span id="local-6989586621679477379"><span class="annot"><span class="annottext">polyLine
+</span><a href="#local-6989586621679477379"><span class="hs-identifier hs-var">pl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector point -&gt; PolyLine point
 forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
 </span><span class="hs-identifier hs-var">PolyLine</span></span><span> </span><span class="annot"><span class="annottext">(NonEmptyVector point -&gt; PolyLine point)
 -&gt; NonEmptyVector point -&gt; PolyLine point
@@ -131,13 +131,13 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall point.
 NonEmpty Int -&gt; NonEmptyVector point -&gt; NonEmptyVector point
 </span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract"><span class="hs-identifier hs-var">extract</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty Int
-</span><a href="#local-6989586621679476513"><span class="hs-identifier hs-var">path</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLine point
-</span><a href="#local-6989586621679476514"><span class="hs-identifier hs-var">pl'</span></a></span><span class="annot"><span class="annottext">PolyLine point
+</span><a href="#local-6989586621679477382"><span class="hs-identifier hs-var">path</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLine point
+</span><a href="#local-6989586621679477383"><span class="hs-identifier hs-var">pl'</span></a></span><span class="annot"><span class="annottext">PolyLine point
 -&gt; Getting
      (NonEmptyVector point) (PolyLine point) (NonEmptyVector point)
 -&gt; NonEmptyVector point
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (NonEmptyVector point) (PolyLine point) (NonEmptyVector point)
 forall {k1} {k2} (f1 :: k1 -&gt; *) (point :: k1) (f' :: k2 -&gt; *)
        (point' :: k2) (p :: * -&gt; * -&gt; *) (f2 :: * -&gt; *).
@@ -146,8 +146,8 @@ p (f1 point) (f2 (f' point'))
 -&gt; p (PolyLineF f1 point) (f2 (PolyLineF f' point'))
 </span><span class="hs-identifier hs-var">_PolyLineF</span></span><span class="hs-special">)</span><span>
 </span><span id="line-57"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-58"></span><span>    </span><span id="local-6989586621679476514"><span class="annot"><span class="annottext">pl' :: PolyLine point
-</span><a href="#local-6989586621679476514"><span class="hs-identifier hs-var hs-var">pl'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; PolyLine point
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679477383"><span class="annot"><span class="annottext">pl' :: PolyLine point
+</span><a href="#local-6989586621679477383"><span class="hs-identifier hs-var hs-var">pl'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; PolyLine point
 forall polyLine point (f :: * -&gt; *).
 (ConstructablePolyLine_ polyLine point, Foldable1 f) =&gt;
 f point -&gt; polyLine
@@ -158,7 +158,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting (NonEmptyDList point) polyLine point
 -&gt; polyLine -&gt; NonEmpty point
 forall a s. Getting (NonEmptyDList a) s a -&gt; s -&gt; NonEmpty a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#toNonEmptyOf"><span class="hs-identifier hs-var">toNonEmptyOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (NonEmptyDList point) polyLine point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Fold.html#toNonEmptyOf"><span class="hs-identifier hs-var">toNonEmptyOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (NonEmptyDList point) polyLine point
 forall (d :: Nat) r r'.
 (Point_ point d r, Point_ point d r', NumType polyLine ~ r,
  NumType polyLine ~ r', Dimension polyLine ~ d,
@@ -172,93 +172,93 @@ Traversal1 polyLine polyLine point point
 </span><span class="hs-identifier hs-var">allPoints</span></span><span> </span><span class="annot"><span class="annottext">(polyLine -&gt; PolyLine point) -&gt; polyLine -&gt; PolyLine point
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">polyLine
-</span><a href="#local-6989586621679476510"><span class="hs-identifier hs-var">pl</span></a></span><span>
-</span><span id="line-59"></span><span>    </span><span id="local-6989586621679476521"><span class="annot"><span class="annottext">g :: Graph
-</span><a href="#local-6989586621679476521"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ClosedLineSegment point -&gt; PolyLine point -&gt; Bool)
+</span><a href="#local-6989586621679477379"><span class="hs-identifier hs-var">pl</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679477390"><span class="annot"><span class="annottext">g :: Graph
+</span><a href="#local-6989586621679477390"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ClosedLineSegment point -&gt; PolyLine point -&gt; Bool)
 -&gt; PolyLine point -&gt; Graph
 forall point.
 (ClosedLineSegment point -&gt; PolyLine point -&gt; Bool)
 -&gt; PolyLine point -&gt; Graph
 </span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#mkGraph"><span class="hs-identifier hs-var">mkGraph</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; PolyLine point -&gt; Bool
-</span><a href="#local-6989586621679476509"><span class="hs-identifier hs-var">isValid</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine point
-</span><a href="#local-6989586621679476514"><span class="hs-identifier hs-var">pl'</span></a></span><span>
-</span><span id="line-60"></span><span>    </span><span id="local-6989586621679476523"><span class="annot"><span class="annottext">spt :: Tree (VertexIx Graph)
-</span><a href="#local-6989586621679476523"><span class="hs-identifier hs-var hs-var">spt</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Graph -&gt; VertexIx Graph -&gt; Tree (VertexIx Graph)
+</span><a href="#local-6989586621679477378"><span class="hs-identifier hs-var">isValid</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine point
+</span><a href="#local-6989586621679477383"><span class="hs-identifier hs-var">pl'</span></a></span><span>
+</span><span id="line-60"></span><span>    </span><span id="local-6989586621679477392"><span class="annot"><span class="annottext">spt :: Tree (VertexIx Graph)
+</span><a href="#local-6989586621679477392"><span class="hs-identifier hs-var hs-var">spt</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Graph -&gt; VertexIx Graph -&gt; Tree (VertexIx Graph)
 forall graph.
 (DiGraph_ graph, Enum (VertexIx graph)) =&gt;
 graph -&gt; VertexIx graph -&gt; Tree (VertexIx graph)
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.BFS.html/Hiraffe.BFS.html#bfs"><span class="hs-identifier hs-var">bfs</span></a></span><span> </span><span class="annot"><span class="annottext">Graph
-</span><a href="#local-6989586621679476521"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.BFS.html#bfs"><span class="hs-identifier hs-var">bfs</span></a></span><span> </span><span class="annot"><span class="annottext">Graph
+</span><a href="#local-6989586621679477390"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 VertexIx Graph
 </span><span class="hs-number">0</span></span><span>
-</span><span id="line-61"></span><span>    </span><span id="local-6989586621679476513"><span class="annot"><span class="annottext">path :: NonEmpty Int
-</span><a href="#local-6989586621679476513"><span class="hs-identifier hs-var hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Tree Int -&gt; [NonEmpty Int]
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679477382"><span class="annot"><span class="annottext">path :: NonEmpty Int
+</span><a href="#local-6989586621679477382"><span class="hs-identifier hs-var hs-var">path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Tree Int -&gt; [NonEmpty Int]
 forall a. Eq a =&gt; a -&gt; Tree a -&gt; [NonEmpty a]
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Tree.html/Hiraffe.Tree.html#pathsTo"><span class="hs-identifier hs-var">pathsTo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLine point -&gt; Int
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Tree.html#pathsTo"><span class="hs-identifier hs-var">pathsTo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLine point -&gt; Int
 forall graph. HasVertices' graph =&gt; graph -&gt; Int
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine point
-</span><a href="#local-6989586621679476514"><span class="hs-identifier hs-var">pl'</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine point
+</span><a href="#local-6989586621679477383"><span class="hs-identifier hs-var">pl'</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Tree Int
 Tree (VertexIx Graph)
-</span><a href="#local-6989586621679476523"><span class="hs-identifier hs-var">spt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679477392"><span class="hs-identifier hs-var">spt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-62"></span><span>             </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; NonEmpty Int
 forall a. HasCallStack =&gt; [Char] -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
 </span><span class="hs-string">&quot;no path found?&quot;</span></span><span>
-</span><span id="line-63"></span><span>             </span><span class="hs-special">(</span><span id="local-6989586621679476526"><span class="annot"><span class="annottext">NonEmpty Int
-</span><a href="#local-6989586621679476526"><span class="hs-identifier hs-var">pth</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[NonEmpty Int]
+</span><span id="line-63"></span><span>             </span><span class="hs-special">(</span><span id="local-6989586621679477395"><span class="annot"><span class="annottext">NonEmpty Int
+</span><a href="#local-6989586621679477395"><span class="hs-identifier hs-var">pth</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[NonEmpty Int]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty Int
-</span><a href="#local-6989586621679476526"><span class="hs-identifier hs-var">pth</span></a></span><span>
+</span><a href="#local-6989586621679477395"><span class="hs-identifier hs-var">pth</span></a></span><span>
 </span><span id="line-64"></span><span>
 </span><span id="line-65"></span><span class="hs-comment">----------------------------------------</span><span>
 </span><span id="line-66"></span><span>
 </span><span id="line-67"></span><span class="annot"><span class="hs-comment">-- | Constructs the shortcut graph</span></span><span>
-</span><span id="line-68"></span><span id="local-6989586621679476162"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#mkGraph"><span class="hs-identifier hs-type">mkGraph</span></a></span><span>                          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679476162"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476162"><span class="hs-identifier hs-type">point</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
-</span><span id="line-69"></span><span>                                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679476162"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Graph</span></span></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679477033"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#mkGraph"><span class="hs-identifier hs-type">mkGraph</span></a></span><span>                          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679477033"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679477033"><span class="hs-identifier hs-type">point</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>                                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679477033"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Graph</span></span></span><span>
 </span><span id="line-70"></span><span id="mkGraph"><span class="annot"><span class="annottext">mkGraph :: forall point.
 (ClosedLineSegment point -&gt; PolyLine point -&gt; Bool)
 -&gt; PolyLine point -&gt; Graph
-</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#mkGraph"><span class="hs-identifier hs-var hs-var">mkGraph</span></a></span></span><span> </span><span id="local-6989586621679476552"><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; PolyLineF NonEmptyVector point -&gt; Bool
-</span><a href="#local-6989586621679476552"><span class="hs-identifier hs-var">isValid</span></a></span></span><span> </span><span id="local-6989586621679476553"><span class="annot"><span class="annottext">pl :: PolyLineF NonEmptyVector point
-</span><a href="#local-6989586621679476553"><span class="hs-identifier hs-var">pl</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span id="local-6989586621679476554"><span class="annot"><span class="annottext">NonEmptyVector point
-</span><a href="#local-6989586621679476554"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#mkGraph"><span class="hs-identifier hs-var hs-var">mkGraph</span></a></span></span><span> </span><span id="local-6989586621679477421"><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; PolyLineF NonEmptyVector point -&gt; Bool
+</span><a href="#local-6989586621679477421"><span class="hs-identifier hs-var">isValid</span></a></span></span><span> </span><span id="local-6989586621679477422"><span class="annot"><span class="annottext">pl :: PolyLineF NonEmptyVector point
+</span><a href="#local-6989586621679477422"><span class="hs-identifier hs-var">pl</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span id="local-6989586621679477423"><span class="annot"><span class="annottext">NonEmptyVector point
+</span><a href="#local-6989586621679477423"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-71"></span><span>    </span><span class="annot"><span class="annottext">Bounds -&gt; [Bounds] -&gt; Graph
 </span><span class="hs-identifier hs-var">buildG</span></span><span> </span><span class="annot"><span class="annottext">Bounds
-</span><a href="#local-6989586621679476555"><span class="hs-identifier hs-var">rng</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476556"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476557"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679476556"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476556"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Bounds -&gt; [Int]
+</span><a href="#local-6989586621679477424"><span class="hs-identifier hs-var">rng</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477425"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477426"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679477425"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477425"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Bounds -&gt; [Int]
 forall a. Ix a =&gt; (a, a) -&gt; [a]
 </span><span class="hs-identifier hs-var">Array.range</span></span><span> </span><span class="annot"><span class="annottext">Bounds
-</span><a href="#local-6989586621679476555"><span class="hs-identifier hs-var">rng</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679476557"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476557"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Bounds -&gt; [Int]
+</span><a href="#local-6989586621679477424"><span class="hs-identifier hs-var">rng</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679477426"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477426"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Bounds -&gt; [Int]
 forall a. Ix a =&gt; (a, a) -&gt; [a]
 </span><span class="hs-identifier hs-var">Array.range</span></span><span> </span><span class="annot"><span class="annottext">Bounds
-</span><a href="#local-6989586621679476555"><span class="hs-identifier hs-var">rng</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476556"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679477424"><span class="hs-identifier hs-var">rng</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477425"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476557"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
-</span><a href="#local-6989586621679476560"><span class="hs-identifier hs-var">isValid'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476556"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476557"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679477426"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679477429"><span class="hs-identifier hs-var">isValid'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477425"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477426"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-72"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>    </span><span id="local-6989586621679476555"><span class="annot"><span class="annottext">rng :: Bounds
-</span><a href="#local-6989586621679476555"><span class="hs-identifier hs-var hs-var">rng</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679477424"><span class="annot"><span class="annottext">rng :: Bounds
+</span><a href="#local-6989586621679477424"><span class="hs-identifier hs-var hs-var">rng</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point -&gt; Int
 forall graph. HasVertices' graph =&gt; graph -&gt; Int
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
-</span><a href="#local-6989586621679476553"><span class="hs-identifier hs-var">pl</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
+</span><a href="#local-6989586621679477422"><span class="hs-identifier hs-var">pl</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
-</span><span id="line-74"></span><span>    </span><span id="local-6989586621679476560"><span class="annot"><span class="annottext">isValid' :: Int -&gt; Int -&gt; Bool
-</span><a href="#local-6989586621679476560"><span class="hs-identifier hs-var hs-var">isValid'</span></a></span></span><span> </span><span id="local-6989586621679476561"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476561"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679476562"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476562"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679476563"><span class="annot"><span class="annottext">subPoly :: PolyLineF NonEmptyVector point
-</span><a href="#local-6989586621679476563"><span class="hs-identifier hs-var hs-var">subPoly</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector point -&gt; PolyLineF NonEmptyVector point
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679477429"><span class="annot"><span class="annottext">isValid' :: Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679477429"><span class="hs-identifier hs-var hs-var">isValid'</span></a></span></span><span> </span><span id="local-6989586621679477430"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477430"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679477431"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477431"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679477432"><span class="annot"><span class="annottext">subPoly :: PolyLineF NonEmptyVector point
+</span><a href="#local-6989586621679477432"><span class="hs-identifier hs-var hs-var">subPoly</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector point -&gt; PolyLineF NonEmptyVector point
 forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
 </span><span class="hs-identifier hs-var">PolyLine</span></span><span> </span><span class="annot"><span class="annottext">(NonEmptyVector point -&gt; PolyLineF NonEmptyVector point)
 -&gt; (Vector point -&gt; NonEmptyVector point)
@@ -267,57 +267,57 @@ forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; NonEmptyVector point
 forall a. Vector a -&gt; NonEmptyVector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-vector-0.2.4-35b277dd8fff524486dc8302cf5c123530ebecd0662a66c97dfadfce0cb0b290/share/doc/html/src/Data.Vector.NonEmpty.html/Data.Vector.NonEmpty.html#unsafeFromVector"><span class="hs-identifier hs-var">NonEmptyVector.unsafeFromVector</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector point -&gt; PolyLineF NonEmptyVector point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.html#unsafeFromVector"><span class="hs-identifier hs-var">NonEmptyVector.unsafeFromVector</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector point -&gt; PolyLineF NonEmptyVector point)
 -&gt; Vector point -&gt; PolyLineF NonEmptyVector point
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-75"></span><span>                                    </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; NonEmptyVector point -&gt; Vector point
 forall a. Int -&gt; Int -&gt; NonEmptyVector a -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-vector-0.2.4-35b277dd8fff524486dc8302cf5c123530ebecd0662a66c97dfadfce0cb0b290/share/doc/html/src/Data.Vector.NonEmpty.html/Data.Vector.NonEmpty.html#slice"><span class="hs-identifier hs-var">NonEmptyVector.slice</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476561"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476562"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.html#slice"><span class="hs-identifier hs-var">NonEmptyVector.slice</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477430"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477431"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476561"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector point
-</span><a href="#local-6989586621679476554"><span class="hs-identifier hs-var">vs</span></a></span><span>
-</span><span id="line-76"></span><span>                       </span><span id="local-6989586621679476567"><span class="annot"><span class="annottext">shortcut :: ClosedLineSegment point
-</span><a href="#local-6989586621679476567"><span class="hs-identifier hs-var hs-var">shortcut</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="#local-6989586621679477430"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector point
+</span><a href="#local-6989586621679477423"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-76"></span><span>                       </span><span id="local-6989586621679477436"><span class="annot"><span class="annottext">shortcut :: ClosedLineSegment point
+</span><a href="#local-6989586621679477436"><span class="hs-identifier hs-var hs-var">shortcut</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
 forall point. point -&gt; point -&gt; ClosedLineSegment point
 </span><span class="hs-identifier hs-var">ClosedLineSegment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
-</span><a href="#local-6989586621679476563"><span class="hs-identifier hs-var">subPoly</span></a></span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
+</span><a href="#local-6989586621679477432"><span class="hs-identifier hs-var">subPoly</span></a></span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
 -&gt; Getting point (PolyLineF NonEmptyVector point) point -&gt; point
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (PolyLineF NonEmptyVector point) point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (PolyLineF NonEmptyVector point) point
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' (PolyLineF NonEmptyVector point) point
 </span><span class="hs-identifier hs-var">start</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
-</span><a href="#local-6989586621679476563"><span class="hs-identifier hs-var">subPoly</span></a></span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
+</span><a href="#local-6989586621679477432"><span class="hs-identifier hs-var">subPoly</span></a></span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
 -&gt; Getting point (PolyLineF NonEmptyVector point) point -&gt; point
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (PolyLineF NonEmptyVector point) point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (PolyLineF NonEmptyVector point) point
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' (PolyLineF NonEmptyVector point) point
 </span><span class="hs-identifier hs-var">end</span></span><span class="hs-special">)</span><span>
 </span><span id="line-77"></span><span>                   </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point -&gt; PolyLineF NonEmptyVector point -&gt; Bool
-</span><a href="#local-6989586621679476552"><span class="hs-identifier hs-var">isValid</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
-</span><a href="#local-6989586621679476567"><span class="hs-identifier hs-var">shortcut</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
-</span><a href="#local-6989586621679476563"><span class="hs-identifier hs-var">subPoly</span></a></span><span>
+</span><a href="#local-6989586621679477421"><span class="hs-identifier hs-var">isValid</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
+</span><a href="#local-6989586621679477436"><span class="hs-identifier hs-var">shortcut</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLineF NonEmptyVector point
+</span><a href="#local-6989586621679477432"><span class="hs-identifier hs-var">subPoly</span></a></span><span>
 </span><span id="line-78"></span><span>
 </span><span id="line-79"></span><span class="hs-comment">-- | Given a non-empty list of indices, and some LSeq, extract the elemnets</span><span>
 </span><span id="line-80"></span><span class="hs-comment">-- on those indices.</span><span>
 </span><span id="line-81"></span><span class="hs-comment">--</span><span>
 </span><span id="line-82"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
-</span><span id="line-83"></span><span id="local-6989586621679476135"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract"><span class="hs-identifier hs-type">extract</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-84"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-vector-0.2.4-35b277dd8fff524486dc8302cf5c123530ebecd0662a66c97dfadfce0cb0b290/share/doc/html/src/Data.Vector.NonEmpty.Internal.html/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector.NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476135"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-vector-0.2.4-35b277dd8fff524486dc8302cf5c123530ebecd0662a66c97dfadfce0cb0b290/share/doc/html/src/Data.Vector.NonEmpty.Internal.html/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector.NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476135"><span class="hs-identifier hs-type">point</span></a></span></span><span>
+</span><span id="line-83"></span><span id="local-6989586621679477006"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract"><span class="hs-identifier hs-type">extract</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-84"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector.NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477006"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector.NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477006"><span class="hs-identifier hs-type">point</span></a></span></span><span>
 </span><span id="line-85"></span><span id="extract"><span class="annot"><span class="annottext">extract :: forall point.
 NonEmpty Int -&gt; NonEmptyVector point -&gt; NonEmptyVector point
-</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract"><span class="hs-identifier hs-var hs-var">extract</span></a></span></span><span> </span><span id="local-6989586621679476575"><span class="annot"><span class="annottext">NonEmpty Int
-</span><a href="#local-6989586621679476575"><span class="hs-identifier hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; NonEmptyVector point
+</span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract"><span class="hs-identifier hs-var hs-var">extract</span></a></span></span><span> </span><span id="local-6989586621679477444"><span class="annot"><span class="annottext">NonEmpty Int
+</span><a href="#local-6989586621679477444"><span class="hs-identifier hs-var">is</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; NonEmptyVector point
 forall a. [a] -&gt; NonEmptyVector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-vector-0.2.4-35b277dd8fff524486dc8302cf5c123530ebecd0662a66c97dfadfce0cb0b290/share/doc/html/src/Data.Vector.NonEmpty.html/Data.Vector.NonEmpty.html#unsafeFromList"><span class="hs-identifier hs-var">NonEmptyVector.unsafeFromList</span></a></span><span> </span><span class="annot"><span class="annottext">([point] -&gt; NonEmptyVector point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.html#unsafeFromList"><span class="hs-identifier hs-var">NonEmptyVector.unsafeFromList</span></a></span><span> </span><span class="annot"><span class="annottext">([point] -&gt; NonEmptyVector point)
 -&gt; (NonEmptyVector point -&gt; [point])
 -&gt; NonEmptyVector point
 -&gt; NonEmptyVector point
@@ -328,7 +328,7 @@ forall a. [Int] -&gt; Int -&gt; [a] -&gt; [a]
 forall a. NonEmpty a -&gt; [a]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty Int
-</span><a href="#local-6989586621679476575"><span class="hs-identifier hs-var">is</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477444"><span class="hs-identifier hs-var">is</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">([point] -&gt; [point])
 -&gt; (NonEmptyVector point -&gt; [point])
 -&gt; NonEmptyVector point
@@ -340,7 +340,7 @@ forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">F.toList</span></span><span>
 </span><span id="line-86"></span><span>
 </span><span id="line-87"></span><span class="annot"><span class="hs-comment">-- | Extract the indices</span></span><span>
-</span><span id="line-88"></span><span id="local-6989586621679476189"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract%27"><span class="hs-identifier hs-type">extract'</span></a></span><span>                                 </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679476189"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679476189"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679477060"><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract%27"><span class="hs-identifier hs-type">extract'</span></a></span><span>                                 </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679477060"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679477060"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
 </span><span id="line-89"></span><span id="extract%27"><span class="annot"><span class="annottext">extract' :: forall a. [Int] -&gt; Int -&gt; [a] -&gt; [a]
 </span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract%27"><span class="hs-identifier hs-var hs-var">extract'</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>         </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">[a]
@@ -349,38 +349,38 @@ forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier">_</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[Int]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>      </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>                 </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-91"></span><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract%27"><span class="hs-identifier hs-var">extract'</span></a></span><span> </span><span id="local-6989586621679476584"><span class="annot"><span class="annottext">is' :: [Int]
-</span><a href="#local-6989586621679476584"><span class="hs-identifier hs-var">is'</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679476585"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476585"><span class="hs-identifier hs-var">i</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679476586"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679476586"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679476587"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476587"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679476588"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679476588"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679476589"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679476589"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476585"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><span id="line-91"></span><span class="annot"><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract%27"><span class="hs-identifier hs-var">extract'</span></a></span><span> </span><span id="local-6989586621679477453"><span class="annot"><span class="annottext">is' :: [Int]
+</span><a href="#local-6989586621679477453"><span class="hs-identifier hs-var">is'</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679477454"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477454"><span class="hs-identifier hs-var">i</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679477455"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679477455"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679477456"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477456"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679477457"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679477457"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679477458"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679477458"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477454"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476587"><span class="hs-identifier hs-var">j</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679476588"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679477456"><span class="hs-identifier hs-var">j</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679477457"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int -&gt; [a] -&gt; [a]
 forall a. [Int] -&gt; Int -&gt; [a] -&gt; [a]
 </span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract%27"><span class="hs-identifier hs-var">extract'</span></a></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679476586"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476587"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679477455"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477456"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679476589"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679477458"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-92"></span><span>                             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int -&gt; [a] -&gt; [a]
 forall a. [Int] -&gt; Int -&gt; [a] -&gt; [a]
 </span><a href="HGeometry.PolyLine.Simplification.ImaiIri.html#extract%27"><span class="hs-identifier hs-var">extract'</span></a></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679476584"><span class="hs-identifier hs-var">is'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679476587"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679477453"><span class="hs-identifier hs-var">is'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679477456"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679476589"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679477458"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-93"></span><span>
 </span><span id="line-94"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-95"></span><span>

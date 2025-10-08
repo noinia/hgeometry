@@ -7,7 +7,7 @@
 --   This library provides a basic set of operations for manipulating files
 --   and directories in a portable way.
 @package directory
-@version 1.3.8.3
+@version 1.3.9.0
 
 
 -- | Internal modules are always subject to change from version to version.
@@ -15,6 +15,77 @@
 --   shown in the Hackage documentation may differ from what is actually
 --   available on your system.
 module System.Directory.Internal
+andM :: Monad m => m Bool -> m Bool -> m Bool
+
+-- | Copy data from one handle to another until end of file.
+copyHandleData :: Handle -> Handle -> IO ()
+dropSpecialDotDirs :: [OsPath] -> [OsPath]
+emptyListT :: forall (m :: Type -> Type) a. Applicative m => ListT m a
+
+-- | Convert empty paths to the current directory, otherwise leave it
+--   unchanged.
+emptyToCurDir :: OsPath -> OsPath
+
+-- | Given a list of path segments, expand <tt>.</tt> and <tt>..</tt>. The
+--   path segments must not contain path separators.
+expandDots :: [OsPath] -> [OsPath]
+
+-- | Check whether the given <a>FileType</a> is considered a directory by
+--   the operating system. This affects the choice of certain functions
+--   e.g. <a>removeDirectory</a> vs <a>removeFile</a>.
+fileTypeIsDirectory :: FileType -> Bool
+
+-- | Return whether the given <a>FileType</a> is a link.
+fileTypeIsLink :: FileType -> Bool
+
+-- | Attempt to perform the given action, silencing any IO exception thrown
+--   by it.
+ignoreIOExceptions :: IO () -> IO ()
+ioeAddLocation :: IOError -> String -> IOError
+ioeSetOsPath :: IOError -> OsPath -> IOError
+isNoFollow :: WhetherFollow -> Bool
+liftJoinListT :: Monad m => m (ListT m a) -> ListT m a
+listTHead :: Functor m => ListT m a -> m (Maybe a)
+listTToList :: Monad m => ListT m a -> m [a]
+listToListT :: forall (m :: Type -> Type) a. Applicative m => [a] -> ListT m a
+maybeToListT :: Applicative m => m (Maybe a) -> ListT m a
+
+-- | Convert to the right kind of slashes.
+normalisePathSeps :: OsPath -> OsPath
+
+-- | Remove redundant trailing slashes and pick the right kind of slash.
+normaliseTrailingSep :: OsPath -> OsPath
+
+-- | Fallibly converts String to OsString. Only intended to be used on
+--   literals.
+os :: String -> OsString
+rightOrError :: Exception e => Either e a -> a
+sequenceWithIOErrors_ :: [IO ()] -> IO ()
+
+-- | Similar to <a>normalise</a> but empty paths stay empty.
+simplifyPosix :: OsPath -> OsPath
+
+-- | Similar to <a>normalise</a> but:
+--   
+--   <ul>
+--   <li>empty paths stay empty,</li>
+--   <li>parent dirs (<tt>..</tt>) are expanded, and</li>
+--   <li>paths starting with <tt>\\?\</tt> are preserved.</li>
+--   </ul>
+--   
+--   The goal is to preserve the meaning of paths better than
+--   <a>normalise</a>.
+simplifyWindows :: OsPath -> OsPath
+
+-- | Fallibly converts OsString to String. Only intended to be used on
+--   literals.
+so :: OsString -> String
+specializeErrorString :: String -> (IOError -> Bool) -> IO a -> IO a
+
+-- | Similar to <a>try</a> but only catches a specify kind of
+--   <a>IOError</a> as specified by the predicate.
+tryIOErrorType :: (IOError -> Bool) -> IO a -> IO (Either IOError a)
+withBinaryFile :: OsPath -> IOMode -> (Handle -> IO r) -> IO r
 data FileType
 File :: FileType
 
@@ -25,26 +96,19 @@ Directory :: FileType
 -- | Windows only: directory link
 DirectoryLink :: FileType
 
--- | Fallibly converts String to OsString. Only intended to be used on
---   literals.
-os :: String -> OsString
-
--- | Newtype representing short operating system specific strings.
---   
---   Internally this is either <a>WindowsString</a> or <a>PosixString</a>,
---   depending on the platform. Both use unpinned <tt>ShortByteString</tt>
---   for efficiency.
---   
---   The constructor is only exported via
---   <a>System.OsString.Internal.Types</a>, since dealing with the
---   internals isn't generally recommended, but supported in case you need
---   to write platform specific code.
-data OsString
-
--- | Type representing filenames/pathnames.
---   
---   This type doesn't add any guarantees over <a>OsString</a>.
-type OsPath = OsString
+-- | A generator with side-effects.
+newtype ListT (m :: Type -> Type) a
+ListT :: m (Maybe (a, ListT m a)) -> ListT (m :: Type -> Type) a
+[unListT] :: ListT (m :: Type -> Type) a -> m (Maybe (a, ListT m a))
+data Permissions
+Permissions :: Bool -> Bool -> Bool -> Bool -> Permissions
+[readable] :: Permissions -> Bool
+[writable] :: Permissions -> Bool
+[executable] :: Permissions -> Bool
+[searchable] :: Permissions -> Bool
+data WhetherFollow
+NoFollow :: WhetherFollow
+FollowLinks :: WhetherFollow
 
 -- | Special directories for storing user-specific application data,
 --   configuration, and cache files, as specified by the <a>XDG Base
@@ -107,105 +171,81 @@ XdgDataDirs :: XdgDirectoryList
 --   <tt>/etc/xdg</tt>. On Windows, the default is <tt>%PROGRAMDATA%</tt>
 --   or <tt>%ALLUSERSPROFILE%</tt> (e.g. <tt>C:/ProgramData</tt>).
 XdgConfigDirs :: XdgDirectoryList
-data Permissions
-Permissions :: Bool -> Bool -> Bool -> Bool -> Permissions
-[readable] :: Permissions -> Bool
-[writable] :: Permissions -> Bool
-[executable] :: Permissions -> Bool
-[searchable] :: Permissions -> Bool
 
--- | A generator with side-effects.
-newtype ListT (m :: Type -> Type) a
-ListT :: m (Maybe (a, ListT m a)) -> ListT (m :: Type -> Type) a
-[unListT] :: ListT (m :: Type -> Type) a -> m (Maybe (a, ListT m a))
-emptyListT :: forall (m :: Type -> Type) a. Applicative m => ListT m a
-maybeToListT :: Applicative m => m (Maybe a) -> ListT m a
-listToListT :: forall (m :: Type -> Type) a. Applicative m => [a] -> ListT m a
-liftJoinListT :: Monad m => m (ListT m a) -> ListT m a
-listTHead :: Functor m => ListT m a -> m (Maybe a)
-listTToList :: Monad m => ListT m a -> m [a]
-andM :: Monad m => m Bool -> m Bool -> m Bool
-sequenceWithIOErrors_ :: [IO ()] -> IO ()
-
--- | Similar to <a>try</a> but only catches a specify kind of
---   <a>IOError</a> as specified by the predicate.
-tryIOErrorType :: (IOError -> Bool) -> IO a -> IO (Either IOError a)
-
--- | Attempt to perform the given action, silencing any IO exception thrown
---   by it.
-ignoreIOExceptions :: IO () -> IO ()
-specializeErrorString :: String -> (IOError -> Bool) -> IO a -> IO a
-ioeAddLocation :: IOError -> String -> IOError
-rightOrError :: Exception e => Either e a -> a
-
--- | Fallibly converts OsString to String. Only intended to be used on
---   literals.
-so :: OsString -> String
-ioeSetOsPath :: IOError -> OsPath -> IOError
-
--- | Given a list of path segments, expand <tt>.</tt> and <tt>..</tt>. The
---   path segments must not contain path separators.
-expandDots :: [OsPath] -> [OsPath]
-
--- | Convert to the right kind of slashes.
-normalisePathSeps :: OsPath -> OsPath
-
--- | Remove redundant trailing slashes and pick the right kind of slash.
-normaliseTrailingSep :: OsPath -> OsPath
-
--- | Convert empty paths to the current directory, otherwise leave it
---   unchanged.
-emptyToCurDir :: OsPath -> OsPath
-
--- | Similar to <a>normalise</a> but empty paths stay empty.
-simplifyPosix :: OsPath -> OsPath
-
--- | Similar to <a>normalise</a> but:
+-- | Type representing filenames/pathnames.
 --   
---   <ul>
---   <li>empty paths stay empty,</li>
---   <li>parent dirs (<tt>..</tt>) are expanded, and</li>
---   <li>paths starting with <tt>\\?\</tt> are preserved.</li>
---   </ul>
+--   This type doesn't add any guarantees over <a>OsString</a>.
+type OsPath = OsString
+
+-- | Newtype representing short operating system specific strings.
 --   
---   The goal is to preserve the meaning of paths better than
---   <a>normalise</a>.
-simplifyWindows :: OsPath -> OsPath
-
--- | Check whether the given <a>FileType</a> is considered a directory by
---   the operating system. This affects the choice of certain functions
---   e.g. <a>removeDirectory</a> vs <a>removeFile</a>.
-fileTypeIsDirectory :: FileType -> Bool
-
--- | Return whether the given <a>FileType</a> is a link.
-fileTypeIsLink :: FileType -> Bool
-withBinaryHandle :: IO Handle -> (Handle -> IO r) -> IO r
-
--- | Copy data from one handle to another until end of file.
-copyHandleData :: Handle -> Handle -> IO ()
-setFileMode :: OsPath -> Mode -> IO ()
-createSymbolicLink :: Bool -> OsPath -> OsPath -> IO ()
-readSymbolicLink :: OsPath -> IO OsPath
-createDirectoryInternal :: OsPath -> IO ()
-removePathInternal :: Bool -> OsPath -> IO ()
-renamePathInternal :: OsPath -> OsPath -> IO ()
-filesAlwaysRemovable :: Bool
-
--- | On POSIX, equivalent to <a>simplifyPosix</a>.
-simplify :: OsPath -> OsPath
-c_free :: Ptr a -> IO ()
+--   Internally this is either <a>WindowsString</a> or <a>PosixString</a>,
+--   depending on the platform. Both use unpinned <tt>ShortByteString</tt>
+--   for efficiency.
+--   
+--   The constructor is only exported via
+--   <a>System.OsString.Internal.Types</a>, since dealing with the
+--   internals isn't generally recommended, but supported in case you need
+--   to write platform specific code.
+data OsString
+accessTimeFromMetadata :: Metadata -> UTCTime
+allWriteMode :: FileMode
+atWhetherFollow :: WhetherFollow -> CInt
+c_AT_FDCWD :: Fd
+c_AT_SYMLINK_NOFOLLOW :: CInt
 c_PATH_MAX :: Maybe Int
+c_fchmodat :: Fd -> CString -> FileMode -> CInt -> IO CInt
+c_free :: Ptr a -> IO ()
+c_fstatat :: Fd -> CString -> Ptr CStat -> CInt -> IO CInt
 c_realpath :: CString -> CString -> IO CString
-withRealpath :: CString -> (CString -> IO a) -> IO a
-realPath :: OsPath -> IO OsPath
+c_unlinkat :: Fd -> CString -> CInt -> IO CInt
 canonicalizePathSimplify :: OsPath -> IO OsPath
+closeRaw :: RawHandle -> IO ()
+
+-- | Truncate the destination file and then copy the contents of the source
+--   file to the destination file. If the destination file already exists,
+--   its attributes shall remain unchanged. Otherwise, its attributes are
+--   reset to the defaults.
+copyFileContents :: OsPath -> OsPath -> IO ()
+copyFileWithMetadataInternal :: (Metadata -> OsPath -> IO ()) -> (Metadata -> OsPath -> IO ()) -> OsPath -> OsPath -> IO ()
+copyGroupFromStatus :: FileStatus -> OsPath -> IO ()
+copyOwnerFromStatus :: FileStatus -> OsPath -> IO ()
+createDirectoryInternal :: OsPath -> IO ()
+createHardLink :: OsPath -> OsPath -> IO ()
+createSymbolicLink :: Bool -> OsPath -> OsPath -> IO ()
+defaultOpenFlags :: OpenFileFlags
+exeExtensionInternal :: OsString
+fileSizeFromMetadata :: Metadata -> Integer
+fileTypeFromMetadata :: Metadata -> FileType
+filesAlwaysRemovable :: Bool
 findExecutablesLazyInternal :: ([OsPath] -> OsString -> ListT IO OsPath) -> OsString -> ListT IO OsPath
+getAccessPermissions :: OsPath -> IO Permissions
+getAppUserDataDirectoryInternal :: OsPath -> IO OsPath
+getCurrentDirectoryInternal :: IO OsPath
+getDirectoryContentsInternal :: OsPath -> IO [OsPath]
+getEnvOs :: OsString -> IO OsString
+getFileMetadata :: OsPath -> IO Metadata
+
+-- | $HOME is preferred, because the user has control over it. However,
+--   POSIX doesn't define it as a mandatory variable, so fall back to
+--   <tt>getpwuid_r</tt>.
+getHomeDirectoryInternal :: IO OsPath
+getMetadataAt :: WhetherFollow -> Maybe RawHandle -> OsPath -> IO Metadata
 
 -- | Get the contents of the <tt>PATH</tt> environment variable.
 getPath :: IO [OsPath]
-exeExtensionInternal :: OsString
-getDirectoryContentsInternal :: OsPath -> IO [OsPath]
-getCurrentDirectoryInternal :: IO OsPath
+getSymbolicLinkMetadata :: OsPath -> IO Metadata
+getTemporaryDirectoryInternal :: IO OsPath
+getUserDocumentsDirectoryInternal :: IO OsPath
+getXdgDirectoryFallback :: IO OsPath -> XdgDirectory -> IO OsPath
+getXdgDirectoryListFallback :: XdgDirectoryList -> IO [OsPath]
+hasWriteMode :: Mode -> Bool
+linkToDirectoryIsDirectory :: Bool
+lookupEnvOs :: OsString -> IO (Maybe OsString)
+modeFromMetadata :: Metadata -> Mode
+modificationTimeFromMetadata :: Metadata -> UTCTime
+openDirFromFd :: Fd -> IO DirStream
+openRaw :: WhetherFollow -> Maybe RawHandle -> OsPath -> IO RawHandle
 
 -- | Convert a path into an absolute path. If the given path is relative,
 --   the current directory is prepended and the path may or may not be
@@ -218,50 +258,29 @@ getCurrentDirectoryInternal :: IO OsPath
 --   
 --   Empty paths are treated as the current directory.
 prependCurrentDirectory :: OsPath -> IO OsPath
-setCurrentDirectoryInternal :: OsPath -> IO ()
-linkToDirectoryIsDirectory :: Bool
-createHardLink :: OsPath -> OsPath -> IO ()
-type Metadata = FileStatus
-getSymbolicLinkMetadata :: OsPath -> IO Metadata
-getFileMetadata :: OsPath -> IO Metadata
-fileTypeFromMetadata :: Metadata -> FileType
-fileSizeFromMetadata :: Metadata -> Integer
-accessTimeFromMetadata :: Metadata -> UTCTime
-modificationTimeFromMetadata :: Metadata -> UTCTime
-type Mode = FileMode
-modeFromMetadata :: Metadata -> Mode
-allWriteMode :: FileMode
-hasWriteMode :: Mode -> Bool
-setWriteMode :: Bool -> Mode -> Mode
-setFilePermissions :: OsPath -> Mode -> IO ()
-getAccessPermissions :: OsPath -> IO Permissions
+readDirStreamToEnd :: DirStream -> IO [OsPath]
+readDirToEnd :: RawHandle -> IO [OsPath]
+readSymbolicLink :: OsPath -> IO OsPath
+realPath :: OsPath -> IO OsPath
+removePathAt :: FileType -> Maybe RawHandle -> OsPath -> IO ()
+removePathInternal :: Bool -> OsPath -> IO ()
+renamePathInternal :: OsPath -> OsPath -> IO ()
 setAccessPermissions :: OsPath -> Permissions -> IO ()
-copyOwnerFromStatus :: FileStatus -> OsPath -> IO ()
-copyGroupFromStatus :: FileStatus -> OsPath -> IO ()
-tryCopyOwnerAndGroupFromStatus :: FileStatus -> OsPath -> IO ()
-defaultFlags :: OpenFileFlags
-openFileForRead :: OsPath -> IO Handle
-openFileForWrite :: OsPath -> IO Handle
-
--- | Truncate the destination file and then copy the contents of the source
---   file to the destination file. If the destination file already exists,
---   its attributes shall remain unchanged. Otherwise, its attributes are
---   reset to the defaults.
-copyFileContents :: OsPath -> OsPath -> IO ()
-copyFileWithMetadataInternal :: (Metadata -> OsPath -> IO ()) -> (Metadata -> OsPath -> IO ()) -> OsPath -> OsPath -> IO ()
+setCurrentDirectoryInternal :: OsPath -> IO ()
+setFileMode :: OsPath -> Mode -> IO ()
+setFilePermissions :: OsPath -> Mode -> IO ()
+setForceRemoveMode :: Mode -> Mode
+setModeAt :: WhetherFollow -> Maybe RawHandle -> OsPath -> Mode -> IO ()
 setTimes :: OsPath -> (Maybe POSIXTime, Maybe POSIXTime) -> IO ()
-lookupEnvOs :: OsString -> IO (Maybe OsString)
-getEnvOs :: OsString -> IO OsString
+setWriteMode :: Bool -> Mode -> Mode
 
--- | $HOME is preferred, because the user has control over it. However,
---   POSIX doesn't define it as a mandatory variable, so fall back to
---   <tt>getpwuid_r</tt>.
-getHomeDirectoryInternal :: IO OsPath
-getXdgDirectoryFallback :: IO OsPath -> XdgDirectory -> IO OsPath
-getXdgDirectoryListFallback :: XdgDirectoryList -> IO [OsPath]
-getAppUserDataDirectoryInternal :: OsPath -> IO OsPath
-getUserDocumentsDirectoryInternal :: IO OsPath
-getTemporaryDirectoryInternal :: IO OsPath
+-- | On POSIX, equivalent to <a>simplifyPosix</a>.
+simplify :: OsPath -> OsPath
+tryCopyOwnerAndGroupFromStatus :: FileStatus -> OsPath -> IO ()
+withRealpath :: CString -> (CString -> IO a) -> IO a
+type Metadata = FileStatus
+type Mode = FileMode
+type RawHandle = Fd
 
 
 -- | System-independent interface to directory manipulation.

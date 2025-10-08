@@ -5,11 +5,11 @@
 </span><span id="line-5"></span><span>
 </span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.html"><span class="hs-identifier">GHC.Prelude</span></a></span><span>
 </span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
 </span><span id="line-9"></span><span>
 </span><span id="line-10"></span><span class="hs-keyword">newtype</span><span> </span><span id="LlvmVersion"><span class="annot"><a href="GHC.CmmToLlvm.Version.Type.html#LlvmVersion"><span class="hs-identifier hs-var">LlvmVersion</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LlvmVersion"><span class="annot"><a href="GHC.CmmToLlvm.Version.Type.html#LlvmVersion"><span class="hs-identifier hs-var">LlvmVersion</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="llvmVersionNE"><span class="annot"><span class="annottext">LlvmVersion -&gt; NonEmpty Int
 </span><a href="GHC.CmmToLlvm.Version.Type.html#llvmVersionNE"><span class="hs-identifier hs-var hs-var">llvmVersionNE</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NE.NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-11"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682326919"><span id="local-6989586621682326925"><span class="annot"><span class="annottext">LlvmVersion -&gt; LlvmVersion -&gt; Bool
+</span><span id="line-11"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682464542"><span id="local-6989586621682464548"><span class="annot"><span class="annottext">LlvmVersion -&gt; LlvmVersion -&gt; Bool
 (LlvmVersion -&gt; LlvmVersion -&gt; Bool)
 -&gt; (LlvmVersion -&gt; LlvmVersion -&gt; Bool) -&gt; Eq LlvmVersion
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -17,7 +17,7 @@ $c== :: LlvmVersion -&gt; LlvmVersion -&gt; Bool
 == :: LlvmVersion -&gt; LlvmVersion -&gt; Bool
 $c/= :: LlvmVersion -&gt; LlvmVersion -&gt; Bool
 /= :: LlvmVersion -&gt; LlvmVersion -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682326936"><span id="local-6989586621682326942"><span id="local-6989586621682326947"><span id="local-6989586621682326952"><span id="local-6989586621682326957"><span id="local-6989586621682326962"><span id="local-6989586621682326967"><span class="annot"><span class="annottext">Eq LlvmVersion
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682464559"><span id="local-6989586621682464565"><span id="local-6989586621682464570"><span id="local-6989586621682464575"><span id="local-6989586621682464580"><span id="local-6989586621682464585"><span id="local-6989586621682464590"><span class="annot"><span class="annottext">Eq LlvmVersion
 Eq LlvmVersion =&gt;
 (LlvmVersion -&gt; LlvmVersion -&gt; Ordering)
 -&gt; (LlvmVersion -&gt; LlvmVersion -&gt; Bool)

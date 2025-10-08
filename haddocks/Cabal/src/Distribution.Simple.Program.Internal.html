@@ -11,9 +11,9 @@
 </span><span id="line-11"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Internal.html#stripExtractVersion"><span class="hs-identifier">stripExtractVersion</span></a></span><span>
 </span><span id="line-12"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-13"></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Generic.html/Distribution.Utils.Generic.html"><span class="hs-identifier">Distribution.Utils.Generic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Generic.html/Distribution.Utils.Generic.html#safeTail"><span class="hs-identifier">safeTail</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Generic.html"><span class="hs-identifier">Distribution.Utils.Generic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Generic.html#safeTail"><span class="hs-identifier">safeTail</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span><span class="hs-comment">-- | Extract the version number from the output of 'strip --version'.</span><span>
 </span><span id="line-19"></span><span class="hs-comment">--</span><span>
@@ -23,29 +23,29 @@
 </span><span id="line-23"></span><span class="hs-comment">-- 'strip' doesn't appear to have a version flag.</span><span>
 </span><span id="line-24"></span><span class="annot"><a href="Distribution.Simple.Program.Internal.html#stripExtractVersion"><span class="hs-identifier hs-type">stripExtractVersion</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-25"></span><span id="stripExtractVersion"><span class="annot"><span class="annottext">stripExtractVersion :: String -&gt; String
-</span><a href="Distribution.Simple.Program.Internal.html#stripExtractVersion"><span class="hs-identifier hs-var hs-var">stripExtractVersion</span></a></span></span><span> </span><span id="local-6989586621679445718"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445718"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679445719"><span class="annot"><span class="annottext">numeric :: String -&gt; Bool
-</span><a href="#local-6989586621679445719"><span class="hs-identifier hs-var hs-var">numeric</span></a></span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="Distribution.Simple.Program.Internal.html#stripExtractVersion"><span class="hs-identifier hs-var hs-var">stripExtractVersion</span></a></span></span><span> </span><span id="local-6989586621679499371"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499371"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679499372"><span class="annot"><span class="annottext">numeric :: String -&gt; Bool
+</span><a href="#local-6989586621679499372"><span class="hs-identifier hs-var hs-var">numeric</span></a></span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-27"></span><span>      </span><span class="annot"><a href="#local-6989586621679445719"><span class="hs-identifier hs-var">numeric</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679445720"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679445720"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-27"></span><span>      </span><span class="annot"><a href="#local-6989586621679499372"><span class="hs-identifier hs-var">numeric</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499373"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679499373"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isDigit</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679445720"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679499373"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-28"></span><span>
 </span><span id="line-29"></span><span>      </span><span class="hs-comment">-- Filter out everything in parentheses.</span><span>
-</span><span id="line-30"></span><span>      </span><span class="annot"><a href="#local-6989586621679445722"><span class="hs-identifier hs-type">filterPar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
-</span><span id="line-31"></span><span>      </span><span id="local-6989586621679445722"><span class="annot"><span class="annottext">filterPar' :: Int -&gt; [String] -&gt; [String]
-</span><a href="#local-6989586621679445722"><span class="hs-identifier hs-var hs-var">filterPar'</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-30"></span><span>      </span><span class="annot"><a href="#local-6989586621679499375"><span class="hs-identifier hs-type">filterPar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-31"></span><span>      </span><span id="local-6989586621679499375"><span class="annot"><span class="annottext">filterPar' :: Int -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679499375"><span class="hs-identifier hs-var hs-var">filterPar'</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-32"></span><span>      </span><span class="annot"><a href="#local-6989586621679445722"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span id="local-6989586621679445723"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679445724"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445724"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679445725"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679445725"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>      </span><span class="annot"><a href="#local-6989586621679499375"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span id="local-6989586621679499376"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499377"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499377"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679499378"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679499378"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-33"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
@@ -53,20 +53,20 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-string">&quot;(&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
 forall a. Eq a =&gt; [a] -&gt; [a] -&gt; Bool
 </span><span class="hs-operator hs-var">`isPrefixOf`</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445724"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
-</span><a href="#local-6989586621679445722"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679499377"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679499375"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; String
 forall a. [a] -&gt; [a]
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Generic.html/Distribution.Utils.Generic.html#safeTail"><span class="hs-identifier hs-var">safeTail</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445724"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Generic.html#safeTail"><span class="hs-identifier hs-var">safeTail</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499377"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679445725"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679499378"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-34"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
@@ -74,33 +74,33 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-string">&quot;)&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
 forall a. Eq a =&gt; [a] -&gt; [a] -&gt; Bool
 </span><span class="hs-operator hs-var">`isSuffixOf`</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445724"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
-</span><a href="#local-6989586621679445722"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679499377"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679499375"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679445725"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679499378"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-35"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
-</span><a href="#local-6989586621679445722"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679445725"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679499375"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679499378"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-36"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445724"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679499377"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
-</span><a href="#local-6989586621679445722"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679445723"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679445725"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679499375"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679499376"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679499378"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-37"></span><span>
-</span><span id="line-38"></span><span>      </span><span id="local-6989586621679445731"><span class="annot"><span class="annottext">filterPar :: [String] -&gt; [String]
-</span><a href="#local-6989586621679445731"><span class="hs-identifier hs-var hs-var">filterPar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
-</span><a href="#local-6989586621679445722"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-38"></span><span>      </span><span id="local-6989586621679499384"><span class="annot"><span class="annottext">filterPar :: [String] -&gt; [String]
+</span><a href="#local-6989586621679499384"><span class="hs-identifier hs-var hs-var">filterPar</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679499375"><span class="hs-identifier hs-var">filterPar'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span>
 </span><span id="line-39"></span><span>   </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(String -&gt; Bool) -&gt; [String] -&gt; [String]
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
@@ -108,48 +108,48 @@ forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; (String -&gt; Bool) -&gt; String -&gt; Bool
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
-</span><a href="#local-6989586621679445719"><span class="hs-identifier hs-var">numeric</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[String] -&gt; [String]
-</span><a href="#local-6989586621679445731"><span class="hs-identifier hs-var">filterPar</span></a></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [String])
+</span><a href="#local-6989586621679499372"><span class="hs-identifier hs-var">numeric</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[String] -&gt; [String]
+</span><a href="#local-6989586621679499384"><span class="hs-identifier hs-var">filterPar</span></a></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [String])
 -&gt; (String -&gt; [String]) -&gt; String -&gt; [String]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
 </span><span class="hs-identifier hs-var">words</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; [String]) -&gt; String -&gt; [String]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445718"><span class="hs-identifier hs-var">str</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-40"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679445736"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445736"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679499371"><span class="hs-identifier hs-var">str</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-40"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679499389"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499389"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">[String]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-41"></span><span>          </span><span class="hs-comment">-- take the first two version components</span><span>
-</span><span id="line-42"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679445738"><span class="annot"><span class="annottext">isDot :: Char -&gt; Bool
-</span><a href="#local-6989586621679445738"><span class="hs-identifier hs-var hs-var">isDot</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><span id="line-42"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679499391"><span class="annot"><span class="annottext">isDot :: Char -&gt; Bool
+</span><a href="#local-6989586621679499391"><span class="hs-identifier hs-var hs-var">isDot</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'.'</span></span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>              </span><span class="hs-special">(</span><span id="local-6989586621679445739"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445739"><span class="hs-identifier hs-var">major</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679445740"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445740"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
+</span><span id="line-43"></span><span>              </span><span class="hs-special">(</span><span id="local-6989586621679499392"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499392"><span class="hs-identifier hs-var">major</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499393"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499393"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">break</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
-</span><a href="#local-6989586621679445738"><span class="hs-identifier hs-var">isDot</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445736"><span class="hs-identifier hs-var">ver</span></a></span><span>
-</span><span id="line-44"></span><span>              </span><span id="local-6989586621679445742"><span class="annot"><span class="annottext">minor :: String
-</span><a href="#local-6989586621679445742"><span class="hs-identifier hs-var hs-var">minor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; String
+</span><a href="#local-6989586621679499391"><span class="hs-identifier hs-var">isDot</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499389"><span class="hs-identifier hs-var">ver</span></a></span><span>
+</span><span id="line-44"></span><span>              </span><span id="local-6989586621679499395"><span class="annot"><span class="annottext">minor :: String
+</span><a href="#local-6989586621679499395"><span class="hs-identifier hs-var hs-var">minor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; String
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">takeWhile</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><span class="hs-identifier hs-var">isDigit</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; String
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">dropWhile</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
-</span><a href="#local-6989586621679445738"><span class="hs-identifier hs-var">isDot</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445740"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679499391"><span class="hs-identifier hs-var">isDot</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679499393"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-45"></span><span>           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445739"><span class="hs-identifier hs-var">major</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+</span><a href="#local-6989586621679499392"><span class="hs-identifier hs-var">major</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;.&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679445742"><span class="hs-identifier hs-var">minor</span></a></span><span>
+</span><a href="#local-6989586621679499395"><span class="hs-identifier hs-var">minor</span></a></span><span>
 </span><span id="line-46"></span><span>        </span><span class="annot"><span class="annottext">[String]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE PatternSynonyms, DeriveFunctor #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE PatternSynonyms, DeriveFunctor, DerivingVia #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE UnboxedTuples #-}</span><span>
 </span><span id="line-4"></span><span>
@@ -42,33 +42,33 @@
 </span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html"><span class="hs-identifier">GHC.CmmToAsm.Reg.Linear.StackMap</span></a></span><span>
 </span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html"><span class="hs-identifier">GHC.CmmToAsm.Reg.Linear.Base</span></a></span><span>
 </span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Liveness.html"><span class="hs-identifier">GHC.CmmToAsm.Reg.Liveness</span></a></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Instr.html"><span class="hs-identifier">GHC.CmmToAsm.Instr</span></a></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Config.html"><span class="hs-identifier">GHC.CmmToAsm.Config</span></a></span><span>
-</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html"><span class="hs-identifier">GHC.Platform.Reg</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Format.html"><span class="hs-identifier">GHC.CmmToAsm.Format</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Instr.html"><span class="hs-identifier">GHC.CmmToAsm.Instr</span></a></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Config.html"><span class="hs-identifier">GHC.CmmToAsm.Config</span></a></span><span>
 </span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Cmm.BlockId.html"><span class="hs-identifier">GHC.Cmm.BlockId</span></a></span><span>
 </span><span id="line-49"></span><span>
 </span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.html"><span class="hs-identifier">GHC.Platform</span></a></span><span>
 </span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html"><span class="hs-identifier">GHC.Types.Unique</span></a></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Supply.html"><span class="hs-identifier">GHC.Types.Unique.Supply</span></a></span><span>
-</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//GHC.Exts.html/GHC.Exts.html"><span class="hs-identifier">GHC.Exts</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">oneShot</span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.Unique.DSM.html"><span class="hs-identifier">GHC.Types.Unique.DSM</span></a></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/GHC.Exts.html"><span class="hs-identifier">GHC.Exts</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">oneShot</span></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.html/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Monad.State.Strict.html"><span class="hs-identifier">GHC.Utils.Monad.State.Strict</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Strict</span></span><span>
 </span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span class="hs-keyword">type</span><span> </span><span id="RA_Result"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span></span><span> </span><span id="local-6989586621682630209"><span class="annot"><a href="#local-6989586621682630209"><span class="hs-identifier hs-type">freeRegs</span></a></span></span><span> </span><span id="local-6989586621682630210"><span class="annot"><a href="#local-6989586621682630210"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630209"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682630210"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">#)</span><span>
+</span><span id="line-57"></span><span class="hs-keyword">type</span><span> </span><span id="RA_Result"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span></span><span> </span><span id="local-6989586621682823813"><span class="annot"><a href="#local-6989586621682823813"><span class="hs-identifier hs-type">freeRegs</span></a></span></span><span> </span><span id="local-6989586621682823814"><span class="annot"><a href="#local-6989586621682823814"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><a href="#local-6989586621682823814"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823813"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621682630069"><span id="local-6989586621682630070"><span class="annot"><a href="#local-6989586621682630069"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682630070"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><a href="#local-6989586621682630069"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682630070"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">#)</span></span></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621682823656"><span id="local-6989586621682823657"><span class="annot"><a href="#local-6989586621682823657"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682823656"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(#</span><span> </span><span class="annot"><a href="#local-6989586621682823656"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682823657"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">#)</span></span></span><span>
 </span><span id="line-60"></span><span class="hs-keyword">pattern</span><span> </span><span id="RA_Result"><span id="%24mRA_Result"><span id="%24bRA_Result"><span class="annot"><span class="annottext">$mRA_Result :: forall {r} {a} {b}.
-(# a, b #) -&gt; (a -&gt; b -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
-$bRA_Result :: forall a b. a -&gt; b -&gt; (# a, b #)
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var hs-var hs-var">RA_Result</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621682630214"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630215"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682630214"><span class="annot"><a href="#local-6989586621682630214"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682630215"><span class="annot"><a href="#local-6989586621682630215"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-special">#)</span><span>
+(# b, a #) -&gt; (a -&gt; b -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
+$bRA_Result :: forall a b. a -&gt; b -&gt; (# b, a #)
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var hs-var hs-var">RA_Result</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621682823818"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823819"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(#</span><span> </span><span id="local-6989586621682823819"><span class="annot"><a href="#local-6989586621682823819"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682823818"><span class="annot"><a href="#local-6989586621682823818"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-61"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-pragma hs-type">RA_Result</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-62"></span><span>
 </span><span id="line-63"></span><span class="annot"><span class="hs-comment">-- | The register allocator monad type.</span></span><span>
-</span><span id="line-64"></span><span class="hs-keyword">newtype</span><span> </span><span id="RegM"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-var">RegM</span></a></span></span><span> </span><span id="local-6989586621682630074"><span class="annot"><a href="#local-6989586621682630074"><span class="hs-identifier hs-type">freeRegs</span></a></span></span><span> </span><span id="local-6989586621682630075"><span class="annot"><a href="#local-6989586621682630075"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">newtype</span><span> </span><span id="RegM"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-var">RegM</span></a></span></span><span> </span><span id="local-6989586621682823661"><span class="annot"><a href="#local-6989586621682823661"><span class="hs-identifier hs-type">freeRegs</span></a></span></span><span> </span><span id="local-6989586621682823662"><span class="annot"><a href="#local-6989586621682823662"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-65"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span id="RegM"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-var">RegM</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="unReg"><span class="annot"><span class="annottext">forall freeRegs a.
 RegM freeRegs a -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#unReg"><span class="hs-identifier hs-var hs-var">unReg</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630074"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630074"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630075"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-66"></span><span>        </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682630219"><span id="local-6989586621682630221"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b)
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#unReg"><span class="hs-identifier hs-var hs-var">unReg</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823661"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823661"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823662"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-66"></span><span>        </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682823823"><span id="local-6989586621682823828"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b)
 -&gt; (forall a b. a -&gt; RegM freeRegs b -&gt; RegM freeRegs a)
 -&gt; Functor (RegM freeRegs)
 forall a b. a -&gt; RegM freeRegs b -&gt; RegM freeRegs a
@@ -82,202 +82,249 @@ $cfmap :: forall freeRegs a b. (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM free
 fmap :: forall a b. (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b
 $c&lt;$ :: forall freeRegs a b. a -&gt; RegM freeRegs b -&gt; RegM freeRegs a
 &lt;$ :: forall a b. a -&gt; RegM freeRegs b -&gt; RegM freeRegs a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682823837"><span id="local-6989586621682823842"><span id="local-6989586621682823846"><span id="local-6989586621682823850"><span id="local-6989586621682823854"><span class="annot"><span class="annottext">Functor (RegM freeRegs)
+Functor (RegM freeRegs) =&gt;
+(forall a. a -&gt; RegM freeRegs a)
+-&gt; (forall a b.
+    RegM freeRegs (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b)
+-&gt; (forall a b c.
+    (a -&gt; b -&gt; c)
+    -&gt; RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs c)
+-&gt; (forall a b.
+    RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b)
+-&gt; (forall a b.
+    RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs a)
+-&gt; Applicative (RegM freeRegs)
+forall freeRegs. Functor (RegM freeRegs)
+forall a. a -&gt; RegM freeRegs a
+forall freeRegs a. a -&gt; RegM freeRegs a
+forall a b. RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs a
+forall a b. RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+forall a b.
+RegM freeRegs (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b
+forall freeRegs a b.
+RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs a
+forall freeRegs a b.
+RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+forall freeRegs a b.
+RegM freeRegs (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b
+forall a b c.
+(a -&gt; b -&gt; c)
+-&gt; RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs c
+forall freeRegs a b c.
+(a -&gt; b -&gt; c)
+-&gt; RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs c
+forall (f :: * -&gt; *).
+Functor f =&gt;
+(forall a. a -&gt; f a)
+-&gt; (forall a b. f (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c)
+-&gt; (forall a b. f a -&gt; f b -&gt; f b)
+-&gt; (forall a b. f a -&gt; f b -&gt; f a)
+-&gt; Applicative f
+$cpure :: forall freeRegs a. a -&gt; RegM freeRegs a
+pure :: forall a. a -&gt; RegM freeRegs a
+$c&lt;*&gt; :: forall freeRegs a b.
+RegM freeRegs (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b
+&lt;*&gt; :: forall a b.
+RegM freeRegs (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b
+$cliftA2 :: forall freeRegs a b c.
+(a -&gt; b -&gt; c)
+-&gt; RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs c
+liftA2 :: forall a b c.
+(a -&gt; b -&gt; c)
+-&gt; RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs c
+$c*&gt; :: forall freeRegs a b.
+RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+*&gt; :: forall a b. RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+$c&lt;* :: forall freeRegs a b.
+RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs a
+&lt;* :: forall a b. RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Applicative</span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682823864"><span id="local-6989586621682823869"><span id="local-6989586621682823873"><span class="annot"><span class="annottext">Applicative (RegM freeRegs)
+Applicative (RegM freeRegs) =&gt;
+(forall a b.
+ RegM freeRegs a -&gt; (a -&gt; RegM freeRegs b) -&gt; RegM freeRegs b)
+-&gt; (forall a b.
+    RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b)
+-&gt; (forall a. a -&gt; RegM freeRegs a)
+-&gt; Monad (RegM freeRegs)
+forall freeRegs. Applicative (RegM freeRegs)
+forall a. a -&gt; RegM freeRegs a
+forall freeRegs a. a -&gt; RegM freeRegs a
+forall a b. RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+forall a b.
+RegM freeRegs a -&gt; (a -&gt; RegM freeRegs b) -&gt; RegM freeRegs b
+forall freeRegs a b.
+RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+forall freeRegs a b.
+RegM freeRegs a -&gt; (a -&gt; RegM freeRegs b) -&gt; RegM freeRegs b
+forall (m :: * -&gt; *).
+Applicative m =&gt;
+(forall a b. m a -&gt; (a -&gt; m b) -&gt; m b)
+-&gt; (forall a b. m a -&gt; m b -&gt; m b)
+-&gt; (forall a. a -&gt; m a)
+-&gt; Monad m
+$c&gt;&gt;= :: forall freeRegs a b.
+RegM freeRegs a -&gt; (a -&gt; RegM freeRegs b) -&gt; RegM freeRegs b
+&gt;&gt;= :: forall a b.
+RegM freeRegs a -&gt; (a -&gt; RegM freeRegs b) -&gt; RegM freeRegs b
+$c&gt;&gt; :: forall freeRegs a b.
+RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+&gt;&gt; :: forall a b. RegM freeRegs a -&gt; RegM freeRegs b -&gt; RegM freeRegs b
+$creturn :: forall freeRegs a. a -&gt; RegM freeRegs a
+return :: forall a. a -&gt; RegM freeRegs a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monad</span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Monad.State.Strict.html#State"><span class="hs-identifier hs-type">Strict.State</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823661"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-67"></span><span>
 </span><span id="line-68"></span><span class="hs-comment">-- | Smart constructor for 'RegM', as described in Note [The one-shot state</span><span>
 </span><span id="line-69"></span><span class="hs-comment">-- monad trick] in GHC.Utils.Monad.</span><span>
-</span><span id="line-70"></span><span id="local-6989586621682630088"><span id="local-6989586621682630089"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-type">mkRegM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630088"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630088"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630089"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630088"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630089"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-70"></span><span id="local-6989586621682823722"><span id="local-6989586621682823723"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-type">mkRegM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823722"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823722"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823723"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823722"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823723"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
 </span><span id="line-71"></span><span id="mkRegM"><span class="annot"><span class="annottext">mkRegM :: forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var hs-var">mkRegM</span></a></span></span><span> </span><span id="local-6989586621682630226"><span class="annot"><span class="annottext">RA_State freeRegs -&gt; RA_Result freeRegs a
-</span><a href="#local-6989586621682630226"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var hs-var">mkRegM</span></a></span></span><span> </span><span id="local-6989586621682823879"><span class="annot"><span class="annottext">RA_State freeRegs -&gt; RA_Result freeRegs a
+</span><a href="#local-6989586621682823879"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-var">RegM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs a)
 -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">oneShot</span></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; RA_Result freeRegs a
-</span><a href="#local-6989586621682630226"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682823879"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682630108"><span id="local-6989586621682630232"><span id="local-6989586621682630236"><span id="local-6989586621682630239"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630108"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>      </span><span id="local-6989586621682630242"><span class="annot"><span class="annottext">pure :: forall a. a -&gt; RegM freeRegs a
-</span><span class="hs-identifier hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621682630243"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682630243"><span class="hs-identifier hs-var">a</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
-forall freeRegs a.
-(RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a)
--&gt; (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630244"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630244"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; a -&gt; RA_Result freeRegs a
-forall a b. a -&gt; b -&gt; (# a, b #)
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630244"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682630243"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-75"></span><span>      </span><span id="local-6989586621682630247"><span class="annot"><span class="annottext">&lt;*&gt; :: forall a b.
-RegM freeRegs (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b
-</span><span class="hs-operator hs-var hs-var hs-var">(&lt;*&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegM freeRegs (a -&gt; b) -&gt; RegM freeRegs a -&gt; RegM freeRegs b
-forall (m :: * -&gt; *) a b. Monad m =&gt; m (a -&gt; b) -&gt; m a -&gt; m b
-</span><span class="hs-identifier hs-var">ap</span></span><span>
-</span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682630110"><span id="local-6989586621682630252"><span id="local-6989586621682630255"><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630110"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-78"></span><span>  </span><span id="local-6989586621682630258"><span class="annot"><span class="annottext">RegM freeRegs a
-</span><a href="#local-6989586621682630258"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621682630259"><span class="annot"><span class="annottext">&gt;&gt;= :: forall a b.
-RegM freeRegs a -&gt; (a -&gt; RegM freeRegs b) -&gt; RegM freeRegs b
-</span><span class="hs-operator hs-var hs-var hs-var">&gt;&gt;=</span></span></span><span> </span><span id="local-6989586621682630260"><span class="annot"><span class="annottext">a -&gt; RegM freeRegs b
-</span><a href="#local-6989586621682630260"><span class="hs-identifier hs-var">k</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs b) -&gt; RegM freeRegs b
-forall freeRegs a.
-(RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs b) -&gt; RegM freeRegs b)
--&gt; (RA_State freeRegs -&gt; RA_Result freeRegs b) -&gt; RegM freeRegs b
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630261"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630261"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegM freeRegs a -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
-forall freeRegs a.
-RegM freeRegs a -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#unReg"><span class="hs-identifier hs-var">unReg</span></a></span><span> </span><span class="annot"><span class="annottext">RegM freeRegs a
-</span><a href="#local-6989586621682630258"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630261"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span id="local-6989586621682630262"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630262"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621682630263"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682630263"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegM freeRegs b -&gt; RA_State freeRegs -&gt; RA_Result freeRegs b
-forall freeRegs a.
-RegM freeRegs a -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#unReg"><span class="hs-identifier hs-var">unReg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; RegM freeRegs b
-</span><a href="#local-6989586621682630260"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682630263"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630262"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span class="annot"><span class="hs-comment">-- | Get native code generator configuration</span></span><span>
-</span><span id="line-81"></span><span id="local-6989586621682630125"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getConfig"><span class="hs-identifier hs-type">getConfig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630125"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Config.html#NCGConfig"><span class="hs-identifier hs-type">NCGConfig</span></a></span></span><span>
-</span><span id="line-82"></span><span id="getConfig"><span class="annot"><span class="annottext">getConfig :: forall a. RegM a NCGConfig
+</span><span id="line-73"></span><span class="annot"><span class="hs-comment">-- | Get native code generator configuration</span></span><span>
+</span><span id="line-74"></span><span id="local-6989586621682823728"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getConfig"><span class="hs-identifier hs-type">getConfig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823728"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Config.html#NCGConfig"><span class="hs-identifier hs-type">NCGConfig</span></a></span></span><span>
+</span><span id="line-75"></span><span id="getConfig"><span class="annot"><span class="annottext">getConfig :: forall a. RegM a NCGConfig
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getConfig"><span class="hs-identifier hs-var hs-var">getConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State a -&gt; RA_Result a NCGConfig) -&gt; RegM a NCGConfig
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State a -&gt; RA_Result a NCGConfig) -&gt; RegM a NCGConfig)
 -&gt; (RA_State a -&gt; RA_Result a NCGConfig) -&gt; RegM a NCGConfig
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630264"><span class="annot"><span class="annottext">RA_State a
-</span><a href="#local-6989586621682630264"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State a -&gt; NCGConfig -&gt; RA_Result a NCGConfig
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682823880"><span class="annot"><span class="annottext">RA_State a
+</span><a href="#local-6989586621682823880"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State a -&gt; NCGConfig -&gt; RA_Result a NCGConfig
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State a
-</span><a href="#local-6989586621682630264"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State a -&gt; NCGConfig
+</span><a href="#local-6989586621682823880"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State a -&gt; NCGConfig
 forall freeRegs. RA_State freeRegs -&gt; NCGConfig
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_config"><span class="hs-identifier hs-var">ra_config</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State a
-</span><a href="#local-6989586621682630264"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span class="annot"><span class="hs-comment">-- | Get target platform from native code generator configuration</span></span><span>
-</span><span id="line-85"></span><span id="local-6989586621682630129"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getPlatform"><span class="hs-identifier hs-type">getPlatform</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630129"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span></span><span>
-</span><span id="line-86"></span><span id="getPlatform"><span class="annot"><span class="annottext">getPlatform :: forall a. RegM a Platform
+</span><a href="#local-6989586621682823880"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="annot"><span class="hs-comment">-- | Get target platform from native code generator configuration</span></span><span>
+</span><span id="line-78"></span><span id="local-6989586621682823732"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getPlatform"><span class="hs-identifier hs-type">getPlatform</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823732"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span></span><span>
+</span><span id="line-79"></span><span id="getPlatform"><span class="annot"><span class="annottext">getPlatform :: forall a. RegM a Platform
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getPlatform"><span class="hs-identifier hs-var hs-var">getPlatform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NCGConfig -&gt; Platform
 </span><a href="GHC.CmmToAsm.Config.html#ncgPlatform"><span class="hs-identifier hs-var">ncgPlatform</span></a></span><span> </span><span class="annot"><span class="annottext">(NCGConfig -&gt; Platform) -&gt; RegM a NCGConfig -&gt; RegM a Platform
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">RegM a NCGConfig
 forall a. RegM a NCGConfig
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getConfig"><span class="hs-identifier hs-var">getConfig</span></a></span><span>
-</span><span id="line-87"></span><span>
-</span><span id="line-88"></span><span class="annot"><span class="hs-comment">-- | Run a computation in the RegM register allocator monad.</span></span><span>
-</span><span id="line-89"></span><span id="local-6989586621682630135"><span id="local-6989586621682630141"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#runR"><span class="hs-identifier hs-type">runR</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Config.html#NCGConfig"><span class="hs-identifier hs-type">NCGConfig</span></a></span><span>
-</span><span id="line-90"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630135"><span class="hs-identifier hs-type">freeRegs</span></a></span><span>
-</span><span id="line-91"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682630135"><span class="hs-identifier hs-type">freeRegs</span></a></span><span>
-</span><span id="line-92"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Liveness.html#RegMap"><span class="hs-identifier hs-type">RegMap</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span>
-</span><span id="line-93"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span>
-</span><span id="line-94"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Supply.html#UniqSupply"><span class="hs-identifier hs-type">UniqSupply</span></a></span><span>
-</span><span id="line-95"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630135"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630141"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-96"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630135"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RegAllocStats"><span class="hs-identifier hs-type">RegAllocStats</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682630141"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-97"></span><span>
-</span><span id="line-98"></span><span id="runR"><span class="annot"><span class="annottext">runR :: forall freeRegs a.
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="annot"><span class="hs-comment">-- | Run a computation in the RegM register allocator monad.</span></span><span>
+</span><span id="line-82"></span><span id="local-6989586621682823738"><span id="local-6989586621682823744"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#runR"><span class="hs-identifier hs-type">runR</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Config.html#NCGConfig"><span class="hs-identifier hs-type">NCGConfig</span></a></span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823738"><span class="hs-identifier hs-type">freeRegs</span></a></span><span>
+</span><span id="line-84"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682823738"><span class="hs-identifier hs-type">freeRegs</span></a></span><span>
+</span><span id="line-85"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Liveness.html#RegMap"><span class="hs-identifier hs-type">RegMap</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span>
+</span><span id="line-86"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span>
+</span><span id="line-87"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.DSM.html#DUniqSupply"><span class="hs-identifier hs-type">DUniqSupply</span></a></span><span>
+</span><span id="line-88"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823738"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823744"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-89"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823738"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RegAllocStats"><span class="hs-identifier hs-type">RegAllocStats</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682823744"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Unique.DSM.html#DUniqSupply"><span class="hs-identifier hs-type">DUniqSupply</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span id="runR"><span class="annot"><span class="annottext">runR :: forall freeRegs a.
 NCGConfig
 -&gt; BlockAssignment freeRegs
 -&gt; freeRegs
 -&gt; RegMap Loc
 -&gt; StackMap
--&gt; UniqSupply
+-&gt; DUniqSupply
 -&gt; RegM freeRegs a
--&gt; (BlockAssignment freeRegs, StackMap, RegAllocStats, a)
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#runR"><span class="hs-identifier hs-var hs-var">runR</span></a></span></span><span> </span><span id="local-6989586621682630269"><span class="annot"><span class="annottext">NCGConfig
-</span><a href="#local-6989586621682630269"><span class="hs-identifier hs-var">config</span></a></span></span><span> </span><span id="local-6989586621682630270"><span class="annot"><span class="annottext">BlockAssignment freeRegs
-</span><a href="#local-6989586621682630270"><span class="hs-identifier hs-var">block_assig</span></a></span></span><span> </span><span id="local-6989586621682630271"><span class="annot"><span class="annottext">freeRegs
-</span><a href="#local-6989586621682630271"><span class="hs-identifier hs-var">freeregs</span></a></span></span><span> </span><span id="local-6989586621682630272"><span class="annot"><span class="annottext">RegMap Loc
-</span><a href="#local-6989586621682630272"><span class="hs-identifier hs-var">assig</span></a></span></span><span> </span><span id="local-6989586621682630273"><span class="annot"><span class="annottext">StackMap
-</span><a href="#local-6989586621682630273"><span class="hs-identifier hs-var">stack</span></a></span></span><span> </span><span id="local-6989586621682630274"><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682630274"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span id="local-6989586621682630275"><span class="annot"><span class="annottext">RegM freeRegs a
-</span><a href="#local-6989586621682630275"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-99"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegM freeRegs a -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
+-&gt; (BlockAssignment freeRegs, StackMap, RegAllocStats, a,
+    DUniqSupply)
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#runR"><span class="hs-identifier hs-var hs-var">runR</span></a></span></span><span> </span><span id="local-6989586621682823885"><span class="annot"><span class="annottext">NCGConfig
+</span><a href="#local-6989586621682823885"><span class="hs-identifier hs-var">config</span></a></span></span><span> </span><span id="local-6989586621682823886"><span class="annot"><span class="annottext">BlockAssignment freeRegs
+</span><a href="#local-6989586621682823886"><span class="hs-identifier hs-var">block_assig</span></a></span></span><span> </span><span id="local-6989586621682823887"><span class="annot"><span class="annottext">freeRegs
+</span><a href="#local-6989586621682823887"><span class="hs-identifier hs-var">freeregs</span></a></span></span><span> </span><span id="local-6989586621682823888"><span class="annot"><span class="annottext">RegMap Loc
+</span><a href="#local-6989586621682823888"><span class="hs-identifier hs-var">assig</span></a></span></span><span> </span><span id="local-6989586621682823889"><span class="annot"><span class="annottext">StackMap
+</span><a href="#local-6989586621682823889"><span class="hs-identifier hs-var">stack</span></a></span></span><span> </span><span id="local-6989586621682823890"><span class="annot"><span class="annottext">DUniqSupply
+</span><a href="#local-6989586621682823890"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span id="local-6989586621682823891"><span class="annot"><span class="annottext">RegM freeRegs a
+</span><a href="#local-6989586621682823891"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegM freeRegs a -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
 forall freeRegs a.
 RegM freeRegs a -&gt; RA_State freeRegs -&gt; RA_Result freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#unReg"><span class="hs-identifier hs-var">unReg</span></a></span><span> </span><span class="annot"><span class="annottext">RegM freeRegs a
-</span><a href="#local-6989586621682630275"><span class="hs-identifier hs-var">thing</span></a></span><span>
-</span><span id="line-100"></span><span>        </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span>
-</span><span id="line-101"></span><span>                </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ra_blockassig :: BlockAssignment freeRegs
+</span><a href="#local-6989586621682823891"><span class="hs-identifier hs-var">thing</span></a></span><span>
+</span><span id="line-93"></span><span>        </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span>
+</span><span id="line-94"></span><span>                </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ra_blockassig :: BlockAssignment freeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_blockassig"><span class="hs-identifier hs-var">ra_blockassig</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BlockAssignment freeRegs
-</span><a href="#local-6989586621682630270"><span class="hs-identifier hs-var">block_assig</span></a></span><span>
-</span><span id="line-102"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_freeregs :: freeRegs
+</span><a href="#local-6989586621682823886"><span class="hs-identifier hs-var">block_assig</span></a></span><span>
+</span><span id="line-95"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_freeregs :: freeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_freeregs"><span class="hs-identifier hs-var">ra_freeregs</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">freeRegs
-</span><a href="#local-6989586621682630271"><span class="hs-identifier hs-var">freeregs</span></a></span><span>
-</span><span id="line-103"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_assig :: RegMap Loc
+</span><a href="#local-6989586621682823887"><span class="hs-identifier hs-var">freeregs</span></a></span><span>
+</span><span id="line-96"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_assig :: RegMap Loc
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_assig"><span class="hs-identifier hs-var">ra_assig</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegMap Loc
-</span><a href="#local-6989586621682630272"><span class="hs-identifier hs-var">assig</span></a></span><span>
-</span><span id="line-104"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_delta :: Int
+</span><a href="#local-6989586621682823888"><span class="hs-identifier hs-var">assig</span></a></span><span>
+</span><span id="line-97"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_delta :: Int
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_delta"><span class="hs-identifier hs-var">ra_delta</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-comment">{-???-}</span><span>
-</span><span id="line-105"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_stack :: StackMap
+</span><span id="line-98"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_stack :: StackMap
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_stack"><span class="hs-identifier hs-var">ra_stack</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StackMap
-</span><a href="#local-6989586621682630273"><span class="hs-identifier hs-var">stack</span></a></span><span>
-</span><span id="line-106"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_us :: UniqSupply
-</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_us"><span class="hs-identifier hs-var">ra_us</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682630274"><span class="hs-identifier hs-var">us</span></a></span><span>
-</span><span id="line-107"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_spills :: [SpillReason]
+</span><a href="#local-6989586621682823889"><span class="hs-identifier hs-var">stack</span></a></span><span>
+</span><span id="line-99"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_us :: DUniqSupply
+</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_us"><span class="hs-identifier hs-var">ra_us</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DUniqSupply
+</span><a href="#local-6989586621682823890"><span class="hs-identifier hs-var">us</span></a></span><span>
+</span><span id="line-100"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_spills :: [SpillReason]
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_spills"><span class="hs-identifier hs-var">ra_spills</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-108"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_config :: NCGConfig
+</span><span id="line-101"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_config :: NCGConfig
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_config"><span class="hs-identifier hs-var">ra_config</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NCGConfig
-</span><a href="#local-6989586621682630269"><span class="hs-identifier hs-var">config</span></a></span><span>
-</span><span id="line-109"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_fixups :: [(BlockId, BlockId, BlockId)]
+</span><a href="#local-6989586621682823885"><span class="hs-identifier hs-var">config</span></a></span><span>
+</span><span id="line-102"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_fixups :: [(BlockId, BlockId, BlockId)]
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_fixups"><span class="hs-identifier hs-var">ra_fixups</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-110"></span><span>   </span><span class="hs-keyword">of</span><span>
-</span><span id="line-111"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span id="local-6989586621682630285"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630285"><span class="hs-identifier hs-var">state</span></a></span></span><span> </span><span id="local-6989586621682630286"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682630286"><span class="hs-identifier hs-var">returned_thing</span></a></span></span><span>
-</span><span id="line-112"></span><span>         </span><span class="hs-glyph">-&gt;</span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; BlockAssignment freeRegs
+</span><span id="line-103"></span><span>   </span><span class="hs-keyword">of</span><span>
+</span><span id="line-104"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-type">RA_Result</span></a></span><span> </span><span id="local-6989586621682823901"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823901"><span class="hs-identifier hs-var">state</span></a></span></span><span> </span><span id="local-6989586621682823902"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682823902"><span class="hs-identifier hs-var">returned_thing</span></a></span></span><span>
+</span><span id="line-105"></span><span>         </span><span class="hs-glyph">-&gt;</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; BlockAssignment freeRegs
 forall freeRegs. RA_State freeRegs -&gt; BlockAssignment freeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_blockassig"><span class="hs-identifier hs-var">ra_blockassig</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630285"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; StackMap
+</span><a href="#local-6989586621682823901"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; StackMap
 forall freeRegs. RA_State freeRegs -&gt; StackMap
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_stack"><span class="hs-identifier hs-var">ra_stack</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630285"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; RegAllocStats
+</span><a href="#local-6989586621682823901"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; RegAllocStats
 forall freeRegs. RA_State freeRegs -&gt; RegAllocStats
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#makeRAStats"><span class="hs-identifier hs-var">makeRAStats</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630285"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682630286"><span class="hs-identifier hs-var">returned_thing</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-113"></span><span>
-</span><span id="line-114"></span><span>
-</span><span id="line-115"></span><span class="annot"><span class="hs-comment">-- | Make register allocator stats from its final state.</span></span><span>
-</span><span id="line-116"></span><span id="local-6989586621682630149"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#makeRAStats"><span class="hs-identifier hs-type">makeRAStats</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630149"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RegAllocStats"><span class="hs-identifier hs-type">RegAllocStats</span></a></span></span><span>
-</span><span id="line-117"></span><span id="makeRAStats"><span class="annot"><span class="annottext">makeRAStats :: forall freeRegs. RA_State freeRegs -&gt; RegAllocStats
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#makeRAStats"><span class="hs-identifier hs-var hs-var">makeRAStats</span></a></span></span><span> </span><span id="local-6989586621682630288"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630288"><span class="hs-identifier hs-var">state</span></a></span></span><span>
-</span><span id="line-118"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RegAllocStats"><span class="hs-identifier hs-type">RegAllocStats</span></a></span><span>
-</span><span id="line-119"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ra_spillInstrs :: UniqFM Unique [Int]
+</span><a href="#local-6989586621682823901"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682823902"><span class="hs-identifier hs-var">returned_thing</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; DUniqSupply
+forall freeRegs. RA_State freeRegs -&gt; DUniqSupply
+</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_us"><span class="hs-identifier hs-var">ra_us</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823901"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="annot"><span class="hs-comment">-- | Make register allocator stats from its final state.</span></span><span>
+</span><span id="line-109"></span><span id="local-6989586621682823752"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#makeRAStats"><span class="hs-identifier hs-type">makeRAStats</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823752"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RegAllocStats"><span class="hs-identifier hs-type">RegAllocStats</span></a></span></span><span>
+</span><span id="line-110"></span><span id="makeRAStats"><span class="annot"><span class="annottext">makeRAStats :: forall freeRegs. RA_State freeRegs -&gt; RegAllocStats
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#makeRAStats"><span class="hs-identifier hs-var hs-var">makeRAStats</span></a></span></span><span> </span><span id="local-6989586621682823904"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823904"><span class="hs-identifier hs-var">state</span></a></span></span><span>
+</span><span id="line-111"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RegAllocStats"><span class="hs-identifier hs-type">RegAllocStats</span></a></span><span>
+</span><span id="line-112"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ra_spillInstrs :: UniqFM Unique [Int]
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_spillInstrs"><span class="hs-identifier hs-var">ra_spillInstrs</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SpillReason] -&gt; UniqFM Unique [Int]
 </span><a href="GHC.CmmToAsm.Reg.Linear.Stats.html#binSpillReasons"><span class="hs-identifier hs-var">binSpillReasons</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; [SpillReason]
 forall freeRegs. RA_State freeRegs -&gt; [SpillReason]
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_spills"><span class="hs-identifier hs-var">ra_spills</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630288"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-120"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_fixupList :: [(BlockId, BlockId, BlockId)]
+</span><a href="#local-6989586621682823904"><span class="hs-identifier hs-var">state</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ra_fixupList :: [(BlockId, BlockId, BlockId)]
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_fixupList"><span class="hs-identifier hs-var">ra_fixupList</span></a></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; [(BlockId, BlockId, BlockId)]
 forall freeRegs. RA_State freeRegs -&gt; [(BlockId, BlockId, BlockId)]
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_fixups"><span class="hs-identifier hs-var">ra_fixups</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630288"><span class="hs-identifier hs-var">state</span></a></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-121"></span><span>
-</span><span id="line-122"></span><span>
-</span><span id="line-123"></span><span id="local-6989586621682630155"><span id="local-6989586621682630158"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#spillR"><span class="hs-identifier hs-type">spillR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Instr.html#Instruction"><span class="hs-identifier hs-type">Instruction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630155"><span class="hs-identifier hs-type">instr</span></a></span><span>
-</span><span id="line-124"></span><span>       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630158"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621682630155"><span class="hs-identifier hs-type">instr</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-125"></span><span>
-</span><span id="line-126"></span><span id="spillR"><span class="annot"><span class="annottext">spillR :: forall instr freeRegs.
+</span><a href="#local-6989586621682823904"><span class="hs-identifier hs-var">state</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span id="local-6989586621682823759"><span id="local-6989586621682823762"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#spillR"><span class="hs-identifier hs-type">spillR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Instr.html#Instruction"><span class="hs-identifier hs-type">Instruction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823759"><span class="hs-identifier hs-type">instr</span></a></span><span>
+</span><span id="line-117"></span><span>       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Format.html#RegWithFormat"><span class="hs-identifier hs-type">RegWithFormat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823762"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621682823759"><span class="hs-identifier hs-type">instr</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span id="spillR"><span class="annot"><span class="annottext">spillR :: forall instr freeRegs.
 Instruction instr =&gt;
-Reg -&gt; Unique -&gt; RegM freeRegs ([instr], Int)
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#spillR"><span class="hs-identifier hs-var hs-var">spillR</span></a></span></span><span> </span><span id="local-6989586621682630295"><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682630295"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span id="local-6989586621682630296"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682630296"><span class="hs-identifier hs-var">temp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ([instr], Int))
+RegWithFormat -&gt; Unique -&gt; RegM freeRegs ([instr], Int)
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#spillR"><span class="hs-identifier hs-var hs-var">spillR</span></a></span></span><span> </span><span id="local-6989586621682823912"><span class="annot"><span class="annottext">RegWithFormat
+</span><a href="#local-6989586621682823912"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span id="local-6989586621682823913"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682823913"><span class="hs-identifier hs-var">temp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ([instr], Int))
 -&gt; RegM freeRegs ([instr], Int)
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
@@ -286,49 +333,51 @@ forall freeRegs a.
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs ([instr], Int))
 -&gt; RegM freeRegs ([instr], Int)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630297"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630297"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-127"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682630298"><span class="annot"><span class="annottext">StackMap
-</span><a href="#local-6989586621682630298"><span class="hs-identifier hs-var">stack1</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682630299"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682630299"><span class="hs-identifier hs-var">slot</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StackMap -&gt; Unique -&gt; (StackMap, Int)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682823914"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823914"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682823915"><span class="annot"><span class="annottext">StackMap
+</span><a href="#local-6989586621682823915"><span class="hs-identifier hs-var">stack1</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682823916"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682823916"><span class="hs-identifier hs-var">slots</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StackMap -&gt; Format -&gt; Unique -&gt; (StackMap, Int)
 </span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackSlotFor"><span class="hs-identifier hs-var">getStackSlotFor</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; StackMap
 forall freeRegs. RA_State freeRegs -&gt; StackMap
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_stack"><span class="hs-identifier hs-var">ra_stack</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630297"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682630296"><span class="hs-identifier hs-var">temp</span></a></span><span>
-</span><span id="line-128"></span><span>      </span><span id="local-6989586621682630301"><span class="annot"><span class="annottext">instr :: [instr]
-</span><a href="#local-6989586621682630301"><span class="hs-identifier hs-var hs-var">instr</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NCGConfig -&gt; Reg -&gt; Int -&gt; Int -&gt; [instr]
+</span><a href="#local-6989586621682823914"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RegWithFormat -&gt; Format
+</span><a href="GHC.CmmToAsm.Format.html#regWithFormat_format"><span class="hs-identifier hs-var">regWithFormat_format</span></a></span><span> </span><span class="annot"><span class="annottext">RegWithFormat
+</span><a href="#local-6989586621682823912"><span class="hs-identifier hs-var">reg</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682823913"><span class="hs-identifier hs-var">temp</span></a></span><span>
+</span><span id="line-121"></span><span>      </span><span id="local-6989586621682823919"><span class="annot"><span class="annottext">instr :: [instr]
+</span><a href="#local-6989586621682823919"><span class="hs-identifier hs-var hs-var">instr</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NCGConfig -&gt; RegWithFormat -&gt; Int -&gt; Int -&gt; [instr]
 forall instr.
-Instruction instr =&gt;
-NCGConfig -&gt; Reg -&gt; Int -&gt; Int -&gt; [instr]
+(Instruction instr, HasDebugCallStack) =&gt;
+NCGConfig -&gt; RegWithFormat -&gt; Int -&gt; Int -&gt; [instr]
 </span><a href="GHC.CmmToAsm.Instr.html#mkSpillInstr"><span class="hs-identifier hs-var">mkSpillInstr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; NCGConfig
 forall freeRegs. RA_State freeRegs -&gt; NCGConfig
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_config"><span class="hs-identifier hs-var">ra_config</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630297"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682630295"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int
+</span><a href="#local-6989586621682823914"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RegWithFormat
+</span><a href="#local-6989586621682823912"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int
 forall freeRegs. RA_State freeRegs -&gt; Int
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_delta"><span class="hs-identifier hs-var">ra_delta</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630297"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682630299"><span class="hs-identifier hs-var">slot</span></a></span><span>
-</span><span id="line-129"></span><span>  </span><span class="hs-keyword">in</span><span>
-</span><span id="line-130"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823914"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682823916"><span class="hs-identifier hs-var">slots</span></a></span><span>
+</span><span id="line-122"></span><span>  </span><span class="hs-keyword">in</span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs
 -&gt; ([instr], Int) -&gt; RA_Result freeRegs ([instr], Int)
-forall a b. a -&gt; b -&gt; (# a, b #)
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630297"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_stack"><span class="hs-identifier hs-var">ra_stack</span></a></span><span class="hs-glyph">=</span><span class="annot"><a href="#local-6989586621682630298"><span class="hs-identifier hs-type">stack1</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[instr]
-</span><a href="#local-6989586621682630301"><span class="hs-identifier hs-var">instr</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682630299"><span class="hs-identifier hs-var">slot</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-131"></span><span>
-</span><span id="line-132"></span><span>
-</span><span id="line-133"></span><span id="local-6989586621682630163"><span id="local-6989586621682630164"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#loadR"><span class="hs-identifier hs-type">loadR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Instr.html#Instruction"><span class="hs-identifier hs-type">Instruction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630163"><span class="hs-identifier hs-type">instr</span></a></span><span>
-</span><span id="line-134"></span><span>      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html#Reg"><span class="hs-identifier hs-type">Reg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630164"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621682630163"><span class="hs-identifier hs-type">instr</span></a></span><span class="hs-special">]</span></span></span><span>
-</span><span id="line-135"></span><span>
-</span><span id="line-136"></span><span id="loadR"><span class="annot"><span class="annottext">loadR :: forall instr freeRegs.
+</span><a href="#local-6989586621682823914"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_stack"><span class="hs-identifier hs-var">ra_stack</span></a></span><span class="hs-glyph">=</span><span class="annot"><a href="#local-6989586621682823915"><span class="hs-identifier hs-type">stack1</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[instr]
+</span><a href="#local-6989586621682823919"><span class="hs-identifier hs-var">instr</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682823916"><span class="hs-identifier hs-var">slots</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span id="local-6989586621682823769"><span id="local-6989586621682823770"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#loadR"><span class="hs-identifier hs-type">loadR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Instr.html#Instruction"><span class="hs-identifier hs-type">Instruction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823769"><span class="hs-identifier hs-type">instr</span></a></span><span>
+</span><span id="line-127"></span><span>      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Format.html#RegWithFormat"><span class="hs-identifier hs-type">RegWithFormat</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823770"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621682823769"><span class="hs-identifier hs-type">instr</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span id="loadR"><span class="annot"><span class="annottext">loadR :: forall instr freeRegs.
 Instruction instr =&gt;
-Reg -&gt; Int -&gt; RegM freeRegs [instr]
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#loadR"><span class="hs-identifier hs-var hs-var">loadR</span></a></span></span><span> </span><span id="local-6989586621682630305"><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682630305"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span id="local-6989586621682630306"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682630306"><span class="hs-identifier hs-var">slot</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs [instr])
+RegWithFormat -&gt; Int -&gt; RegM freeRegs [instr]
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#loadR"><span class="hs-identifier hs-var hs-var">loadR</span></a></span></span><span> </span><span id="local-6989586621682823924"><span class="annot"><span class="annottext">RegWithFormat
+</span><a href="#local-6989586621682823924"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span id="local-6989586621682823925"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682823925"><span class="hs-identifier hs-var">slot</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs [instr])
 -&gt; RegM freeRegs [instr]
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
@@ -337,27 +386,27 @@ forall freeRegs a.
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs [instr])
 -&gt; RegM freeRegs [instr]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630307"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630307"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-137"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; [instr] -&gt; RA_Result freeRegs [instr]
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682823926"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823926"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-130"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; [instr] -&gt; RA_Result freeRegs [instr]
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630307"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NCGConfig -&gt; Reg -&gt; Int -&gt; Int -&gt; [instr]
+</span><a href="#local-6989586621682823926"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NCGConfig -&gt; RegWithFormat -&gt; Int -&gt; Int -&gt; [instr]
 forall instr.
-Instruction instr =&gt;
-NCGConfig -&gt; Reg -&gt; Int -&gt; Int -&gt; [instr]
+(Instruction instr, HasDebugCallStack) =&gt;
+NCGConfig -&gt; RegWithFormat -&gt; Int -&gt; Int -&gt; [instr]
 </span><a href="GHC.CmmToAsm.Instr.html#mkLoadInstr"><span class="hs-identifier hs-var">mkLoadInstr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; NCGConfig
 forall freeRegs. RA_State freeRegs -&gt; NCGConfig
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_config"><span class="hs-identifier hs-var">ra_config</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630307"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Reg
-</span><a href="#local-6989586621682630305"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int
+</span><a href="#local-6989586621682823926"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RegWithFormat
+</span><a href="#local-6989586621682823924"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int
 forall freeRegs. RA_State freeRegs -&gt; Int
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_delta"><span class="hs-identifier hs-var">ra_delta</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630307"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682630306"><span class="hs-identifier hs-var">slot</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-138"></span><span>
-</span><span id="line-139"></span><span id="local-6989586621682630167"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getFreeRegsR"><span class="hs-identifier hs-type">getFreeRegsR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630167"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630167"><span class="hs-identifier hs-type">freeRegs</span></a></span></span><span>
-</span><span id="line-140"></span><span id="getFreeRegsR"><span class="annot"><span class="annottext">getFreeRegsR :: forall freeRegs. RegM freeRegs freeRegs
+</span><a href="#local-6989586621682823926"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682823925"><span class="hs-identifier hs-var">slot</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span id="local-6989586621682823773"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getFreeRegsR"><span class="hs-identifier hs-type">getFreeRegsR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823773"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823773"><span class="hs-identifier hs-type">freeRegs</span></a></span></span><span>
+</span><span id="line-133"></span><span id="getFreeRegsR"><span class="annot"><span class="annottext">getFreeRegsR :: forall freeRegs. RegM freeRegs freeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getFreeRegsR"><span class="hs-identifier hs-var hs-var">getFreeRegsR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs freeRegs)
 -&gt; RegM freeRegs freeRegs
 forall freeRegs a.
@@ -367,34 +416,34 @@ forall freeRegs a.
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs freeRegs)
 -&gt; RegM freeRegs freeRegs
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682630309"><span class="annot"><span class="annottext">s :: RA_State freeRegs
-</span><a href="#local-6989586621682630309"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">ra_freeregs :: forall freeRegs. RA_State freeRegs -&gt; freeRegs
-</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_freeregs"><span class="hs-identifier hs-var">ra_freeregs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682630310"><span class="annot"><span class="annottext">freeRegs
-</span><a href="#local-6989586621682630310"><span class="hs-identifier hs-var">freeregs</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-141"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; freeRegs -&gt; RA_Result freeRegs freeRegs
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682823928"><span class="annot"><span class="annottext">s :: RA_State freeRegs
+</span><a href="#local-6989586621682823928"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">ra_freeregs :: forall freeRegs. RA_State freeRegs -&gt; freeRegs
+</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_freeregs"><span class="hs-identifier hs-var">ra_freeregs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682823929"><span class="annot"><span class="annottext">freeRegs
+</span><a href="#local-6989586621682823929"><span class="hs-identifier hs-var">freeregs</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-134"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; freeRegs -&gt; RA_Result freeRegs freeRegs
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630309"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">freeRegs
-</span><a href="#local-6989586621682630310"><span class="hs-identifier hs-var">freeregs</span></a></span><span>
-</span><span id="line-142"></span><span>
-</span><span id="line-143"></span><span id="local-6989586621682630170"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setFreeRegsR"><span class="hs-identifier hs-type">setFreeRegsR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621682630170"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630170"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-144"></span><span id="setFreeRegsR"><span class="annot"><span class="annottext">setFreeRegsR :: forall freeRegs. freeRegs -&gt; RegM freeRegs ()
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setFreeRegsR"><span class="hs-identifier hs-var hs-var">setFreeRegsR</span></a></span></span><span> </span><span id="local-6989586621682630311"><span class="annot"><span class="annottext">freeRegs
-</span><a href="#local-6989586621682630311"><span class="hs-identifier hs-var">regs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
+</span><a href="#local-6989586621682823928"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">freeRegs
+</span><a href="#local-6989586621682823929"><span class="hs-identifier hs-var">freeregs</span></a></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span id="local-6989586621682823776"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setFreeRegsR"><span class="hs-identifier hs-type">setFreeRegsR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621682823776"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823776"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-137"></span><span id="setFreeRegsR"><span class="annot"><span class="annottext">setFreeRegsR :: forall freeRegs. freeRegs -&gt; RegM freeRegs ()
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setFreeRegsR"><span class="hs-identifier hs-var hs-var">setFreeRegsR</span></a></span></span><span> </span><span id="local-6989586621682823930"><span class="annot"><span class="annottext">freeRegs
+</span><a href="#local-6989586621682823930"><span class="hs-identifier hs-var">regs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ())
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682630312"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630312"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-145"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682823931"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823931"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-138"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630312"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_freeregs"><span class="hs-identifier hs-var">ra_freeregs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682630311"><span class="hs-identifier hs-type">regs</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-146"></span><span>
-</span><span id="line-147"></span><span id="local-6989586621682630172"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getAssigR"><span class="hs-identifier hs-type">getAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630172"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Liveness.html#RegMap"><span class="hs-identifier hs-type">RegMap</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-148"></span><span id="getAssigR"><span class="annot"><span class="annottext">getAssigR :: forall freeRegs. RegM freeRegs (RegMap Loc)
+</span><a href="#local-6989586621682823931"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_freeregs"><span class="hs-identifier hs-var">ra_freeregs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682823930"><span class="hs-identifier hs-type">regs</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span id="local-6989586621682823778"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getAssigR"><span class="hs-identifier hs-type">getAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823778"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Liveness.html#RegMap"><span class="hs-identifier hs-type">RegMap</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-141"></span><span id="getAssigR"><span class="annot"><span class="annottext">getAssigR :: forall freeRegs. RegM freeRegs (RegMap Loc)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getAssigR"><span class="hs-identifier hs-var hs-var">getAssigR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs (RegMap Loc))
 -&gt; RegM freeRegs (RegMap Loc)
 forall freeRegs a.
@@ -404,34 +453,34 @@ forall freeRegs a.
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs (RegMap Loc))
 -&gt; RegM freeRegs (RegMap Loc)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682630313"><span class="annot"><span class="annottext">s :: RA_State freeRegs
-</span><a href="#local-6989586621682630313"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">ra_assig :: forall freeRegs. RA_State freeRegs -&gt; RegMap Loc
-</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_assig"><span class="hs-identifier hs-var">ra_assig</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682630314"><span class="annot"><span class="annottext">RegMap Loc
-</span><a href="#local-6989586621682630314"><span class="hs-identifier hs-var">assig</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-149"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; RegMap Loc -&gt; RA_Result freeRegs (RegMap Loc)
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682823932"><span class="annot"><span class="annottext">s :: RA_State freeRegs
+</span><a href="#local-6989586621682823932"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">ra_assig :: forall freeRegs. RA_State freeRegs -&gt; RegMap Loc
+</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_assig"><span class="hs-identifier hs-var">ra_assig</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682823933"><span class="annot"><span class="annottext">RegMap Loc
+</span><a href="#local-6989586621682823933"><span class="hs-identifier hs-var">assig</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-142"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; RegMap Loc -&gt; RA_Result freeRegs (RegMap Loc)
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630313"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">RegMap Loc
-</span><a href="#local-6989586621682630314"><span class="hs-identifier hs-var">assig</span></a></span><span>
-</span><span id="line-150"></span><span>
-</span><span id="line-151"></span><span id="local-6989586621682630175"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setAssigR"><span class="hs-identifier hs-type">setAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Liveness.html#RegMap"><span class="hs-identifier hs-type">RegMap</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630175"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-152"></span><span id="setAssigR"><span class="annot"><span class="annottext">setAssigR :: forall freeRegs. RegMap Loc -&gt; RegM freeRegs ()
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setAssigR"><span class="hs-identifier hs-var hs-var">setAssigR</span></a></span></span><span> </span><span id="local-6989586621682630315"><span class="annot"><span class="annottext">RegMap Loc
-</span><a href="#local-6989586621682630315"><span class="hs-identifier hs-var">assig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
+</span><a href="#local-6989586621682823932"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">RegMap Loc
+</span><a href="#local-6989586621682823933"><span class="hs-identifier hs-var">assig</span></a></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span id="local-6989586621682823781"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setAssigR"><span class="hs-identifier hs-type">setAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Liveness.html#RegMap"><span class="hs-identifier hs-type">RegMap</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#Loc"><span class="hs-identifier hs-type">Loc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823781"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-145"></span><span id="setAssigR"><span class="annot"><span class="annottext">setAssigR :: forall freeRegs. RegMap Loc -&gt; RegM freeRegs ()
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setAssigR"><span class="hs-identifier hs-var hs-var">setAssigR</span></a></span></span><span> </span><span id="local-6989586621682823934"><span class="annot"><span class="annottext">RegMap Loc
+</span><a href="#local-6989586621682823934"><span class="hs-identifier hs-var">assig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ())
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682630316"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630316"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-153"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682823935"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823935"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-146"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630316"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_assig"><span class="hs-identifier hs-var">ra_assig</span></a></span><span class="hs-glyph">=</span><span class="annot"><a href="#local-6989586621682630315"><span class="hs-identifier hs-type">assig</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-154"></span><span>
-</span><span id="line-155"></span><span id="local-6989586621682630177"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getBlockAssigR"><span class="hs-identifier hs-type">getBlockAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630177"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630177"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-156"></span><span id="getBlockAssigR"><span class="annot"><span class="annottext">getBlockAssigR :: forall freeRegs. RegM freeRegs (BlockAssignment freeRegs)
+</span><a href="#local-6989586621682823935"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_assig"><span class="hs-identifier hs-var">ra_assig</span></a></span><span class="hs-glyph">=</span><span class="annot"><a href="#local-6989586621682823934"><span class="hs-identifier hs-type">assig</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span id="local-6989586621682823783"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getBlockAssigR"><span class="hs-identifier hs-type">getBlockAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823783"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823783"><span class="hs-identifier hs-type">freeRegs</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-149"></span><span id="getBlockAssigR"><span class="annot"><span class="annottext">getBlockAssigR :: forall freeRegs. RegM freeRegs (BlockAssignment freeRegs)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getBlockAssigR"><span class="hs-identifier hs-var hs-var">getBlockAssigR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs
  -&gt; RA_Result freeRegs (BlockAssignment freeRegs))
 -&gt; RegM freeRegs (BlockAssignment freeRegs)
@@ -444,52 +493,52 @@ forall freeRegs a.
     -&gt; RA_Result freeRegs (BlockAssignment freeRegs))
 -&gt; RegM freeRegs (BlockAssignment freeRegs)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682630317"><span class="annot"><span class="annottext">s :: RA_State freeRegs
-</span><a href="#local-6989586621682630317"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">ra_blockassig :: forall freeRegs. RA_State freeRegs -&gt; BlockAssignment freeRegs
-</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_blockassig"><span class="hs-identifier hs-var">ra_blockassig</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682630318"><span class="annot"><span class="annottext">BlockAssignment freeRegs
-</span><a href="#local-6989586621682630318"><span class="hs-identifier hs-var">assig</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-157"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682823936"><span class="annot"><span class="annottext">s :: RA_State freeRegs
+</span><a href="#local-6989586621682823936"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#RA_State"><span class="hs-identifier hs-type">RA_State</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">ra_blockassig :: forall freeRegs. RA_State freeRegs -&gt; BlockAssignment freeRegs
+</span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_blockassig"><span class="hs-identifier hs-var">ra_blockassig</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621682823937"><span class="annot"><span class="annottext">BlockAssignment freeRegs
+</span><a href="#local-6989586621682823937"><span class="hs-identifier hs-var">assig</span></a></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-150"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs
 -&gt; BlockAssignment freeRegs
 -&gt; RA_Result freeRegs (BlockAssignment freeRegs)
-forall a b. a -&gt; b -&gt; (# a, b #)
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630317"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">BlockAssignment freeRegs
-</span><a href="#local-6989586621682630318"><span class="hs-identifier hs-var">assig</span></a></span><span>
-</span><span id="line-158"></span><span>
-</span><span id="line-159"></span><span id="local-6989586621682630179"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setBlockAssigR"><span class="hs-identifier hs-type">setBlockAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630179"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630179"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-160"></span><span id="setBlockAssigR"><span class="annot"><span class="annottext">setBlockAssigR :: forall freeRegs. BlockAssignment freeRegs -&gt; RegM freeRegs ()
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setBlockAssigR"><span class="hs-identifier hs-var hs-var">setBlockAssigR</span></a></span></span><span> </span><span id="local-6989586621682630319"><span class="annot"><span class="annottext">BlockAssignment freeRegs
-</span><a href="#local-6989586621682630319"><span class="hs-identifier hs-var">assig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
+</span><a href="#local-6989586621682823936"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">BlockAssignment freeRegs
+</span><a href="#local-6989586621682823937"><span class="hs-identifier hs-var">assig</span></a></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span id="local-6989586621682823785"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setBlockAssigR"><span class="hs-identifier hs-type">setBlockAssigR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#BlockAssignment"><span class="hs-identifier hs-type">BlockAssignment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823785"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823785"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-153"></span><span id="setBlockAssigR"><span class="annot"><span class="annottext">setBlockAssigR :: forall freeRegs. BlockAssignment freeRegs -&gt; RegM freeRegs ()
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setBlockAssigR"><span class="hs-identifier hs-var hs-var">setBlockAssigR</span></a></span></span><span> </span><span id="local-6989586621682823938"><span class="annot"><span class="annottext">BlockAssignment freeRegs
+</span><a href="#local-6989586621682823938"><span class="hs-identifier hs-var">assig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ())
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682630320"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630320"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-161"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682823939"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823939"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630320"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_blockassig"><span class="hs-identifier hs-var">ra_blockassig</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682630319"><span class="hs-identifier hs-type">assig</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-162"></span><span>
-</span><span id="line-163"></span><span id="local-6989586621682630181"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setDeltaR"><span class="hs-identifier hs-type">setDeltaR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630181"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-164"></span><span id="setDeltaR"><span class="annot"><span class="annottext">setDeltaR :: forall freeRegs. Int -&gt; RegM freeRegs ()
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setDeltaR"><span class="hs-identifier hs-var hs-var">setDeltaR</span></a></span></span><span> </span><span id="local-6989586621682630321"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682630321"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
+</span><a href="#local-6989586621682823939"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_blockassig"><span class="hs-identifier hs-var">ra_blockassig</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682823938"><span class="hs-identifier hs-type">assig</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span id="local-6989586621682823787"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#setDeltaR"><span class="hs-identifier hs-type">setDeltaR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823787"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-157"></span><span id="setDeltaR"><span class="annot"><span class="annottext">setDeltaR :: forall freeRegs. Int -&gt; RegM freeRegs ()
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#setDeltaR"><span class="hs-identifier hs-var hs-var">setDeltaR</span></a></span></span><span> </span><span id="local-6989586621682823940"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682823940"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ())
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682630322"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630322"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-165"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span> </span><span id="local-6989586621682823941"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823941"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-158"></span><span>  </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630322"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_delta"><span class="hs-identifier hs-var">ra_delta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682630321"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-166"></span><span>
-</span><span id="line-167"></span><span id="local-6989586621682630183"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getDeltaR"><span class="hs-identifier hs-type">getDeltaR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630183"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
-</span><span id="line-168"></span><span id="getDeltaR"><span class="annot"><span class="annottext">getDeltaR :: forall freeRegs. RegM freeRegs Int
+</span><a href="#local-6989586621682823941"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_delta"><span class="hs-identifier hs-var">ra_delta</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682823940"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span id="local-6989586621682823789"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getDeltaR"><span class="hs-identifier hs-type">getDeltaR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823789"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
+</span><span id="line-161"></span><span id="getDeltaR"><span class="annot"><span class="annottext">getDeltaR :: forall freeRegs. RegM freeRegs Int
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getDeltaR"><span class="hs-identifier hs-var hs-var">getDeltaR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs Int) -&gt; RegM freeRegs Int
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
@@ -498,17 +547,17 @@ forall freeRegs a.
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs Int)
 -&gt; RegM freeRegs Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630323"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630323"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int -&gt; RA_Result freeRegs Int
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682823942"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823942"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int -&gt; RA_Result freeRegs Int
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630323"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int
+</span><a href="#local-6989586621682823942"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Int
 forall freeRegs. RA_State freeRegs -&gt; Int
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_delta"><span class="hs-identifier hs-var">ra_delta</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630323"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-169"></span><span>
-</span><span id="line-170"></span><span id="local-6989586621682630185"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getUniqueR"><span class="hs-identifier hs-type">getUniqueR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630185"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span></span><span>
-</span><span id="line-171"></span><span id="getUniqueR"><span class="annot"><span class="annottext">getUniqueR :: forall freeRegs. RegM freeRegs Unique
+</span><a href="#local-6989586621682823942"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span id="local-6989586621682823791"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#getUniqueR"><span class="hs-identifier hs-type">getUniqueR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823791"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span></span><span>
+</span><span id="line-164"></span><span id="getUniqueR"><span class="annot"><span class="annottext">getUniqueR :: forall freeRegs. RegM freeRegs Unique
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#getUniqueR"><span class="hs-identifier hs-var hs-var">getUniqueR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs Unique)
 -&gt; RegM freeRegs Unique
 forall freeRegs a.
@@ -518,55 +567,55 @@ forall freeRegs a.
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs Unique)
 -&gt; RegM freeRegs Unique
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630324"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630324"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-172"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UniqSupply -&gt; (Unique, UniqSupply)
-</span><a href="GHC.Types.Unique.Supply.html#takeUniqFromSupply"><span class="hs-identifier hs-var">takeUniqFromSupply</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; UniqSupply
-forall freeRegs. RA_State freeRegs -&gt; UniqSupply
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682823943"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823943"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-165"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DUniqSupply -&gt; (Unique, DUniqSupply)
+</span><a href="GHC.Types.Unique.DSM.html#takeUniqueFromDSupply"><span class="hs-identifier hs-var">takeUniqueFromDSupply</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; DUniqSupply
+forall freeRegs. RA_State freeRegs -&gt; DUniqSupply
 </span><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_us"><span class="hs-identifier hs-var">ra_us</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630324"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-173"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682630326"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682630326"><span class="hs-identifier hs-var">uniq</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682630327"><span class="annot"><span class="annottext">UniqSupply
-</span><a href="#local-6989586621682630327"><span class="hs-identifier hs-var">us</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Unique -&gt; RA_Result freeRegs Unique
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><a href="#local-6989586621682823943"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621682823945"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682823945"><span class="hs-identifier hs-var">uniq</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682823946"><span class="annot"><span class="annottext">DUniqSupply
+</span><a href="#local-6989586621682823946"><span class="hs-identifier hs-var">us</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; Unique -&gt; RA_Result freeRegs Unique
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630324"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_us"><span class="hs-identifier hs-var">ra_us</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682630327"><span class="hs-identifier hs-type">us</span></a></span><span class="hs-special">}</span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621682630326"><span class="hs-identifier hs-var">uniq</span></a></span><span>
-</span><span id="line-174"></span><span>
-</span><span id="line-175"></span><span>
-</span><span id="line-176"></span><span class="annot"><span class="hs-comment">-- | Record that a spill instruction was inserted, for profiling.</span></span><span>
-</span><span id="line-177"></span><span id="local-6989586621682630188"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordSpill"><span class="hs-identifier hs-type">recordSpill</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#SpillReason"><span class="hs-identifier hs-type">SpillReason</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630188"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-178"></span><span id="recordSpill"><span class="annot"><span class="annottext">recordSpill :: forall freeRegs. SpillReason -&gt; RegM freeRegs ()
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordSpill"><span class="hs-identifier hs-var hs-var">recordSpill</span></a></span></span><span> </span><span id="local-6989586621682630328"><span class="annot"><span class="annottext">SpillReason
-</span><a href="#local-6989586621682630328"><span class="hs-identifier hs-var">spill</span></a></span></span><span>
-</span><span id="line-179"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
+</span><a href="#local-6989586621682823943"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">{</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_us"><span class="hs-identifier hs-var">ra_us</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682823946"><span class="hs-identifier hs-type">us</span></a></span><span class="hs-special">}</span><span> </span><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682823945"><span class="hs-identifier hs-var">uniq</span></a></span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span class="annot"><span class="hs-comment">-- | Record that a spill instruction was inserted, for profiling.</span></span><span>
+</span><span id="line-170"></span><span id="local-6989586621682823793"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordSpill"><span class="hs-identifier hs-type">recordSpill</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#SpillReason"><span class="hs-identifier hs-type">SpillReason</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823793"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-171"></span><span id="recordSpill"><span class="annot"><span class="annottext">recordSpill :: forall freeRegs. SpillReason -&gt; RegM freeRegs ()
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordSpill"><span class="hs-identifier hs-var hs-var">recordSpill</span></a></span></span><span> </span><span id="local-6989586621682823947"><span class="annot"><span class="annottext">SpillReason
+</span><a href="#local-6989586621682823947"><span class="hs-identifier hs-var">spill</span></a></span></span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ())
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630329"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630329"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682823948"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823948"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630329"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_spills"><span class="hs-identifier hs-var">ra_spills</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682630328"><span class="hs-identifier hs-type">spill</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_spills"><span class="hs-identifier hs-var">ra_spills</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630329"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-180"></span><span>
-</span><span id="line-181"></span><span class="annot"><span class="hs-comment">-- | Record a created fixup block</span></span><span>
-</span><span id="line-182"></span><span id="local-6989586621682630190"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordFixupBlock"><span class="hs-identifier hs-type">recordFixupBlock</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Cmm.BlockId.html#BlockId"><span class="hs-identifier hs-type">BlockId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Cmm.BlockId.html#BlockId"><span class="hs-identifier hs-type">BlockId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Cmm.BlockId.html#BlockId"><span class="hs-identifier hs-type">BlockId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630190"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-183"></span><span id="recordFixupBlock"><span class="annot"><span class="annottext">recordFixupBlock :: forall freeRegs. BlockId -&gt; BlockId -&gt; BlockId -&gt; RegM freeRegs ()
-</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordFixupBlock"><span class="hs-identifier hs-var hs-var">recordFixupBlock</span></a></span></span><span> </span><span id="local-6989586621682630330"><span class="annot"><span class="annottext">BlockId
-</span><a href="#local-6989586621682630330"><span class="hs-identifier hs-var">from</span></a></span></span><span> </span><span id="local-6989586621682630331"><span class="annot"><span class="annottext">BlockId
-</span><a href="#local-6989586621682630331"><span class="hs-identifier hs-var">between</span></a></span></span><span> </span><span id="local-6989586621682630332"><span class="annot"><span class="annottext">BlockId
-</span><a href="#local-6989586621682630332"><span class="hs-identifier hs-var">to</span></a></span></span><span>
-</span><span id="line-184"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
+</span><a href="#local-6989586621682823948"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_spills"><span class="hs-identifier hs-var">ra_spills</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621682823947"><span class="hs-identifier hs-type">spill</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_spills"><span class="hs-identifier hs-var">ra_spills</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823948"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span class="annot"><span class="hs-comment">-- | Record a created fixup block</span></span><span>
+</span><span id="line-175"></span><span id="local-6989586621682823795"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordFixupBlock"><span class="hs-identifier hs-type">recordFixupBlock</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Cmm.BlockId.html#BlockId"><span class="hs-identifier hs-type">BlockId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Cmm.BlockId.html#BlockId"><span class="hs-identifier hs-type">BlockId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Cmm.BlockId.html#BlockId"><span class="hs-identifier hs-type">BlockId</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.State.html#RegM"><span class="hs-identifier hs-type">RegM</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823795"><span class="hs-identifier hs-type">freeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-176"></span><span id="recordFixupBlock"><span class="annot"><span class="annottext">recordFixupBlock :: forall freeRegs. BlockId -&gt; BlockId -&gt; BlockId -&gt; RegM freeRegs ()
+</span><a href="GHC.CmmToAsm.Reg.Linear.State.html#recordFixupBlock"><span class="hs-identifier hs-var hs-var">recordFixupBlock</span></a></span></span><span> </span><span id="local-6989586621682823949"><span class="annot"><span class="annottext">BlockId
+</span><a href="#local-6989586621682823949"><span class="hs-identifier hs-var">from</span></a></span></span><span> </span><span id="local-6989586621682823950"><span class="annot"><span class="annottext">BlockId
+</span><a href="#local-6989586621682823950"><span class="hs-identifier hs-var">between</span></a></span></span><span> </span><span id="local-6989586621682823951"><span class="annot"><span class="annottext">BlockId
+</span><a href="#local-6989586621682823951"><span class="hs-identifier hs-var">to</span></a></span></span><span>
+</span><span id="line-177"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall freeRegs a.
 (RA_State freeRegs -&gt; RA_Result freeRegs a) -&gt; RegM freeRegs a
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#mkRegM"><span class="hs-identifier hs-var">mkRegM</span></a></span><span> </span><span class="annot"><span class="annottext">((RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ())
 -&gt; (RA_State freeRegs -&gt; RA_Result freeRegs ()) -&gt; RegM freeRegs ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682630333"><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630333"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
-forall a b. a -&gt; b -&gt; (# a, b #)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682823952"><span class="annot"><span class="annottext">RA_State freeRegs
+</span><a href="#local-6989586621682823952"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RA_State freeRegs -&gt; () -&gt; RA_Result freeRegs ()
+forall a b. a -&gt; b -&gt; (# b, a #)
 </span><a href="GHC.CmmToAsm.Reg.Linear.State.html#RA_Result"><span class="hs-identifier hs-var">RA_Result</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RA_State freeRegs
-</span><a href="#local-6989586621682630333"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_fixups"><span class="hs-identifier hs-var">ra_fixups</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682630330"><span class="hs-identifier hs-type">from</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621682630331"><span class="hs-identifier hs-type">between</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621682630332"><span class="hs-identifier hs-type">to</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_fixups"><span class="hs-identifier hs-var">ra_fixups</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682630333"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-185"></span></pre></body></html>
+</span><a href="#local-6989586621682823952"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_fixups"><span class="hs-identifier hs-var">ra_fixups</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682823949"><span class="hs-identifier hs-type">from</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621682823950"><span class="hs-identifier hs-type">between</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621682823951"><span class="hs-identifier hs-type">to</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.Base.html#ra_fixups"><span class="hs-identifier hs-var">ra_fixups</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682823952"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-178"></span></pre></body></html>

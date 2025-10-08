@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Small.AtMostTwo</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A type expressing that some value may have two or three values</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html"><span class="hs-identifier">HGeometry.Small.TwoOrThree</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier">TwoOrThree</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier">Two</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Combinatorial.Util.html#Three"><span class="hs-identifier">Three</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier">Two</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Combinatorial.Util.html#Three"><span class="hs-identifier">Three</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bitraversable</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-adeda497ad59323f53aa49f21fe460ea48898de026c75aad8e59c34f06f45622/share/doc/html/src/Data.Semigroup.Bitraversable.html"><span class="hs-identifier">Data.Semigroup.Bitraversable</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-adeda497ad59323f53aa49f21fe460ea48898de026c75aad8e59c34f06f45622/share/doc/html/src/Data.Semigroup.Bifoldable.html"><span class="hs-identifier">Data.Semigroup.Bifoldable</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-adeda497ad59323f53aa49f21fe460ea48898de026c75aad8e59c34f06f45622/share/doc/html/src/Data.Semigroup.Traversable.html"><span class="hs-identifier">Data.Semigroup.Traversable</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Combinatorial.Util.html"><span class="hs-identifier">HGeometry.Combinatorial.Util</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="annot"><span class="hs-comment">-- | Either two or three elements</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">newtype</span><span> </span><span id="TwoOrThree"><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-var">TwoOrThree</span></a></span></span><span> </span><span id="local-6989586621679236675"><span class="annot"><a href="#local-6989586621679236675"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TwoOrThree"><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-var">TwoOrThree</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679236675"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Combinatorial.Util.html#Three"><span class="hs-identifier hs-type">Three</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679236675"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>                     </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679236782"><span id="local-6989586621679236790"><span id="local-6989586621679236794"><span class="annot"><span class="annottext">Int -&gt; TwoOrThree a -&gt; ShowS
+[TwoOrThree a] -&gt; ShowS
+TwoOrThree a -&gt; String
+(Int -&gt; TwoOrThree a -&gt; ShowS)
+-&gt; (TwoOrThree a -&gt; String)
+-&gt; ([TwoOrThree a] -&gt; ShowS)
+-&gt; Show (TwoOrThree a)
+forall a. Show a =&gt; Int -&gt; TwoOrThree a -&gt; ShowS
+forall a. Show a =&gt; [TwoOrThree a] -&gt; ShowS
+forall a. Show a =&gt; TwoOrThree a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; TwoOrThree a -&gt; ShowS
+showsPrec :: Int -&gt; TwoOrThree a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; TwoOrThree a -&gt; String
+show :: TwoOrThree a -&gt; String
+$cshowList :: forall a. Show a =&gt; [TwoOrThree a] -&gt; ShowS
+showList :: [TwoOrThree a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679236802"><span id="local-6989586621679236809"><span class="annot"><span class="annottext">TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+(TwoOrThree a -&gt; TwoOrThree a -&gt; Bool)
+-&gt; (TwoOrThree a -&gt; TwoOrThree a -&gt; Bool) -&gt; Eq (TwoOrThree a)
+forall a. Eq a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. Eq a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+== :: TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+/= :: TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679236824"><span id="local-6989586621679236831"><span id="local-6989586621679236837"><span id="local-6989586621679236843"><span id="local-6989586621679236849"><span id="local-6989586621679236855"><span id="local-6989586621679236861"><span class="annot"><span class="annottext">Eq (TwoOrThree a)
+Eq (TwoOrThree a) =&gt;
+(TwoOrThree a -&gt; TwoOrThree a -&gt; Ordering)
+-&gt; (TwoOrThree a -&gt; TwoOrThree a -&gt; Bool)
+-&gt; (TwoOrThree a -&gt; TwoOrThree a -&gt; Bool)
+-&gt; (TwoOrThree a -&gt; TwoOrThree a -&gt; Bool)
+-&gt; (TwoOrThree a -&gt; TwoOrThree a -&gt; Bool)
+-&gt; (TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a)
+-&gt; (TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a)
+-&gt; Ord (TwoOrThree a)
+TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+TwoOrThree a -&gt; TwoOrThree a -&gt; Ordering
+TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (TwoOrThree a)
+forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Ordering
+forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a
+$ccompare :: forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Ordering
+compare :: TwoOrThree a -&gt; TwoOrThree a -&gt; Ordering
+$c&lt; :: forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+&lt; :: TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+&lt;= :: TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+&gt; :: TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+&gt;= :: TwoOrThree a -&gt; TwoOrThree a -&gt; Bool
+$cmax :: forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a
+max :: TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a
+$cmin :: forall a. Ord a =&gt; TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a
+min :: TwoOrThree a -&gt; TwoOrThree a -&gt; TwoOrThree a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679236879"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-30"></span><span>  </span><span id="local-6989586621679236889"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; TwoOrThree a -&gt; TwoOrThree b
+</span><span class="hs-identifier hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679236890"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679236890"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span><span> </span><span id="local-6989586621679236891"><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679236891"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either (Two b) (Three b) -&gt; TwoOrThree b
+forall a. Either (Two a) (Three a) -&gt; TwoOrThree a
+</span><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-var">TwoOrThree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Two a -&gt; Two b)
+-&gt; (Three a -&gt; Three b)
+-&gt; Either (Two a) (Three a)
+-&gt; Either (Two b) (Three b)
+forall a b c d. (a -&gt; b) -&gt; (c -&gt; d) -&gt; Either a c -&gt; Either b d
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Two a -&gt; Two b
+forall a b. (a -&gt; b) -&gt; V2 a -&gt; V2 b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679236890"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Three a -&gt; Three b
+forall a b. (a -&gt; b) -&gt; V3 a -&gt; V3 b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679236890"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679236891"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679236897"><span id="local-6989586621679236904"><span id="local-6989586621679236909"><span id="local-6989586621679236912"><span id="local-6989586621679236917"><span id="local-6989586621679236922"><span id="local-6989586621679236925"><span id="local-6989586621679236928"><span id="local-6989586621679236931"><span id="local-6989586621679236934"><span id="local-6989586621679236937"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>  </span><span id="local-6989586621679236950"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; TwoOrThree a -&gt; m
+</span><a href="#local-6989586621679236950"><span class="hs-identifier hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679236952"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679236952"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span><span> </span><span id="local-6989586621679236953"><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679236953"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Two a -&gt; m) -&gt; (Three a -&gt; m) -&gt; Either (Two a) (Three a) -&gt; m
+forall m a b.
+Semigroup m =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; Either a b -&gt; m
+forall (t :: * -&gt; * -&gt; *) m a b.
+(Bifoldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; t a b -&gt; m
+</span><span class="hs-identifier hs-var">bifoldMap1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Two a -&gt; m
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; V2 a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679236952"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Three a -&gt; m
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; V3 a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679236952"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679236953"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679236956"><span id="local-6989586621679236962"><span id="local-6989586621679236967"><span id="local-6989586621679236970"><span id="local-6989586621679236973"><span id="local-6989586621679236976"><span id="local-6989586621679236979"><span id="local-6989586621679236982"><span id="local-6989586621679236985"><span id="local-6989586621679236988"><span id="local-6989586621679236991"><span id="local-6989586621679236994"><span id="local-6989586621679236999"><span id="local-6989586621679237004"><span id="local-6989586621679237009"><span id="local-6989586621679237014"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621679237024"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; TwoOrThree a -&gt; m
+</span><a href="#local-6989586621679237024"><span class="hs-identifier hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; TwoOrThree a -&gt; m
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; TwoOrThree a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679237033"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-adeda497ad59323f53aa49f21fe460ea48898de026c75aad8e59c34f06f45622/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679237052"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; TwoOrThree a -&gt; f (TwoOrThree b)
+</span><a href="#local-6989586621679237052"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679237054"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679237054"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span><span> </span><span id="local-6989586621679237055"><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679237055"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either (Two b) (Three b) -&gt; TwoOrThree b
+forall a. Either (Two a) (Three a) -&gt; TwoOrThree a
+</span><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-var">TwoOrThree</span></a></span><span> </span><span class="annot"><span class="annottext">(Either (Two b) (Three b) -&gt; TwoOrThree b)
+-&gt; f (Either (Two b) (Three b)) -&gt; f (TwoOrThree b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Two a -&gt; f (Two b))
+-&gt; (Three a -&gt; f (Three b))
+-&gt; Either (Two a) (Three a)
+-&gt; f (Either (Two b) (Three b))
+forall (f :: * -&gt; *) a b c d.
+Apply f =&gt;
+(a -&gt; f b) -&gt; (c -&gt; f d) -&gt; Either a c -&gt; f (Either b d)
+forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a b c d.
+(Bitraversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; (c -&gt; f d) -&gt; t a c -&gt; f (t b d)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-adeda497ad59323f53aa49f21fe460ea48898de026c75aad8e59c34f06f45622/share/doc/html/src/Data.Semigroup.Traversable.Class.html#bitraverse1"><span class="hs-identifier hs-var">bitraverse1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Two a -&gt; f (Two b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b. Apply f =&gt; (a -&gt; f b) -&gt; V2 a -&gt; f (V2 b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-adeda497ad59323f53aa49f21fe460ea48898de026c75aad8e59c34f06f45622/share/doc/html/src/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679237054"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Three a -&gt; f (Three b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b. Apply f =&gt; (a -&gt; f b) -&gt; V3 a -&gt; f (V3 b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-adeda497ad59323f53aa49f21fe460ea48898de026c75aad8e59c34f06f45622/share/doc/html/src/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679237054"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679237055"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679237064"><span id="local-6989586621679237069"><span id="local-6989586621679237074"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>  </span><span id="local-6989586621679237092"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; TwoOrThree a -&gt; f (TwoOrThree b)
+</span><a href="#local-6989586621679237092"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679237094"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679237094"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-type">TwoOrThree</span></a></span><span> </span><span id="local-6989586621679237095"><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679237095"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either (Two b) (Three b) -&gt; TwoOrThree b
+forall a. Either (Two a) (Three a) -&gt; TwoOrThree a
+</span><a href="HGeometry.Small.TwoOrThree.html#TwoOrThree"><span class="hs-identifier hs-var">TwoOrThree</span></a></span><span> </span><span class="annot"><span class="annottext">(Either (Two b) (Three b) -&gt; TwoOrThree b)
+-&gt; f (Either (Two b) (Three b)) -&gt; f (TwoOrThree b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Two a -&gt; f (Two b))
+-&gt; (Three a -&gt; f (Three b))
+-&gt; Either (Two a) (Three a)
+-&gt; f (Either (Two b) (Three b))
+forall (f :: * -&gt; *) a c b d.
+Applicative f =&gt;
+(a -&gt; f c) -&gt; (b -&gt; f d) -&gt; Either a b -&gt; f (Either c d)
+forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a c b d.
+(Bitraversable t, Applicative f) =&gt;
+(a -&gt; f c) -&gt; (b -&gt; f d) -&gt; t a b -&gt; f (t c d)
+</span><span class="hs-identifier hs-var">bitraverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Two a -&gt; f (Two b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; V2 a -&gt; f (V2 b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679237094"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Three a -&gt; f (Three b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; V3 a -&gt; f (V3 b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679237094"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Either (Two a) (Three a)
+</span><a href="#local-6989586621679237095"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-39"></span></pre></body></html>

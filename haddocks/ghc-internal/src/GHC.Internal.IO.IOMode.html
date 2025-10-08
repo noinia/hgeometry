@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679608690"><span id="local-6989586621679608691"><span id="local-6989586621679608692"></span></span></span><span class="hs-pragma">{-# LANGUAGE Trustworthy #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679747077"><span id="local-6989586621679747078"><span id="local-6989586621679747079"></span></span></span><span class="hs-pragma">{-# LANGUAGE Trustworthy #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE NoImplicitPrelude #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_HADDOCK not-home #-}</span><span>
 </span><span id="line-4"></span><span>
@@ -26,7 +26,7 @@
 </span><span id="line-26"></span><span>
 </span><span id="line-27"></span><span class="annot"><span class="hs-comment">-- | See 'GHC.Internal.System.IO.openFile'</span></span><span>
 </span><span id="line-28"></span><span class="hs-keyword">data</span><span> </span><span id="IOMode"><span class="annot"><a href="GHC.Internal.IO.IOMode.html#IOMode"><span class="hs-identifier hs-var">IOMode</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span>  </span><span id="ReadMode"><span class="annot"><a href="GHC.Internal.IO.IOMode.html#ReadMode"><span class="hs-identifier hs-var">ReadMode</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="WriteMode"><span class="annot"><a href="GHC.Internal.IO.IOMode.html#WriteMode"><span class="hs-identifier hs-var">WriteMode</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="AppendMode"><span class="annot"><a href="GHC.Internal.IO.IOMode.html#AppendMode"><span class="hs-identifier hs-var">AppendMode</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="ReadWriteMode"><span class="annot"><a href="GHC.Internal.IO.IOMode.html#ReadWriteMode"><span class="hs-identifier hs-var">ReadWriteMode</span></a></span></span><span>
-</span><span id="line-29"></span><span>                    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679608698"><span id="local-6989586621679608703"><span class="annot"><span class="annottext">IOMode -&gt; IOMode -&gt; Bool
+</span><span id="line-29"></span><span>                    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span> </span><span id="local-6989586621679747085"><span id="local-6989586621679747090"><span class="annot"><span class="annottext">IOMode -&gt; IOMode -&gt; Bool
 (IOMode -&gt; IOMode -&gt; Bool)
 -&gt; (IOMode -&gt; IOMode -&gt; Bool) -&gt; Eq IOMode
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -34,8 +34,8 @@ $c== :: IOMode -&gt; IOMode -&gt; Bool
 == :: IOMode -&gt; IOMode -&gt; Bool
 $c/= :: IOMode -&gt; IOMode -&gt; Bool
 /= :: IOMode -&gt; IOMode -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span>   </span><span class="annot"><span class="hs-comment">-- ^ @since base-4.2.0.0</span></span><span>
-</span><span id="line-30"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679608710"><span id="local-6989586621679608714"><span id="local-6989586621679608718"><span id="local-6989586621679608722"><span id="local-6989586621679608725"><span id="local-6989586621679608728"><span id="local-6989586621679608731"><span class="annot"><span class="annottext">Eq IOMode
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span>   </span><span class="annot"><span class="hs-comment">-- ^ @since base-4.2.0.0</span></span><span>
+</span><span id="line-30"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679747097"><span id="local-6989586621679747101"><span id="local-6989586621679747105"><span id="local-6989586621679747109"><span id="local-6989586621679747112"><span id="local-6989586621679747115"><span id="local-6989586621679747118"><span class="annot"><span class="annottext">Eq IOMode
 Eq IOMode =&gt;
 (IOMode -&gt; IOMode -&gt; Ordering)
 -&gt; (IOMode -&gt; IOMode -&gt; Bool)
@@ -72,8 +72,8 @@ $cmax :: IOMode -&gt; IOMode -&gt; IOMode
 max :: IOMode -&gt; IOMode -&gt; IOMode
 $cmin :: IOMode -&gt; IOMode -&gt; IOMode
 min :: IOMode -&gt; IOMode -&gt; IOMode
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since base-4.2.0.0</span></span><span>
-</span><span id="line-31"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679608741"><span id="local-6989586621679608747"><span id="local-6989586621679608751"><span id="local-6989586621679608755"><span id="local-6989586621679608760"><span id="local-6989586621679608763"><span class="annot"><span class="annottext">Ord IOMode
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since base-4.2.0.0</span></span><span>
+</span><span id="line-31"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679747128"><span id="local-6989586621679747134"><span id="local-6989586621679747138"><span id="local-6989586621679747142"><span id="local-6989586621679747147"><span id="local-6989586621679747150"><span class="annot"><span class="annottext">Ord IOMode
 Ord IOMode =&gt;
 ((IOMode, IOMode) -&gt; [IOMode])
 -&gt; ((IOMode, IOMode) -&gt; IOMode -&gt; Int)
@@ -108,7 +108,7 @@ rangeSize :: (IOMode, IOMode) -&gt; Int
 $cunsafeRangeSize :: (IOMode, IOMode) -&gt; Int
 unsafeRangeSize :: (IOMode, IOMode) -&gt; Int
 </span><a href="GHC.Internal.Ix.html#Ix"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ix</span></a></span></span></span></span></span></span></span><span>   </span><span class="annot"><span class="hs-comment">-- ^ @since base-4.2.0.0</span></span><span>
-</span><span id="line-32"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679608770"><span id="local-6989586621679608779"><span id="local-6989586621679608786"><span id="local-6989586621679608796"><span id="local-6989586621679608799"><span id="local-6989586621679608803"><span id="local-6989586621679608809"><span id="local-6989586621679608813"><span class="annot"><span class="annottext">Int -&gt; IOMode
+</span><span id="line-32"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679747157"><span id="local-6989586621679747164"><span id="local-6989586621679747169"><span id="local-6989586621679747175"><span id="local-6989586621679747178"><span id="local-6989586621679747182"><span id="local-6989586621679747189"><span id="local-6989586621679747193"><span class="annot"><span class="annottext">Int -&gt; IOMode
 IOMode -&gt; Int
 IOMode -&gt; [IOMode]
 IOMode -&gt; IOMode
@@ -150,7 +150,7 @@ enumFromTo :: IOMode -&gt; IOMode -&gt; [IOMode]
 $cenumFromThenTo :: IOMode -&gt; IOMode -&gt; IOMode -&gt; [IOMode]
 enumFromThenTo :: IOMode -&gt; IOMode -&gt; IOMode -&gt; [IOMode]
 </span><a href="GHC.Internal.Enum.html#Enum"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></a></span></span></span></span></span></span></span></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ @since base-4.2.0.0</span></span><span>
-</span><span id="line-33"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679608821"><span id="local-6989586621679608825"><span id="local-6989586621679608828"><span id="local-6989586621679608835"><span class="annot"><span class="annottext">ReadPrec [IOMode]
+</span><span id="line-33"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679747201"><span id="local-6989586621679747205"><span id="local-6989586621679747208"><span id="local-6989586621679747215"><span class="annot"><span class="annottext">ReadPrec [IOMode]
 ReadPrec IOMode
 Int -&gt; ReadS IOMode
 ReadS [IOMode]
@@ -171,7 +171,7 @@ readPrec :: ReadPrec IOMode
 $creadListPrec :: ReadPrec [IOMode]
 readListPrec :: ReadPrec [IOMode]
 </span><a href="GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ @since base-4.2.0.0</span></span><span>
-</span><span id="line-34"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679608842"><span id="local-6989586621679608844"><span id="local-6989586621679608848"><span class="annot"><span class="annottext">Int -&gt; IOMode -&gt; ShowS
+</span><span id="line-34"></span><span>                             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679747222"><span id="local-6989586621679747224"><span id="local-6989586621679747228"><span class="annot"><span class="annottext">Int -&gt; IOMode -&gt; ShowS
 [IOMode] -&gt; ShowS
 IOMode -&gt; String
 (Int -&gt; IOMode -&gt; ShowS)

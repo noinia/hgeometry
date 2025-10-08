@@ -6,7 +6,7 @@
 --   
 --   Extensible optionally-pure exceptions.
 @package exceptions
-@version 0.10.7
+@version 0.10.9
 
 
 -- | This module supports monads that can throw extensible exceptions. The
@@ -18,7 +18,7 @@
 --   compatible with them, though doesn't mimic the module structure or
 --   offer the complete range of features in those packages.
 --   
---   This is very similar to <tt>ErrorT</tt> and <tt>MonadError</tt>, but
+--   This is very similar to <a>ExceptT</a> and <tt>MonadError</tt>, but
 --   based on features of <a>Control.Exception</a>. In particular, it
 --   handles the complex case of asynchronous exceptions by including
 --   <a>mask</a> in the typeclass. Note that the extensible exceptions
@@ -152,18 +152,18 @@ uninterruptibleMask :: (MonadMask m, HasCallStack) => ((forall a. () => m a -> m
 --   subtleties:
 --   
 --   <pre>
---   generalBracket acquire release use = StateT $ s0 -&gt; do
+--   generalBracket acquire release use = StateT $ \s0 -&gt; do
 --     ((b, _s2), (c, s3)) &lt;- generalBracket
 --       (runStateT acquire s0)
---       ((resource, s1) exitCase -&gt; case exitCase of
+--       (\(resource, s1) exitCase -&gt; case exitCase of
 --         ExitCaseSuccess (b, s2) -&gt; runStateT (release resource (ExitCaseSuccess b)) s2
 --   
---         -- In the two other cases, the base monad overrides <tt>use</tt>'s state
---         -- changes and the state reverts to <tt>s1</tt>.
+--         -- In the two other cases, the base monad overrides `use`'s state
+--         -- changes and the state reverts to `s1`.
 --         ExitCaseException e     -&gt; runStateT (release resource (ExitCaseException e)) s1
 --         ExitCaseAbort           -&gt; runStateT (release resource ExitCaseAbort) s1
 --       )
---       ((resource, s1) -&gt; runStateT (use resource) s1)
+--       (\(resource, s1) -&gt; runStateT (use resource) s1)
 --     return ((b, c), s3)
 --   </pre>
 --   
@@ -210,17 +210,17 @@ uninterruptibleMask :: (MonadMask m, HasCallStack) => ((forall a. () => m a -> m
 --   generalBracket acquire release use = ExceptT $ do
 --     (eb, ec) &lt;- generalBracket
 --       (runExceptT acquire)
---       (eresource exitCase -&gt; case eresource of
---         Left e -&gt; return (Left e) -- nothing to release, acquire didn't succeed
+--       (\eresource exitCase -&gt; case eresource of
+--         Left e -&gt; return (Left e) -- nothing to release, `acquire` didn't succeed
 --         Right resource -&gt; case exitCase of
 --           ExitCaseSuccess (Right b) -&gt; runExceptT (release resource (ExitCaseSuccess b))
 --           ExitCaseException e       -&gt; runExceptT (release resource (ExitCaseException e))
 --           _                         -&gt; runExceptT (release resource ExitCaseAbort))
 --       (either (return . Left) (runExceptT . use))
 --     return $ do
---       -- The order in which we perform those two <a>Either</a> effects determines
---       -- which error will win if they are both <a>Left</a>s. We want the error from
---       -- <tt>release</tt> to win.
+--       -- The order in which we perform those two `Either` effects determines
+--       -- which error will win if they are both `Left`s. We want the error from
+--       -- `release` to win.
 --       c &lt;- ec
 --       b &lt;- eb
 --       return (b, c)
@@ -392,7 +392,7 @@ instance Control.Monad.Catch.MonadThrow m => Control.Monad.Catch.MonadThrow (Con
 instance Control.Monad.Catch.MonadThrow []
 instance Control.Monad.Catch.MonadThrow GHC.Internal.Maybe.Maybe
 instance Control.Monad.Catch.MonadThrow m => Control.Monad.Catch.MonadThrow (Control.Monad.Trans.Maybe.MaybeT m)
-instance Control.Monad.Catch.MonadThrow Language.Haskell.TH.Syntax.Q
+instance Control.Monad.Catch.MonadThrow GHC.Internal.TH.Syntax.Q
 instance (Control.Monad.Catch.MonadThrow m, GHC.Internal.Base.Monoid w) => Control.Monad.Catch.MonadThrow (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance (Control.Monad.Catch.MonadThrow m, GHC.Internal.Base.Monoid w) => Control.Monad.Catch.MonadThrow (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance Control.Monad.Catch.MonadThrow m => Control.Monad.Catch.MonadThrow (Control.Monad.Trans.Reader.ReaderT r m)
@@ -457,7 +457,7 @@ instance GHC.Internal.Base.Monad m => Control.Monad.Catch.MonadCatch (Control.Mo
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Catch.Pure.CatchT m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Catch.Pure.CatchT m)
 instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Catch.Pure.CatchT m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Catch.Pure.CatchT m)
+instance GHC.Internal.Control.Monad.IO.Class.MonadIO m => GHC.Internal.Control.Monad.IO.Class.MonadIO (Control.Monad.Catch.Pure.CatchT m)
 instance GHC.Internal.Base.Monad m => Control.Monad.Catch.MonadMask (Control.Monad.Catch.Pure.CatchT m)
 instance GHC.Internal.Base.Monad m => GHC.Internal.Base.MonadPlus (Control.Monad.Catch.Pure.CatchT m)
 instance Control.Monad.RWS.Class.MonadRWS r w s m => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Catch.Pure.CatchT m)

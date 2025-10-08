@@ -2,13 +2,13 @@
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-3"></span><span>
 </span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Exts.Heap.ClosureTypes.html"><span class="hs-identifier">GHC.Exts.Heap.ClosureTypes</span></a></span><span>
-</span><span id="line-5"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html#ClosureType"><span class="hs-identifier">ClosureType</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html#ClosureType"><span class="hs-identifier">ClosureType</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-6"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Exts.Heap.ClosureTypes.html#closureTypeHeaderSize"><span class="hs-identifier">closureTypeHeaderSize</span></a></span><span>
 </span><span id="line-7"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-comment">-- See note [Why do we import Prelude here?]</span><span class="hs-cpp">
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-comment">-- See note [Why do we import Prelude here?]</span><span class="hs-cpp">
 #if __GLASGOW_HASKELL__ &gt;= 909
-</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html"><span class="hs-identifier">GHC.Internal.ClosureTypes</span></a></span><span class="hs-cpp">
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html"><span class="hs-identifier">GHC.Internal.ClosureTypes</span></a></span><span class="hs-cpp">
 #else
 </span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Generics</span><span>
 </span><span id="line-14"></span><span>
@@ -89,66 +89,66 @@
 #endif
 </span><span>
 </span><span id="line-91"></span><span class="annot"><span class="hs-comment">-- | Return the size of the closures header in words</span></span><span>
-</span><span id="line-92"></span><span class="annot"><a href="GHC.Exts.Heap.ClosureTypes.html#closureTypeHeaderSize"><span class="hs-identifier hs-type">closureTypeHeaderSize</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html#ClosureType"><span class="hs-identifier hs-type">ClosureType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-92"></span><span class="annot"><a href="GHC.Exts.Heap.ClosureTypes.html#closureTypeHeaderSize"><span class="hs-identifier hs-type">closureTypeHeaderSize</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html#ClosureType"><span class="hs-identifier hs-type">ClosureType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
 </span><span id="line-93"></span><span id="closureTypeHeaderSize"><span class="annot"><span class="annottext">closureTypeHeaderSize :: ClosureType -&gt; Int
-</span><a href="GHC.Exts.Heap.ClosureTypes.html#closureTypeHeaderSize"><span class="hs-identifier hs-var hs-var">closureTypeHeaderSize</span></a></span></span><span> </span><span id="local-6989586621679100934"><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100934"><span class="hs-identifier hs-var">closType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Exts.Heap.ClosureTypes.html#closureTypeHeaderSize"><span class="hs-identifier hs-var hs-var">closureTypeHeaderSize</span></a></span></span><span> </span><span id="local-6989586621679102695"><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102695"><span class="hs-identifier hs-var">closType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-94"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100934"><span class="hs-identifier hs-var">closType</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-95"></span><span>        </span><span id="local-6989586621679100935"><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100935"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html#THUNK"><span class="hs-identifier hs-var">THUNK</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
+</span><a href="#local-6989586621679102695"><span class="hs-identifier hs-var">closType</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-95"></span><span>        </span><span id="local-6989586621679102696"><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102696"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html#THUNK"><span class="hs-identifier hs-var">THUNK</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3C%3D"><span class="hs-operator hs-var">&lt;=</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100935"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%26%26"><span class="hs-operator hs-var">&amp;&amp;</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100935"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3C%3D"><span class="hs-operator hs-var">&lt;=</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102696"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%26%26"><span class="hs-operator hs-var">&amp;&amp;</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102696"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3C%3D"><span class="hs-operator hs-var">&lt;=</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html#THUNK_0_2"><span class="hs-identifier hs-var">THUNK_0_2</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679100940"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
-</span><span id="line-96"></span><span>        </span><span id="local-6989586621679100941"><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100941"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100941"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3C%3D"><span class="hs-operator hs-var">&lt;=</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html#THUNK_0_2"><span class="hs-identifier hs-var">THUNK_0_2</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679102701"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
+</span><span id="line-96"></span><span>        </span><span id="local-6989586621679102702"><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102702"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102702"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html#THUNK_SELECTOR"><span class="hs-identifier hs-var">THUNK_SELECTOR</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679100940"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
-</span><span id="line-97"></span><span>        </span><span id="local-6989586621679100943"><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100943"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100943"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html#THUNK_SELECTOR"><span class="hs-identifier hs-var">THUNK_SELECTOR</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679102701"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
+</span><span id="line-97"></span><span>        </span><span id="local-6989586621679102704"><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102704"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102704"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html#AP"><span class="hs-identifier hs-var">AP</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679100940"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
-</span><span id="line-98"></span><span>        </span><span id="local-6989586621679100945"><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100945"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="#local-6989586621679100945"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html#AP"><span class="hs-identifier hs-var">AP</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679102701"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
+</span><span id="line-98"></span><span>        </span><span id="local-6989586621679102706"><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102706"><span class="hs-identifier hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="#local-6989586621679102706"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType -&gt; ClosureType -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.ClosureTypes.html/GHC.Internal.ClosureTypes.html#AP_STACK"><span class="hs-identifier hs-var">AP_STACK</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679100940"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">ClosureType
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.ClosureTypes.html#AP_STACK"><span class="hs-identifier hs-var">AP_STACK</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679102701"><span class="hs-identifier hs-var">thunkHeader</span></a></span><span>
 </span><span id="line-99"></span><span>        </span><span class="annot"><span class="annottext">ClosureType
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679100947"><span class="hs-identifier hs-var">header</span></a></span><span>
+</span><a href="#local-6989586621679102708"><span class="hs-identifier hs-var">header</span></a></span><span>
 </span><span id="line-100"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-101"></span><span>    </span><span id="local-6989586621679100947"><span class="annot"><span class="annottext">header :: Int
-</span><a href="#local-6989586621679100947"><span class="hs-identifier hs-var hs-var">header</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621679102708"><span class="annot"><span class="annottext">header :: Int
+</span><a href="#local-6989586621679102708"><span class="hs-identifier hs-var hs-var">header</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Num.html/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679100952"><span class="hs-identifier hs-var">prof</span></a></span><span>
-</span><span id="line-102"></span><span>    </span><span id="local-6989586621679100940"><span class="annot"><span class="annottext">thunkHeader :: Int
-</span><a href="#local-6989586621679100940"><span class="hs-identifier hs-var hs-var">thunkHeader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679102713"><span class="hs-identifier hs-var">prof</span></a></span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621679102701"><span class="annot"><span class="annottext">thunkHeader :: Int
+</span><a href="#local-6989586621679102701"><span class="hs-identifier hs-var hs-var">thunkHeader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Num.html/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679100952"><span class="hs-identifier hs-var">prof</span></a></span><span class="hs-cpp">
+</span><a href="../../ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679102713"><span class="hs-identifier hs-var">prof</span></a></span><span class="hs-cpp">
 #if defined(PROFILING)
 </span><span>    </span><span class="hs-identifier">prof</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-number">2</span><span class="hs-cpp">
 #else
-</span><span>    </span><span id="local-6989586621679100952"><span class="annot"><span class="annottext">prof :: Int
-</span><a href="#local-6989586621679100952"><span class="hs-identifier hs-var hs-var">prof</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span>    </span><span id="local-6989586621679102713"><span class="annot"><span class="annottext">prof :: Int
+</span><a href="#local-6989586621679102713"><span class="hs-identifier hs-var hs-var">prof</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-cpp">
 #endif
 </span></pre></body></html>

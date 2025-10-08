@@ -11,7 +11,7 @@
 --   easier concurrency, and a more composable API. You can read more about
 --   it at <a>https://github.com/fpco/typed-process/#readme</a>.
 @package process
-@version 1.6.19.0
+@version 1.6.25.0
 
 
 -- | <b>Note:</b> This module exports internal implementation details that
@@ -282,6 +282,74 @@ createPipeFd :: IO (FD, FD)
 --   for processes created using <tt>createProcess</tt> and setting the
 --   <a>create_group</a> flag
 interruptProcessGroupOf :: ProcessHandle -> IO ()
+
+-- | Fork a thread while doing something else, but kill it if there's an
+--   exception.
+--   
+--   This is important in the cases above because we want to kill the
+--   thread that is holding the Handle lock, because when we clean up the
+--   process we try to close that handle, which could otherwise deadlock.
+withForkWait :: IO () -> (IO () -> IO a) -> IO a
+
+-- | Handle any SIGPIPE errors in the given computation.
+ignoreSigPipe :: IO () -> IO ()
+
+module System.Process.CommunicationHandle.Internal
+
+-- | Gets a GHC Handle File description from the given OS Handle or POSIX
+--   fd.
+--   
+--   A <a>CommunicationHandle</a> is an abstraction over operating-system
+--   specific internal representation of a <a>Handle</a>, which can be
+--   communicated through a command-line interface.
+--   
+--   In a typical use case, the parent process creates a pipe, using e.g.
+--   <tt>createWeReadTheyWritePipe</tt> or
+--   <tt>createTheyReadWeWritePipe</tt>.
+--   
+--   <ul>
+--   <li>One end of the pipe is a <a>Handle</a>, which can be read
+--   from/written to by the parent process.</li>
+--   <li>The other end is a <a>CommunicationHandle</a>, which can be
+--   inherited by a child process. A reference to the handle can be
+--   serialised (using the <a>Show</a> instance), and passed to the child
+--   process. It is recommended to close the parent's reference to the
+--   <a>CommunicationHandle</a> using <a>closeCommunicationHandle</a> after
+--   it has been inherited by the child process.</li>
+--   <li>The child process can deserialise the <a>CommunicationHandle</a>
+--   (using the <a>Read</a> instance), and then use
+--   <tt>openCommunicationHandleWrite</tt> or
+--   <tt>openCommunicationHandleRead</tt> in order to retrieve a
+--   <a>Handle</a> which it can write to/read from.</li>
+--   </ul>
+--   
+--   <tt>readCreateProcessWithExitCodeCommunicationHandle</tt> provides a
+--   high-level API to this functionality. See there for example code.
+newtype CommunicationHandle
+CommunicationHandle :: Fd -> CommunicationHandle
+
+-- | Close a <a>CommunicationHandle</a>.
+--   
+--   Use this to close the <a>CommunicationHandle</a> in the parent process
+--   after the <a>CommunicationHandle</a> has been inherited by the child
+--   process.
+closeCommunicationHandle :: CommunicationHandle -> IO ()
+
+-- | Internal function used to define <tt>openCommunicationHandleRead</tt>
+--   and openCommunicationHandleWrite.
+useCommunicationHandle :: Bool -> CommunicationHandle -> IO Handle
+
+-- | Internal helper function used to define
+--   <tt>createWeReadTheyWritePipe</tt> and
+--   <tt>createTheyReadWeWritePipe</tt> while reducing code duplication.
+--   
+--   The returned <a>Handle</a> does not have any finalizers attached to
+--   it; use <a>hClose</a> to close it.
+createCommunicationPipe :: (forall a. () => (a, a) -> (a, a)) -> Bool -> IO (Handle, CommunicationHandle)
+instance GHC.Classes.Eq System.Process.CommunicationHandle.Internal.CommunicationHandle
+instance GHC.Classes.Ord System.Process.CommunicationHandle.Internal.CommunicationHandle
+instance GHC.Internal.Read.Read System.Process.CommunicationHandle.Internal.CommunicationHandle
+instance GHC.Internal.Show.Show System.Process.CommunicationHandle.Internal.CommunicationHandle
 
 
 -- | Operations for creating and interacting with sub-processes.
@@ -833,6 +901,106 @@ system :: String -> IO ExitCode
 --   The return codes and possible failures are the same as for
 --   <a>system</a>.
 rawSystem :: String -> [String] -> IO ExitCode
+
+module System.Process.CommunicationHandle
+
+-- | Gets a GHC Handle File description from the given OS Handle or POSIX
+--   fd.
+--   
+--   A <a>CommunicationHandle</a> is an abstraction over operating-system
+--   specific internal representation of a <a>Handle</a>, which can be
+--   communicated through a command-line interface.
+--   
+--   In a typical use case, the parent process creates a pipe, using e.g.
+--   <tt>createWeReadTheyWritePipe</tt> or
+--   <tt>createTheyReadWeWritePipe</tt>.
+--   
+--   <ul>
+--   <li>One end of the pipe is a <a>Handle</a>, which can be read
+--   from/written to by the parent process.</li>
+--   <li>The other end is a <a>CommunicationHandle</a>, which can be
+--   inherited by a child process. A reference to the handle can be
+--   serialised (using the <a>Show</a> instance), and passed to the child
+--   process. It is recommended to close the parent's reference to the
+--   <a>CommunicationHandle</a> using <a>closeCommunicationHandle</a> after
+--   it has been inherited by the child process.</li>
+--   <li>The child process can deserialise the <a>CommunicationHandle</a>
+--   (using the <a>Read</a> instance), and then use
+--   <tt>openCommunicationHandleWrite</tt> or
+--   <tt>openCommunicationHandleRead</tt> in order to retrieve a
+--   <a>Handle</a> which it can write to/read from.</li>
+--   </ul>
+--   
+--   <tt>readCreateProcessWithExitCodeCommunicationHandle</tt> provides a
+--   high-level API to this functionality. See there for example code.
+data CommunicationHandle
+
+-- | Turn the <a>CommunicationHandle</a> into a <a>Handle</a> that can be
+--   read from in the current process.
+--   
+--   The returned <a>Handle</a> does not have any finalizers attached to
+--   it; use <a>hClose</a> to close it.
+openCommunicationHandleRead :: CommunicationHandle -> IO Handle
+
+-- | Turn the <a>CommunicationHandle</a> into a <a>Handle</a> that can be
+--   written to in the current process.
+--   
+--   The returned <a>Handle</a> does not have any finalizers attached to
+--   it; use <a>hClose</a> to close it.
+openCommunicationHandleWrite :: CommunicationHandle -> IO Handle
+
+-- | Close a <a>CommunicationHandle</a>.
+--   
+--   Use this to close the <a>CommunicationHandle</a> in the parent process
+--   after the <a>CommunicationHandle</a> has been inherited by the child
+--   process.
+closeCommunicationHandle :: CommunicationHandle -> IO ()
+
+-- | Create a pipe <tt>(weRead,theyWrite)</tt> that the current process can
+--   read from, and whose write end can be passed to a child process in
+--   order to receive data from it.
+--   
+--   The returned <a>Handle</a> does not have any finalizers attached to
+--   it; use <a>hClose</a> to close it.
+--   
+--   See <a>CommunicationHandle</a>.
+createWeReadTheyWritePipe :: IO (Handle, CommunicationHandle)
+
+-- | Create a pipe <tt>(theyRead,weWrite)</tt> that the current process can
+--   write to, and whose read end can be passed to a child process in order
+--   to send data to it.
+--   
+--   The returned <a>Handle</a> does not have any finalizers attached to
+--   it; use <a>hClose</a> to close it.
+--   
+--   See <a>CommunicationHandle</a>.
+createTheyReadWeWritePipe :: IO (CommunicationHandle, Handle)
+
+-- | A version of <tt>readCreateProcessWithExitCode</tt> that communicates
+--   with the child process through a pair of <a>CommunicationHandle</a>s.
+--   
+--   Example usage:
+--   
+--   <pre>
+--   readCreateProcessWithExitCodeCommunicationHandle
+--     (\(chTheyRead, chTheyWrite) -&gt; proc "child-exe" [show chTheyRead, show chTheyWrite])
+--     (\ hWeRead -&gt; hGetContents hWeRead)
+--     (\ hWeWrite -&gt; hPut hWeWrite "xyz")
+--   </pre>
+--   
+--   where <tt>child-exe</tt> is a separate executable that is implemented
+--   as:
+--   
+--   <pre>
+--   main = do
+--     [chRead, chWrite] &lt;- getArgs
+--     hRead  &lt;- openCommunicationHandleRead  $ read chRead
+--     hWrite &lt;- openCommunicationHandleWrite $ read chWrite
+--     input &lt;- hGetContents hRead
+--     hPut hWrite $ someFn input
+--     hClose hWrite
+--   </pre>
+readCreateProcessWithExitCodeCommunicationHandle :: NFData a => ((CommunicationHandle, CommunicationHandle) -> CreateProcess) -> (Handle -> IO a) -> (Handle -> IO ()) -> IO (ExitCode, a)
 
 
 -- | Executing an external command.

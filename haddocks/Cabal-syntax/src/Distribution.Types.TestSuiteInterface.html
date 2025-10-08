@@ -1,34 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679494205"><span id="local-6989586621679494206"><span id="local-6989586621679494207"><span id="local-6989586621679494208"></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
-</span><span id="line-3"></span><span>
-</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html"><span class="hs-identifier">Distribution.Types.TestSuiteInterface</span></a></span><span>
-</span><span id="line-5"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier">TestSuiteInterface</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-6"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-10"></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.ModuleName.html"><span class="hs-identifier">Distribution.ModuleName</span></a></span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.TestType.html"><span class="hs-identifier">Distribution.Types.TestType</span></a></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>
-</span><span id="line-14"></span><span>
-</span><span id="line-15"></span><span class="hs-comment">-- | The test suite interfaces that are currently defined.</span><span>
-</span><span id="line-16"></span><span class="hs-comment">--</span><span>
-</span><span id="line-17"></span><span class="hs-comment">-- More interfaces may be defined in future, either new revisions or totally</span><span>
-</span><span id="line-18"></span><span class="hs-comment">-- new interfaces.</span><span>
-</span><span id="line-19"></span><span class="hs-keyword">data</span><span> </span><span id="TestSuiteInterface"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-var">TestSuiteInterface</span></a></span></span><span>
-</span><span id="line-20"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-comment">-- | Test interface \&quot;exitcode-stdio-1.0\&quot;. The test-suite takes the form</span><span>
-</span><span id="line-21"></span><span>    </span><span class="hs-comment">-- of an executable. It returns a zero exit code for success, non-zero for</span><span>
-</span><span id="line-22"></span><span>    </span><span class="hs-comment">-- failure. The stdout and stderr channels may be logged. Test tooling may</span><span>
-</span><span id="line-23"></span><span>    </span><span class="hs-comment">-- pass command line arguments and/or connect the stdin channel to the test.</span><span>
-</span><span id="line-24"></span><span>    </span><span id="TestSuiteExeV10"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteExeV10"><span class="hs-identifier hs-var">TestSuiteExeV10</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-comment">-- | Test interface \&quot;detailed-0.9\&quot;. The test-suite takes the form of a</span><span>
-</span><span id="line-26"></span><span>    </span><span class="hs-comment">-- library containing a designated module that exports \&quot;tests :: [Test]\&quot;.</span><span>
-</span><span id="line-27"></span><span>    </span><span id="TestSuiteLibV09"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteLibV09"><span class="hs-identifier hs-var">TestSuiteLibV09</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="annot"><a href="Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span>
-</span><span id="line-28"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-comment">-- | A test suite that does not conform to one of the above interfaces for</span><span>
-</span><span id="line-29"></span><span>    </span><span class="hs-comment">-- the given reason (e.g. unknown test type).</span><span>
-</span><span id="line-30"></span><span>    </span><span id="TestSuiteUnsupported"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteUnsupported"><span class="hs-identifier hs-var">TestSuiteUnsupported</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Types.TestType.html#TestType"><span class="hs-identifier hs-type">TestType</span></a></span><span>
-</span><span id="line-31"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679494213"><span id="local-6989586621679494228"><span class="annot"><span class="annottext">TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679512489"><span id="local-6989586621679512490"><span id="local-6989586621679512491"><span id="local-6989586621679512492"></span></span></span></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html"><span class="hs-identifier">Distribution.Types.TestSuiteInterface</span></a></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier">TestSuiteInterface</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.ModuleName.html"><span class="hs-identifier">Distribution.ModuleName</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.TestType.html"><span class="hs-identifier">Distribution.Types.TestType</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Utils.Path.html"><span class="hs-identifier">Distribution.Utils.Path</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- | The test suite interfaces that are currently defined.</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- More interfaces may be defined in future, either new revisions or totally</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- new interfaces.</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">data</span><span> </span><span id="TestSuiteInterface"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-var">TestSuiteInterface</span></a></span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-comment">-- | Test interface \&quot;exitcode-stdio-1.0\&quot;. The test-suite takes the form</span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-comment">-- of an executable. It returns a zero exit code for success, non-zero for</span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-comment">-- failure. The stdout and stderr channels may be logged. Test tooling may</span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-comment">-- pass command line arguments and/or connect the stdin channel to the test.</span><span>
+</span><span id="line-26"></span><span>    </span><span id="TestSuiteExeV10"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteExeV10"><span class="hs-identifier hs-var">TestSuiteExeV10</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Utils.Path.html#RelativePath"><span class="hs-identifier hs-type">RelativePath</span></a></span><span> </span><span class="annot"><a href="Distribution.Utils.Path.html#Source"><span class="hs-identifier hs-type">Source</span></a></span><span> </span><span class="annot"><a href="Distribution.Utils.Path.html#File"><span class="hs-identifier hs-type">File</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-comment">-- | Test interface \&quot;detailed-0.9\&quot;. The test-suite takes the form of a</span><span>
+</span><span id="line-28"></span><span>    </span><span class="hs-comment">-- library containing a designated module that exports \&quot;tests :: [Test]\&quot;.</span><span>
+</span><span id="line-29"></span><span>    </span><span id="TestSuiteLibV09"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteLibV09"><span class="hs-identifier hs-var">TestSuiteLibV09</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="annot"><a href="Distribution.ModuleName.html#ModuleName"><span class="hs-identifier hs-type">ModuleName</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="hs-comment">-- | A test suite that does not conform to one of the above interfaces for</span><span>
+</span><span id="line-31"></span><span>    </span><span class="hs-comment">-- the given reason (e.g. unknown test type).</span><span>
+</span><span id="line-32"></span><span>    </span><span id="TestSuiteUnsupported"><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteUnsupported"><span class="hs-identifier hs-var">TestSuiteUnsupported</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Types.TestType.html#TestType"><span class="hs-identifier hs-type">TestType</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679512497"><span id="local-6989586621679512511"><span class="annot"><span class="annottext">TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool
 (TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool)
 -&gt; (TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool)
 -&gt; Eq TestSuiteInterface
@@ -37,7 +39,7 @@ $c== :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool
 == :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool
 $c/= :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool
 /= :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494236"><span id="local-6989586621679494248"><span id="local-6989586621679494256"><span id="local-6989586621679494260"><span id="local-6989586621679494263"><span id="local-6989586621679494266"><span id="local-6989586621679494269"><span class="annot"><span class="annottext">Eq TestSuiteInterface
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679512518"><span id="local-6989586621679512529"><span id="local-6989586621679512536"><span id="local-6989586621679512540"><span id="local-6989586621679512543"><span id="local-6989586621679512546"><span id="local-6989586621679512549"><span class="annot"><span class="annottext">Eq TestSuiteInterface
 Eq TestSuiteInterface =&gt;
 (TestSuiteInterface -&gt; TestSuiteInterface -&gt; Ordering)
 -&gt; (TestSuiteInterface -&gt; TestSuiteInterface -&gt; Bool)
@@ -74,7 +76,7 @@ $cmax :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
 max :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
 $cmin :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
 min :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494278"><span id="local-6989586621679494280"><span class="annot"><span class="annottext">(forall x. TestSuiteInterface -&gt; Rep TestSuiteInterface x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679512557"><span id="local-6989586621679512559"><span class="annot"><span class="annottext">(forall x. TestSuiteInterface -&gt; Rep TestSuiteInterface x)
 -&gt; (forall x. Rep TestSuiteInterface x -&gt; TestSuiteInterface)
 -&gt; Generic TestSuiteInterface
 forall x. Rep TestSuiteInterface x -&gt; TestSuiteInterface
@@ -85,7 +87,7 @@ $cfrom :: forall x. TestSuiteInterface -&gt; Rep TestSuiteInterface x
 from :: forall x. TestSuiteInterface -&gt; Rep TestSuiteInterface x
 $cto :: forall x. Rep TestSuiteInterface x -&gt; TestSuiteInterface
 to :: forall x. Rep TestSuiteInterface x -&gt; TestSuiteInterface
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494286"><span id="local-6989586621679494290"><span id="local-6989586621679494293"><span id="local-6989586621679494317"><span class="annot"><span class="annottext">ReadPrec [TestSuiteInterface]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679512565"><span id="local-6989586621679512569"><span id="local-6989586621679512572"><span id="local-6989586621679512595"><span class="annot"><span class="annottext">ReadPrec [TestSuiteInterface]
 ReadPrec TestSuiteInterface
 Int -&gt; ReadS TestSuiteInterface
 ReadS [TestSuiteInterface]
@@ -105,22 +107,22 @@ $creadPrec :: ReadPrec TestSuiteInterface
 readPrec :: ReadPrec TestSuiteInterface
 $creadListPrec :: ReadPrec [TestSuiteInterface]
 readListPrec :: ReadPrec [TestSuiteInterface]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494325"><span id="local-6989586621679494341"><span id="local-6989586621679494345"><span class="annot"><span class="annottext">Int -&gt; TestSuiteInterface -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679512602"><span id="local-6989586621679512617"><span id="local-6989586621679512621"><span class="annot"><span class="annottext">Int -&gt; TestSuiteInterface -&gt; ShowS
 [TestSuiteInterface] -&gt; ShowS
-TestSuiteInterface -&gt; FilePath
+TestSuiteInterface -&gt; String
 (Int -&gt; TestSuiteInterface -&gt; ShowS)
--&gt; (TestSuiteInterface -&gt; FilePath)
+-&gt; (TestSuiteInterface -&gt; String)
 -&gt; ([TestSuiteInterface] -&gt; ShowS)
 -&gt; Show TestSuiteInterface
 forall a.
-(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; FilePath) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
 $cshowsPrec :: Int -&gt; TestSuiteInterface -&gt; ShowS
 showsPrec :: Int -&gt; TestSuiteInterface -&gt; ShowS
-$cshow :: TestSuiteInterface -&gt; FilePath
-show :: TestSuiteInterface -&gt; FilePath
+$cshow :: TestSuiteInterface -&gt; String
+show :: TestSuiteInterface -&gt; String
 $cshowList :: [TestSuiteInterface] -&gt; ShowS
 showList :: [TestSuiteInterface] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494353"><span id="local-6989586621679494365"><span id="local-6989586621679494373"><span id="local-6989586621679494375"><span id="local-6989586621679494377"><span id="local-6989586621679494383"><span id="local-6989586621679494388"><span id="local-6989586621679494391"><span id="local-6989586621679494394"><span id="local-6989586621679494397"><span id="local-6989586621679494400"><span id="local-6989586621679494403"><span id="local-6989586621679494408"><span id="local-6989586621679494413"><span class="annot"><span class="annottext">Typeable TestSuiteInterface
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679512628"><span id="local-6989586621679512642"><span id="local-6989586621679512652"><span id="local-6989586621679512654"><span id="local-6989586621679512656"><span id="local-6989586621679512662"><span id="local-6989586621679512667"><span id="local-6989586621679512670"><span id="local-6989586621679512673"><span id="local-6989586621679512676"><span id="local-6989586621679512679"><span id="local-6989586621679512682"><span id="local-6989586621679512687"><span id="local-6989586621679512692"><span class="annot"><span class="annottext">Typeable TestSuiteInterface
 Typeable TestSuiteInterface =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -314,36 +316,36 @@ MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d)
 -&gt; TestSuiteInterface -&gt; m TestSuiteInterface
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679494424"><span id="local-6989586621679494431"><span id="local-6989586621679494437"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span></span></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679494510"><span id="local-6989586621679494517"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span></span><span>
-</span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679494610"><span class="annot"><span class="annottext">rnf :: TestSuiteInterface -&gt; ()
-</span><a href="#local-6989586621679494610"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuiteInterface -&gt; ()
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679512702"><span id="local-6989586621679512709"><span id="local-6989586621679512715"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span></span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679512785"><span id="local-6989586621679512792"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679512884"><span class="annot"><span class="annottext">rnf :: TestSuiteInterface -&gt; ()
+</span><a href="#local-6989586621679512884"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuiteInterface -&gt; ()
 forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><a href="Distribution.Compat.Prelude.html#genericRnf"><span class="hs-identifier hs-var">genericRnf</span></a></span><span>
-</span><span id="line-37"></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679494619"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-39"></span><span>  </span><span id="local-6989586621679494625"><span class="annot"><span class="annottext">mempty :: TestSuiteInterface
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679512893"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-41"></span><span>  </span><span id="local-6989586621679512899"><span class="annot"><span class="annottext">mempty :: TestSuiteInterface
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestType -&gt; TestSuiteInterface
-</span><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteUnsupported"><span class="hs-identifier hs-var">TestSuiteUnsupported</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; Version -&gt; TestType
-</span><a href="Distribution.Types.TestType.html#TestTypeUnknown"><span class="hs-identifier hs-var">TestTypeUnknown</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteUnsupported"><span class="hs-identifier hs-var">TestSuiteUnsupported</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Version -&gt; TestType
+</span><a href="Distribution.Types.TestType.html#TestTypeUnknown"><span class="hs-identifier hs-var">TestTypeUnknown</span></a></span><span> </span><span class="annot"><span class="annottext">String
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">Version
 </span><a href="Distribution.Types.Version.html#nullVersion"><span class="hs-identifier hs-var">nullVersion</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>  </span><span id="local-6989586621679494629"><span class="annot"><span class="annottext">mappend :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
+</span><span id="line-42"></span><span>  </span><span id="local-6989586621679512903"><span class="annot"><span class="annottext">mappend :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
-</span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679494632"><span id="local-6989586621679494635"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-43"></span><span>  </span><span id="local-6989586621679494640"><span class="annot"><span class="annottext">TestSuiteInterface
-</span><a href="#local-6989586621679494640"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679494641"><span class="annot"><span class="annottext">&lt;&gt; :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679512906"><span id="local-6989586621679512909"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteInterface"><span class="hs-identifier hs-type">TestSuiteInterface</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679512914"><span class="annot"><span class="annottext">TestSuiteInterface
+</span><a href="#local-6989586621679512914"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679512915"><span class="annot"><span class="annottext">&lt;&gt; :: TestSuiteInterface -&gt; TestSuiteInterface -&gt; TestSuiteInterface
 </span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.TestSuiteInterface.html#TestSuiteUnsupported"><span class="hs-identifier hs-type">TestSuiteUnsupported</span></a></span><span> </span><span class="annot"><span class="annottext">TestType
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuiteInterface
-</span><a href="#local-6989586621679494640"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-44"></span><span>  </span><span class="annot"><span class="annottext">TestSuiteInterface
-</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span id="local-6989586621679494642"><span class="annot"><span class="annottext">TestSuiteInterface
-</span><a href="#local-6989586621679494642"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuiteInterface
-</span><a href="#local-6989586621679494642"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-45"></span></pre></body></html>
+</span><a href="#local-6989586621679512914"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><span class="annottext">TestSuiteInterface
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span id="local-6989586621679512916"><span class="annot"><span class="annottext">TestSuiteInterface
+</span><a href="#local-6989586621679512916"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuiteInterface
+</span><a href="#local-6989586621679512916"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-47"></span></pre></body></html>

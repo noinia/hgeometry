@@ -13,7 +13,7 @@
 --   are constructed in such a way that while ghc-pkg depends on Cabal, the
 --   GHC library and program do not have to depend on Cabal.
 @package ghc-boot
-@version 9.10.1
+@version 9.12.2
 
 
 -- | Note [Base Dir] ~~~~~~~~~~~~~~~~~ GHC's base directory or top
@@ -63,7 +63,7 @@ instance GHC.Internal.Data.Traversable.Traversable GHC.Data.SizedSeq.SizedSeq
 -- | See <tt>GHC.LanguageExtensions</tt> for an explanation on why this is
 --   needed
 module GHC.ForeignSrcLang
-instance Data.Binary.Class.Binary GHC.ForeignSrcLang.Type.ForeignSrcLang
+instance Data.Binary.Class.Binary GHC.Internal.ForeignSrcLang.ForeignSrcLang
 
 
 -- | See GHC #10762 and #15021.
@@ -84,7 +84,7 @@ configureHandleEncoding :: IO ()
 --   <tt>base</tt>. For this reason <tt>template-haskell</tt> depends upon
 --   <tt>ghc-boot-th</tt>, not <tt>ghc-boot</tt>.
 module GHC.LanguageExtensions
-instance Data.Binary.Class.Binary GHC.LanguageExtensions.Type.Extension
+instance Data.Binary.Class.Binary GHC.Internal.LanguageExtensions.Extension
 
 module GHC.Platform.Host
 hostPlatformArch :: Arch
@@ -122,13 +122,14 @@ type RawSettings = Map String String
 
 -- | Read target Arch/OS from the settings
 getTargetArchOS :: FilePath -> RawSettings -> Either String ArchOS
+getGlobalPackageDb :: FilePath -> RawSettings -> Either String FilePath
 getRawSetting :: FilePath -> RawSettings -> String -> Either String String
 getRawFilePathSetting :: FilePath -> FilePath -> RawSettings -> String -> Either String String
 getRawBooleanSetting :: FilePath -> RawSettings -> String -> Either String Bool
 readRawSetting :: (Show a, Read a) => FilePath -> RawSettings -> String -> Either String a
 
 
--- | Simple, non-streaming UTF-8 codecs.
+-- | Simple, non-streaming Modified UTF-8 codecs.
 --   
 --   This is one of several UTF-8 implementations provided by GHC; see Note
 --   [GHC's many UTF-8 implementations] in <a>GHC.Encoding.UTF8</a> for an

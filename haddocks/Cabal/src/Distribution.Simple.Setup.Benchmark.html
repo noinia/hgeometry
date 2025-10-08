@@ -1,71 +1,79 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
-</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
-</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
-</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
-</span><span id="line-6"></span><span>
-</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
-</span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Benchmark</span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
-</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
-</span><span id="line-14"></span><span class="hs-comment">--</span><span>
-</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE PatternSynonyms #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ViewPatterns #-}</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Benchmark</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- License     :  BSD3</span><span>
 </span><span id="line-17"></span><span class="hs-comment">--</span><span>
-</span><span id="line-18"></span><span class="hs-comment">-- Definition of the benchmarking command-line options.</span><span>
-</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html"><span class="hs-identifier">Distribution.Simple.Setup.Benchmark</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier">BenchmarkFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#emptyBenchmarkFlags"><span class="hs-identifier">emptyBenchmarkFlags</span></a></span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#defaultBenchmarkFlags"><span class="hs-identifier">defaultBenchmarkFlags</span></a></span><span>
-</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommand"><span class="hs-identifier">benchmarkCommand</span></a></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions%27"><span class="hs-identifier">benchmarkOptions'</span></a></span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html"><span class="hs-identifier">Distribution.Simple.InstallDirs</span></a></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
-</span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Definition of the benchmarking command-line options.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html"><span class="hs-identifier">Distribution.Simple.Setup.Benchmark</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier">BenchmarkFlags</span></a></span><span>
+</span><span id="line-25"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkCommonFlags"><span class="hs-identifier">BenchmarkCommonFlags</span></a></span><span>
+</span><span id="line-26"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkVerbosity"><span class="hs-identifier">benchmarkVerbosity</span></a></span><span>
+</span><span id="line-27"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkDistPref"><span class="hs-identifier">benchmarkDistPref</span></a></span><span>
+</span><span id="line-28"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCabalFilePath"><span class="hs-identifier">benchmarkCabalFilePath</span></a></span><span>
+</span><span id="line-29"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkWorkingDir"><span class="hs-identifier">benchmarkWorkingDir</span></a></span><span>
+</span><span id="line-30"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkTargets"><span class="hs-identifier">benchmarkTargets</span></a></span><span>
+</span><span id="line-31"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="hs-glyph">..</span><span>
+</span><span id="line-32"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#emptyBenchmarkFlags"><span class="hs-identifier">emptyBenchmarkFlags</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#defaultBenchmarkFlags"><span class="hs-identifier">defaultBenchmarkFlags</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommand"><span class="hs-identifier">benchmarkCommand</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions%27"><span class="hs-identifier">benchmarkOptions'</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
-</span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span class="annot"><span class="hs-comment">-- * Benchmark flags</span></span><span>
-</span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
-</span><span id="line-44"></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">data</span><span> </span><span id="BenchmarkFlags"><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-var">BenchmarkFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="BenchmarkFlags"><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-var">BenchmarkFlags</span></a></span></span><span>
-</span><span id="line-46"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="benchmarkDistPref"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkDistPref"><span class="hs-identifier hs-var hs-var">benchmarkDistPref</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="benchmarkVerbosity"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkVerbosity"><span class="hs-identifier hs-var hs-var">benchmarkVerbosity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
-</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="benchmarkOptions"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; [PathTemplate]
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html"><span class="hs-identifier">Distribution.Simple.InstallDirs</span></a></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html"><span class="hs-identifier">Distribution.Utils.Path</span></a></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="annot"><span class="hs-comment">-- * Benchmark flags</span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">data</span><span> </span><span id="BenchmarkFlags"><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-var">BenchmarkFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="BenchmarkFlags"><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-var">BenchmarkFlags</span></a></span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="benchmarkCommonFlags"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommonFlags"><span class="hs-identifier hs-var hs-var">benchmarkCommonFlags</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#CommonSetupFlags"><span class="hs-identifier hs-type">CommonSetupFlags</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="benchmarkOptions"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; [PathTemplate]
 </span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var hs-var">benchmarkOptions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.InstallDirs.html#PathTemplate"><span class="hs-identifier hs-type">PathTemplate</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-50"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478780"><span id="local-6989586621679478792"><span id="local-6989586621679478796"><span class="annot"><span class="annottext">Int -&gt; BenchmarkFlags -&gt; ShowS
+</span><span id="line-58"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679540437"><span id="local-6989586621679540446"><span id="local-6989586621679540450"><span class="annot"><span class="annottext">Int -&gt; BenchmarkFlags -&gt; ShowS
 [BenchmarkFlags] -&gt; ShowS
-BenchmarkFlags -&gt; FilePath
+BenchmarkFlags -&gt; String
 (Int -&gt; BenchmarkFlags -&gt; ShowS)
--&gt; (BenchmarkFlags -&gt; FilePath)
+-&gt; (BenchmarkFlags -&gt; String)
 -&gt; ([BenchmarkFlags] -&gt; ShowS)
 -&gt; Show BenchmarkFlags
 forall a.
-(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; FilePath) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
 $cshowsPrec :: Int -&gt; BenchmarkFlags -&gt; ShowS
 showsPrec :: Int -&gt; BenchmarkFlags -&gt; ShowS
-$cshow :: BenchmarkFlags -&gt; FilePath
-show :: BenchmarkFlags -&gt; FilePath
+$cshow :: BenchmarkFlags -&gt; String
+show :: BenchmarkFlags -&gt; String
 $cshowList :: [BenchmarkFlags] -&gt; ShowS
 showList :: [BenchmarkFlags] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478805"><span id="local-6989586621679478807"><span class="annot"><span class="annottext">(forall x. BenchmarkFlags -&gt; Rep BenchmarkFlags x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679540456"><span id="local-6989586621679540458"><span class="annot"><span class="annottext">(forall x. BenchmarkFlags -&gt; Rep BenchmarkFlags x)
 -&gt; (forall x. Rep BenchmarkFlags x -&gt; BenchmarkFlags)
 -&gt; Generic BenchmarkFlags
 forall x. Rep BenchmarkFlags x -&gt; BenchmarkFlags
@@ -77,113 +85,135 @@ from :: forall x. BenchmarkFlags -&gt; Rep BenchmarkFlags x
 $cto :: forall x. Rep BenchmarkFlags x -&gt; BenchmarkFlags
 to :: forall x. Rep BenchmarkFlags x -&gt; BenchmarkFlags
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
-</span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478813"><span id="local-6989586621679478820"><span id="local-6989586621679478826"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span></span></span><span>
-</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478875"><span id="local-6989586621679478882"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span></span><span>
-</span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#defaultBenchmarkFlags"><span class="hs-identifier hs-type">defaultBenchmarkFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
-</span><span id="line-56"></span><span id="defaultBenchmarkFlags"><span class="annot"><span class="annottext">defaultBenchmarkFlags :: BenchmarkFlags
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkCommonFlags"><span class="hs-identifier hs-type">BenchmarkCommonFlags</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dist"><span class="hs-identifier hs-type">Dist</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#CWD"><span class="hs-identifier hs-type">CWD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#File"><span class="hs-identifier hs-type">File</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">pattern</span><span> </span><span id="BenchmarkCommonFlags"><span id="%24mBenchmarkCommonFlags"><span class="annot"><span class="annottext">$mBenchmarkCommonFlags :: forall {r}.
+BenchmarkFlags
+-&gt; (Flag Verbosity
+    -&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+    -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+    -&gt; Flag (SymbolicPath Pkg 'File)
+    -&gt; [String]
+    -&gt; r)
+-&gt; ((# #) -&gt; r)
+-&gt; r
+</span><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkCommonFlags"><span class="hs-identifier hs-var hs-var">BenchmarkCommonFlags</span></a></span></span></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="benchmarkVerbosity"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkVerbosity"><span class="hs-identifier hs-var hs-var hs-var">benchmarkVerbosity</span></a></span></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="benchmarkDistPref"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkDistPref"><span class="hs-identifier hs-var hs-var hs-var">benchmarkDistPref</span></a></span></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="benchmarkWorkingDir"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkWorkingDir"><span class="hs-identifier hs-var hs-var hs-var">benchmarkWorkingDir</span></a></span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="benchmarkCabalFilePath"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag (SymbolicPath Pkg 'File)
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCabalFilePath"><span class="hs-identifier hs-var hs-var hs-var">benchmarkCabalFilePath</span></a></span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="benchmarkTargets"><span class="annot"><span class="annottext">BenchmarkFlags -&gt; [String]
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkTargets"><span class="hs-identifier hs-var hs-var hs-var">benchmarkTargets</span></a></span></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommonFlags"><span class="hs-identifier hs-var">benchmarkCommonFlags</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-76"></span><span>      </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#CommonSetupFlags"><span class="hs-identifier hs-type">CommonSetupFlags</span></a></span><span>
+</span><span id="line-77"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupVerbosity"><span class="hs-identifier hs-var">setupVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679540464"><span class="annot"><a href="#local-6989586621679540464"><span class="hs-identifier hs-var">benchmarkVerbosity</span></a></span></span><span>
+</span><span id="line-78"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupDistPref"><span class="hs-identifier hs-var">setupDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679540465"><span class="annot"><a href="#local-6989586621679540465"><span class="hs-identifier hs-var">benchmarkDistPref</span></a></span></span><span>
+</span><span id="line-79"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupWorkingDir"><span class="hs-identifier hs-var">setupWorkingDir</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679540466"><span class="annot"><a href="#local-6989586621679540466"><span class="hs-identifier hs-var">benchmarkWorkingDir</span></a></span></span><span>
+</span><span id="line-80"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupCabalFilePath"><span class="hs-identifier hs-var">setupCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679540467"><span class="annot"><a href="#local-6989586621679540467"><span class="hs-identifier hs-var">benchmarkCabalFilePath</span></a></span></span><span>
+</span><span id="line-81"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupTargets"><span class="hs-identifier hs-var">setupTargets</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679540468"><span class="annot"><a href="#local-6989586621679540468"><span class="hs-identifier hs-var">benchmarkTargets</span></a></span></span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679540476"><span id="local-6989586621679540483"><span id="local-6989586621679540489"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span></span></span><span>
+</span><span id="line-86"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679540522"><span id="local-6989586621679540529"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#defaultBenchmarkFlags"><span class="hs-identifier hs-type">defaultBenchmarkFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
+</span><span id="line-89"></span><span id="defaultBenchmarkFlags"><span class="annot"><span class="annottext">defaultBenchmarkFlags :: BenchmarkFlags
 </span><a href="Distribution.Simple.Setup.Benchmark.html#defaultBenchmarkFlags"><span class="hs-identifier hs-var hs-var">defaultBenchmarkFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-57"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
-</span><span id="line-58"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">benchmarkDistPref :: Flag FilePath
-</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkDistPref"><span class="hs-identifier hs-var">benchmarkDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
-forall a. Flag a
-</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
-</span><span id="line-59"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">benchmarkVerbosity :: Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkVerbosity"><span class="hs-identifier hs-var">benchmarkVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; Flag Verbosity
-forall a. a -&gt; Flag a
-</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="Distribution.Verbosity.html#normal"><span class="hs-identifier hs-var">normal</span></a></span><span>
-</span><span id="line-60"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">benchmarkOptions :: [PathTemplate]
+</span><span id="line-90"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">benchmarkCommonFlags :: CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommonFlags"><span class="hs-identifier hs-var">benchmarkCommonFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Common.html#defaultCommonSetupFlags"><span class="hs-identifier hs-var">defaultCommonSetupFlags</span></a></span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">benchmarkOptions :: [PathTemplate]
 </span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var">benchmarkOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-61"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-62"></span><span>
-</span><span id="line-63"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommand"><span class="hs-identifier hs-type">benchmarkCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
-</span><span id="line-64"></span><span id="benchmarkCommand"><span class="annot"><span class="annottext">benchmarkCommand :: CommandUI BenchmarkFlags
+</span><span id="line-93"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommand"><span class="hs-identifier hs-type">benchmarkCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
+</span><span id="line-96"></span><span id="benchmarkCommand"><span class="annot"><span class="annottext">benchmarkCommand :: CommandUI BenchmarkFlags
 </span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommand"><span class="hs-identifier hs-var hs-var">benchmarkCommand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-65"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
-</span><span id="line-66"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: FilePath
-</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-97"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: String
+</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;bench&quot;</span></span><span>
-</span><span id="line-67"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: FilePath
+</span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: String
 </span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-68"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-100"></span><span>        </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Run all/specific benchmarks.&quot;</span></span><span>
-</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><span id="line-101"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
 </span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679478936"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679478936"><span class="hs-identifier hs-var">_pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-70"></span><span>        </span><span class="annot"><span class="annottext">ShowS
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Generic.html/Distribution.Utils.Generic.html#wrapText"><span class="hs-identifier hs-var">wrapText</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679540571"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679540571"><span class="hs-identifier hs-var">_pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-102"></span><span>        </span><span class="annot"><span class="annottext">ShowS
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Generic.html#wrapText"><span class="hs-identifier hs-var">wrapText</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-71"></span><span>          </span><span class="annot"><span class="annottext">ShowS
-</span><a href="Distribution.Simple.Setup.Common.html#testOrBenchmarkHelpText"><span class="hs-identifier hs-var">testOrBenchmarkHelpText</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-103"></span><span>          </span><span class="annot"><span class="annottext">ShowS
+</span><a href="Distribution.Simple.Setup.Common.html#testOrBenchmarkHelpText"><span class="hs-identifier hs-var">testOrBenchmarkHelpText</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;benchmark&quot;</span></span><span>
-</span><span id="line-72"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
-</span><a href="#local-6989586621679478939"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
+</span><span id="line-104"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-73"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
-</span><a href="#local-6989586621679478940"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-74"></span><span>        </span><span class="annot"><span class="annottext">FilePath -&gt; [FilePath] -&gt; ShowS
+</span><span id="line-105"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-106"></span><span>        </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; ShowS
 </span><a href="Distribution.Simple.Command.html#usageAlternatives"><span class="hs-identifier hs-var">usageAlternatives</span></a></span><span>
-</span><span id="line-75"></span><span>          </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-107"></span><span>          </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;bench&quot;</span></span><span>
-</span><span id="line-76"></span><span>          </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-108"></span><span>          </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;[FLAGS]&quot;</span></span><span>
-</span><span id="line-77"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-109"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;BENCHCOMPONENTS [FLAGS]&quot;</span></span><span>
-</span><span id="line-78"></span><span>          </span><span class="hs-special">]</span><span>
-</span><span id="line-79"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: BenchmarkFlags
-</span><a href="#local-6989586621679478942"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
+</span><span id="line-110"></span><span>          </span><span class="hs-special">]</span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: BenchmarkFlags
+</span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
 </span><a href="Distribution.Simple.Setup.Benchmark.html#defaultBenchmarkFlags"><span class="hs-identifier hs-var">defaultBenchmarkFlags</span></a></span><span>
-</span><span id="line-80"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField BenchmarkFlags]
-</span><a href="#local-6989586621679478943"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs -&gt; [OptionField BenchmarkFlags]
+</span><span id="line-112"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField BenchmarkFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs -&gt; [OptionField BenchmarkFlags]
 </span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions%27"><span class="hs-identifier hs-var">benchmarkOptions'</span></a></span><span>
-</span><span id="line-81"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-82"></span><span>
-</span><span id="line-83"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions%27"><span class="hs-identifier hs-type">benchmarkOptions'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#ShowOrParseArgs"><span class="hs-identifier hs-type">ShowOrParseArgs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Command.html#OptionField"><span class="hs-identifier hs-type">OptionField</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-84"></span><span id="benchmarkOptions%27"><span class="annot"><span class="annottext">benchmarkOptions' :: ShowOrParseArgs -&gt; [OptionField BenchmarkFlags]
-</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions%27"><span class="hs-identifier hs-var hs-var">benchmarkOptions'</span></a></span></span><span> </span><span id="local-6989586621679478944"><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679478944"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-85"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(BenchmarkFlags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; BenchmarkFlags -&gt; BenchmarkFlags)
--&gt; OptionField BenchmarkFlags
-forall flags.
-(flags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span>
-</span><span id="line-86"></span><span>      </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkVerbosity"><span class="hs-identifier hs-var">benchmarkVerbosity</span></a></span><span>
-</span><span id="line-87"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478946"><span class="annot"><span class="annottext">Flag Verbosity
-</span><a href="#local-6989586621679478946"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478947"><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478947"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478947"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkVerbosity"><span class="hs-identifier hs-var">benchmarkVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478946"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-88"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(BenchmarkFlags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; BenchmarkFlags -&gt; BenchmarkFlags)
+</span><span id="line-113"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions%27"><span class="hs-identifier hs-type">benchmarkOptions'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#ShowOrParseArgs"><span class="hs-identifier hs-type">ShowOrParseArgs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Command.html#OptionField"><span class="hs-identifier hs-type">OptionField</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-116"></span><span id="benchmarkOptions%27"><span class="annot"><span class="annottext">benchmarkOptions' :: ShowOrParseArgs -&gt; [OptionField BenchmarkFlags]
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions%27"><span class="hs-identifier hs-var hs-var">benchmarkOptions'</span></a></span></span><span> </span><span id="local-6989586621679540579"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679540579"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-117"></span><span>  </span><span class="annot"><span class="annottext">(BenchmarkFlags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; BenchmarkFlags -&gt; BenchmarkFlags)
 -&gt; ShowOrParseArgs
--&gt; OptionField BenchmarkFlags
+-&gt; [OptionField BenchmarkFlags]
+-&gt; [OptionField BenchmarkFlags]
 forall flags.
-(flags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; flags -&gt; flags)
+(flags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; flags -&gt; flags)
 -&gt; ShowOrParseArgs
--&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
-</span><span id="line-89"></span><span>      </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkDistPref"><span class="hs-identifier hs-var">benchmarkDistPref</span></a></span><span>
-</span><span id="line-90"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478949"><span class="annot"><span class="annottext">Flag FilePath
-</span><a href="#local-6989586621679478949"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679478950"><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478950"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478950"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkDistPref"><span class="hs-identifier hs-var">benchmarkDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478949"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-91"></span><span>      </span><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679478944"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
-</span><span id="line-92"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+-&gt; [OptionField flags]
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#withCommonSetupOptions"><span class="hs-identifier hs-var">withCommonSetupOptions</span></a></span><span>
+</span><span id="line-118"></span><span>    </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommonFlags"><span class="hs-identifier hs-var">benchmarkCommonFlags</span></a></span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679540581"><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="#local-6989586621679540581"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679540582"><span class="annot"><span class="annottext">BenchmarkFlags
+</span><a href="#local-6989586621679540582"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
+</span><a href="#local-6989586621679540582"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkCommonFlags"><span class="hs-identifier hs-var">benchmarkCommonFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679540581"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>    </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679540579"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (BenchmarkFlags -&gt; [PathTemplate])
 -&gt; ([PathTemplate] -&gt; BenchmarkFlags -&gt; BenchmarkFlags)
 -&gt; MkOptDescr
@@ -192,65 +222,65 @@ forall flags.
      BenchmarkFlags
 -&gt; OptionField BenchmarkFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-93"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-94"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-122"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-123"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;benchmark-options&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-95"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-124"></span><span>        </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;give extra options to benchmark executables &quot;</span></span><span>
-</span><span id="line-96"></span><span>          </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span id="line-125"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;(name templates can use $pkgid, $compiler, &quot;</span></span><span>
-</span><span id="line-97"></span><span>          </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span id="line-126"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;$os, $arch, $benchmark)&quot;</span></span><span>
-</span><span id="line-98"></span><span>      </span><span class="hs-special">)</span><span>
-</span><span id="line-99"></span><span>      </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; [PathTemplate]
+</span><span id="line-127"></span><span>        </span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>        </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; [PathTemplate]
 </span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var">benchmarkOptions</span></a></span><span>
-</span><span id="line-100"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478952"><span class="annot"><span class="annottext">[PathTemplate]
-</span><a href="#local-6989586621679478952"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478953"><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478953"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478953"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var">benchmarkOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478952"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-101"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; (FilePath -&gt; [PathTemplate])
--&gt; ([PathTemplate] -&gt; [FilePath])
+</span><span id="line-129"></span><span>        </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679540584"><span class="annot"><span class="annottext">[PathTemplate]
+</span><a href="#local-6989586621679540584"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679540585"><span class="annot"><span class="annottext">BenchmarkFlags
+</span><a href="#local-6989586621679540585"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
+</span><a href="#local-6989586621679540585"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var">benchmarkOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679540584"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>        </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (String -&gt; [PathTemplate])
+-&gt; ([PathTemplate] -&gt; [String])
 -&gt; MkOptDescr
      (BenchmarkFlags -&gt; [PathTemplate])
      ([PathTemplate] -&gt; BenchmarkFlags -&gt; BenchmarkFlags)
      BenchmarkFlags
 forall b a.
 Monoid b =&gt;
-FilePath
--&gt; (FilePath -&gt; b)
--&gt; (b -&gt; [FilePath])
+String
+-&gt; (String -&gt; b)
+-&gt; (b -&gt; [String])
 -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Command.html#reqArg%27"><span class="hs-identifier hs-var">reqArg'</span></a></span><span>
-</span><span id="line-102"></span><span>          </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-131"></span><span>            </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;TEMPLATES&quot;</span></span><span>
-</span><span id="line-103"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(FilePath -&gt; PathTemplate) -&gt; [FilePath] -&gt; [PathTemplate]
+</span><span id="line-132"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(String -&gt; PathTemplate) -&gt; [String] -&gt; [PathTemplate]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; PathTemplate
-</span><a href="Distribution.Simple.InstallDirs.html#toPathTemplate"><span class="hs-identifier hs-var">toPathTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">([FilePath] -&gt; [PathTemplate])
--&gt; (FilePath -&gt; [FilePath]) -&gt; FilePath -&gt; [PathTemplate]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; PathTemplate
+</span><a href="Distribution.Simple.InstallDirs.html#toPathTemplate"><span class="hs-identifier hs-var">toPathTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [PathTemplate])
+-&gt; (String -&gt; [String]) -&gt; String -&gt; [PathTemplate]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; [FilePath]
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
 </span><a href="Distribution.Simple.Setup.Common.html#splitArgs"><span class="hs-identifier hs-var">splitArgs</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-104"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[FilePath] -&gt; [PathTemplate] -&gt; [FilePath]
+</span><span id="line-133"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[String] -&gt; [PathTemplate] -&gt; [String]
 forall a b. a -&gt; b -&gt; a
 </span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-105"></span><span>      </span><span class="hs-special">)</span><span>
-</span><span id="line-106"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+</span><span id="line-134"></span><span>        </span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (BenchmarkFlags -&gt; [PathTemplate])
 -&gt; ([PathTemplate] -&gt; BenchmarkFlags -&gt; BenchmarkFlags)
 -&gt; MkOptDescr
@@ -259,84 +289,84 @@ forall a b. a -&gt; b -&gt; a
      BenchmarkFlags
 -&gt; OptionField BenchmarkFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-107"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-108"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-136"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-137"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;benchmark-option&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-109"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-138"></span><span>        </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;give extra option to benchmark executables &quot;</span></span><span>
-</span><span id="line-110"></span><span>          </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span id="line-139"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;(no need to quote options containing spaces, &quot;</span></span><span>
-</span><span id="line-111"></span><span>          </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span id="line-140"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;name template can use $pkgid, $compiler, &quot;</span></span><span>
-</span><span id="line-112"></span><span>          </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span id="line-141"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;$os, $arch, $benchmark)&quot;</span></span><span>
-</span><span id="line-113"></span><span>      </span><span class="hs-special">)</span><span>
-</span><span id="line-114"></span><span>      </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; [PathTemplate]
+</span><span id="line-142"></span><span>        </span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>        </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; [PathTemplate]
 </span><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var">benchmarkOptions</span></a></span><span>
-</span><span id="line-115"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478959"><span class="annot"><span class="annottext">[PathTemplate]
-</span><a href="#local-6989586621679478959"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478960"><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478960"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
-</span><a href="#local-6989586621679478960"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var">benchmarkOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478959"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-116"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; (FilePath -&gt; [PathTemplate])
--&gt; ([PathTemplate] -&gt; [FilePath])
+</span><span id="line-144"></span><span>        </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679540591"><span class="annot"><span class="annottext">[PathTemplate]
+</span><a href="#local-6989586621679540591"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679540592"><span class="annot"><span class="annottext">BenchmarkFlags
+</span><a href="#local-6989586621679540592"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
+</span><a href="#local-6989586621679540592"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#benchmarkOptions"><span class="hs-identifier hs-var">benchmarkOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679540591"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span>        </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (String -&gt; [PathTemplate])
+-&gt; ([PathTemplate] -&gt; [String])
 -&gt; MkOptDescr
      (BenchmarkFlags -&gt; [PathTemplate])
      ([PathTemplate] -&gt; BenchmarkFlags -&gt; BenchmarkFlags)
      BenchmarkFlags
 forall b a.
 Monoid b =&gt;
-FilePath
--&gt; (FilePath -&gt; b)
--&gt; (b -&gt; [FilePath])
+String
+-&gt; (String -&gt; b)
+-&gt; (b -&gt; [String])
 -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Command.html#reqArg%27"><span class="hs-identifier hs-var">reqArg'</span></a></span><span>
-</span><span id="line-117"></span><span>          </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-146"></span><span>            </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;TEMPLATE&quot;</span></span><span>
-</span><span id="line-118"></span><span>          </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478961"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679478961"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath -&gt; PathTemplate
-</span><a href="Distribution.Simple.InstallDirs.html#toPathTemplate"><span class="hs-identifier hs-var">toPathTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679478961"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-119"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(PathTemplate -&gt; FilePath) -&gt; [PathTemplate] -&gt; [FilePath]
+</span><span id="line-147"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679540593"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679540593"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String -&gt; PathTemplate
+</span><a href="Distribution.Simple.InstallDirs.html#toPathTemplate"><span class="hs-identifier hs-var">toPathTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679540593"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(PathTemplate -&gt; String) -&gt; [PathTemplate] -&gt; [String]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">PathTemplate -&gt; FilePath
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">PathTemplate -&gt; String
 </span><a href="Distribution.Simple.InstallDirs.html#fromPathTemplate"><span class="hs-identifier hs-var">fromPathTemplate</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-120"></span><span>      </span><span class="hs-special">)</span><span>
-</span><span id="line-121"></span><span>  </span><span class="hs-special">]</span><span>
-</span><span id="line-122"></span><span>
-</span><span id="line-123"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#emptyBenchmarkFlags"><span class="hs-identifier hs-type">emptyBenchmarkFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
-</span><span id="line-124"></span><span id="emptyBenchmarkFlags"><span class="annot"><span class="annottext">emptyBenchmarkFlags :: BenchmarkFlags
+</span><span id="line-149"></span><span>        </span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>    </span><span class="hs-special">]</span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#emptyBenchmarkFlags"><span class="hs-identifier hs-type">emptyBenchmarkFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span><span>
+</span><span id="line-153"></span><span id="emptyBenchmarkFlags"><span class="annot"><span class="annottext">emptyBenchmarkFlags :: BenchmarkFlags
 </span><a href="Distribution.Simple.Setup.Benchmark.html#emptyBenchmarkFlags"><span class="hs-identifier hs-var hs-var">emptyBenchmarkFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-125"></span><span>
-</span><span id="line-126"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478969"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-127"></span><span>  </span><span id="local-6989586621679478995"><span class="annot"><span class="annottext">mempty :: BenchmarkFlags
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679540601"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-156"></span><span>  </span><span id="local-6989586621679540622"><span class="annot"><span class="annottext">mempty :: BenchmarkFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags
 forall a. (Generic a, GMonoid (Rep a)) =&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
-</span><span id="line-128"></span><span>  </span><span id="local-6989586621679478998"><span class="annot"><span class="annottext">mappend :: BenchmarkFlags -&gt; BenchmarkFlags -&gt; BenchmarkFlags
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-157"></span><span>  </span><span id="local-6989586621679540625"><span class="annot"><span class="annottext">mappend :: BenchmarkFlags -&gt; BenchmarkFlags -&gt; BenchmarkFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; BenchmarkFlags -&gt; BenchmarkFlags
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
-</span><span id="line-129"></span><span>
-</span><span id="line-130"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679479001"><span id="local-6989586621679479004"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-131"></span><span>  </span><span id="local-6989586621679479027"><span class="annot"><span class="annottext">&lt;&gt; :: BenchmarkFlags -&gt; BenchmarkFlags -&gt; BenchmarkFlags
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679540628"><span id="local-6989586621679540631"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Benchmark.html#BenchmarkFlags"><span class="hs-identifier hs-type">BenchmarkFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621679540650"><span class="annot"><span class="annottext">&lt;&gt; :: BenchmarkFlags -&gt; BenchmarkFlags -&gt; BenchmarkFlags
 </span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BenchmarkFlags -&gt; BenchmarkFlags -&gt; BenchmarkFlags
 forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
-</span><span id="line-132"></span></pre></body></html>
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-161"></span></pre></body></html>

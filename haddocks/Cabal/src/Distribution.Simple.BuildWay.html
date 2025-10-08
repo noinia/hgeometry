@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679494650"><span id="local-6989586621679494651"></span></span><span class="hs-pragma">{-# LANGUAGE LambdaCase #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.BuildWay.html"><span class="hs-identifier">Distribution.Simple.BuildWay</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">data</span><span> </span><span id="BuildWay"><span class="annot"><a href="Distribution.Simple.BuildWay.html#BuildWay"><span class="hs-identifier hs-var">BuildWay</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="StaticWay"><span class="annot"><a href="Distribution.Simple.BuildWay.html#StaticWay"><span class="hs-identifier hs-var">StaticWay</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="DynWay"><span class="annot"><a href="Distribution.Simple.BuildWay.html#DynWay"><span class="hs-identifier hs-var">DynWay</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="ProfWay"><span class="annot"><a href="Distribution.Simple.BuildWay.html#ProfWay"><span class="hs-identifier hs-var">ProfWay</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="ProfDynWay"><span class="annot"><a href="Distribution.Simple.BuildWay.html#ProfDynWay"><span class="hs-identifier hs-var">ProfDynWay</span></a></span></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679494657"><span id="local-6989586621679494662"><span class="annot"><span class="annottext">BuildWay -&gt; BuildWay -&gt; Bool
+(BuildWay -&gt; BuildWay -&gt; Bool)
+-&gt; (BuildWay -&gt; BuildWay -&gt; Bool) -&gt; Eq BuildWay
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: BuildWay -&gt; BuildWay -&gt; Bool
+== :: BuildWay -&gt; BuildWay -&gt; Bool
+$c/= :: BuildWay -&gt; BuildWay -&gt; Bool
+/= :: BuildWay -&gt; BuildWay -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494669"><span id="local-6989586621679494673"><span id="local-6989586621679494677"><span id="local-6989586621679494681"><span id="local-6989586621679494684"><span id="local-6989586621679494687"><span id="local-6989586621679494690"><span class="annot"><span class="annottext">Eq BuildWay
+Eq BuildWay =&gt;
+(BuildWay -&gt; BuildWay -&gt; Ordering)
+-&gt; (BuildWay -&gt; BuildWay -&gt; Bool)
+-&gt; (BuildWay -&gt; BuildWay -&gt; Bool)
+-&gt; (BuildWay -&gt; BuildWay -&gt; Bool)
+-&gt; (BuildWay -&gt; BuildWay -&gt; Bool)
+-&gt; (BuildWay -&gt; BuildWay -&gt; BuildWay)
+-&gt; (BuildWay -&gt; BuildWay -&gt; BuildWay)
+-&gt; Ord BuildWay
+BuildWay -&gt; BuildWay -&gt; Bool
+BuildWay -&gt; BuildWay -&gt; Ordering
+BuildWay -&gt; BuildWay -&gt; BuildWay
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: BuildWay -&gt; BuildWay -&gt; Ordering
+compare :: BuildWay -&gt; BuildWay -&gt; Ordering
+$c&lt; :: BuildWay -&gt; BuildWay -&gt; Bool
+&lt; :: BuildWay -&gt; BuildWay -&gt; Bool
+$c&lt;= :: BuildWay -&gt; BuildWay -&gt; Bool
+&lt;= :: BuildWay -&gt; BuildWay -&gt; Bool
+$c&gt; :: BuildWay -&gt; BuildWay -&gt; Bool
+&gt; :: BuildWay -&gt; BuildWay -&gt; Bool
+$c&gt;= :: BuildWay -&gt; BuildWay -&gt; Bool
+&gt;= :: BuildWay -&gt; BuildWay -&gt; Bool
+$cmax :: BuildWay -&gt; BuildWay -&gt; BuildWay
+max :: BuildWay -&gt; BuildWay -&gt; BuildWay
+$cmin :: BuildWay -&gt; BuildWay -&gt; BuildWay
+min :: BuildWay -&gt; BuildWay -&gt; BuildWay
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494698"><span id="local-6989586621679494700"><span id="local-6989586621679494704"><span class="annot"><span class="annottext">Int -&gt; BuildWay -&gt; ShowS
+[BuildWay] -&gt; ShowS
+BuildWay -&gt; String
+(Int -&gt; BuildWay -&gt; ShowS)
+-&gt; (BuildWay -&gt; String) -&gt; ([BuildWay] -&gt; ShowS) -&gt; Show BuildWay
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; BuildWay -&gt; ShowS
+showsPrec :: Int -&gt; BuildWay -&gt; ShowS
+$cshow :: BuildWay -&gt; String
+show :: BuildWay -&gt; String
+$cshowList :: [BuildWay] -&gt; ShowS
+showList :: [BuildWay] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494709"><span id="local-6989586621679494713"><span id="local-6989586621679494716"><span id="local-6989586621679494723"><span class="annot"><span class="annottext">ReadPrec [BuildWay]
+ReadPrec BuildWay
+Int -&gt; ReadS BuildWay
+ReadS [BuildWay]
+(Int -&gt; ReadS BuildWay)
+-&gt; ReadS [BuildWay]
+-&gt; ReadPrec BuildWay
+-&gt; ReadPrec [BuildWay]
+-&gt; Read BuildWay
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS BuildWay
+readsPrec :: Int -&gt; ReadS BuildWay
+$creadList :: ReadS [BuildWay]
+readList :: ReadS [BuildWay]
+$creadPrec :: ReadPrec BuildWay
+readPrec :: ReadPrec BuildWay
+$creadListPrec :: ReadPrec [BuildWay]
+readListPrec :: ReadPrec [BuildWay]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494730"><span id="local-6989586621679494737"><span id="local-6989586621679494742"><span id="local-6989586621679494748"><span id="local-6989586621679494751"><span id="local-6989586621679494756"><span id="local-6989586621679494763"><span id="local-6989586621679494767"><span class="annot"><span class="annottext">Int -&gt; BuildWay
+BuildWay -&gt; Int
+BuildWay -&gt; [BuildWay]
+BuildWay -&gt; BuildWay
+BuildWay -&gt; BuildWay -&gt; [BuildWay]
+BuildWay -&gt; BuildWay -&gt; BuildWay -&gt; [BuildWay]
+(BuildWay -&gt; BuildWay)
+-&gt; (BuildWay -&gt; BuildWay)
+-&gt; (Int -&gt; BuildWay)
+-&gt; (BuildWay -&gt; Int)
+-&gt; (BuildWay -&gt; [BuildWay])
+-&gt; (BuildWay -&gt; BuildWay -&gt; [BuildWay])
+-&gt; (BuildWay -&gt; BuildWay -&gt; [BuildWay])
+-&gt; (BuildWay -&gt; BuildWay -&gt; BuildWay -&gt; [BuildWay])
+-&gt; Enum BuildWay
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+$csucc :: BuildWay -&gt; BuildWay
+succ :: BuildWay -&gt; BuildWay
+$cpred :: BuildWay -&gt; BuildWay
+pred :: BuildWay -&gt; BuildWay
+$ctoEnum :: Int -&gt; BuildWay
+toEnum :: Int -&gt; BuildWay
+$cfromEnum :: BuildWay -&gt; Int
+fromEnum :: BuildWay -&gt; Int
+$cenumFrom :: BuildWay -&gt; [BuildWay]
+enumFrom :: BuildWay -&gt; [BuildWay]
+$cenumFromThen :: BuildWay -&gt; BuildWay -&gt; [BuildWay]
+enumFromThen :: BuildWay -&gt; BuildWay -&gt; [BuildWay]
+$cenumFromTo :: BuildWay -&gt; BuildWay -&gt; [BuildWay]
+enumFromTo :: BuildWay -&gt; BuildWay -&gt; [BuildWay]
+$cenumFromThenTo :: BuildWay -&gt; BuildWay -&gt; BuildWay -&gt; [BuildWay]
+enumFromThenTo :: BuildWay -&gt; BuildWay -&gt; BuildWay -&gt; [BuildWay]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="annot"><span class="hs-comment">-- | Returns the object/interface extension prefix for the given build way (e.g. &quot;dyn_&quot; for 'DynWay')</span></span><span>
+</span><span id="line-9"></span><span class="annot"><a href="Distribution.Simple.BuildWay.html#buildWayPrefix"><span class="hs-identifier hs-type">buildWayPrefix</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.BuildWay.html#BuildWay"><span class="hs-identifier hs-type">BuildWay</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-10"></span><span id="buildWayPrefix"><span class="annot"><span class="annottext">buildWayPrefix :: BuildWay -&gt; String
+</span><a href="Distribution.Simple.BuildWay.html#buildWayPrefix"><span class="hs-identifier hs-var hs-var">buildWayPrefix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-11"></span><span>  </span><span class="annot"><span class="annottext">BuildWay
+</span><a href="Distribution.Simple.BuildWay.html#StaticWay"><span class="hs-identifier hs-var">StaticWay</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="annot"><span class="annottext">BuildWay
+</span><a href="Distribution.Simple.BuildWay.html#ProfWay"><span class="hs-identifier hs-var">ProfWay</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;p_&quot;</span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="annot"><span class="annottext">BuildWay
+</span><a href="Distribution.Simple.BuildWay.html#DynWay"><span class="hs-identifier hs-var">DynWay</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;dyn_&quot;</span></span><span>
+</span><span id="line-14"></span><span>  </span><span class="annot"><span class="annottext">BuildWay
+</span><a href="Distribution.Simple.BuildWay.html#ProfDynWay"><span class="hs-identifier hs-var">ProfDynWay</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;p_dyn_&quot;</span></span><span>
+</span><span id="line-15"></span></pre></body></html>

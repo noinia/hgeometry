@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679089254"><span id="local-6989586621679089255"></span></span><span class="hs-pragma">{-# LANGUAGE Safe #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679104975"><span id="local-6989586621679104976"></span></span><span class="hs-pragma">{-# LANGUAGE Safe #-}</span><span>
 </span><span id="line-2"></span><span>
 </span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html"><span class="hs-identifier">Data.Time.Clock.Internal.UTCTime</span></a></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-4"></span><span>    </span><span class="annot"><span class="hs-comment">-- * UTC</span></span><span>
@@ -14,23 +14,25 @@
 </span><span id="line-14"></span><span>    </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier">UTCTime</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
 </span><span id="line-15"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html"><span class="hs-identifier">Control.DeepSeq</span></a></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Data.html/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html"><span class="hs-identifier">Control.DeepSeq</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Time.Calendar.Days.html"><span class="hs-identifier">Data.Time.Calendar.Days</span></a></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.DiffTime.html"><span class="hs-identifier">Data.Time.Clock.Internal.DiffTime</span></a></span><span>
-</span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span class="hs-comment">-- | This is the simplest representation of UTC.</span><span>
-</span><span id="line-23"></span><span class="hs-comment">-- It consists of the day number, and a time offset from midnight.</span><span>
-</span><span id="line-24"></span><span class="hs-comment">-- Note that if a day has a leap second added to it, it will have 86401 seconds.</span><span>
-</span><span id="line-25"></span><span class="hs-keyword">data</span><span> </span><span id="UTCTime"><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-var">UTCTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UTCTime"><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-var">UTCTime</span></a></span></span><span>
-</span><span id="line-26"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="utctDay"><span class="annot"><span class="annottext">UTCTime -&gt; Day
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/GHC.Generics.html"><span class="hs-identifier">GHC.Generics</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../template-haskell-2.23.0.0-c7f4/src/Language.Haskell.TH.Syntax.html"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TH</span></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | This is the simplest representation of UTC.</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- It consists of the day number, and a time offset from midnight.</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- Note that if a day has a leap second added to it, it will have 86401 seconds.</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">data</span><span> </span><span id="UTCTime"><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-var">UTCTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="UTCTime"><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-var">UTCTime</span></a></span></span><span>
+</span><span id="line-28"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="utctDay"><span class="annot"><span class="annottext">UTCTime -&gt; Day
 </span><a href="Data.Time.Clock.Internal.UTCTime.html#utctDay"><span class="hs-identifier hs-var hs-var">utctDay</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Time.Calendar.Days.html#Day"><span class="hs-identifier hs-type">Day</span></a></span><span>
-</span><span id="line-27"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ the day</span></span><span>
-</span><span id="line-28"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="utctDayTime"><span class="annot"><span class="annottext">UTCTime -&gt; DiffTime
+</span><span id="line-29"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ the day</span></span><span>
+</span><span id="line-30"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="utctDayTime"><span class="annot"><span class="annottext">UTCTime -&gt; DiffTime
 </span><a href="Data.Time.Clock.Internal.UTCTime.html#utctDayTime"><span class="hs-identifier hs-var hs-var">utctDayTime</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.DiffTime.html#DiffTime"><span class="hs-identifier hs-type">DiffTime</span></a></span><span>
-</span><span id="line-29"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ the time from midnight, 0 &lt;= t &lt; 86401s (because of leap-seconds)</span></span><span>
-</span><span id="line-30"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-31"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679089262"><span id="local-6989586621679089268"><span id="local-6989586621679089272"><span id="local-6989586621679089274"><span id="local-6989586621679089276"><span id="local-6989586621679089282"><span id="local-6989586621679089287"><span id="local-6989586621679089290"><span id="local-6989586621679089293"><span id="local-6989586621679089296"><span id="local-6989586621679089299"><span id="local-6989586621679089302"><span id="local-6989586621679089307"><span id="local-6989586621679089312"><span class="annot"><span class="annottext">Typeable UTCTime
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ the time from midnight, 0 &lt;= t &lt; 86401s (because of leap-seconds)</span></span><span>
+</span><span id="line-32"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679104983"><span id="local-6989586621679104989"><span id="local-6989586621679104993"><span id="local-6989586621679104995"><span id="local-6989586621679104997"><span id="local-6989586621679105003"><span id="local-6989586621679105008"><span id="local-6989586621679105011"><span id="local-6989586621679105014"><span id="local-6989586621679105017"><span id="local-6989586621679105020"><span id="local-6989586621679105023"><span id="local-6989586621679105028"><span id="local-6989586621679105033"><span class="annot"><span class="annottext">Typeable UTCTime
 Typeable UTCTime =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -191,60 +193,82 @@ MonadPlus m =&gt;
 gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d) -&gt; UTCTime -&gt; m UTCTime
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
-</span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-34"></span><span>    </span><span id="local-6989586621679089328"><span class="annot"><span class="annottext">rnf :: UTCTime -&gt; ()
-</span><a href="#local-6989586621679089328"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679089330"><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089330"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679089331"><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089331"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Day -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679105043"><span id="local-6989586621679105053"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; Code m UTCTime)
+-&gt; Lift UTCTime
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; m Exp
+forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; Code m UTCTime
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; Code m UTCTime
+liftTyped :: forall (m :: * -&gt; *). Quote m =&gt; UTCTime -&gt; Code m UTCTime
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">TH.Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679105063"><span id="local-6989586621679105065"><span class="annot"><span class="annottext">(forall x. UTCTime -&gt; Rep UTCTime x)
+-&gt; (forall x. Rep UTCTime x -&gt; UTCTime) -&gt; Generic UTCTime
+forall x. Rep UTCTime x -&gt; UTCTime
+forall x. UTCTime -&gt; Rep UTCTime x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. UTCTime -&gt; Rep UTCTime x
+from :: forall x. UTCTime -&gt; Rep UTCTime x
+$cto :: forall x. Rep UTCTime x -&gt; UTCTime
+to :: forall x. Rep UTCTime x -&gt; UTCTime
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>    </span><span id="local-6989586621679105077"><span class="annot"><span class="annottext">rnf :: UTCTime -&gt; ()
+</span><a href="#local-6989586621679105077"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679105079"><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105079"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679105080"><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679105080"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Day -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089330"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105079"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
 forall a b. a -&gt; b -&gt; b
 </span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">DiffTime -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089331"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679105080"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
 forall a b. a -&gt; b -&gt; b
 </span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679089334"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-37"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679089342"><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089342"><span class="hs-identifier hs-var">da</span></a></span></span><span> </span><span id="local-6989586621679089343"><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089343"><span class="hs-identifier hs-var">ta</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679089344"><span class="annot"><span class="annottext">== :: UTCTime -&gt; UTCTime -&gt; Bool
-</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679089345"><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089345"><span class="hs-identifier hs-var">db</span></a></span></span><span> </span><span id="local-6989586621679089346"><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089346"><span class="hs-identifier hs-var">tb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089342"><span class="hs-identifier hs-var">da</span></a></span><span> </span><span class="annot"><span class="annottext">Day -&gt; Day -&gt; Bool
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679105083"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679105091"><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105091"><span class="hs-identifier hs-var">da</span></a></span></span><span> </span><span id="local-6989586621679105092"><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679105092"><span class="hs-identifier hs-var">ta</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679105093"><span class="annot"><span class="annottext">== :: UTCTime -&gt; UTCTime -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679105094"><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105094"><span class="hs-identifier hs-var">db</span></a></span></span><span> </span><span id="local-6989586621679105095"><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679105095"><span class="hs-identifier hs-var">tb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105091"><span class="hs-identifier hs-var">da</span></a></span><span> </span><span class="annot"><span class="annottext">Day -&gt; Day -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089345"><span class="hs-identifier hs-var">db</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679105094"><span class="hs-identifier hs-var">db</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089343"><span class="hs-identifier hs-var">ta</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime -&gt; DiffTime -&gt; Bool
+</span><a href="#local-6989586621679105092"><span class="hs-identifier hs-var">ta</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime -&gt; DiffTime -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089346"><span class="hs-identifier hs-var">tb</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679089352"><span id="local-6989586621679089356"><span id="local-6989586621679089359"><span id="local-6989586621679089362"><span id="local-6989586621679089365"><span id="local-6989586621679089368"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-40"></span><span>    </span><span id="local-6989586621679089375"><span class="annot"><span class="annottext">compare :: UTCTime -&gt; UTCTime -&gt; Ordering
-</span><a href="#local-6989586621679089375"><span class="hs-identifier hs-var hs-var hs-var">compare</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679089377"><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089377"><span class="hs-identifier hs-var">da</span></a></span></span><span> </span><span id="local-6989586621679089378"><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089378"><span class="hs-identifier hs-var">ta</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679089379"><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089379"><span class="hs-identifier hs-var">db</span></a></span></span><span> </span><span id="local-6989586621679089380"><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089380"><span class="hs-identifier hs-var">tb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-41"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Day -&gt; Day -&gt; Ordering
+</span><a href="#local-6989586621679105095"><span class="hs-identifier hs-var">tb</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679105101"><span id="local-6989586621679105105"><span id="local-6989586621679105108"><span id="local-6989586621679105111"><span id="local-6989586621679105114"><span id="local-6989586621679105117"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>    </span><span id="local-6989586621679105124"><span class="annot"><span class="annottext">compare :: UTCTime -&gt; UTCTime -&gt; Ordering
+</span><a href="#local-6989586621679105124"><span class="hs-identifier hs-var hs-var hs-var">compare</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679105126"><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105126"><span class="hs-identifier hs-var">da</span></a></span></span><span> </span><span id="local-6989586621679105127"><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679105127"><span class="hs-identifier hs-var">ta</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UTCTime.html#UTCTime"><span class="hs-identifier hs-type">UTCTime</span></a></span><span> </span><span id="local-6989586621679105128"><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105128"><span class="hs-identifier hs-var">db</span></a></span></span><span> </span><span id="local-6989586621679105129"><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679105129"><span class="hs-identifier hs-var">tb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-43"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Day -&gt; Day -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089377"><span class="hs-identifier hs-var">da</span></a></span><span> </span><span class="annot"><span class="annottext">Day
-</span><a href="#local-6989586621679089379"><span class="hs-identifier hs-var">db</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-42"></span><span>            </span><span class="annot"><span class="annottext">Ordering
+</span><a href="#local-6989586621679105126"><span class="hs-identifier hs-var">da</span></a></span><span> </span><span class="annot"><span class="annottext">Day
+</span><a href="#local-6989586621679105128"><span class="hs-identifier hs-var">db</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-44"></span><span>            </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiffTime -&gt; DiffTime -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089378"><span class="hs-identifier hs-var">ta</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime
-</span><a href="#local-6989586621679089380"><span class="hs-identifier hs-var">tb</span></a></span><span>
-</span><span id="line-43"></span><span>            </span><span id="local-6989586621679089381"><span class="annot"><span class="annottext">Ordering
-</span><a href="#local-6989586621679089381"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
-</span><a href="#local-6989586621679089381"><span class="hs-identifier hs-var">cmp</span></a></span><span>
-</span><span id="line-44"></span></pre></body></html>
+</span><a href="#local-6989586621679105127"><span class="hs-identifier hs-var">ta</span></a></span><span> </span><span class="annot"><span class="annottext">DiffTime
+</span><a href="#local-6989586621679105129"><span class="hs-identifier hs-var">tb</span></a></span><span>
+</span><span id="line-45"></span><span>            </span><span id="local-6989586621679105130"><span class="annot"><span class="annottext">Ordering
+</span><a href="#local-6989586621679105130"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><a href="#local-6989586621679105130"><span class="hs-identifier hs-var">cmp</span></a></span><span>
+</span><span id="line-46"></span></pre></body></html>

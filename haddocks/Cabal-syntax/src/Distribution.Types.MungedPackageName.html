@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679476377"><span id="local-6989586621679476378"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679491287"><span id="local-6989586621679491288"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-3"></span><span>
 </span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html"><span class="hs-identifier">Distribution.Types.MungedPackageName</span></a></span><span>
@@ -8,7 +8,7 @@
 </span><span id="line-8"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-9"></span><span>
 </span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-12"></span><span>
 </span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span>
 </span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
@@ -17,7 +17,7 @@
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html"><span class="hs-identifier">Distribution.Types.UnqualComponentName</span></a></span><span>
 </span><span id="line-18"></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html"><span class="hs-identifier">Distribution.Compat.CharParsing</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span class="hs-comment">-- | A combination of a package and component name used in various legacy</span><span>
 </span><span id="line-23"></span><span class="hs-comment">-- interfaces, chiefly bundled with a version as 'MungedPackageId'. It's generally</span><span>
@@ -31,7 +31,7 @@
 </span><span id="line-31"></span><span class="hs-comment">--</span><span>
 </span><span id="line-32"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-33"></span><span class="hs-keyword">data</span><span> </span><span id="MungedPackageName"><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-var">MungedPackageName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MungedPackageName"><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-var">MungedPackageName</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span>
-</span><span id="line-34"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679476389"><span id="local-6989586621679476391"><span class="annot"><span class="annottext">(forall x. MungedPackageName -&gt; Rep MungedPackageName x)
+</span><span id="line-34"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679491299"><span id="local-6989586621679491301"><span class="annot"><span class="annottext">(forall x. MungedPackageName -&gt; Rep MungedPackageName x)
 -&gt; (forall x. Rep MungedPackageName x -&gt; MungedPackageName)
 -&gt; Generic MungedPackageName
 forall x. Rep MungedPackageName x -&gt; MungedPackageName
@@ -42,7 +42,7 @@ $cfrom :: forall x. MungedPackageName -&gt; Rep MungedPackageName x
 from :: forall x. MungedPackageName -&gt; Rep MungedPackageName x
 $cto :: forall x. Rep MungedPackageName x -&gt; MungedPackageName
 to :: forall x. Rep MungedPackageName x -&gt; MungedPackageName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679476397"><span id="local-6989586621679476401"><span id="local-6989586621679476404"><span id="local-6989586621679476415"><span class="annot"><span class="annottext">ReadPrec [MungedPackageName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679491307"><span id="local-6989586621679491311"><span id="local-6989586621679491314"><span id="local-6989586621679491325"><span class="annot"><span class="annottext">ReadPrec [MungedPackageName]
 ReadPrec MungedPackageName
 Int -&gt; ReadS MungedPackageName
 ReadS [MungedPackageName]
@@ -62,7 +62,7 @@ $creadPrec :: ReadPrec MungedPackageName
 readPrec :: ReadPrec MungedPackageName
 $creadListPrec :: ReadPrec [MungedPackageName]
 readListPrec :: ReadPrec [MungedPackageName]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679476422"><span id="local-6989586621679476429"><span id="local-6989586621679476433"><span class="annot"><span class="annottext">Int -&gt; MungedPackageName -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679491332"><span id="local-6989586621679491339"><span id="local-6989586621679491343"><span class="annot"><span class="annottext">Int -&gt; MungedPackageName -&gt; ShowS
 [MungedPackageName] -&gt; ShowS
 MungedPackageName -&gt; String
 (Int -&gt; MungedPackageName -&gt; ShowS)
@@ -77,7 +77,7 @@ $cshow :: MungedPackageName -&gt; String
 show :: MungedPackageName -&gt; String
 $cshowList :: [MungedPackageName] -&gt; ShowS
 showList :: [MungedPackageName] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679476438"><span id="local-6989586621679476444"><span class="annot"><span class="annottext">MungedPackageName -&gt; MungedPackageName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679491348"><span id="local-6989586621679491354"><span class="annot"><span class="annottext">MungedPackageName -&gt; MungedPackageName -&gt; Bool
 (MungedPackageName -&gt; MungedPackageName -&gt; Bool)
 -&gt; (MungedPackageName -&gt; MungedPackageName -&gt; Bool)
 -&gt; Eq MungedPackageName
@@ -86,7 +86,7 @@ $c== :: MungedPackageName -&gt; MungedPackageName -&gt; Bool
 == :: MungedPackageName -&gt; MungedPackageName -&gt; Bool
 $c/= :: MungedPackageName -&gt; MungedPackageName -&gt; Bool
 /= :: MungedPackageName -&gt; MungedPackageName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679476451"><span id="local-6989586621679476457"><span id="local-6989586621679476461"><span id="local-6989586621679476465"><span id="local-6989586621679476468"><span id="local-6989586621679476471"><span id="local-6989586621679476474"><span class="annot"><span class="annottext">Eq MungedPackageName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679491361"><span id="local-6989586621679491367"><span id="local-6989586621679491371"><span id="local-6989586621679491375"><span id="local-6989586621679491378"><span id="local-6989586621679491381"><span id="local-6989586621679491384"><span class="annot"><span class="annottext">Eq MungedPackageName
 Eq MungedPackageName =&gt;
 (MungedPackageName -&gt; MungedPackageName -&gt; Ordering)
 -&gt; (MungedPackageName -&gt; MungedPackageName -&gt; Bool)
@@ -123,7 +123,7 @@ $cmax :: MungedPackageName -&gt; MungedPackageName -&gt; MungedPackageName
 max :: MungedPackageName -&gt; MungedPackageName -&gt; MungedPackageName
 $cmin :: MungedPackageName -&gt; MungedPackageName -&gt; MungedPackageName
 min :: MungedPackageName -&gt; MungedPackageName -&gt; MungedPackageName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679476484"><span id="local-6989586621679476490"><span id="local-6989586621679476494"><span id="local-6989586621679476496"><span id="local-6989586621679476498"><span id="local-6989586621679476504"><span id="local-6989586621679476509"><span id="local-6989586621679476512"><span id="local-6989586621679476515"><span id="local-6989586621679476518"><span id="local-6989586621679476521"><span id="local-6989586621679476524"><span id="local-6989586621679476529"><span id="local-6989586621679476534"><span class="annot"><span class="annottext">Typeable MungedPackageName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679491394"><span id="local-6989586621679491400"><span id="local-6989586621679491404"><span id="local-6989586621679491406"><span id="local-6989586621679491408"><span id="local-6989586621679491414"><span id="local-6989586621679491419"><span id="local-6989586621679491422"><span id="local-6989586621679491425"><span id="local-6989586621679491428"><span id="local-6989586621679491431"><span id="local-6989586621679491434"><span id="local-6989586621679491439"><span id="local-6989586621679491444"><span class="annot"><span class="annottext">Typeable MungedPackageName
 Typeable MungedPackageName =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -312,10 +312,10 @@ MonadPlus m =&gt;
 -&gt; MungedPackageName -&gt; m MungedPackageName
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679476544"><span id="local-6989586621679476551"><span id="local-6989586621679476557"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span></span></span></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679476587"><span id="local-6989586621679476594"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span></span></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679476646"><span class="annot"><span class="annottext">rnf :: MungedPackageName -&gt; ()
-</span><a href="#local-6989586621679476646"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MungedPackageName -&gt; ()
+</span><span id="line-36"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679491454"><span id="local-6989586621679491461"><span id="local-6989586621679491467"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span></span></span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679491497"><span id="local-6989586621679491504"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span></span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679491556"><span class="annot"><span class="annottext">rnf :: MungedPackageName -&gt; ()
+</span><a href="#local-6989586621679491556"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MungedPackageName -&gt; ()
 forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><a href="Distribution.Compat.Prelude.html#genericRnf"><span class="hs-identifier hs-var">genericRnf</span></a></span><span>
 </span><span id="line-39"></span><span>
@@ -353,13 +353,13 @@ forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><span id="line-71"></span><span class="hs-comment">--</span><span>
 </span><span id="line-72"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ MungedPackageName &quot;servant&quot; (LSubLibName &quot;lackey&quot;)</span><span>
 </span><span id="line-73"></span><span class="hs-comment">-- &quot;z-servant-z-lackey&quot;</span><span>
-</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679476651"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679491561"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-75"></span><span>  </span><span class="hs-comment">-- First handle the cases where we can just use the original 'PackageName'.</span><span>
 </span><span id="line-76"></span><span>  </span><span class="hs-comment">-- This is for the PRIMARY library, and it is non-Backpack, or the</span><span>
 </span><span id="line-77"></span><span>  </span><span class="hs-comment">-- indefinite package for us.</span><span>
-</span><span id="line-78"></span><span>  </span><span id="local-6989586621679476655"><span class="annot"><span class="annottext">pretty :: MungedPackageName -&gt; Doc
-</span><a href="#local-6989586621679476655"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc)
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621679491565"><span class="annot"><span class="annottext">pretty :: MungedPackageName -&gt; Doc
+</span><a href="#local-6989586621679491565"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc)
 -&gt; (MungedPackageName -&gt; String) -&gt; MungedPackageName -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MungedPackageName -&gt; String
@@ -376,8 +376,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-88"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;z-servant-zz&quot; :: Maybe MungedPackageName</span><span>
 </span><span id="line-89"></span><span class="hs-comment">-- Just (MungedPackageName (PackageName &quot;z-servant-zz&quot;) LMainLibName)</span><span>
 </span><span id="line-90"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-91"></span><span>  </span><span id="local-6989586621679476674"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m MungedPackageName
-</span><a href="#local-6989586621679476674"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; MungedPackageName
+</span><span id="line-91"></span><span>  </span><span id="local-6989586621679491584"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m MungedPackageName
+</span><a href="#local-6989586621679491584"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; MungedPackageName
 </span><a href="Distribution.Types.MungedPackageName.html#decodeCompatPackageName%27"><span class="hs-identifier hs-var">decodeCompatPackageName'</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; MungedPackageName) -&gt; m String -&gt; m MungedPackageName
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m String
@@ -421,46 +421,46 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-113"></span><span>
 </span><span id="line-114"></span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#decodeCompatPackageName%27"><span class="hs-identifier hs-type">decodeCompatPackageName'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span>
 </span><span id="line-115"></span><span id="decodeCompatPackageName%27"><span class="annot"><span class="annottext">decodeCompatPackageName' :: String -&gt; MungedPackageName
-</span><a href="Distribution.Types.MungedPackageName.html#decodeCompatPackageName%27"><span class="hs-identifier hs-var hs-var">decodeCompatPackageName'</span></a></span></span><span> </span><span id="local-6989586621679476681"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476681"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Types.MungedPackageName.html#decodeCompatPackageName%27"><span class="hs-identifier hs-var hs-var">decodeCompatPackageName'</span></a></span></span><span> </span><span id="local-6989586621679491591"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491591"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-116"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476681"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679491591"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-117"></span><span>    </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'z'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679476682"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476682"><span class="hs-identifier hs-var">rest</span></a></span></span><span>
-</span><span id="line-118"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679476683"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476683"><span class="hs-identifier hs-var">pn</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679476684"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476684"><span class="hs-identifier hs-var">cn</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecParser [String] -&gt; String -&gt; Either String [String]
+</span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679491592"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491592"><span class="hs-identifier hs-var">rest</span></a></span></span><span>
+</span><span id="line-118"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679491593"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491593"><span class="hs-identifier hs-var">pn</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679491594"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491594"><span class="hs-identifier hs-var">cn</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ParsecParser [String] -&gt; String -&gt; Either String [String]
 forall a. ParsecParser a -&gt; String -&gt; Either String a
 </span><a href="Distribution.Parsec.html#explicitEitherParsec"><span class="hs-identifier hs-var">explicitEitherParsec</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecParser [String]
 forall (m :: * -&gt; *). CabalParsing m =&gt; m [String]
 </span><a href="Distribution.Types.MungedPackageName.html#parseZDashCode"><span class="hs-identifier hs-var">parseZDashCode</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476682"><span class="hs-identifier hs-var">rest</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679491592"><span class="hs-identifier hs-var">rest</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-119"></span><span>          </span><span class="annot"><span class="annottext">PackageName -&gt; LibraryName -&gt; MungedPackageName
 </span><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-var">MungedPackageName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PackageName
 </span><a href="Distribution.Types.PackageName.html#mkPackageName"><span class="hs-identifier hs-var">mkPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476683"><span class="hs-identifier hs-var">pn</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UnqualComponentName -&gt; LibraryName
+</span><a href="#local-6989586621679491593"><span class="hs-identifier hs-var">pn</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UnqualComponentName -&gt; LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-var">LSubLibName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; UnqualComponentName
 </span><a href="Distribution.Types.UnqualComponentName.html#mkUnqualComponentName"><span class="hs-identifier hs-var">mkUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476684"><span class="hs-identifier hs-var">cn</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-120"></span><span>    </span><span id="local-6989586621679476689"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476689"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; LibraryName -&gt; MungedPackageName
+</span><a href="#local-6989586621679491594"><span class="hs-identifier hs-var">cn</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679491599"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491599"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; LibraryName -&gt; MungedPackageName
 </span><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-var">MungedPackageName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PackageName
 </span><a href="Distribution.Types.PackageName.html#mkPackageName"><span class="hs-identifier hs-var">mkPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476689"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LibraryName
+</span><a href="#local-6989586621679491599"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LMainLibName"><span class="hs-identifier hs-var">LMainLibName</span></a></span><span>
 </span><span id="line-121"></span><span>
 </span><span id="line-122"></span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#encodeCompatPackageName%27"><span class="hs-identifier hs-type">encodeCompatPackageName'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-123"></span><span id="encodeCompatPackageName%27"><span class="annot"><span class="annottext">encodeCompatPackageName' :: MungedPackageName -&gt; String
-</span><a href="Distribution.Types.MungedPackageName.html#encodeCompatPackageName%27"><span class="hs-identifier hs-var hs-var">encodeCompatPackageName'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span id="local-6989586621679476691"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679476691"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span class="annot"><span class="annottext">LibraryName
+</span><a href="Distribution.Types.MungedPackageName.html#encodeCompatPackageName%27"><span class="hs-identifier hs-var hs-var">encodeCompatPackageName'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span id="local-6989586621679491601"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679491601"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span class="annot"><span class="annottext">LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LMainLibName"><span class="hs-identifier hs-var">LMainLibName</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; String
 </span><a href="Distribution.Types.PackageName.html#unPackageName"><span class="hs-identifier hs-var">unPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679476691"><span class="hs-identifier hs-var">pn</span></a></span><span>
-</span><span id="line-124"></span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#encodeCompatPackageName%27"><span class="hs-identifier hs-var">encodeCompatPackageName'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span id="local-6989586621679476692"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679476692"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679476693"><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679476693"><span class="hs-identifier hs-var">uqn</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679491601"><span class="hs-identifier hs-var">pn</span></a></span><span>
+</span><span id="line-124"></span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#encodeCompatPackageName%27"><span class="hs-identifier hs-var">encodeCompatPackageName'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#MungedPackageName"><span class="hs-identifier hs-type">MungedPackageName</span></a></span><span> </span><span id="local-6989586621679491602"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679491602"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679491603"><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679491603"><span class="hs-identifier hs-var">uqn</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-125"></span><span>  </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;z-&quot;</span></span><span>
 </span><span id="line-126"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; ShowS
@@ -468,7 +468,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ShowS
 </span><a href="Distribution.Types.MungedPackageName.html#zdashcode"><span class="hs-identifier hs-var">zdashcode</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageName -&gt; String
 </span><a href="Distribution.Types.PackageName.html#unPackageName"><span class="hs-identifier hs-var">unPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679476692"><span class="hs-identifier hs-var">pn</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679491602"><span class="hs-identifier hs-var">pn</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-127"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -478,36 +478,36 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ShowS
 </span><a href="Distribution.Types.MungedPackageName.html#zdashcode"><span class="hs-identifier hs-var">zdashcode</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UnqualComponentName -&gt; String
 </span><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-var">unUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679476693"><span class="hs-identifier hs-var">uqn</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679491603"><span class="hs-identifier hs-var">uqn</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-129"></span><span>
 </span><span id="line-130"></span><span class="annot"><a href="Distribution.Types.MungedPackageName.html#zdashcode"><span class="hs-identifier hs-type">zdashcode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-131"></span><span id="zdashcode"><span class="annot"><span class="annottext">zdashcode :: ShowS
-</span><a href="Distribution.Types.MungedPackageName.html#zdashcode"><span class="hs-identifier hs-var hs-var">zdashcode</span></a></span></span><span> </span><span id="local-6989586621679476696"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476696"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe Int -&gt; ShowS
+</span><a href="Distribution.Types.MungedPackageName.html#zdashcode"><span class="hs-identifier hs-var hs-var">zdashcode</span></a></span></span><span> </span><span id="local-6989586621679491606"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491606"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe Int -&gt; ShowS
 forall {a}. (Ord a, Num a) =&gt; String -&gt; Maybe a -&gt; ShowS
-</span><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476696"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe Int
+</span><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491606"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe Int
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-132"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-133"></span><span>    </span><span id="local-6989586621679476697"><span class="annot"><span class="annottext">go :: String -&gt; Maybe a -&gt; ShowS
-</span><a href="#local-6989586621679476697"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Maybe a
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679476709"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476709"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS
+</span><span id="line-133"></span><span>    </span><span id="local-6989586621679491607"><span class="annot"><span class="annottext">go :: String -&gt; Maybe a -&gt; ShowS
+</span><a href="#local-6989586621679491607"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679491619"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491619"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS
 forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476709"><span class="hs-identifier hs-var">r</span></a></span><span>
-</span><span id="line-134"></span><span>    </span><span class="annot"><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679476711"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476711"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679476712"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679476712"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679476713"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476713"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679476712"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679491619"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-134"></span><span>    </span><span class="annot"><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679491621"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491621"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679491622"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679491622"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679491623"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491623"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679491622"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe a -&gt; ShowS
-</span><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476711"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
+</span><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491621"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
@@ -517,56 +517,56 @@ forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-char">'z'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476713"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-135"></span><span>    </span><span class="annot"><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679476714"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476714"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe a
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679476715"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476715"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe a -&gt; ShowS
-</span><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476714"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
+</span><a href="#local-6989586621679491623"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>    </span><span class="annot"><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679491624"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491624"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679491625"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491625"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe a -&gt; ShowS
+</span><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491624"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476715"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-136"></span><span>    </span><span class="annot"><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'z'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679476716"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476716"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679476717"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679476717"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679476718"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476718"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe a -&gt; ShowS
-</span><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476716"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
+</span><a href="#local-6989586621679491625"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>    </span><span class="annot"><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'z'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679491626"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491626"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679491627"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679491627"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679491628"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491628"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe a -&gt; ShowS
+</span><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491626"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Maybe a
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679476717"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679491627"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'z'</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476718"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-137"></span><span>    </span><span class="annot"><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679476720"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679476720"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679476721"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476721"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe a
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679476722"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476722"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe a -&gt; ShowS
-</span><a href="#local-6989586621679476697"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476721"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><a href="#local-6989586621679491628"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>    </span><span class="annot"><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679491630"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679491630"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679491631"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491631"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679491632"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491632"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe a -&gt; ShowS
+</span><a href="#local-6989586621679491607"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491631"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679476720"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><a href="#local-6989586621679491630"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476722"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679491632"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-138"></span><span>
-</span><span id="line-139"></span><span id="local-6989586621679476328"><span class="annot"><a href="Distribution.Types.MungedPackageName.html#parseZDashCode"><span class="hs-identifier hs-type">parseZDashCode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476328"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679476328"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span></span><span>
+</span><span id="line-139"></span><span id="local-6989586621679491238"><span class="annot"><a href="Distribution.Types.MungedPackageName.html#parseZDashCode"><span class="hs-identifier hs-type">parseZDashCode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491238"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679491238"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span></span><span>
 </span><span id="line-140"></span><span id="parseZDashCode"><span class="annot"><span class="annottext">parseZDashCode :: forall (m :: * -&gt; *). CabalParsing m =&gt; m [String]
 </span><a href="Distribution.Types.MungedPackageName.html#parseZDashCode"><span class="hs-identifier hs-var hs-var">parseZDashCode</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-141"></span><span>  </span><span id="local-6989586621679476748"><span class="annot"><a href="#local-6989586621679476748"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">NonEmpty String -&gt; [String]
+</span><span id="line-141"></span><span>  </span><span id="local-6989586621679491658"><span class="annot"><a href="#local-6989586621679491658"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">NonEmpty String -&gt; [String]
 forall a. NonEmpty a -&gt; [a]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty String -&gt; [String]) -&gt; m (NonEmpty String) -&gt; m [String]
@@ -587,64 +587,64 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span class="hs-special">)</span><span>
-</span><span id="line-142"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679476755"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476748"><span class="hs-identifier hs-type">ns</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679491665"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491658"><span class="hs-identifier hs-type">ns</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-143"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-144"></span><span>    </span><span id="local-6989586621679476755"><span class="annot"><span class="annottext">go :: [String] -&gt; [String]
-</span><a href="#local-6989586621679476755"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679476761"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679476761"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(String -&gt; Bool) -&gt; [String] -&gt; ([String], [String])
+</span><span id="line-144"></span><span>    </span><span id="local-6989586621679491665"><span class="annot"><span class="annottext">go :: [String] -&gt; [String]
+</span><a href="#local-6989586621679491665"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679491671"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679491671"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(String -&gt; Bool) -&gt; [String] -&gt; ([String], [String])
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">break</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;z&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679476761"><span class="hs-identifier hs-var">ns</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679491671"><span class="hs-identifier hs-var">ns</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-145"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[String]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[String] -&gt; String
-</span><a href="#local-6989586621679476763"><span class="hs-identifier hs-var">paste</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679476761"><span class="hs-identifier hs-var">ns</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-146"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679476764"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679476764"><span class="hs-keyword hs-var">as</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;z&quot;</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679476765"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679476765"><span class="hs-identifier hs-var">bs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
-</span><a href="#local-6989586621679476763"><span class="hs-identifier hs-var">paste</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679476764"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679491673"><span class="hs-identifier hs-var">paste</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679491671"><span class="hs-identifier hs-var">ns</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-146"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679491674"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679491674"><span class="hs-keyword hs-var">as</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;z&quot;</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679491675"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679491675"><span class="hs-identifier hs-var">bs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
+</span><a href="#local-6989586621679491673"><span class="hs-identifier hs-var">paste</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679491674"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[String] -&gt; [String]
-</span><a href="#local-6989586621679476755"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679476765"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><a href="#local-6989586621679491665"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679491675"><span class="hs-identifier hs-var">bs</span></a></span><span>
 </span><span id="line-147"></span><span>      </span><span class="annot"><span class="annottext">([String], [String])
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;parseZDashCode: go&quot;</span></span><span>
-</span><span id="line-148"></span><span>    </span><span class="annot"><a href="#local-6989586621679476767"><span class="hs-identifier hs-type">unZ</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-149"></span><span>    </span><span id="local-6989586621679476767"><span class="annot"><span class="annottext">unZ :: ShowS
-</span><a href="#local-6989586621679476767"><span class="hs-identifier hs-var hs-var">unZ</span></a></span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-148"></span><span>    </span><span class="annot"><a href="#local-6989586621679491677"><span class="hs-identifier hs-type">unZ</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-149"></span><span>    </span><span id="local-6989586621679491677"><span class="annot"><span class="annottext">unZ :: ShowS
+</span><a href="#local-6989586621679491677"><span class="hs-identifier hs-var hs-var">unZ</span></a></span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;parseZDashCode: unZ&quot;</span></span><span>
-</span><span id="line-150"></span><span>    </span><span class="annot"><a href="#local-6989586621679476767"><span class="hs-identifier hs-var">unZ</span></a></span><span> </span><span id="local-6989586621679476768"><span class="annot"><span class="annottext">r :: String
-</span><a href="#local-6989586621679476768"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">'z'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679476769"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476769"><span class="hs-identifier hs-var">zs</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>    </span><span class="annot"><a href="#local-6989586621679491677"><span class="hs-identifier hs-var">unZ</span></a></span><span> </span><span id="local-6989586621679491678"><span class="annot"><span class="annottext">r :: String
+</span><a href="#local-6989586621679491678"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'z'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679491679"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491679"><span class="hs-identifier hs-var">zs</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-151"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'z'</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476769"><span class="hs-identifier hs-var">zs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476769"><span class="hs-identifier hs-var">zs</span></a></span><span>
+</span><a href="#local-6989586621679491679"><span class="hs-identifier hs-var">zs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491679"><span class="hs-identifier hs-var">zs</span></a></span><span>
 </span><span id="line-152"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476768"><span class="hs-identifier hs-var">r</span></a></span><span>
-</span><span id="line-153"></span><span>    </span><span class="annot"><a href="#local-6989586621679476767"><span class="hs-identifier hs-var">unZ</span></a></span><span> </span><span id="local-6989586621679476771"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476771"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679476771"><span class="hs-identifier hs-var">r</span></a></span><span>
-</span><span id="line-154"></span><span>    </span><span class="annot"><a href="#local-6989586621679476763"><span class="hs-identifier hs-type">paste</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-155"></span><span>    </span><span id="local-6989586621679476763"><span class="annot"><span class="annottext">paste :: [String] -&gt; String
-</span><a href="#local-6989586621679476763"><span class="hs-identifier hs-var hs-var">paste</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; String
+</span><a href="#local-6989586621679491678"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-153"></span><span>    </span><span class="annot"><a href="#local-6989586621679491677"><span class="hs-identifier hs-var">unZ</span></a></span><span> </span><span id="local-6989586621679491681"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491681"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679491681"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-154"></span><span>    </span><span class="annot"><a href="#local-6989586621679491673"><span class="hs-identifier hs-type">paste</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-155"></span><span>    </span><span id="local-6989586621679491673"><span class="annot"><span class="annottext">paste :: [String] -&gt; String
+</span><a href="#local-6989586621679491673"><span class="hs-identifier hs-var hs-var">paste</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; String
 forall a. [a] -&gt; [[a]] -&gt; [a]
 </span><span class="hs-identifier hs-var">intercalate</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; String)
@@ -653,7 +653,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; [String] -&gt; [String]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="#local-6989586621679476767"><span class="hs-identifier hs-var">unZ</span></a></span><span>
+</span><a href="#local-6989586621679491677"><span class="hs-identifier hs-var">unZ</span></a></span><span>
 </span><span id="line-156"></span><span>
 </span><span id="line-157"></span><span class="hs-comment">-- $setup</span><span>
 </span><span id="line-158"></span><span class="hs-comment">-- &gt;&gt;&gt; :seti -XOverloadedStrings</span><span>

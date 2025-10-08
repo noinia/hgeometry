@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679089466"><span id="local-6989586621679089467"></span></span><span class="hs-pragma">{-# LANGUAGE Safe #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679105259"><span id="local-6989586621679105260"></span></span><span class="hs-pragma">{-# LANGUAGE Safe #-}</span><span>
 </span><span id="line-2"></span><span>
 </span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html"><span class="hs-identifier">Data.Time.Clock.Internal.UniversalTime</span></a></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-4"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Universal Time</span></span><span>
@@ -7,16 +7,18 @@
 </span><span id="line-7"></span><span>    </span><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#UniversalTime"><span class="hs-identifier">UniversalTime</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
 </span><span id="line-8"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-9"></span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html"><span class="hs-identifier">Control.DeepSeq</span></a></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Data.html/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span>
-</span><span id="line-12"></span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- | The Modified Julian Date is the day with the fraction of the day, measured from UT midnight.</span><span>
-</span><span id="line-14"></span><span class="hs-comment">-- It's used to represent UT1, which is time as measured by the earth's rotation, adjusted for various wobbles.</span><span>
-</span><span id="line-15"></span><span class="hs-keyword">newtype</span><span> </span><span id="UniversalTime"><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#UniversalTime"><span class="hs-identifier hs-var">UniversalTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ModJulianDate"><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#ModJulianDate"><span class="hs-identifier hs-var">ModJulianDate</span></a></span></span><span>
-</span><span id="line-16"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="getModJulianDate"><span class="annot"><span class="annottext">UniversalTime -&gt; Rational
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html"><span class="hs-identifier">Control.DeepSeq</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Data.html"><span class="hs-identifier">Data.Data</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/GHC.Generics.html"><span class="hs-identifier">GHC.Generics</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../template-haskell-2.23.0.0-c7f4/src/Language.Haskell.TH.Syntax.html"><span class="hs-identifier">Language.Haskell.TH.Syntax</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TH</span></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- | The Modified Julian Date is the day with the fraction of the day, measured from UT midnight.</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- It's used to represent UT1, which is time as measured by the earth's rotation, adjusted for various wobbles.</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">newtype</span><span> </span><span id="UniversalTime"><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#UniversalTime"><span class="hs-identifier hs-var">UniversalTime</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ModJulianDate"><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#ModJulianDate"><span class="hs-identifier hs-var">ModJulianDate</span></a></span></span><span>
+</span><span id="line-18"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="getModJulianDate"><span class="annot"><span class="annottext">UniversalTime -&gt; Rational
 </span><a href="Data.Time.Clock.Internal.UniversalTime.html#getModJulianDate"><span class="hs-identifier hs-var hs-var">getModJulianDate</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
-</span><span id="line-17"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-18"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679089471"><span id="local-6989586621679089477"><span class="annot"><span class="annottext">UniversalTime -&gt; UniversalTime -&gt; Bool
+</span><span id="line-19"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-20"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679105264"><span id="local-6989586621679105270"><span class="annot"><span class="annottext">UniversalTime -&gt; UniversalTime -&gt; Bool
 (UniversalTime -&gt; UniversalTime -&gt; Bool)
 -&gt; (UniversalTime -&gt; UniversalTime -&gt; Bool) -&gt; Eq UniversalTime
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -24,7 +26,7 @@ $c== :: UniversalTime -&gt; UniversalTime -&gt; Bool
 == :: UniversalTime -&gt; UniversalTime -&gt; Bool
 $c/= :: UniversalTime -&gt; UniversalTime -&gt; Bool
 /= :: UniversalTime -&gt; UniversalTime -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679089488"><span id="local-6989586621679089494"><span id="local-6989586621679089499"><span id="local-6989586621679089504"><span id="local-6989586621679089509"><span id="local-6989586621679089514"><span id="local-6989586621679089519"><span class="annot"><span class="annottext">Eq UniversalTime
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679105281"><span id="local-6989586621679105287"><span id="local-6989586621679105292"><span id="local-6989586621679105297"><span id="local-6989586621679105302"><span id="local-6989586621679105307"><span id="local-6989586621679105312"><span class="annot"><span class="annottext">Eq UniversalTime
 Eq UniversalTime =&gt;
 (UniversalTime -&gt; UniversalTime -&gt; Ordering)
 -&gt; (UniversalTime -&gt; UniversalTime -&gt; Bool)
@@ -61,7 +63,7 @@ $cmax :: UniversalTime -&gt; UniversalTime -&gt; UniversalTime
 max :: UniversalTime -&gt; UniversalTime -&gt; UniversalTime
 $cmin :: UniversalTime -&gt; UniversalTime -&gt; UniversalTime
 min :: UniversalTime -&gt; UniversalTime -&gt; UniversalTime
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679089535"><span id="local-6989586621679089541"><span id="local-6989586621679089546"><span id="local-6989586621679089548"><span id="local-6989586621679089550"><span id="local-6989586621679089556"><span id="local-6989586621679089561"><span id="local-6989586621679089564"><span id="local-6989586621679089567"><span id="local-6989586621679089570"><span id="local-6989586621679089573"><span id="local-6989586621679089576"><span id="local-6989586621679089581"><span id="local-6989586621679089586"><span class="annot"><span class="annottext">Typeable UniversalTime
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679105328"><span id="local-6989586621679105334"><span id="local-6989586621679105339"><span id="local-6989586621679105341"><span id="local-6989586621679105343"><span id="local-6989586621679105349"><span id="local-6989586621679105354"><span id="local-6989586621679105357"><span id="local-6989586621679105360"><span id="local-6989586621679105363"><span id="local-6989586621679105366"><span id="local-6989586621679105369"><span id="local-6989586621679105374"><span id="local-6989586621679105379"><span class="annot"><span class="annottext">Typeable UniversalTime
 Typeable UniversalTime =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -227,13 +229,44 @@ MonadPlus m =&gt;
 gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d) -&gt; UniversalTime -&gt; m UniversalTime
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
-</span><span id="line-19"></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#UniversalTime"><span class="hs-identifier hs-type">UniversalTime</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-21"></span><span>    </span><span id="local-6989586621679089603"><span class="annot"><span class="annottext">rnf :: UniversalTime -&gt; ()
-</span><a href="#local-6989586621679089603"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#ModJulianDate"><span class="hs-identifier hs-type">ModJulianDate</span></a></span><span> </span><span id="local-6989586621679089605"><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679089605"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679105390"><span id="local-6989586621679105398"><span class="annot"><span class="annottext">(forall (m :: * -&gt; *). Quote m =&gt; UniversalTime -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *).
+    Quote m =&gt;
+    UniversalTime -&gt; Code m UniversalTime)
+-&gt; Lift UniversalTime
+forall t.
+(forall (m :: * -&gt; *). Quote m =&gt; t -&gt; m Exp)
+-&gt; (forall (m :: * -&gt; *). Quote m =&gt; t -&gt; Code m t) -&gt; Lift t
+forall (m :: * -&gt; *). Quote m =&gt; UniversalTime -&gt; m Exp
+forall (m :: * -&gt; *).
+Quote m =&gt;
+UniversalTime -&gt; Code m UniversalTime
+$clift :: forall (m :: * -&gt; *). Quote m =&gt; UniversalTime -&gt; m Exp
+lift :: forall (m :: * -&gt; *). Quote m =&gt; UniversalTime -&gt; m Exp
+$cliftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+UniversalTime -&gt; Code m UniversalTime
+liftTyped :: forall (m :: * -&gt; *).
+Quote m =&gt;
+UniversalTime -&gt; Code m UniversalTime
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">TH.Lift</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679105407"><span id="local-6989586621679105409"><span class="annot"><span class="annottext">(forall x. UniversalTime -&gt; Rep UniversalTime x)
+-&gt; (forall x. Rep UniversalTime x -&gt; UniversalTime)
+-&gt; Generic UniversalTime
+forall x. Rep UniversalTime x -&gt; UniversalTime
+forall x. UniversalTime -&gt; Rep UniversalTime x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. UniversalTime -&gt; Rep UniversalTime x
+from :: forall x. UniversalTime -&gt; Rep UniversalTime x
+$cto :: forall x. Rep UniversalTime x -&gt; UniversalTime
+to :: forall x. Rep UniversalTime x -&gt; UniversalTime
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#UniversalTime"><span class="hs-identifier hs-type">UniversalTime</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>    </span><span id="local-6989586621679105421"><span class="annot"><span class="annottext">rnf :: UniversalTime -&gt; ()
+</span><a href="#local-6989586621679105421"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Time.Clock.Internal.UniversalTime.html#ModJulianDate"><span class="hs-identifier hs-type">ModJulianDate</span></a></span><span> </span><span id="local-6989586621679105423"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679105423"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679089605"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-22"></span></pre></body></html>
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679105423"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-24"></span></pre></body></html>

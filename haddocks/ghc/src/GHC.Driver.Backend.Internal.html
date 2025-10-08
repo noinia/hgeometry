@@ -30,7 +30,7 @@ Only back ends found in version 9.2 have names.
 </span><span id="line-30"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="JavaScript"><span class="annot"><a href="GHC.Driver.Backend.Internal.html#JavaScript"><span class="hs-identifier hs-var">JavaScript</span></a></span></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Names the JS backend.</span></span><span>
 </span><span id="line-31"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="Interpreter"><span class="annot"><a href="GHC.Driver.Backend.Internal.html#Interpreter"><span class="hs-identifier hs-var">Interpreter</span></a></span></span><span>   </span><span class="annot"><span class="hs-comment">-- ^ Names the ByteCode interpreter.</span></span><span>
 </span><span id="line-32"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="NoBackend"><span class="annot"><a href="GHC.Driver.Backend.Internal.html#NoBackend"><span class="hs-identifier hs-var">NoBackend</span></a></span></span><span>     </span><span class="annot"><span class="hs-comment">-- ^ Names the `-fno-code` backend.</span></span><span>
-</span><span id="line-33"></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682324646"><span id="local-6989586621682324651"><span class="annot"><span class="annottext">BackendName -&gt; BackendName -&gt; Bool
+</span><span id="line-33"></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682461490"><span id="local-6989586621682461495"><span class="annot"><span class="annottext">BackendName -&gt; BackendName -&gt; Bool
 (BackendName -&gt; BackendName -&gt; Bool)
 -&gt; (BackendName -&gt; BackendName -&gt; Bool) -&gt; Eq BackendName
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -38,7 +38,7 @@ $c== :: BackendName -&gt; BackendName -&gt; Bool
 == :: BackendName -&gt; BackendName -&gt; Bool
 $c/= :: BackendName -&gt; BackendName -&gt; Bool
 /= :: BackendName -&gt; BackendName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682324656"><span id="local-6989586621682324658"><span id="local-6989586621682324662"><span class="annot"><span class="annottext">Int -&gt; BackendName -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682461500"><span id="local-6989586621682461502"><span id="local-6989586621682461506"><span class="annot"><span class="annottext">Int -&gt; BackendName -&gt; ShowS
 [BackendName] -&gt; ShowS
 BackendName -&gt; String
 (Int -&gt; BackendName -&gt; ShowS)

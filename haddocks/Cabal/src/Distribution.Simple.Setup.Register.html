@@ -1,85 +1,89 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
-</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
-</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
-</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
-</span><span id="line-6"></span><span>
-</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
-</span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Register</span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
-</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
-</span><span id="line-14"></span><span class="hs-comment">--</span><span>
-</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE PatternSynonyms #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ViewPatterns #-}</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Register</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- License     :  BSD3</span><span>
 </span><span id="line-17"></span><span class="hs-comment">--</span><span>
-</span><span id="line-18"></span><span class="hs-comment">-- Definition of the register command-line options.</span><span>
-</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html"><span class="hs-identifier">Distribution.Simple.Setup.Register</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier">RegisterFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#emptyRegisterFlags"><span class="hs-identifier">emptyRegisterFlags</span></a></span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#defaultRegisterFlags"><span class="hs-identifier">defaultRegisterFlags</span></a></span><span>
-</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCommand"><span class="hs-identifier">registerCommand</span></a></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#unregisterCommand"><span class="hs-identifier">unregisterCommand</span></a></span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html"><span class="hs-identifier">Distribution.Simple.Compiler</span></a></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
-</span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
-</span><span id="line-37"></span><span>
-</span><span id="line-38"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
-</span><span id="line-39"></span><span>
-</span><span id="line-40"></span><span class="annot"><span class="hs-comment">-- * Register flags</span></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Definition of the register command-line options.</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html"><span class="hs-identifier">Distribution.Simple.Setup.Register</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier">RegisterFlags</span></a></span><span>
+</span><span id="line-25"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterCommonFlags"><span class="hs-identifier">RegisterCommonFlags</span></a></span><span>
+</span><span id="line-26"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerVerbosity"><span class="hs-identifier">registerVerbosity</span></a></span><span>
+</span><span id="line-27"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerDistPref"><span class="hs-identifier">registerDistPref</span></a></span><span>
+</span><span id="line-28"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCabalFilePath"><span class="hs-identifier">registerCabalFilePath</span></a></span><span>
+</span><span id="line-29"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerWorkingDir"><span class="hs-identifier">registerWorkingDir</span></a></span><span>
+</span><span id="line-30"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerTargets"><span class="hs-identifier">registerTargets</span></a></span><span>
+</span><span id="line-31"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="hs-glyph">..</span><span>
+</span><span id="line-32"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#emptyRegisterFlags"><span class="hs-identifier">emptyRegisterFlags</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#defaultRegisterFlags"><span class="hs-identifier">defaultRegisterFlags</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCommand"><span class="hs-identifier">registerCommand</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#unregisterCommand"><span class="hs-identifier">unregisterCommand</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
-</span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span class="hs-comment">-- | Flags to @register@ and @unregister@: (user package, gen-script,</span><span>
-</span><span id="line-45"></span><span class="hs-comment">-- in-place, verbosity)</span><span>
-</span><span id="line-46"></span><span class="hs-keyword">data</span><span> </span><span id="RegisterFlags"><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-var">RegisterFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="RegisterFlags"><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-var">RegisterFlags</span></a></span></span><span>
-</span><span id="line-47"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="regPackageDB"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag PackageDB
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html"><span class="hs-identifier">Distribution.Simple.Compiler</span></a></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html"><span class="hs-identifier">Distribution.Utils.Path</span></a></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="annot"><span class="hs-comment">-- * Register flags</span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- | Flags to @register@ and @unregister@: (user package, gen-script,</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- in-place, verbosity)</span><span>
+</span><span id="line-57"></span><span class="hs-keyword">data</span><span> </span><span id="RegisterFlags"><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-var">RegisterFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="RegisterFlags"><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-var">RegisterFlags</span></a></span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="registerCommonFlags"><span class="annot"><span class="annottext">RegisterFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Register.html#registerCommonFlags"><span class="hs-identifier hs-var hs-var">registerCommonFlags</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#CommonSetupFlags"><span class="hs-identifier hs-type">CommonSetupFlags</span></a></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regPackageDB"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag PackageDB
 </span><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var hs-var">regPackageDB</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html#PackageDB"><span class="hs-identifier hs-type">PackageDB</span></a></span><span>
-</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regGenScript"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
+</span><span id="line-60"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regGenScript"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var hs-var">regGenScript</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regGenPkgConf"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag (Maybe FilePath)
-</span><a href="Distribution.Simple.Setup.Register.html#regGenPkgConf"><span class="hs-identifier hs-var hs-var">regGenPkgConf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span>
-</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regInPlace"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
+</span><span id="line-61"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regGenPkgConf"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+</span><a href="Distribution.Simple.Setup.Register.html#regGenPkgConf"><span class="hs-identifier hs-var hs-var">regGenPkgConf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#PkgConf"><span class="hs-identifier hs-type">PkgConf</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regInPlace"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regInPlace"><span class="hs-identifier hs-var hs-var">regInPlace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regDistPref"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Register.html#regDistPref"><span class="hs-identifier hs-var hs-var">regDistPref</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regPrintId"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
+</span><span id="line-63"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regPrintId"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regPrintId"><span class="hs-identifier hs-var hs-var">regPrintId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regVerbosity"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Register.html#regVerbosity"><span class="hs-identifier hs-var hs-var">regVerbosity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
-</span><span id="line-54"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- Same as in 'buildArgs' and 'copyArgs'</span><span>
-</span><span id="line-55"></span><span>    </span><span id="regArgs"><span class="annot"><span class="annottext">RegisterFlags -&gt; [FilePath]
-</span><a href="Distribution.Simple.Setup.Register.html#regArgs"><span class="hs-identifier hs-var hs-var">regArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
-</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="regCabalFilePath"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Register.html#regCabalFilePath"><span class="hs-identifier hs-var hs-var">regCabalFilePath</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-57"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-58"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679467619"><span id="local-6989586621679467639"><span id="local-6989586621679467643"><span class="annot"><span class="annottext">Int -&gt; RegisterFlags -&gt; ShowS
+</span><span id="line-64"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679528171"><span id="local-6989586621679528186"><span id="local-6989586621679528190"><span class="annot"><span class="annottext">Int -&gt; RegisterFlags -&gt; ShowS
 [RegisterFlags] -&gt; ShowS
-RegisterFlags -&gt; FilePath
+RegisterFlags -&gt; String
 (Int -&gt; RegisterFlags -&gt; ShowS)
--&gt; (RegisterFlags -&gt; FilePath)
+-&gt; (RegisterFlags -&gt; String)
 -&gt; ([RegisterFlags] -&gt; ShowS)
 -&gt; Show RegisterFlags
 forall a.
-(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; FilePath) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
 $cshowsPrec :: Int -&gt; RegisterFlags -&gt; ShowS
 showsPrec :: Int -&gt; RegisterFlags -&gt; ShowS
-$cshow :: RegisterFlags -&gt; FilePath
-show :: RegisterFlags -&gt; FilePath
+$cshow :: RegisterFlags -&gt; String
+show :: RegisterFlags -&gt; String
 $cshowList :: [RegisterFlags] -&gt; ShowS
 showList :: [RegisterFlags] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679467654"><span id="local-6989586621679467656"><span class="annot"><span class="annottext">(forall x. RegisterFlags -&gt; Rep RegisterFlags x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679528201"><span id="local-6989586621679528203"><span class="annot"><span class="annottext">(forall x. RegisterFlags -&gt; Rep RegisterFlags x)
 -&gt; (forall x. Rep RegisterFlags x -&gt; RegisterFlags)
 -&gt; Generic RegisterFlags
 forall x. Rep RegisterFlags x -&gt; RegisterFlags
@@ -91,119 +95,140 @@ from :: forall x. RegisterFlags -&gt; Rep RegisterFlags x
 $cto :: forall x. Rep RegisterFlags x -&gt; RegisterFlags
 to :: forall x. Rep RegisterFlags x -&gt; RegisterFlags
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#defaultRegisterFlags"><span class="hs-identifier hs-type">defaultRegisterFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
-</span><span id="line-61"></span><span id="defaultRegisterFlags"><span class="annot"><span class="annottext">defaultRegisterFlags :: RegisterFlags
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterCommonFlags"><span class="hs-identifier hs-type">RegisterCommonFlags</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dist"><span class="hs-identifier hs-type">Dist</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#CWD"><span class="hs-identifier hs-type">CWD</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Dir"><span class="hs-identifier hs-type">Dir</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#SymbolicPath"><span class="hs-identifier hs-type">SymbolicPath</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#Pkg"><span class="hs-identifier hs-type">Pkg</span></a></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#File"><span class="hs-identifier hs-type">File</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">pattern</span><span> </span><span id="RegisterCommonFlags"><span id="%24mRegisterCommonFlags"><span class="annot"><span class="annottext">$mRegisterCommonFlags :: forall {r}.
+RegisterFlags
+-&gt; (Flag Verbosity
+    -&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+    -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+    -&gt; Flag (SymbolicPath Pkg 'File)
+    -&gt; [String]
+    -&gt; r)
+-&gt; ((# #) -&gt; r)
+-&gt; r
+</span><a href="Distribution.Simple.Setup.Register.html#RegisterCommonFlags"><span class="hs-identifier hs-var hs-var">RegisterCommonFlags</span></a></span></span></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="registerVerbosity"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Register.html#registerVerbosity"><span class="hs-identifier hs-var hs-var hs-var">registerVerbosity</span></a></span></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="registerDistPref"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+</span><a href="Distribution.Simple.Setup.Register.html#registerDistPref"><span class="hs-identifier hs-var hs-var hs-var">registerDistPref</span></a></span></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="registerWorkingDir"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag (SymbolicPath CWD ('Dir Pkg))
+</span><a href="Distribution.Simple.Setup.Register.html#registerWorkingDir"><span class="hs-identifier hs-var hs-var hs-var">registerWorkingDir</span></a></span></span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="registerCabalFilePath"><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag (SymbolicPath Pkg 'File)
+</span><a href="Distribution.Simple.Setup.Register.html#registerCabalFilePath"><span class="hs-identifier hs-var hs-var hs-var">registerCabalFilePath</span></a></span></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="registerTargets"><span class="annot"><span class="annottext">RegisterFlags -&gt; [String]
+</span><a href="Distribution.Simple.Setup.Register.html#registerTargets"><span class="hs-identifier hs-var hs-var hs-var">registerTargets</span></a></span></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCommonFlags"><span class="hs-identifier hs-var">registerCommonFlags</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-82"></span><span>      </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#CommonSetupFlags"><span class="hs-identifier hs-type">CommonSetupFlags</span></a></span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupVerbosity"><span class="hs-identifier hs-var">setupVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528209"><span class="annot"><a href="#local-6989586621679528209"><span class="hs-identifier hs-var">registerVerbosity</span></a></span></span><span>
+</span><span id="line-84"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupDistPref"><span class="hs-identifier hs-var">setupDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528210"><span class="annot"><a href="#local-6989586621679528210"><span class="hs-identifier hs-var">registerDistPref</span></a></span></span><span>
+</span><span id="line-85"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupWorkingDir"><span class="hs-identifier hs-var">setupWorkingDir</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528211"><span class="annot"><a href="#local-6989586621679528211"><span class="hs-identifier hs-var">registerWorkingDir</span></a></span></span><span>
+</span><span id="line-86"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupCabalFilePath"><span class="hs-identifier hs-var">setupCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528212"><span class="annot"><a href="#local-6989586621679528212"><span class="hs-identifier hs-var">registerCabalFilePath</span></a></span></span><span>
+</span><span id="line-87"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#setupTargets"><span class="hs-identifier hs-var">setupTargets</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679528213"><span class="annot"><a href="#local-6989586621679528213"><span class="hs-identifier hs-var">registerTargets</span></a></span></span><span>
+</span><span id="line-88"></span><span>        </span><span class="hs-special">}</span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#defaultRegisterFlags"><span class="hs-identifier hs-type">defaultRegisterFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
+</span><span id="line-92"></span><span id="defaultRegisterFlags"><span class="annot"><span class="annottext">defaultRegisterFlags :: RegisterFlags
 </span><a href="Distribution.Simple.Setup.Register.html#defaultRegisterFlags"><span class="hs-identifier hs-var hs-var">defaultRegisterFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-62"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
-</span><span id="line-63"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">regPackageDB :: Flag PackageDB
+</span><span id="line-93"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">registerCommonFlags :: CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Register.html#registerCommonFlags"><span class="hs-identifier hs-var">registerCommonFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Common.html#defaultCommonSetupFlags"><span class="hs-identifier hs-var">defaultCommonSetupFlags</span></a></span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regPackageDB :: Flag PackageDB
 </span><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var">regPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag PackageDB
 forall a. Flag a
 </span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
-</span><span id="line-64"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regGenScript :: Flag Bool
+</span><span id="line-96"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regGenScript :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var">regGenScript</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-65"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regGenPkgConf :: Flag (Maybe FilePath)
-</span><a href="Distribution.Simple.Setup.Register.html#regGenPkgConf"><span class="hs-identifier hs-var">regGenPkgConf</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag (Maybe FilePath)
+</span><span id="line-97"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regGenPkgConf :: Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+</span><a href="Distribution.Simple.Setup.Register.html#regGenPkgConf"><span class="hs-identifier hs-var">regGenPkgConf</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
 forall a. Flag a
 </span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
-</span><span id="line-66"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regInPlace :: Flag Bool
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regInPlace :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regInPlace"><span class="hs-identifier hs-var">regInPlace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-67"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regDistPref :: Flag FilePath
-</span><a href="Distribution.Simple.Setup.Register.html#regDistPref"><span class="hs-identifier hs-var">regDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
-forall a. Flag a
-</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
-</span><span id="line-68"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regPrintId :: Flag Bool
+</span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regPrintId :: Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regPrintId"><span class="hs-identifier hs-var">regPrintId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regArgs :: [FilePath]
-</span><a href="Distribution.Simple.Setup.Register.html#regArgs"><span class="hs-identifier hs-var">regArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-70"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regCabalFilePath :: Flag FilePath
-</span><a href="Distribution.Simple.Setup.Register.html#regCabalFilePath"><span class="hs-identifier hs-var">regCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
-forall a. Monoid a =&gt; a
-</span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-71"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">regVerbosity :: Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Register.html#regVerbosity"><span class="hs-identifier hs-var">regVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; Flag Verbosity
-forall a. a -&gt; Flag a
-</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="Distribution.Verbosity.html#normal"><span class="hs-identifier hs-var">normal</span></a></span><span>
-</span><span id="line-72"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-73"></span><span>
-</span><span id="line-74"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCommand"><span class="hs-identifier hs-type">registerCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
-</span><span id="line-75"></span><span id="registerCommand"><span class="annot"><span class="annottext">registerCommand :: CommandUI RegisterFlags
+</span><span id="line-100"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCommand"><span class="hs-identifier hs-type">registerCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
+</span><span id="line-103"></span><span id="registerCommand"><span class="annot"><span class="annottext">registerCommand :: CommandUI RegisterFlags
 </span><a href="Distribution.Simple.Setup.Register.html#registerCommand"><span class="hs-identifier hs-var hs-var">registerCommand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-76"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
-</span><span id="line-77"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: FilePath
-</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-104"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: String
+</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;register&quot;</span></span><span>
-</span><span id="line-78"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: FilePath
+</span><span id="line-106"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: String
 </span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-79"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-107"></span><span>        </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Register this package with the compiler.&quot;</span></span><span>
-</span><span id="line-80"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><span id="line-108"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
 </span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-81"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><span id="line-109"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
 </span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-82"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
-</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467670"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679467670"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-83"></span><span>        </span><span class="annot"><span class="annottext">FilePath
-</span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span id="line-110"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679528229"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679528229"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-111"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679467670"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679528229"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; register [FLAGS]\n&quot;</span></span><span>
-</span><span id="line-84"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: RegisterFlags
+</span><span id="line-112"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: RegisterFlags
 </span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
 </span><a href="Distribution.Simple.Setup.Register.html#defaultRegisterFlags"><span class="hs-identifier hs-var">defaultRegisterFlags</span></a></span><span>
-</span><span id="line-85"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField RegisterFlags]
-</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467673"><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679467673"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-86"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(RegisterFlags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; RegisterFlags -&gt; RegisterFlags)
--&gt; OptionField RegisterFlags
-forall flags.
-(flags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Register.html#regVerbosity"><span class="hs-identifier hs-var">regVerbosity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467675"><span class="annot"><span class="annottext">Flag Verbosity
-</span><a href="#local-6989586621679467675"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467676"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467676"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467676"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regVerbosity"><span class="hs-identifier hs-var">regVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467675"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-87"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(RegisterFlags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; RegisterFlags -&gt; RegisterFlags)
+</span><span id="line-113"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField RegisterFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679528232"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679528232"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-114"></span><span>        </span><span class="annot"><span class="annottext">(RegisterFlags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; ShowOrParseArgs
--&gt; OptionField RegisterFlags
+-&gt; [OptionField RegisterFlags]
+-&gt; [OptionField RegisterFlags]
 forall flags.
-(flags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; flags -&gt; flags)
+(flags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; flags -&gt; flags)
 -&gt; ShowOrParseArgs
--&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
-</span><span id="line-88"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Register.html#regDistPref"><span class="hs-identifier hs-var">regDistPref</span></a></span><span>
-</span><span id="line-89"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467678"><span class="annot"><span class="annottext">Flag FilePath
-</span><a href="#local-6989586621679467678"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679467679"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467679"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467679"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regDistPref"><span class="hs-identifier hs-var">regDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467678"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-90"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679467673"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
-</span><span id="line-91"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+-&gt; [OptionField flags]
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#withCommonSetupOptions"><span class="hs-identifier hs-var">withCommonSetupOptions</span></a></span><span>
+</span><span id="line-115"></span><span>          </span><span class="annot"><span class="annottext">RegisterFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Register.html#registerCommonFlags"><span class="hs-identifier hs-var">registerCommonFlags</span></a></span><span>
+</span><span id="line-116"></span><span>          </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528234"><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="#local-6989586621679528234"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679528235"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528235"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528235"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCommonFlags"><span class="hs-identifier hs-var">registerCommonFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528234"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>          </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679528232"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-118"></span><span>          </span><span class="annot"><span class="annottext">([OptionField RegisterFlags] -&gt; [OptionField RegisterFlags])
+-&gt; [OptionField RegisterFlags] -&gt; [OptionField RegisterFlags]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (RegisterFlags -&gt; Flag PackageDB)
 -&gt; (Flag PackageDB -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; MkOptDescr
@@ -212,60 +237,62 @@ forall flags.
      RegisterFlags
 -&gt; OptionField RegisterFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-92"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-119"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-93"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-120"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;packageDB&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-94"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-121"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-95"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag PackageDB
+</span><span id="line-122"></span><span>                </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag PackageDB
 </span><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var">regPackageDB</span></a></span><span>
-</span><span id="line-96"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467681"><span class="annot"><span class="annottext">Flag PackageDB
-</span><a href="#local-6989586621679467681"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467682"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467682"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467682"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var">regPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467681"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-97"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[(Flag PackageDB, OptFlags, FilePath)]
+</span><span id="line-123"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528237"><span class="annot"><span class="annottext">Flag PackageDB
+</span><a href="#local-6989586621679528237"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679528238"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528238"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528238"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var">regPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528237"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>                </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[(Flag PackageDB, OptFlags, String)]
 -&gt; MkOptDescr
      (RegisterFlags -&gt; Flag PackageDB)
      (Flag PackageDB -&gt; RegisterFlags -&gt; RegisterFlags)
      RegisterFlags
 forall b a.
 Eq b =&gt;
-[(b, OptFlags, FilePath)] -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
+[(b, OptFlags, String)] -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Command.html#choiceOpt"><span class="hs-identifier hs-var">choiceOpt</span></a></span><span>
-</span><span id="line-98"></span><span>                </span><span class="hs-special">[</span><span>
-</span><span id="line-99"></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
+</span><span id="line-125"></span><span>                    </span><span class="hs-special">[</span><span>
+</span><span id="line-126"></span><span>                      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDB
+forall fp. PackageDBX fp
 </span><a href="Distribution.Simple.Compiler.html#UserPackageDB"><span class="hs-identifier hs-var">UserPackageDB</span></a></span><span>
-</span><span id="line-100"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-127"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;user&quot;</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-101"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-128"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;upon registration, register this package in the user's local package database&quot;</span></span><span>
-</span><span id="line-102"></span><span>                  </span><span class="hs-special">)</span><span>
-</span><span id="line-103"></span><span>                </span><span class="hs-special">,</span><span>
-</span><span id="line-104"></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
+</span><span id="line-129"></span><span>                      </span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>                    </span><span class="hs-special">,</span><span>
+</span><span id="line-131"></span><span>                      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDB
+forall fp. PackageDBX fp
 </span><a href="Distribution.Simple.Compiler.html#GlobalPackageDB"><span class="hs-identifier hs-var">GlobalPackageDB</span></a></span><span>
-</span><span id="line-105"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-132"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;global&quot;</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-106"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-133"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;(default)upon registration, register this package in the system-wide package database&quot;</span></span><span>
-</span><span id="line-107"></span><span>                  </span><span class="hs-special">)</span><span>
-</span><span id="line-108"></span><span>                </span><span class="hs-special">]</span><span>
-</span><span id="line-109"></span><span>            </span><span class="hs-special">)</span><span>
-</span><span id="line-110"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+</span><span id="line-134"></span><span>                      </span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>                    </span><span class="hs-special">]</span><span>
+</span><span id="line-136"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (RegisterFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; MkOptDescr
@@ -274,35 +301,35 @@ forall a. a -&gt; Flag a
      RegisterFlags
 -&gt; OptionField RegisterFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-111"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-138"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-112"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-139"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;inplace&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-113"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-140"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;register the package in the build location, so it can be used without being installed&quot;</span></span><span>
-</span><span id="line-114"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
+</span><span id="line-141"></span><span>                </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regInPlace"><span class="hs-identifier hs-var">regInPlace</span></a></span><span>
-</span><span id="line-115"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467686"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679467686"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467687"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467687"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467687"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regInPlace"><span class="hs-identifier hs-var">regInPlace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467686"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-116"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-142"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528242"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679528242"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679528243"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528243"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528243"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regInPlace"><span class="hs-identifier hs-var">regInPlace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528242"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>                </span><span class="annot"><span class="annottext">MkOptDescr
   (RegisterFlags -&gt; Flag Bool)
   (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
   RegisterFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-117"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+</span><span id="line-144"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (RegisterFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; MkOptDescr
@@ -311,85 +338,121 @@ forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
      RegisterFlags
 -&gt; OptionField RegisterFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-118"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-145"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-119"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-146"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;gen-script&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-120"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-147"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;instead of registering, generate a script to register later&quot;</span></span><span>
-</span><span id="line-121"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
+</span><span id="line-148"></span><span>                </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var">regGenScript</span></a></span><span>
-</span><span id="line-122"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467689"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679467689"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467690"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467690"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467690"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var">regGenScript</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467689"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-123"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-149"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528245"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679528245"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679528246"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528246"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528246"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var">regGenScript</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528245"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>                </span><span class="annot"><span class="annottext">MkOptDescr
   (RegisterFlags -&gt; Flag Bool)
   (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
   RegisterFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-124"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
--&gt; (RegisterFlags -&gt; Flag (Maybe FilePath))
--&gt; (Flag (Maybe FilePath) -&gt; RegisterFlags -&gt; RegisterFlags)
+</span><span id="line-151"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
+-&gt; (RegisterFlags
+    -&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf))))
+-&gt; (Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+    -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; MkOptDescr
-     (RegisterFlags -&gt; Flag (Maybe FilePath))
-     (Flag (Maybe FilePath) -&gt; RegisterFlags -&gt; RegisterFlags)
+     (RegisterFlags -&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf))))
+     (Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+      -&gt; RegisterFlags -&gt; RegisterFlags)
      RegisterFlags
 -&gt; OptionField RegisterFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-125"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-152"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-126"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-153"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;gen-pkg-config&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-127"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-154"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;instead of registering, generate a package registration file/directory&quot;</span></span><span>
-</span><span id="line-128"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag (Maybe FilePath)
+</span><span id="line-155"></span><span>                </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
 </span><a href="Distribution.Simple.Setup.Register.html#regGenPkgConf"><span class="hs-identifier hs-var">regGenPkgConf</span></a></span><span>
-</span><span id="line-129"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467691"><span class="annot"><span class="annottext">Flag (Maybe FilePath)
-</span><a href="#local-6989586621679467691"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467692"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467692"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467692"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regGenPkgConf"><span class="hs-identifier hs-var">regGenPkgConf</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467691"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-130"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath
--&gt; (Maybe FilePath -&gt; Flag (Maybe FilePath))
--&gt; (Flag (Maybe FilePath) -&gt; [Maybe FilePath])
+</span><span id="line-156"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528247"><span class="annot"><span class="annottext">Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+</span><a href="#local-6989586621679528247"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679528248"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528248"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528248"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regGenPkgConf"><span class="hs-identifier hs-var">regGenPkgConf</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528247"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-157"></span><span>                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+-&gt; (Maybe String -&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf))))
+-&gt; (Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+    -&gt; [Maybe String])
 -&gt; MkOptDescr
-     (RegisterFlags -&gt; Flag (Maybe FilePath))
-     (Flag (Maybe FilePath) -&gt; RegisterFlags -&gt; RegisterFlags)
+     (RegisterFlags -&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf))))
+     (Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+      -&gt; RegisterFlags -&gt; RegisterFlags)
      RegisterFlags
 forall b a.
 Monoid b =&gt;
-FilePath
--&gt; (Maybe FilePath -&gt; b)
--&gt; (b -&gt; [Maybe FilePath])
+String
+-&gt; (Maybe String -&gt; b)
+-&gt; (b -&gt; [Maybe String])
 -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
-</span><a href="Distribution.Simple.Command.html#optArg%27"><span class="hs-identifier hs-var">optArg'</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><span class="hs-string">&quot;PKG&quot;</span></span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; Flag (Maybe FilePath)
+</span><a href="Distribution.Simple.Command.html#optArg%27"><span class="hs-identifier hs-var">optArg'</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;PKG&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (SymbolicPath Pkg ('Dir PkgConf))
+-&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
 forall a. a -&gt; Flag a
-</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Flag (Maybe FilePath) -&gt; [Maybe FilePath]
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (SymbolicPath Pkg ('Dir PkgConf))
+ -&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf))))
+-&gt; (Maybe String -&gt; Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+-&gt; Maybe String
+-&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; SymbolicPath Pkg ('Dir PkgConf))
+-&gt; Maybe String -&gt; Maybe (SymbolicPath Pkg ('Dir PkgConf))
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; SymbolicPath Pkg ('Dir PkgConf)
+forall from (to :: FileOrDir). String -&gt; SymbolicPath from to
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#makeSymbolicPath"><span class="hs-identifier hs-var">makeSymbolicPath</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Flag (Maybe String) -&gt; [Maybe String]
 forall a. Flag a -&gt; [a]
-</span><a href="Distribution.Simple.Flag.html#flagToList"><span class="hs-identifier hs-var">flagToList</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-131"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+</span><a href="Distribution.Simple.Flag.html#flagToList"><span class="hs-identifier hs-var">flagToList</span></a></span><span> </span><span class="annot"><span class="annottext">(Flag (Maybe String) -&gt; [Maybe String])
+-&gt; (Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+    -&gt; Flag (Maybe String))
+-&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+-&gt; [Maybe String]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (SymbolicPath Pkg ('Dir PkgConf)) -&gt; Maybe String)
+-&gt; Flag (Maybe (SymbolicPath Pkg ('Dir PkgConf)))
+-&gt; Flag (Maybe String)
+forall a b. (a -&gt; b) -&gt; Flag a -&gt; Flag b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(SymbolicPath Pkg ('Dir PkgConf) -&gt; String)
+-&gt; Maybe (SymbolicPath Pkg ('Dir PkgConf)) -&gt; Maybe String
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">SymbolicPath Pkg ('Dir PkgConf) -&gt; String
+forall (allowAbsolute :: AllowAbsolute) from (to :: FileOrDir).
+SymbolicPathX allowAbsolute from to -&gt; String
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#getSymbolicPath"><span class="hs-identifier hs-var">getSymbolicPath</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (RegisterFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; MkOptDescr
@@ -398,103 +461,97 @@ forall a. Flag a -&gt; [a]
      RegisterFlags
 -&gt; OptionField RegisterFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-132"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-159"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-133"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-160"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;print-ipid&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-134"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-161"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;print the installed package ID calculated for this package&quot;</span></span><span>
-</span><span id="line-135"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
+</span><span id="line-162"></span><span>                </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regPrintId"><span class="hs-identifier hs-var">regPrintId</span></a></span><span>
-</span><span id="line-136"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467695"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679467695"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467696"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467696"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467696"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regPrintId"><span class="hs-identifier hs-var">regPrintId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467695"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-137"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-163"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528254"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679528254"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679528255"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528255"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528255"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regPrintId"><span class="hs-identifier hs-var">regPrintId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528254"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span>                </span><span class="annot"><span class="annottext">MkOptDescr
   (RegisterFlags -&gt; Flag Bool)
   (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
   RegisterFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-138"></span><span>        </span><span class="hs-special">]</span><span>
-</span><span id="line-139"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-140"></span><span>
-</span><span id="line-141"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#unregisterCommand"><span class="hs-identifier hs-type">unregisterCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
-</span><span id="line-142"></span><span id="unregisterCommand"><span class="annot"><span class="annottext">unregisterCommand :: CommandUI RegisterFlags
+</span><span id="line-165"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#unregisterCommand"><span class="hs-identifier hs-type">unregisterCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
+</span><span id="line-169"></span><span id="unregisterCommand"><span class="annot"><span class="annottext">unregisterCommand :: CommandUI RegisterFlags
 </span><a href="Distribution.Simple.Setup.Register.html#unregisterCommand"><span class="hs-identifier hs-var hs-var">unregisterCommand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-143"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
-</span><span id="line-144"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: FilePath
-</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-170"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-171"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: String
+</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;unregister&quot;</span></span><span>
-</span><span id="line-145"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: FilePath
+</span><span id="line-172"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: String
 </span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-146"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-173"></span><span>        </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Unregister this package with the compiler.&quot;</span></span><span>
-</span><span id="line-147"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><span id="line-174"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
 </span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-148"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><span id="line-175"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
 </span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-149"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
-</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467697"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679467697"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-150"></span><span>        </span><span class="annot"><span class="annottext">FilePath
-</span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span id="line-176"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679528256"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679528256"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-177"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679467697"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679528256"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot; unregister [FLAGS]\n&quot;</span></span><span>
-</span><span id="line-151"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: RegisterFlags
+</span><span id="line-178"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: RegisterFlags
 </span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
 </span><a href="Distribution.Simple.Setup.Register.html#defaultRegisterFlags"><span class="hs-identifier hs-var">defaultRegisterFlags</span></a></span><span>
-</span><span id="line-152"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField RegisterFlags]
-</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467698"><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679467698"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-153"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(RegisterFlags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; RegisterFlags -&gt; RegisterFlags)
--&gt; OptionField RegisterFlags
-forall flags.
-(flags -&gt; Flag Verbosity)
--&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Register.html#regVerbosity"><span class="hs-identifier hs-var">regVerbosity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467699"><span class="annot"><span class="annottext">Flag Verbosity
-</span><a href="#local-6989586621679467699"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467700"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467700"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467700"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regVerbosity"><span class="hs-identifier hs-var">regVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467699"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-154"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(RegisterFlags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; RegisterFlags -&gt; RegisterFlags)
+</span><span id="line-179"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField RegisterFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679528257"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679528257"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-180"></span><span>        </span><span class="annot"><span class="annottext">(RegisterFlags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; ShowOrParseArgs
--&gt; OptionField RegisterFlags
+-&gt; [OptionField RegisterFlags]
+-&gt; [OptionField RegisterFlags]
 forall flags.
-(flags -&gt; Flag FilePath)
--&gt; (Flag FilePath -&gt; flags -&gt; flags)
+(flags -&gt; CommonSetupFlags)
+-&gt; (CommonSetupFlags -&gt; flags -&gt; flags)
 -&gt; ShowOrParseArgs
--&gt; OptionField flags
-</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
-</span><span id="line-155"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Register.html#regDistPref"><span class="hs-identifier hs-var">regDistPref</span></a></span><span>
-</span><span id="line-156"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467701"><span class="annot"><span class="annottext">Flag FilePath
-</span><a href="#local-6989586621679467701"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679467702"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467702"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467702"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regDistPref"><span class="hs-identifier hs-var">regDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467701"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-157"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
-</span><a href="#local-6989586621679467698"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
-</span><span id="line-158"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+-&gt; [OptionField flags]
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#withCommonSetupOptions"><span class="hs-identifier hs-var">withCommonSetupOptions</span></a></span><span>
+</span><span id="line-181"></span><span>          </span><span class="annot"><span class="annottext">RegisterFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Register.html#registerCommonFlags"><span class="hs-identifier hs-var">registerCommonFlags</span></a></span><span>
+</span><span id="line-182"></span><span>          </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528258"><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="#local-6989586621679528258"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679528259"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528259"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528259"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#registerCommonFlags"><span class="hs-identifier hs-var">registerCommonFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528258"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span>          </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679528257"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-184"></span><span>          </span><span class="annot"><span class="annottext">([OptionField RegisterFlags] -&gt; [OptionField RegisterFlags])
+-&gt; [OptionField RegisterFlags] -&gt; [OptionField RegisterFlags]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (RegisterFlags -&gt; Flag PackageDB)
 -&gt; (Flag PackageDB -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; MkOptDescr
@@ -503,60 +560,62 @@ forall flags.
      RegisterFlags
 -&gt; OptionField RegisterFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-159"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-185"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-160"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-186"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;user&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-161"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-187"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-162"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag PackageDB
+</span><span id="line-188"></span><span>                </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag PackageDB
 </span><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var">regPackageDB</span></a></span><span>
-</span><span id="line-163"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467703"><span class="annot"><span class="annottext">Flag PackageDB
-</span><a href="#local-6989586621679467703"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467704"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467704"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467704"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var">regPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467703"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-164"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[(Flag PackageDB, OptFlags, FilePath)]
+</span><span id="line-189"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528260"><span class="annot"><span class="annottext">Flag PackageDB
+</span><a href="#local-6989586621679528260"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679528261"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528261"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528261"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regPackageDB"><span class="hs-identifier hs-var">regPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528260"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-190"></span><span>                </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[(Flag PackageDB, OptFlags, String)]
 -&gt; MkOptDescr
      (RegisterFlags -&gt; Flag PackageDB)
      (Flag PackageDB -&gt; RegisterFlags -&gt; RegisterFlags)
      RegisterFlags
 forall b a.
 Eq b =&gt;
-[(b, OptFlags, FilePath)] -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
+[(b, OptFlags, String)] -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Command.html#choiceOpt"><span class="hs-identifier hs-var">choiceOpt</span></a></span><span>
-</span><span id="line-165"></span><span>                </span><span class="hs-special">[</span><span>
-</span><span id="line-166"></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
+</span><span id="line-191"></span><span>                    </span><span class="hs-special">[</span><span>
+</span><span id="line-192"></span><span>                      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDB
+forall fp. PackageDBX fp
 </span><a href="Distribution.Simple.Compiler.html#UserPackageDB"><span class="hs-identifier hs-var">UserPackageDB</span></a></span><span>
-</span><span id="line-167"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-193"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;user&quot;</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-168"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-194"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;unregister this package in the user's local package database&quot;</span></span><span>
-</span><span id="line-169"></span><span>                  </span><span class="hs-special">)</span><span>
-</span><span id="line-170"></span><span>                </span><span class="hs-special">,</span><span>
-</span><span id="line-171"></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
+</span><span id="line-195"></span><span>                      </span><span class="hs-special">)</span><span>
+</span><span id="line-196"></span><span>                    </span><span class="hs-special">,</span><span>
+</span><span id="line-197"></span><span>                      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
 forall a. a -&gt; Flag a
 </span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDB
+forall fp. PackageDBX fp
 </span><a href="Distribution.Simple.Compiler.html#GlobalPackageDB"><span class="hs-identifier hs-var">GlobalPackageDB</span></a></span><span>
-</span><span id="line-172"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-198"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;global&quot;</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
-</span><span id="line-173"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-199"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;(default) unregister this package in the  system-wide package database&quot;</span></span><span>
-</span><span id="line-174"></span><span>                  </span><span class="hs-special">)</span><span>
-</span><span id="line-175"></span><span>                </span><span class="hs-special">]</span><span>
-</span><span id="line-176"></span><span>            </span><span class="hs-special">)</span><span>
-</span><span id="line-177"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
--&gt; [FilePath]
--&gt; FilePath
+</span><span id="line-200"></span><span>                      </span><span class="hs-special">)</span><span>
+</span><span id="line-201"></span><span>                    </span><span class="hs-special">]</span><span>
+</span><span id="line-202"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-203"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
 -&gt; (RegisterFlags -&gt; Flag Bool)
 -&gt; (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
 -&gt; MkOptDescr
@@ -565,54 +624,54 @@ forall a. a -&gt; Flag a
      RegisterFlags
 -&gt; OptionField RegisterFlags
 forall get set a.
-FilePath
--&gt; [FilePath]
--&gt; FilePath
+String
+-&gt; [String]
+-&gt; String
 -&gt; get
 -&gt; set
 -&gt; MkOptDescr get set a
 -&gt; OptionField a
 </span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
-</span><span id="line-178"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-204"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-179"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-205"></span><span>                </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;gen-script&quot;</span></span><span class="hs-special">]</span><span>
-</span><span id="line-180"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-206"></span><span>                </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Instead of performing the unregister command, generate a script to unregister later&quot;</span></span><span>
-</span><span id="line-181"></span><span>            </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
+</span><span id="line-207"></span><span>                </span><span class="annot"><span class="annottext">RegisterFlags -&gt; Flag Bool
 </span><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var">regGenScript</span></a></span><span>
-</span><span id="line-182"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467705"><span class="annot"><span class="annottext">Flag Bool
-</span><a href="#local-6989586621679467705"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467706"><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467706"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
-</span><a href="#local-6989586621679467706"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var">regGenScript</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467705"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-183"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+</span><span id="line-208"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679528262"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679528262"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679528263"><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528263"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
+</span><a href="#local-6989586621679528263"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#regGenScript"><span class="hs-identifier hs-var">regGenScript</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679528262"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-209"></span><span>                </span><span class="annot"><span class="annottext">MkOptDescr
   (RegisterFlags -&gt; Flag Bool)
   (Flag Bool -&gt; RegisterFlags -&gt; RegisterFlags)
   RegisterFlags
 forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
 </span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
-</span><span id="line-184"></span><span>        </span><span class="hs-special">]</span><span>
-</span><span id="line-185"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-186"></span><span>
-</span><span id="line-187"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#emptyRegisterFlags"><span class="hs-identifier hs-type">emptyRegisterFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
-</span><span id="line-188"></span><span id="emptyRegisterFlags"><span class="annot"><span class="annottext">emptyRegisterFlags :: RegisterFlags
+</span><span id="line-210"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-211"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-212"></span><span>
+</span><span id="line-213"></span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#emptyRegisterFlags"><span class="hs-identifier hs-type">emptyRegisterFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span><span>
+</span><span id="line-214"></span><span id="emptyRegisterFlags"><span class="annot"><span class="annottext">emptyRegisterFlags :: RegisterFlags
 </span><a href="Distribution.Simple.Setup.Register.html#emptyRegisterFlags"><span class="hs-identifier hs-var hs-var">emptyRegisterFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-189"></span><span>
-</span><span id="line-190"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467713"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-191"></span><span>  </span><span id="local-6989586621679467759"><span class="annot"><span class="annottext">mempty :: RegisterFlags
+</span><span id="line-215"></span><span>
+</span><span id="line-216"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679528270"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-217"></span><span>  </span><span id="local-6989586621679528305"><span class="annot"><span class="annottext">mempty :: RegisterFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegisterFlags
 forall a. (Generic a, GMonoid (Rep a)) =&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
-</span><span id="line-192"></span><span>  </span><span id="local-6989586621679467762"><span class="annot"><span class="annottext">mappend :: RegisterFlags -&gt; RegisterFlags -&gt; RegisterFlags
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-218"></span><span>  </span><span id="local-6989586621679528308"><span class="annot"><span class="annottext">mappend :: RegisterFlags -&gt; RegisterFlags -&gt; RegisterFlags
 </span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegisterFlags -&gt; RegisterFlags -&gt; RegisterFlags
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
-</span><span id="line-193"></span><span>
-</span><span id="line-194"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467765"><span id="local-6989586621679467768"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-195"></span><span>  </span><span id="local-6989586621679467809"><span class="annot"><span class="annottext">&lt;&gt; :: RegisterFlags -&gt; RegisterFlags -&gt; RegisterFlags
+</span><span id="line-219"></span><span>
+</span><span id="line-220"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679528311"><span id="local-6989586621679528314"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Register.html#RegisterFlags"><span class="hs-identifier hs-type">RegisterFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-221"></span><span>  </span><span id="local-6989586621679528345"><span class="annot"><span class="annottext">&lt;&gt; :: RegisterFlags -&gt; RegisterFlags -&gt; RegisterFlags
 </span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">RegisterFlags -&gt; RegisterFlags -&gt; RegisterFlags
 forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
-</span><span id="line-196"></span></pre></body></html>
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-222"></span></pre></body></html>

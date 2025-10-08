@@ -22,11 +22,11 @@
 </span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Settings.Config.html"><span class="hs-identifier">GHC.Settings.Config</span></a></span><span>
 </span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Constants.html"><span class="hs-identifier">GHC.Utils.Constants</span></a></span><span>
 </span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Exception.html"><span class="hs-identifier">GHC.Utils.Exception</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Exception</span></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//GHC.Stack.html/GHC.Stack.html"><span class="hs-identifier">GHC.Stack</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/GHC.Stack.html"><span class="hs-identifier">GHC.Stack</span></a></span><span>
 </span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.Basic.html"><span class="hs-identifier">GHC.Prelude.Basic</span></a></span><span>
 </span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.html/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">when</span></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.IO.Unsafe.html/System.IO.Unsafe.html"><span class="hs-identifier">System.IO.Unsafe</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">when</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/System.IO.Unsafe.html"><span class="hs-identifier">System.IO.Unsafe</span></a></span><span>
 </span><span id="line-30"></span><span>
 </span><span id="line-31"></span><span class="hs-comment">-- | This type is very similar to 'GHC.Utils.Panic.GhcException', but it omits</span><span>
 </span><span id="line-32"></span><span class="hs-comment">-- the constructors that involve pretty-printing via</span><span>
@@ -60,15 +60,15 @@
 </span><span id="line-60"></span><span>  </span><span class="annot"><span class="hs-comment">-- | An error in the user's code, probably.</span></span><span>
 </span><span id="line-61"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="PlainProgramError"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainProgramError"><span class="hs-identifier hs-var">PlainProgramError</span></a></span></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-62"></span><span>
-</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682313810"><span id="local-6989586621682313814"><span id="local-6989586621682313817"><span id="local-6989586621682313820"><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainGhcException"><span class="hs-identifier hs-type">PlainGhcException</span></a></span></span></span></span></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682449075"><span id="local-6989586621682449079"><span id="local-6989586621682449082"><span id="local-6989586621682449085"><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainGhcException"><span class="hs-identifier hs-type">PlainGhcException</span></a></span></span></span></span></span><span>
 </span><span id="line-64"></span><span>
-</span><span id="line-65"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682313825"><span id="local-6989586621682313828"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainGhcException"><span class="hs-identifier hs-type">PlainGhcException</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-66"></span><span>  </span><span id="local-6989586621682313831"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; PlainGhcException -&gt; ShowS
-</span><a href="#local-6989586621682313831"><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682313833"><span class="annot"><span class="annottext">PlainGhcException
-</span><a href="#local-6989586621682313833"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; ShowS
+</span><span id="line-65"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682449090"><span id="local-6989586621682449093"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainGhcException"><span class="hs-identifier hs-type">PlainGhcException</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621682449096"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; PlainGhcException -&gt; ShowS
+</span><a href="#local-6989586621682449096"><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682449098"><span class="annot"><span class="annottext">PlainGhcException
+</span><a href="#local-6989586621682449098"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; ShowS
 </span><a href="GHC.Utils.Panic.Plain.html#showPlainGhcException"><span class="hs-identifier hs-var">showPlainGhcException</span></a></span><span> </span><span class="annot"><span class="annottext">PlainGhcException
-</span><a href="#local-6989586621682313833"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><a href="#local-6989586621682449098"><span class="hs-identifier hs-var">e</span></a></span><span>
 </span><span id="line-67"></span><span>
 </span><span id="line-68"></span><span class="annot"><span class="hs-comment">-- | Short usage information to display when we are given the wrong cmd line arguments.</span></span><span>
 </span><span id="line-69"></span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#short_usage"><span class="hs-identifier hs-type">short_usage</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
@@ -81,19 +81,19 @@
 </span><span id="line-74"></span><span id="showPlainGhcException"><span class="annot"><span class="annottext">showPlainGhcException :: PlainGhcException -&gt; ShowS
 </span><a href="GHC.Utils.Panic.Plain.html#showPlainGhcException"><span class="hs-identifier hs-var hs-var">showPlainGhcException</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-75"></span><span>  </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-76"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainSignal"><span class="hs-identifier hs-type">PlainSignal</span></a></span><span> </span><span id="local-6989586621682313835"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682313835"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span id="line-76"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainSignal"><span class="hs-identifier hs-type">PlainSignal</span></a></span><span> </span><span id="local-6989586621682449100"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682449100"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;signal: &quot;</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; ShowS
 forall a. Show a =&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">shows</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682313835"><span class="hs-identifier hs-var">n</span></a></span><span>
-</span><span id="line-77"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainUsageError"><span class="hs-identifier hs-type">PlainUsageError</span></a></span><span> </span><span id="local-6989586621682313839"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313839"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682449100"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-77"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainUsageError"><span class="hs-identifier hs-type">PlainUsageError</span></a></span><span> </span><span id="local-6989586621682449104"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449104"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313839"><span class="hs-identifier hs-var">str</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><a href="#local-6989586621682449104"><span class="hs-identifier hs-var">str</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 </span><span class="hs-identifier hs-var">showChar</span></span><span> </span><span class="annot"><span class="annottext">Char
@@ -102,33 +102,33 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><a href="GHC.Utils.Panic.Plain.html#short_usage"><span class="hs-identifier hs-var">short_usage</span></a></span><span>
-</span><span id="line-78"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainCmdLineError"><span class="hs-identifier hs-type">PlainCmdLineError</span></a></span><span> </span><span id="local-6989586621682313841"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313841"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span id="line-78"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainCmdLineError"><span class="hs-identifier hs-type">PlainCmdLineError</span></a></span><span> </span><span id="local-6989586621682449106"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449106"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313841"><span class="hs-identifier hs-var">str</span></a></span><span>
-</span><span id="line-79"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainPanic"><span class="hs-identifier hs-type">PlainPanic</span></a></span><span> </span><span id="local-6989586621682313842"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313842"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
-</span><a href="#local-6989586621682313843"><span class="hs-identifier hs-var">panicMsg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682449106"><span class="hs-identifier hs-var">str</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainPanic"><span class="hs-identifier hs-type">PlainPanic</span></a></span><span> </span><span id="local-6989586621682449107"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449107"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
+</span><a href="#local-6989586621682449108"><span class="hs-identifier hs-var">panicMsg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313842"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-80"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainSorry"><span class="hs-identifier hs-type">PlainSorry</span></a></span><span> </span><span id="local-6989586621682313844"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313844"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
-</span><a href="#local-6989586621682313845"><span class="hs-identifier hs-var">sorryMsg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682449107"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainSorry"><span class="hs-identifier hs-type">PlainSorry</span></a></span><span> </span><span id="local-6989586621682449109"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449109"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
+</span><a href="#local-6989586621682449110"><span class="hs-identifier hs-var">sorryMsg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313844"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-81"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainInstallationError"><span class="hs-identifier hs-type">PlainInstallationError</span></a></span><span> </span><span id="local-6989586621682313846"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313846"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682449109"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainInstallationError"><span class="hs-identifier hs-type">PlainInstallationError</span></a></span><span> </span><span id="local-6989586621682449111"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449111"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313846"><span class="hs-identifier hs-var">str</span></a></span><span>
-</span><span id="line-82"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainProgramError"><span class="hs-identifier hs-type">PlainProgramError</span></a></span><span> </span><span id="local-6989586621682313847"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313847"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682449111"><span class="hs-identifier hs-var">str</span></a></span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainProgramError"><span class="hs-identifier hs-type">PlainProgramError</span></a></span><span> </span><span id="local-6989586621682449112"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449112"><span class="hs-identifier hs-var">str</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313847"><span class="hs-identifier hs-var">str</span></a></span><span>
+</span><a href="#local-6989586621682449112"><span class="hs-identifier hs-var">str</span></a></span><span>
 </span><span id="line-83"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-84"></span><span>    </span><span class="annot"><a href="#local-6989586621682313845"><span class="hs-identifier hs-type">sorryMsg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span>
-</span><span id="line-85"></span><span>    </span><span id="local-6989586621682313845"><span class="annot"><span class="annottext">sorryMsg :: ShowS -&gt; ShowS
-</span><a href="#local-6989586621682313845"><span class="hs-identifier hs-var hs-var">sorryMsg</span></a></span></span><span> </span><span id="local-6989586621682313848"><span class="annot"><span class="annottext">ShowS
-</span><a href="#local-6989586621682313848"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><a href="#local-6989586621682449110"><span class="hs-identifier hs-type">sorryMsg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621682449110"><span class="annot"><span class="annottext">sorryMsg :: ShowS -&gt; ShowS
+</span><a href="#local-6989586621682449110"><span class="hs-identifier hs-var hs-var">sorryMsg</span></a></span></span><span> </span><span id="local-6989586621682449113"><span class="annot"><span class="annottext">ShowS
+</span><a href="#local-6989586621682449113"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-86"></span><span>        </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;sorry! (unimplemented feature or known bug)\n&quot;</span></span><span>
@@ -139,23 +139,23 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-string">&quot;  GHC version &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="../../ghc-boot-9.10.1-5e10/src//GHC.Version.html/GHC.Version.html#cProjectVersion"><span class="hs-identifier hs-var">cProjectVersion</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="../../ghc-boot-9.12.2-1a37/src/GHC.Version.html#cProjectVersion"><span class="hs-identifier hs-var">cProjectVersion</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;:\n\t&quot;</span></span><span class="hs-special">)</span><span>
 </span><span id="line-88"></span><span>      </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="#local-6989586621682313848"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><a href="#local-6989586621682449113"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;\n&quot;</span></span><span>
 </span><span id="line-89"></span><span>
-</span><span id="line-90"></span><span>    </span><span class="annot"><a href="#local-6989586621682313843"><span class="hs-identifier hs-type">panicMsg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span>
-</span><span id="line-91"></span><span>    </span><span id="local-6989586621682313843"><span class="annot"><span class="annottext">panicMsg :: ShowS -&gt; ShowS
-</span><a href="#local-6989586621682313843"><span class="hs-identifier hs-var hs-var">panicMsg</span></a></span></span><span> </span><span id="local-6989586621682313850"><span class="annot"><span class="annottext">ShowS
-</span><a href="#local-6989586621682313850"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-90"></span><span>    </span><span class="annot"><a href="#local-6989586621682449108"><span class="hs-identifier hs-type">panicMsg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ShowS</span></span><span>
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621682449108"><span class="annot"><span class="annottext">panicMsg :: ShowS -&gt; ShowS
+</span><a href="#local-6989586621682449108"><span class="hs-identifier hs-var hs-var">panicMsg</span></a></span></span><span> </span><span id="local-6989586621682449115"><span class="annot"><span class="annottext">ShowS
+</span><a href="#local-6989586621682449115"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-92"></span><span>        </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;panic! (the 'impossible' happened)\n&quot;</span></span><span>
@@ -166,14 +166,14 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-string">&quot;  GHC version &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="../../ghc-boot-9.10.1-5e10/src//GHC.Version.html/GHC.Version.html#cProjectVersion"><span class="hs-identifier hs-var">cProjectVersion</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="../../ghc-boot-9.12.2-1a37/src/GHC.Version.html#cProjectVersion"><span class="hs-identifier hs-var">cProjectVersion</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;:\n\t&quot;</span></span><span class="hs-special">)</span><span>
 </span><span id="line-94"></span><span>      </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ShowS
-</span><a href="#local-6989586621682313850"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><a href="#local-6989586621682449115"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
@@ -184,66 +184,43 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Please report this as a GHC bug:  https://www.haskell.org/ghc/reportabug\n&quot;</span></span><span>
 </span><span id="line-96"></span><span>
-</span><span id="line-97"></span><span id="local-6989586621682313737"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-type">throwPlainGhcException</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainGhcException"><span class="hs-identifier hs-type">PlainGhcException</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313737"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-97"></span><span id="local-6989586621682449012"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-type">throwPlainGhcException</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainGhcException"><span class="hs-identifier hs-type">PlainGhcException</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449012"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-98"></span><span id="throwPlainGhcException"><span class="annot"><span class="annottext">throwPlainGhcException :: forall a. PlainGhcException -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-var hs-var">throwPlainGhcException</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; a
-forall a e. (?callStack::CallStack, Exception e) =&gt; e -&gt; a
+forall a e. (HasCallStack, Exception e) =&gt; e -&gt; a
 </span><span class="hs-identifier hs-var">Exception.throw</span></span><span>
 </span><span id="line-99"></span><span>
 </span><span id="line-100"></span><span class="annot"><span class="hs-comment">-- | Panics and asserts.</span></span><span>
-</span><span id="line-101"></span><span id="local-6989586621682313742"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-type">panic</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#sorry"><span class="hs-identifier hs-type">sorry</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#pgmError"><span class="hs-identifier hs-type">pgmError</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313742"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-102"></span><span id="panic"><span class="annot"><span class="annottext">panic :: forall a. (?callStack::CallStack) =&gt; String -&gt; a
-</span><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-var hs-var">panic</span></a></span></span><span>    </span><span id="local-6989586621682313863"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313863"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; a
+</span><span id="line-101"></span><span id="local-6989586621682449018"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-type">panic</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#sorry"><span class="hs-identifier hs-type">sorry</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#pgmError"><span class="hs-identifier hs-type">pgmError</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449018"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-102"></span><span id="panic"><span class="annot"><span class="annottext">panic :: forall a. HasCallStack =&gt; String -&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#panic"><span class="hs-identifier hs-var hs-var">panic</span></a></span></span><span>    </span><span id="local-6989586621682449122"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449122"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; a
 forall a. IO a -&gt; a
 </span><span class="hs-identifier hs-var">unsafeDupablePerformIO</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; a) -&gt; IO a -&gt; a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-103"></span><span>   </span><span id="local-6989586621682313865"><span class="annot"><a href="#local-6989586621682313865"><span class="hs-identifier hs-var">stack</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CostCentreStack -&gt; IO [String]
-</span><span class="hs-identifier hs-var">ccsToStrings</span></span><span> </span><span class="annot"><span class="annottext">(Ptr CostCentreStack -&gt; IO [String])
--&gt; IO (Ptr CostCentreStack) -&gt; IO [String]
-forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
-</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; IO (Ptr CostCentreStack)
-forall dummy. dummy -&gt; IO (Ptr CostCentreStack)
-</span><span class="hs-identifier hs-var">getCurrentCCS</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313863"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-104"></span><span>   </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682313873"><span class="annot"><a href="#local-6989586621682313873"><span class="hs-identifier hs-var hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
-</span><span class="hs-identifier hs-var">unlines</span></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; String) -&gt; [String] -&gt; String
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; [String] -&gt; [String]
-forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;  &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [String]) -&gt; [String] -&gt; [String]
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
-</span><span class="hs-identifier hs-var">lines</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CallStack -&gt; String
-</span><span class="hs-identifier hs-var">prettyCallStack</span></span><span> </span><span class="annot"><span class="annottext">CallStack
-(?callStack::CallStack) =&gt; CallStack
-</span><span class="hs-identifier hs-var">callStack</span></span><span class="hs-special">)</span><span>
-</span><span id="line-105"></span><span>   </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">null</span></span><span> </span><span class="annot"><a href="#local-6989586621682313865"><span class="hs-identifier hs-type">stack</span></a></span><span>
-</span><span id="line-106"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-type">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainPanic"><span class="hs-identifier hs-type">PlainPanic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682313863"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-char">'\n'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><a href="#local-6989586621682313873"><span class="hs-identifier hs-type">doc</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-107"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-type">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainPanic"><span class="hs-identifier hs-type">PlainPanic</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682313863"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-char">'\n'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">renderStack</span></span><span> </span><span class="annot"><a href="#local-6989586621682313865"><span class="hs-identifier hs-type">stack</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-108"></span><span>
-</span><span id="line-109"></span><span id="sorry"><span class="annot"><span class="annottext">sorry :: forall a. (?callStack::CallStack) =&gt; String -&gt; a
-</span><a href="GHC.Utils.Panic.Plain.html#sorry"><span class="hs-identifier hs-var hs-var">sorry</span></a></span></span><span>    </span><span id="local-6989586621682313881"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313881"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; a
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; IO a
+forall a. PlainGhcException -&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-var">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PlainGhcException
+</span><a href="GHC.Utils.Panic.Plain.html#PlainPanic"><span class="hs-identifier hs-var">PlainPanic</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449122"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span id="sorry"><span class="annot"><span class="annottext">sorry :: forall a. HasCallStack =&gt; String -&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#sorry"><span class="hs-identifier hs-var hs-var">sorry</span></a></span></span><span>    </span><span id="local-6989586621682449125"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449125"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; a
 forall a. PlainGhcException -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-var">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PlainGhcException
 </span><a href="GHC.Utils.Panic.Plain.html#PlainSorry"><span class="hs-identifier hs-var">PlainSorry</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313881"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-110"></span><span id="pgmError"><span class="annot"><span class="annottext">pgmError :: forall a. (?callStack::CallStack) =&gt; String -&gt; a
-</span><a href="GHC.Utils.Panic.Plain.html#pgmError"><span class="hs-identifier hs-var hs-var">pgmError</span></a></span></span><span> </span><span id="local-6989586621682313883"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313883"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; a
+</span><a href="#local-6989586621682449125"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span id="pgmError"><span class="annot"><span class="annottext">pgmError :: forall a. HasCallStack =&gt; String -&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#pgmError"><span class="hs-identifier hs-var hs-var">pgmError</span></a></span></span><span> </span><span id="local-6989586621682449127"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449127"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; a
 forall a. PlainGhcException -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-var">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PlainGhcException
 </span><a href="GHC.Utils.Panic.Plain.html#PlainProgramError"><span class="hs-identifier hs-var">PlainProgramError</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313883"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-111"></span><span>
-</span><span id="line-112"></span><span id="local-6989586621682313762"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#cmdLineError"><span class="hs-identifier hs-type">cmdLineError</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313762"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-113"></span><span id="cmdLineError"><span class="annot"><span class="annottext">cmdLineError :: forall a. String -&gt; a
+</span><a href="#local-6989586621682449127"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span id="local-6989586621682449027"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#cmdLineError"><span class="hs-identifier hs-type">cmdLineError</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449027"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-108"></span><span id="cmdLineError"><span class="annot"><span class="annottext">cmdLineError :: forall a. String -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#cmdLineError"><span class="hs-identifier hs-var hs-var">cmdLineError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO a -&gt; a
 forall a. IO a -&gt; a
 </span><span class="hs-identifier hs-var">unsafeDupablePerformIO</span></span><span> </span><span class="annot"><span class="annottext">(IO a -&gt; a) -&gt; (String -&gt; IO a) -&gt; String -&gt; a
@@ -251,38 +228,31 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; IO a
 forall a. String -&gt; IO a
 </span><a href="GHC.Utils.Panic.Plain.html#cmdLineErrorIO"><span class="hs-identifier hs-var">cmdLineErrorIO</span></a></span><span>
-</span><span id="line-114"></span><span>
-</span><span id="line-115"></span><span id="local-6989586621682313764"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#cmdLineErrorIO"><span class="hs-identifier hs-type">cmdLineErrorIO</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682313764"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-116"></span><span id="cmdLineErrorIO"><span class="annot"><span class="annottext">cmdLineErrorIO :: forall a. String -&gt; IO a
-</span><a href="GHC.Utils.Panic.Plain.html#cmdLineErrorIO"><span class="hs-identifier hs-var hs-var">cmdLineErrorIO</span></a></span></span><span> </span><span id="local-6989586621682313887"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313887"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-117"></span><span>  </span><span id="local-6989586621682313888"><span class="annot"><a href="#local-6989586621682313888"><span class="hs-identifier hs-var">stack</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CostCentreStack -&gt; IO [String]
-</span><span class="hs-identifier hs-var">ccsToStrings</span></span><span> </span><span class="annot"><span class="annottext">(Ptr CostCentreStack -&gt; IO [String])
--&gt; IO (Ptr CostCentreStack) -&gt; IO [String]
-forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
-</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; IO (Ptr CostCentreStack)
-forall dummy. dummy -&gt; IO (Ptr CostCentreStack)
-</span><span class="hs-identifier hs-var">getCurrentCCS</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313887"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-118"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">null</span></span><span> </span><span class="annot"><a href="#local-6989586621682313888"><span class="hs-identifier hs-type">stack</span></a></span><span>
-</span><span id="line-119"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-type">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainCmdLineError"><span class="hs-identifier hs-type">PlainCmdLineError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682313887"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-120"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-type">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#PlainCmdLineError"><span class="hs-identifier hs-type">PlainCmdLineError</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682313887"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-char">'\n'</span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">renderStack</span></span><span> </span><span class="annot"><a href="#local-6989586621682313888"><span class="hs-identifier hs-type">stack</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-121"></span><span>
-</span><span id="line-122"></span><span class="annot"><span class="hs-comment">-- | Throw a failed assertion exception for a given filename and line number.</span></span><span>
-</span><span id="line-123"></span><span id="local-6989586621682313766"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertPanic"><span class="hs-identifier hs-type">assertPanic</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313766"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-124"></span><span id="assertPanic"><span class="annot"><span class="annottext">assertPanic :: forall a. String -&gt; Int -&gt; a
-</span><a href="GHC.Utils.Panic.Plain.html#assertPanic"><span class="hs-identifier hs-var hs-var">assertPanic</span></a></span></span><span> </span><span id="local-6989586621682313894"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313894"><span class="hs-identifier hs-var">file</span></a></span></span><span> </span><span id="local-6989586621682313895"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682313895"><span class="hs-identifier hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-125"></span><span>  </span><span class="annot"><span class="annottext">AssertionFailed -&gt; a
-forall a e. (?callStack::CallStack, Exception e) =&gt; e -&gt; a
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span id="local-6989586621682449029"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#cmdLineErrorIO"><span class="hs-identifier hs-type">cmdLineErrorIO</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682449029"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-111"></span><span id="cmdLineErrorIO"><span class="annot"><span class="annottext">cmdLineErrorIO :: forall a. String -&gt; IO a
+</span><a href="GHC.Utils.Panic.Plain.html#cmdLineErrorIO"><span class="hs-identifier hs-var hs-var">cmdLineErrorIO</span></a></span></span><span> </span><span id="local-6989586621682449128"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449128"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlainGhcException -&gt; IO a
+forall a. PlainGhcException -&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#throwPlainGhcException"><span class="hs-identifier hs-var">throwPlainGhcException</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PlainGhcException
+</span><a href="GHC.Utils.Panic.Plain.html#PlainCmdLineError"><span class="hs-identifier hs-var">PlainCmdLineError</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449128"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="annot"><span class="hs-comment">-- | Throw a failed assertion exception for a given filename and line number.</span></span><span>
+</span><span id="line-114"></span><span id="local-6989586621682449031"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertPanic"><span class="hs-identifier hs-type">assertPanic</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449031"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-115"></span><span id="assertPanic"><span class="annot"><span class="annottext">assertPanic :: forall a. String -&gt; Int -&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#assertPanic"><span class="hs-identifier hs-var hs-var">assertPanic</span></a></span></span><span> </span><span id="local-6989586621682449134"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682449134"><span class="hs-identifier hs-var">file</span></a></span></span><span> </span><span id="local-6989586621682449135"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682449135"><span class="hs-identifier hs-var">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-116"></span><span>  </span><span class="annot"><span class="annottext">AssertionFailed -&gt; a
+forall a e. (HasCallStack, Exception e) =&gt; e -&gt; a
 </span><span class="hs-identifier hs-var">Exception.throw</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; AssertionFailed
 </span><span class="hs-identifier hs-var">Exception.AssertionFailed</span></span><span>
-</span><span id="line-126"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span id="line-117"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;ASSERT failed! file &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682313894"><span class="hs-identifier hs-var">file</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682449134"><span class="hs-identifier hs-var">file</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;, line &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
@@ -290,108 +260,68 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682313895"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-127"></span><span>
-</span><span id="line-128"></span><span>
-</span><span id="line-129"></span><span id="local-6989586621682313769"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertPanic%27"><span class="hs-identifier hs-type">assertPanic'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313769"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-130"></span><span id="assertPanic%27"><span class="annot"><span class="annottext">assertPanic' :: forall a. (?callStack::CallStack) =&gt; a
-</span><a href="GHC.Utils.Panic.Plain.html#assertPanic%27"><span class="hs-identifier hs-var hs-var">assertPanic'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-131"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682313908"><span class="annot"><span class="annottext">doc :: String
-</span><a href="#local-6989586621682313908"><span class="hs-identifier hs-var hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; String
-</span><span class="hs-identifier hs-var">unlines</span></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; String) -&gt; [String] -&gt; String
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; [String] -&gt; [String]
-forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;  &quot;</span></span><span class="annot"><span class="annottext">String -&gt; ShowS
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [String]) -&gt; [String] -&gt; [String]
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
-</span><span class="hs-identifier hs-var">lines</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CallStack -&gt; String
-</span><span class="hs-identifier hs-var">prettyCallStack</span></span><span> </span><span class="annot"><span class="annottext">CallStack
-(?callStack::CallStack) =&gt; CallStack
-</span><span class="hs-identifier hs-var">callStack</span></span><span class="hs-special">)</span><span>
-</span><span id="line-132"></span><span>  </span><span class="hs-keyword">in</span><span>
-</span><span id="line-133"></span><span>  </span><span class="annot"><span class="annottext">AssertionFailed -&gt; a
-forall a e. (?callStack::CallStack, Exception e) =&gt; e -&gt; a
+</span><a href="#local-6989586621682449135"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span id="local-6989586621682449034"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertPanic%27"><span class="hs-identifier hs-type">assertPanic'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449034"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-121"></span><span id="assertPanic%27"><span class="annot"><span class="annottext">assertPanic' :: forall a. HasCallStack =&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#assertPanic%27"><span class="hs-identifier hs-var hs-var">assertPanic'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AssertionFailed -&gt; a
+forall a e. (HasCallStack, Exception e) =&gt; e -&gt; a
 </span><span class="hs-identifier hs-var">Exception.throw</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; AssertionFailed
-</span><span class="hs-identifier hs-var">Exception.AssertionFailed</span></span><span>
-</span><span id="line-134"></span><span>           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;ASSERT failed!\n&quot;</span></span><span>
-</span><span id="line-135"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
-forall a. [a] -&gt; [a] -&gt; [a]
-</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">((?callStack::CallStack) =&gt; String) -&gt; String
-forall a.
-(?callStack::CallStack) =&gt;
-((?callStack::CallStack) =&gt; a) -&gt; a
-</span><span class="hs-identifier hs-var">withFrozenCallStack</span></span><span> </span><span class="annot"><span class="annottext">String
-(?callStack::CallStack) =&gt; String
-</span><a href="#local-6989586621682313908"><span class="hs-identifier hs-var">doc</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-136"></span><span>
-</span><span id="line-137"></span><span id="local-6989586621682313772"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-identifier hs-type">assert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313772"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313772"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-138"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-pragma hs-type">assert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-139"></span><span id="assert"><span class="annot"><span class="annottext">assert :: forall a. (?callStack::CallStack) =&gt; Bool -&gt; a -&gt; a
-</span><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-identifier hs-var hs-var">assert</span></a></span></span><span> </span><span id="local-6989586621682313914"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682313914"><span class="hs-identifier hs-var">cond</span></a></span></span><span> </span><span id="local-6989586621682313915"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682313915"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-140"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">Exception.AssertionFailed</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ASSERT failed!&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span id="local-6989586621682449036"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-identifier hs-type">assert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449036"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449036"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-124"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-pragma hs-type">assert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-125"></span><span id="assert"><span class="annot"><span class="annottext">assert :: forall a. HasCallStack =&gt; Bool -&gt; a -&gt; a
+</span><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-identifier hs-var hs-var">assert</span></a></span></span><span> </span><span id="local-6989586621682449146"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682449146"><span class="hs-identifier hs-var">cond</span></a></span></span><span> </span><span id="local-6989586621682449147"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682449147"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><a href="GHC.Utils.Constants.html#debugIsOn"><span class="hs-identifier hs-var">debugIsOn</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682313914"><span class="hs-identifier hs-var">cond</span></a></span><span>
-</span><span id="line-141"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">((?callStack::CallStack) =&gt; a) -&gt; a
-forall a.
-(?callStack::CallStack) =&gt;
-((?callStack::CallStack) =&gt; a) -&gt; a
+</span><a href="#local-6989586621682449146"><span class="hs-identifier hs-var">cond</span></a></span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(HasCallStack =&gt; a) -&gt; a
+forall a. HasCallStack =&gt; (HasCallStack =&gt; a) -&gt; a
 </span><span class="hs-identifier hs-var">withFrozenCallStack</span></span><span> </span><span class="annot"><span class="annottext">a
-(?callStack::CallStack) =&gt; a
-forall a. (?callStack::CallStack) =&gt; a
+HasCallStack =&gt; a
+forall a. HasCallStack =&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#assertPanic%27"><span class="hs-identifier hs-var">assertPanic'</span></a></span><span>
-</span><span id="line-142"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682313915"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-143"></span><span>
-</span><span id="line-144"></span><span id="local-6989586621682313774"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#massert"><span class="hs-identifier hs-type">massert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="#local-6989586621682313774"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313774"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-145"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#massert"><span class="hs-pragma hs-type">massert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-146"></span><span id="massert"><span class="annot"><span class="annottext">massert :: forall (m :: * -&gt; *).
-(?callStack::CallStack, Applicative m) =&gt;
-Bool -&gt; m ()
-</span><a href="GHC.Utils.Panic.Plain.html#massert"><span class="hs-identifier hs-var hs-var">massert</span></a></span></span><span> </span><span id="local-6989586621682313926"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682313926"><span class="hs-identifier hs-var">cond</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((?callStack::CallStack) =&gt; m ()) -&gt; m ()
-forall a.
-(?callStack::CallStack) =&gt;
-((?callStack::CallStack) =&gt; a) -&gt; a
+</span><span id="line-128"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682449147"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span id="local-6989586621682449039"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#massert"><span class="hs-identifier hs-type">massert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="#local-6989586621682449039"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449039"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-131"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#massert"><span class="hs-pragma hs-type">massert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-132"></span><span id="massert"><span class="annot"><span class="annottext">massert :: forall (m :: * -&gt; *). (HasCallStack, Applicative m) =&gt; Bool -&gt; m ()
+</span><a href="GHC.Utils.Panic.Plain.html#massert"><span class="hs-identifier hs-var hs-var">massert</span></a></span></span><span> </span><span id="local-6989586621682449159"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682449159"><span class="hs-identifier hs-var">cond</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HasCallStack =&gt; m ()) -&gt; m ()
+forall a. HasCallStack =&gt; (HasCallStack =&gt; a) -&gt; a
 </span><span class="hs-identifier hs-var">withFrozenCallStack</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; m () -&gt; m ()
-forall a. (?callStack::CallStack) =&gt; Bool -&gt; a -&gt; a
+forall a. HasCallStack =&gt; Bool -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.Plain.html#assert"><span class="hs-identifier hs-var">assert</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621682313926"><span class="hs-identifier hs-var">cond</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; m ()
+</span><a href="#local-6989586621682449159"><span class="hs-identifier hs-var">cond</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; m ()
 forall a. a -&gt; m a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-147"></span><span>
-</span><span id="line-148"></span><span id="local-6989586621682313778"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertM"><span class="hs-identifier hs-type">assertM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621682313778"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313778"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682313778"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-149"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertM"><span class="hs-pragma hs-type">assertM</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-150"></span><span id="assertM"><span class="annot"><span class="annottext">assertM :: forall (m :: * -&gt; *).
-(?callStack::CallStack, Monad m) =&gt;
-m Bool -&gt; m ()
-</span><a href="GHC.Utils.Panic.Plain.html#assertM"><span class="hs-identifier hs-var hs-var">assertM</span></a></span></span><span> </span><span id="local-6989586621682313938"><span class="annot"><span class="annottext">m Bool
-</span><a href="#local-6989586621682313938"><span class="hs-identifier hs-var">mcond</span></a></span></span><span>
-</span><span id="line-151"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="GHC.Utils.Constants.html#debugIsOn"><span class="hs-identifier hs-var">debugIsOn</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((?callStack::CallStack) =&gt; m ()) -&gt; m ()
-forall a.
-(?callStack::CallStack) =&gt;
-((?callStack::CallStack) =&gt; a) -&gt; a
-</span><span class="hs-identifier hs-var">withFrozenCallStack</span></span><span> </span><span class="annot"><span class="annottext">(((?callStack::CallStack) =&gt; m ()) -&gt; m ())
--&gt; ((?callStack::CallStack) =&gt; m ()) -&gt; m ()
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span id="local-6989586621682449043"><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertM"><span class="hs-identifier hs-type">assertM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621682449043"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449043"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621682449043"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-135"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertM"><span class="hs-pragma hs-type">assertM</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-136"></span><span id="assertM"><span class="annot"><span class="annottext">assertM :: forall (m :: * -&gt; *). (HasCallStack, Monad m) =&gt; m Bool -&gt; m ()
+</span><a href="GHC.Utils.Panic.Plain.html#assertM"><span class="hs-identifier hs-var hs-var">assertM</span></a></span></span><span> </span><span id="local-6989586621682449171"><span class="annot"><span class="annottext">m Bool
+</span><a href="#local-6989586621682449171"><span class="hs-identifier hs-var">mcond</span></a></span></span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="GHC.Utils.Constants.html#debugIsOn"><span class="hs-identifier hs-var">debugIsOn</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HasCallStack =&gt; m ()) -&gt; m ()
+forall a. HasCallStack =&gt; (HasCallStack =&gt; a) -&gt; a
+</span><span class="hs-identifier hs-var">withFrozenCallStack</span></span><span> </span><span class="annot"><span class="annottext">((HasCallStack =&gt; m ()) -&gt; m ()) -&gt; (HasCallStack =&gt; m ()) -&gt; m ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-152"></span><span>      </span><span id="local-6989586621682313944"><span class="annot"><a href="#local-6989586621682313944"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m Bool
-</span><a href="#local-6989586621682313938"><span class="hs-identifier hs-var">mcond</span></a></span><span>
-</span><span id="line-153"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">not</span></span><span> </span><span class="annot"><a href="#local-6989586621682313944"><span class="hs-identifier hs-type">res</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertPanic%27"><span class="hs-identifier hs-type">assertPanic'</span></a></span><span>
-</span><span id="line-154"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-138"></span><span>      </span><span id="local-6989586621682449177"><span class="annot"><a href="#local-6989586621682449177"><span class="hs-identifier hs-var">res</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m Bool
+</span><a href="#local-6989586621682449171"><span class="hs-identifier hs-var">mcond</span></a></span><span>
+</span><span id="line-139"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">not</span></span><span> </span><span class="annot"><a href="#local-6989586621682449177"><span class="hs-identifier hs-type">res</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.Plain.html#assertPanic%27"><span class="hs-identifier hs-type">assertPanic'</span></a></span><span>
+</span><span id="line-140"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; m ()
 forall a. a -&gt; m a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-155"></span></pre></body></html>
+</span><span id="line-141"></span></pre></body></html>

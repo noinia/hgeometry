@@ -16,8 +16,8 @@
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.html"><span class="hs-identifier">GHC.Prelude</span></a></span><span>
 </span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Char.html/Data.Char.html"><span class="hs-identifier">Data.Char</span></a></span><span>        </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">ord</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">chr</span></span><span> </span><span class="hs-special">)</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Word.html/Data.Word.html"><span class="hs-identifier">Data.Word</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Char.html"><span class="hs-identifier">Data.Char</span></a></span><span>        </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">ord</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">chr</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Word.html"><span class="hs-identifier">Data.Word</span></a></span><span>
 </span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.html"><span class="hs-identifier">GHC.Utils.Panic</span></a></span><span>
 </span><span id="line-22"></span><span>
 </span><span id="line-23"></span><span class="hs-comment">-- Bit masks</span><span>
@@ -51,14 +51,19 @@
 </span><span id="line-37"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="GHC.Parser.CharClass.html#is_ctype"><span class="hs-pragma hs-type">is_ctype</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-38"></span><span class="annot"><a href="GHC.Parser.CharClass.html#is_ctype"><span class="hs-identifier hs-type">is_ctype</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-39"></span><span id="is_ctype"><span class="annot"><span class="annottext">is_ctype :: Word8 -&gt; Char -&gt; Bool
-</span><a href="GHC.Parser.CharClass.html#is_ctype"><span class="hs-identifier hs-var hs-var">is_ctype</span></a></span></span><span> </span><span id="local-6989586621682329147"><span class="annot"><span class="annottext">Word8
-</span><a href="#local-6989586621682329147"><span class="hs-identifier hs-var">mask</span></a></span></span><span> </span><span id="local-6989586621682329148"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329148"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="GHC.Parser.CharClass.html#is_ctype"><span class="hs-identifier hs-var hs-var">is_ctype</span></a></span></span><span> </span><span id="local-6989586621682466979"><span class="annot"><span class="annottext">Word8
+</span><a href="#local-6989586621682466979"><span class="hs-identifier hs-var">mask</span></a></span></span><span> </span><span id="local-6989586621682466980"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466980"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466980"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\127'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
 </span><a href="GHC.Parser.CharClass.html#charType"><span class="hs-identifier hs-var">charType</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329148"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Word8
+</span><a href="#local-6989586621682466980"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Word8
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">.&amp;.</span></span><span> </span><span class="annot"><span class="annottext">Word8
-</span><a href="#local-6989586621682329147"><span class="hs-identifier hs-var">mask</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
+</span><a href="#local-6989586621682466979"><span class="hs-identifier hs-var">mask</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">0</span></span><span>
@@ -108,12 +113,12 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-53"></span><span>
 </span><span id="line-54"></span><span class="annot"><a href="GHC.Parser.CharClass.html#hexDigit"><span class="hs-identifier hs-type">hexDigit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-55"></span><span id="hexDigit"><span class="annot"><span class="annottext">hexDigit :: Char -&gt; Int
-</span><a href="GHC.Parser.CharClass.html#hexDigit"><span class="hs-identifier hs-var hs-var">hexDigit</span></a></span></span><span> </span><span id="local-6989586621682329153"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329153"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><a href="GHC.Parser.CharClass.html#hexDigit"><span class="hs-identifier hs-var hs-var">hexDigit</span></a></span></span><span> </span><span id="local-6989586621682466987"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466987"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><a href="GHC.Parser.CharClass.html#is_decdigit"><span class="hs-identifier hs-var">is_decdigit</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329153"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
+</span><a href="#local-6989586621682466987"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329153"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682466987"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
@@ -122,7 +127,7 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char
 </span><a href="GHC.Parser.CharClass.html#to_lower"><span class="hs-identifier hs-var">to_lower</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329153"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682466987"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
@@ -133,10 +138,10 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-57"></span><span>
 </span><span id="line-58"></span><span class="annot"><a href="GHC.Parser.CharClass.html#octDecDigit"><span class="hs-identifier hs-type">octDecDigit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-59"></span><span id="octDecDigit"><span class="annot"><span class="annottext">octDecDigit :: Char -&gt; Int
-</span><a href="GHC.Parser.CharClass.html#octDecDigit"><span class="hs-identifier hs-var hs-var">octDecDigit</span></a></span></span><span> </span><span id="local-6989586621682329155"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329155"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
+</span><a href="GHC.Parser.CharClass.html#octDecDigit"><span class="hs-identifier hs-var hs-var">octDecDigit</span></a></span></span><span> </span><span id="local-6989586621682466989"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466989"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329155"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682466989"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
@@ -144,94 +149,94 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span class="annot"><a href="GHC.Parser.CharClass.html#is_decdigit"><span class="hs-identifier hs-type">is_decdigit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-62"></span><span id="is_decdigit"><span class="annot"><span class="annottext">is_decdigit :: Char -&gt; Bool
-</span><a href="GHC.Parser.CharClass.html#is_decdigit"><span class="hs-identifier hs-var hs-var">is_decdigit</span></a></span></span><span> </span><span id="local-6989586621682329156"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329156"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="GHC.Parser.CharClass.html#is_decdigit"><span class="hs-identifier hs-var hs-var">is_decdigit</span></a></span></span><span> </span><span id="local-6989586621682466990"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466990"><span class="hs-identifier hs-var">c</span></a></span></span><span>
 </span><span id="line-63"></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329156"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466990"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'0'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329156"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466990"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'9'</span></span><span>
 </span><span id="line-64"></span><span>
 </span><span id="line-65"></span><span class="annot"><a href="GHC.Parser.CharClass.html#is_hexdigit"><span class="hs-identifier hs-type">is_hexdigit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-66"></span><span id="is_hexdigit"><span class="annot"><span class="annottext">is_hexdigit :: Char -&gt; Bool
-</span><a href="GHC.Parser.CharClass.html#is_hexdigit"><span class="hs-identifier hs-var hs-var">is_hexdigit</span></a></span></span><span> </span><span id="local-6989586621682329159"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329159"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="GHC.Parser.CharClass.html#is_hexdigit"><span class="hs-identifier hs-var hs-var">is_hexdigit</span></a></span></span><span> </span><span id="local-6989586621682466991"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466991"><span class="hs-identifier hs-var">c</span></a></span></span><span>
 </span><span id="line-67"></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Char -&gt; Bool
 </span><a href="GHC.Parser.CharClass.html#is_decdigit"><span class="hs-identifier hs-var">is_decdigit</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329159"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621682466991"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-68"></span><span>        </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329159"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466991"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'a'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329159"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466991"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'f'</span></span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>        </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329159"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466991"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'A'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329159"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466991"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'F'</span></span><span class="hs-special">)</span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span class="annot"><a href="GHC.Parser.CharClass.html#is_octdigit"><span class="hs-identifier hs-type">is_octdigit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-72"></span><span id="is_octdigit"><span class="annot"><span class="annottext">is_octdigit :: Char -&gt; Bool
-</span><a href="GHC.Parser.CharClass.html#is_octdigit"><span class="hs-identifier hs-var hs-var">is_octdigit</span></a></span></span><span> </span><span id="local-6989586621682329161"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329161"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329161"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="GHC.Parser.CharClass.html#is_octdigit"><span class="hs-identifier hs-var hs-var">is_octdigit</span></a></span></span><span> </span><span id="local-6989586621682466993"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466993"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466993"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'0'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329161"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466993"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'7'</span></span><span>
 </span><span id="line-73"></span><span>
 </span><span id="line-74"></span><span class="annot"><a href="GHC.Parser.CharClass.html#is_bindigit"><span class="hs-identifier hs-type">is_bindigit</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-75"></span><span id="is_bindigit"><span class="annot"><span class="annottext">is_bindigit :: Char -&gt; Bool
-</span><a href="GHC.Parser.CharClass.html#is_bindigit"><span class="hs-identifier hs-var hs-var">is_bindigit</span></a></span></span><span> </span><span id="local-6989586621682329162"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329162"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329162"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="GHC.Parser.CharClass.html#is_bindigit"><span class="hs-identifier hs-var hs-var">is_bindigit</span></a></span></span><span> </span><span id="local-6989586621682466994"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466994"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466994"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'0'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329162"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466994"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'1'</span></span><span>
 </span><span id="line-76"></span><span>
 </span><span id="line-77"></span><span class="annot"><a href="GHC.Parser.CharClass.html#to_lower"><span class="hs-identifier hs-type">to_lower</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span>
 </span><span id="line-78"></span><span id="to_lower"><span class="annot"><span class="annottext">to_lower :: Char -&gt; Char
-</span><a href="GHC.Parser.CharClass.html#to_lower"><span class="hs-identifier hs-var hs-var">to_lower</span></a></span></span><span> </span><span id="local-6989586621682329163"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329163"><span class="hs-identifier hs-var">c</span></a></span></span><span>
+</span><a href="GHC.Parser.CharClass.html#to_lower"><span class="hs-identifier hs-var hs-var">to_lower</span></a></span></span><span> </span><span id="local-6989586621682466995"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466995"><span class="hs-identifier hs-var">c</span></a></span></span><span>
 </span><span id="line-79"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329163"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466995"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span>  </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'A'</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329163"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621682466995"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'Z'</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Char
 </span><span class="hs-identifier hs-var">chr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329163"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682466995"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Int
 </span><span class="hs-identifier hs-var">ord</span></span><span> </span><span class="annot"><span class="annottext">Char
@@ -242,13 +247,13 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-char">'a'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-80"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329163"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621682466995"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-81"></span><span>
 </span><span id="line-82"></span><span class="annot"><a href="GHC.Parser.CharClass.html#charType"><span class="hs-identifier hs-type">charType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span>
 </span><span id="line-83"></span><span id="charType"><span class="annot"><span class="annottext">charType :: Char -&gt; Word8
-</span><a href="GHC.Parser.CharClass.html#charType"><span class="hs-identifier hs-var hs-var">charType</span></a></span></span><span> </span><span id="local-6989586621682329164"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329164"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329164"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="GHC.Parser.CharClass.html#charType"><span class="hs-identifier hs-var hs-var">charType</span></a></span></span><span> </span><span id="local-6989586621682466996"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466996"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682466996"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-84"></span><span>   </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'\0'</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">0</span></span><span>                             </span><span class="hs-comment">-- \000</span><span>
@@ -1086,5 +1091,5 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682329164"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682466996"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-213"></span></pre></body></html>

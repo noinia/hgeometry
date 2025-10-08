@@ -51,7 +51,7 @@ should NOT be linked against.
 </span><span id="line-51"></span><span class="hs-keyword">data</span><span> </span><span id="HsBootOrSig"><span class="annot"><a href="GHC.Types.SourceFile.html#HsBootOrSig"><span class="hs-identifier hs-var">HsBootOrSig</span></a></span></span><span>
 </span><span id="line-52"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="HsBoot"><span class="annot"><a href="GHC.Types.SourceFile.html#HsBoot"><span class="hs-identifier hs-var">HsBoot</span></a></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ .hs-boot file</span></span><span>
 </span><span id="line-53"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Hsig"><span class="annot"><a href="GHC.Types.SourceFile.html#Hsig"><span class="hs-identifier hs-var">Hsig</span></a></span></span><span>   </span><span class="annot"><span class="hs-comment">-- ^ .hsig file</span></span><span>
-</span><span id="line-54"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682349332"><span id="local-6989586621682349337"><span class="annot"><span class="annottext">HsBootOrSig -&gt; HsBootOrSig -&gt; Bool
+</span><span id="line-54"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682492809"><span id="local-6989586621682492814"><span class="annot"><span class="annottext">HsBootOrSig -&gt; HsBootOrSig -&gt; Bool
 (HsBootOrSig -&gt; HsBootOrSig -&gt; Bool)
 -&gt; (HsBootOrSig -&gt; HsBootOrSig -&gt; Bool) -&gt; Eq HsBootOrSig
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -59,7 +59,7 @@ $c== :: HsBootOrSig -&gt; HsBootOrSig -&gt; Bool
 == :: HsBootOrSig -&gt; HsBootOrSig -&gt; Bool
 $c/= :: HsBootOrSig -&gt; HsBootOrSig -&gt; Bool
 /= :: HsBootOrSig -&gt; HsBootOrSig -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682349344"><span id="local-6989586621682349346"><span id="local-6989586621682349348"><span id="local-6989586621682349352"><span id="local-6989586621682349355"><span id="local-6989586621682349358"><span id="local-6989586621682349361"><span class="annot"><span class="annottext">Eq HsBootOrSig
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682492821"><span id="local-6989586621682492823"><span id="local-6989586621682492825"><span id="local-6989586621682492829"><span id="local-6989586621682492832"><span id="local-6989586621682492835"><span id="local-6989586621682492838"><span class="annot"><span class="annottext">Eq HsBootOrSig
 Eq HsBootOrSig =&gt;
 (HsBootOrSig -&gt; HsBootOrSig -&gt; Ordering)
 -&gt; (HsBootOrSig -&gt; HsBootOrSig -&gt; Bool)
@@ -96,7 +96,7 @@ $cmax :: HsBootOrSig -&gt; HsBootOrSig -&gt; HsBootOrSig
 max :: HsBootOrSig -&gt; HsBootOrSig -&gt; HsBootOrSig
 $cmin :: HsBootOrSig -&gt; HsBootOrSig -&gt; HsBootOrSig
 min :: HsBootOrSig -&gt; HsBootOrSig -&gt; HsBootOrSig
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682349369"><span id="local-6989586621682349371"><span id="local-6989586621682349375"><span class="annot"><span class="annottext">Int -&gt; HsBootOrSig -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682492846"><span id="local-6989586621682492848"><span id="local-6989586621682492852"><span class="annot"><span class="annottext">Int -&gt; HsBootOrSig -&gt; ShowS
 [HsBootOrSig] -&gt; ShowS
 HsBootOrSig -&gt; String
 (Int -&gt; HsBootOrSig -&gt; ShowS)
@@ -118,7 +118,7 @@ showList :: [HsBootOrSig] -&gt; ShowS
 </span><span id="line-58"></span><span>   </span><span class="hs-glyph">=</span><span> </span><span id="HsSrcFile"><span class="annot"><a href="GHC.Types.SourceFile.html#HsSrcFile"><span class="hs-identifier hs-var">HsSrcFile</span></a></span></span><span>
 </span><span id="line-59"></span><span>   </span><span class="annot"><span class="hs-comment">-- | .hs-boot or .hsig file</span></span><span>
 </span><span id="line-60"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="HsBootOrSig"><span class="annot"><a href="GHC.Types.SourceFile.html#HsBootOrSig"><span class="hs-identifier hs-var">HsBootOrSig</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="GHC.Types.SourceFile.html#HsBootOrSig"><span class="hs-identifier hs-type">HsBootOrSig</span></a></span><span>
-</span><span id="line-61"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682349382"><span id="local-6989586621682349387"><span class="annot"><span class="annottext">HscSource -&gt; HscSource -&gt; Bool
+</span><span id="line-61"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682492859"><span id="local-6989586621682492864"><span class="annot"><span class="annottext">HscSource -&gt; HscSource -&gt; Bool
 (HscSource -&gt; HscSource -&gt; Bool)
 -&gt; (HscSource -&gt; HscSource -&gt; Bool) -&gt; Eq HscSource
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -126,7 +126,7 @@ $c== :: HscSource -&gt; HscSource -&gt; Bool
 == :: HscSource -&gt; HscSource -&gt; Bool
 $c/= :: HscSource -&gt; HscSource -&gt; Bool
 /= :: HscSource -&gt; HscSource -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682349393"><span id="local-6989586621682349396"><span id="local-6989586621682349399"><span id="local-6989586621682349403"><span id="local-6989586621682349406"><span id="local-6989586621682349409"><span id="local-6989586621682349412"><span class="annot"><span class="annottext">Eq HscSource
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682492870"><span id="local-6989586621682492873"><span id="local-6989586621682492876"><span id="local-6989586621682492880"><span id="local-6989586621682492883"><span id="local-6989586621682492886"><span id="local-6989586621682492889"><span class="annot"><span class="annottext">Eq HscSource
 Eq HscSource =&gt;
 (HscSource -&gt; HscSource -&gt; Ordering)
 -&gt; (HscSource -&gt; HscSource -&gt; Bool)
@@ -163,7 +163,7 @@ $cmax :: HscSource -&gt; HscSource -&gt; HscSource
 max :: HscSource -&gt; HscSource -&gt; HscSource
 $cmin :: HscSource -&gt; HscSource -&gt; HscSource
 min :: HscSource -&gt; HscSource -&gt; HscSource
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682349415"><span id="local-6989586621682349420"><span id="local-6989586621682349424"><span class="annot"><span class="annottext">Int -&gt; HscSource -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682492892"><span id="local-6989586621682492897"><span id="local-6989586621682492901"><span class="annot"><span class="annottext">Int -&gt; HscSource -&gt; ShowS
 [HscSource] -&gt; ShowS
 HscSource -&gt; String
 (Int -&gt; HscSource -&gt; ShowS)
@@ -202,33 +202,33 @@ $bHsigFile :: HscSource
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IsBootInterface
 </span><a href="Language.Haskell.Syntax.ImpExp.html#NotBoot"><span class="hs-identifier hs-var">NotBoot</span></a></span><span>
 </span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682349434"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.SourceFile.html#HscSource"><span class="hs-identifier hs-type">HscSource</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-77"></span><span>    </span><span id="local-6989586621682349443"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; HscSource -&gt; IO ()
-</span><a href="#local-6989586621682349443"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682349445"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349445"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">HscSource
-</span><a href="GHC.Types.SourceFile.html#HsSrcFile"><span class="hs-identifier hs-var">HsSrcFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349445"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><span id="line-76"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682492911"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.SourceFile.html#HscSource"><span class="hs-identifier hs-type">HscSource</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621682492920"><span class="annot"><span class="annottext">put_ :: WriteBinHandle -&gt; HscSource -&gt; IO ()
+</span><a href="#local-6989586621682492920"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682492922"><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682492922"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">HscSource
+</span><a href="GHC.Types.SourceFile.html#HsSrcFile"><span class="hs-identifier hs-var">HsSrcFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; Word8 -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682492922"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">0</span></span><span>
-</span><span id="line-78"></span><span>    </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621682349447"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349447"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">HscSource
-</span><a href="GHC.Types.SourceFile.html#HsBootFile"><span class="hs-identifier hs-var">HsBootFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349447"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><span id="line-78"></span><span>    </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621682492924"><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682492924"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">HscSource
+</span><a href="GHC.Types.SourceFile.html#HsBootFile"><span class="hs-identifier hs-var">HsBootFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; Word8 -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682492924"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">1</span></span><span>
-</span><span id="line-79"></span><span>    </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621682349448"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349448"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">HscSource
-</span><a href="GHC.Types.SourceFile.html#HsigFile"><span class="hs-identifier hs-var">HsigFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349448"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><span id="line-79"></span><span>    </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621682492925"><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682492925"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">HscSource
+</span><a href="GHC.Types.SourceFile.html#HsigFile"><span class="hs-identifier hs-var">HsigFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">WriteBinHandle -&gt; Word8 -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">WriteBinHandle
+</span><a href="#local-6989586621682492925"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">2</span></span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621682349459"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO HscSource
-</span><a href="#local-6989586621682349459"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682349461"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349461"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-81"></span><span>        </span><span id="local-6989586621682349462"><span class="annot"><a href="#local-6989586621682349462"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Word8
-</span><a href="GHC.Utils.Binary.html#getByte"><span class="hs-identifier hs-var">getByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621682349461"><span class="hs-identifier hs-var">bh</span></a></span><span>
-</span><span id="line-82"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682349462"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621682492936"><span class="annot"><span class="annottext">get :: ReadBinHandle -&gt; IO HscSource
+</span><a href="#local-6989586621682492936"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span> </span><span id="local-6989586621682492938"><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682492938"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-81"></span><span>        </span><span id="local-6989586621682492939"><span class="annot"><a href="#local-6989586621682492939"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadBinHandle -&gt; IO Word8
+</span><a href="GHC.Utils.Binary.html#getByte"><span class="hs-identifier hs-var">getByte</span></a></span><span> </span><span class="annot"><span class="annottext">ReadBinHandle
+</span><a href="#local-6989586621682492938"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682492939"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-83"></span><span>            </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HscSource -&gt; IO HscSource
 forall a. a -&gt; IO a

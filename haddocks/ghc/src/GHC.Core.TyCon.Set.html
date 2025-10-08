@@ -103,27 +103,27 @@ forall a. UniqSet a -&gt; UniqSet a -&gt; Bool
 </span><span id="line-61"></span><span>
 </span><span id="line-62"></span><span>
 </span><span id="line-63"></span><span id="delListFromTyConSet"><span class="annot"><span class="annottext">delListFromTyConSet :: TyConSet -&gt; [TyCon] -&gt; TyConSet
-</span><a href="GHC.Core.TyCon.Set.html#delListFromTyConSet"><span class="hs-identifier hs-var hs-var">delListFromTyConSet</span></a></span></span><span> </span><span id="local-6989586621682397291"><span class="annot"><span class="annottext">TyConSet
-</span><a href="#local-6989586621682397291"><span class="hs-identifier hs-var">set</span></a></span></span><span> </span><span id="local-6989586621682397292"><span class="annot"><span class="annottext">[TyCon]
-</span><a href="#local-6989586621682397292"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(TyConSet -&gt; TyCon -&gt; TyConSet) -&gt; TyConSet -&gt; [TyCon] -&gt; TyConSet
+</span><a href="GHC.Core.TyCon.Set.html#delListFromTyConSet"><span class="hs-identifier hs-var hs-var">delListFromTyConSet</span></a></span></span><span> </span><span id="local-6989586621682555251"><span class="annot"><span class="annottext">TyConSet
+</span><a href="#local-6989586621682555251"><span class="hs-identifier hs-var">set</span></a></span></span><span> </span><span id="local-6989586621682555252"><span class="annot"><span class="annottext">[TyCon]
+</span><a href="#local-6989586621682555252"><span class="hs-identifier hs-var">ns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(TyConSet -&gt; TyCon -&gt; TyConSet) -&gt; TyConSet -&gt; [TyCon] -&gt; TyConSet
 forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) b a.
 Foldable t =&gt;
 (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
 </span><span class="hs-identifier hs-var">foldl'</span></span><span> </span><span class="annot"><span class="annottext">TyConSet -&gt; TyCon -&gt; TyConSet
 </span><a href="GHC.Core.TyCon.Set.html#delFromTyConSet"><span class="hs-identifier hs-var">delFromTyConSet</span></a></span><span> </span><span class="annot"><span class="annottext">TyConSet
-</span><a href="#local-6989586621682397291"><span class="hs-identifier hs-var">set</span></a></span><span> </span><span class="annot"><span class="annottext">[TyCon]
-</span><a href="#local-6989586621682397292"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><a href="#local-6989586621682555251"><span class="hs-identifier hs-var">set</span></a></span><span> </span><span class="annot"><span class="annottext">[TyCon]
+</span><a href="#local-6989586621682555252"><span class="hs-identifier hs-var">ns</span></a></span><span>
 </span><span id="line-64"></span><span>
 </span><span id="line-65"></span><span id="intersectsTyConSet"><span class="annot"><span class="annottext">intersectsTyConSet :: TyConSet -&gt; TyConSet -&gt; Bool
-</span><a href="GHC.Core.TyCon.Set.html#intersectsTyConSet"><span class="hs-identifier hs-var hs-var">intersectsTyConSet</span></a></span></span><span> </span><span id="local-6989586621682397294"><span class="annot"><span class="annottext">TyConSet
-</span><a href="#local-6989586621682397294"><span class="hs-identifier hs-var">s1</span></a></span></span><span> </span><span id="local-6989586621682397295"><span class="annot"><span class="annottext">TyConSet
-</span><a href="#local-6989586621682397295"><span class="hs-identifier hs-var">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><a href="GHC.Core.TyCon.Set.html#intersectsTyConSet"><span class="hs-identifier hs-var hs-var">intersectsTyConSet</span></a></span></span><span> </span><span id="local-6989586621682555254"><span class="annot"><span class="annottext">TyConSet
+</span><a href="#local-6989586621682555254"><span class="hs-identifier hs-var">s1</span></a></span></span><span> </span><span id="local-6989586621682555255"><span class="annot"><span class="annottext">TyConSet
+</span><a href="#local-6989586621682555255"><span class="hs-identifier hs-var">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyConSet -&gt; Bool
 </span><a href="GHC.Core.TyCon.Set.html#isEmptyTyConSet"><span class="hs-identifier hs-var">isEmptyTyConSet</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TyConSet
-</span><a href="#local-6989586621682397294"><span class="hs-identifier hs-var">s1</span></a></span><span> </span><span class="annot"><span class="annottext">TyConSet -&gt; TyConSet -&gt; TyConSet
+</span><a href="#local-6989586621682555254"><span class="hs-identifier hs-var">s1</span></a></span><span> </span><span class="annot"><span class="annottext">TyConSet -&gt; TyConSet -&gt; TyConSet
 </span><a href="GHC.Core.TyCon.Set.html#intersectTyConSet"><span class="hs-operator hs-var">`intersectTyConSet`</span></a></span><span> </span><span class="annot"><span class="annottext">TyConSet
-</span><a href="#local-6989586621682397295"><span class="hs-identifier hs-var">s2</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682555255"><span class="hs-identifier hs-var">s2</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-66"></span><span>
 </span><span id="line-67"></span><span class="annot"><a href="GHC.Core.TyCon.Set.html#nameSetAny"><span class="hs-identifier hs-type">nameSetAny</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCon.html#TyCon"><span class="hs-identifier hs-type">TyCon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCon.Set.html#TyConSet"><span class="hs-identifier hs-type">TyConSet</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-68"></span><span id="nameSetAny"><span class="annot"><span class="annottext">nameSetAny :: (TyCon -&gt; Bool) -&gt; TyConSet -&gt; Bool

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679474389"><span id="local-6989586621679474390"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679489083"><span id="local-6989586621679489084"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
 </span><span id="line-4"></span><span>
@@ -12,11 +12,11 @@
 </span><span id="line-12"></span><span>
 </span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
 </span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html"><span class="hs-identifier">Distribution.Utils.ShortText</span></a></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
 </span><span id="line-20"></span><span>
 </span><span id="line-21"></span><span class="hs-comment">-- | A package name.</span><span>
 </span><span id="line-22"></span><span class="hs-comment">--</span><span>
@@ -27,7 +27,7 @@
 </span><span id="line-27"></span><span class="hs-comment">--</span><span>
 </span><span id="line-28"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-29"></span><span class="hs-keyword">newtype</span><span> </span><span id="PackageName"><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-var">PackageName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PackageName"><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-var">PackageName</span></a></span></span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html#ShortText"><span class="hs-identifier hs-type">ShortText</span></a></span><span>
-</span><span id="line-30"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679474397"><span id="local-6989586621679474399"><span class="annot"><span class="annottext">(forall x. PackageName -&gt; Rep PackageName x)
+</span><span id="line-30"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679489091"><span id="local-6989586621679489093"><span class="annot"><span class="annottext">(forall x. PackageName -&gt; Rep PackageName x)
 -&gt; (forall x. Rep PackageName x -&gt; PackageName)
 -&gt; Generic PackageName
 forall x. Rep PackageName x -&gt; PackageName
@@ -38,7 +38,7 @@ $cfrom :: forall x. PackageName -&gt; Rep PackageName x
 from :: forall x. PackageName -&gt; Rep PackageName x
 $cto :: forall x. Rep PackageName x -&gt; PackageName
 to :: forall x. Rep PackageName x -&gt; PackageName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474405"><span id="local-6989586621679474409"><span id="local-6989586621679474412"><span id="local-6989586621679474420"><span class="annot"><span class="annottext">ReadPrec [PackageName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489099"><span id="local-6989586621679489103"><span id="local-6989586621679489106"><span id="local-6989586621679489114"><span class="annot"><span class="annottext">ReadPrec [PackageName]
 ReadPrec PackageName
 Int -&gt; ReadS PackageName
 ReadS [PackageName]
@@ -58,7 +58,7 @@ $creadPrec :: ReadPrec PackageName
 readPrec :: ReadPrec PackageName
 $creadListPrec :: ReadPrec [PackageName]
 readListPrec :: ReadPrec [PackageName]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474427"><span id="local-6989586621679474433"><span id="local-6989586621679474437"><span class="annot"><span class="annottext">Int -&gt; PackageName -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489121"><span id="local-6989586621679489127"><span id="local-6989586621679489131"><span class="annot"><span class="annottext">Int -&gt; PackageName -&gt; ShowS
 [PackageName] -&gt; ShowS
 PackageName -&gt; String
 (Int -&gt; PackageName -&gt; ShowS)
@@ -73,7 +73,7 @@ $cshow :: PackageName -&gt; String
 show :: PackageName -&gt; String
 $cshowList :: [PackageName] -&gt; ShowS
 showList :: [PackageName] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474442"><span id="local-6989586621679474447"><span class="annot"><span class="annottext">PackageName -&gt; PackageName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489136"><span id="local-6989586621679489141"><span class="annot"><span class="annottext">PackageName -&gt; PackageName -&gt; Bool
 (PackageName -&gt; PackageName -&gt; Bool)
 -&gt; (PackageName -&gt; PackageName -&gt; Bool) -&gt; Eq PackageName
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -81,7 +81,7 @@ $c== :: PackageName -&gt; PackageName -&gt; Bool
 == :: PackageName -&gt; PackageName -&gt; Bool
 $c/= :: PackageName -&gt; PackageName -&gt; Bool
 /= :: PackageName -&gt; PackageName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474456"><span id="local-6989586621679474461"><span id="local-6989586621679474465"><span id="local-6989586621679474469"><span id="local-6989586621679474473"><span id="local-6989586621679474477"><span id="local-6989586621679474481"><span class="annot"><span class="annottext">Eq PackageName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489150"><span id="local-6989586621679489155"><span id="local-6989586621679489159"><span id="local-6989586621679489163"><span id="local-6989586621679489167"><span id="local-6989586621679489171"><span id="local-6989586621679489175"><span class="annot"><span class="annottext">Eq PackageName
 Eq PackageName =&gt;
 (PackageName -&gt; PackageName -&gt; Ordering)
 -&gt; (PackageName -&gt; PackageName -&gt; Bool)
@@ -118,7 +118,7 @@ $cmax :: PackageName -&gt; PackageName -&gt; PackageName
 max :: PackageName -&gt; PackageName -&gt; PackageName
 $cmin :: PackageName -&gt; PackageName -&gt; PackageName
 min :: PackageName -&gt; PackageName -&gt; PackageName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679474495"><span id="local-6989586621679474499"><span id="local-6989586621679474502"><span id="local-6989586621679474504"><span id="local-6989586621679474506"><span id="local-6989586621679474512"><span id="local-6989586621679474517"><span id="local-6989586621679474520"><span id="local-6989586621679474523"><span id="local-6989586621679474526"><span id="local-6989586621679474529"><span id="local-6989586621679474532"><span id="local-6989586621679474537"><span id="local-6989586621679474542"><span class="annot"><span class="annottext">Typeable PackageName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679489189"><span id="local-6989586621679489193"><span id="local-6989586621679489196"><span id="local-6989586621679489198"><span id="local-6989586621679489200"><span id="local-6989586621679489206"><span id="local-6989586621679489211"><span id="local-6989586621679489214"><span id="local-6989586621679489217"><span id="local-6989586621679489220"><span id="local-6989586621679489223"><span id="local-6989586621679489226"><span id="local-6989586621679489231"><span id="local-6989586621679489236"><span class="annot"><span class="annottext">Typeable PackageName
 Typeable PackageName =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -289,17 +289,17 @@ MonadPlus m =&gt;
 </span><span id="line-32"></span><span class="annot"><span class="hs-comment">-- | Convert 'PackageName' to 'String'</span></span><span>
 </span><span id="line-33"></span><span class="annot"><a href="Distribution.Types.PackageName.html#unPackageName"><span class="hs-identifier hs-type">unPackageName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-34"></span><span id="unPackageName"><span class="annot"><span class="annottext">unPackageName :: PackageName -&gt; String
-</span><a href="Distribution.Types.PackageName.html#unPackageName"><span class="hs-identifier hs-var hs-var">unPackageName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span id="local-6989586621679474551"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679474551"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
+</span><a href="Distribution.Types.PackageName.html#unPackageName"><span class="hs-identifier hs-var hs-var">unPackageName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span id="local-6989586621679489245"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489245"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; String
 </span><a href="Distribution.Utils.ShortText.html#fromShortText"><span class="hs-identifier hs-var">fromShortText</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679474551"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679489245"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- | @since 3.4.0.0</span></span><span>
 </span><span id="line-37"></span><span class="annot"><a href="Distribution.Types.PackageName.html#unPackageNameST"><span class="hs-identifier hs-type">unPackageNameST</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Utils.ShortText.html#ShortText"><span class="hs-identifier hs-type">ShortText</span></a></span><span>
 </span><span id="line-38"></span><span id="unPackageNameST"><span class="annot"><span class="annottext">unPackageNameST :: PackageName -&gt; ShortText
-</span><a href="Distribution.Types.PackageName.html#unPackageNameST"><span class="hs-identifier hs-var hs-var">unPackageNameST</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span id="local-6989586621679474553"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679474553"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679474553"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="Distribution.Types.PackageName.html#unPackageNameST"><span class="hs-identifier hs-var hs-var">unPackageNameST</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span id="local-6989586621679489247"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489247"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489247"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-39"></span><span>
 </span><span id="line-40"></span><span class="hs-comment">-- | Construct a 'PackageName' from a 'String'</span><span>
 </span><span id="line-41"></span><span class="hs-comment">--</span><span>
@@ -333,35 +333,35 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-61"></span><span class="hs-comment">--</span><span>
 </span><span id="line-62"></span><span class="hs-comment">-- @since 2.0.0.2</span><span>
 </span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-64"></span><span>  </span><span id="local-6989586621679474559"><span class="annot"><span class="annottext">fromString :: String -&gt; PackageName
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679489253"><span class="annot"><span class="annottext">fromString :: String -&gt; PackageName
 </span><span class="hs-identifier hs-var hs-var hs-var">fromString</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PackageName
 </span><a href="Distribution.Types.PackageName.html#mkPackageName"><span class="hs-identifier hs-var">mkPackageName</span></a></span><span>
 </span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679474561"><span id="local-6989586621679474568"><span id="local-6989586621679474574"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span></span></span></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679474593"><span id="local-6989586621679474600"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span></span></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679489255"><span id="local-6989586621679489262"><span id="local-6989586621679489268"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span></span></span></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679489287"><span id="local-6989586621679489294"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span></span></span><span>
 </span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679474630"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-70"></span><span>  </span><span id="local-6989586621679474634"><span class="annot"><span class="annottext">pretty :: PackageName -&gt; Doc
-</span><a href="#local-6989586621679474634"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; (PackageName -&gt; String) -&gt; PackageName -&gt; Doc
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679489324"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679489328"><span class="annot"><span class="annottext">pretty :: PackageName -&gt; Doc
+</span><a href="#local-6989586621679489328"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">Disp.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; (PackageName -&gt; String) -&gt; PackageName -&gt; Doc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; String
 </span><a href="Distribution.Types.PackageName.html#unPackageName"><span class="hs-identifier hs-var">unPackageName</span></a></span><span>
 </span><span id="line-71"></span><span>
 </span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>  </span><span id="local-6989586621679474651"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m PackageName
-</span><a href="#local-6989586621679474651"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PackageName
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679489345"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m PackageName
+</span><a href="#local-6989586621679489345"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; PackageName
 </span><a href="Distribution.Types.PackageName.html#mkPackageName"><span class="hs-identifier hs-var">mkPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; PackageName) -&gt; m String -&gt; m PackageName
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m String
 forall (m :: * -&gt; *). CabalParsing m =&gt; m String
 </span><a href="Distribution.Parsec.html#parsecUnqualComponentName"><span class="hs-identifier hs-var">parsecUnqualComponentName</span></a></span><span>
 </span><span id="line-74"></span><span>
-</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-76"></span><span>  </span><span id="local-6989586621679474660"><span class="annot"><span class="annottext">rnf :: PackageName -&gt; ()
-</span><a href="#local-6989586621679474660"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span id="local-6989586621679474662"><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679474662"><span class="hs-identifier hs-var">pkg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; ()
+</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>  </span><span id="local-6989586621679489354"><span class="annot"><span class="annottext">rnf :: PackageName -&gt; ()
+</span><a href="#local-6989586621679489354"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span id="local-6989586621679489356"><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489356"><span class="hs-identifier hs-var">pkg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShortText -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
-</span><a href="#local-6989586621679474662"><span class="hs-identifier hs-var">pkg</span></a></span><span>
+</span><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">ShortText
+</span><a href="#local-6989586621679489356"><span class="hs-identifier hs-var">pkg</span></a></span><span>
 </span><span id="line-77"></span></pre></body></html>

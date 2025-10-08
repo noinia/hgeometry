@@ -16,20 +16,20 @@
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Set.html"><span class="hs-identifier">GHC.Types.Unique.Set</span></a></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Types.Unique.FM.html"><span class="hs-identifier">GHC.Types.Unique.FM</span></a></span><span>
 </span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.html/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapAccumL</span></span><span class="hs-special">)</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Maybe.html/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.html"><span class="hs-identifier">Data.List</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapAccumL</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span>
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span>
 </span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | Pretty print a graph in a somewhat human readable format.</span></span><span>
-</span><span id="line-24"></span><span id="local-6989586621682361719"><span id="local-6989586621682361721"><span id="local-6989586621682361722"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dumpGraph"><span class="hs-identifier hs-type">dumpGraph</span></a></span><span>
-</span><span id="line-25"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361719"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361721"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-26"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Graph"><span class="hs-identifier hs-type">Graph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361719"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361722"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361721"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
+</span><span id="line-24"></span><span id="local-6989586621682507479"><span id="local-6989586621682507481"><span id="local-6989586621682507482"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dumpGraph"><span class="hs-identifier hs-type">dumpGraph</span></a></span><span>
+</span><span id="line-25"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507479"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507481"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Graph"><span class="hs-identifier hs-type">Graph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507479"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507482"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507481"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
 </span><span id="line-27"></span><span>
 </span><span id="line-28"></span><span id="dumpGraph"><span class="annot"><span class="annottext">dumpGraph :: forall k color cls.
 (Outputable k, Outputable color) =&gt;
 Graph k cls color -&gt; SDoc
-</span><a href="GHC.Data.Graph.Ppr.html#dumpGraph"><span class="hs-identifier hs-var hs-var">dumpGraph</span></a></span></span><span> </span><span id="local-6989586621682361840"><span class="annot"><span class="annottext">Graph k cls color
-</span><a href="#local-6989586621682361840"><span class="hs-identifier hs-var">graph</span></a></span></span><span>
+</span><a href="GHC.Data.Graph.Ppr.html#dumpGraph"><span class="hs-identifier hs-var hs-var">dumpGraph</span></a></span></span><span> </span><span id="local-6989586621682507600"><span class="annot"><span class="annottext">Graph k cls color
+</span><a href="#local-6989586621682507600"><span class="hs-identifier hs-var">graph</span></a></span></span><span>
 </span><span id="line-29"></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -42,7 +42,7 @@ forall {k} (key :: k) a. UniqFM key a -&gt; ([a] -&gt; SDoc) -&gt; SDoc
 forall k cls color.
 Graph k cls color -&gt; UniqFM k (Node k cls color)
 </span><a href="GHC.Data.Graph.Base.html#graphMap"><span class="hs-identifier hs-var">graphMap</span></a></span><span> </span><span class="annot"><span class="annottext">Graph k cls color
-</span><a href="#local-6989586621682361840"><span class="hs-identifier hs-var">graph</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
+</span><a href="#local-6989586621682507600"><span class="hs-identifier hs-var">graph</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsDoc doc =&gt; [doc] -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#vcat"><span class="hs-identifier hs-var">vcat</span></a></span><span> </span><span class="annot"><span class="annottext">([SDoc] -&gt; SDoc)
 -&gt; ([Node k cls color] -&gt; [SDoc]) -&gt; [Node k cls color] -&gt; SDoc
@@ -55,15 +55,15 @@ forall k color cls.
 Node k cls color -&gt; SDoc
 </span><a href="GHC.Data.Graph.Ppr.html#dumpNode"><span class="hs-identifier hs-var">dumpNode</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-31"></span><span>
-</span><span id="line-32"></span><span id="local-6989586621682361745"><span id="local-6989586621682361746"><span id="local-6989586621682361747"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dumpNode"><span class="hs-identifier hs-type">dumpNode</span></a></span><span>
-</span><span id="line-33"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361745"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361746"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361745"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361747"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361746"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621682507505"><span id="local-6989586621682507506"><span id="local-6989586621682507507"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dumpNode"><span class="hs-identifier hs-type">dumpNode</span></a></span><span>
+</span><span id="line-33"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507505"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507506"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507505"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507507"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507506"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span id="dumpNode"><span class="annot"><span class="annottext">dumpNode :: forall k color cls.
 (Outputable k, Outputable color) =&gt;
 Node k cls color -&gt; SDoc
-</span><a href="GHC.Data.Graph.Ppr.html#dumpNode"><span class="hs-identifier hs-var hs-var">dumpNode</span></a></span></span><span> </span><span id="local-6989586621682361883"><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span></span><span>
+</span><a href="GHC.Data.Graph.Ppr.html#dumpNode"><span class="hs-identifier hs-var hs-var">dumpNode</span></a></span></span><span> </span><span id="local-6989586621682507643"><span class="annot"><span class="annottext">Node k cls color
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span></span><span>
 </span><span id="line-37"></span><span>        </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -74,7 +74,7 @@ forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
 forall k cls color. Node k cls color -&gt; k
 </span><a href="GHC.Data.Graph.Base.html#nodeId"><span class="hs-identifier hs-var">nodeId</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span>        </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -94,7 +94,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
 forall k cls color. Node k cls color -&gt; UniqSet k
 </span><a href="GHC.Data.Graph.Base.html#nodeConflicts"><span class="hs-identifier hs-var">nodeConflicts</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-40"></span><span>                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -108,7 +108,7 @@ forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
 forall k cls color. Node k cls color -&gt; UniqSet k
 </span><a href="GHC.Data.Graph.Base.html#nodeConflicts"><span class="hs-identifier hs-var">nodeConflicts</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-42"></span><span>
 </span><span id="line-43"></span><span>        </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
@@ -129,7 +129,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet color
 forall k cls color. Node k cls color -&gt; UniqSet color
 </span><a href="GHC.Data.Graph.Base.html#nodeExclusions"><span class="hs-identifier hs-var">nodeExclusions</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-45"></span><span>                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -143,7 +143,7 @@ forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet color
 forall k cls color. Node k cls color -&gt; UniqSet color
 </span><a href="GHC.Data.Graph.Base.html#nodeExclusions"><span class="hs-identifier hs-var">nodeExclusions</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span>        </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
@@ -164,7 +164,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
 forall k cls color. Node k cls color -&gt; UniqSet k
 </span><a href="GHC.Data.Graph.Base.html#nodeCoalesce"><span class="hs-identifier hs-var">nodeCoalesce</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-50"></span><span>                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -178,7 +178,7 @@ forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
 forall k cls color. Node k cls color -&gt; UniqSet k
 </span><a href="GHC.Data.Graph.Base.html#nodeCoalesce"><span class="hs-identifier hs-var">nodeCoalesce</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361883"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507643"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-52"></span><span>
 </span><span id="line-53"></span><span>        </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
@@ -191,24 +191,24 @@ forall doc. IsLine doc =&gt; doc
 </span><span id="line-57"></span><span class="hs-comment">-- | Pretty print a graph in graphviz .dot format.</span><span>
 </span><span id="line-58"></span><span class="hs-comment">--      Conflicts get solid edges.</span><span>
 </span><span id="line-59"></span><span class="hs-comment">--      Coalescences get dashed edges.</span><span>
-</span><span id="line-60"></span><span id="local-6989586621682361771"><span id="local-6989586621682361773"><span id="local-6989586621682361774"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dotGraph"><span class="hs-identifier hs-type">dotGraph</span></a></span><span>
-</span><span id="line-61"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Uniquable"><span class="hs-identifier hs-type">Uniquable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361771"><span class="hs-identifier hs-type">k</span></a></span><span>
-</span><span id="line-62"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361771"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361773"><span class="hs-identifier hs-type">cls</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361774"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-63"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682361774"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ What graphviz color to use for each node color</span><span>
+</span><span id="line-60"></span><span id="local-6989586621682507531"><span id="local-6989586621682507533"><span id="local-6989586621682507534"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dotGraph"><span class="hs-identifier hs-type">dotGraph</span></a></span><span>
+</span><span id="line-61"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Uniquable"><span class="hs-identifier hs-type">Uniquable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507531"><span class="hs-identifier hs-type">k</span></a></span><span>
+</span><span id="line-62"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507531"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507533"><span class="hs-identifier hs-type">cls</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507534"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682507534"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- ^ What graphviz color to use for each node color</span><span>
 </span><span id="line-64"></span><span>                            </span><span class="hs-comment">--  It's usually safe to return X11 style colors here,</span><span>
 </span><span id="line-65"></span><span>                            </span><span class="hs-comment">--  ie &quot;red&quot;, &quot;green&quot; etc or a hex triplet #aaff55 etc</span><span>
-</span><span id="line-66"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Triv"><span class="hs-identifier hs-type">Triv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361773"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361774"><span class="hs-identifier hs-type">color</span></a></span><span>
-</span><span id="line-67"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Graph"><span class="hs-identifier hs-type">Graph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361771"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361773"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361774"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
+</span><span id="line-66"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Triv"><span class="hs-identifier hs-type">Triv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507531"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507533"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507534"><span class="hs-identifier hs-type">color</span></a></span><span>
+</span><span id="line-67"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Graph"><span class="hs-identifier hs-type">Graph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507531"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507533"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507534"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
 </span><span id="line-68"></span><span>
 </span><span id="line-69"></span><span id="dotGraph"><span class="annot"><span class="annottext">dotGraph :: forall k cls color.
 (Uniquable k, Outputable k, Outputable cls, Outputable color) =&gt;
 (color -&gt; SDoc) -&gt; Triv k cls color -&gt; Graph k cls color -&gt; SDoc
-</span><a href="GHC.Data.Graph.Ppr.html#dotGraph"><span class="hs-identifier hs-var hs-var">dotGraph</span></a></span></span><span> </span><span id="local-6989586621682361909"><span class="annot"><span class="annottext">color -&gt; SDoc
-</span><a href="#local-6989586621682361909"><span class="hs-identifier hs-var">colorMap</span></a></span></span><span> </span><span id="local-6989586621682361910"><span class="annot"><span class="annottext">Triv k cls color
-</span><a href="#local-6989586621682361910"><span class="hs-identifier hs-var">triv</span></a></span></span><span> </span><span id="local-6989586621682361911"><span class="annot"><span class="annottext">Graph k cls color
-</span><a href="#local-6989586621682361911"><span class="hs-identifier hs-var">graph</span></a></span></span><span>
-</span><span id="line-70"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>  </span><span id="local-6989586621682361912"><span class="annot"><span class="annottext">nodes :: [Node k cls color]
-</span><a href="#local-6989586621682361912"><span class="hs-identifier hs-var hs-var">nodes</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UniqFM k (Node k cls color) -&gt; [Node k cls color]
+</span><a href="GHC.Data.Graph.Ppr.html#dotGraph"><span class="hs-identifier hs-var hs-var">dotGraph</span></a></span></span><span> </span><span id="local-6989586621682507669"><span class="annot"><span class="annottext">color -&gt; SDoc
+</span><a href="#local-6989586621682507669"><span class="hs-identifier hs-var">colorMap</span></a></span></span><span> </span><span id="local-6989586621682507670"><span class="annot"><span class="annottext">Triv k cls color
+</span><a href="#local-6989586621682507670"><span class="hs-identifier hs-var">triv</span></a></span></span><span> </span><span id="local-6989586621682507671"><span class="annot"><span class="annottext">Graph k cls color
+</span><a href="#local-6989586621682507671"><span class="hs-identifier hs-var">graph</span></a></span></span><span>
+</span><span id="line-70"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>  </span><span id="local-6989586621682507672"><span class="annot"><span class="annottext">nodes :: [Node k cls color]
+</span><a href="#local-6989586621682507672"><span class="hs-identifier hs-var hs-var">nodes</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UniqFM k (Node k cls color) -&gt; [Node k cls color]
 forall {k} (key :: k) elt. UniqFM key elt -&gt; [elt]
 </span><a href="GHC.Types.Unique.FM.html#nonDetEltsUFM"><span class="hs-identifier hs-var">nonDetEltsUFM</span></a></span><span> </span><span class="annot"><span class="annottext">(UniqFM k (Node k cls color) -&gt; [Node k cls color])
 -&gt; UniqFM k (Node k cls color) -&gt; [Node k cls color]
@@ -217,7 +217,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall k cls color.
 Graph k cls color -&gt; UniqFM k (Node k cls color)
 </span><a href="GHC.Data.Graph.Base.html#graphMap"><span class="hs-identifier hs-var">graphMap</span></a></span><span> </span><span class="annot"><span class="annottext">Graph k cls color
-</span><a href="#local-6989586621682361911"><span class="hs-identifier hs-var">graph</span></a></span><span>
+</span><a href="#local-6989586621682507671"><span class="hs-identifier hs-var">graph</span></a></span><span>
 </span><span id="line-71"></span><span>                  </span><span class="hs-comment">-- See Note [Unique Determinism and code generation]</span><span>
 </span><span id="line-72"></span><span>   </span><span class="hs-keyword">in</span><span>   </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsDoc doc =&gt; [doc] -&gt; doc
@@ -235,9 +235,9 @@ forall k cls color.
 (Outputable k, Outputable cls, Outputable color) =&gt;
 (color -&gt; SDoc) -&gt; Triv k cls color -&gt; Node k cls color -&gt; SDoc
 </span><a href="GHC.Data.Graph.Ppr.html#dotNode"><span class="hs-identifier hs-var">dotNode</span></a></span><span> </span><span class="annot"><span class="annottext">color -&gt; SDoc
-</span><a href="#local-6989586621682361909"><span class="hs-identifier hs-var">colorMap</span></a></span><span> </span><span class="annot"><span class="annottext">Triv k cls color
-</span><a href="#local-6989586621682361910"><span class="hs-identifier hs-var">triv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Node k cls color]
-</span><a href="#local-6989586621682361912"><span class="hs-identifier hs-var">nodes</span></a></span><span>
+</span><a href="#local-6989586621682507669"><span class="hs-identifier hs-var">colorMap</span></a></span><span> </span><span class="annot"><span class="annottext">Triv k cls color
+</span><a href="#local-6989586621682507670"><span class="hs-identifier hs-var">triv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Node k cls color]
+</span><a href="#local-6989586621682507672"><span class="hs-identifier hs-var">nodes</span></a></span><span>
 </span><span id="line-75"></span><span>                </span><span class="annot"><span class="annottext">[SDoc] -&gt; [SDoc] -&gt; [SDoc]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Maybe SDoc] -&gt; [SDoc]
@@ -261,7 +261,7 @@ UniqSet k -&gt; Node k cls color -&gt; (UniqSet k, Maybe SDoc)
 </span><a href="GHC.Data.Graph.Ppr.html#dotNodeEdges"><span class="hs-identifier hs-var">dotNodeEdges</span></a></span><span> </span><span class="annot"><span class="annottext">UniqSet k
 forall a. UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#emptyUniqSet"><span class="hs-identifier hs-var">emptyUniqSet</span></a></span><span> </span><span class="annot"><span class="annottext">[Node k cls color]
-</span><a href="#local-6989586621682361912"><span class="hs-identifier hs-var">nodes</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507672"><span class="hs-identifier hs-var">nodes</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-76"></span><span>                </span><span class="annot"><span class="annottext">[SDoc] -&gt; [SDoc] -&gt; [SDoc]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -273,39 +273,39 @@ forall doc. IsLine doc =&gt; doc
 </span><a href="GHC.Utils.Outputable.html#space"><span class="hs-identifier hs-var">space</span></a></span><span> </span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-78"></span><span>
 </span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span id="local-6989586621682361783"><span id="local-6989586621682361784"><span id="local-6989586621682361785"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dotNode"><span class="hs-identifier hs-type">dotNode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361783"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361784"><span class="hs-identifier hs-type">cls</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361785"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-81"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682361785"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-82"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Triv"><span class="hs-identifier hs-type">Triv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361783"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361784"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361785"><span class="hs-identifier hs-type">color</span></a></span><span>
-</span><span id="line-83"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361783"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361784"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361785"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
+</span><span id="line-80"></span><span id="local-6989586621682507543"><span id="local-6989586621682507544"><span id="local-6989586621682507545"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dotNode"><span class="hs-identifier hs-type">dotNode</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507543"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507544"><span class="hs-identifier hs-type">cls</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507545"><span class="hs-identifier hs-type">color</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682507545"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Triv"><span class="hs-identifier hs-type">Triv</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507543"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507544"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507545"><span class="hs-identifier hs-type">color</span></a></span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507543"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507544"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507545"><span class="hs-identifier hs-type">color</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span></span></span></span><span>
 </span><span id="line-84"></span><span>
 </span><span id="line-85"></span><span id="dotNode"><span class="annot"><span class="annottext">dotNode :: forall k cls color.
 (Outputable k, Outputable cls, Outputable color) =&gt;
 (color -&gt; SDoc) -&gt; Triv k cls color -&gt; Node k cls color -&gt; SDoc
-</span><a href="GHC.Data.Graph.Ppr.html#dotNode"><span class="hs-identifier hs-var hs-var">dotNode</span></a></span></span><span> </span><span id="local-6989586621682361982"><span class="annot"><span class="annottext">color -&gt; SDoc
-</span><a href="#local-6989586621682361982"><span class="hs-identifier hs-var">colorMap</span></a></span></span><span> </span><span id="local-6989586621682361983"><span class="annot"><span class="annottext">Triv k cls color
-</span><a href="#local-6989586621682361983"><span class="hs-identifier hs-var">triv</span></a></span></span><span> </span><span id="local-6989586621682361984"><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span></span><span>
-</span><span id="line-86"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>  </span><span id="local-6989586621682361985"><span class="annot"><span class="annottext">name :: SDoc
-</span><a href="#local-6989586621682361985"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; SDoc
+</span><a href="GHC.Data.Graph.Ppr.html#dotNode"><span class="hs-identifier hs-var hs-var">dotNode</span></a></span></span><span> </span><span id="local-6989586621682507742"><span class="annot"><span class="annottext">color -&gt; SDoc
+</span><a href="#local-6989586621682507742"><span class="hs-identifier hs-var">colorMap</span></a></span></span><span> </span><span id="local-6989586621682507743"><span class="annot"><span class="annottext">Triv k cls color
+</span><a href="#local-6989586621682507743"><span class="hs-identifier hs-var">triv</span></a></span></span><span> </span><span id="local-6989586621682507744"><span class="annot"><span class="annottext">Node k cls color
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span></span><span>
+</span><span id="line-86"></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>  </span><span id="local-6989586621682507745"><span class="annot"><span class="annottext">name :: SDoc
+</span><a href="#local-6989586621682507745"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">(k -&gt; SDoc) -&gt; k -&gt; SDoc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; k
 forall k cls color. Node k cls color -&gt; k
 </span><a href="GHC.Data.Graph.Base.html#nodeId"><span class="hs-identifier hs-var">nodeId</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span>
-</span><span id="line-87"></span><span>        </span><span id="local-6989586621682361986"><span class="annot"><span class="annottext">cls :: SDoc
-</span><a href="#local-6989586621682361986"><span class="hs-identifier hs-var hs-var">cls</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cls -&gt; SDoc
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><span id="line-87"></span><span>        </span><span id="local-6989586621682507746"><span class="annot"><span class="annottext">cls :: SDoc
+</span><a href="#local-6989586621682507746"><span class="hs-identifier hs-var hs-var">cls</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">cls -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">(cls -&gt; SDoc) -&gt; cls -&gt; SDoc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; cls
 forall k cls color. Node k cls color -&gt; cls
 </span><a href="GHC.Data.Graph.Base.html#nodeClass"><span class="hs-identifier hs-var">nodeClass</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span>
 </span><span id="line-88"></span><span>
-</span><span id="line-89"></span><span>        </span><span id="local-6989586621682361988"><span class="annot"><span class="annottext">excludes :: SDoc
-</span><a href="#local-6989586621682361988"><span class="hs-identifier hs-var hs-var">excludes</span></a></span></span><span>
+</span><span id="line-89"></span><span>        </span><span id="local-6989586621682507748"><span class="annot"><span class="annottext">excludes :: SDoc
+</span><a href="#local-6989586621682507748"><span class="hs-identifier hs-var hs-var">excludes</span></a></span></span><span>
 </span><span id="line-90"></span><span>                </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsLine doc =&gt; [doc] -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#hcat"><span class="hs-identifier hs-var">hcat</span></a></span><span> </span><span class="annot"><span class="annottext">([SDoc] -&gt; SDoc) -&gt; [SDoc] -&gt; SDoc
@@ -319,8 +319,8 @@ forall doc. IsLine doc =&gt; doc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(color -&gt; SDoc) -&gt; [color] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682361991"><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682361991"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682507751"><span class="annot"><span class="annottext">color
+</span><a href="#local-6989586621682507751"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -328,7 +328,7 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">color -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682361991"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507751"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-92"></span><span>                </span><span class="annot"><span class="annottext">([color] -&gt; [SDoc]) -&gt; [color] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">UniqSet color -&gt; [color]
@@ -338,11 +338,11 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet color
 forall k cls color. Node k cls color -&gt; UniqSet color
 </span><a href="GHC.Data.Graph.Base.html#nodeExclusions"><span class="hs-identifier hs-var">nodeExclusions</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span>
 </span><span id="line-93"></span><span>                </span><span class="hs-comment">-- See Note [Unique Determinism and code generation]</span><span>
 </span><span id="line-94"></span><span>
-</span><span id="line-95"></span><span>        </span><span id="local-6989586621682361993"><span class="annot"><span class="annottext">preferences :: SDoc
-</span><a href="#local-6989586621682361993"><span class="hs-identifier hs-var hs-var">preferences</span></a></span></span><span>
+</span><span id="line-95"></span><span>        </span><span id="local-6989586621682507753"><span class="annot"><span class="annottext">preferences :: SDoc
+</span><a href="#local-6989586621682507753"><span class="hs-identifier hs-var hs-var">preferences</span></a></span></span><span>
 </span><span id="line-96"></span><span>                </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsLine doc =&gt; [doc] -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#hcat"><span class="hs-identifier hs-var">hcat</span></a></span><span> </span><span class="annot"><span class="annottext">([SDoc] -&gt; SDoc) -&gt; [SDoc] -&gt; SDoc
@@ -356,8 +356,8 @@ forall doc. IsLine doc =&gt; doc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(color -&gt; SDoc) -&gt; [color] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682361994"><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682361994"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682507754"><span class="annot"><span class="annottext">color
+</span><a href="#local-6989586621682507754"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;+&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -365,29 +365,29 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">color -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682361994"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507754"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-98"></span><span>                </span><span class="annot"><span class="annottext">([color] -&gt; [SDoc]) -&gt; [color] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; [color]
 forall k cls color. Node k cls color -&gt; [color]
 </span><a href="GHC.Data.Graph.Base.html#nodePreference"><span class="hs-identifier hs-var">nodePreference</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span>
 </span><span id="line-99"></span><span>
-</span><span id="line-100"></span><span>        </span><span id="local-6989586621682361996"><span class="annot"><span class="annottext">expref :: SDoc
-</span><a href="#local-6989586621682361996"><span class="hs-identifier hs-var hs-var">expref</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
+</span><span id="line-100"></span><span>        </span><span id="local-6989586621682507756"><span class="annot"><span class="annottext">expref :: SDoc
+</span><a href="#local-6989586621682507756"><span class="hs-identifier hs-var hs-var">expref</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
 forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">and</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">UniqSet color -&gt; Bool
 forall a. UniqSet a -&gt; Bool
 </span><a href="GHC.Types.Unique.Set.html#isEmptyUniqSet"><span class="hs-identifier hs-var">isEmptyUniqSet</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet color
 forall k cls color. Node k cls color -&gt; UniqSet color
 </span><a href="GHC.Data.Graph.Base.html#nodeExclusions"><span class="hs-identifier hs-var">nodeExclusions</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[color] -&gt; Bool
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[color] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; [color]
 forall k cls color. Node k cls color -&gt; [color]
 </span><a href="GHC.Data.Graph.Base.html#nodePreference"><span class="hs-identifier hs-var">nodePreference</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-101"></span><span>                        </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">SDoc
 forall doc. IsOutput doc =&gt; doc
 </span><a href="GHC.Utils.Outputable.html#empty"><span class="hs-identifier hs-var">empty</span></a></span><span>
@@ -397,20 +397,20 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><span class="hs-string">&quot;\\n&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682361988"><span class="hs-identifier hs-var">excludes</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682507748"><span class="hs-identifier hs-var">excludes</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682361993"><span class="hs-identifier hs-var">preferences</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507753"><span class="hs-identifier hs-var">preferences</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-103"></span><span>
 </span><span id="line-104"></span><span>        </span><span class="hs-comment">-- if the node has been colored then show that,</span><span>
 </span><span id="line-105"></span><span>        </span><span class="hs-comment">--      otherwise indicate whether it looks trivially colorable.</span><span>
-</span><span id="line-106"></span><span>        </span><span id="local-6989586621682362002"><span class="annot"><span class="annottext">color :: SDoc
-</span><a href="#local-6989586621682362002"><span class="hs-identifier hs-var hs-var">color</span></a></span></span><span>
-</span><span id="line-107"></span><span>                </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682362003"><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682362003"><span class="hs-identifier hs-var">c</span></a></span></span><span>        </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; Maybe color
+</span><span id="line-106"></span><span>        </span><span id="local-6989586621682507762"><span class="annot"><span class="annottext">color :: SDoc
+</span><a href="#local-6989586621682507762"><span class="hs-identifier hs-var hs-var">color</span></a></span></span><span>
+</span><span id="line-107"></span><span>                </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682507763"><span class="annot"><span class="annottext">color
+</span><a href="#local-6989586621682507763"><span class="hs-identifier hs-var">c</span></a></span></span><span>        </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; Maybe color
 forall k cls color. Node k cls color -&gt; Maybe color
 </span><a href="GHC.Data.Graph.Base.html#nodeColor"><span class="hs-identifier hs-var">nodeColor</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span>
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span>
 </span><span id="line-108"></span><span>                </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -419,7 +419,7 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">color -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682362003"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682507763"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -427,16 +427,16 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><span class="hs-string">&quot;)&quot;</span></span><span>
 </span><span id="line-109"></span><span>
 </span><span id="line-110"></span><span>                </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Triv k cls color
-</span><a href="#local-6989586621682361983"><span class="hs-identifier hs-var">triv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; cls
+</span><a href="#local-6989586621682507743"><span class="hs-identifier hs-var">triv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; cls
 forall k cls color. Node k cls color -&gt; cls
 </span><a href="GHC.Data.Graph.Base.html#nodeClass"><span class="hs-identifier hs-var">nodeClass</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
 forall k cls color. Node k cls color -&gt; UniqSet k
 </span><a href="GHC.Data.Graph.Base.html#nodeConflicts"><span class="hs-identifier hs-var">nodeConflicts</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet color
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet color
 forall k cls color. Node k cls color -&gt; UniqSet color
 </span><a href="GHC.Data.Graph.Base.html#nodeExclusions"><span class="hs-identifier hs-var">nodeExclusions</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-111"></span><span>                </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
@@ -469,9 +469,9 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;)&quot;</span></span><span>
 </span><span id="line-115"></span><span>
-</span><span id="line-116"></span><span>        </span><span id="local-6989586621682362005"><span class="annot"><span class="annottext">label :: SDoc
-</span><a href="#local-6989586621682362005"><span class="hs-keyword hs-var hs-var">label</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682361985"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><span id="line-116"></span><span>        </span><span id="local-6989586621682507765"><span class="annot"><span class="annottext">label :: SDoc
+</span><a href="#local-6989586621682507765"><span class="hs-keyword hs-var hs-var">label</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682507745"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -479,28 +479,28 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><span class="hs-string">&quot; :: &quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682361986"><span class="hs-identifier hs-var">cls</span></a></span><span>
+</span><a href="#local-6989586621682507746"><span class="hs-identifier hs-var">cls</span></a></span><span>
 </span><span id="line-117"></span><span>                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682361996"><span class="hs-identifier hs-var">expref</span></a></span><span>
+</span><a href="#local-6989586621682507756"><span class="hs-identifier hs-var">expref</span></a></span><span>
 </span><span id="line-118"></span><span>                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682362002"><span class="hs-identifier hs-var">color</span></a></span><span>
+</span><a href="#local-6989586621682507762"><span class="hs-identifier hs-var">color</span></a></span><span>
 </span><span id="line-119"></span><span>
-</span><span id="line-120"></span><span>        </span><span id="local-6989586621682362006"><span class="annot"><span class="annottext">pcolorC :: SDoc
-</span><a href="#local-6989586621682362006"><span class="hs-identifier hs-var hs-var">pcolorC</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; Maybe color
+</span><span id="line-120"></span><span>        </span><span id="local-6989586621682507766"><span class="annot"><span class="annottext">pcolorC :: SDoc
+</span><a href="#local-6989586621682507766"><span class="hs-identifier hs-var hs-var">pcolorC</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Node k cls color -&gt; Maybe color
 forall k cls color. Node k cls color -&gt; Maybe color
 </span><a href="GHC.Data.Graph.Base.html#nodeColor"><span class="hs-identifier hs-var">nodeColor</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682361984"><span class="hs-identifier hs-var">node</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682507744"><span class="hs-identifier hs-var">node</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-121"></span><span>                        </span><span class="annot"><span class="annottext">Maybe color
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;style=filled fillcolor=white&quot;</span></span><span>
-</span><span id="line-122"></span><span>                        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682362007"><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682362007"><span class="hs-identifier hs-var">c</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-122"></span><span>                        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682507767"><span class="annot"><span class="annottext">color
+</span><a href="#local-6989586621682507767"><span class="hs-identifier hs-var">c</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;style=filled fillcolor=&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -508,12 +508,12 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#doubleQuotes"><span class="hs-identifier hs-var">doubleQuotes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">color -&gt; SDoc
-</span><a href="#local-6989586621682361982"><span class="hs-identifier hs-var">colorMap</span></a></span><span> </span><span class="annot"><span class="annottext">color
-</span><a href="#local-6989586621682362007"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507742"><span class="hs-identifier hs-var">colorMap</span></a></span><span> </span><span class="annot"><span class="annottext">color
+</span><a href="#local-6989586621682507767"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-123"></span><span>
 </span><span id="line-124"></span><span>
-</span><span id="line-125"></span><span>        </span><span id="local-6989586621682362009"><span class="annot"><span class="annottext">pout :: SDoc
-</span><a href="#local-6989586621682362009"><span class="hs-identifier hs-var hs-var">pout</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-125"></span><span>        </span><span id="local-6989586621682507769"><span class="annot"><span class="annottext">pout :: SDoc
+</span><a href="#local-6989586621682507769"><span class="hs-identifier hs-var hs-var">pout</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;node [label=&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -521,14 +521,14 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#doubleQuotes"><span class="hs-identifier hs-var">doubleQuotes</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682362005"><span class="hs-keyword hs-var">label</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682507765"><span class="hs-keyword hs-var">label</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
 forall doc. IsLine doc =&gt; doc
 </span><a href="GHC.Utils.Outputable.html#space"><span class="hs-identifier hs-var">space</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682362006"><span class="hs-identifier hs-var">pcolorC</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682507766"><span class="hs-identifier hs-var">pcolorC</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -543,7 +543,7 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#doubleQuotes"><span class="hs-identifier hs-var">doubleQuotes</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682361985"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><a href="#local-6989586621682507745"><span class="hs-identifier hs-var">name</span></a></span><span>
 </span><span id="line-127"></span><span>                </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -552,51 +552,51 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><span class="hs-string">&quot;;&quot;</span></span><span>
 </span><span id="line-128"></span><span>
 </span><span id="line-129"></span><span> </span><span class="hs-keyword">in</span><span>     </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682362009"><span class="hs-identifier hs-var">pout</span></a></span><span>
+</span><a href="#local-6989586621682507769"><span class="hs-identifier hs-var">pout</span></a></span><span>
 </span><span id="line-130"></span><span>
 </span><span id="line-131"></span><span>
 </span><span id="line-132"></span><span class="hs-comment">-- | Nodes in the graph are doubly linked, but we only want one edge for each</span><span>
 </span><span id="line-133"></span><span class="hs-comment">--      conflict if the graphviz graph. Traverse over the graph, but make sure</span><span>
 </span><span id="line-134"></span><span class="hs-comment">--      to only print the edges for each node once.</span><span>
 </span><span id="line-135"></span><span>
-</span><span id="line-136"></span><span id="local-6989586621682361793"><span id="local-6989586621682361794"><span id="local-6989586621682361795"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dotNodeEdges"><span class="hs-identifier hs-type">dotNodeEdges</span></a></span><span>
-</span><span id="line-137"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Uniquable"><span class="hs-identifier hs-type">Uniquable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361793"><span class="hs-identifier hs-type">k</span></a></span><span>
-</span><span id="line-138"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361793"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-139"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Set.html#UniqSet"><span class="hs-identifier hs-type">UniqSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361793"><span class="hs-identifier hs-type">k</span></a></span><span>
-</span><span id="line-140"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361793"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361794"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361795"><span class="hs-identifier hs-type">color</span></a></span><span>
-</span><span id="line-141"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Unique.Set.html#UniqSet"><span class="hs-identifier hs-type">UniqSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682361793"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-136"></span><span id="local-6989586621682507553"><span id="local-6989586621682507554"><span id="local-6989586621682507555"><span class="annot"><a href="GHC.Data.Graph.Ppr.html#dotNodeEdges"><span class="hs-identifier hs-type">dotNodeEdges</span></a></span><span>
+</span><span id="line-137"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Uniquable"><span class="hs-identifier hs-type">Uniquable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507553"><span class="hs-identifier hs-type">k</span></a></span><span>
+</span><span id="line-138"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507553"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.Set.html#UniqSet"><span class="hs-identifier hs-type">UniqSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507553"><span class="hs-identifier hs-type">k</span></a></span><span>
+</span><span id="line-140"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Graph.Base.html#Node"><span class="hs-identifier hs-type">Node</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507553"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507554"><span class="hs-identifier hs-type">cls</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507555"><span class="hs-identifier hs-type">color</span></a></span><span>
+</span><span id="line-141"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Unique.Set.html#UniqSet"><span class="hs-identifier hs-type">UniqSet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682507553"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-142"></span><span>
 </span><span id="line-143"></span><span id="dotNodeEdges"><span class="annot"><span class="annottext">dotNodeEdges :: forall k cls color.
 (Uniquable k, Outputable k) =&gt;
 UniqSet k -&gt; Node k cls color -&gt; (UniqSet k, Maybe SDoc)
-</span><a href="GHC.Data.Graph.Ppr.html#dotNodeEdges"><span class="hs-identifier hs-var hs-var">dotNodeEdges</span></a></span></span><span> </span><span id="local-6989586621682362021"><span class="annot"><span class="annottext">UniqSet k
-</span><a href="#local-6989586621682362021"><span class="hs-identifier hs-var">visited</span></a></span></span><span> </span><span id="local-6989586621682362022"><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682362022"><span class="hs-identifier hs-var">node</span></a></span></span><span>
+</span><a href="GHC.Data.Graph.Ppr.html#dotNodeEdges"><span class="hs-identifier hs-var hs-var">dotNodeEdges</span></a></span></span><span> </span><span id="local-6989586621682507781"><span class="annot"><span class="annottext">UniqSet k
+</span><a href="#local-6989586621682507781"><span class="hs-identifier hs-var">visited</span></a></span></span><span> </span><span id="local-6989586621682507782"><span class="annot"><span class="annottext">Node k cls color
+</span><a href="#local-6989586621682507782"><span class="hs-identifier hs-var">node</span></a></span></span><span>
 </span><span id="line-144"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">k -&gt; UniqSet k -&gt; Bool
 forall a. Uniquable a =&gt; a -&gt; UniqSet a -&gt; Bool
 </span><a href="GHC.Types.Unique.Set.html#elementOfUniqSet"><span class="hs-identifier hs-var">elementOfUniqSet</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
 forall k cls color. Node k cls color -&gt; k
 </span><a href="GHC.Data.Graph.Base.html#nodeId"><span class="hs-identifier hs-var">nodeId</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682362022"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">UniqSet k
-</span><a href="#local-6989586621682362021"><span class="hs-identifier hs-var">visited</span></a></span><span>
+</span><a href="#local-6989586621682507782"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">UniqSet k
+</span><a href="#local-6989586621682507781"><span class="hs-identifier hs-var">visited</span></a></span><span>
 </span><span id="line-145"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">UniqSet k
-</span><a href="#local-6989586621682362021"><span class="hs-identifier hs-var">visited</span></a></span><span>
+</span><a href="#local-6989586621682507781"><span class="hs-identifier hs-var">visited</span></a></span><span>
 </span><span id="line-146"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe SDoc
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>
 </span><span id="line-147"></span><span>
 </span><span id="line-148"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>
-</span><span id="line-149"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>   </span><span id="local-6989586621682362024"><span class="annot"><span class="annottext">dconflicts :: [SDoc]
-</span><a href="#local-6989586621682362024"><span class="hs-identifier hs-var hs-var">dconflicts</span></a></span></span><span>
+</span><span id="line-149"></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>   </span><span id="local-6989586621682507784"><span class="annot"><span class="annottext">dconflicts :: [SDoc]
+</span><a href="#local-6989586621682507784"><span class="hs-identifier hs-var hs-var">dconflicts</span></a></span></span><span>
 </span><span id="line-150"></span><span>                        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(k -&gt; SDoc) -&gt; [k] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k -&gt; k -&gt; SDoc
 forall {a} {a}. (Outputable a, Outputable a) =&gt; a -&gt; a -&gt; SDoc
-</span><a href="#local-6989586621682362025"><span class="hs-identifier hs-var">dotEdgeConflict</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
+</span><a href="#local-6989586621682507785"><span class="hs-identifier hs-var">dotEdgeConflict</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
 forall k cls color. Node k cls color -&gt; k
 </span><a href="GHC.Data.Graph.Base.html#nodeId"><span class="hs-identifier hs-var">nodeId</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682362022"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507782"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-151"></span><span>                        </span><span class="annot"><span class="annottext">([k] -&gt; [SDoc]) -&gt; [k] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">UniqSet k -&gt; [k]
@@ -610,19 +610,19 @@ forall a. UniqSet a -&gt; UniqSet a -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#minusUniqSet"><span class="hs-identifier hs-var">minusUniqSet</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
 forall k cls color. Node k cls color -&gt; UniqSet k
 </span><a href="GHC.Data.Graph.Base.html#nodeConflicts"><span class="hs-identifier hs-var">nodeConflicts</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682362022"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">UniqSet k
-</span><a href="#local-6989586621682362021"><span class="hs-identifier hs-var">visited</span></a></span><span>
+</span><a href="#local-6989586621682507782"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">UniqSet k
+</span><a href="#local-6989586621682507781"><span class="hs-identifier hs-var">visited</span></a></span><span>
 </span><span id="line-154"></span><span>
-</span><span id="line-155"></span><span>                </span><span id="local-6989586621682362027"><span class="annot"><span class="annottext">dcoalesces :: [SDoc]
-</span><a href="#local-6989586621682362027"><span class="hs-identifier hs-var hs-var">dcoalesces</span></a></span></span><span>
+</span><span id="line-155"></span><span>                </span><span id="local-6989586621682507787"><span class="annot"><span class="annottext">dcoalesces :: [SDoc]
+</span><a href="#local-6989586621682507787"><span class="hs-identifier hs-var hs-var">dcoalesces</span></a></span></span><span>
 </span><span id="line-156"></span><span>                        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(k -&gt; SDoc) -&gt; [k] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k -&gt; k -&gt; SDoc
 forall {a} {a}. (Outputable a, Outputable a) =&gt; a -&gt; a -&gt; SDoc
-</span><a href="#local-6989586621682362028"><span class="hs-identifier hs-var">dotEdgeCoalesce</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
+</span><a href="#local-6989586621682507788"><span class="hs-identifier hs-var">dotEdgeCoalesce</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
 forall k cls color. Node k cls color -&gt; k
 </span><a href="GHC.Data.Graph.Base.html#nodeId"><span class="hs-identifier hs-var">nodeId</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682362022"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507782"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-157"></span><span>                        </span><span class="annot"><span class="annottext">([k] -&gt; [SDoc]) -&gt; [k] -&gt; [SDoc]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">UniqSet k -&gt; [k]
@@ -636,43 +636,43 @@ forall a. UniqSet a -&gt; UniqSet a -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#minusUniqSet"><span class="hs-identifier hs-var">minusUniqSet</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; UniqSet k
 forall k cls color. Node k cls color -&gt; UniqSet k
 </span><a href="GHC.Data.Graph.Base.html#nodeCoalesce"><span class="hs-identifier hs-var">nodeCoalesce</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682362022"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">UniqSet k
-</span><a href="#local-6989586621682362021"><span class="hs-identifier hs-var">visited</span></a></span><span>
+</span><a href="#local-6989586621682507782"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">UniqSet k
+</span><a href="#local-6989586621682507781"><span class="hs-identifier hs-var">visited</span></a></span><span>
 </span><span id="line-160"></span><span>
-</span><span id="line-161"></span><span>                </span><span id="local-6989586621682362029"><span class="annot"><span class="annottext">out :: SDoc
-</span><a href="#local-6989586621682362029"><span class="hs-identifier hs-var hs-var">out</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
+</span><span id="line-161"></span><span>                </span><span id="local-6989586621682507789"><span class="annot"><span class="annottext">out :: SDoc
+</span><a href="#local-6989586621682507789"><span class="hs-identifier hs-var hs-var">out</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsDoc doc =&gt; [doc] -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#vcat"><span class="hs-identifier hs-var">vcat</span></a></span><span> </span><span class="annot"><span class="annottext">[SDoc]
-</span><a href="#local-6989586621682362024"><span class="hs-identifier hs-var">dconflicts</span></a></span><span>
+</span><a href="#local-6989586621682507784"><span class="hs-identifier hs-var">dconflicts</span></a></span><span>
 </span><span id="line-162"></span><span>                        </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsDoc doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%24%24"><span class="hs-operator hs-var">$$</span></a></span><span> </span><span class="annot"><span class="annottext">[SDoc] -&gt; SDoc
 forall doc. IsDoc doc =&gt; [doc] -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#vcat"><span class="hs-identifier hs-var">vcat</span></a></span><span> </span><span class="annot"><span class="annottext">[SDoc]
-</span><a href="#local-6989586621682362027"><span class="hs-identifier hs-var">dcoalesces</span></a></span><span>
+</span><a href="#local-6989586621682507787"><span class="hs-identifier hs-var">dcoalesces</span></a></span><span>
 </span><span id="line-163"></span><span>
 </span><span id="line-164"></span><span>          </span><span class="hs-keyword">in</span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">UniqSet k -&gt; k -&gt; UniqSet k
 forall a. Uniquable a =&gt; UniqSet a -&gt; a -&gt; UniqSet a
 </span><a href="GHC.Types.Unique.Set.html#addOneToUniqSet"><span class="hs-identifier hs-var">addOneToUniqSet</span></a></span><span> </span><span class="annot"><span class="annottext">UniqSet k
-</span><a href="#local-6989586621682362021"><span class="hs-identifier hs-var">visited</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
+</span><a href="#local-6989586621682507781"><span class="hs-identifier hs-var">visited</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Node k cls color -&gt; k
 forall k cls color. Node k cls color -&gt; k
 </span><a href="GHC.Data.Graph.Base.html#nodeId"><span class="hs-identifier hs-var">nodeId</span></a></span><span> </span><span class="annot"><span class="annottext">Node k cls color
-</span><a href="#local-6989586621682362022"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507782"><span class="hs-identifier hs-var">node</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-165"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; Maybe SDoc
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682362029"><span class="hs-identifier hs-var">out</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507789"><span class="hs-identifier hs-var">out</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-166"></span><span>
-</span><span id="line-167"></span><span>        </span><span class="hs-keyword">where</span><span>   </span><span id="local-6989586621682362025"><span class="annot"><span class="annottext">dotEdgeConflict :: a -&gt; a -&gt; SDoc
-</span><a href="#local-6989586621682362025"><span class="hs-identifier hs-var hs-var">dotEdgeConflict</span></a></span></span><span> </span><span id="local-6989586621682362042"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362042"><span class="hs-identifier hs-var">u1</span></a></span></span><span> </span><span id="local-6989586621682362043"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362043"><span class="hs-identifier hs-var">u2</span></a></span></span><span>
+</span><span id="line-167"></span><span>        </span><span class="hs-keyword">where</span><span>   </span><span id="local-6989586621682507785"><span class="annot"><span class="annottext">dotEdgeConflict :: a -&gt; a -&gt; SDoc
+</span><a href="#local-6989586621682507785"><span class="hs-identifier hs-var hs-var">dotEdgeConflict</span></a></span></span><span> </span><span id="local-6989586621682507802"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682507802"><span class="hs-identifier hs-var">u1</span></a></span></span><span> </span><span id="local-6989586621682507803"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682507803"><span class="hs-identifier hs-var">u2</span></a></span></span><span>
 </span><span id="line-168"></span><span>                        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#doubleQuotes"><span class="hs-identifier hs-var">doubleQuotes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362042"><span class="hs-identifier hs-var">u1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682507802"><span class="hs-identifier hs-var">u1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -684,7 +684,7 @@ forall doc. IsLine doc =&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#doubleQuotes"><span class="hs-identifier hs-var">doubleQuotes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362043"><span class="hs-identifier hs-var">u2</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507803"><span class="hs-identifier hs-var">u2</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-169"></span><span>                        </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -692,16 +692,16 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;;&quot;</span></span><span>
 </span><span id="line-170"></span><span>
-</span><span id="line-171"></span><span>                </span><span id="local-6989586621682362028"><span class="annot"><span class="annottext">dotEdgeCoalesce :: a -&gt; a -&gt; SDoc
-</span><a href="#local-6989586621682362028"><span class="hs-identifier hs-var hs-var">dotEdgeCoalesce</span></a></span></span><span> </span><span id="local-6989586621682362057"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362057"><span class="hs-identifier hs-var">u1</span></a></span></span><span> </span><span id="local-6989586621682362058"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362058"><span class="hs-identifier hs-var">u2</span></a></span></span><span>
+</span><span id="line-171"></span><span>                </span><span id="local-6989586621682507788"><span class="annot"><span class="annottext">dotEdgeCoalesce :: a -&gt; a -&gt; SDoc
+</span><a href="#local-6989586621682507788"><span class="hs-identifier hs-var hs-var">dotEdgeCoalesce</span></a></span></span><span> </span><span id="local-6989586621682507817"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682507817"><span class="hs-identifier hs-var">u1</span></a></span></span><span> </span><span id="local-6989586621682507818"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682507818"><span class="hs-identifier hs-var">u2</span></a></span></span><span>
 </span><span id="line-172"></span><span>                        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#doubleQuotes"><span class="hs-identifier hs-var">doubleQuotes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362057"><span class="hs-identifier hs-var">u1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682507817"><span class="hs-identifier hs-var">u1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -713,7 +713,7 @@ forall doc. IsLine doc =&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#doubleQuotes"><span class="hs-identifier hs-var">doubleQuotes</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682362058"><span class="hs-identifier hs-var">u2</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682507818"><span class="hs-identifier hs-var">u2</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-173"></span><span>                        </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc

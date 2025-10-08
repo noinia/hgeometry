@@ -10,7 +10,7 @@
 </span><span id="line-10"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArmISAExt"><span class="hs-identifier">ArmISAExt</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-11"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArmABI"><span class="hs-identifier">ArmABI</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-12"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#PPC_64ABI"><span class="hs-identifier">PPC_64ABI</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-13"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier">isARM</span></a></span><span>
+</span><span id="line-13"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier">isARM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#isPPC"><span class="hs-identifier">isPPC</span></a></span><span>
 </span><span id="line-14"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#stringEncodeArch"><span class="hs-identifier">stringEncodeArch</span></a></span><span>
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span>     </span><span class="annot"><span class="hs-comment">-- * Operating systems</span></span><span>
@@ -21,7 +21,7 @@
 </span><span id="line-21"></span><span>   </span><span class="hs-special">)</span><span>
 </span><span id="line-22"></span><span class="hs-keyword">where</span><span>
 </span><span id="line-23"></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-comment">-- See Note [Why do we import Prelude here?]</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-comment">-- See Note [Why do we import Prelude here?]</span><span>
 </span><span id="line-25"></span><span>
 </span><span id="line-26"></span><span class="annot"><span class="hs-comment">-- | Platform architecture and OS.</span></span><span>
 </span><span id="line-27"></span><span class="hs-keyword">data</span><span> </span><span id="ArchOS"><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchOS"><span class="hs-identifier hs-var">ArchOS</span></a></span></span><span>
@@ -31,7 +31,7 @@
 </span><span id="line-30"></span><span>      </span><span class="hs-special">,</span><span> </span><span id="archOS_OS"><span class="annot"><span class="annottext">ArchOS -&gt; OS
 </span><a href="GHC.Platform.ArchOS.html#archOS_OS"><span class="hs-identifier hs-var hs-var">archOS_OS</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#OS"><span class="hs-identifier hs-type">OS</span></a></span><span>
 </span><span id="line-31"></span><span>      </span><span class="hs-special">}</span><span>
-</span><span id="line-32"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037493"><span id="local-6989586621679037497"><span id="local-6989586621679037500"><span id="local-6989586621679037514"><span class="annot"><span class="annottext">ReadPrec [ArchOS]
+</span><span id="line-32"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039281"><span id="local-6989586621679039285"><span id="local-6989586621679039288"><span id="local-6989586621679039302"><span class="annot"><span class="annottext">ReadPrec [ArchOS]
 ReadPrec ArchOS
 Int -&gt; ReadS ArchOS
 ReadS [ArchOS]
@@ -51,7 +51,7 @@ $creadPrec :: ReadPrec ArchOS
 readPrec :: ReadPrec ArchOS
 $creadListPrec :: ReadPrec [ArchOS]
 readListPrec :: ReadPrec [ArchOS]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037521"><span id="local-6989586621679037529"><span id="local-6989586621679037533"><span class="annot"><span class="annottext">Int -&gt; ArchOS -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039309"><span id="local-6989586621679039317"><span id="local-6989586621679039321"><span class="annot"><span class="annottext">Int -&gt; ArchOS -&gt; ShowS
 [ArchOS] -&gt; ShowS
 ArchOS -&gt; String
 (Int -&gt; ArchOS -&gt; ShowS)
@@ -64,7 +64,7 @@ $cshow :: ArchOS -&gt; String
 show :: ArchOS -&gt; String
 $cshowList :: [ArchOS] -&gt; ShowS
 showList :: [ArchOS] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037538"><span id="local-6989586621679037544"><span class="annot"><span class="annottext">ArchOS -&gt; ArchOS -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039326"><span id="local-6989586621679039332"><span class="annot"><span class="annottext">ArchOS -&gt; ArchOS -&gt; Bool
 (ArchOS -&gt; ArchOS -&gt; Bool)
 -&gt; (ArchOS -&gt; ArchOS -&gt; Bool) -&gt; Eq ArchOS
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -72,7 +72,7 @@ $c== :: ArchOS -&gt; ArchOS -&gt; Bool
 == :: ArchOS -&gt; ArchOS -&gt; Bool
 $c/= :: ArchOS -&gt; ArchOS -&gt; Bool
 /= :: ArchOS -&gt; ArchOS -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037551"><span id="local-6989586621679037557"><span id="local-6989586621679037561"><span id="local-6989586621679037565"><span id="local-6989586621679037568"><span id="local-6989586621679037571"><span id="local-6989586621679037574"><span class="annot"><span class="annottext">Eq ArchOS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039339"><span id="local-6989586621679039345"><span id="local-6989586621679039349"><span id="local-6989586621679039353"><span id="local-6989586621679039356"><span id="local-6989586621679039359"><span id="local-6989586621679039362"><span class="annot"><span class="annottext">Eq ArchOS
 Eq ArchOS =&gt;
 (ArchOS -&gt; ArchOS -&gt; Ordering)
 -&gt; (ArchOS -&gt; ArchOS -&gt; Bool)
@@ -128,7 +128,7 @@ min :: ArchOS -&gt; ArchOS -&gt; ArchOS
 </span><span id="line-48"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="ArchLoongArch64"><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchLoongArch64"><span class="hs-identifier hs-var">ArchLoongArch64</span></a></span></span><span>
 </span><span id="line-49"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="ArchJavaScript"><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchJavaScript"><span class="hs-identifier hs-var">ArchJavaScript</span></a></span></span><span>
 </span><span id="line-50"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="ArchWasm32"><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchWasm32"><span class="hs-identifier hs-var">ArchWasm32</span></a></span></span><span>
-</span><span id="line-51"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037597"><span id="local-6989586621679037600"><span id="local-6989586621679037603"><span id="local-6989586621679037635"><span class="annot"><span class="annottext">ReadPrec [Arch]
+</span><span id="line-51"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039385"><span id="local-6989586621679039388"><span id="local-6989586621679039391"><span id="local-6989586621679039423"><span class="annot"><span class="annottext">ReadPrec [Arch]
 ReadPrec Arch
 Int -&gt; ReadS Arch
 ReadS [Arch]
@@ -145,7 +145,7 @@ $creadPrec :: ReadPrec Arch
 readPrec :: ReadPrec Arch
 $creadListPrec :: ReadPrec [Arch]
 readListPrec :: ReadPrec [Arch]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037639"><span id="local-6989586621679037652"><span id="local-6989586621679037655"><span class="annot"><span class="annottext">Int -&gt; Arch -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039427"><span id="local-6989586621679039440"><span id="local-6989586621679039443"><span class="annot"><span class="annottext">Int -&gt; Arch -&gt; ShowS
 [Arch] -&gt; ShowS
 Arch -&gt; String
 (Int -&gt; Arch -&gt; ShowS)
@@ -158,14 +158,14 @@ $cshow :: Arch -&gt; String
 show :: Arch -&gt; String
 $cshowList :: [Arch] -&gt; ShowS
 showList :: [Arch] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037659"><span id="local-6989586621679037673"><span class="annot"><span class="annottext">Arch -&gt; Arch -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039447"><span id="local-6989586621679039461"><span class="annot"><span class="annottext">Arch -&gt; Arch -&gt; Bool
 (Arch -&gt; Arch -&gt; Bool) -&gt; (Arch -&gt; Arch -&gt; Bool) -&gt; Eq Arch
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c== :: Arch -&gt; Arch -&gt; Bool
 == :: Arch -&gt; Arch -&gt; Bool
 $c/= :: Arch -&gt; Arch -&gt; Bool
 /= :: Arch -&gt; Arch -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037679"><span id="local-6989586621679037694"><span id="local-6989586621679037697"><span id="local-6989586621679037700"><span id="local-6989586621679037703"><span id="local-6989586621679037706"><span id="local-6989586621679037709"><span class="annot"><span class="annottext">Eq Arch
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039467"><span id="local-6989586621679039482"><span id="local-6989586621679039485"><span id="local-6989586621679039488"><span id="local-6989586621679039491"><span id="local-6989586621679039494"><span id="local-6989586621679039497"><span class="annot"><span class="annottext">Eq Arch
 Eq Arch =&gt;
 (Arch -&gt; Arch -&gt; Ordering)
 -&gt; (Arch -&gt; Arch -&gt; Bool)
@@ -209,7 +209,7 @@ min :: Arch -&gt; Arch -&gt; Arch
 </span><span id="line-55"></span><span>   </span><span class="hs-glyph">=</span><span> </span><span id="ARMv5"><span class="annot"><a href="GHC.Platform.ArchOS.html#ARMv5"><span class="hs-identifier hs-var">ARMv5</span></a></span></span><span>
 </span><span id="line-56"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="ARMv6"><span class="annot"><a href="GHC.Platform.ArchOS.html#ARMv6"><span class="hs-identifier hs-var">ARMv6</span></a></span></span><span>
 </span><span id="line-57"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="ARMv7"><span class="annot"><a href="GHC.Platform.ArchOS.html#ARMv7"><span class="hs-identifier hs-var">ARMv7</span></a></span></span><span>
-</span><span id="line-58"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037716"><span id="local-6989586621679037719"><span id="local-6989586621679037722"><span id="local-6989586621679037727"><span class="annot"><span class="annottext">ReadPrec [ArmISA]
+</span><span id="line-58"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039504"><span id="local-6989586621679039507"><span id="local-6989586621679039510"><span id="local-6989586621679039515"><span class="annot"><span class="annottext">ReadPrec [ArmISA]
 ReadPrec ArmISA
 Int -&gt; ReadS ArmISA
 ReadS [ArmISA]
@@ -229,7 +229,7 @@ $creadPrec :: ReadPrec ArmISA
 readPrec :: ReadPrec ArmISA
 $creadListPrec :: ReadPrec [ArmISA]
 readListPrec :: ReadPrec [ArmISA]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037730"><span id="local-6989586621679037732"><span id="local-6989586621679037735"><span class="annot"><span class="annottext">Int -&gt; ArmISA -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039518"><span id="local-6989586621679039520"><span id="local-6989586621679039523"><span class="annot"><span class="annottext">Int -&gt; ArmISA -&gt; ShowS
 [ArmISA] -&gt; ShowS
 ArmISA -&gt; String
 (Int -&gt; ArmISA -&gt; ShowS)
@@ -242,7 +242,7 @@ $cshow :: ArmISA -&gt; String
 show :: ArmISA -&gt; String
 $cshowList :: [ArmISA] -&gt; ShowS
 showList :: [ArmISA] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037738"><span id="local-6989586621679037742"><span class="annot"><span class="annottext">ArmISA -&gt; ArmISA -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039526"><span id="local-6989586621679039530"><span class="annot"><span class="annottext">ArmISA -&gt; ArmISA -&gt; Bool
 (ArmISA -&gt; ArmISA -&gt; Bool)
 -&gt; (ArmISA -&gt; ArmISA -&gt; Bool) -&gt; Eq ArmISA
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -250,7 +250,7 @@ $c== :: ArmISA -&gt; ArmISA -&gt; Bool
 == :: ArmISA -&gt; ArmISA -&gt; Bool
 $c/= :: ArmISA -&gt; ArmISA -&gt; Bool
 /= :: ArmISA -&gt; ArmISA -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037747"><span id="local-6989586621679037751"><span id="local-6989586621679037755"><span id="local-6989586621679037758"><span id="local-6989586621679037761"><span id="local-6989586621679037764"><span id="local-6989586621679037767"><span class="annot"><span class="annottext">Eq ArmISA
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039535"><span id="local-6989586621679039539"><span id="local-6989586621679039543"><span id="local-6989586621679039546"><span id="local-6989586621679039549"><span id="local-6989586621679039552"><span id="local-6989586621679039555"><span class="annot"><span class="annottext">Eq ArmISA
 Eq ArmISA =&gt;
 (ArmISA -&gt; ArmISA -&gt; Ordering)
 -&gt; (ArmISA -&gt; ArmISA -&gt; Bool)
@@ -296,7 +296,7 @@ min :: ArmISA -&gt; ArmISA -&gt; ArmISA
 </span><span id="line-64"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="VFPv3D16"><span class="annot"><a href="GHC.Platform.ArchOS.html#VFPv3D16"><span class="hs-identifier hs-var">VFPv3D16</span></a></span></span><span>
 </span><span id="line-65"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="NEON"><span class="annot"><a href="GHC.Platform.ArchOS.html#NEON"><span class="hs-identifier hs-var">NEON</span></a></span></span><span>
 </span><span id="line-66"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="IWMMX2"><span class="annot"><a href="GHC.Platform.ArchOS.html#IWMMX2"><span class="hs-identifier hs-var">IWMMX2</span></a></span></span><span>
-</span><span id="line-67"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037775"><span id="local-6989586621679037778"><span id="local-6989586621679037781"><span id="local-6989586621679037788"><span class="annot"><span class="annottext">ReadPrec [ArmISAExt]
+</span><span id="line-67"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039563"><span id="local-6989586621679039566"><span id="local-6989586621679039569"><span id="local-6989586621679039576"><span class="annot"><span class="annottext">ReadPrec [ArmISAExt]
 ReadPrec ArmISAExt
 Int -&gt; ReadS ArmISAExt
 ReadS [ArmISAExt]
@@ -316,7 +316,7 @@ $creadPrec :: ReadPrec ArmISAExt
 readPrec :: ReadPrec ArmISAExt
 $creadListPrec :: ReadPrec [ArmISAExt]
 readListPrec :: ReadPrec [ArmISAExt]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037791"><span id="local-6989586621679037793"><span id="local-6989586621679037796"><span class="annot"><span class="annottext">Int -&gt; ArmISAExt -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039579"><span id="local-6989586621679039581"><span id="local-6989586621679039584"><span class="annot"><span class="annottext">Int -&gt; ArmISAExt -&gt; ShowS
 [ArmISAExt] -&gt; ShowS
 ArmISAExt -&gt; String
 (Int -&gt; ArmISAExt -&gt; ShowS)
@@ -331,7 +331,7 @@ $cshow :: ArmISAExt -&gt; String
 show :: ArmISAExt -&gt; String
 $cshowList :: [ArmISAExt] -&gt; ShowS
 showList :: [ArmISAExt] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037799"><span id="local-6989586621679037803"><span class="annot"><span class="annottext">ArmISAExt -&gt; ArmISAExt -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039587"><span id="local-6989586621679039591"><span class="annot"><span class="annottext">ArmISAExt -&gt; ArmISAExt -&gt; Bool
 (ArmISAExt -&gt; ArmISAExt -&gt; Bool)
 -&gt; (ArmISAExt -&gt; ArmISAExt -&gt; Bool) -&gt; Eq ArmISAExt
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -339,7 +339,7 @@ $c== :: ArmISAExt -&gt; ArmISAExt -&gt; Bool
 == :: ArmISAExt -&gt; ArmISAExt -&gt; Bool
 $c/= :: ArmISAExt -&gt; ArmISAExt -&gt; Bool
 /= :: ArmISAExt -&gt; ArmISAExt -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037808"><span id="local-6989586621679037812"><span id="local-6989586621679037816"><span id="local-6989586621679037819"><span id="local-6989586621679037822"><span id="local-6989586621679037825"><span id="local-6989586621679037828"><span class="annot"><span class="annottext">Eq ArmISAExt
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039596"><span id="local-6989586621679039600"><span id="local-6989586621679039604"><span id="local-6989586621679039607"><span id="local-6989586621679039610"><span id="local-6989586621679039613"><span id="local-6989586621679039616"><span class="annot"><span class="annottext">Eq ArmISAExt
 Eq ArmISAExt =&gt;
 (ArmISAExt -&gt; ArmISAExt -&gt; Ordering)
 -&gt; (ArmISAExt -&gt; ArmISAExt -&gt; Bool)
@@ -383,7 +383,7 @@ min :: ArmISAExt -&gt; ArmISAExt -&gt; ArmISAExt
 </span><span id="line-71"></span><span>   </span><span class="hs-glyph">=</span><span> </span><span id="SOFT"><span class="annot"><a href="GHC.Platform.ArchOS.html#SOFT"><span class="hs-identifier hs-var">SOFT</span></a></span></span><span>
 </span><span id="line-72"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="SOFTFP"><span class="annot"><a href="GHC.Platform.ArchOS.html#SOFTFP"><span class="hs-identifier hs-var">SOFTFP</span></a></span></span><span>
 </span><span id="line-73"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="HARD"><span class="annot"><a href="GHC.Platform.ArchOS.html#HARD"><span class="hs-identifier hs-var">HARD</span></a></span></span><span>
-</span><span id="line-74"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037834"><span id="local-6989586621679037837"><span id="local-6989586621679037840"><span id="local-6989586621679037845"><span class="annot"><span class="annottext">ReadPrec [ArmABI]
+</span><span id="line-74"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039622"><span id="local-6989586621679039625"><span id="local-6989586621679039628"><span id="local-6989586621679039633"><span class="annot"><span class="annottext">ReadPrec [ArmABI]
 ReadPrec ArmABI
 Int -&gt; ReadS ArmABI
 ReadS [ArmABI]
@@ -403,7 +403,7 @@ $creadPrec :: ReadPrec ArmABI
 readPrec :: ReadPrec ArmABI
 $creadListPrec :: ReadPrec [ArmABI]
 readListPrec :: ReadPrec [ArmABI]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037848"><span id="local-6989586621679037850"><span id="local-6989586621679037853"><span class="annot"><span class="annottext">Int -&gt; ArmABI -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039636"><span id="local-6989586621679039638"><span id="local-6989586621679039641"><span class="annot"><span class="annottext">Int -&gt; ArmABI -&gt; ShowS
 [ArmABI] -&gt; ShowS
 ArmABI -&gt; String
 (Int -&gt; ArmABI -&gt; ShowS)
@@ -416,7 +416,7 @@ $cshow :: ArmABI -&gt; String
 show :: ArmABI -&gt; String
 $cshowList :: [ArmABI] -&gt; ShowS
 showList :: [ArmABI] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037856"><span id="local-6989586621679037860"><span class="annot"><span class="annottext">ArmABI -&gt; ArmABI -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039644"><span id="local-6989586621679039648"><span class="annot"><span class="annottext">ArmABI -&gt; ArmABI -&gt; Bool
 (ArmABI -&gt; ArmABI -&gt; Bool)
 -&gt; (ArmABI -&gt; ArmABI -&gt; Bool) -&gt; Eq ArmABI
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -424,7 +424,7 @@ $c== :: ArmABI -&gt; ArmABI -&gt; Bool
 == :: ArmABI -&gt; ArmABI -&gt; Bool
 $c/= :: ArmABI -&gt; ArmABI -&gt; Bool
 /= :: ArmABI -&gt; ArmABI -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037865"><span id="local-6989586621679037869"><span id="local-6989586621679037873"><span id="local-6989586621679037876"><span id="local-6989586621679037879"><span id="local-6989586621679037882"><span id="local-6989586621679037885"><span class="annot"><span class="annottext">Eq ArmABI
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039653"><span id="local-6989586621679039657"><span id="local-6989586621679039661"><span id="local-6989586621679039664"><span id="local-6989586621679039667"><span id="local-6989586621679039670"><span id="local-6989586621679039673"><span class="annot"><span class="annottext">Eq ArmABI
 Eq ArmABI =&gt;
 (ArmABI -&gt; ArmABI -&gt; Ordering)
 -&gt; (ArmABI -&gt; ArmABI -&gt; Bool)
@@ -467,7 +467,7 @@ min :: ArmABI -&gt; ArmABI -&gt; ArmABI
 </span><span id="line-77"></span><span class="hs-keyword">data</span><span> </span><span id="PPC_64ABI"><span class="annot"><a href="GHC.Platform.ArchOS.html#PPC_64ABI"><span class="hs-identifier hs-var">PPC_64ABI</span></a></span></span><span>
 </span><span id="line-78"></span><span>   </span><span class="hs-glyph">=</span><span> </span><span id="ELF_V1"><span class="annot"><a href="GHC.Platform.ArchOS.html#ELF_V1"><span class="hs-identifier hs-var">ELF_V1</span></a></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ PowerPC64</span></span><span>
 </span><span id="line-79"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="ELF_V2"><span class="annot"><a href="GHC.Platform.ArchOS.html#ELF_V2"><span class="hs-identifier hs-var">ELF_V2</span></a></span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ PowerPC64 LE</span></span><span>
-</span><span id="line-80"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037890"><span id="local-6989586621679037893"><span id="local-6989586621679037896"><span id="local-6989586621679037900"><span class="annot"><span class="annottext">ReadPrec [PPC_64ABI]
+</span><span id="line-80"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039678"><span id="local-6989586621679039681"><span id="local-6989586621679039684"><span id="local-6989586621679039688"><span class="annot"><span class="annottext">ReadPrec [PPC_64ABI]
 ReadPrec PPC_64ABI
 Int -&gt; ReadS PPC_64ABI
 ReadS [PPC_64ABI]
@@ -487,7 +487,7 @@ $creadPrec :: ReadPrec PPC_64ABI
 readPrec :: ReadPrec PPC_64ABI
 $creadListPrec :: ReadPrec [PPC_64ABI]
 readListPrec :: ReadPrec [PPC_64ABI]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037903"><span id="local-6989586621679037905"><span id="local-6989586621679037908"><span class="annot"><span class="annottext">Int -&gt; PPC_64ABI -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039691"><span id="local-6989586621679039693"><span id="local-6989586621679039696"><span class="annot"><span class="annottext">Int -&gt; PPC_64ABI -&gt; ShowS
 [PPC_64ABI] -&gt; ShowS
 PPC_64ABI -&gt; String
 (Int -&gt; PPC_64ABI -&gt; ShowS)
@@ -502,7 +502,7 @@ $cshow :: PPC_64ABI -&gt; String
 show :: PPC_64ABI -&gt; String
 $cshowList :: [PPC_64ABI] -&gt; ShowS
 showList :: [PPC_64ABI] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037911"><span id="local-6989586621679037915"><span class="annot"><span class="annottext">PPC_64ABI -&gt; PPC_64ABI -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039699"><span id="local-6989586621679039703"><span class="annot"><span class="annottext">PPC_64ABI -&gt; PPC_64ABI -&gt; Bool
 (PPC_64ABI -&gt; PPC_64ABI -&gt; Bool)
 -&gt; (PPC_64ABI -&gt; PPC_64ABI -&gt; Bool) -&gt; Eq PPC_64ABI
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -510,7 +510,7 @@ $c== :: PPC_64ABI -&gt; PPC_64ABI -&gt; Bool
 == :: PPC_64ABI -&gt; PPC_64ABI -&gt; Bool
 $c/= :: PPC_64ABI -&gt; PPC_64ABI -&gt; Bool
 /= :: PPC_64ABI -&gt; PPC_64ABI -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037920"><span id="local-6989586621679037922"><span id="local-6989586621679037924"><span id="local-6989586621679037927"><span id="local-6989586621679037930"><span id="local-6989586621679037933"><span id="local-6989586621679037936"><span class="annot"><span class="annottext">Eq PPC_64ABI
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039708"><span id="local-6989586621679039710"><span id="local-6989586621679039712"><span id="local-6989586621679039715"><span id="local-6989586621679039718"><span id="local-6989586621679039721"><span id="local-6989586621679039724"><span class="annot"><span class="annottext">Eq PPC_64ABI
 Eq PPC_64ABI =&gt;
 (PPC_64ABI -&gt; PPC_64ABI -&gt; Ordering)
 -&gt; (PPC_64ABI -&gt; PPC_64ABI -&gt; Bool)
@@ -570,7 +570,7 @@ min :: PPC_64ABI -&gt; PPC_64ABI -&gt; PPC_64ABI
 </span><span id="line-100"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="OSHurd"><span class="annot"><a href="GHC.Platform.ArchOS.html#OSHurd"><span class="hs-identifier hs-var">OSHurd</span></a></span></span><span>
 </span><span id="line-101"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="OSWasi"><span class="annot"><a href="GHC.Platform.ArchOS.html#OSWasi"><span class="hs-identifier hs-var">OSWasi</span></a></span></span><span>
 </span><span id="line-102"></span><span>   </span><span class="hs-glyph">|</span><span> </span><span id="OSGhcjs"><span class="annot"><a href="GHC.Platform.ArchOS.html#OSGhcjs"><span class="hs-identifier hs-var">OSGhcjs</span></a></span></span><span>
-</span><span id="line-103"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037955"><span id="local-6989586621679037958"><span id="local-6989586621679037961"><span id="local-6989586621679037979"><span class="annot"><span class="annottext">ReadPrec [OS]
+</span><span id="line-103"></span><span>   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679039743"><span id="local-6989586621679039746"><span id="local-6989586621679039749"><span id="local-6989586621679039767"><span class="annot"><span class="annottext">ReadPrec [OS]
 ReadPrec OS
 Int -&gt; ReadS OS
 ReadS [OS]
@@ -587,7 +587,7 @@ $creadPrec :: ReadPrec OS
 readPrec :: ReadPrec OS
 $creadListPrec :: ReadPrec [OS]
 readListPrec :: ReadPrec [OS]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037982"><span id="local-6989586621679037984"><span id="local-6989586621679037987"><span class="annot"><span class="annottext">Int -&gt; OS -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039770"><span id="local-6989586621679039772"><span id="local-6989586621679039775"><span class="annot"><span class="annottext">Int -&gt; OS -&gt; ShowS
 [OS] -&gt; ShowS
 OS -&gt; String
 (Int -&gt; OS -&gt; ShowS)
@@ -600,14 +600,14 @@ $cshow :: OS -&gt; String
 show :: OS -&gt; String
 $cshowList :: [OS] -&gt; ShowS
 showList :: [OS] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037990"><span id="local-6989586621679037994"><span class="annot"><span class="annottext">OS -&gt; OS -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039778"><span id="local-6989586621679039782"><span class="annot"><span class="annottext">OS -&gt; OS -&gt; Bool
 (OS -&gt; OS -&gt; Bool) -&gt; (OS -&gt; OS -&gt; Bool) -&gt; Eq OS
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c== :: OS -&gt; OS -&gt; Bool
 == :: OS -&gt; OS -&gt; Bool
 $c/= :: OS -&gt; OS -&gt; Bool
 /= :: OS -&gt; OS -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037999"><span id="local-6989586621679038003"><span id="local-6989586621679038007"><span id="local-6989586621679038010"><span id="local-6989586621679038013"><span id="local-6989586621679038016"><span id="local-6989586621679038019"><span class="annot"><span class="annottext">Eq OS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679039787"><span id="local-6989586621679039791"><span id="local-6989586621679039795"><span id="local-6989586621679039798"><span id="local-6989586621679039801"><span id="local-6989586621679039804"><span id="local-6989586621679039807"><span class="annot"><span class="annottext">Eq OS
 Eq OS =&gt;
 (OS -&gt; OS -&gt; Ordering)
 -&gt; (OS -&gt; OS -&gt; Bool)
@@ -680,181 +680,190 @@ min :: OS -&gt; OS -&gt; OS
 </span><a href="GHC.Platform.ArchOS.html#ArchPPC"><span class="hs-identifier hs-var">ArchPPC</span></a></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;powerpc&quot;</span></span><span>
 </span><span id="line-129"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchPPC_64"><span class="hs-identifier hs-type">ArchPPC_64</span></a></span><span> </span><span class="annot"><span class="annottext">PPC_64ABI
-</span><a href="GHC.Platform.ArchOS.html#ELF_V1"><span class="hs-identifier hs-var">ELF_V1</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;powerpc64&quot;</span></span><span>
-</span><span id="line-130"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchPPC_64"><span class="hs-identifier hs-type">ArchPPC_64</span></a></span><span> </span><span class="annot"><span class="annottext">PPC_64ABI
-</span><a href="GHC.Platform.ArchOS.html#ELF_V2"><span class="hs-identifier hs-var">ELF_V2</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;powerpc64le&quot;</span></span><span>
-</span><span id="line-131"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-130"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchS390X"><span class="hs-identifier hs-var">ArchS390X</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;s390x&quot;</span></span><span>
-</span><span id="line-132"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchARM"><span class="hs-identifier hs-type">ArchARM</span></a></span><span> </span><span class="annot"><span class="annottext">ArmISA
+</span><span id="line-131"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchARM"><span class="hs-identifier hs-type">ArchARM</span></a></span><span> </span><span class="annot"><span class="annottext">ArmISA
 </span><a href="GHC.Platform.ArchOS.html#ARMv5"><span class="hs-identifier hs-var">ARMv5</span></a></span><span> </span><span class="annot"><span class="annottext">[ArmISAExt]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">ArmABI
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;armv5&quot;</span></span><span>
-</span><span id="line-133"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchARM"><span class="hs-identifier hs-type">ArchARM</span></a></span><span> </span><span class="annot"><span class="annottext">ArmISA
+</span><span id="line-132"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchARM"><span class="hs-identifier hs-type">ArchARM</span></a></span><span> </span><span class="annot"><span class="annottext">ArmISA
 </span><a href="GHC.Platform.ArchOS.html#ARMv6"><span class="hs-identifier hs-var">ARMv6</span></a></span><span> </span><span class="annot"><span class="annottext">[ArmISAExt]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">ArmABI
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;armv6&quot;</span></span><span>
-</span><span id="line-134"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchARM"><span class="hs-identifier hs-type">ArchARM</span></a></span><span> </span><span class="annot"><span class="annottext">ArmISA
+</span><span id="line-133"></span><span>  </span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchARM"><span class="hs-identifier hs-type">ArchARM</span></a></span><span> </span><span class="annot"><span class="annottext">ArmISA
 </span><a href="GHC.Platform.ArchOS.html#ARMv7"><span class="hs-identifier hs-var">ARMv7</span></a></span><span> </span><span class="annot"><span class="annottext">[ArmISAExt]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">ArmABI
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;armv7&quot;</span></span><span>
-</span><span id="line-135"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-134"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchAArch64"><span class="hs-identifier hs-var">ArchAArch64</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;aarch64&quot;</span></span><span>
-</span><span id="line-136"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-135"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchAlpha"><span class="hs-identifier hs-var">ArchAlpha</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;alpha&quot;</span></span><span>
-</span><span id="line-137"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-136"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchMipseb"><span class="hs-identifier hs-var">ArchMipseb</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;mipseb&quot;</span></span><span>
-</span><span id="line-138"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-137"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchMipsel"><span class="hs-identifier hs-var">ArchMipsel</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;mipsel&quot;</span></span><span>
-</span><span id="line-139"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-138"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchRISCV64"><span class="hs-identifier hs-var">ArchRISCV64</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;riscv64&quot;</span></span><span>
-</span><span id="line-140"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-139"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchLoongArch64"><span class="hs-identifier hs-var">ArchLoongArch64</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;loongarch64&quot;</span></span><span>
-</span><span id="line-141"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-140"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchJavaScript"><span class="hs-identifier hs-var">ArchJavaScript</span></a></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;javascript&quot;</span></span><span>
-</span><span id="line-142"></span><span>  </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-141"></span><span>  </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchWasm32"><span class="hs-identifier hs-var">ArchWasm32</span></a></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;wasm32&quot;</span></span><span>
-</span><span id="line-143"></span><span>
-</span><span id="line-144"></span><span class="annot"><span class="hs-comment">-- | See Note [Platform Syntax].</span></span><span>
-</span><span id="line-145"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#stringEncodeOS"><span class="hs-identifier hs-type">stringEncodeOS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#OS"><span class="hs-identifier hs-type">OS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-146"></span><span id="stringEncodeOS"><span class="annot"><span class="annottext">stringEncodeOS :: OS -&gt; String
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="annot"><span class="hs-comment">-- | See Note [Platform Syntax].</span></span><span>
+</span><span id="line-144"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#stringEncodeOS"><span class="hs-identifier hs-type">stringEncodeOS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#OS"><span class="hs-identifier hs-type">OS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-145"></span><span id="stringEncodeOS"><span class="annot"><span class="annottext">stringEncodeOS :: OS -&gt; String
 </span><a href="GHC.Platform.ArchOS.html#stringEncodeOS"><span class="hs-identifier hs-var hs-var">stringEncodeOS</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-147"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-146"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSUnknown"><span class="hs-identifier hs-var">OSUnknown</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;unknown&quot;</span></span><span>
-</span><span id="line-148"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-147"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSLinux"><span class="hs-identifier hs-var">OSLinux</span></a></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;linux&quot;</span></span><span>
-</span><span id="line-149"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-148"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSDarwin"><span class="hs-identifier hs-var">OSDarwin</span></a></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;darwin&quot;</span></span><span>
-</span><span id="line-150"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-149"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSSolaris2"><span class="hs-identifier hs-var">OSSolaris2</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;solaris2&quot;</span></span><span>
-</span><span id="line-151"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-150"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSMinGW32"><span class="hs-identifier hs-var">OSMinGW32</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;mingw32&quot;</span></span><span>
-</span><span id="line-152"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-151"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSFreeBSD"><span class="hs-identifier hs-var">OSFreeBSD</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;freebsd&quot;</span></span><span>
-</span><span id="line-153"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-152"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSDragonFly"><span class="hs-identifier hs-var">OSDragonFly</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;dragonfly&quot;</span></span><span>
-</span><span id="line-154"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-153"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSOpenBSD"><span class="hs-identifier hs-var">OSOpenBSD</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;openbsd&quot;</span></span><span>
-</span><span id="line-155"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-154"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSNetBSD"><span class="hs-identifier hs-var">OSNetBSD</span></a></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;netbsd&quot;</span></span><span>
-</span><span id="line-156"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-155"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSKFreeBSD"><span class="hs-identifier hs-var">OSKFreeBSD</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;kfreebsdgnu&quot;</span></span><span>
-</span><span id="line-157"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-156"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSHaiku"><span class="hs-identifier hs-var">OSHaiku</span></a></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;haiku&quot;</span></span><span>
-</span><span id="line-158"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-157"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSQNXNTO"><span class="hs-identifier hs-var">OSQNXNTO</span></a></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;nto-qnx&quot;</span></span><span>
-</span><span id="line-159"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-158"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSAIX"><span class="hs-identifier hs-var">OSAIX</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;aix&quot;</span></span><span>
-</span><span id="line-160"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-159"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSHurd"><span class="hs-identifier hs-var">OSHurd</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;hurd&quot;</span></span><span>
-</span><span id="line-161"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-160"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSWasi"><span class="hs-identifier hs-var">OSWasi</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;wasi&quot;</span></span><span>
-</span><span id="line-162"></span><span>  </span><span class="annot"><span class="annottext">OS
+</span><span id="line-161"></span><span>  </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSGhcjs"><span class="hs-identifier hs-var">OSGhcjs</span></a></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;ghcjs&quot;</span></span><span>
-</span><span id="line-163"></span><span>
-</span><span id="line-164"></span><span class="annot"><span class="hs-comment">-- | This predicate tells us whether the OS uses the ELF as its primary object format.</span></span><span>
-</span><span id="line-165"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-type">osElfTarget</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#OS"><span class="hs-identifier hs-type">OS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-166"></span><span id="osElfTarget"><span class="annot"><span class="annottext">osElfTarget :: OS -&gt; Bool
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span class="annot"><span class="hs-comment">-- | This predicate tells us whether the OS uses the ELF as its primary object format.</span></span><span>
+</span><span id="line-164"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-type">osElfTarget</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#OS"><span class="hs-identifier hs-type">OS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-165"></span><span id="osElfTarget"><span class="annot"><span class="annottext">osElfTarget :: OS -&gt; Bool
 </span><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var hs-var">osElfTarget</span></a></span></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSLinux"><span class="hs-identifier hs-var">OSLinux</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-167"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-166"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSFreeBSD"><span class="hs-identifier hs-var">OSFreeBSD</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-168"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-167"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSDragonFly"><span class="hs-identifier hs-var">OSDragonFly</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-169"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-168"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSOpenBSD"><span class="hs-identifier hs-var">OSOpenBSD</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-170"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-169"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSNetBSD"><span class="hs-identifier hs-var">OSNetBSD</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-171"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-170"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSSolaris2"><span class="hs-identifier hs-var">OSSolaris2</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-172"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-171"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSDarwin"><span class="hs-identifier hs-var">OSDarwin</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-173"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-172"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSMinGW32"><span class="hs-identifier hs-var">OSMinGW32</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-174"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-173"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSKFreeBSD"><span class="hs-identifier hs-var">OSKFreeBSD</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-175"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-174"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSHaiku"><span class="hs-identifier hs-var">OSHaiku</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-176"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-175"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSQNXNTO"><span class="hs-identifier hs-var">OSQNXNTO</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-177"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-176"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSAIX"><span class="hs-identifier hs-var">OSAIX</span></a></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-178"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-177"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSHurd"><span class="hs-identifier hs-var">OSHurd</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-179"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-178"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSWasi"><span class="hs-identifier hs-var">OSWasi</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-180"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-179"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSGhcjs"><span class="hs-identifier hs-var">OSGhcjs</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-181"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-180"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osElfTarget"><span class="hs-identifier hs-var">osElfTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSUnknown"><span class="hs-identifier hs-var">OSUnknown</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-182"></span><span> </span><span class="hs-comment">-- Defaulting to False is safe; it means don't rely on any</span><span>
-</span><span id="line-183"></span><span> </span><span class="hs-comment">-- ELF-specific functionality.  It is important to have a default for</span><span>
-</span><span id="line-184"></span><span> </span><span class="hs-comment">-- portability, otherwise we have to answer this question for every</span><span>
-</span><span id="line-185"></span><span> </span><span class="hs-comment">-- new platform we compile on (even unreg).</span><span>
-</span><span id="line-186"></span><span>
-</span><span id="line-187"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier hs-type">isARM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#Arch"><span class="hs-identifier hs-type">Arch</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-188"></span><span id="isARM"><span class="annot"><span class="annottext">isARM :: Arch -&gt; Bool
+</span><span id="line-181"></span><span> </span><span class="hs-comment">-- Defaulting to False is safe; it means don't rely on any</span><span>
+</span><span id="line-182"></span><span> </span><span class="hs-comment">-- ELF-specific functionality.  It is important to have a default for</span><span>
+</span><span id="line-183"></span><span> </span><span class="hs-comment">-- portability, otherwise we have to answer this question for every</span><span>
+</span><span id="line-184"></span><span> </span><span class="hs-comment">-- new platform we compile on (even unreg).</span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier hs-type">isARM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#Arch"><span class="hs-identifier hs-type">Arch</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-187"></span><span id="isARM"><span class="annot"><span class="annottext">isARM :: Arch -&gt; Bool
 </span><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier hs-var hs-var">isARM</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchARM"><span class="hs-identifier hs-type">ArchARM</span></a></span><span> </span><span class="hs-special">{</span><span class="hs-special">}</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-189"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier hs-var">isARM</span></a></span><span> </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-188"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier hs-var">isARM</span></a></span><span> </span><span class="annot"><span class="annottext">Arch
 </span><a href="GHC.Platform.ArchOS.html#ArchAArch64"><span class="hs-identifier hs-var">ArchAArch64</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-190"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier hs-var">isARM</span></a></span><span> </span><span class="annot"><span class="annottext">Arch
+</span><span id="line-189"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isARM"><span class="hs-identifier hs-var">isARM</span></a></span><span> </span><span class="annot"><span class="annottext">Arch
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-191"></span><span>
-</span><span id="line-192"></span><span class="annot"><span class="hs-comment">-- | This predicate tells us whether the OS support Mach-O shared libraries.</span></span><span>
-</span><span id="line-193"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osMachOTarget"><span class="hs-identifier hs-type">osMachOTarget</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#OS"><span class="hs-identifier hs-type">OS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-194"></span><span id="osMachOTarget"><span class="annot"><span class="annottext">osMachOTarget :: OS -&gt; Bool
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isPPC"><span class="hs-identifier hs-type">isPPC</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#Arch"><span class="hs-identifier hs-type">Arch</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-192"></span><span id="isPPC"><span class="annot"><span class="annottext">isPPC :: Arch -&gt; Bool
+</span><a href="GHC.Platform.ArchOS.html#isPPC"><span class="hs-identifier hs-var hs-var">isPPC</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Platform.ArchOS.html#ArchPPC_64"><span class="hs-identifier hs-type">ArchPPC_64</span></a></span><span> </span><span class="annot"><span class="annottext">PPC_64ABI
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-193"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isPPC"><span class="hs-identifier hs-var">isPPC</span></a></span><span> </span><span class="annot"><span class="annottext">Arch
+</span><a href="GHC.Platform.ArchOS.html#ArchPPC"><span class="hs-identifier hs-var">ArchPPC</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-194"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#isPPC"><span class="hs-identifier hs-var">isPPC</span></a></span><span> </span><span class="annot"><span class="annottext">Arch
+</span><span class="hs-identifier">_</span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-195"></span><span>
+</span><span id="line-196"></span><span class="annot"><span class="hs-comment">-- | This predicate tells us whether the OS support Mach-O shared libraries.</span></span><span>
+</span><span id="line-197"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osMachOTarget"><span class="hs-identifier hs-type">osMachOTarget</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.ArchOS.html#OS"><span class="hs-identifier hs-type">OS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-198"></span><span id="osMachOTarget"><span class="annot"><span class="annottext">osMachOTarget :: OS -&gt; Bool
 </span><a href="GHC.Platform.ArchOS.html#osMachOTarget"><span class="hs-identifier hs-var hs-var">osMachOTarget</span></a></span></span><span> </span><span class="annot"><span class="annottext">OS
 </span><a href="GHC.Platform.ArchOS.html#OSDarwin"><span class="hs-identifier hs-var">OSDarwin</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-195"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osMachOTarget"><span class="hs-identifier hs-var">osMachOTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
+</span><span id="line-199"></span><span class="annot"><a href="GHC.Platform.ArchOS.html#osMachOTarget"><span class="hs-identifier hs-var">osMachOTarget</span></a></span><span> </span><span class="annot"><span class="annottext">OS
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
-</span><span id="line-196"></span></pre></body></html>
+</span><span id="line-200"></span></pre></body></html>

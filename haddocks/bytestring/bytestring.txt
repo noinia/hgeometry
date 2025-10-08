@@ -48,7 +48,7 @@
 --   import qualified Data.ByteString as BS
 --   </pre>
 @package bytestring
-@version 0.12.1.0
+@version 0.12.2.0
 
 
 -- | <ul>
@@ -570,7 +570,7 @@ instance GHC.Internal.Data.Data.Data Data.ByteString.Lazy.Internal.ByteString
 instance GHC.Classes.Eq Data.ByteString.Lazy.Internal.ByteString
 instance GHC.Internal.IsList.IsList Data.ByteString.Lazy.Internal.ByteString
 instance GHC.Internal.Data.String.IsString Data.ByteString.Lazy.Internal.ByteString
-instance Language.Haskell.TH.Syntax.Lift Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Internal.TH.Lift.Lift Data.ByteString.Lazy.Internal.ByteString
 instance GHC.Internal.Base.Monoid Data.ByteString.Lazy.Internal.ByteString
 instance Control.DeepSeq.NFData Data.ByteString.Lazy.Internal.ByteString
 instance GHC.Classes.Ord Data.ByteString.Lazy.Internal.ByteString
@@ -1118,7 +1118,7 @@ instance GHC.Classes.Eq Data.ByteString.Short.Internal.ShortByteString
 instance GHC.Internal.Generics.Generic Data.ByteString.Short.Internal.ShortByteString
 instance GHC.Internal.IsList.IsList Data.ByteString.Short.Internal.ShortByteString
 instance GHC.Internal.Data.String.IsString Data.ByteString.Short.Internal.ShortByteString
-instance Language.Haskell.TH.Syntax.Lift Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.TH.Lift.Lift Data.ByteString.Short.Internal.ShortByteString
 instance GHC.Internal.Base.Monoid Data.ByteString.Short.Internal.ShortByteString
 instance Control.DeepSeq.NFData Data.ByteString.Short.Internal.ShortByteString
 instance GHC.Classes.Ord Data.ByteString.Short.Internal.ShortByteString
@@ -2286,8 +2286,8 @@ span :: (Word8 -> Bool) -> ByteString -> (ByteString, ByteString)
 --   predicate and the remainder of the string.
 --   
 --   <a>spanEnd</a> <tt>p</tt> is equivalent to <tt><a>breakEnd</a> (not .
---   p)</tt> and to <tt>(<a>takeWhileEnd</a> p &amp;&amp;&amp;
---   <a>dropWhileEnd</a> p)</tt>.
+--   p)</tt> and to <tt>(<a>dropWhileEnd</a> p &amp;&amp;&amp;
+--   <a>takeWhileEnd</a> p)</tt>.
 --   
 --   We have
 --   
@@ -2325,8 +2325,8 @@ break :: (Word8 -> Bool) -> ByteString -> (ByteString, ByteString)
 --   not</b> satisfy the predicate and the remainder of the string.
 --   
 --   <a>breakEnd</a> <tt>p</tt> is equivalent to <tt><a>spanEnd</a> (not .
---   p)</tt> and to <tt>(<a>takeWhileEnd</a> (not . p) &amp;&amp;&amp;
---   <a>dropWhileEnd</a> (not . p))</tt>.
+--   p)</tt> and to <tt>(<a>dropWhileEnd</a> (not . p) &amp;&amp;&amp;
+--   <a>takeWhileEnd</a> (not . p))</tt>.
 breakEnd :: (Word8 -> Bool) -> ByteString -> (ByteString, ByteString)
 
 -- | The <a>group</a> function takes a ByteString and returns a list of
@@ -3132,8 +3132,8 @@ span :: (Word8 -> Bool) -> ByteString -> (ByteString, ByteString)
 --   predicate and the remainder of the string.
 --   
 --   <a>spanEnd</a> <tt>p</tt> is equivalent to <tt><a>breakEnd</a> (not .
---   p)</tt> and to <tt>(<a>takeWhileEnd</a> p &amp;&amp;&amp;
---   <a>dropWhileEnd</a> p)</tt>.
+--   p)</tt> and to <tt>(<a>dropWhileEnd</a> p &amp;&amp;&amp;
+--   <a>takeWhileEnd</a> p)</tt>.
 --   
 --   We have
 --   
@@ -3163,8 +3163,8 @@ break :: (Word8 -> Bool) -> ByteString -> (ByteString, ByteString)
 --   not</b> satisfy the predicate and the remainder of the string.
 --   
 --   <a>breakEnd</a> <tt>p</tt> is equivalent to <tt><a>spanEnd</a> (not .
---   p)</tt> and to <tt>(<a>takeWhileEnd</a> (not . p) &amp;&amp;&amp;
---   <a>dropWhileEnd</a> (not . p))</tt>.
+--   p)</tt> and to <tt>(<a>dropWhileEnd</a> (not . p) &amp;&amp;&amp;
+--   <a>takeWhileEnd</a> (not . p))</tt>.
 breakEnd :: (Word8 -> Bool) -> ByteString -> (ByteString, ByteString)
 
 -- | The <a>group</a> function takes a ByteString and returns a list of
@@ -5411,6 +5411,11 @@ byteString :: StrictByteString -> Builder
 --   the generated chunks are large on average.
 lazyByteString :: LazyByteString -> Builder
 
+-- | Execute a <a>Builder</a> and return the generated chunks as a
+--   <a>LazyByteString</a>. The work is performed lazy, i.e., only when a
+--   chunk of the <a>LazyByteString</a> is forced.
+toLazyByteString :: Builder -> LazyByteString
+
 -- | <i>Heavy inlining.</i> Execute a <a>Builder</a> with custom execution
 --   parameters.
 --   
@@ -5421,10 +5426,10 @@ lazyByteString :: LazyByteString -> Builder
 --   <pre>
 --   {-# NOINLINE toLazyByteString #-}
 --   toLazyByteString =
---     toLazyByteStringWith (<a>safeStrategy</a> <a>smallChunkSize</a> <a>defaultChunkSize</a>) L.empty
+--     toLazyByteStringWith (<a>safeStrategy</a> <a>smallChunkSize</a> <a>defaultChunkSize</a>) L.Empty
 --   </pre>
 --   
---   where <tt>L.empty</tt> is the zero-length <a>LazyByteString</a>.
+--   where <tt>L.Empty</tt> is the zero-length <a>LazyByteString</a>.
 --   
 --   In most cases, the parameters used by <a>toLazyByteString</a> give
 --   good performance. A sub-performing case of <a>toLazyByteString</a> is
@@ -5434,7 +5439,7 @@ lazyByteString :: LazyByteString -> Builder
 --   problem using
 --   
 --   <pre>
---   toLazyByteStringWith (safeStrategy 128 smallChunkSize) L.empty
+--   toLazyByteStringWith (safeStrategy 128 smallChunkSize) L.Empty
 --   </pre>
 --   
 --   This reduces the allocation and trimming overhead, as all generated
@@ -5581,8 +5586,11 @@ putBuilder :: Builder -> Put ()
 fromPut :: Put () -> Builder
 instance GHC.Internal.Base.Applicative Data.ByteString.Builder.Internal.Put
 instance GHC.Internal.Base.Functor Data.ByteString.Builder.Internal.Put
+instance GHC.Internal.IsList.IsList Data.ByteString.Builder.Internal.Builder
 instance GHC.Internal.Base.Monad Data.ByteString.Builder.Internal.Put
 instance GHC.Internal.Base.Monoid Data.ByteString.Builder.Internal.Builder
+instance Control.DeepSeq.NFData Data.ByteString.Builder.Internal.Buffer
+instance Control.DeepSeq.NFData Data.ByteString.Builder.Internal.BufferRange
 instance GHC.Internal.Base.Semigroup Data.ByteString.Builder.Internal.Builder
 
 
@@ -5926,59 +5934,55 @@ primMapByteStringFixed :: FixedPrim Word8 -> StrictByteString -> Builder
 --   from left-to-right with a <a>FixedPrim</a>.
 primMapLazyByteStringFixed :: FixedPrim Word8 -> LazyByteString -> Builder
 
--- | Encoding single signed bytes as-is.
-int8 :: FixedPrim Int8
+-- | Encode a <a>Double</a> in big endian format.
+doubleBE :: FixedPrim Double
 
--- | Encoding single unsigned bytes as-is.
-word8 :: FixedPrim Word8
+-- | Encode a <a>Double</a> in native host order and host endianness.
+doubleHost :: FixedPrim Double
 
--- | Encoding <a>Int16</a>s in big endian format.
-int16BE :: FixedPrim Int16
-
--- | Encoding <a>Int32</a>s in big endian format.
-int32BE :: FixedPrim Int32
-
--- | Encoding <a>Int64</a>s in big endian format.
-int64BE :: FixedPrim Int64
-
--- | Encoding <a>Word16</a>s in big endian format.
-word16BE :: FixedPrim Word16
-
--- | Encoding <a>Word32</a>s in big endian format.
-word32BE :: FixedPrim Word32
-
--- | Encoding <a>Word64</a>s in big endian format.
-word64BE :: FixedPrim Word64
+-- | Encode a <a>Double</a> in little endian format.
+doubleLE :: FixedPrim Double
 
 -- | Encode a <a>Float</a> in big endian format.
 floatBE :: FixedPrim Float
 
--- | Encode a <a>Double</a> in big endian format.
-doubleBE :: FixedPrim Double
-
--- | Encoding <a>Int16</a>s in little endian format.
-int16LE :: FixedPrim Int16
-
--- | Encoding <a>Int32</a>s in little endian format.
-int32LE :: FixedPrim Int32
-
--- | Encoding <a>Int64</a>s in little endian format.
-int64LE :: FixedPrim Int64
-
--- | Encoding <a>Word16</a>s in little endian format.
-word16LE :: FixedPrim Word16
-
--- | Encoding <a>Word32</a>s in little endian format.
-word32LE :: FixedPrim Word32
-
--- | Encoding <a>Word64</a>s in little endian format.
-word64LE :: FixedPrim Word64
+-- | Encode a <a>Float</a> in native host order and host endianness. Values
+--   written this way are not portable to different endian machines,
+--   without conversion.
+floatHost :: FixedPrim Float
 
 -- | Encode a <a>Float</a> in little endian format.
 floatLE :: FixedPrim Float
 
--- | Encode a <a>Double</a> in little endian format.
-doubleLE :: FixedPrim Double
+-- | Encoding <a>Int16</a>s in big endian format.
+int16BE :: FixedPrim Int16
+
+-- | Encoding <a>Int16</a>s in native host order and host endianness.
+int16Host :: FixedPrim Int16
+
+-- | Encoding <a>Int16</a>s in little endian format.
+int16LE :: FixedPrim Int16
+
+-- | Encoding <a>Int32</a>s in big endian format.
+int32BE :: FixedPrim Int32
+
+-- | Encoding <a>Int32</a>s in native host order and host endianness.
+int32Host :: FixedPrim Int32
+
+-- | Encoding <a>Int32</a>s in little endian format.
+int32LE :: FixedPrim Int32
+
+-- | Encoding <a>Int64</a>s in big endian format.
+int64BE :: FixedPrim Int64
+
+-- | Encoding <a>Int64</a>s in native host order and host endianness.
+int64Host :: FixedPrim Int64
+
+-- | Encoding <a>Int64</a>s in little endian format.
+int64LE :: FixedPrim Int64
+
+-- | Encoding single signed bytes as-is.
+int8 :: FixedPrim Int8
 
 -- | Encode a single native machine <a>Int</a>. The <a>Int</a>s is encoded
 --   in host order, host endian form, for the machine you are on. On a 64
@@ -5987,14 +5991,35 @@ doubleLE :: FixedPrim Double
 --   integer sized machines, without conversion.
 intHost :: FixedPrim Int
 
--- | Encoding <a>Int16</a>s in native host order and host endianness.
-int16Host :: FixedPrim Int16
+-- | Encoding <a>Word16</a>s in big endian format.
+word16BE :: FixedPrim Word16
 
--- | Encoding <a>Int32</a>s in native host order and host endianness.
-int32Host :: FixedPrim Int32
+-- | Encoding <a>Word16</a>s in native host order and host endianness.
+word16Host :: FixedPrim Word16
 
--- | Encoding <a>Int64</a>s in native host order and host endianness.
-int64Host :: FixedPrim Int64
+-- | Encoding <a>Word16</a>s in little endian format.
+word16LE :: FixedPrim Word16
+
+-- | Encoding <a>Word32</a>s in big endian format.
+word32BE :: FixedPrim Word32
+
+-- | Encoding <a>Word32</a>s in native host order and host endianness.
+word32Host :: FixedPrim Word32
+
+-- | Encoding <a>Word32</a>s in little endian format.
+word32LE :: FixedPrim Word32
+
+-- | Encoding <a>Word64</a>s in big endian format.
+word64BE :: FixedPrim Word64
+
+-- | Encoding <a>Word64</a>s in native host order and host endianness.
+word64Host :: FixedPrim Word64
+
+-- | Encoding <a>Word64</a>s in little endian format.
+word64LE :: FixedPrim Word64
+
+-- | Encoding single unsigned bytes as-is.
+word8 :: FixedPrim Word8
 
 -- | Encode a single native machine <a>Word</a>. The <a>Word</a>s is
 --   encoded in host order, host endian form, for the machine you are on.
@@ -6003,100 +6028,83 @@ int64Host :: FixedPrim Int64
 --   different endian or word sized machines, without conversion.
 wordHost :: FixedPrim Word
 
--- | Encoding <a>Word16</a>s in native host order and host endianness.
-word16Host :: FixedPrim Word16
-
--- | Encoding <a>Word32</a>s in native host order and host endianness.
-word32Host :: FixedPrim Word32
-
--- | Encoding <a>Word64</a>s in native host order and host endianness.
-word64Host :: FixedPrim Word64
-
--- | Encode a <a>Float</a> in native host order and host endianness. Values
---   written this way are not portable to different endian machines,
---   without conversion.
-floatHost :: FixedPrim Float
-
--- | Encode a <a>Double</a> in native host order and host endianness.
-doubleHost :: FixedPrim Double
-
 -- | Encode the least 7-bits of a <a>Char</a> using the ASCII encoding.
 char7 :: FixedPrim Char
 
--- | Decimal encoding of an <a>Int8</a>.
-int8Dec :: BoundedPrim Int8
-
--- | Decimal encoding of an <a>Int16</a>.
-int16Dec :: BoundedPrim Int16
-
--- | Decimal encoding of an <a>Int32</a>.
-int32Dec :: BoundedPrim Int32
-
--- | Decimal encoding of an <a>Int64</a>.
-int64Dec :: BoundedPrim Int64
-
--- | Decimal encoding of an <a>Int</a>.
-intDec :: BoundedPrim Int
-
--- | Decimal encoding of a <a>Word8</a>.
-word8Dec :: BoundedPrim Word8
-
--- | Decimal encoding of a <a>Word16</a>.
-word16Dec :: BoundedPrim Word16
-
--- | Decimal encoding of a <a>Word32</a>.
-word32Dec :: BoundedPrim Word32
-
--- | Decimal encoding of a <a>Word64</a>.
-word64Dec :: BoundedPrim Word64
-
--- | Decimal encoding of a <a>Word</a>.
-wordDec :: BoundedPrim Word
-
--- | Hexadecimal encoding of a <a>Word8</a>.
-word8Hex :: BoundedPrim Word8
-
--- | Hexadecimal encoding of a <a>Word16</a>.
-word16Hex :: BoundedPrim Word16
-
--- | Hexadecimal encoding of a <a>Word32</a>.
-word32Hex :: BoundedPrim Word32
-
--- | Hexadecimal encoding of a <a>Word64</a>.
-word64Hex :: BoundedPrim Word64
-
--- | Hexadecimal encoding of a <a>Word</a>.
-wordHex :: BoundedPrim Word
-
--- | Encode a <a>Int8</a> using 2 nibbles (hexadecimal digits).
-int8HexFixed :: FixedPrim Int8
-
--- | Encode a <a>Int16</a> using 4 nibbles.
-int16HexFixed :: FixedPrim Int16
-
--- | Encode a <a>Int32</a> using 8 nibbles.
-int32HexFixed :: FixedPrim Int32
-
--- | Encode a <a>Int64</a> using 16 nibbles.
-int64HexFixed :: FixedPrim Int64
-
--- | Encode a <a>Word8</a> using 2 nibbles (hexadecimal digits).
-word8HexFixed :: FixedPrim Word8
-
--- | Encode a <a>Word16</a> using 4 nibbles.
-word16HexFixed :: FixedPrim Word16
-
--- | Encode a <a>Word32</a> using 8 nibbles.
-word32HexFixed :: FixedPrim Word32
-
--- | Encode a <a>Word64</a> using 16 nibbles.
-word64HexFixed :: FixedPrim Word64
+-- | Encode an IEEE <a>Double</a> using 16 nibbles.
+doubleHexFixed :: FixedPrim Double
 
 -- | Encode an IEEE <a>Float</a> using 8 nibbles.
 floatHexFixed :: FixedPrim Float
 
--- | Encode an IEEE <a>Double</a> using 16 nibbles.
-doubleHexFixed :: FixedPrim Double
+-- | Decimal encoding of an <a>Int16</a>.
+int16Dec :: BoundedPrim Int16
+
+-- | Encode a <a>Int16</a> using 4 nibbles.
+int16HexFixed :: FixedPrim Int16
+
+-- | Decimal encoding of an <a>Int32</a>.
+int32Dec :: BoundedPrim Int32
+
+-- | Encode a <a>Int32</a> using 8 nibbles.
+int32HexFixed :: FixedPrim Int32
+
+-- | Decimal encoding of an <a>Int64</a>.
+int64Dec :: BoundedPrim Int64
+
+-- | Encode a <a>Int64</a> using 16 nibbles.
+int64HexFixed :: FixedPrim Int64
+
+-- | Decimal encoding of an <a>Int8</a>.
+int8Dec :: BoundedPrim Int8
+
+-- | Encode a <a>Int8</a> using 2 nibbles (hexadecimal digits).
+int8HexFixed :: FixedPrim Int8
+
+-- | Decimal encoding of an <a>Int</a>.
+intDec :: BoundedPrim Int
+
+-- | Decimal encoding of a <a>Word16</a>.
+word16Dec :: BoundedPrim Word16
+
+-- | Hexadecimal encoding of a <a>Word16</a>.
+word16Hex :: BoundedPrim Word16
+
+-- | Encode a <a>Word16</a> using 4 nibbles.
+word16HexFixed :: FixedPrim Word16
+
+-- | Decimal encoding of a <a>Word32</a>.
+word32Dec :: BoundedPrim Word32
+
+-- | Hexadecimal encoding of a <a>Word32</a>.
+word32Hex :: BoundedPrim Word32
+
+-- | Encode a <a>Word32</a> using 8 nibbles.
+word32HexFixed :: FixedPrim Word32
+
+-- | Decimal encoding of a <a>Word64</a>.
+word64Dec :: BoundedPrim Word64
+
+-- | Hexadecimal encoding of a <a>Word64</a>.
+word64Hex :: BoundedPrim Word64
+
+-- | Encode a <a>Word64</a> using 16 nibbles.
+word64HexFixed :: FixedPrim Word64
+
+-- | Decimal encoding of a <a>Word8</a>.
+word8Dec :: BoundedPrim Word8
+
+-- | Hexadecimal encoding of a <a>Word8</a>.
+word8Hex :: BoundedPrim Word8
+
+-- | Encode a <a>Word8</a> using 2 nibbles (hexadecimal digits).
+word8HexFixed :: FixedPrim Word8
+
+-- | Decimal encoding of a <a>Word</a>.
+wordDec :: BoundedPrim Word
+
+-- | Hexadecimal encoding of a <a>Word</a>.
+wordHex :: BoundedPrim Word
 
 -- | Char8 encode a <a>Char</a>.
 char8 :: FixedPrim Char
@@ -6287,10 +6295,10 @@ module Data.ByteString.Builder.Extra
 --   <pre>
 --   {-# NOINLINE toLazyByteString #-}
 --   toLazyByteString =
---     toLazyByteStringWith (<a>safeStrategy</a> <a>smallChunkSize</a> <a>defaultChunkSize</a>) L.empty
+--     toLazyByteStringWith (<a>safeStrategy</a> <a>smallChunkSize</a> <a>defaultChunkSize</a>) L.Empty
 --   </pre>
 --   
---   where <tt>L.empty</tt> is the zero-length <a>LazyByteString</a>.
+--   where <tt>L.Empty</tt> is the zero-length <a>LazyByteString</a>.
 --   
 --   In most cases, the parameters used by <a>toLazyByteString</a> give
 --   good performance. A sub-performing case of <a>toLazyByteString</a> is
@@ -6300,7 +6308,7 @@ module Data.ByteString.Builder.Extra
 --   problem using
 --   
 --   <pre>
---   toLazyByteStringWith (safeStrategy 128 smallChunkSize) L.empty
+--   toLazyByteStringWith (safeStrategy 128 smallChunkSize) L.Empty
 --   </pre>
 --   
 --   This reduces the allocation and trimming overhead, as all generated
@@ -6747,6 +6755,34 @@ charUtf8 :: Char -> Builder
 --   consequently may emit invalid UTF-8 if asked (e.g. single surrogates).
 stringUtf8 :: String -> Builder
 
+-- | Encode each byte of a <a>StrictByteString</a> using its fixed-width
+--   hex encoding.
+byteStringHex :: StrictByteString -> Builder
+
+-- | Encode an IEEE <a>Double</a> using 16 nibbles.
+doubleHexFixed :: Double -> Builder
+
+-- | Encode an IEEE <a>Float</a> using 8 nibbles.
+floatHexFixed :: Float -> Builder
+
+-- | Decimal encoding of an <a>Int16</a> using the ASCII digits.
+int16Dec :: Int16 -> Builder
+
+-- | Encode a <a>Int16</a> using 4 nibbles.
+int16HexFixed :: Int16 -> Builder
+
+-- | Decimal encoding of an <a>Int32</a> using the ASCII digits.
+int32Dec :: Int32 -> Builder
+
+-- | Encode a <a>Int32</a> using 8 nibbles.
+int32HexFixed :: Int32 -> Builder
+
+-- | Decimal encoding of an <a>Int64</a> using the ASCII digits.
+int64Dec :: Int64 -> Builder
+
+-- | Encode a <a>Int64</a> using 16 nibbles.
+int64HexFixed :: Int64 -> Builder
+
 -- | Decimal encoding of an <a>Int8</a> using the ASCII digits.
 --   
 --   e.g.
@@ -6757,14 +6793,8 @@ stringUtf8 :: String -> Builder
 --   </pre>
 int8Dec :: Int8 -> Builder
 
--- | Decimal encoding of an <a>Int16</a> using the ASCII digits.
-int16Dec :: Int16 -> Builder
-
--- | Decimal encoding of an <a>Int32</a> using the ASCII digits.
-int32Dec :: Int32 -> Builder
-
--- | Decimal encoding of an <a>Int64</a> using the ASCII digits.
-int64Dec :: Int64 -> Builder
+-- | Encode a <a>Int8</a> using 2 nibbles (hexadecimal digits).
+int8HexFixed :: Int8 -> Builder
 
 -- | Decimal encoding of an <a>Int</a> using the ASCII digits.
 intDec :: Int -> Builder
@@ -6772,28 +6802,56 @@ intDec :: Int -> Builder
 -- | Decimal encoding of an <a>Integer</a> using the ASCII digits.
 integerDec :: Integer -> Builder
 
--- | Decimal encoding of a <a>Word8</a> using the ASCII digits.
-word8Dec :: Word8 -> Builder
+-- | Encode each byte of a <a>LazyByteString</a> using its fixed-width hex
+--   encoding.
+lazyByteStringHex :: LazyByteString -> Builder
 
 -- | Decimal encoding of a <a>Word16</a> using the ASCII digits.
 word16Dec :: Word16 -> Builder
 
+-- | Shortest hexadecimal encoding of a <a>Word16</a> using lower-case
+--   characters.
+word16Hex :: Word16 -> Builder
+
+-- | Encode a <a>Word16</a> using 4 nibbles.
+word16HexFixed :: Word16 -> Builder
+
 -- | Decimal encoding of a <a>Word32</a> using the ASCII digits.
 word32Dec :: Word32 -> Builder
+
+-- | Shortest hexadecimal encoding of a <a>Word32</a> using lower-case
+--   characters.
+word32Hex :: Word32 -> Builder
+
+-- | Encode a <a>Word32</a> using 8 nibbles.
+word32HexFixed :: Word32 -> Builder
 
 -- | Decimal encoding of a <a>Word64</a> using the ASCII digits.
 word64Dec :: Word64 -> Builder
 
+-- | Shortest hexadecimal encoding of a <a>Word64</a> using lower-case
+--   characters.
+word64Hex :: Word64 -> Builder
+
+-- | Encode a <a>Word64</a> using 16 nibbles.
+word64HexFixed :: Word64 -> Builder
+
+-- | Decimal encoding of a <a>Word8</a> using the ASCII digits.
+word8Dec :: Word8 -> Builder
+
+-- | Shortest hexadecimal encoding of a <a>Word8</a> using lower-case
+--   characters.
+word8Hex :: Word8 -> Builder
+
+-- | Encode a <a>Word8</a> using 2 nibbles (hexadecimal digits).
+word8HexFixed :: Word8 -> Builder
+
 -- | Decimal encoding of a <a>Word</a> using the ASCII digits.
 wordDec :: Word -> Builder
 
--- | Returns a rendered Float. Matches <a>show</a> in displaying in
---   standard or scientific notation
---   
---   <pre>
---   floatDec = <a>formatFloat</a> <a>generic</a>
---   </pre>
-floatDec :: Float -> Builder
+-- | Shortest hexadecimal encoding of a <a>Word</a> using lower-case
+--   characters.
+wordHex :: Word -> Builder
 
 -- | Returns a rendered Double. Matches <a>show</a> in displaying in
 --   standard or scientific notation
@@ -6803,62 +6861,12 @@ floatDec :: Float -> Builder
 --   </pre>
 doubleDec :: Double -> Builder
 
--- | Shortest hexadecimal encoding of a <a>Word8</a> using lower-case
---   characters.
-word8Hex :: Word8 -> Builder
-
--- | Shortest hexadecimal encoding of a <a>Word16</a> using lower-case
---   characters.
-word16Hex :: Word16 -> Builder
-
--- | Shortest hexadecimal encoding of a <a>Word32</a> using lower-case
---   characters.
-word32Hex :: Word32 -> Builder
-
--- | Shortest hexadecimal encoding of a <a>Word64</a> using lower-case
---   characters.
-word64Hex :: Word64 -> Builder
-
--- | Shortest hexadecimal encoding of a <a>Word</a> using lower-case
---   characters.
-wordHex :: Word -> Builder
-
--- | Encode a <a>Int8</a> using 2 nibbles (hexadecimal digits).
-int8HexFixed :: Int8 -> Builder
-
--- | Encode a <a>Int16</a> using 4 nibbles.
-int16HexFixed :: Int16 -> Builder
-
--- | Encode a <a>Int32</a> using 8 nibbles.
-int32HexFixed :: Int32 -> Builder
-
--- | Encode a <a>Int64</a> using 16 nibbles.
-int64HexFixed :: Int64 -> Builder
-
--- | Encode a <a>Word8</a> using 2 nibbles (hexadecimal digits).
-word8HexFixed :: Word8 -> Builder
-
--- | Encode a <a>Word16</a> using 4 nibbles.
-word16HexFixed :: Word16 -> Builder
-
--- | Encode a <a>Word32</a> using 8 nibbles.
-word32HexFixed :: Word32 -> Builder
-
--- | Encode a <a>Word64</a> using 16 nibbles.
-word64HexFixed :: Word64 -> Builder
-
--- | Encode an IEEE <a>Float</a> using 8 nibbles.
-floatHexFixed :: Float -> Builder
-
--- | Encode an IEEE <a>Double</a> using 16 nibbles.
-doubleHexFixed :: Double -> Builder
-
--- | Encode each byte of a <a>StrictByteString</a> using its fixed-width
---   hex encoding.
-byteStringHex :: StrictByteString -> Builder
-
--- | Encode each byte of a <a>LazyByteString</a> using its fixed-width hex
---   encoding.
-lazyByteStringHex :: LazyByteString -> Builder
+-- | Returns a rendered Float. Matches <a>show</a> in displaying in
+--   standard or scientific notation
+--   
+--   <pre>
+--   floatDec = <a>formatFloat</a> <a>generic</a>
+--   </pre>
+floatDec :: Float -> Builder
 instance GHC.Internal.Data.String.IsString Data.ByteString.Builder.Internal.Builder
 instance GHC.Internal.Show.Show Data.ByteString.Builder.Internal.Builder

@@ -27,9 +27,9 @@
 </span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html"><span class="hs-identifier">GHC.Utils.Outputable</span></a></span><span>
 </span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.html"><span class="hs-identifier">GHC.Utils.Panic</span></a></span><span>
 </span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Concurrent.MVar.html/Control.Concurrent.MVar.html"><span class="hs-identifier">Control.Concurrent.MVar</span></a></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.html/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Applicative.html/Control.Applicative.html"><span class="hs-identifier">Control.Applicative</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Control.Concurrent.MVar.html"><span class="hs-identifier">Control.Concurrent.MVar</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Control.Applicative.html"><span class="hs-identifier">Control.Applicative</span></a></span><span>
 </span><span id="line-33"></span><span>
 </span><span id="line-34"></span><span class="hs-comment">{-
 
@@ -102,148 +102,148 @@ for built-in and punned syntax,
 </span><span id="line-100"></span><span>
 </span><span id="line-101"></span><span class="annot"><a href="GHC.Types.Name.Cache.html#takeUniqFromNameCache"><span class="hs-identifier hs-type">takeUniqFromNameCache</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span>
 </span><span id="line-102"></span><span id="takeUniqFromNameCache"><span class="annot"><span class="annottext">takeUniqFromNameCache :: NameCache -&gt; IO Unique
-</span><a href="GHC.Types.Name.Cache.html#takeUniqFromNameCache"><span class="hs-identifier hs-var hs-var">takeUniqFromNameCache</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span> </span><span id="local-6989586621682438441"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682438441"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="annottext">MVar OrigNameCache
+</span><a href="GHC.Types.Name.Cache.html#takeUniqFromNameCache"><span class="hs-identifier hs-var hs-var">takeUniqFromNameCache</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span> </span><span id="local-6989586621682597702"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682597702"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="annot"><span class="annottext">MVar OrigNameCache
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; IO Unique
 </span><a href="GHC.Types.Unique.Supply.html#uniqFromTag"><span class="hs-identifier hs-var">uniqFromTag</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682438441"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621682597702"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-103"></span><span>
 </span><span id="line-104"></span><span class="annot"><a href="GHC.Types.Name.Cache.html#lookupOrigNameCache"><span class="hs-identifier hs-type">lookupOrigNameCache</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Unit.Types.html#Module"><span class="hs-identifier hs-type">Module</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.Occurrence.html#OccName"><span class="hs-identifier hs-type">OccName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
 </span><span id="line-105"></span><span id="lookupOrigNameCache"><span class="annot"><span class="annottext">lookupOrigNameCache :: OrigNameCache -&gt; Module -&gt; OccName -&gt; Maybe Name
-</span><a href="GHC.Types.Name.Cache.html#lookupOrigNameCache"><span class="hs-identifier hs-var hs-var">lookupOrigNameCache</span></a></span></span><span> </span><span id="local-6989586621682438443"><span class="annot"><span class="annottext">OrigNameCache
-</span><a href="#local-6989586621682438443"><span class="hs-identifier hs-var">nc</span></a></span></span><span> </span><span id="local-6989586621682438444"><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438444"><span class="hs-identifier hs-var">mod</span></a></span></span><span> </span><span id="local-6989586621682438445"><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438445"><span class="hs-identifier hs-var">occ</span></a></span></span><span>
+</span><a href="GHC.Types.Name.Cache.html#lookupOrigNameCache"><span class="hs-identifier hs-var hs-var">lookupOrigNameCache</span></a></span></span><span> </span><span id="local-6989586621682597704"><span class="annot"><span class="annottext">OrigNameCache
+</span><a href="#local-6989586621682597704"><span class="hs-identifier hs-var">nc</span></a></span></span><span> </span><span id="local-6989586621682597705"><span class="annot"><span class="annottext">Module
+</span><a href="#local-6989586621682597705"><span class="hs-identifier hs-var">mod</span></a></span></span><span> </span><span id="local-6989586621682597706"><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621682597706"><span class="hs-identifier hs-var">occ</span></a></span></span><span>
 </span><span id="line-106"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438444"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
+</span><a href="#local-6989586621682597705"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Module
 </span><a href="GHC.Builtin.Names.html#gHC_TYPES"><span class="hs-identifier hs-var">gHC_TYPES</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438444"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
+</span><a href="#local-6989586621682597705"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Module
 </span><a href="GHC.Builtin.Names.html#gHC_PRIM"><span class="hs-identifier hs-var">gHC_PRIM</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438444"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
+</span><a href="#local-6989586621682597705"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Module
 </span><a href="GHC.Builtin.Names.html#gHC_INTERNAL_TUPLE"><span class="hs-identifier hs-var">gHC_INTERNAL_TUPLE</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438444"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
+</span><a href="#local-6989586621682597705"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">Module -&gt; Module -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Module
 </span><a href="GHC.Builtin.Names.html#gHC_CLASSES"><span class="hs-identifier hs-var">gHC_CLASSES</span></a></span><span>
-</span><span id="line-107"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682438451"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438451"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">OccName -&gt; Maybe Name
+</span><span id="line-107"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682597712"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682597712"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">OccName -&gt; Maybe Name
 </span><a href="GHC.Builtin.Types.html#isBuiltInOcc_maybe"><span class="hs-identifier hs-var">isBuiltInOcc_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438445"><span class="hs-identifier hs-var">occ</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Name -&gt; Maybe Name -&gt; Maybe Name
+</span><a href="#local-6989586621682597706"><span class="hs-identifier hs-var">occ</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Name -&gt; Maybe Name -&gt; Maybe Name
 forall a. Maybe a -&gt; Maybe a -&gt; Maybe a
 forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Module -&gt; OccName -&gt; Maybe Name
 </span><a href="GHC.Builtin.Types.html#isPunOcc_maybe"><span class="hs-identifier hs-var">isPunOcc_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438444"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438445"><span class="hs-identifier hs-var">occ</span></a></span><span>
+</span><a href="#local-6989586621682597705"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621682597706"><span class="hs-identifier hs-var">occ</span></a></span><span>
 </span><span id="line-108"></span><span>  </span><span class="hs-glyph">=</span><span>     </span><span class="hs-comment">-- See Note [Known-key names], 3(c) in GHC.Builtin.Names</span><span>
 </span><span id="line-109"></span><span>        </span><span class="hs-comment">-- Special case for tuples; there are too many</span><span>
 </span><span id="line-110"></span><span>        </span><span class="hs-comment">-- of them to pre-populate the original-name cache</span><span>
 </span><span id="line-111"></span><span>    </span><span class="annot"><span class="annottext">Name -&gt; Maybe Name
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438451"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><a href="#local-6989586621682597712"><span class="hs-identifier hs-var">name</span></a></span><span>
 </span><span id="line-112"></span><span>
 </span><span id="line-113"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>
 </span><span id="line-114"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">OrigNameCache -&gt; Module -&gt; Maybe (OccEnv Name)
 forall a. ModuleEnv a -&gt; Module -&gt; Maybe a
 </span><a href="GHC.Unit.Module.Env.html#lookupModuleEnv"><span class="hs-identifier hs-var">lookupModuleEnv</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache
-</span><a href="#local-6989586621682438443"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438444"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682597704"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="annot"><span class="annottext">Module
+</span><a href="#local-6989586621682597705"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-115"></span><span>        </span><span class="annot"><span class="annottext">Maybe (OccEnv Name)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Name
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-116"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682438456"><span class="annot"><span class="annottext">OccEnv Name
-</span><a href="#local-6989586621682438456"><span class="hs-identifier hs-var">occ_env</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">OccEnv Name -&gt; OccName -&gt; Maybe Name
+</span><span id="line-116"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682597717"><span class="annot"><span class="annottext">OccEnv Name
+</span><a href="#local-6989586621682597717"><span class="hs-identifier hs-var">occ_env</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">OccEnv Name -&gt; OccName -&gt; Maybe Name
 forall a. OccEnv a -&gt; OccName -&gt; Maybe a
 </span><a href="GHC.Types.Name.Occurrence.html#lookupOccEnv"><span class="hs-identifier hs-var">lookupOccEnv</span></a></span><span> </span><span class="annot"><span class="annottext">OccEnv Name
-</span><a href="#local-6989586621682438456"><span class="hs-identifier hs-var">occ_env</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438445"><span class="hs-identifier hs-var">occ</span></a></span><span>
+</span><a href="#local-6989586621682597717"><span class="hs-identifier hs-var">occ_env</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621682597706"><span class="hs-identifier hs-var">occ</span></a></span><span>
 </span><span id="line-117"></span><span>
 </span><span id="line-118"></span><span class="annot"><a href="GHC.Types.Name.Cache.html#extendOrigNameCache%27"><span class="hs-identifier hs-type">extendOrigNameCache'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span>
 </span><span id="line-119"></span><span id="extendOrigNameCache%27"><span class="annot"><span class="annottext">extendOrigNameCache' :: OrigNameCache -&gt; Name -&gt; OrigNameCache
-</span><a href="GHC.Types.Name.Cache.html#extendOrigNameCache%27"><span class="hs-identifier hs-var hs-var">extendOrigNameCache'</span></a></span></span><span> </span><span id="local-6989586621682438458"><span class="annot"><span class="annottext">OrigNameCache
-</span><a href="#local-6989586621682438458"><span class="hs-identifier hs-var">nc</span></a></span></span><span> </span><span id="local-6989586621682438459"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438459"><span class="hs-identifier hs-var">name</span></a></span></span><span>
+</span><a href="GHC.Types.Name.Cache.html#extendOrigNameCache%27"><span class="hs-identifier hs-var hs-var">extendOrigNameCache'</span></a></span></span><span> </span><span id="local-6989586621682597719"><span class="annot"><span class="annottext">OrigNameCache
+</span><a href="#local-6989586621682597719"><span class="hs-identifier hs-var">nc</span></a></span></span><span> </span><span id="local-6989586621682597720"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682597720"><span class="hs-identifier hs-var">name</span></a></span></span><span>
 </span><span id="line-120"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SDoc -&gt; OrigNameCache -&gt; OrigNameCache
 forall a. HasCallStack =&gt; Bool -&gt; SDoc -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.html#assertPpr"><span class="hs-identifier hs-var">assertPpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; Bool
 </span><a href="GHC.Types.Name.html#isExternalName"><span class="hs-identifier hs-var">isExternalName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438459"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; SDoc
+</span><a href="#local-6989586621682597720"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438459"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(OrigNameCache -&gt; OrigNameCache) -&gt; OrigNameCache -&gt; OrigNameCache
+</span><a href="#local-6989586621682597720"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(OrigNameCache -&gt; OrigNameCache) -&gt; OrigNameCache -&gt; OrigNameCache
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-121"></span><span>    </span><span class="annot"><span class="annottext">OrigNameCache -&gt; Module -&gt; OccName -&gt; Name -&gt; OrigNameCache
 </span><a href="GHC.Types.Name.Cache.html#extendOrigNameCache"><span class="hs-identifier hs-var">extendOrigNameCache</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache
-</span><a href="#local-6989586621682438458"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Name -&gt; Module
+</span><a href="#local-6989586621682597719"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Name -&gt; Module
 Name -&gt; Module
 </span><a href="GHC.Types.Name.html#nameModule"><span class="hs-identifier hs-var">nameModule</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438459"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; OccName
+</span><a href="#local-6989586621682597720"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Name -&gt; OccName
 </span><a href="GHC.Types.Name.html#nameOccName"><span class="hs-identifier hs-var">nameOccName</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438459"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438459"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><a href="#local-6989586621682597720"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682597720"><span class="hs-identifier hs-var">name</span></a></span><span>
 </span><span id="line-122"></span><span>
 </span><span id="line-123"></span><span class="annot"><a href="GHC.Types.Name.Cache.html#extendOrigNameCache"><span class="hs-identifier hs-type">extendOrigNameCache</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Unit.Types.html#Module"><span class="hs-identifier hs-type">Module</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.Occurrence.html#OccName"><span class="hs-identifier hs-type">OccName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span>
 </span><span id="line-124"></span><span id="extendOrigNameCache"><span class="annot"><span class="annottext">extendOrigNameCache :: OrigNameCache -&gt; Module -&gt; OccName -&gt; Name -&gt; OrigNameCache
-</span><a href="GHC.Types.Name.Cache.html#extendOrigNameCache"><span class="hs-identifier hs-var hs-var">extendOrigNameCache</span></a></span></span><span> </span><span id="local-6989586621682438465"><span class="annot"><span class="annottext">OrigNameCache
-</span><a href="#local-6989586621682438465"><span class="hs-identifier hs-var">nc</span></a></span></span><span> </span><span id="local-6989586621682438466"><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438466"><span class="hs-identifier hs-var">mod</span></a></span></span><span> </span><span id="local-6989586621682438467"><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438467"><span class="hs-identifier hs-var">occ</span></a></span></span><span> </span><span id="local-6989586621682438468"><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438468"><span class="hs-identifier hs-var">name</span></a></span></span><span>
+</span><a href="GHC.Types.Name.Cache.html#extendOrigNameCache"><span class="hs-identifier hs-var hs-var">extendOrigNameCache</span></a></span></span><span> </span><span id="local-6989586621682597726"><span class="annot"><span class="annottext">OrigNameCache
+</span><a href="#local-6989586621682597726"><span class="hs-identifier hs-var">nc</span></a></span></span><span> </span><span id="local-6989586621682597727"><span class="annot"><span class="annottext">Module
+</span><a href="#local-6989586621682597727"><span class="hs-identifier hs-var">mod</span></a></span></span><span> </span><span id="local-6989586621682597728"><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621682597728"><span class="hs-identifier hs-var">occ</span></a></span></span><span> </span><span id="local-6989586621682597729"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682597729"><span class="hs-identifier hs-var">name</span></a></span></span><span>
 </span><span id="line-125"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OccEnv Name -&gt; OccEnv Name -&gt; OccEnv Name)
 -&gt; OrigNameCache -&gt; Module -&gt; OccEnv Name -&gt; OrigNameCache
 forall a.
 (a -&gt; a -&gt; a) -&gt; ModuleEnv a -&gt; Module -&gt; a -&gt; ModuleEnv a
 </span><a href="GHC.Unit.Module.Env.html#extendModuleEnvWith"><span class="hs-identifier hs-var">extendModuleEnvWith</span></a></span><span> </span><span class="annot"><span class="annottext">OccEnv Name -&gt; OccEnv Name -&gt; OccEnv Name
-</span><a href="#local-6989586621682438470"><span class="hs-identifier hs-var">combine</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache
-</span><a href="#local-6989586621682438465"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438466"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OccName -&gt; Name -&gt; OccEnv Name
+</span><a href="#local-6989586621682597731"><span class="hs-identifier hs-var">combine</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache
+</span><a href="#local-6989586621682597726"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="annot"><span class="annottext">Module
+</span><a href="#local-6989586621682597727"><span class="hs-identifier hs-var">mod</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OccName -&gt; Name -&gt; OccEnv Name
 forall a. OccName -&gt; a -&gt; OccEnv a
 </span><a href="GHC.Types.Name.Occurrence.html#unitOccEnv"><span class="hs-identifier hs-var">unitOccEnv</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438467"><span class="hs-identifier hs-var">occ</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438468"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682597728"><span class="hs-identifier hs-var">occ</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682597729"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-126"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-127"></span><span>    </span><span id="local-6989586621682438470"><span class="annot"><span class="annottext">combine :: OccEnv Name -&gt; OccEnv Name -&gt; OccEnv Name
-</span><a href="#local-6989586621682438470"><span class="hs-identifier hs-var hs-var">combine</span></a></span></span><span> </span><span class="annot"><span class="annottext">OccEnv Name
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682438472"><span class="annot"><span class="annottext">OccEnv Name
-</span><a href="#local-6989586621682438472"><span class="hs-identifier hs-var">occ_env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OccEnv Name -&gt; OccName -&gt; Name -&gt; OccEnv Name
+</span><span id="line-127"></span><span>    </span><span id="local-6989586621682597731"><span class="annot"><span class="annottext">combine :: OccEnv Name -&gt; OccEnv Name -&gt; OccEnv Name
+</span><a href="#local-6989586621682597731"><span class="hs-identifier hs-var hs-var">combine</span></a></span></span><span> </span><span class="annot"><span class="annottext">OccEnv Name
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682597733"><span class="annot"><span class="annottext">OccEnv Name
+</span><a href="#local-6989586621682597733"><span class="hs-identifier hs-var">occ_env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OccEnv Name -&gt; OccName -&gt; Name -&gt; OccEnv Name
 forall a. OccEnv a -&gt; OccName -&gt; a -&gt; OccEnv a
 </span><a href="GHC.Types.Name.Occurrence.html#extendOccEnv"><span class="hs-identifier hs-var">extendOccEnv</span></a></span><span> </span><span class="annot"><span class="annottext">OccEnv Name
-</span><a href="#local-6989586621682438472"><span class="hs-identifier hs-var">occ_env</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438467"><span class="hs-identifier hs-var">occ</span></a></span><span> </span><span class="annot"><span class="annottext">Name
-</span><a href="#local-6989586621682438468"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><a href="#local-6989586621682597733"><span class="hs-identifier hs-var">occ_env</span></a></span><span> </span><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621682597728"><span class="hs-identifier hs-var">occ</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621682597729"><span class="hs-identifier hs-var">name</span></a></span><span>
 </span><span id="line-128"></span><span>
 </span><span id="line-129"></span><span class="annot"><a href="GHC.Types.Name.Cache.html#initNameCache"><span class="hs-identifier hs-type">initNameCache</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span>
 </span><span id="line-130"></span><span id="initNameCache"><span class="annot"><span class="annottext">initNameCache :: Char -&gt; [Name] -&gt; IO NameCache
-</span><a href="GHC.Types.Name.Cache.html#initNameCache"><span class="hs-identifier hs-var hs-var">initNameCache</span></a></span></span><span> </span><span id="local-6989586621682438474"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682438474"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621682438475"><span class="annot"><span class="annottext">[Name]
-</span><a href="#local-6989586621682438475"><span class="hs-identifier hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; MVar OrigNameCache -&gt; NameCache
+</span><a href="GHC.Types.Name.Cache.html#initNameCache"><span class="hs-identifier hs-var hs-var">initNameCache</span></a></span></span><span> </span><span id="local-6989586621682597735"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682597735"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621682597736"><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621682597736"><span class="hs-identifier hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; MVar OrigNameCache -&gt; NameCache
 </span><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-var">NameCache</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682438474"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">(MVar OrigNameCache -&gt; NameCache)
+</span><a href="#local-6989586621682597735"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">(MVar OrigNameCache -&gt; NameCache)
 -&gt; IO (MVar OrigNameCache) -&gt; IO NameCache
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (MVar OrigNameCache)
 forall a. a -&gt; IO (MVar a)
 </span><span class="hs-identifier hs-var">newMVar</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Name] -&gt; OrigNameCache
 </span><a href="GHC.Types.Name.Cache.html#initOrigNames"><span class="hs-identifier hs-var">initOrigNames</span></a></span><span> </span><span class="annot"><span class="annottext">[Name]
-</span><a href="#local-6989586621682438475"><span class="hs-identifier hs-var">names</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682597736"><span class="hs-identifier hs-var">names</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-131"></span><span>
 </span><span id="line-132"></span><span class="annot"><a href="GHC.Types.Name.Cache.html#initOrigNames"><span class="hs-identifier hs-type">initOrigNames</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Name.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span>
 </span><span id="line-133"></span><span id="initOrigNames"><span class="annot"><span class="annottext">initOrigNames :: [Name] -&gt; OrigNameCache
-</span><a href="GHC.Types.Name.Cache.html#initOrigNames"><span class="hs-identifier hs-var hs-var">initOrigNames</span></a></span></span><span> </span><span id="local-6989586621682438479"><span class="annot"><span class="annottext">[Name]
-</span><a href="#local-6989586621682438479"><span class="hs-identifier hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OrigNameCache -&gt; Name -&gt; OrigNameCache)
+</span><a href="GHC.Types.Name.Cache.html#initOrigNames"><span class="hs-identifier hs-var hs-var">initOrigNames</span></a></span></span><span> </span><span id="local-6989586621682597740"><span class="annot"><span class="annottext">[Name]
+</span><a href="#local-6989586621682597740"><span class="hs-identifier hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OrigNameCache -&gt; Name -&gt; OrigNameCache)
 -&gt; OrigNameCache -&gt; [Name] -&gt; OrigNameCache
 forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) b a.
@@ -253,51 +253,51 @@ Foldable t =&gt;
 </span><a href="GHC.Types.Name.Cache.html#extendOrigNameCache%27"><span class="hs-identifier hs-var">extendOrigNameCache'</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache
 forall a. ModuleEnv a
 </span><a href="GHC.Unit.Module.Env.html#emptyModuleEnv"><span class="hs-identifier hs-var">emptyModuleEnv</span></a></span><span> </span><span class="annot"><span class="annottext">[Name]
-</span><a href="#local-6989586621682438479"><span class="hs-identifier hs-var">names</span></a></span><span>
+</span><a href="#local-6989586621682597740"><span class="hs-identifier hs-var">names</span></a></span><span>
 </span><span id="line-134"></span><span>
 </span><span id="line-135"></span><span class="annot"><span class="hs-comment">-- | Update the name cache with the given function</span></span><span>
-</span><span id="line-136"></span><span id="local-6989586621682438393"><span class="annot"><a href="GHC.Types.Name.Cache.html#updateNameCache%27"><span class="hs-identifier hs-type">updateNameCache'</span></a></span><span>
+</span><span id="line-136"></span><span id="local-6989586621682597654"><span class="annot"><a href="GHC.Types.Name.Cache.html#updateNameCache%27"><span class="hs-identifier hs-type">updateNameCache'</span></a></span><span>
 </span><span id="line-137"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span>
-</span><span id="line-138"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682438393"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- The updating function</span><span>
-</span><span id="line-139"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682438393"><span class="hs-identifier hs-type">c</span></a></span></span><span>
+</span><span id="line-138"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682597654"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>  </span><span class="hs-comment">-- The updating function</span><span>
+</span><span id="line-139"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682597654"><span class="hs-identifier hs-type">c</span></a></span></span><span>
 </span><span id="line-140"></span><span id="updateNameCache%27"><span class="annot"><span class="annottext">updateNameCache' :: forall c.
 NameCache -&gt; (OrigNameCache -&gt; IO (OrigNameCache, c)) -&gt; IO c
-</span><a href="GHC.Types.Name.Cache.html#updateNameCache%27"><span class="hs-identifier hs-var hs-var">updateNameCache'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span> </span><span id="local-6989586621682438482"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621682438482"><span class="hs-identifier hs-var">_c</span></a></span></span><span> </span><span id="local-6989586621682438483"><span class="annot"><span class="annottext">MVar OrigNameCache
-</span><a href="#local-6989586621682438483"><span class="hs-identifier hs-var">nc</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682438484"><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
-</span><a href="#local-6989586621682438484"><span class="hs-identifier hs-var">upd_fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar OrigNameCache
+</span><a href="GHC.Types.Name.Cache.html#updateNameCache%27"><span class="hs-identifier hs-var hs-var">updateNameCache'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span> </span><span id="local-6989586621682597743"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682597743"><span class="hs-identifier hs-var">_c</span></a></span></span><span> </span><span id="local-6989586621682597744"><span class="annot"><span class="annottext">MVar OrigNameCache
+</span><a href="#local-6989586621682597744"><span class="hs-identifier hs-var">nc</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682597745"><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
+</span><a href="#local-6989586621682597745"><span class="hs-identifier hs-var">upd_fn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar OrigNameCache
 -&gt; (OrigNameCache -&gt; IO (OrigNameCache, c)) -&gt; IO c
 forall a b. MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
 </span><a href="GHC.Types.Name.Cache.html#modifyMVar%27"><span class="hs-identifier hs-var">modifyMVar'</span></a></span><span> </span><span class="annot"><span class="annottext">MVar OrigNameCache
-</span><a href="#local-6989586621682438483"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
-</span><a href="#local-6989586621682438484"><span class="hs-identifier hs-var">upd_fn</span></a></span><span>
+</span><a href="#local-6989586621682597744"><span class="hs-identifier hs-var">nc</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
+</span><a href="#local-6989586621682597745"><span class="hs-identifier hs-var">upd_fn</span></a></span><span>
 </span><span id="line-141"></span><span>
 </span><span id="line-142"></span><span class="hs-comment">-- this should be in `base`</span><span>
-</span><span id="line-143"></span><span id="local-6989586621682438395"><span id="local-6989586621682438396"><span class="annot"><a href="GHC.Types.Name.Cache.html#modifyMVar%27"><span class="hs-identifier hs-type">modifyMVar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621682438395"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682438395"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682438395"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621682438396"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682438396"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-143"></span><span id="local-6989586621682597656"><span id="local-6989586621682597657"><span class="annot"><a href="GHC.Types.Name.Cache.html#modifyMVar%27"><span class="hs-identifier hs-type">modifyMVar'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MVar</span></span><span> </span><span class="annot"><a href="#local-6989586621682597656"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682597656"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621682597656"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621682597657"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682597657"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
 </span><span id="line-144"></span><span id="modifyMVar%27"><span class="annot"><span class="annottext">modifyMVar' :: forall a b. MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
-</span><a href="GHC.Types.Name.Cache.html#modifyMVar%27"><span class="hs-identifier hs-var hs-var">modifyMVar'</span></a></span></span><span> </span><span id="local-6989586621682438490"><span class="annot"><span class="annottext">MVar a
-</span><a href="#local-6989586621682438490"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621682438491"><span class="annot"><span class="annottext">a -&gt; IO (a, b)
-</span><a href="#local-6989586621682438491"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+</span><a href="GHC.Types.Name.Cache.html#modifyMVar%27"><span class="hs-identifier hs-var hs-var">modifyMVar'</span></a></span></span><span> </span><span id="local-6989586621682597751"><span class="annot"><span class="annottext">MVar a
+</span><a href="#local-6989586621682597751"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621682597752"><span class="annot"><span class="annottext">a -&gt; IO (a, b)
+</span><a href="#local-6989586621682597752"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
 forall a b. MVar a -&gt; (a -&gt; IO (a, b)) -&gt; IO b
 </span><span class="hs-identifier hs-var">modifyMVar</span></span><span> </span><span class="annot"><span class="annottext">MVar a
-</span><a href="#local-6989586621682438490"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO (a, b)) -&gt; IO b) -&gt; (a -&gt; IO (a, b)) -&gt; IO b
+</span><a href="#local-6989586621682597751"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; IO (a, b)) -&gt; IO b) -&gt; (a -&gt; IO (a, b)) -&gt; IO b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (a, b)
-</span><a href="#local-6989586621682438491"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; IO (a, b)) -&gt; ((a, b) -&gt; IO (a, b)) -&gt; a -&gt; IO (a, b)
+</span><a href="#local-6989586621682597752"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; IO (a, b)) -&gt; ((a, b) -&gt; IO (a, b)) -&gt; a -&gt; IO (a, b)
 forall (m :: * -&gt; *) a b c.
 Monad m =&gt;
 (a -&gt; m b) -&gt; (b -&gt; m c) -&gt; a -&gt; m c
-</span><span class="hs-operator hs-var">&gt;=&gt;</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682438494"><span class="annot"><span class="annottext">(a, b)
-</span><a href="#local-6989586621682438494"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; a
+</span><span class="hs-operator hs-var">&gt;=&gt;</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621682597755"><span class="annot"><span class="annottext">(a, b)
+</span><a href="#local-6989586621682597755"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; a
 forall a b. (a, b) -&gt; a
 </span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">(a, b)
-</span><a href="#local-6989586621682438494"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (a, b) -&gt; IO (a, b)
+</span><a href="#local-6989586621682597755"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; IO (a, b) -&gt; IO (a, b)
 forall a b. a -&gt; b -&gt; b
 </span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; IO (a, b)
 forall a. a -&gt; IO a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(a, b)
-</span><a href="#local-6989586621682438494"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><a href="#local-6989586621682597755"><span class="hs-identifier hs-var">c</span></a></span><span>
 </span><span id="line-145"></span><span>
 </span><span id="line-146"></span><span class="hs-comment">-- | Update the name cache with the given function</span><span>
 </span><span id="line-147"></span><span class="hs-comment">--</span><span>
@@ -307,27 +307,27 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span id="line-151"></span><span class="hs-comment">--      then pull on mod (say)</span><span>
 </span><span id="line-152"></span><span class="hs-comment">--      which does some stuff that modifies the name cache</span><span>
 </span><span id="line-153"></span><span class="hs-comment">-- This did happen, with tycon_mod in GHC.IfaceToCore.tcIfaceAlt (DataAlt..)</span><span>
-</span><span id="line-154"></span><span id="local-6989586621682438409"><span class="annot"><a href="GHC.Types.Name.Cache.html#updateNameCache"><span class="hs-identifier hs-type">updateNameCache</span></a></span><span>
+</span><span id="line-154"></span><span id="local-6989586621682597670"><span class="annot"><a href="GHC.Types.Name.Cache.html#updateNameCache"><span class="hs-identifier hs-type">updateNameCache</span></a></span><span>
 </span><span id="line-155"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Name.Cache.html#NameCache"><span class="hs-identifier hs-type">NameCache</span></a></span><span>
 </span><span id="line-156"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Unit.Types.html#Module"><span class="hs-identifier hs-type">Module</span></a></span><span>
 </span><span id="line-157"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Name.Occurrence.html#OccName"><span class="hs-identifier hs-type">OccName</span></a></span><span>
-</span><span id="line-158"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682438409"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-159"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682438409"><span class="hs-identifier hs-type">c</span></a></span></span><span>
+</span><span id="line-158"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Name.Cache.html#OrigNameCache"><span class="hs-identifier hs-type">OrigNameCache</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621682597670"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-159"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621682597670"><span class="hs-identifier hs-type">c</span></a></span></span><span>
 </span><span id="line-160"></span><span id="updateNameCache"><span class="annot"><span class="annottext">updateNameCache :: forall c.
 NameCache
 -&gt; Module
 -&gt; OccName
 -&gt; (OrigNameCache -&gt; IO (OrigNameCache, c))
 -&gt; IO c
-</span><a href="GHC.Types.Name.Cache.html#updateNameCache"><span class="hs-identifier hs-var hs-var">updateNameCache</span></a></span></span><span> </span><span id="local-6989586621682438496"><span class="annot"><span class="annottext">NameCache
-</span><a href="#local-6989586621682438496"><span class="hs-identifier hs-var">name_cache</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682438497"><span class="annot"><span class="annottext">Module
-</span><a href="#local-6989586621682438497"><span class="hs-identifier hs-var">_mod</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682438498"><span class="annot"><span class="annottext">OccName
-</span><a href="#local-6989586621682438498"><span class="hs-identifier hs-var">_occ</span></a></span></span><span> </span><span id="local-6989586621682438499"><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
-</span><a href="#local-6989586621682438499"><span class="hs-identifier hs-var">upd_fn</span></a></span></span><span>
+</span><a href="GHC.Types.Name.Cache.html#updateNameCache"><span class="hs-identifier hs-var hs-var">updateNameCache</span></a></span></span><span> </span><span id="local-6989586621682597757"><span class="annot"><span class="annottext">NameCache
+</span><a href="#local-6989586621682597757"><span class="hs-identifier hs-var">name_cache</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682597758"><span class="annot"><span class="annottext">Module
+</span><a href="#local-6989586621682597758"><span class="hs-identifier hs-var">_mod</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682597759"><span class="annot"><span class="annottext">OccName
+</span><a href="#local-6989586621682597759"><span class="hs-identifier hs-var">_occ</span></a></span></span><span> </span><span id="local-6989586621682597760"><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
+</span><a href="#local-6989586621682597760"><span class="hs-identifier hs-var">upd_fn</span></a></span></span><span>
 </span><span id="line-161"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NameCache -&gt; (OrigNameCache -&gt; IO (OrigNameCache, c)) -&gt; IO c
 forall c.
 NameCache -&gt; (OrigNameCache -&gt; IO (OrigNameCache, c)) -&gt; IO c
 </span><a href="GHC.Types.Name.Cache.html#updateNameCache%27"><span class="hs-identifier hs-var">updateNameCache'</span></a></span><span> </span><span class="annot"><span class="annottext">NameCache
-</span><a href="#local-6989586621682438496"><span class="hs-identifier hs-var">name_cache</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
-</span><a href="#local-6989586621682438499"><span class="hs-identifier hs-var">upd_fn</span></a></span><span>
+</span><a href="#local-6989586621682597757"><span class="hs-identifier hs-var">name_cache</span></a></span><span> </span><span class="annot"><span class="annottext">OrigNameCache -&gt; IO (OrigNameCache, c)
+</span><a href="#local-6989586621682597760"><span class="hs-identifier hs-var">upd_fn</span></a></span><span>
 </span><span id="line-162"></span></pre></body></html>

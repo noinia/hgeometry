@@ -1,154 +1,187 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE NamedFieldPuns #-}</span><span>
-</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
-</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE ViewPatterns #-}</span><span>
-</span><span id="line-5"></span><span>
-</span><span id="line-6"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DuplicateRecordFields #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE NamedFieldPuns #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE ViewPatterns #-}</span><span>
 </span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Test</span><span>
-</span><span id="line-10"></span><span class="hs-comment">-- Copyright   :  Thomas Tuegel 2010</span><span>
-</span><span id="line-11"></span><span class="hs-comment">-- License     :  BSD3</span><span>
-</span><span id="line-12"></span><span class="hs-comment">--</span><span>
-</span><span id="line-13"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
-</span><span id="line-14"></span><span class="hs-comment">-- Portability :  portable</span><span>
-</span><span id="line-15"></span><span class="hs-comment">--</span><span>
-</span><span id="line-16"></span><span class="hs-comment">-- This is the entry point into testing a built package. It performs the</span><span>
-</span><span id="line-17"></span><span class="hs-comment">-- \&quot;@.\/setup test@\&quot; action. It runs test suites designated in the package</span><span>
-</span><span id="line-18"></span><span class="hs-comment">-- description and reports on the results.</span><span>
-</span><span id="line-19"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.html"><span class="hs-identifier">Distribution.Simple.Test</span></a></span><span>
-</span><span id="line-20"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.html#test"><span class="hs-identifier">test</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-25"></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.PackageDescription.html/Distribution.PackageDescription.html"><span class="hs-identifier">Distribution.PackageDescription</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PD</span></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html"><span class="hs-identifier">Distribution.Simple.Compiler</span></a></span><span>
-</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Flag.html#fromFlag"><span class="hs-identifier">fromFlag</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Hpc.html"><span class="hs-identifier">Distribution.Simple.Hpc</span></a></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html"><span class="hs-identifier">Distribution.Simple.InstallDirs</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Simple.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Simple.LocalBuildInfo</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LBI</span></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Test.html"><span class="hs-identifier">Distribution.Simple.Setup.Test</span></a></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.ExeV10.html"><span class="hs-identifier">Distribution.Simple.Test.ExeV10</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">ExeV10</span></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.LibV09.html"><span class="hs-identifier">Distribution.Simple.Test.LibV09</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LibV09</span></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html"><span class="hs-identifier">Distribution.Simple.Test.Log</span></a></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.UserHooks.html"><span class="hs-identifier">Distribution.Simple.UserHooks</span></a></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
-</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.TestSuite.html"><span class="hs-identifier">Distribution.TestSuite</span></a></span><span>
-</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Types.LocalBuildInfo</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LBI</span></span><span>
-</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.UnqualComponentName.html/Distribution.Types.UnqualComponentName.html"><span class="hs-identifier">Distribution.Types.UnqualComponentName</span></a></span><span>
-</span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Configure.html"><span class="hs-identifier">Distribution.Simple.Configure</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Configure.html#getInstalledPackagesById"><span class="hs-identifier">getInstalledPackagesById</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Errors.html"><span class="hs-identifier">Distribution.Simple.Errors</span></a></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Register.html"><span class="hs-identifier">Distribution.Simple.Register</span></a></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html"><span class="hs-identifier">Distribution.Simple.Setup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Flag.html#fromFlagOrDefault"><span class="hs-identifier">fromFlagOrDefault</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Setup.Common.html#extraCompilationArtifacts"><span class="hs-identifier">extraCompilationArtifacts</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Config.html"><span class="hs-identifier">Distribution.Simple.Setup.Config</span></a></span><span>
-</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.ExposedModule.html/Distribution.Types.ExposedModule.html"><span class="hs-identifier">Distribution.Types.ExposedModule</span></a></span><span>
-</span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.InstalledPackageInfo.html/Distribution.Types.InstalledPackageInfo.html"><span class="hs-identifier">Distribution.Types.InstalledPackageInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.InstalledPackageInfo.html/Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier">InstalledPackageInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.InstalledPackageInfo.html/Distribution.Types.InstalledPackageInfo.html#libraryDirs"><span class="hs-identifier">libraryDirs</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.InstalledPackageInfo.html/Distribution.Types.InstalledPackageInfo.html#exposedModules"><span class="hs-identifier">exposedModules</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Types.LocalBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier">LocalBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html"><span class="hs-identifier">System.Directory</span></a></span><span>
-</span><span id="line-53"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#createDirectoryIfMissing"><span class="hs-identifier">createDirectoryIfMissing</span></a></span><span>
-</span><span id="line-54"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#doesFileExist"><span class="hs-identifier">doesFileExist</span></a></span><span>
-</span><span id="line-55"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#getDirectoryContents"><span class="hs-identifier">getDirectoryContents</span></a></span><span>
-</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#removeFile"><span class="hs-identifier">removeFile</span></a></span><span>
-</span><span id="line-57"></span><span>  </span><span class="hs-special">)</span><span>
-</span><span id="line-58"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator">(&lt;/&gt;)</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="annot"><span class="hs-comment">-- | Perform the \&quot;@.\/setup test@\&quot; action.</span></span><span>
-</span><span id="line-61"></span><span class="annot"><a href="Distribution.Simple.Test.html#test"><span class="hs-identifier hs-type">test</span></a></span><span>
-</span><span id="line-62"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.UserHooks.html#Args"><span class="hs-identifier hs-type">Args</span></a></span><span>
-</span><span id="line-63"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ positional command-line arguments</span></span><span>
-</span><span id="line-64"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#PackageDescription"><span class="hs-identifier hs-type">PD.PackageDescription</span></a></span><span>
-</span><span id="line-65"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ information from the .cabal file</span></span><span>
-</span><span id="line-66"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier hs-type">LBI.LocalBuildInfo</span></a></span><span>
-</span><span id="line-67"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ information from the configure step</span></span><span>
-</span><span id="line-68"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Test.html#TestFlags"><span class="hs-identifier hs-type">TestFlags</span></a></span><span>
-</span><span id="line-69"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ flags sent to test</span></span><span>
-</span><span id="line-70"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-71"></span><span id="test"><span class="annot"><span class="annottext">test :: Args -&gt; PackageDescription -&gt; LocalBuildInfo -&gt; TestFlags -&gt; IO ()
-</span><a href="Distribution.Simple.Test.html#test"><span class="hs-identifier hs-var hs-var">test</span></a></span></span><span> </span><span id="local-6989586621679498343"><span class="annot"><span class="annottext">Args
-</span><a href="#local-6989586621679498343"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679498344"><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span></span><span> </span><span id="local-6989586621679498345"><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498345"><span class="hs-identifier hs-var">lbi0</span></a></span></span><span> </span><span id="local-6989586621679498346"><span class="annot"><span class="annottext">TestFlags
-</span><a href="#local-6989586621679498346"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-72"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679498349"><span class="annot"><span class="annottext">verbosity :: Verbosity
-</span><a href="#local-6989586621679498349"><span class="hs-identifier hs-var hs-var hs-var">verbosity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag Verbosity -&gt; Verbosity
+</span><span id="line-8"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Test</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Copyright   :  Thomas Tuegel 2010</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- This is the entry point into testing a built package. It performs the</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- \&quot;@.\/setup test@\&quot; action. It runs test suites designated in the package</span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- description and reports on the results.</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.html"><span class="hs-identifier">Distribution.Simple.Test</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.html#test"><span class="hs-identifier">test</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.PackageDescription.html"><span class="hs-identifier">Distribution.PackageDescription</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PD</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.html"><span class="hs-identifier">Distribution.Simple.Build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Build.html#addInternalBuildTools"><span class="hs-identifier">addInternalBuildTools</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html"><span class="hs-identifier">Distribution.Simple.Compiler</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Hpc.html"><span class="hs-identifier">Distribution.Simple.Hpc</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html"><span class="hs-identifier">Distribution.Simple.InstallDirs</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Simple.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Simple.LocalBuildInfo</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LBI</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Test.html"><span class="hs-identifier">Distribution.Simple.Setup.Test</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.ExeV10.html"><span class="hs-identifier">Distribution.Simple.Test.ExeV10</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">ExeV10</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.LibV09.html"><span class="hs-identifier">Distribution.Simple.Test.LibV09</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LibV09</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html"><span class="hs-identifier">Distribution.Simple.Test.Log</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.UserHooks.html"><span class="hs-identifier">Distribution.Simple.UserHooks</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.TestSuite.html"><span class="hs-identifier">Distribution.TestSuite</span></a></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Types.LocalBuildInfo</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">LBI</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.UnqualComponentName.html"><span class="hs-identifier">Distribution.Types.UnqualComponentName</span></a></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html"><span class="hs-identifier">Distribution.Utils.Path</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Configure.html"><span class="hs-identifier">Distribution.Simple.Configure</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Configure.html#getInstalledPackagesById"><span class="hs-identifier">getInstalledPackagesById</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Errors.html"><span class="hs-identifier">Distribution.Simple.Errors</span></a></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Register.html"><span class="hs-identifier">Distribution.Simple.Register</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Register.html#internalPackageDBPath"><span class="hs-identifier">internalPackageDBPath</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Config.html"><span class="hs-identifier">Distribution.Simple.Setup.Config</span></a></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ExposedModule.html"><span class="hs-identifier">Distribution.Types.ExposedModule</span></a></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.InstalledPackageInfo.html"><span class="hs-identifier">Distribution.Types.InstalledPackageInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.InstalledPackageInfo.html#InstalledPackageInfo"><span class="hs-identifier">InstalledPackageInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.InstalledPackageInfo.html#libraryDirs"><span class="hs-identifier">libraryDirs</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.InstalledPackageInfo.html#exposedModules"><span class="hs-identifier">exposedModules</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Types.LocalBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier">LocalBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html"><span class="hs-identifier">System.Directory</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#createDirectoryIfMissing"><span class="hs-identifier">createDirectoryIfMissing</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#doesFileExist"><span class="hs-identifier">doesFileExist</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#getDirectoryContents"><span class="hs-identifier">getDirectoryContents</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#removeFile"><span class="hs-identifier">removeFile</span></a></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="annot"><span class="hs-comment">-- | Perform the \&quot;@.\/setup test@\&quot; action.</span></span><span>
+</span><span id="line-62"></span><span class="annot"><a href="Distribution.Simple.Test.html#test"><span class="hs-identifier hs-type">test</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.UserHooks.html#Args"><span class="hs-identifier hs-type">Args</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ positional command-line arguments</span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageDescription.html#PackageDescription"><span class="hs-identifier hs-type">PD.PackageDescription</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ information from the .cabal file</span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier hs-type">LBI.LocalBuildInfo</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ information from the configure step</span></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Test.html#TestFlags"><span class="hs-identifier hs-type">TestFlags</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ flags sent to test</span></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span id="test"><span class="annot"><span class="annottext">test :: Args -&gt; PackageDescription -&gt; LocalBuildInfo -&gt; TestFlags -&gt; IO ()
+</span><a href="Distribution.Simple.Test.html#test"><span class="hs-identifier hs-var hs-var">test</span></a></span></span><span> </span><span id="local-6989586621679569769"><span class="annot"><span class="annottext">Args
+</span><a href="#local-6989586621679569769"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679569770"><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span></span><span> </span><span id="local-6989586621679569771"><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569771"><span class="hs-identifier hs-var">lbi0</span></a></span></span><span> </span><span id="local-6989586621679569772"><span class="annot"><span class="annottext">TestFlags
+</span><a href="#local-6989586621679569772"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679569773"><span class="annot"><span class="annottext">common :: CommonSetupFlags
+</span><a href="#local-6989586621679569773"><span class="hs-identifier hs-var hs-var hs-var">common</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestFlags -&gt; CommonSetupFlags
+</span><a href="Distribution.Simple.Setup.Test.html#testCommonFlags"><span class="hs-identifier hs-var">testCommonFlags</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
+</span><a href="#local-6989586621679569772"><span class="hs-identifier hs-var">flags</span></a></span><span>
+</span><span id="line-74"></span><span>      </span><span id="local-6989586621679569777"><span class="annot"><span class="annottext">verbosity :: Verbosity
+</span><a href="#local-6989586621679569777"><span class="hs-identifier hs-var hs-var hs-var">verbosity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag Verbosity -&gt; Verbosity
 forall a. WithCallStack (Flag a -&gt; a)
 </span><a href="Distribution.Simple.Flag.html#fromFlag"><span class="hs-identifier hs-var">fromFlag</span></a></span><span> </span><span class="annot"><span class="annottext">(Flag Verbosity -&gt; Verbosity) -&gt; Flag Verbosity -&gt; Verbosity
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TestFlags -&gt; Flag Verbosity
-</span><a href="Distribution.Simple.Setup.Test.html#testVerbosity"><span class="hs-identifier hs-var">testVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
-</span><a href="#local-6989586621679498346"><span class="hs-identifier hs-var">flags</span></a></span><span>
-</span><span id="line-73"></span><span>      </span><span id="local-6989586621679498353"><span class="annot"><span class="annottext">machineTemplate :: PathTemplate
-</span><a href="#local-6989586621679498353"><span class="hs-identifier hs-var hs-var hs-var">machineTemplate</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag PathTemplate -&gt; PathTemplate
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CommonSetupFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Common.html#setupVerbosity"><span class="hs-identifier hs-var">setupVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="#local-6989586621679569773"><span class="hs-identifier hs-var">common</span></a></span><span>
+</span><span id="line-75"></span><span>      </span><span id="local-6989586621679569782"><span class="annot"><span class="annottext">distPref :: SymbolicPath Pkg ('Dir Dist)
+</span><a href="#local-6989586621679569782"><span class="hs-identifier hs-var hs-var hs-var">distPref</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag (SymbolicPath Pkg ('Dir Dist)) -&gt; SymbolicPath Pkg ('Dir Dist)
+forall a. WithCallStack (Flag a -&gt; a)
+</span><a href="Distribution.Simple.Flag.html#fromFlag"><span class="hs-identifier hs-var">fromFlag</span></a></span><span> </span><span class="annot"><span class="annottext">(Flag (SymbolicPath Pkg ('Dir Dist))
+ -&gt; SymbolicPath Pkg ('Dir Dist))
+-&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+-&gt; SymbolicPath Pkg ('Dir Dist)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CommonSetupFlags -&gt; Flag (SymbolicPath Pkg ('Dir Dist))
+</span><a href="Distribution.Simple.Setup.Common.html#setupDistPref"><span class="hs-identifier hs-var">setupDistPref</span></a></span><span> </span><span class="annot"><span class="annottext">CommonSetupFlags
+</span><a href="#local-6989586621679569773"><span class="hs-identifier hs-var">common</span></a></span><span>
+</span><span id="line-76"></span><span>      </span><span id="local-6989586621679569784"><span class="annot"><span class="annottext">i :: SymbolicPathX allowAbsolute Pkg to -&gt; FilePath
+</span><a href="#local-6989586621679569784"><span class="hs-identifier hs-var hs-var hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; SymbolicPathX allowAbsolute Pkg to -&gt; FilePath
+forall (allowAbsolute :: AllowAbsolute) (to :: FileOrDir).
+LocalBuildInfo -&gt; SymbolicPathX allowAbsolute Pkg to -&gt; FilePath
+</span><a href="Distribution.Simple.LocalBuildInfo.html#interpretSymbolicPathLBI"><span class="hs-identifier hs-var">LBI.interpretSymbolicPathLBI</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="hs-comment">-- See Note [Symbolic paths] in Distribution.Utils.Path</span><span>
+</span><span id="line-77"></span><span>      </span><span id="local-6989586621679569789"><span class="annot"><span class="annottext">machineTemplate :: PathTemplate
+</span><a href="#local-6989586621679569789"><span class="hs-identifier hs-var hs-var hs-var">machineTemplate</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag PathTemplate -&gt; PathTemplate
 forall a. WithCallStack (Flag a -&gt; a)
 </span><a href="Distribution.Simple.Flag.html#fromFlag"><span class="hs-identifier hs-var">fromFlag</span></a></span><span> </span><span class="annot"><span class="annottext">(Flag PathTemplate -&gt; PathTemplate)
 -&gt; Flag PathTemplate -&gt; PathTemplate
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TestFlags -&gt; Flag PathTemplate
 </span><a href="Distribution.Simple.Setup.Test.html#testMachineLog"><span class="hs-identifier hs-var">testMachineLog</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
-</span><a href="#local-6989586621679498346"><span class="hs-identifier hs-var">flags</span></a></span><span>
-</span><span id="line-74"></span><span>      </span><span id="local-6989586621679498357"><span class="annot"><span class="annottext">distPref :: FilePath
-</span><a href="#local-6989586621679498357"><span class="hs-identifier hs-var hs-var hs-var">distPref</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath -&gt; FilePath
-forall a. WithCallStack (Flag a -&gt; a)
-</span><a href="Distribution.Simple.Flag.html#fromFlag"><span class="hs-identifier hs-var">fromFlag</span></a></span><span> </span><span class="annot"><span class="annottext">(Flag FilePath -&gt; FilePath) -&gt; Flag FilePath -&gt; FilePath
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TestFlags -&gt; Flag FilePath
-</span><a href="Distribution.Simple.Setup.Test.html#testDistPref"><span class="hs-identifier hs-var">testDistPref</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
-</span><a href="#local-6989586621679498346"><span class="hs-identifier hs-var">flags</span></a></span><span>
-</span><span id="line-75"></span><span>      </span><span id="local-6989586621679498359"><span class="annot"><span class="annottext">testLogDir :: FilePath
-</span><a href="#local-6989586621679498359"><span class="hs-identifier hs-var hs-var hs-var">testLogDir</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679498357"><span class="hs-identifier hs-var">distPref</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679569772"><span class="hs-identifier hs-var">flags</span></a></span><span>
+</span><span id="line-78"></span><span>      </span><span id="local-6989586621679569799"><span class="annot"><span class="annottext">testLogDir :: SymbolicPathX 'AllowAbsolute Pkg c3
+</span><a href="#local-6989586621679569799"><span class="hs-identifier hs-var hs-var hs-var">testLogDir</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SymbolicPath Pkg ('Dir Dist)
+</span><a href="#local-6989586621679569782"><span class="hs-identifier hs-var">distPref</span></a></span><span> </span><span class="annot"><span class="annottext">SymbolicPath Pkg ('Dir Dist)
+-&gt; RelativePath Dist c3 -&gt; SymbolicPathX 'AllowAbsolute Pkg c3
+forall p q r. PathLike p q r =&gt; p -&gt; q -&gt; r
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; RelativePath Dist c3
+forall from (to :: FileOrDir).
+HasCallStack =&gt;
+FilePath -&gt; RelativePath from to
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#makeRelativePathEx"><span class="hs-identifier hs-var">makeRelativePathEx</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;test&quot;</span></span><span>
-</span><span id="line-76"></span><span>      </span><span id="local-6989586621679498360"><span class="annot"><span class="annottext">testNames :: Args
-</span><a href="#local-6989586621679498360"><span class="hs-identifier hs-var hs-var hs-var">testNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Args
-</span><a href="#local-6989586621679498343"><span class="hs-identifier hs-var">args</span></a></span><span>
-</span><span id="line-77"></span><span>      </span><span id="local-6989586621679498361"><span class="annot"><span class="annottext">pkgTests :: [TestSuite]
-</span><a href="#local-6989586621679498361"><span class="hs-identifier hs-var hs-var hs-var">pkgTests</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageDescription -&gt; [TestSuite]
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#testSuites"><span class="hs-identifier hs-var">PD.testSuites</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span>
-</span><span id="line-78"></span><span>      </span><span id="local-6989586621679498363"><span class="annot"><span class="annottext">enabledTests :: [(TestSuite, ComponentLocalBuildInfo)]
-</span><a href="#local-6989586621679498363"><span class="hs-identifier hs-var hs-var hs-var">enabledTests</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageDescription
+</span><span id="line-79"></span><span>      </span><span id="local-6989586621679569802"><span class="annot"><span class="annottext">testNames :: Args
+</span><a href="#local-6989586621679569802"><span class="hs-identifier hs-var hs-var hs-var">testNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Args
+</span><a href="#local-6989586621679569769"><span class="hs-identifier hs-var">args</span></a></span><span>
+</span><span id="line-80"></span><span>      </span><span id="local-6989586621679569803"><span class="annot"><span class="annottext">pkgTests :: [TestSuite]
+</span><a href="#local-6989586621679569803"><span class="hs-identifier hs-var hs-var hs-var">pkgTests</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageDescription -&gt; [TestSuite]
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageDescription.html#testSuites"><span class="hs-identifier hs-var">PD.testSuites</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span>
+</span><span id="line-81"></span><span>      </span><span id="local-6989586621679569805"><span class="annot"><span class="annottext">enabledTests :: [(TestSuite, ComponentLocalBuildInfo)]
+</span><a href="#local-6989586621679569805"><span class="hs-identifier hs-var hs-var hs-var">enabledTests</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageDescription
 -&gt; LocalBuildInfo -&gt; [(TestSuite, ComponentLocalBuildInfo)]
 </span><a href="Distribution.Simple.LocalBuildInfo.html#enabledTestLBIs"><span class="hs-identifier hs-var">LBI.enabledTestLBIs</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span>
-</span><span id="line-79"></span><span>      </span><span class="hs-comment">-- We must add the internalPkgDB to the package database stack to lookup</span><span>
-</span><span id="line-80"></span><span>      </span><span class="hs-comment">-- the path to HPC dirs of libraries local to this package</span><span>
-</span><span id="line-81"></span><span>      </span><span id="local-6989586621679498366"><span class="annot"><span class="annottext">internalPkgDB :: FilePath
-</span><a href="#local-6989586621679498366"><span class="hs-identifier hs-var hs-var hs-var">internalPkgDB</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; FilePath -&gt; FilePath
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-82"></span><span>      </span><span class="hs-comment">-- We must add the internalPkgDB to the package database stack to lookup</span><span>
+</span><span id="line-83"></span><span>      </span><span class="hs-comment">-- the path to HPC dirs of libraries local to this package</span><span>
+</span><span id="line-84"></span><span>      </span><span id="local-6989586621679569807"><span class="annot"><span class="annottext">internalPkgDb :: SymbolicPath Pkg ('Dir PkgDB)
+</span><a href="#local-6989586621679569807"><span class="hs-identifier hs-var hs-var hs-var">internalPkgDb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+-&gt; SymbolicPath Pkg ('Dir Dist) -&gt; SymbolicPath Pkg ('Dir PkgDB)
 </span><a href="Distribution.Simple.Register.html#internalPackageDBPath"><span class="hs-identifier hs-var">internalPackageDBPath</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679498357"><span class="hs-identifier hs-var">distPref</span></a></span><span>
-</span><span id="line-82"></span><span>      </span><span id="local-6989586621679498365"><span class="annot"><span class="annottext">lbi :: LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var hs-var hs-var">lbi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498345"><span class="hs-identifier hs-var">lbi0</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#withPackageDB"><span class="hs-identifier hs-var">withPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#withPackageDB"><span class="hs-identifier hs-var">withPackageDB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498345"><span class="hs-identifier hs-type">lbi0</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Compiler.html#SpecificPackageDB"><span class="hs-identifier hs-type">SpecificPackageDB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498366"><span class="hs-identifier hs-type">internalPkgDB</span></a></span><span class="hs-special">]</span><span class="hs-special">}</span><span>
-</span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span>      </span><span class="annot"><a href="#local-6989586621679498370"><span class="hs-identifier hs-type">doTest</span></a></span><span>
-</span><span id="line-85"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Hpc.html#HPCMarkupInfo"><span class="hs-identifier hs-type">HPCMarkupInfo</span></a></span><span>
-</span><span id="line-86"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuite.html/Distribution.Types.TestSuite.html#TestSuite"><span class="hs-identifier hs-type">PD.TestSuite</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentLocalBuildInfo.html#ComponentLocalBuildInfo"><span class="hs-identifier hs-type">LBI.ComponentLocalBuildInfo</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-87"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestSuiteLog"><span class="hs-identifier hs-type">TestSuiteLog</span></a></span><span>
-</span><span id="line-88"></span><span>           </span><span class="hs-special">)</span><span>
-</span><span id="line-89"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestSuiteLog"><span class="hs-identifier hs-type">TestSuiteLog</span></a></span><span>
-</span><span id="line-90"></span><span>      </span><span id="local-6989586621679498370"><span class="annot"><span class="annottext">doTest :: HPCMarkupInfo
+</span><a href="#local-6989586621679569771"><span class="hs-identifier hs-var">lbi0</span></a></span><span> </span><span class="annot"><span class="annottext">SymbolicPath Pkg ('Dir Dist)
+</span><a href="#local-6989586621679569782"><span class="hs-identifier hs-var">distPref</span></a></span><span>
+</span><span id="line-85"></span><span>      </span><span id="local-6989586621679569786"><span class="annot"><span class="annottext">lbi :: LocalBuildInfo
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var hs-var hs-var">lbi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569771"><span class="hs-identifier hs-var">lbi0</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#withPackageDB"><span class="hs-identifier hs-var">withPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#withPackageDB"><span class="hs-identifier hs-var">withPackageDB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569771"><span class="hs-identifier hs-type">lbi0</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Compiler.html#SpecificPackageDB"><span class="hs-identifier hs-type">SpecificPackageDB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569807"><span class="hs-identifier hs-type">internalPkgDb</span></a></span><span class="hs-special">]</span><span class="hs-special">}</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>      </span><span class="annot"><a href="#local-6989586621679569810"><span class="hs-identifier hs-type">doTest</span></a></span><span>
+</span><span id="line-88"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Hpc.html#HPCMarkupInfo"><span class="hs-identifier hs-type">HPCMarkupInfo</span></a></span><span>
+</span><span id="line-89"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#TestSuite"><span class="hs-identifier hs-type">PD.TestSuite</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentLocalBuildInfo.html#ComponentLocalBuildInfo"><span class="hs-identifier hs-type">LBI.ComponentLocalBuildInfo</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestSuiteLog"><span class="hs-identifier hs-type">TestSuiteLog</span></a></span><span>
+</span><span id="line-91"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestSuiteLog"><span class="hs-identifier hs-type">TestSuiteLog</span></a></span><span>
+</span><span id="line-93"></span><span>      </span><span id="local-6989586621679569810"><span class="annot"><span class="annottext">doTest :: HPCMarkupInfo
 -&gt; ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
 -&gt; IO TestSuiteLog
-</span><a href="#local-6989586621679498370"><span class="hs-identifier hs-var hs-var hs-var">doTest</span></a></span></span><span> </span><span id="local-6989586621679498371"><span class="annot"><span class="annottext">HPCMarkupInfo
-</span><a href="#local-6989586621679498371"><span class="hs-identifier hs-var">hpcMarkupInfo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679498372"><span class="annot"><span class="annottext">TestSuite
-</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">suite</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679498373"><span class="annot"><span class="annottext">ComponentLocalBuildInfo
-</span><a href="#local-6989586621679498373"><span class="hs-identifier hs-var">clbi</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TestSuiteLog
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-91"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">TestSuite -&gt; TestSuiteInterface
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuite.html/Distribution.Types.TestSuite.html#testInterface"><span class="hs-identifier hs-var">PD.testInterface</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
-</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">suite</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-92"></span><span>          </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuiteInterface.html/Distribution.Types.TestSuiteInterface.html#TestSuiteExeV10"><span class="hs-identifier hs-type">PD.TestSuiteExeV10</span></a></span><span> </span><span class="annot"><span class="annottext">Version
-</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679569810"><span class="hs-identifier hs-var hs-var hs-var">doTest</span></a></span></span><span> </span><span id="local-6989586621679569811"><span class="annot"><span class="annottext">HPCMarkupInfo
+</span><a href="#local-6989586621679569811"><span class="hs-identifier hs-var">hpcMarkupInfo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679569812"><span class="annot"><span class="annottext">TestSuite
+</span><a href="#local-6989586621679569812"><span class="hs-identifier hs-var">suite</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679569813"><span class="annot"><span class="annottext">ComponentLocalBuildInfo
+</span><a href="#local-6989586621679569813"><span class="hs-identifier hs-var">clbi</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TestSuiteLog
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-94"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679569814"><span class="annot"><span class="annottext">lbiForTest :: LocalBuildInfo
+</span><a href="#local-6989586621679569814"><span class="hs-identifier hs-var hs-var">lbiForTest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-95"></span><span>              </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-96"></span><span>                </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#withPrograms"><span class="hs-identifier hs-var">withPrograms</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-97"></span><span>                    </span><span class="hs-comment">-- Include any build-tool-depends on build tools internal to the current package.</span><span>
+</span><span id="line-98"></span><span>                    </span><span class="annot"><a href="Distribution.Simple.Build.html#addInternalBuildTools"><span class="hs-identifier hs-type">addInternalBuildTools</span></a></span><span>
+</span><span id="line-99"></span><span>                      </span><span class="annot"><a href="#local-6989586621679569770"><span class="hs-identifier hs-type">pkg_descr</span></a></span><span>
+</span><span id="line-100"></span><span>                      </span><span class="annot"><a href="#local-6989586621679569786"><span class="hs-identifier hs-type">lbi</span></a></span><span>
+</span><span id="line-101"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#testBuildInfo"><span class="hs-identifier hs-var">PD.testBuildInfo</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569812"><span class="hs-identifier hs-type">suite</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>                      </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#withPrograms"><span class="hs-identifier hs-var">withPrograms</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569786"><span class="hs-identifier hs-type">lbi</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>                </span><span class="hs-special">}</span><span>
+</span><span id="line-104"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">TestSuite -&gt; TestSuiteInterface
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#testInterface"><span class="hs-identifier hs-var">PD.testInterface</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
+</span><a href="#local-6989586621679569812"><span class="hs-identifier hs-var">suite</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-105"></span><span>          </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuiteInterface.html#TestSuiteExeV10"><span class="hs-identifier hs-type">PD.TestSuiteExeV10</span></a></span><span> </span><span class="annot"><span class="annottext">Version
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">RelativePath Source 'File
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-93"></span><span>            </span><span class="annot"><span class="annottext">PackageDescription
+</span><span id="line-106"></span><span>            </span><span class="annot"><span class="annottext">PackageDescription
 -&gt; LocalBuildInfo
 -&gt; ComponentLocalBuildInfo
 -&gt; HPCMarkupInfo
@@ -156,16 +189,16 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; TestSuite
 -&gt; IO TestSuiteLog
 </span><a href="Distribution.Simple.Test.ExeV10.html#runTest"><span class="hs-identifier hs-var">ExeV10.runTest</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentLocalBuildInfo
-</span><a href="#local-6989586621679498373"><span class="hs-identifier hs-var">clbi</span></a></span><span> </span><span class="annot"><span class="annottext">HPCMarkupInfo
-</span><a href="#local-6989586621679498371"><span class="hs-identifier hs-var">hpcMarkupInfo</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
-</span><a href="#local-6989586621679498346"><span class="hs-identifier hs-var">flags</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
-</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">suite</span></a></span><span>
-</span><span id="line-94"></span><span>          </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuiteInterface.html/Distribution.Types.TestSuiteInterface.html#TestSuiteLibV09"><span class="hs-identifier hs-type">PD.TestSuiteLibV09</span></a></span><span> </span><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569814"><span class="hs-identifier hs-var">lbiForTest</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentLocalBuildInfo
+</span><a href="#local-6989586621679569813"><span class="hs-identifier hs-var">clbi</span></a></span><span> </span><span class="annot"><span class="annottext">HPCMarkupInfo
+</span><a href="#local-6989586621679569811"><span class="hs-identifier hs-var">hpcMarkupInfo</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
+</span><a href="#local-6989586621679569772"><span class="hs-identifier hs-var">flags</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
+</span><a href="#local-6989586621679569812"><span class="hs-identifier hs-var">suite</span></a></span><span>
+</span><span id="line-107"></span><span>          </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuiteInterface.html#TestSuiteLibV09"><span class="hs-identifier hs-type">PD.TestSuiteLibV09</span></a></span><span> </span><span class="annot"><span class="annottext">Version
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">ModuleName
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-95"></span><span>            </span><span class="annot"><span class="annottext">PackageDescription
+</span><span id="line-108"></span><span>            </span><span class="annot"><span class="annottext">PackageDescription
 -&gt; LocalBuildInfo
 -&gt; ComponentLocalBuildInfo
 -&gt; HPCMarkupInfo
@@ -173,100 +206,100 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; TestSuite
 -&gt; IO TestSuiteLog
 </span><a href="Distribution.Simple.Test.LibV09.html#runTest"><span class="hs-identifier hs-var">LibV09.runTest</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentLocalBuildInfo
-</span><a href="#local-6989586621679498373"><span class="hs-identifier hs-var">clbi</span></a></span><span> </span><span class="annot"><span class="annottext">HPCMarkupInfo
-</span><a href="#local-6989586621679498371"><span class="hs-identifier hs-var">hpcMarkupInfo</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
-</span><a href="#local-6989586621679498346"><span class="hs-identifier hs-var">flags</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
-</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">suite</span></a></span><span>
-</span><span id="line-96"></span><span>          </span><span class="annot"><span class="annottext">TestSuiteInterface
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569814"><span class="hs-identifier hs-var">lbiForTest</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentLocalBuildInfo
+</span><a href="#local-6989586621679569813"><span class="hs-identifier hs-var">clbi</span></a></span><span> </span><span class="annot"><span class="annottext">HPCMarkupInfo
+</span><a href="#local-6989586621679569811"><span class="hs-identifier hs-var">hpcMarkupInfo</span></a></span><span> </span><span class="annot"><span class="annottext">TestFlags
+</span><a href="#local-6989586621679569772"><span class="hs-identifier hs-var">flags</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
+</span><a href="#local-6989586621679569812"><span class="hs-identifier hs-var">suite</span></a></span><span>
+</span><span id="line-109"></span><span>          </span><span class="annot"><span class="annottext">TestSuiteInterface
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-97"></span><span>            </span><span class="annot"><span class="annottext">TestSuiteLog -&gt; IO TestSuiteLog
+</span><span id="line-110"></span><span>            </span><span class="annot"><span class="annottext">TestSuiteLog -&gt; IO TestSuiteLog
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span>
-</span><span id="line-98"></span><span>              </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestSuiteLog"><span class="hs-identifier hs-type">TestSuiteLog</span></a></span><span>
-</span><span id="line-99"></span><span>                </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">testSuiteName :: UnqualComponentName
-</span><a href="#local-6989586621679498380"><span class="hs-identifier hs-var">testSuiteName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuite -&gt; UnqualComponentName
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuite.html/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
-</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">suite</span></a></span><span>
-</span><span id="line-100"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">testLogs :: TestLogs
-</span><a href="#local-6989586621679498382"><span class="hs-identifier hs-var">testLogs</span></a></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-101"></span><span>                    </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestLog"><span class="hs-identifier hs-type">TestLog</span></a></span><span>
-</span><span id="line-102"></span><span>                      </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">testName :: FilePath
-</span><a href="#local-6989586621679498384"><span class="hs-identifier hs-var">testName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; FilePath
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.UnqualComponentName.html/Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-var">unUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">(UnqualComponentName -&gt; FilePath)
+</span><span id="line-111"></span><span>              </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestSuiteLog"><span class="hs-identifier hs-type">TestSuiteLog</span></a></span><span>
+</span><span id="line-112"></span><span>                </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">testSuiteName :: UnqualComponentName
+</span><a href="Distribution.Simple.Test.Log.html#testSuiteName"><span class="hs-identifier hs-var">testSuiteName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TestSuite -&gt; UnqualComponentName
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
+</span><a href="#local-6989586621679569812"><span class="hs-identifier hs-var">suite</span></a></span><span>
+</span><span id="line-113"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">testLogs :: TestLogs
+</span><a href="Distribution.Simple.Test.Log.html#testLogs"><span class="hs-identifier hs-var">testLogs</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-114"></span><span>                    </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#TestLog"><span class="hs-identifier hs-type">TestLog</span></a></span><span>
+</span><span id="line-115"></span><span>                      </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">testName :: FilePath
+</span><a href="Distribution.Simple.Test.Log.html#testName"><span class="hs-identifier hs-var">testName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; FilePath
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-var">unUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">(UnqualComponentName -&gt; FilePath)
 -&gt; UnqualComponentName -&gt; FilePath
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TestSuite -&gt; UnqualComponentName
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuite.html/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
-</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">suite</span></a></span><span>
-</span><span id="line-103"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">testOptionsReturned :: Options
-</span><a href="#local-6989586621679498386"><span class="hs-identifier hs-var">testOptionsReturned</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-104"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">testResult :: Result
-</span><a href="#local-6989586621679498387"><span class="hs-identifier hs-var">testResult</span></a></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-105"></span><span>                          </span><span class="annot"><span class="annottext">FilePath -&gt; Result
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
+</span><a href="#local-6989586621679569812"><span class="hs-identifier hs-var">suite</span></a></span><span>
+</span><span id="line-116"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">testOptionsReturned :: Options
+</span><a href="Distribution.Simple.Test.Log.html#testOptionsReturned"><span class="hs-identifier hs-var">testOptionsReturned</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-117"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">testResult :: Result
+</span><a href="Distribution.Simple.Test.Log.html#testResult"><span class="hs-identifier hs-var">testResult</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-118"></span><span>                          </span><span class="annot"><span class="annottext">FilePath -&gt; Result
 </span><a href="Distribution.TestSuite.html#Error"><span class="hs-identifier hs-var">Error</span></a></span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; Result) -&gt; FilePath -&gt; Result
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-106"></span><span>                            </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-119"></span><span>                            </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;No support for running test suite type: &quot;</span></span><span>
-</span><span id="line-107"></span><span>                              </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
+</span><span id="line-120"></span><span>                              </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; FilePath
 forall a. Show a =&gt; a -&gt; FilePath
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TestType -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Pretty.html/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">(TestType -&gt; Doc) -&gt; TestType -&gt; Doc
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">(TestType -&gt; Doc) -&gt; TestType -&gt; Doc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TestSuite -&gt; TestType
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuite.html/Distribution.Types.TestSuite.html#testType"><span class="hs-identifier hs-var">PD.testType</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
-</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">suite</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-108"></span><span>                      </span><span class="hs-special">}</span><span>
-</span><span id="line-109"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">logFile :: FilePath
-</span><a href="#local-6989586621679498392"><span class="hs-identifier hs-var">logFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#testType"><span class="hs-identifier hs-var">PD.testType</span></a></span><span> </span><span class="annot"><span class="annottext">TestSuite
+</span><a href="#local-6989586621679569812"><span class="hs-identifier hs-var">suite</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>                      </span><span class="hs-special">}</span><span>
+</span><span id="line-122"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">logFile :: FilePath
+</span><a href="Distribution.Simple.Test.Log.html#logFile"><span class="hs-identifier hs-var">logFile</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;&quot;</span></span><span>
-</span><span id="line-110"></span><span>                </span><span class="hs-special">}</span><span>
-</span><span id="line-111"></span><span>
-</span><span id="line-112"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; IO () -&gt; IO ()
+</span><span id="line-123"></span><span>                </span><span class="hs-special">}</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; IO () -&gt; IO ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">unless</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageDescription -&gt; Bool
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#hasTests"><span class="hs-identifier hs-var">PD.hasTests</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageDescription.html#hasTests"><span class="hs-identifier hs-var">PD.hasTests</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-113"></span><span>    </span><span class="annot"><span class="annottext">Verbosity -&gt; FilePath -&gt; IO ()
+</span><span id="line-126"></span><span>    </span><span class="annot"><span class="annottext">Verbosity -&gt; FilePath -&gt; IO ()
 </span><a href="Distribution.Simple.Utils.html#notice"><span class="hs-identifier hs-var">notice</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="#local-6989586621679498349"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679569777"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;Package has no test suites.&quot;</span></span><span>
-</span><span id="line-114"></span><span>    </span><span class="annot"><span class="annottext">IO ()
+</span><span id="line-127"></span><span>    </span><span class="annot"><span class="annottext">IO ()
 forall a. IO a
 </span><span class="hs-identifier hs-var">exitSuccess</span></span><span>
-</span><span id="line-115"></span><span>
-</span><span id="line-116"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; IO () -&gt; IO ()
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; IO () -&gt; IO ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageDescription -&gt; Bool
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#hasTests"><span class="hs-identifier hs-var">PD.hasTests</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageDescription.html#hasTests"><span class="hs-identifier hs-var">PD.hasTests</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">[(TestSuite, ComponentLocalBuildInfo)] -&gt; Bool
 forall a. [a] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
 </span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[(TestSuite, ComponentLocalBuildInfo)]
-</span><a href="#local-6989586621679498363"><span class="hs-identifier hs-var">enabledTests</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
+</span><a href="#local-6989586621679569805"><span class="hs-identifier hs-var">enabledTests</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-117"></span><span>    </span><span class="annot"><span class="annottext">Verbosity -&gt; CabalException -&gt; IO ()
+</span><span id="line-130"></span><span>    </span><span class="annot"><span class="annottext">Verbosity -&gt; CabalException -&gt; IO ()
 forall a1 a.
 (HasCallStack, Show a1, Typeable a1,
  Exception (VerboseException a1)) =&gt;
 Verbosity -&gt; a1 -&gt; IO a
 </span><a href="Distribution.Simple.Utils.html#dieWithException"><span class="hs-identifier hs-var">dieWithException</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="#local-6989586621679498349"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">CabalException
+</span><a href="#local-6989586621679569777"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">CabalException
 </span><a href="Distribution.Simple.Errors.html#NoTestSuitesEnabled"><span class="hs-identifier hs-var">NoTestSuitesEnabled</span></a></span><span>
-</span><span id="line-118"></span><span>
-</span><span id="line-119"></span><span>  </span><span id="local-6989586621679498402"><span class="annot"><a href="#local-6989586621679498402"><span class="hs-identifier hs-var">testsToRun</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Args
-</span><a href="#local-6989586621679498360"><span class="hs-identifier hs-var">testNames</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-120"></span><span>    </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span>  </span><span id="local-6989586621679569845"><span class="annot"><a href="#local-6989586621679569845"><span class="hs-identifier hs-var">testsToRun</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Args
+</span><a href="#local-6989586621679569802"><span class="hs-identifier hs-var">testNames</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
 -&gt; IO [((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
@@ -280,7 +313,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; [((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[(TestSuite, ComponentLocalBuildInfo)]
-</span><a href="#local-6989586621679498363"><span class="hs-identifier hs-var">enabledTests</span></a></span><span> </span><span class="annot"><span class="annottext">([Maybe TestSuiteLog]
+</span><a href="#local-6989586621679569805"><span class="hs-identifier hs-var">enabledTests</span></a></span><span> </span><span class="annot"><span class="annottext">([Maybe TestSuiteLog]
  -&gt; [((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)])
 -&gt; [Maybe TestSuiteLog]
 -&gt; [((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
@@ -290,8 +323,8 @@ forall a. a -&gt; [a]
 </span><span class="hs-identifier hs-var">repeat</span></span><span> </span><span class="annot"><span class="annottext">Maybe TestSuiteLog
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-121"></span><span>    </span><span id="local-6989586621679498404"><span class="annot"><span class="annottext">Args
-</span><a href="#local-6989586621679498404"><span class="hs-identifier hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Args
+</span><span id="line-134"></span><span>    </span><span id="local-6989586621679569847"><span class="annot"><span class="annottext">Args
+</span><a href="#local-6989586621679569847"><span class="hs-identifier hs-var">names</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Args
 -&gt; (FilePath
     -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog))
 -&gt; IO [((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
@@ -299,29 +332,29 @@ forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 t a -&gt; (a -&gt; f b) -&gt; f (t b)
 </span><span class="hs-identifier hs-var">for</span></span><span> </span><span class="annot"><span class="annottext">Args
-</span><a href="#local-6989586621679498404"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">((FilePath
+</span><a href="#local-6989586621679569847"><span class="hs-identifier hs-var">names</span></a></span><span> </span><span class="annot"><span class="annottext">((FilePath
   -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog))
  -&gt; IO [((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)])
 -&gt; (FilePath
     -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog))
 -&gt; IO [((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679498406"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679498406"><span class="hs-identifier hs-var">tName</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-122"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679498407"><span class="annot"><span class="annottext">testMap :: [(UnqualComponentName, (TestSuite, ComponentLocalBuildInfo))]
-</span><a href="#local-6989586621679498407"><span class="hs-identifier hs-var hs-var">testMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[UnqualComponentName]
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679569849"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679569849"><span class="hs-identifier hs-var">tName</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679569850"><span class="annot"><span class="annottext">testMap :: [(UnqualComponentName, (TestSuite, ComponentLocalBuildInfo))]
+</span><a href="#local-6989586621679569850"><span class="hs-identifier hs-var hs-var">testMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[UnqualComponentName]
 -&gt; [(TestSuite, ComponentLocalBuildInfo)]
 -&gt; [(UnqualComponentName, (TestSuite, ComponentLocalBuildInfo))]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[UnqualComponentName]
-</span><a href="#local-6989586621679498408"><span class="hs-identifier hs-var">enabledNames</span></a></span><span> </span><span class="annot"><span class="annottext">[(TestSuite, ComponentLocalBuildInfo)]
-</span><a href="#local-6989586621679498363"><span class="hs-identifier hs-var">enabledTests</span></a></span><span>
-</span><span id="line-123"></span><span>          </span><span id="local-6989586621679498408"><span class="annot"><span class="annottext">enabledNames :: [UnqualComponentName]
-</span><a href="#local-6989586621679498408"><span class="hs-identifier hs-var hs-var">enabledNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((TestSuite, ComponentLocalBuildInfo) -&gt; UnqualComponentName)
+</span><a href="#local-6989586621679569851"><span class="hs-identifier hs-var">enabledNames</span></a></span><span> </span><span class="annot"><span class="annottext">[(TestSuite, ComponentLocalBuildInfo)]
+</span><a href="#local-6989586621679569805"><span class="hs-identifier hs-var">enabledTests</span></a></span><span>
+</span><span id="line-136"></span><span>          </span><span id="local-6989586621679569851"><span class="annot"><span class="annottext">enabledNames :: [UnqualComponentName]
+</span><a href="#local-6989586621679569851"><span class="hs-identifier hs-var hs-var">enabledNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((TestSuite, ComponentLocalBuildInfo) -&gt; UnqualComponentName)
 -&gt; [(TestSuite, ComponentLocalBuildInfo)] -&gt; [UnqualComponentName]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TestSuite -&gt; UnqualComponentName
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuite.html/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">(TestSuite -&gt; UnqualComponentName)
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">(TestSuite -&gt; UnqualComponentName)
 -&gt; ((TestSuite, ComponentLocalBuildInfo) -&gt; TestSuite)
 -&gt; (TestSuite, ComponentLocalBuildInfo)
 -&gt; UnqualComponentName
@@ -329,43 +362,43 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(TestSuite, ComponentLocalBuildInfo) -&gt; TestSuite
 forall a b. (a, b) -&gt; a
 </span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(TestSuite, ComponentLocalBuildInfo)]
-</span><a href="#local-6989586621679498363"><span class="hs-identifier hs-var">enabledTests</span></a></span><span>
-</span><span id="line-124"></span><span>          </span><span id="local-6989586621679498411"><span class="annot"><span class="annottext">allNames :: [UnqualComponentName]
-</span><a href="#local-6989586621679498411"><span class="hs-identifier hs-var hs-var">allNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(TestSuite -&gt; UnqualComponentName)
+</span><a href="#local-6989586621679569805"><span class="hs-identifier hs-var">enabledTests</span></a></span><span>
+</span><span id="line-137"></span><span>          </span><span id="local-6989586621679569854"><span class="annot"><span class="annottext">allNames :: [UnqualComponentName]
+</span><a href="#local-6989586621679569854"><span class="hs-identifier hs-var hs-var">allNames</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(TestSuite -&gt; UnqualComponentName)
 -&gt; [TestSuite] -&gt; [UnqualComponentName]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">TestSuite -&gt; UnqualComponentName
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.TestSuite.html/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">[TestSuite]
-</span><a href="#local-6989586621679498361"><span class="hs-identifier hs-var">pkgTests</span></a></span><span>
-</span><span id="line-125"></span><span>          </span><span id="local-6989586621679498412"><span class="annot"><span class="annottext">tCompName :: UnqualComponentName
-</span><a href="#local-6989586621679498412"><span class="hs-identifier hs-var hs-var">tCompName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; UnqualComponentName
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.UnqualComponentName.html/Distribution.Types.UnqualComponentName.html#mkUnqualComponentName"><span class="hs-identifier hs-var">mkUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679498406"><span class="hs-identifier hs-var">tName</span></a></span><span>
-</span><span id="line-126"></span><span>       </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.TestSuite.html#testName"><span class="hs-identifier hs-var">PD.testName</span></a></span><span> </span><span class="annot"><span class="annottext">[TestSuite]
+</span><a href="#local-6989586621679569803"><span class="hs-identifier hs-var">pkgTests</span></a></span><span>
+</span><span id="line-138"></span><span>          </span><span id="local-6989586621679569855"><span class="annot"><span class="annottext">tCompName :: UnqualComponentName
+</span><a href="#local-6989586621679569855"><span class="hs-identifier hs-var hs-var">tCompName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; UnqualComponentName
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.UnqualComponentName.html#mkUnqualComponentName"><span class="hs-identifier hs-var">mkUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679569849"><span class="hs-identifier hs-var">tName</span></a></span><span>
+</span><span id="line-139"></span><span>       </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
 -&gt; [(UnqualComponentName, (TestSuite, ComponentLocalBuildInfo))]
 -&gt; Maybe (TestSuite, ComponentLocalBuildInfo)
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679498412"><span class="hs-identifier hs-var">tCompName</span></a></span><span> </span><span class="annot"><span class="annottext">[(UnqualComponentName, (TestSuite, ComponentLocalBuildInfo))]
-</span><a href="#local-6989586621679498407"><span class="hs-identifier hs-var">testMap</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-127"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679498415"><span class="annot"><span class="annottext">(TestSuite, ComponentLocalBuildInfo)
-</span><a href="#local-6989586621679498415"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
+</span><a href="#local-6989586621679569855"><span class="hs-identifier hs-var">tCompName</span></a></span><span> </span><span class="annot"><span class="annottext">[(UnqualComponentName, (TestSuite, ComponentLocalBuildInfo))]
+</span><a href="#local-6989586621679569850"><span class="hs-identifier hs-var">testMap</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-140"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679569858"><span class="annot"><span class="annottext">(TestSuite, ComponentLocalBuildInfo)
+</span><a href="#local-6989586621679569858"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
 -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(TestSuite, ComponentLocalBuildInfo)
-</span><a href="#local-6989586621679498415"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TestSuiteLog
+</span><a href="#local-6989586621679569858"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe TestSuiteLog
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>
-</span><span id="line-128"></span><span>            </span><span class="annot"><span class="annottext">Maybe (TestSuite, ComponentLocalBuildInfo)
+</span><span id="line-141"></span><span>            </span><span class="annot"><span class="annottext">Maybe (TestSuite, ComponentLocalBuildInfo)
 </span><span class="hs-identifier">_</span></span><span>
-</span><span id="line-129"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679498412"><span class="hs-identifier hs-var">tCompName</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; [UnqualComponentName] -&gt; Bool
+</span><span id="line-142"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679569855"><span class="hs-identifier hs-var">tCompName</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; [UnqualComponentName] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="annot"><span class="annottext">[UnqualComponentName]
-</span><a href="#local-6989586621679498411"><span class="hs-identifier hs-var">allNames</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-130"></span><span>                  </span><span class="annot"><span class="annottext">Verbosity
+</span><a href="#local-6989586621679569854"><span class="hs-identifier hs-var">allNames</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-143"></span><span>                  </span><span class="annot"><span class="annottext">Verbosity
 -&gt; CabalException
 -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
 forall a1 a.
@@ -373,15 +406,15 @@ forall a1 a.
  Exception (VerboseException a1)) =&gt;
 Verbosity -&gt; a1 -&gt; IO a
 </span><a href="Distribution.Simple.Utils.html#dieWithException"><span class="hs-identifier hs-var">dieWithException</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="#local-6989586621679498349"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">(CabalException
+</span><a href="#local-6989586621679569777"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">(CabalException
  -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog))
 -&gt; CabalException
 -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; CabalException
 </span><a href="Distribution.Simple.Errors.html#TestNameDisabled"><span class="hs-identifier hs-var">TestNameDisabled</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679498406"><span class="hs-identifier hs-var">tName</span></a></span><span>
-</span><span id="line-131"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679569849"><span class="hs-identifier hs-var">tName</span></a></span><span>
+</span><span id="line-144"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Verbosity
 -&gt; CabalException
 -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
@@ -390,149 +423,172 @@ forall a1 a.
  Exception (VerboseException a1)) =&gt;
 Verbosity -&gt; a1 -&gt; IO a
 </span><a href="Distribution.Simple.Utils.html#dieWithException"><span class="hs-identifier hs-var">dieWithException</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
-</span><a href="#local-6989586621679498349"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">(CabalException
+</span><a href="#local-6989586621679569777"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">(CabalException
  -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog))
 -&gt; CabalException
 -&gt; IO ((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; CabalException
 </span><a href="Distribution.Simple.Errors.html#NoSuchTest"><span class="hs-identifier hs-var">NoSuchTest</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679498406"><span class="hs-identifier hs-var">tName</span></a></span><span>
-</span><span id="line-132"></span><span>
-</span><span id="line-133"></span><span>  </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#createDirectoryIfMissing"><span class="hs-identifier hs-type">createDirectoryIfMissing</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span> </span><span class="annot"><a href="#local-6989586621679498359"><span class="hs-identifier hs-type">testLogDir</span></a></span><span>
-</span><span id="line-134"></span><span>
-</span><span id="line-135"></span><span>  </span><span class="hs-comment">-- Delete ordinary files from test log directory.</span><span>
-</span><span id="line-136"></span><span>  </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#getDirectoryContents"><span class="hs-identifier hs-type">getDirectoryContents</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498359"><span class="hs-identifier hs-type">testLogDir</span></a></span><span>
-</span><span id="line-137"></span><span>    </span><span class="annot"><span class="hs-operator hs-type">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">filterM</span></span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#doesFileExist"><span class="hs-identifier hs-type">doesFileExist</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">testLogDir</span></span><span> </span><span class="annot"><span class="hs-operator">&lt;/&gt;</span></span><span class="hs-special">)</span><span>
-</span><span id="line-138"></span><span>    </span><span class="annot"><span class="hs-operator hs-type">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse_</span></span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#removeFile"><span class="hs-identifier hs-type">removeFile</span></a></span><span>
-</span><span id="line-139"></span><span>
-</span><span id="line-140"></span><span>  </span><span class="hs-comment">-- We configured the unit-ids of libraries we should cover in our coverage</span><span>
-</span><span id="line-141"></span><span>  </span><span class="hs-comment">-- report at configure time into the local build info. At build time, we built</span><span>
-</span><span id="line-142"></span><span>  </span><span class="hs-comment">-- the hpc artifacts into the extraCompilationArtifacts directory, which, at</span><span>
-</span><span id="line-143"></span><span>  </span><span class="hs-comment">-- install time, is copied into the ghc-pkg database files.</span><span>
-</span><span id="line-144"></span><span>  </span><span class="hs-comment">-- Now, we get the path to the HPC artifacts and exposed modules of each</span><span>
-</span><span id="line-145"></span><span>  </span><span class="hs-comment">-- library by querying the package database keyed by unit-id:</span><span>
-</span><span id="line-146"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679498425"><span class="annot"><a href="#local-6989586621679498425"><span class="hs-identifier hs-var hs-var">coverageFor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-147"></span><span>        </span><span class="annot"><span class="annottext">[UnitId] -&gt; [UnitId]
+</span><a href="#local-6989586621679569849"><span class="hs-identifier hs-var">tName</span></a></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span>  </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#createDirectoryIfMissing"><span class="hs-identifier hs-type">createDirectoryIfMissing</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621679569784"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569799"><span class="hs-identifier hs-type">testLogDir</span></a></span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-comment">-- Delete ordinary files from test log directory.</span><span>
+</span><span id="line-149"></span><span>  </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#getDirectoryContents"><span class="hs-identifier hs-type">getDirectoryContents</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679569784"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569799"><span class="hs-identifier hs-type">testLogDir</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>    </span><span class="annot"><span class="hs-operator hs-type">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">filterM</span></span><span> </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#doesFileExist"><span class="hs-identifier hs-type">doesFileExist</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">i</span></span><span> </span><span class="annot"><span class="hs-identifier">testLogDir</span></span><span> </span><span class="annot"><span class="hs-operator">&lt;/&gt;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>    </span><span class="annot"><span class="hs-operator hs-type">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse_</span></span><span> </span><span class="annot"><a href="../../directory-1.3.9.0-af18/src/System.Directory.html#removeFile"><span class="hs-identifier hs-type">removeFile</span></a></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span>  </span><span class="hs-comment">-- We configured the unit-ids of libraries we should cover in our coverage</span><span>
+</span><span id="line-154"></span><span>  </span><span class="hs-comment">-- report at configure time into the local build info. At build time, we built</span><span>
+</span><span id="line-155"></span><span>  </span><span class="hs-comment">-- the hpc artifacts into the extraCompilationArtifacts directory, which, at</span><span>
+</span><span id="line-156"></span><span>  </span><span class="hs-comment">-- install time, is copied into the ghc-pkg database files.</span><span>
+</span><span id="line-157"></span><span>  </span><span class="hs-comment">-- Now, we get the path to the HPC artifacts and exposed modules of each</span><span>
+</span><span id="line-158"></span><span>  </span><span class="hs-comment">-- library by querying the package database keyed by unit-id:</span><span>
+</span><span id="line-159"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679569868"><span class="annot"><a href="#local-6989586621679569868"><span class="hs-identifier hs-var hs-var">coverageFor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-160"></span><span>        </span><span class="annot"><span class="annottext">[UnitId] -&gt; [UnitId]
 forall a. Eq a =&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">nub</span></span><span> </span><span class="annot"><span class="annottext">([UnitId] -&gt; [UnitId]) -&gt; [UnitId] -&gt; [UnitId]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-148"></span><span>          </span><span class="annot"><span class="annottext">[UnitId] -&gt; Flag [UnitId] -&gt; [UnitId]
+</span><span id="line-161"></span><span>          </span><span class="annot"><span class="annottext">[UnitId] -&gt; Flag [UnitId] -&gt; [UnitId]
 forall a. a -&gt; Flag a -&gt; a
 </span><a href="Distribution.Simple.Flag.html#fromFlagOrDefault"><span class="hs-identifier hs-var">fromFlagOrDefault</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ConfigFlags -&gt; Flag [UnitId]
 </span><a href="Distribution.Simple.Setup.Config.html#configCoverageFor"><span class="hs-identifier hs-var">configCoverageFor</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; ConfigFlags
 </span><a href="Distribution.Types.LocalBuildInfo.html#configFlags"><span class="hs-identifier hs-var">configFlags</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-149"></span><span>            </span><span class="annot"><span class="annottext">[UnitId] -&gt; [UnitId] -&gt; [UnitId]
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-162"></span><span>            </span><span class="annot"><span class="annottext">[UnitId] -&gt; [UnitId] -&gt; [UnitId]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; [UnitId]
 </span><a href="Distribution.Types.LocalBuildInfo.html#extraCoverageFor"><span class="hs-identifier hs-var">extraCoverageFor</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span>
-</span><span id="line-150"></span><span>  </span><span id="local-6989586621679498430"><span class="annot"><a href="#local-6989586621679498430"><span class="hs-identifier hs-var">ipkginfos</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Simple.Configure.html#getInstalledPackagesById"><span class="hs-identifier hs-type">getInstalledPackagesById</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498349"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498365"><span class="hs-identifier hs-type">lbi</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Errors.html#MissingCoveredInstalledLibrary"><span class="hs-identifier hs-type">MissingCoveredInstalledLibrary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498425"><span class="hs-identifier hs-type">coverageFor</span></a></span><span>
-</span><span id="line-151"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">concat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679498435"><span class="annot"><a href="#local-6989586621679498435"><span class="hs-identifier hs-var">pathsToLibsArtifacts</span></a></span></span><span>
-</span><span id="line-152"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">concat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679498436"><span class="annot"><a href="#local-6989586621679498436"><span class="hs-identifier hs-var">libsModulesToInclude</span></a></span></span><span>
-</span><span id="line-153"></span><span>        </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-154"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">unzip</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
-</span><span id="line-155"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span>
-</span><span id="line-156"></span><span>              </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679498438"><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679498438"><span class="hs-identifier hs-var">ip</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-157"></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; FilePath) -&gt; Args -&gt; Args
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-163"></span><span>  </span><span id="local-6989586621679569874"><span class="annot"><a href="#local-6989586621679569874"><span class="hs-identifier hs-var">ipkginfos</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Simple.Configure.html#getInstalledPackagesById"><span class="hs-identifier hs-type">getInstalledPackagesById</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569777"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569786"><span class="hs-identifier hs-type">lbi</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Errors.html#MissingCoveredInstalledLibrary"><span class="hs-identifier hs-type">MissingCoveredInstalledLibrary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569868"><span class="hs-identifier hs-type">coverageFor</span></a></span><span>
+</span><span id="line-164"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">concat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679569884"><span class="annot"><a href="#local-6989586621679569884"><span class="hs-identifier hs-var">pathsToLibsArtifacts</span></a></span></span><span>
+</span><span id="line-165"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">concat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679569885"><span class="annot"><a href="#local-6989586621679569885"><span class="hs-identifier hs-var">libsModulesToInclude</span></a></span></span><span>
+</span><span id="line-166"></span><span>        </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-167"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">unzip</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-168"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span>
+</span><span id="line-169"></span><span>              </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679569887"><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679569887"><span class="hs-identifier hs-var">ip</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-170"></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; SymbolicPathX 'AllowAbsolute a3 c3)
+-&gt; Args -&gt; [SymbolicPathX 'AllowAbsolute a3 c3]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="Distribution.Simple.Setup.Common.html#extraCompilationArtifacts"><span class="hs-identifier hs-var">extraCompilationArtifacts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Args -&gt; Args) -&gt; Args -&gt; Args
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">SymbolicPath a3 ('Dir Build)
+-&gt; SymbolicPathX 'OnlyRelative Build c3
+-&gt; SymbolicPathX 'AllowAbsolute a3 c3
+forall p q r. PathLike p q r =&gt; p -&gt; q -&gt; r
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SymbolicPathX 'OnlyRelative Build ('Dir Artifacts)
+-&gt; SymbolicPathX 'OnlyRelative Build c3
+forall (allowAbsolute :: AllowAbsolute) from (to1 :: FileOrDir)
+       (to2 :: FileOrDir).
+SymbolicPathX allowAbsolute from to1
+-&gt; SymbolicPathX allowAbsolute from to2
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#coerceSymbolicPath"><span class="hs-identifier hs-var">coerceSymbolicPath</span></a></span><span> </span><span class="annot"><span class="annottext">SymbolicPathX 'OnlyRelative Build ('Dir Artifacts)
+</span><a href="Distribution.Simple.Setup.Common.html#extraCompilationArtifacts"><span class="hs-identifier hs-var">extraCompilationArtifacts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(SymbolicPath a3 ('Dir Build)
+ -&gt; SymbolicPathX 'AllowAbsolute a3 c3)
+-&gt; (FilePath -&gt; SymbolicPath a3 ('Dir Build))
+-&gt; FilePath
+-&gt; SymbolicPathX 'AllowAbsolute a3 c3
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; SymbolicPath a3 ('Dir Build)
+forall from (to :: FileOrDir). FilePath -&gt; SymbolicPath from to
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#makeSymbolicPath"><span class="hs-identifier hs-var">makeSymbolicPath</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Args -&gt; [SymbolicPathX 'AllowAbsolute a3 c3])
+-&gt; Args -&gt; [SymbolicPathX 'AllowAbsolute a3 c3]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; Args
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.InstalledPackageInfo.html/Distribution.Types.InstalledPackageInfo.html#libraryDirs"><span class="hs-identifier hs-var">libraryDirs</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679498438"><span class="hs-identifier hs-var">ip</span></a></span><span>
-</span><span id="line-158"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(ExposedModule -&gt; ModuleName) -&gt; [ExposedModule] -&gt; [ModuleName]
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.InstalledPackageInfo.html#libraryDirs"><span class="hs-identifier hs-var">libraryDirs</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679569887"><span class="hs-identifier hs-var">ip</span></a></span><span>
+</span><span id="line-171"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(ExposedModule -&gt; ModuleName) -&gt; [ExposedModule] -&gt; [ModuleName]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">ExposedModule -&gt; ModuleName
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.ExposedModule.html/Distribution.Types.ExposedModule.html#exposedName"><span class="hs-identifier hs-var">exposedName</span></a></span><span> </span><span class="annot"><span class="annottext">([ExposedModule] -&gt; [ModuleName])
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.ExposedModule.html#exposedName"><span class="hs-identifier hs-var">exposedName</span></a></span><span> </span><span class="annot"><span class="annottext">([ExposedModule] -&gt; [ModuleName])
 -&gt; [ExposedModule] -&gt; [ModuleName]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo -&gt; [ExposedModule]
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.InstalledPackageInfo.html/Distribution.Types.InstalledPackageInfo.html#exposedModules"><span class="hs-identifier hs-var">exposedModules</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
-</span><a href="#local-6989586621679498438"><span class="hs-identifier hs-var">ip</span></a></span><span>
-</span><span id="line-159"></span><span>                  </span><span class="hs-special">)</span><span>
-</span><span id="line-160"></span><span>              </span><span class="hs-special">)</span><span>
-</span><span id="line-161"></span><span>              </span><span class="annot"><a href="#local-6989586621679498430"><span class="hs-identifier hs-type">ipkginfos</span></a></span><span>
-</span><span id="line-162"></span><span>      </span><span id="local-6989586621679498440"><span class="annot"><a href="#local-6989586621679498440"><span class="hs-identifier hs-var hs-var">hpcMarkupInfo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.Simple.Hpc.html#HPCMarkupInfo"><span class="hs-identifier hs-type">HPCMarkupInfo</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">Args
-pathsToLibsArtifacts :: Args
-pathsToLibsArtifacts :: Args
-</span><a href="#local-6989586621679498435"><span class="hs-identifier hs-var hs-var">pathsToLibsArtifacts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[ModuleName]
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.InstalledPackageInfo.html#exposedModules"><span class="hs-identifier hs-var">exposedModules</span></a></span><span> </span><span class="annot"><span class="annottext">InstalledPackageInfo
+</span><a href="#local-6989586621679569887"><span class="hs-identifier hs-var">ip</span></a></span><span>
+</span><span id="line-172"></span><span>                  </span><span class="hs-special">)</span><span>
+</span><span id="line-173"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-174"></span><span>              </span><span class="annot"><a href="#local-6989586621679569874"><span class="hs-identifier hs-type">ipkginfos</span></a></span><span>
+</span><span id="line-175"></span><span>      </span><span id="local-6989586621679569892"><span class="annot"><a href="#local-6989586621679569892"><span class="hs-identifier hs-var hs-var">hpcMarkupInfo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.Simple.Hpc.html#HPCMarkupInfo"><span class="hs-identifier hs-type">HPCMarkupInfo</span></a></span><span class="hs-special">{</span><span class="annot"><span class="annottext">[SymbolicPath Pkg ('Dir Artifacts)]
+forall {a3} {c3 :: FileOrDir}. [SymbolicPathX 'AllowAbsolute a3 c3]
+pathsToLibsArtifacts :: forall {a3} {c3 :: FileOrDir}. [SymbolicPathX 'AllowAbsolute a3 c3]
+pathsToLibsArtifacts :: [SymbolicPath Pkg ('Dir Artifacts)]
+</span><a href="#local-6989586621679569884"><span class="hs-identifier hs-var hs-var">pathsToLibsArtifacts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[ModuleName]
 libsModulesToInclude :: [ModuleName]
 libsModulesToInclude :: [ModuleName]
-</span><a href="#local-6989586621679498436"><span class="hs-identifier hs-var hs-var">libsModulesToInclude</span></a></span><span class="hs-special">}</span><span>
-</span><span id="line-163"></span><span>
-</span><span id="line-164"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679498445"><span class="annot"><a href="#local-6989586621679498445"><span class="hs-identifier hs-var hs-var">totalSuites</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)] -&gt; Int
+</span><a href="#local-6989586621679569885"><span class="hs-identifier hs-var hs-var">libsModulesToInclude</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679569897"><span class="annot"><a href="#local-6989586621679569897"><span class="hs-identifier hs-var hs-var">totalSuites</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)] -&gt; Int
 forall a. [a] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[((TestSuite, ComponentLocalBuildInfo), Maybe TestSuiteLog)]
-</span><a href="#local-6989586621679498402"><span class="hs-identifier hs-var">testsToRun</span></a></span><span>
-</span><span id="line-165"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Utils.html#notice"><span class="hs-identifier hs-type">notice</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498349"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Running &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621679498445"><span class="hs-identifier hs-type">totalSuites</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-string">&quot; test suites...&quot;</span></span><span>
-</span><span id="line-166"></span><span>  </span><span id="local-6989586621679498447"><span class="annot"><a href="#local-6989586621679498447"><span class="hs-identifier hs-var">suites</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679498370"><span class="hs-identifier hs-type">doTest</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498440"><span class="hs-identifier hs-type">hpcMarkupInfo</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679498402"><span class="hs-identifier hs-type">testsToRun</span></a></span><span>
-</span><span id="line-167"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679498449"><span class="annot"><a href="#local-6989586621679498449"><span class="hs-identifier hs-var hs-var">packageLog</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageDescription -&gt; LocalBuildInfo -&gt; PackageLog
+</span><a href="#local-6989586621679569845"><span class="hs-identifier hs-var">testsToRun</span></a></span><span>
+</span><span id="line-178"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Utils.html#notice"><span class="hs-identifier hs-type">notice</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569777"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Running &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621679569897"><span class="hs-identifier hs-type">totalSuites</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-string">&quot; test suites...&quot;</span></span><span>
+</span><span id="line-179"></span><span>  </span><span id="local-6989586621679569899"><span class="annot"><a href="#local-6989586621679569899"><span class="hs-identifier hs-var">suites</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679569810"><span class="hs-identifier hs-type">doTest</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569892"><span class="hs-identifier hs-type">hpcMarkupInfo</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679569845"><span class="hs-identifier hs-type">testsToRun</span></a></span><span>
+</span><span id="line-180"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679569901"><span class="annot"><a href="#local-6989586621679569901"><span class="hs-identifier hs-var hs-var">packageLog</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageDescription -&gt; LocalBuildInfo -&gt; PackageLog
 </span><a href="Distribution.Simple.Test.Log.html#localPackageLog"><span class="hs-identifier hs-var">localPackageLog</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Test.Log.html#testSuites"><span class="hs-identifier hs-var">testSuites</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679498447"><span class="hs-identifier hs-type">suites</span></a></span><span class="hs-special">}</span><span>
-</span><span id="line-168"></span><span>      </span><span id="local-6989586621679498452"><span class="annot"><a href="#local-6989586621679498452"><span class="hs-identifier hs-var hs-var">packageLogFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-169"></span><span>        </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
-</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">(&lt;/&gt;)</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679498359"><span class="hs-identifier hs-var">testLogDir</span></a></span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; FilePath) -&gt; FilePath -&gt; FilePath
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-170"></span><span>          </span><span class="annot"><span class="annottext">PathTemplate -&gt; PackageDescription -&gt; LocalBuildInfo -&gt; FilePath
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Test.Log.html#testSuites"><span class="hs-identifier hs-var">testSuites</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679569899"><span class="hs-identifier hs-type">suites</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-181"></span><span>      </span><span id="local-6989586621679569905"><span class="annot"><a href="#local-6989586621679569905"><span class="hs-identifier hs-var hs-var">packageLogFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-182"></span><span>        </span><span class="annot"><span class="annottext">SymbolicPathX 'AllowAbsolute Pkg (ZonkAny 5) -&gt; FilePath
+forall {allowAbsolute :: AllowAbsolute} {to :: FileOrDir}.
+SymbolicPathX allowAbsolute Pkg to -&gt; FilePath
+</span><a href="#local-6989586621679569784"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">SymbolicPathX 'AllowAbsolute Pkg (ZonkAny 5)
+forall {c3 :: FileOrDir}. SymbolicPathX 'AllowAbsolute Pkg c3
+</span><a href="#local-6989586621679569799"><span class="hs-identifier hs-var">testLogDir</span></a></span><span>
+</span><span id="line-183"></span><span>          </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
+forall p q r. PathLike p q r =&gt; p -&gt; q -&gt; r
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Path.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">PathTemplate -&gt; PackageDescription -&gt; LocalBuildInfo -&gt; FilePath
 </span><a href="Distribution.Simple.Test.html#packageLogPath"><span class="hs-identifier hs-var">packageLogPath</span></a></span><span> </span><span class="annot"><span class="annottext">PathTemplate
-</span><a href="#local-6989586621679498353"><span class="hs-identifier hs-var">machineTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498344"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498365"><span class="hs-identifier hs-var">lbi</span></a></span><span>
-</span><span id="line-171"></span><span>  </span><span id="local-6989586621679498454"><span class="annot"><a href="#local-6989586621679498454"><span class="hs-identifier hs-var">allOk</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#summarizePackage"><span class="hs-identifier hs-type">summarizePackage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498349"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498449"><span class="hs-identifier hs-type">packageLog</span></a></span><span>
-</span><span id="line-172"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">writeFile</span></span><span> </span><span class="annot"><a href="#local-6989586621679498452"><span class="hs-identifier hs-type">packageLogFile</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621679498449"><span class="hs-identifier hs-type">packageLog</span></a></span><span>
-</span><span id="line-173"></span><span>
-</span><span id="line-174"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#testCoverage"><span class="hs-identifier hs-type">LBI.testCoverage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498365"><span class="hs-identifier hs-type">lbi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
-</span><span id="line-175"></span><span>    </span><span class="annot"><a href="Distribution.Simple.Hpc.html#markupPackage"><span class="hs-identifier hs-type">markupPackage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498349"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498440"><span class="hs-identifier hs-type">hpcMarkupInfo</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498365"><span class="hs-identifier hs-type">lbi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498357"><span class="hs-identifier hs-type">distPref</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498344"><span class="hs-identifier hs-type">pkg_descr</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
-</span><span id="line-176"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">fst</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">fst</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679498402"><span class="hs-identifier hs-type">testsToRun</span></a></span><span>
-</span><span id="line-177"></span><span>
-</span><span id="line-178"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">unless</span></span><span> </span><span class="annot"><a href="#local-6989586621679498454"><span class="hs-identifier hs-type">allOk</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">exitFailure</span></span><span>
-</span><span id="line-179"></span><span>
-</span><span id="line-180"></span><span class="annot"><a href="Distribution.Simple.Test.html#packageLogPath"><span class="hs-identifier hs-type">packageLogPath</span></a></span><span>
-</span><span id="line-181"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html#PathTemplate"><span class="hs-identifier hs-type">PathTemplate</span></a></span><span>
-</span><span id="line-182"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#PackageDescription"><span class="hs-identifier hs-type">PD.PackageDescription</span></a></span><span>
-</span><span id="line-183"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier hs-type">LBI.LocalBuildInfo</span></a></span><span>
-</span><span id="line-184"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
-</span><span id="line-185"></span><span id="packageLogPath"><span class="annot"><span class="annottext">packageLogPath :: PathTemplate -&gt; PackageDescription -&gt; LocalBuildInfo -&gt; FilePath
-</span><a href="Distribution.Simple.Test.html#packageLogPath"><span class="hs-identifier hs-var hs-var">packageLogPath</span></a></span></span><span> </span><span id="local-6989586621679498460"><span class="annot"><span class="annottext">PathTemplate
-</span><a href="#local-6989586621679498460"><span class="hs-identifier hs-var">template</span></a></span></span><span> </span><span id="local-6989586621679498461"><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498461"><span class="hs-identifier hs-var">pkg_descr</span></a></span></span><span> </span><span id="local-6989586621679498462"><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498462"><span class="hs-identifier hs-var">lbi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-186"></span><span>  </span><span class="annot"><span class="annottext">PathTemplate -&gt; FilePath
+</span><a href="#local-6989586621679569789"><span class="hs-identifier hs-var">machineTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679569770"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569786"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-184"></span><span>  </span><span id="local-6989586621679569907"><span class="annot"><a href="#local-6989586621679569907"><span class="hs-identifier hs-var">allOk</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Simple.Test.Log.html#summarizePackage"><span class="hs-identifier hs-type">summarizePackage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569777"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569901"><span class="hs-identifier hs-type">packageLog</span></a></span><span>
+</span><span id="line-185"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">writeFile</span></span><span> </span><span class="annot"><a href="#local-6989586621679569905"><span class="hs-identifier hs-type">packageLogFile</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="annot"><a href="#local-6989586621679569901"><span class="hs-identifier hs-type">packageLog</span></a></span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#testCoverage"><span class="hs-identifier hs-type">LBI.testCoverage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569786"><span class="hs-identifier hs-type">lbi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-188"></span><span>    </span><span class="annot"><a href="Distribution.Simple.Hpc.html#markupPackage"><span class="hs-identifier hs-type">markupPackage</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569777"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569892"><span class="hs-identifier hs-type">hpcMarkupInfo</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569786"><span class="hs-identifier hs-type">lbi</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569782"><span class="hs-identifier hs-type">distPref</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679569770"><span class="hs-identifier hs-type">pkg_descr</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-189"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">fst</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">.</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">fst</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679569845"><span class="hs-identifier hs-type">testsToRun</span></a></span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">unless</span></span><span> </span><span class="annot"><a href="#local-6989586621679569907"><span class="hs-identifier hs-type">allOk</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">exitFailure</span></span><span>
+</span><span id="line-192"></span><span>
+</span><span id="line-193"></span><span class="annot"><a href="Distribution.Simple.Test.html#packageLogPath"><span class="hs-identifier hs-type">packageLogPath</span></a></span><span>
+</span><span id="line-194"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html#PathTemplate"><span class="hs-identifier hs-type">PathTemplate</span></a></span><span>
+</span><span id="line-195"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageDescription.html#PackageDescription"><span class="hs-identifier hs-type">PD.PackageDescription</span></a></span><span>
+</span><span id="line-196"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier hs-type">LBI.LocalBuildInfo</span></a></span><span>
+</span><span id="line-197"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-198"></span><span id="packageLogPath"><span class="annot"><span class="annottext">packageLogPath :: PathTemplate -&gt; PackageDescription -&gt; LocalBuildInfo -&gt; FilePath
+</span><a href="Distribution.Simple.Test.html#packageLogPath"><span class="hs-identifier hs-var hs-var">packageLogPath</span></a></span></span><span> </span><span id="local-6989586621679569913"><span class="annot"><span class="annottext">PathTemplate
+</span><a href="#local-6989586621679569913"><span class="hs-identifier hs-var">template</span></a></span></span><span> </span><span id="local-6989586621679569914"><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679569914"><span class="hs-identifier hs-var">pkg_descr</span></a></span></span><span> </span><span id="local-6989586621679569915"><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679569915"><span class="hs-identifier hs-var">lbi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-199"></span><span>  </span><span class="annot"><span class="annottext">PathTemplate -&gt; FilePath
 </span><a href="Distribution.Simple.InstallDirs.html#fromPathTemplate"><span class="hs-identifier hs-var">fromPathTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">(PathTemplate -&gt; FilePath) -&gt; PathTemplate -&gt; FilePath
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PathTemplateEnv -&gt; PathTemplate -&gt; PathTemplate
 </span><a href="Distribution.Simple.InstallDirs.html#substPathTemplate"><span class="hs-identifier hs-var">substPathTemplate</span></a></span><span> </span><span class="annot"><span class="annottext">PathTemplateEnv
-</span><a href="#local-6989586621679498465"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">PathTemplate
-</span><a href="#local-6989586621679498460"><span class="hs-identifier hs-var">template</span></a></span><span>
-</span><span id="line-187"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-188"></span><span>    </span><span id="local-6989586621679498465"><span class="annot"><span class="annottext">env :: PathTemplateEnv
-</span><a href="#local-6989586621679498465"><span class="hs-identifier hs-var hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-189"></span><span>      </span><span class="annot"><span class="annottext">PackageIdentifier
+</span><a href="#local-6989586621679569918"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="annot"><span class="annottext">PathTemplate
+</span><a href="#local-6989586621679569913"><span class="hs-identifier hs-var">template</span></a></span><span>
+</span><span id="line-200"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-201"></span><span>    </span><span id="local-6989586621679569918"><span class="annot"><span class="annottext">env :: PathTemplateEnv
+</span><a href="#local-6989586621679569918"><span class="hs-identifier hs-var hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-202"></span><span>      </span><span class="annot"><span class="annottext">PackageIdentifier
 -&gt; UnitId -&gt; CompilerInfo -&gt; Platform -&gt; PathTemplateEnv
 </span><a href="Distribution.Simple.InstallDirs.html#initialPathTemplateEnv"><span class="hs-identifier hs-var">initialPathTemplateEnv</span></a></span><span>
-</span><span id="line-190"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageDescription -&gt; PackageIdentifier
-</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#package"><span class="hs-identifier hs-var">PD.package</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
-</span><a href="#local-6989586621679498461"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-191"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; UnitId
+</span><span id="line-203"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageDescription -&gt; PackageIdentifier
+</span><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageDescription.html#package"><span class="hs-identifier hs-var">PD.package</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679569914"><span class="hs-identifier hs-var">pkg_descr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-204"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; UnitId
 </span><a href="Distribution.Types.LocalBuildInfo.html#localUnitId"><span class="hs-identifier hs-var">LBI.localUnitId</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498462"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-192"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Compiler -&gt; CompilerInfo
+</span><a href="#local-6989586621679569915"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-205"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Compiler -&gt; CompilerInfo
 </span><a href="Distribution.Simple.Compiler.html#compilerInfo"><span class="hs-identifier hs-var">compilerInfo</span></a></span><span> </span><span class="annot"><span class="annottext">(Compiler -&gt; CompilerInfo) -&gt; Compiler -&gt; CompilerInfo
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Compiler
 </span><a href="Distribution.Types.LocalBuildInfo.html#compiler"><span class="hs-identifier hs-var">LBI.compiler</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498462"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-193"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Platform
+</span><a href="#local-6989586621679569915"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-206"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Platform
 </span><a href="Distribution.Types.LocalBuildInfo.html#hostPlatform"><span class="hs-identifier hs-var">LBI.hostPlatform</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
-</span><a href="#local-6989586621679498462"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-194"></span></pre></body></html>
+</span><a href="#local-6989586621679569915"><span class="hs-identifier hs-var">lbi</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span></pre></body></html>

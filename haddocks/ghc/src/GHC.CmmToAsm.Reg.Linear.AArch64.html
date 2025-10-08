@@ -3,16 +3,16 @@
 </span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.html"><span class="hs-identifier">GHC.Prelude</span></a></span><span>
 </span><span id="line-4"></span><span>
 </span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.AArch64.Regs.html"><span class="hs-identifier">GHC.CmmToAsm.AArch64.Regs</span></a></span><span>
-</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.Class.html"><span class="hs-identifier">GHC.Platform.Reg.Class</span></a></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.Class.Unified.html"><span class="hs-identifier">GHC.Platform.Reg.Class.Unified</span></a></span><span>
 </span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html"><span class="hs-identifier">GHC.Platform.Reg</span></a></span><span>
 </span><span id="line-8"></span><span>
 </span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html"><span class="hs-identifier">GHC.Utils.Outputable</span></a></span><span>
 </span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.html"><span class="hs-identifier">GHC.Utils.Panic</span></a></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.html"><span class="hs-identifier">GHC.Platform</span></a></span><span>
-</span><span id="line-12"></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Word.html/Data.Word.html"><span class="hs-identifier">Data.Word</span></a></span><span>
-</span><span id="line-14"></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//GHC.Stack.html/GHC.Stack.html"><span class="hs-identifier">GHC.Stack</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Misc.html"><span class="hs-identifier">GHC.Utils.Misc</span></a></span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Utils.Misc.html#HasDebugCallStack"><span class="hs-identifier">HasDebugCallStack</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Platform.html"><span class="hs-identifier">GHC.Platform</span></a></span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Word.html"><span class="hs-identifier">Data.Word</span></a></span><span>
+</span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span class="hs-comment">-- AArch64 has 32 64bit general purpose register r0..r30, and zr/sp</span><span>
 </span><span id="line-17"></span><span class="hs-comment">-- AArch64 has 32 128bit floating point registers v0..v31 as part of the NEON</span><span>
 </span><span id="line-18"></span><span class="hs-comment">-- extension in Armv8-A.</span><span>
@@ -45,29 +45,29 @@
 </span><span id="line-45"></span><span>
 </span><span id="line-46"></span><span class="hs-keyword">data</span><span> </span><span id="FreeRegs"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-var">FreeRegs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FreeRegs"><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-var">FreeRegs</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span>
 </span><span id="line-47"></span><span>
-</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682633542"><span id="local-6989586621682633547"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>  </span><span id="local-6989586621682633550"><span class="annot"><span class="annottext">show :: FreeRegs -&gt; String
-</span><a href="#local-6989586621682633550"><span class="hs-identifier hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682633552"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633552"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682633553"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633553"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682826955"><span id="local-6989586621682826960"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621682826963"><span class="annot"><span class="annottext">show :: FreeRegs -&gt; String
+</span><a href="#local-6989586621682826963"><span class="hs-identifier hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682826965"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682826965"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682826966"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682826966"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;FreeRegs: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; String
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#showBits"><span class="hs-identifier hs-var">showBits</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633552"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682826965"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;; &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; String
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#showBits"><span class="hs-identifier hs-var">showBits</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633553"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><a href="#local-6989586621682826966"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-50"></span><span>
 </span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-52"></span><span>    </span><span id="local-6989586621682633591"><span class="annot"><span class="annottext">ppr :: FreeRegs -&gt; SDoc
-</span><a href="#local-6989586621682633591"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682633593"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633593"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682633594"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633594"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621682827004"><span class="annot"><span class="annottext">ppr :: FreeRegs -&gt; SDoc
+</span><a href="#local-6989586621682827004"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682827006"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827006"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682827007"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827007"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;   &quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -77,15 +77,15 @@ forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) a b.
 Foldable t =&gt;
 (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
-</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682633598"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633598"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621682633599"><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682633599"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; SDoc
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682827011"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827011"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621682827012"><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682827012"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; SDoc
 forall {doc}. IsLine doc =&gt; Int -&gt; doc
-</span><a href="#local-6989586621682633600"><span class="hs-identifier hs-var">pad_int</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633598"><span class="hs-identifier hs-var">i</span></a></span><span>    </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682827013"><span class="hs-identifier hs-var">pad_int</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827011"><span class="hs-identifier hs-var">i</span></a></span><span>    </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682633599"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><a href="#local-6989586621682827012"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
@@ -103,16 +103,16 @@ forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) a b.
 Foldable t =&gt;
 (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
-</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682633602"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633602"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621682633603"><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682633603"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; SDoc
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682827015"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827015"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621682827016"><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682827016"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; SDoc
 forall {a} {doc}. (Bits a, IsLine doc) =&gt; a -&gt; Int -&gt; doc
-</span><a href="#local-6989586621682633604"><span class="hs-identifier hs-var">show_bit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633593"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633602"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682827017"><span class="hs-identifier hs-var">show_bit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827006"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827015"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682633603"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><a href="#local-6989586621682827016"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
@@ -130,25 +130,25 @@ forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) a b.
 Foldable t =&gt;
 (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
-</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682633605"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633605"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621682633606"><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682633606"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; SDoc
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682827018"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827018"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621682827019"><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682827019"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; SDoc
 forall {a} {doc}. (Bits a, IsLine doc) =&gt; a -&gt; Int -&gt; doc
-</span><a href="#local-6989586621682633604"><span class="hs-identifier hs-var">show_bit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633594"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633605"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682827017"><span class="hs-identifier hs-var">show_bit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827007"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827018"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621682633606"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><a href="#local-6989586621682827019"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">31</span></span><span class="hs-special">]</span><span>
-</span><span id="line-55"></span><span>      </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682633600"><span class="annot"><span class="annottext">pad_int :: Int -&gt; doc
-</span><a href="#local-6989586621682633600"><span class="hs-identifier hs-var hs-var">pad_int</span></a></span></span><span> </span><span id="local-6989586621682633618"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633618"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633618"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><span id="line-55"></span><span>      </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621682827013"><span class="annot"><span class="annottext">pad_int :: Int -&gt; doc
+</span><a href="#local-6989586621682827013"><span class="hs-identifier hs-var hs-var">pad_int</span></a></span></span><span> </span><span id="local-6989586621682827031"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827031"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827031"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; doc
@@ -159,25 +159,25 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; doc
 forall {doc}. IsLine doc =&gt; Int -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633618"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-56"></span><span>            </span><span class="annot"><a href="#local-6989586621682633600"><span class="hs-identifier hs-var">pad_int</span></a></span><span> </span><span id="local-6989586621682633623"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633623"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; doc
+</span><a href="#local-6989586621682827031"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-56"></span><span>            </span><span class="annot"><a href="#local-6989586621682827013"><span class="hs-identifier hs-var">pad_int</span></a></span><span> </span><span id="local-6989586621682827036"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827036"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; doc
 forall {doc}. IsLine doc =&gt; Int -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633623"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682827036"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-57"></span><span>            </span><span class="hs-comment">-- remember bit = 1 means it's available.</span><span>
-</span><span id="line-58"></span><span>            </span><span id="local-6989586621682633604"><span class="annot"><span class="annottext">show_bit :: a -&gt; Int -&gt; doc
-</span><a href="#local-6989586621682633604"><span class="hs-identifier hs-var hs-var">show_bit</span></a></span></span><span> </span><span id="local-6989586621682633634"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682633634"><span class="hs-identifier hs-var">bits</span></a></span></span><span> </span><span id="local-6989586621682633635"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633635"><span class="hs-identifier hs-var">bit</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int -&gt; Bool
+</span><span id="line-58"></span><span>            </span><span id="local-6989586621682827017"><span class="annot"><span class="annottext">show_bit :: a -&gt; Int -&gt; doc
+</span><a href="#local-6989586621682827017"><span class="hs-identifier hs-var hs-var">show_bit</span></a></span></span><span> </span><span id="local-6989586621682827047"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682827047"><span class="hs-identifier hs-var">bits</span></a></span></span><span> </span><span id="local-6989586621682827048"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827048"><span class="hs-identifier hs-var">bit</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int -&gt; Bool
 forall a. Bits a =&gt; a -&gt; Int -&gt; Bool
 </span><span class="hs-identifier hs-var">testBit</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621682633634"><span class="hs-identifier hs-var">bits</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633635"><span class="hs-identifier hs-var">bit</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; doc
+</span><a href="#local-6989586621682827047"><span class="hs-identifier hs-var">bits</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827048"><span class="hs-identifier hs-var">bit</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; doc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;  &quot;</span></span><span>
-</span><span id="line-59"></span><span>            </span><span class="annot"><a href="#local-6989586621682633604"><span class="hs-identifier hs-var">show_bit</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span id="line-59"></span><span>            </span><span class="annot"><a href="#local-6989586621682827017"><span class="hs-identifier hs-var">show_bit</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span>    </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; doc
 forall doc. IsLine doc =&gt; String -&gt; doc
@@ -193,67 +193,67 @@ forall doc. IsLine doc =&gt; String -&gt; doc
 </span><span id="line-63"></span><span>
 </span><span id="line-64"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#showBits"><span class="hs-identifier hs-type">showBits</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word32</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-65"></span><span id="showBits"><span class="annot"><span class="annottext">showBits :: Word32 -&gt; String
-</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#showBits"><span class="hs-identifier hs-var hs-var">showBits</span></a></span></span><span> </span><span id="local-6989586621682633638"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633638"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Char) -&gt; [Int] -&gt; String
+</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#showBits"><span class="hs-identifier hs-var hs-var">showBits</span></a></span></span><span> </span><span id="local-6989586621682827051"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827051"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Char) -&gt; [Int] -&gt; String
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682633639"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633639"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Bool
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682827052"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827052"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Bool
 forall a. Bits a =&gt; a -&gt; Int -&gt; Bool
 </span><span class="hs-identifier hs-var">testBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633638"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633639"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621682827051"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827052"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'1'</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'0'</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">31</span></span><span class="hs-special">]</span><span>
 </span><span id="line-66"></span><span>
 </span><span id="line-67"></span><span class="hs-comment">-- FR instance implementation (See Linear.FreeRegs)</span><span>
-</span><span id="line-68"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#allocateReg"><span class="hs-identifier hs-type">allocateReg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html#RealReg"><span class="hs-identifier hs-type">RealReg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span>
-</span><span id="line-69"></span><span id="allocateReg"><span class="annot"><span class="annottext">allocateReg :: HasCallStack =&gt; RealReg -&gt; FreeRegs -&gt; FreeRegs
-</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#allocateReg"><span class="hs-identifier hs-var hs-var">allocateReg</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Platform.Reg.html#RealRegSingle"><span class="hs-identifier hs-type">RealRegSingle</span></a></span><span> </span><span id="local-6989586621682633667"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682633668"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633668"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682633669"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633669"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#allocateReg"><span class="hs-identifier hs-type">allocateReg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Utils.Misc.html#HasDebugCallStack"><span class="hs-identifier hs-type">HasDebugCallStack</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html#RealReg"><span class="hs-identifier hs-type">RealReg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span>
+</span><span id="line-69"></span><span id="allocateReg"><span class="annot"><span class="annottext">allocateReg :: HasDebugCallStack =&gt; RealReg -&gt; FreeRegs -&gt; FreeRegs
+</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#allocateReg"><span class="hs-identifier hs-var hs-var">allocateReg</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Platform.Reg.html#RealRegSingle"><span class="hs-identifier hs-type">RealRegSingle</span></a></span><span> </span><span id="local-6989586621682827082"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682827083"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827083"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682827084"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827084"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-70"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">31</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Bool
 forall a. Bits a =&gt; a -&gt; Int -&gt; Bool
 </span><span class="hs-identifier hs-var">testBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633669"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827084"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Word32 -&gt; FreeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-var">FreeRegs</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633668"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Word32
-forall a. Bits a =&gt; a -&gt; Int -&gt; a
-</span><span class="hs-identifier hs-var">clearBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633669"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827083"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Word32
+forall a. (Num a, Bits a) =&gt; a -&gt; Int -&gt; a
+</span><a href="GHC.Prelude.Basic.html#clearBit"><span class="hs-identifier hs-var">clearBit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827084"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-71"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Bool
 forall a. Bits a =&gt; a -&gt; Int -&gt; Bool
 </span><span class="hs-identifier hs-var">testBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633668"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Word32 -&gt; FreeRegs
+</span><a href="#local-6989586621682827083"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Word32 -&gt; FreeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-var">FreeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Word32
-forall a. Bits a =&gt; a -&gt; Int -&gt; a
-</span><span class="hs-identifier hs-var">clearBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633668"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633669"><span class="hs-identifier hs-var">f</span></a></span><span>
+forall a. (Num a, Bits a) =&gt; a -&gt; Int -&gt; a
+</span><a href="GHC.Prelude.Basic.html#clearBit"><span class="hs-identifier hs-var">clearBit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827083"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827084"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-72"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">31</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; FreeRegs
@@ -266,7 +266,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
@@ -276,7 +276,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; String
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#showBits"><span class="hs-identifier hs-var">showBits</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633669"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><a href="#local-6989586621682827084"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-73"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; FreeRegs
 forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
@@ -291,14 +291,14 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633667"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><a href="#local-6989586621682827082"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;; &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; String
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#showBits"><span class="hs-identifier hs-var">showBits</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633668"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682827083"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="hs-comment">-- we start from 28 downwards... the logic is similar to the ppc logic.</span><span>
 </span><span id="line-76"></span><span class="hs-comment">-- 31 is Stack Pointer</span><span>
@@ -344,79 +344,76 @@ def CC_AArch64_GHC : CallingConv&lt;[
 </span><span id="line-116"></span><span>
 </span><span id="line-117"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#getFreeRegs"><span class="hs-identifier hs-type">getFreeRegs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.Class.html#RegClass"><span class="hs-identifier hs-type">RegClass</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Platform.Reg.html#RealReg"><span class="hs-identifier hs-type">RealReg</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-118"></span><span id="getFreeRegs"><span class="annot"><span class="annottext">getFreeRegs :: RegClass -&gt; FreeRegs -&gt; [RealReg]
-</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#getFreeRegs"><span class="hs-identifier hs-var hs-var">getFreeRegs</span></a></span></span><span> </span><span id="local-6989586621682633676"><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682633676"><span class="hs-identifier hs-var">cls</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682633677"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633677"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682633678"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633678"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-119"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.Platform.Reg.Class.html#RcFloat"><span class="hs-identifier hs-var">RcFloat</span></a></span><span>   </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682633676"><span class="hs-identifier hs-var">cls</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- For now we only support double and integer registers, floats will need to be promoted.</span><span>
-</span><span id="line-120"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.Platform.Reg.Class.html#RcDouble"><span class="hs-identifier hs-var">RcDouble</span></a></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682633676"><span class="hs-identifier hs-var">cls</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Word32 -&gt; Int -&gt; [RealReg]
+</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#getFreeRegs"><span class="hs-identifier hs-var hs-var">getFreeRegs</span></a></span></span><span> </span><span id="local-6989586621682827091"><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682827091"><span class="hs-identifier hs-var">cls</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682827092"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827092"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682827093"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827093"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">RegClass
+</span><a href="#local-6989586621682827091"><span class="hs-identifier hs-var">cls</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-120"></span><span>    </span><span class="annot"><span class="annottext">RegClass
+</span><a href="GHC.Platform.Reg.Class.Unified.html#RcFloatOrVector"><span class="hs-identifier hs-var">RcFloatOrVector</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Word32 -&gt; Int -&gt; [RealReg]
 forall {t}. Bits t =&gt; Int -&gt; t -&gt; Int -&gt; [RealReg]
-</span><a href="#local-6989586621682633681"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827095"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633678"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827093"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">31</span></span><span>
-</span><span id="line-121"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="GHC.Platform.Reg.Class.html#RcInteger"><span class="hs-identifier hs-var">RcInteger</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RegClass
-</span><a href="#local-6989586621682633676"><span class="hs-identifier hs-var">cls</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Word32 -&gt; Int -&gt; [RealReg]
+</span><span id="line-121"></span><span>    </span><span class="annot"><span class="annottext">RegClass
+</span><a href="GHC.Platform.Reg.Class.Unified.html#RcInteger"><span class="hs-identifier hs-var">RcInteger</span></a></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Word32 -&gt; Int -&gt; [RealReg]
 forall {t}. Bits t =&gt; Int -&gt; t -&gt; Int -&gt; [RealReg]
-</span><a href="#local-6989586621682633681"><span class="hs-identifier hs-var">go</span></a></span><span>  </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827095"><span class="hs-identifier hs-var">go</span></a></span><span>  </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633677"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827092"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">18</span></span><span>
 </span><span id="line-122"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-123"></span><span>        </span><span id="local-6989586621682633681"><span class="annot"><span class="annottext">go :: Int -&gt; t -&gt; Int -&gt; [RealReg]
-</span><a href="#local-6989586621682633681"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span id="line-123"></span><span>        </span><span id="local-6989586621682827095"><span class="annot"><span class="annottext">go :: Int -&gt; t -&gt; Int -&gt; [RealReg]
+</span><a href="#local-6989586621682827095"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span>   </span><span class="annot"><span class="annottext">t
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682633694"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633694"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633694"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682827108"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827108"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827108"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-124"></span><span>        </span><span class="annot"><a href="#local-6989586621682633681"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621682633695"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633695"><span class="hs-identifier hs-var">off</span></a></span></span><span> </span><span id="local-6989586621682633696"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621682633696"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621682633697"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633697"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">t -&gt; Int -&gt; Bool
+</span><span id="line-124"></span><span>        </span><span class="annot"><a href="#local-6989586621682827095"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621682827109"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827109"><span class="hs-identifier hs-var">off</span></a></span></span><span> </span><span id="local-6989586621682827110"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621682827110"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621682827111"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827111"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">t -&gt; Int -&gt; Bool
 forall a. Bits a =&gt; a -&gt; Int -&gt; Bool
 </span><span class="hs-identifier hs-var">testBit</span></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621682633696"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633697"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; RealReg
+</span><a href="#local-6989586621682827110"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827111"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; RealReg
 </span><a href="GHC.Platform.Reg.html#RealRegSingle"><span class="hs-identifier hs-var">RealRegSingle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633695"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827109"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633697"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RealReg -&gt; [RealReg] -&gt; [RealReg]
+</span><a href="#local-6989586621682827111"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RealReg -&gt; [RealReg] -&gt; [RealReg]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; t -&gt; Int -&gt; [RealReg]
-</span><a href="#local-6989586621682633681"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633695"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621682633696"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; [RealReg]) -&gt; Int -&gt; [RealReg]
+</span><a href="#local-6989586621682827095"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827109"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621682827110"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; [RealReg]) -&gt; Int -&gt; [RealReg]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633697"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827111"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-125"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; t -&gt; Int -&gt; [RealReg]
-</span><a href="#local-6989586621682633681"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633695"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621682633696"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; [RealReg]) -&gt; Int -&gt; [RealReg]
+</span><a href="#local-6989586621682827095"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827109"><span class="hs-identifier hs-var">off</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621682827110"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; [RealReg]) -&gt; Int -&gt; [RealReg]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633697"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827111"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-126"></span><span>
 </span><span id="line-127"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#initFreeRegs"><span class="hs-identifier hs-type">initFreeRegs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span>
 </span><span id="line-128"></span><span id="initFreeRegs"><span class="annot"><span class="annottext">initFreeRegs :: Platform -&gt; FreeRegs
-</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#initFreeRegs"><span class="hs-identifier hs-var hs-var">initFreeRegs</span></a></span></span><span> </span><span id="local-6989586621682633701"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682633701"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(FreeRegs -&gt; RealReg -&gt; FreeRegs)
+</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#initFreeRegs"><span class="hs-identifier hs-var hs-var">initFreeRegs</span></a></span></span><span> </span><span id="local-6989586621682827115"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682827115"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(FreeRegs -&gt; RealReg -&gt; FreeRegs)
 -&gt; FreeRegs -&gt; [RealReg] -&gt; FreeRegs
 forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) b a.
@@ -425,29 +422,29 @@ Foldable t =&gt;
 </span><span class="hs-identifier hs-var">foldl'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(RealReg -&gt; FreeRegs -&gt; FreeRegs)
 -&gt; FreeRegs -&gt; RealReg -&gt; FreeRegs
 forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
-</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">HasCallStack =&gt; RealReg -&gt; FreeRegs -&gt; FreeRegs
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; RealReg -&gt; FreeRegs -&gt; FreeRegs
 RealReg -&gt; FreeRegs -&gt; FreeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#releaseReg"><span class="hs-identifier hs-var">releaseReg</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">FreeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#noFreeRegs"><span class="hs-identifier hs-var">noFreeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Platform -&gt; [RealReg]
 </span><a href="GHC.CmmToAsm.AArch64.Regs.html#allocatableRegs"><span class="hs-identifier hs-var">allocatableRegs</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682633701"><span class="hs-identifier hs-var">platform</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682827115"><span class="hs-identifier hs-var">platform</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-129"></span><span>
-</span><span id="line-130"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#releaseReg"><span class="hs-identifier hs-type">releaseReg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCallStack</span></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html#RealReg"><span class="hs-identifier hs-type">RealReg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span>
-</span><span id="line-131"></span><span id="releaseReg"><span class="annot"><span class="annottext">releaseReg :: HasCallStack =&gt; RealReg -&gt; FreeRegs -&gt; FreeRegs
-</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#releaseReg"><span class="hs-identifier hs-var hs-var">releaseReg</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Platform.Reg.html#RealRegSingle"><span class="hs-identifier hs-type">RealRegSingle</span></a></span><span> </span><span id="local-6989586621682633733"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682633734"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633734"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682633735"><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633735"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#releaseReg"><span class="hs-identifier hs-type">releaseReg</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Utils.Misc.html#HasDebugCallStack"><span class="hs-identifier hs-type">HasDebugCallStack</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="GHC.Platform.Reg.html#RealReg"><span class="hs-identifier hs-type">RealReg</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span>
+</span><span id="line-131"></span><span id="releaseReg"><span class="annot"><span class="annottext">releaseReg :: HasDebugCallStack =&gt; RealReg -&gt; FreeRegs -&gt; FreeRegs
+</span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#releaseReg"><span class="hs-identifier hs-var hs-var">releaseReg</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Platform.Reg.html#RealRegSingle"><span class="hs-identifier hs-type">RealRegSingle</span></a></span><span> </span><span id="local-6989586621682827149"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-type">FreeRegs</span></a></span><span> </span><span id="local-6989586621682827150"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827150"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621682827151"><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827151"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-132"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">31</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Bool
 forall a. Bits a =&gt; a -&gt; Int -&gt; Bool
 </span><span class="hs-identifier hs-var">testBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633735"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827151"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; FreeRegs
@@ -461,20 +458,20 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; SDoc
 forall {doc}. IsLine doc =&gt; Int -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-133"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Bool
 forall a. Bits a =&gt; a -&gt; Int -&gt; Bool
 </span><span class="hs-identifier hs-var">testBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633734"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; FreeRegs
+</span><a href="#local-6989586621682827150"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; FreeRegs
 forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 </span><a href="GHC.Utils.Panic.html#pprPanic"><span class="hs-identifier hs-var">pprPanic</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Linear.AArch64.releaseReg&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; SDoc
@@ -485,27 +482,27 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; SDoc
 forall {doc}. IsLine doc =&gt; Int -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-134"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">31</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Word32 -&gt; FreeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-var">FreeRegs</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633734"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Word32
-forall a. Bits a =&gt; a -&gt; Int -&gt; a
-</span><span class="hs-identifier hs-var">setBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633735"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682827150"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Word32
+forall a. (Num a, Bits a) =&gt; a -&gt; Int -&gt; a
+</span><a href="GHC.Prelude.Basic.html#setBit"><span class="hs-identifier hs-var">setBit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827151"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">32</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-135"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word32 -&gt; Word32 -&gt; FreeRegs
 </span><a href="GHC.CmmToAsm.Reg.Linear.AArch64.html#FreeRegs"><span class="hs-identifier hs-var">FreeRegs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word32 -&gt; Int -&gt; Word32
-forall a. Bits a =&gt; a -&gt; Int -&gt; a
-</span><span class="hs-identifier hs-var">setBit</span></span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633734"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682633733"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Word32
-</span><a href="#local-6989586621682633735"><span class="hs-identifier hs-var">f</span></a></span><span>
+forall a. (Num a, Bits a) =&gt; a -&gt; Int -&gt; a
+</span><a href="GHC.Prelude.Basic.html#setBit"><span class="hs-identifier hs-var">setBit</span></a></span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827150"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682827149"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Word32
+</span><a href="#local-6989586621682827151"><span class="hs-identifier hs-var">f</span></a></span><span>
 </span><span id="line-136"></span></pre></body></html>

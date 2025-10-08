@@ -30,31 +30,31 @@ generated code which need to be emitted as sequences of StgWords.
 </span><span id="line-30"></span><span id="mkBitmap"><span class="annot"><span class="annottext">mkBitmap :: Platform -&gt; [Bool] -&gt; Bitmap
 </span><a href="GHC.Data.Bitmap.html#mkBitmap"><span class="hs-identifier hs-var hs-var">mkBitmap</span></a></span></span><span> </span><span class="annot"><span class="annottext">Platform
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-31"></span><span class="annot"><a href="GHC.Data.Bitmap.html#mkBitmap"><span class="hs-identifier hs-var">mkBitmap</span></a></span><span> </span><span id="local-6989586621682370656"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370656"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370657"><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370657"><span class="hs-identifier hs-var">stuff</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; [Bool] -&gt; StgWord
+</span><span id="line-31"></span><span class="annot"><a href="GHC.Data.Bitmap.html#mkBitmap"><span class="hs-identifier hs-var">mkBitmap</span></a></span><span> </span><span id="local-6989586621682520218"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520218"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520219"><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621682520219"><span class="hs-identifier hs-var">stuff</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; [Bool] -&gt; StgWord
 </span><a href="GHC.Data.Bitmap.html#chunkToBitmap"><span class="hs-identifier hs-var">chunkToBitmap</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370656"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370659"><span class="hs-identifier hs-var">chunk</span></a></span><span> </span><span class="annot"><span class="annottext">StgWord -&gt; Bitmap -&gt; Bitmap
+</span><a href="#local-6989586621682520218"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621682520221"><span class="hs-identifier hs-var">chunk</span></a></span><span> </span><span class="annot"><span class="annottext">StgWord -&gt; Bitmap -&gt; Bitmap
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Platform -&gt; [Bool] -&gt; Bitmap
 </span><a href="GHC.Data.Bitmap.html#mkBitmap"><span class="hs-identifier hs-var">mkBitmap</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370656"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370660"><span class="hs-identifier hs-var">rest</span></a></span><span>
-</span><span id="line-32"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682370659"><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370659"><span class="hs-identifier hs-var">chunk</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682370660"><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370660"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Bool] -&gt; ([Bool], [Bool])
+</span><a href="#local-6989586621682520218"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621682520222"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682520221"><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621682520221"><span class="hs-identifier hs-var">chunk</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682520222"><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621682520222"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Bool] -&gt; ([Bool], [Bool])
 forall a. Int -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">splitAt</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Platform -&gt; Int
 </span><a href="GHC.Platform.html#platformWordSizeInBits"><span class="hs-identifier hs-var">platformWordSizeInBits</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370656"><span class="hs-identifier hs-var">platform</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370657"><span class="hs-identifier hs-var">stuff</span></a></span><span>
+</span><a href="#local-6989586621682520218"><span class="hs-identifier hs-var">platform</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621682520219"><span class="hs-identifier hs-var">stuff</span></a></span><span>
 </span><span id="line-33"></span><span>
 </span><span id="line-34"></span><span class="annot"><a href="GHC.Data.Bitmap.html#chunkToBitmap"><span class="hs-identifier hs-type">chunkToBitmap</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Runtime.Heap.Layout.html#StgWord"><span class="hs-identifier hs-type">StgWord</span></a></span><span>
 </span><span id="line-35"></span><span id="chunkToBitmap"><span class="annot"><span class="annottext">chunkToBitmap :: Platform -&gt; [Bool] -&gt; StgWord
-</span><a href="GHC.Data.Bitmap.html#chunkToBitmap"><span class="hs-identifier hs-var hs-var">chunkToBitmap</span></a></span></span><span> </span><span id="local-6989586621682370663"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370663"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370664"><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370664"><span class="hs-identifier hs-var">chunk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Data.Bitmap.html#chunkToBitmap"><span class="hs-identifier hs-var hs-var">chunkToBitmap</span></a></span></span><span> </span><span id="local-6989586621682520225"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520225"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520226"><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621682520226"><span class="hs-identifier hs-var">chunk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-36"></span><span>  </span><span class="annot"><span class="annottext">(StgWord -&gt; StgWord -&gt; StgWord) -&gt; StgWord -&gt; Bitmap -&gt; StgWord
 forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) b a.
@@ -64,27 +64,27 @@ Foldable t =&gt;
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">(.|.)</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Platform -&gt; Integer -&gt; StgWord
 </span><a href="GHC.Runtime.Heap.Layout.html#toStgWord"><span class="hs-identifier hs-var">toStgWord</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370663"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621682520225"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Int -&gt; StgWord
-</span><a href="#local-6989586621682370668"><span class="hs-identifier hs-var">oneAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370669"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span id="local-6989586621682370669"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370669"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; [Int] -&gt; [(Bool, Int)]
+</span><a href="#local-6989586621682520230"><span class="hs-identifier hs-var">oneAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520231"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span id="local-6989586621682520231"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520231"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; [Int] -&gt; [(Bool, Int)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[Bool]
-</span><a href="#local-6989586621682370664"><span class="hs-identifier hs-var">chunk</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520226"><span class="hs-identifier hs-var">chunk</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-37"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-38"></span><span>    </span><span class="annot"><a href="#local-6989586621682370668"><span class="hs-identifier hs-type">oneAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Runtime.Heap.Layout.html#StgWord"><span class="hs-identifier hs-type">StgWord</span></a></span><span>
-</span><span id="line-39"></span><span>    </span><span id="local-6989586621682370668"><span class="annot"><span class="annottext">oneAt :: Int -&gt; StgWord
-</span><a href="#local-6989586621682370668"><span class="hs-identifier hs-var hs-var">oneAt</span></a></span></span><span> </span><span id="local-6989586621682370670"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370670"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Integer -&gt; StgWord
+</span><span id="line-38"></span><span>    </span><span class="annot"><a href="#local-6989586621682520230"><span class="hs-identifier hs-type">oneAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Runtime.Heap.Layout.html#StgWord"><span class="hs-identifier hs-type">StgWord</span></a></span><span>
+</span><span id="line-39"></span><span>    </span><span id="local-6989586621682520230"><span class="annot"><span class="annottext">oneAt :: Int -&gt; StgWord
+</span><a href="#local-6989586621682520230"><span class="hs-identifier hs-var hs-var">oneAt</span></a></span></span><span> </span><span id="local-6989586621682520232"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520232"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Integer -&gt; StgWord
 </span><a href="GHC.Runtime.Heap.Layout.html#toStgWord"><span class="hs-identifier hs-var">toStgWord</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370663"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621682520225"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">StgWord -&gt; Int -&gt; StgWord
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftL"><span class="hs-operator hs-var">`shiftL`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370670"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682520232"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-40"></span><span>
 </span><span id="line-41"></span><span class="hs-comment">-- | Make a bitmap where the slots specified are the /zeros/ in the bitmap.</span><span>
 </span><span id="line-42"></span><span class="hs-comment">-- eg. @[0,1,3], size 4 ==&gt; 0x4@  (we leave any bits outside the size as zero,</span><span>
@@ -96,39 +96,39 @@ forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><span id="line-48"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span>    </span><span class="annot"><span class="hs-comment">-- ^ sorted indices of zeros free of duplicates</span></span><span>
 </span><span id="line-49"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Bitmap.html#Bitmap"><span class="hs-identifier hs-type">Bitmap</span></a></span><span>
 </span><span id="line-50"></span><span id="intsToReverseBitmap"><span class="annot"><span class="annottext">intsToReverseBitmap :: Platform -&gt; Int -&gt; [Int] -&gt; Bitmap
-</span><a href="GHC.Data.Bitmap.html#intsToReverseBitmap"><span class="hs-identifier hs-var hs-var">intsToReverseBitmap</span></a></span></span><span> </span><span id="local-6989586621682370672"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370672"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682370673"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370673"><span class="hs-identifier hs-var">size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; Bitmap
-</span><a href="#local-6989586621682370674"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="GHC.Data.Bitmap.html#intsToReverseBitmap"><span class="hs-identifier hs-var hs-var">intsToReverseBitmap</span></a></span></span><span> </span><span id="local-6989586621682520234"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520234"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span id="local-6989586621682520235"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520235"><span class="hs-identifier hs-var">size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; Bitmap
+</span><a href="#local-6989586621682520236"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span>
 </span><span id="line-51"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-52"></span><span>    </span><span id="local-6989586621682370675"><span class="annot"><span class="annottext">word_sz :: Int
-</span><a href="#local-6989586621682370675"><span class="hs-identifier hs-var hs-var">word_sz</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Int
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621682520237"><span class="annot"><span class="annottext">word_sz :: Int
+</span><a href="#local-6989586621682520237"><span class="hs-identifier hs-var hs-var">word_sz</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Int
 </span><a href="GHC.Platform.html#platformWordSizeInBits"><span class="hs-identifier hs-var">platformWordSizeInBits</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370672"><span class="hs-identifier hs-var">platform</span></a></span><span>
-</span><span id="line-53"></span><span>    </span><span class="annot"><a href="#local-6989586621682370676"><span class="hs-identifier hs-type">oneAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Runtime.Heap.Layout.html#StgWord"><span class="hs-identifier hs-type">StgWord</span></a></span><span>
-</span><span id="line-54"></span><span>    </span><span id="local-6989586621682370676"><span class="annot"><span class="annottext">oneAt :: Int -&gt; StgWord
-</span><a href="#local-6989586621682370676"><span class="hs-identifier hs-var hs-var">oneAt</span></a></span></span><span> </span><span id="local-6989586621682370677"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370677"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Integer -&gt; StgWord
+</span><a href="#local-6989586621682520234"><span class="hs-identifier hs-var">platform</span></a></span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><a href="#local-6989586621682520238"><span class="hs-identifier hs-type">oneAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Runtime.Heap.Layout.html#StgWord"><span class="hs-identifier hs-type">StgWord</span></a></span><span>
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621682520238"><span class="annot"><span class="annottext">oneAt :: Int -&gt; StgWord
+</span><a href="#local-6989586621682520238"><span class="hs-identifier hs-var hs-var">oneAt</span></a></span></span><span> </span><span id="local-6989586621682520239"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520239"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; Integer -&gt; StgWord
 </span><a href="GHC.Runtime.Heap.Layout.html#toStgWord"><span class="hs-identifier hs-var">toStgWord</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370672"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621682520234"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">StgWord -&gt; Int -&gt; StgWord
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftL"><span class="hs-operator hs-var">`shiftL`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370677"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621682520239"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span>    </span><span class="hs-comment">-- It is important that we maintain strictness here.</span><span>
 </span><span id="line-57"></span><span>    </span><span class="hs-comment">-- See Note [Strictness when building Bitmaps].</span><span>
-</span><span id="line-58"></span><span>    </span><span class="annot"><a href="#local-6989586621682370674"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Bitmap.html#Bitmap"><span class="hs-identifier hs-type">Bitmap</span></a></span><span>
-</span><span id="line-59"></span><span>    </span><span id="local-6989586621682370674"><span class="annot"><span class="annottext">go :: Int -&gt; [Int] -&gt; Bitmap
-</span><a href="#local-6989586621682370674"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682370678"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370678"><span class="hs-identifier hs-var">pos</span></a></span></span><span> </span><span id="local-6989586621682370679"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621682370679"><span class="hs-identifier hs-var">slots</span></a></span></span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><a href="#local-6989586621682520236"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Data.Bitmap.html#Bitmap"><span class="hs-identifier hs-type">Bitmap</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621682520236"><span class="annot"><span class="annottext">go :: Int -&gt; [Int] -&gt; Bitmap
+</span><a href="#local-6989586621682520236"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621682520240"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520240"><span class="hs-identifier hs-var">pos</span></a></span></span><span> </span><span id="local-6989586621682520241"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621682520241"><span class="hs-identifier hs-var">slots</span></a></span></span><span>
 </span><span id="line-60"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370673"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682520235"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370678"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682520240"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-61"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-62"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(StgWord -&gt; StgWord -&gt; StgWord) -&gt; StgWord -&gt; Bitmap -&gt; StgWord
@@ -140,59 +140,59 @@ Foldable t =&gt;
 forall a. Bits a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">xor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Platform -&gt; Integer -&gt; StgWord
 </span><a href="GHC.Runtime.Heap.Layout.html#toStgWord"><span class="hs-identifier hs-var">toStgWord</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370672"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621682370682"><span class="hs-identifier hs-var">init</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int -&gt; StgWord) -&gt; [Int] -&gt; Bitmap
+</span><a href="#local-6989586621682520234"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621682520244"><span class="hs-identifier hs-var">init</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int -&gt; StgWord) -&gt; [Int] -&gt; Bitmap
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682370683"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370683"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-glyph">-&gt;</span><span class="annot"><span class="annottext">Int -&gt; StgWord
-</span><a href="#local-6989586621682370676"><span class="hs-identifier hs-var">oneAt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370683"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621682520245"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520245"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-glyph">-&gt;</span><span class="annot"><span class="annottext">Int -&gt; StgWord
+</span><a href="#local-6989586621682520238"><span class="hs-identifier hs-var">oneAt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520245"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370678"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621682370684"><span class="hs-identifier hs-var">these</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">StgWord -&gt; Bitmap -&gt; Bitmap
+</span><a href="#local-6989586621682520240"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621682520246"><span class="hs-identifier hs-var">these</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">StgWord -&gt; Bitmap -&gt; Bitmap
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span>
 </span><span id="line-63"></span><span>          </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; Bitmap
-</span><a href="#local-6989586621682370674"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370678"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682520236"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520240"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370675"><span class="hs-identifier hs-var">word_sz</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621682370686"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><a href="#local-6989586621682520237"><span class="hs-identifier hs-var">word_sz</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621682520248"><span class="hs-identifier hs-var">rest</span></a></span><span>
 </span><span id="line-64"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-65"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682370684"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621682370684"><span class="hs-identifier hs-var">these</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682370686"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621682370686"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Bool) -&gt; [Int] -&gt; ([Int], [Int])
+</span><span id="line-65"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621682520246"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621682520246"><span class="hs-identifier hs-var">these</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621682520248"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621682520248"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Bool) -&gt; [Int] -&gt; ([Int], [Int])
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">span</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370678"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682520240"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370675"><span class="hs-identifier hs-var">word_sz</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621682370679"><span class="hs-identifier hs-var">slots</span></a></span><span>
-</span><span id="line-66"></span><span>        </span><span id="local-6989586621682370689"><span class="annot"><span class="annottext">remain :: Int
-</span><a href="#local-6989586621682370689"><span class="hs-identifier hs-var hs-var">remain</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370673"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682520237"><span class="hs-identifier hs-var">word_sz</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621682520241"><span class="hs-identifier hs-var">slots</span></a></span><span>
+</span><span id="line-66"></span><span>        </span><span id="local-6989586621682520251"><span class="annot"><span class="annottext">remain :: Int
+</span><a href="#local-6989586621682520251"><span class="hs-identifier hs-var hs-var">remain</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682520235"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370678"><span class="hs-identifier hs-var">pos</span></a></span><span>
-</span><span id="line-67"></span><span>        </span><span id="local-6989586621682370682"><span class="annot"><span class="annottext">init :: Integer
-</span><a href="#local-6989586621682370682"><span class="hs-identifier hs-var hs-var">init</span></a></span></span><span>
+</span><a href="#local-6989586621682520240"><span class="hs-identifier hs-var">pos</span></a></span><span>
+</span><span id="line-67"></span><span>        </span><span id="local-6989586621682520244"><span class="annot"><span class="annottext">init :: Integer
+</span><a href="#local-6989586621682520244"><span class="hs-identifier hs-var hs-var">init</span></a></span></span><span>
 </span><span id="line-68"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370689"><span class="hs-identifier hs-var">remain</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621682520251"><span class="hs-identifier hs-var">remain</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370675"><span class="hs-identifier hs-var">word_sz</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621682520237"><span class="hs-identifier hs-var">word_sz</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-69"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int -&gt; Integer
 forall a. Bits a =&gt; a -&gt; Int -&gt; a
 </span><a href="GHC.Prelude.Basic.html#shiftL"><span class="hs-operator hs-var">`shiftL`</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621682370689"><span class="hs-identifier hs-var">remain</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+</span><a href="#local-6989586621682520251"><span class="hs-identifier hs-var">remain</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">1</span></span><span>
@@ -225,11 +225,11 @@ packed into a single word.
 -}</span></span><span>
 </span><span id="line-97"></span><span class="annot"><a href="GHC.Data.Bitmap.html#mAX_SMALL_BITMAP_SIZE"><span class="hs-identifier hs-type">mAX_SMALL_BITMAP_SIZE</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Platform.html#Platform"><span class="hs-identifier hs-type">Platform</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-98"></span><span id="mAX_SMALL_BITMAP_SIZE"><span class="annot"><span class="annottext">mAX_SMALL_BITMAP_SIZE :: Platform -&gt; Int
-</span><a href="GHC.Data.Bitmap.html#mAX_SMALL_BITMAP_SIZE"><span class="hs-identifier hs-var hs-var">mAX_SMALL_BITMAP_SIZE</span></a></span></span><span> </span><span id="local-6989586621682370690"><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370690"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Data.Bitmap.html#mAX_SMALL_BITMAP_SIZE"><span class="hs-identifier hs-var hs-var">mAX_SMALL_BITMAP_SIZE</span></a></span></span><span> </span><span id="local-6989586621682520252"><span class="annot"><span class="annottext">Platform
+</span><a href="#local-6989586621682520252"><span class="hs-identifier hs-var">platform</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-99"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Platform -&gt; PlatformWordSize
 </span><a href="GHC.Platform.html#platformWordSize"><span class="hs-identifier hs-var">platformWordSize</span></a></span><span> </span><span class="annot"><span class="annottext">Platform
-</span><a href="#local-6989586621682370690"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682520252"><span class="hs-identifier hs-var">platform</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-100"></span><span>      </span><span class="annot"><span class="annottext">PlatformWordSize
 </span><a href="GHC.Platform.html#PW4"><span class="hs-identifier hs-var">PW4</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">27</span></span><span> </span><span class="hs-comment">-- On 32-bit: 5 bits for size, 27 bits for bitmap</span><span>

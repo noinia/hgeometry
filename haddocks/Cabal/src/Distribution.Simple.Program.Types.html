@@ -34,14 +34,14 @@
 </span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#simpleConfiguredProgram"><span class="hs-identifier">simpleConfiguredProgram</span></a></span><span>
 </span><span id="line-35"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-39"></span><span>
-</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.PackageDescription.html/Distribution.PackageDescription.html"><span class="hs-identifier">Distribution.PackageDescription</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.PackageDescription.html"><span class="hs-identifier">Distribution.PackageDescription</span></a></span><span>
 </span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
-</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Version.html/Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>
 </span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Map.html/Data.Map.html"><span class="hs-identifier">Data.Map</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Map.html"><span class="hs-identifier">Data.Map</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
 </span><span id="line-45"></span><span>
 </span><span id="line-46"></span><span class="hs-comment">-- | Represents a program which can be configured.</span><span>
 </span><span id="line-47"></span><span class="hs-comment">--</span><span>
@@ -68,7 +68,7 @@
 </span><span id="line-65"></span><span>  </span><span class="hs-comment">-- where the program was found, it returns all the other places that</span><span>
 </span><span id="line-66"></span><span>  </span><span class="hs-comment">-- were tried.</span><span>
 </span><span id="line-67"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="programFindVersion"><span class="annot"><span class="annottext">Program -&gt; Verbosity -&gt; String -&gt; IO (Maybe Version)
-</span><a href="Distribution.Simple.Program.Types.html#programFindVersion"><span class="hs-identifier hs-var hs-var">programFindVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span class="hs-special">)</span><span>
+</span><a href="Distribution.Simple.Program.Types.html#programFindVersion"><span class="hs-identifier hs-var hs-var">programFindVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-68"></span><span>  </span><span class="hs-comment">-- ^ Try to find the version of the program. For many programs this is</span><span>
 </span><span id="line-69"></span><span>  </span><span class="hs-comment">-- not possible or is not necessary so it's OK to return Nothing.</span><span>
 </span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="programPostConf"><span class="annot"><span class="annottext">Program -&gt; Verbosity -&gt; ConfiguredProgram -&gt; IO ConfiguredProgram
@@ -78,16 +78,16 @@
 </span><span id="line-73"></span><span>  </span><span class="hs-comment">-- it could add args, or environment vars.</span><span>
 </span><span id="line-74"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="programNormaliseArgs"><span class="annot"><span class="annottext">Program
 -&gt; Maybe Version -&gt; PackageDescription -&gt; [String] -&gt; [String]
-</span><a href="Distribution.Simple.Program.Types.html#programNormaliseArgs"><span class="hs-identifier hs-var hs-var">programNormaliseArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#PackageDescription"><span class="hs-identifier hs-type">PackageDescription</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><a href="Distribution.Simple.Program.Types.html#programNormaliseArgs"><span class="hs-identifier hs-var hs-var">programNormaliseArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.PackageDescription.html#PackageDescription"><span class="hs-identifier hs-type">PackageDescription</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
 </span><span id="line-75"></span><span>  </span><span class="hs-comment">-- ^ A function that filters any arguments that don't impact the output</span><span>
 </span><span id="line-76"></span><span>  </span><span class="hs-comment">-- from a commandline. Used to limit the volatility of dependency hashes</span><span>
 </span><span id="line-77"></span><span>  </span><span class="hs-comment">-- when using new-build.</span><span>
 </span><span id="line-78"></span><span>  </span><span class="hs-special">}</span><span>
 </span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679449836"><span id="local-6989586621679449841"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#Program"><span class="hs-identifier hs-type">Program</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-81"></span><span>  </span><span id="local-6989586621679449844"><span class="annot"><span class="annottext">show :: Program -&gt; String
-</span><a href="#local-6989586621679449844"><span class="hs-identifier hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Program.Types.html#Program"><span class="hs-identifier hs-type">Program</span></a></span><span> </span><span id="local-6989586621679449846"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679449846"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; ProgramSearchPath -&gt; IO (Maybe (String, [String]))
+</span><span id="line-80"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679507615"><span id="local-6989586621679507620"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#Program"><span class="hs-identifier hs-type">Program</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-81"></span><span>  </span><span id="local-6989586621679507623"><span class="annot"><span class="annottext">show :: Program -&gt; String
+</span><a href="#local-6989586621679507623"><span class="hs-identifier hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Program.Types.html#Program"><span class="hs-identifier hs-type">Program</span></a></span><span> </span><span id="local-6989586621679507625"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679507625"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; ProgramSearchPath -&gt; IO (Maybe (String, [String]))
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; String -&gt; IO (Maybe Version)
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; ConfiguredProgram -&gt; IO ConfiguredProgram
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Maybe Version -&gt; PackageDescription -&gt; [String] -&gt; [String]
@@ -95,7 +95,7 @@
 </span><span class="hs-string">&quot;Program: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679449846"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><a href="#local-6989586621679507625"><span class="hs-identifier hs-var">name</span></a></span><span>
 </span><span id="line-82"></span><span>
 </span><span id="line-83"></span><span class="hs-keyword">type</span><span> </span><span id="ProgArg"><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgArg"><span class="hs-identifier hs-var">ProgArg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-84"></span><span>
@@ -124,7 +124,22 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span id="line-107"></span><span>    </span><span id="ProgramSearchPathDir"><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramSearchPathDir"><span class="hs-identifier hs-var">ProgramSearchPathDir</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
 </span><span id="line-108"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | The system default</span></span><span>
 </span><span id="line-109"></span><span>    </span><span id="ProgramSearchPathDefault"><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramSearchPathDefault"><span class="hs-identifier hs-var">ProgramSearchPathDefault</span></a></span></span><span>
-</span><span id="line-110"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679449850"><span id="local-6989586621679449858"><span class="annot"><span class="annottext">ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool
+</span><span id="line-110"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679507629"><span id="local-6989586621679507636"><span id="local-6989586621679507640"><span class="annot"><span class="annottext">Int -&gt; ProgramSearchPathEntry -&gt; ShowS
+ProgramSearchPath -&gt; ShowS
+ProgramSearchPathEntry -&gt; String
+(Int -&gt; ProgramSearchPathEntry -&gt; ShowS)
+-&gt; (ProgramSearchPathEntry -&gt; String)
+-&gt; (ProgramSearchPath -&gt; ShowS)
+-&gt; Show ProgramSearchPathEntry
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ProgramSearchPathEntry -&gt; ShowS
+showsPrec :: Int -&gt; ProgramSearchPathEntry -&gt; ShowS
+$cshow :: ProgramSearchPathEntry -&gt; String
+show :: ProgramSearchPathEntry -&gt; String
+$cshowList :: ProgramSearchPath -&gt; ShowS
+showList :: ProgramSearchPath -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679507645"><span id="local-6989586621679507653"><span class="annot"><span class="annottext">ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool
 (ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool)
 -&gt; (ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool)
 -&gt; Eq ProgramSearchPathEntry
@@ -133,7 +148,7 @@ $c== :: ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool
 == :: ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool
 $c/= :: ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool
 /= :: ProgramSearchPathEntry -&gt; ProgramSearchPathEntry -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679449864"><span id="local-6989586621679449866"><span class="annot"><span class="annottext">(forall x. ProgramSearchPathEntry -&gt; Rep ProgramSearchPathEntry x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679507659"><span id="local-6989586621679507661"><span class="annot"><span class="annottext">(forall x. ProgramSearchPathEntry -&gt; Rep ProgramSearchPathEntry x)
 -&gt; (forall x.
     Rep ProgramSearchPathEntry x -&gt; ProgramSearchPathEntry)
 -&gt; Generic ProgramSearchPathEntry
@@ -147,8 +162,8 @@ $cto :: forall x. Rep ProgramSearchPathEntry x -&gt; ProgramSearchPathEntry
 to :: forall x. Rep ProgramSearchPathEntry x -&gt; ProgramSearchPathEntry
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-111"></span><span>
-</span><span id="line-112"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679449872"><span id="local-6989586621679449879"><span id="local-6989586621679449885"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramSearchPathEntry"><span class="hs-identifier hs-type">ProgramSearchPathEntry</span></a></span></span></span></span><span>
-</span><span id="line-113"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679449924"><span id="local-6989586621679449931"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramSearchPathEntry"><span class="hs-identifier hs-type">ProgramSearchPathEntry</span></a></span></span></span><span>
+</span><span id="line-112"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679507667"><span id="local-6989586621679507674"><span id="local-6989586621679507680"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramSearchPathEntry"><span class="hs-identifier hs-type">ProgramSearchPathEntry</span></a></span></span></span></span><span>
+</span><span id="line-113"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679507719"><span id="local-6989586621679507726"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramSearchPathEntry"><span class="hs-identifier hs-type">ProgramSearchPathEntry</span></a></span></span></span><span>
 </span><span id="line-114"></span><span>
 </span><span id="line-115"></span><span class="hs-comment">-- | Represents a program which has been configured and is thus ready to be run.</span><span>
 </span><span id="line-116"></span><span class="hs-comment">--</span><span>
@@ -160,7 +175,7 @@ to :: forall x. Rep ProgramSearchPathEntry x -&gt; ProgramSearchPathEntry
 </span><a href="Distribution.Simple.Program.Types.html#programId"><span class="hs-identifier hs-var hs-var">programId</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-122"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Just the name again</span></span><span>
 </span><span id="line-123"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="programVersion"><span class="annot"><span class="annottext">ConfiguredProgram -&gt; Maybe Version
-</span><a href="Distribution.Simple.Program.Types.html#programVersion"><span class="hs-identifier hs-var hs-var">programVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Version.html/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span>
+</span><a href="Distribution.Simple.Program.Types.html#programVersion"><span class="hs-identifier hs-var hs-var">programVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span>
 </span><span id="line-124"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The version of this program, if it is known.</span></span><span>
 </span><span id="line-125"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="programDefaultArgs"><span class="annot"><span class="annottext">ConfiguredProgram -&gt; [String]
 </span><a href="Distribution.Simple.Program.Types.html#programDefaultArgs"><span class="hs-identifier hs-var hs-var">programDefaultArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
@@ -178,7 +193,7 @@ to :: forall x. Rep ProgramSearchPathEntry x -&gt; ProgramSearchPathEntry
 </span><span id="line-135"></span><span>  </span><span class="hs-comment">-- These env vars will extend\/override the prevailing environment of</span><span>
 </span><span id="line-136"></span><span>  </span><span class="hs-comment">-- the current to form the environment for the new process.</span><span>
 </span><span id="line-137"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="programProperties"><span class="annot"><span class="annottext">ConfiguredProgram -&gt; Map String String
-</span><a href="Distribution.Simple.Program.Types.html#programProperties"><span class="hs-identifier hs-var hs-var">programProperties</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#Map"><span class="hs-identifier hs-type">Map.Map</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><a href="Distribution.Simple.Program.Types.html#programProperties"><span class="hs-identifier hs-var hs-var">programProperties</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#Map"><span class="hs-identifier hs-type">Map.Map</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
 </span><span id="line-138"></span><span>  </span><span class="hs-comment">-- ^ A key-value map listing various properties of the program, useful</span><span>
 </span><span id="line-139"></span><span>  </span><span class="hs-comment">-- for feature detection. Populated during the configuration step, key</span><span>
 </span><span id="line-140"></span><span>  </span><span class="hs-comment">-- names depend on the specific program.</span><span>
@@ -193,7 +208,7 @@ to :: forall x. Rep ProgramSearchPathEntry x -&gt; ProgramSearchPathEntry
 </span><span id="line-147"></span><span>  </span><span class="hs-comment">-- monitor to detect when the re-configuring the program might give a</span><span>
 </span><span id="line-148"></span><span>  </span><span class="hs-comment">-- different result (e.g. found in a different location).</span><span>
 </span><span id="line-149"></span><span>  </span><span class="hs-special">}</span><span>
-</span><span id="line-150"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679449977"><span id="local-6989586621679449993"><span class="annot"><span class="annottext">ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool
+</span><span id="line-150"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679507772"><span id="local-6989586621679507788"><span class="annot"><span class="annottext">ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool
 (ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool)
 -&gt; (ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool)
 -&gt; Eq ConfiguredProgram
@@ -202,7 +217,7 @@ $c== :: ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool
 == :: ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool
 $c/= :: ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool
 /= :: ConfiguredProgram -&gt; ConfiguredProgram -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450000"><span id="local-6989586621679450002"><span class="annot"><span class="annottext">(forall x. ConfiguredProgram -&gt; Rep ConfiguredProgram x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679507795"><span id="local-6989586621679507797"><span class="annot"><span class="annottext">(forall x. ConfiguredProgram -&gt; Rep ConfiguredProgram x)
 -&gt; (forall x. Rep ConfiguredProgram x -&gt; ConfiguredProgram)
 -&gt; Generic ConfiguredProgram
 forall x. Rep ConfiguredProgram x -&gt; ConfiguredProgram
@@ -213,7 +228,7 @@ $cfrom :: forall x. ConfiguredProgram -&gt; Rep ConfiguredProgram x
 from :: forall x. ConfiguredProgram -&gt; Rep ConfiguredProgram x
 $cto :: forall x. Rep ConfiguredProgram x -&gt; ConfiguredProgram
 to :: forall x. Rep ConfiguredProgram x -&gt; ConfiguredProgram
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450005"><span id="local-6989586621679450009"><span id="local-6989586621679450012"><span id="local-6989586621679450050"><span class="annot"><span class="annottext">ReadPrec [ConfiguredProgram]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679507800"><span id="local-6989586621679507804"><span id="local-6989586621679507807"><span id="local-6989586621679507845"><span class="annot"><span class="annottext">ReadPrec [ConfiguredProgram]
 ReadPrec ConfiguredProgram
 Int -&gt; ReadS ConfiguredProgram
 ReadS [ConfiguredProgram]
@@ -233,7 +248,7 @@ $creadPrec :: ReadPrec ConfiguredProgram
 readPrec :: ReadPrec ConfiguredProgram
 $creadListPrec :: ReadPrec [ConfiguredProgram]
 readListPrec :: ReadPrec [ConfiguredProgram]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450064"><span id="local-6989586621679450083"><span id="local-6989586621679450087"><span class="annot"><span class="annottext">Int -&gt; ConfiguredProgram -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679507859"><span id="local-6989586621679507876"><span id="local-6989586621679507880"><span class="annot"><span class="annottext">Int -&gt; ConfiguredProgram -&gt; ShowS
 [ConfiguredProgram] -&gt; ShowS
 ConfiguredProgram -&gt; String
 (Int -&gt; ConfiguredProgram -&gt; ShowS)
@@ -250,8 +265,8 @@ $cshowList :: [ConfiguredProgram] -&gt; ShowS
 showList :: [ConfiguredProgram] -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-151"></span><span>
-</span><span id="line-152"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679450095"><span id="local-6989586621679450102"><span id="local-6989586621679450108"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span></span></span></span><span>
-</span><span id="line-153"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679450184"><span id="local-6989586621679450191"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span></span></span><span>
+</span><span id="line-152"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679507886"><span id="local-6989586621679507893"><span id="local-6989586621679507899"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span></span></span></span><span>
+</span><span id="line-153"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679507975"><span id="local-6989586621679507982"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span></span></span><span>
 </span><span id="line-154"></span><span>
 </span><span id="line-155"></span><span class="hs-comment">-- | Where a program was found. Also tells us whether it's specified by user or</span><span>
 </span><span id="line-156"></span><span class="hs-comment">-- not.  This includes not just the path, but the program as well.</span><span>
@@ -262,7 +277,7 @@ showList :: [ConfiguredProgram] -&gt; ShowS
 </span><a href="Distribution.Simple.Program.Types.html#locationPath"><span class="hs-identifier hs-var hs-var">locationPath</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">}</span><span>
 </span><span id="line-161"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-comment">-- | The program was found automatically.</span></span><span>
 </span><span id="line-162"></span><span>    </span><span id="FoundOnSystem"><span class="annot"><a href="Distribution.Simple.Program.Types.html#FoundOnSystem"><span class="hs-identifier hs-var">FoundOnSystem</span></a></span></span><span> </span><span class="hs-special">{</span><span id="locationPath"><span class="annot"><a href="Distribution.Simple.Program.Types.html#locationPath"><span class="hs-identifier hs-var">locationPath</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">}</span><span>
-</span><span id="line-163"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679450254"><span id="local-6989586621679450261"><span class="annot"><span class="annottext">ProgramLocation -&gt; ProgramLocation -&gt; Bool
+</span><span id="line-163"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679508045"><span id="local-6989586621679508052"><span class="annot"><span class="annottext">ProgramLocation -&gt; ProgramLocation -&gt; Bool
 (ProgramLocation -&gt; ProgramLocation -&gt; Bool)
 -&gt; (ProgramLocation -&gt; ProgramLocation -&gt; Bool)
 -&gt; Eq ProgramLocation
@@ -271,7 +286,7 @@ $c== :: ProgramLocation -&gt; ProgramLocation -&gt; Bool
 == :: ProgramLocation -&gt; ProgramLocation -&gt; Bool
 $c/= :: ProgramLocation -&gt; ProgramLocation -&gt; Bool
 /= :: ProgramLocation -&gt; ProgramLocation -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450264"><span id="local-6989586621679450266"><span class="annot"><span class="annottext">(forall x. ProgramLocation -&gt; Rep ProgramLocation x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679508055"><span id="local-6989586621679508057"><span class="annot"><span class="annottext">(forall x. ProgramLocation -&gt; Rep ProgramLocation x)
 -&gt; (forall x. Rep ProgramLocation x -&gt; ProgramLocation)
 -&gt; Generic ProgramLocation
 forall x. Rep ProgramLocation x -&gt; ProgramLocation
@@ -282,7 +297,7 @@ $cfrom :: forall x. ProgramLocation -&gt; Rep ProgramLocation x
 from :: forall x. ProgramLocation -&gt; Rep ProgramLocation x
 $cto :: forall x. Rep ProgramLocation x -&gt; ProgramLocation
 to :: forall x. Rep ProgramLocation x -&gt; ProgramLocation
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450269"><span id="local-6989586621679450272"><span id="local-6989586621679450275"><span id="local-6989586621679450290"><span class="annot"><span class="annottext">ReadPrec [ProgramLocation]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679508060"><span id="local-6989586621679508063"><span id="local-6989586621679508066"><span id="local-6989586621679508081"><span class="annot"><span class="annottext">ReadPrec [ProgramLocation]
 ReadPrec ProgramLocation
 Int -&gt; ReadS ProgramLocation
 ReadS [ProgramLocation]
@@ -302,7 +317,7 @@ $creadPrec :: ReadPrec ProgramLocation
 readPrec :: ReadPrec ProgramLocation
 $creadListPrec :: ReadPrec [ProgramLocation]
 readListPrec :: ReadPrec [ProgramLocation]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679450293"><span id="local-6989586621679450300"><span id="local-6989586621679450303"><span class="annot"><span class="annottext">Int -&gt; ProgramLocation -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679508084"><span id="local-6989586621679508091"><span id="local-6989586621679508094"><span class="annot"><span class="annottext">Int -&gt; ProgramLocation -&gt; ShowS
 [ProgramLocation] -&gt; ShowS
 ProgramLocation -&gt; String
 (Int -&gt; ProgramLocation -&gt; ShowS)
@@ -319,8 +334,8 @@ $cshowList :: [ProgramLocation] -&gt; ShowS
 showList :: [ProgramLocation] -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
 </span><span id="line-164"></span><span>
-</span><span id="line-165"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679450306"><span id="local-6989586621679450312"><span id="local-6989586621679450318"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramLocation"><span class="hs-identifier hs-type">ProgramLocation</span></a></span></span></span></span><span>
-</span><span id="line-166"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679450341"><span id="local-6989586621679450347"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramLocation"><span class="hs-identifier hs-type">ProgramLocation</span></a></span></span></span><span>
+</span><span id="line-165"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679508097"><span id="local-6989586621679508103"><span id="local-6989586621679508109"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramLocation"><span class="hs-identifier hs-type">ProgramLocation</span></a></span></span></span></span><span>
+</span><span id="line-166"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679508132"><span id="local-6989586621679508138"><span class="annot"><a href="../../Cabal-syntax-3.14.1.0-ebb2/src/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramLocation"><span class="hs-identifier hs-type">ProgramLocation</span></a></span></span></span><span>
 </span><span id="line-167"></span><span>
 </span><span id="line-168"></span><span class="annot"><span class="hs-comment">-- | The full path of a configured program.</span></span><span>
 </span><span id="line-169"></span><span class="annot"><a href="Distribution.Simple.Program.Types.html#programPath"><span class="hs-identifier hs-type">programPath</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
@@ -337,22 +352,22 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-172"></span><span class="annot"><span class="hs-comment">-- | Suppress any extra arguments added by the user.</span></span><span>
 </span><span id="line-173"></span><span class="annot"><a href="Distribution.Simple.Program.Types.html#suppressOverrideArgs"><span class="hs-identifier hs-type">suppressOverrideArgs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span><span>
 </span><span id="line-174"></span><span id="suppressOverrideArgs"><span class="annot"><span class="annottext">suppressOverrideArgs :: ConfiguredProgram -&gt; ConfiguredProgram
-</span><a href="Distribution.Simple.Program.Types.html#suppressOverrideArgs"><span class="hs-identifier hs-var hs-var">suppressOverrideArgs</span></a></span></span><span> </span><span id="local-6989586621679450372"><span class="annot"><span class="annottext">ConfiguredProgram
-</span><a href="#local-6989586621679450372"><span class="hs-identifier hs-var">prog</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ConfiguredProgram
-</span><a href="#local-6989586621679450372"><span class="hs-identifier hs-var">prog</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Program.Types.html#programOverrideArgs"><span class="hs-identifier hs-var">programOverrideArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">}</span><span>
+</span><a href="Distribution.Simple.Program.Types.html#suppressOverrideArgs"><span class="hs-identifier hs-var hs-var">suppressOverrideArgs</span></a></span></span><span> </span><span id="local-6989586621679508163"><span class="annot"><span class="annottext">ConfiguredProgram
+</span><a href="#local-6989586621679508163"><span class="hs-identifier hs-var">prog</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ConfiguredProgram
+</span><a href="#local-6989586621679508163"><span class="hs-identifier hs-var">prog</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Program.Types.html#programOverrideArgs"><span class="hs-identifier hs-var">programOverrideArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">}</span><span>
 </span><span id="line-175"></span><span>
 </span><span id="line-176"></span><span class="hs-comment">-- | Make a simple 'ConfiguredProgram'.</span><span>
 </span><span id="line-177"></span><span class="hs-comment">--</span><span>
 </span><span id="line-178"></span><span class="hs-comment">-- &gt; simpleConfiguredProgram &quot;foo&quot; (FoundOnSystem path)</span><span>
 </span><span id="line-179"></span><span class="annot"><a href="Distribution.Simple.Program.Types.html#simpleConfiguredProgram"><span class="hs-identifier hs-type">simpleConfiguredProgram</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ProgramLocation"><span class="hs-identifier hs-type">ProgramLocation</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span><span>
 </span><span id="line-180"></span><span id="simpleConfiguredProgram"><span class="annot"><span class="annottext">simpleConfiguredProgram :: String -&gt; ProgramLocation -&gt; ConfiguredProgram
-</span><a href="Distribution.Simple.Program.Types.html#simpleConfiguredProgram"><span class="hs-identifier hs-var hs-var">simpleConfiguredProgram</span></a></span></span><span> </span><span id="local-6989586621679450373"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679450373"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679450374"><span class="annot"><span class="annottext">ProgramLocation
-</span><a href="#local-6989586621679450374"><span class="hs-identifier hs-var">loc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Distribution.Simple.Program.Types.html#simpleConfiguredProgram"><span class="hs-identifier hs-var hs-var">simpleConfiguredProgram</span></a></span></span><span> </span><span id="local-6989586621679508164"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679508164"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679508165"><span class="annot"><span class="annottext">ProgramLocation
+</span><a href="#local-6989586621679508165"><span class="hs-identifier hs-var">loc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-181"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Program.Types.html#ConfiguredProgram"><span class="hs-identifier hs-type">ConfiguredProgram</span></a></span><span>
 </span><span id="line-182"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">programId :: String
 </span><a href="Distribution.Simple.Program.Types.html#programId"><span class="hs-identifier hs-var">programId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679450373"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><a href="#local-6989586621679508164"><span class="hs-identifier hs-var">name</span></a></span><span>
 </span><span id="line-183"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">programVersion :: Maybe Version
 </span><a href="Distribution.Simple.Program.Types.html#programVersion"><span class="hs-identifier hs-var">programVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Version
 forall a. Maybe a
@@ -366,10 +381,10 @@ forall a. Maybe a
 </span><span id="line-187"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">programProperties :: Map String String
 </span><a href="Distribution.Simple.Program.Types.html#programProperties"><span class="hs-identifier hs-var">programProperties</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map String String
 forall k a. Map k a
-</span><a href="../../containers-0.7-7628/src//Data.Map.Internal.html/Data.Map.Internal.html#empty"><span class="hs-identifier hs-var">Map.empty</span></a></span><span>
+</span><a href="../../containers-0.7-5a8f/src/Data.Map.Internal.html#empty"><span class="hs-identifier hs-var">Map.empty</span></a></span><span>
 </span><span id="line-188"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">programLocation :: ProgramLocation
 </span><a href="Distribution.Simple.Program.Types.html#programLocation"><span class="hs-identifier hs-var">programLocation</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProgramLocation
-</span><a href="#local-6989586621679450374"><span class="hs-identifier hs-var">loc</span></a></span><span>
+</span><a href="#local-6989586621679508165"><span class="hs-identifier hs-var">loc</span></a></span><span>
 </span><span id="line-189"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">programMonitorFiles :: [String]
 </span><a href="Distribution.Simple.Program.Types.html#programMonitorFiles"><span class="hs-identifier hs-var">programMonitorFiles</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- did not look in any other locations</span><span>
 </span><span id="line-190"></span><span>    </span><span class="hs-special">}</span><span>

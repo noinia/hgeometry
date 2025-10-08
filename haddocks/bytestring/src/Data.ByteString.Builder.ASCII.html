@@ -81,8 +81,8 @@
 </span><span id="line-81"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.ByteString.Builder.RealFloat.html"><span class="hs-identifier">Data.ByteString.Builder.RealFloat</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.ByteString.Builder.RealFloat.html#floatDec"><span class="hs-identifier">floatDec</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.RealFloat.html#doubleDec"><span class="hs-identifier">doubleDec</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-82"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.ByteString.Internal.Type.html"><span class="hs-identifier">Data.ByteString.Internal.Type</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_int_dec_padded9"><span class="hs-identifier">c_int_dec_padded9</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_long_long_int_dec_padded18"><span class="hs-identifier">c_long_long_int_dec_padded18</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Foreign.html/Foreign.html"><span class="hs-identifier">Foreign</span></a></span><span>
-</span><span id="line-85"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Foreign.html"><span class="hs-identifier">Foreign</span></a></span><span>
+</span><span id="line-85"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-86"></span><span>
 </span><span id="line-87"></span><span class="hs-comment">------------------------------------------------------------------------------</span><span>
 </span><span id="line-88"></span><span class="hs-comment">-- Decimal Encoding</span><span>
@@ -135,7 +135,7 @@ forall a. BoundedPrim a -&gt; a -&gt; Builder
 </span><span id="line-119"></span><span>
 </span><span id="line-120"></span><span class="annot"><span class="hs-comment">-- | Decimal encoding of an 'Int' using the ASCII digits.</span></span><span>
 </span><span id="line-121"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#intDec"><span class="hs-pragma hs-type">intDec</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-122"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#intDec"><span class="hs-identifier hs-type">intDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
+</span><span id="line-122"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#intDec"><span class="hs-identifier hs-type">intDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
 </span><span id="line-123"></span><span id="intDec"><span class="annot"><span class="annottext">intDec :: Int -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#intDec"><span class="hs-identifier hs-var hs-var">intDec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BoundedPrim Int -&gt; Int -&gt; Builder
 forall a. BoundedPrim a -&gt; a -&gt; Builder
@@ -184,7 +184,7 @@ forall a. BoundedPrim a -&gt; a -&gt; Builder
 </span><span id="line-148"></span><span>
 </span><span id="line-149"></span><span class="annot"><span class="hs-comment">-- | Decimal encoding of a 'Word' using the ASCII digits.</span></span><span>
 </span><span id="line-150"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#wordDec"><span class="hs-pragma hs-type">wordDec</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-151"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#wordDec"><span class="hs-identifier hs-type">wordDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Word"><span class="hs-identifier hs-type">Word</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
+</span><span id="line-151"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#wordDec"><span class="hs-identifier hs-type">wordDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Word"><span class="hs-identifier hs-type">Word</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
 </span><span id="line-152"></span><span id="wordDec"><span class="annot"><span class="annottext">wordDec :: Word -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#wordDec"><span class="hs-identifier hs-var hs-var">wordDec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word -&gt; Word -&gt; Builder
 forall a. BoundedPrim a -&gt; a -&gt; Builder
@@ -237,7 +237,7 @@ forall a. BoundedPrim a -&gt; a -&gt; Builder
 </span><span id="line-181"></span><span>
 </span><span id="line-182"></span><span class="annot"><span class="hs-comment">-- | Shortest hexadecimal encoding of a 'Word' using lower-case characters.</span></span><span>
 </span><span id="line-183"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#wordHex"><span class="hs-pragma hs-type">wordHex</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-184"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#wordHex"><span class="hs-identifier hs-type">wordHex</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Word"><span class="hs-identifier hs-type">Word</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
+</span><span id="line-184"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#wordHex"><span class="hs-identifier hs-type">wordHex</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Word"><span class="hs-identifier hs-type">Word</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
 </span><span id="line-185"></span><span id="wordHex"><span class="annot"><span class="annottext">wordHex :: Word -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#wordHex"><span class="hs-identifier hs-var hs-var">wordHex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word -&gt; Word -&gt; Builder
 forall a. BoundedPrim a -&gt; a -&gt; Builder
@@ -322,7 +322,7 @@ forall a. FixedPrim a -&gt; a -&gt; Builder
 </span><span id="line-230"></span><span>
 </span><span id="line-231"></span><span class="annot"><span class="hs-comment">-- | Encode an IEEE 'Float' using 8 nibbles.</span></span><span>
 </span><span id="line-232"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#floatHexFixed"><span class="hs-pragma hs-type">floatHexFixed</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-233"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#floatHexFixed"><span class="hs-identifier hs-type">floatHexFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Float"><span class="hs-identifier hs-type">Float</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
+</span><span id="line-233"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#floatHexFixed"><span class="hs-identifier hs-type">floatHexFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Float"><span class="hs-identifier hs-type">Float</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
 </span><span id="line-234"></span><span id="floatHexFixed"><span class="annot"><span class="annottext">floatHexFixed :: Float -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#floatHexFixed"><span class="hs-identifier hs-var hs-var">floatHexFixed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim Float -&gt; Float -&gt; Builder
 forall a. FixedPrim a -&gt; a -&gt; Builder
@@ -331,7 +331,7 @@ forall a. FixedPrim a -&gt; a -&gt; Builder
 </span><span id="line-235"></span><span>
 </span><span id="line-236"></span><span class="annot"><span class="hs-comment">-- | Encode an IEEE 'Double' using 16 nibbles.</span></span><span>
 </span><span id="line-237"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#doubleHexFixed"><span class="hs-pragma hs-type">doubleHexFixed</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-238"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#doubleHexFixed"><span class="hs-identifier hs-type">doubleHexFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Double"><span class="hs-identifier hs-type">Double</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
+</span><span id="line-238"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#doubleHexFixed"><span class="hs-identifier hs-type">doubleHexFixed</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Double"><span class="hs-identifier hs-type">Double</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
 </span><span id="line-239"></span><span id="doubleHexFixed"><span class="annot"><span class="annottext">doubleHexFixed :: Double -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#doubleHexFixed"><span class="hs-identifier hs-var hs-var">doubleHexFixed</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim Double -&gt; Double -&gt; Builder
 forall a. FixedPrim a -&gt; a -&gt; Builder
@@ -377,36 +377,36 @@ forall a. Integral a =&gt; a -&gt; Integer
 </span><span class="hs-identifier hs-var">toInteger</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Integer) -&gt; Int -&gt; Integer
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">10</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span class="hs-number">10</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
 </span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. a -&gt; a -&gt; a
 </span><a href="Data.ByteString.Builder.Prim.Internal.html#caseWordSize_32_64"><span class="hs-identifier hs-var">P.caseWordSize_32_64</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">9</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">9</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">18</span></span><span>
 </span><span id="line-269"></span><span>
 </span><span id="line-270"></span><span class="annot"><span class="hs-comment">-- | Decimal encoding of an 'Integer' using the ASCII digits.</span></span><span>
 </span><span id="line-271"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#integerDec"><span class="hs-identifier hs-type">integerDec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
 </span><span id="line-272"></span><span id="integerDec"><span class="annot"><span class="annottext">integerDec :: Integer -&gt; Builder
-</span><a href="Data.ByteString.Builder.ASCII.html#integerDec"><span class="hs-identifier hs-var hs-var">integerDec</span></a></span></span><span> </span><span id="local-6989586621679129939"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129939"><span class="hs-identifier hs-var">i</span></a></span></span><span>
-</span><span id="line-273"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679129940"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129940"><span class="hs-identifier hs-var">i'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
+</span><a href="Data.ByteString.Builder.ASCII.html#integerDec"><span class="hs-identifier hs-var hs-var">integerDec</span></a></span></span><span> </span><span id="local-6989586621679132407"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132407"><span class="hs-identifier hs-var">i</span></a></span></span><span>
+</span><span id="line-273"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679132408"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679132408"><span class="hs-identifier hs-var">i'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
 forall a. Num a =&gt; Integer -&gt; a
 </span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129939"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Integer
+</span><a href="#local-6989586621679132407"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Integer
 forall a. Integral a =&gt; a -&gt; Integer
 </span><span class="hs-identifier hs-var">toInteger</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129940"><span class="hs-identifier hs-var">i'</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+</span><a href="#local-6989586621679132408"><span class="hs-identifier hs-var">i'</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129939"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Builder
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132407"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#intDec"><span class="hs-identifier hs-var">intDec</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129940"><span class="hs-identifier hs-var">i'</span></a></span><span>
+</span><a href="#local-6989586621679132408"><span class="hs-identifier hs-var">i'</span></a></span><span>
 </span><span id="line-274"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129939"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+</span><a href="#local-6989586621679132407"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">0</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim Char -&gt; Char -&gt; Builder
 forall a. FixedPrim a -&gt; a -&gt; Builder
 </span><a href="Data.ByteString.Builder.Prim.html#primFixed"><span class="hs-identifier hs-var">P.primFixed</span></a></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
@@ -414,195 +414,195 @@ forall a. FixedPrim a -&gt; a -&gt; Builder
 </span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
 forall a. Monoid a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mappend`</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Builder
-</span><a href="#local-6989586621679129943"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129939"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679132411"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132407"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-275"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>                                   </span><span class="annot"><span class="annottext">Integer -&gt; Builder
-</span><a href="#local-6989586621679129943"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129939"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="#local-6989586621679132411"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132407"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-276"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-277"></span><span>    </span><span class="annot"><a href="#local-6989586621679129943"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
-</span><span id="line-278"></span><span>    </span><span id="local-6989586621679129943"><span class="annot"><span class="annottext">go :: Integer -&gt; Builder
-</span><a href="#local-6989586621679129943"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679129944"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129944"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129944"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+</span><span id="line-277"></span><span>    </span><span class="annot"><a href="#local-6989586621679132411"><span class="hs-identifier hs-type">go</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Internal.html#Builder"><span class="hs-identifier hs-type">Builder</span></a></span><span>
+</span><span id="line-278"></span><span>    </span><span id="local-6989586621679132411"><span class="annot"><span class="annottext">go :: Integer -&gt; Builder
+</span><a href="#local-6989586621679132411"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679132412"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132412"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132412"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3C"><span class="hs-operator hs-var">&lt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><a href="Data.ByteString.Builder.ASCII.html#maxPow10"><span class="hs-identifier hs-var">maxPow10</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#intDec"><span class="hs-identifier hs-var">intDec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Int
 forall a. Num a =&gt; Integer -&gt; a
 </span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129944"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679132412"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-279"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>    </span><span class="hs-glyph">=</span><span>
 </span><span id="line-280"></span><span>             </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">NonEmpty Integer -&gt; NonEmpty Int
-</span><a href="#local-6989586621679129945"><span class="hs-identifier hs-var">putH</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; NonEmpty Integer
-</span><a href="#local-6989586621679129946"><span class="hs-identifier hs-var">splitf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132413"><span class="hs-identifier hs-var">putH</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; NonEmpty Integer
+</span><a href="#local-6989586621679132414"><span class="hs-identifier hs-var">splitf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
 </span><a href="Data.ByteString.Builder.ASCII.html#maxPow10"><span class="hs-identifier hs-var">maxPow10</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><a href="Data.ByteString.Builder.ASCII.html#maxPow10"><span class="hs-identifier hs-var">maxPow10</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129944"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-281"></span><span>               </span><span id="local-6989586621679129948"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129948"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679129950"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679129950"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Builder
+</span><a href="#local-6989586621679132412"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-281"></span><span>               </span><span id="local-6989586621679132416"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679132416"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679132418"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679132418"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Builder
 </span><a href="Data.ByteString.Builder.ASCII.html#intDec"><span class="hs-identifier hs-var">intDec</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129948"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
+</span><a href="#local-6989586621679132416"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder -&gt; Builder
 forall a. Monoid a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mappend`</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Int -&gt; [Int] -&gt; Builder
 forall a. BoundedPrim a -&gt; [a] -&gt; Builder
 </span><a href="Data.ByteString.Builder.Prim.html#primMapListBounded"><span class="hs-identifier hs-var">P.primMapListBounded</span></a></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Int
 </span><a href="Data.ByteString.Builder.ASCII.html#intDecPadded"><span class="hs-identifier hs-var">intDecPadded</span></a></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679129950"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679132418"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-282"></span><span>
-</span><span id="line-283"></span><span>    </span><span class="annot"><a href="#local-6989586621679129946"><span class="hs-identifier hs-type">splitf</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
-</span><span id="line-284"></span><span>    </span><span id="local-6989586621679129946"><span class="annot"><span class="annottext">splitf :: Integer -&gt; Integer -&gt; NonEmpty Integer
-</span><a href="#local-6989586621679129946"><span class="hs-identifier hs-var hs-var">splitf</span></a></span></span><span> </span><span id="local-6989586621679129953"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129953"><span class="hs-identifier hs-var">pow10</span></a></span></span><span> </span><span id="local-6989586621679129954"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129954"><span class="hs-identifier hs-var">n0</span></a></span></span><span>
+</span><span id="line-283"></span><span>    </span><span class="annot"><a href="#local-6989586621679132414"><span class="hs-identifier hs-type">splitf</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-284"></span><span>    </span><span id="local-6989586621679132414"><span class="annot"><span class="annottext">splitf :: Integer -&gt; Integer -&gt; NonEmpty Integer
+</span><a href="#local-6989586621679132414"><span class="hs-identifier hs-var hs-var">splitf</span></a></span></span><span> </span><span id="local-6989586621679132421"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132421"><span class="hs-identifier hs-var">pow10</span></a></span></span><span> </span><span id="local-6989586621679132422"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132422"><span class="hs-identifier hs-var">n0</span></a></span></span><span>
 </span><span id="line-285"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129953"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+</span><a href="#local-6989586621679132421"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129954"><span class="hs-identifier hs-var">n0</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129954"><span class="hs-identifier hs-var">n0</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; NonEmpty Integer
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132422"><span class="hs-identifier hs-var">n0</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132422"><span class="hs-identifier hs-var">n0</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; NonEmpty Integer
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-286"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty Integer -&gt; NonEmpty Integer
-</span><a href="#local-6989586621679129956"><span class="hs-identifier hs-var">splith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; NonEmpty Integer
-</span><a href="#local-6989586621679129946"><span class="hs-identifier hs-var">splitf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129953"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+</span><a href="#local-6989586621679132424"><span class="hs-identifier hs-var">splith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; NonEmpty Integer
+</span><a href="#local-6989586621679132414"><span class="hs-identifier hs-var">splitf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132421"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129953"><span class="hs-identifier hs-var">pow10</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129954"><span class="hs-identifier hs-var">n0</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679132421"><span class="hs-identifier hs-var">pow10</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132422"><span class="hs-identifier hs-var">n0</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-287"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-288"></span><span>        </span><span id="local-6989586621679129956"><span class="annot"><span class="annottext">splith :: NonEmpty Integer -&gt; NonEmpty Integer
-</span><a href="#local-6989586621679129956"><span class="hs-identifier hs-var hs-var">splith</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679129960"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129960"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679129961"><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129961"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-288"></span><span>        </span><span id="local-6989586621679132424"><span class="annot"><span class="annottext">splith :: NonEmpty Integer -&gt; NonEmpty Integer
+</span><a href="#local-6989586621679132424"><span class="hs-identifier hs-var hs-var">splith</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679132428"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132428"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679132429"><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132429"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-289"></span><span>            </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129960"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
+</span><a href="#local-6989586621679132428"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`quotRem`</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129953"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-290"></span><span>                </span><span class="hs-special">(</span><span id="local-6989586621679129963"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129963"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679129964"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129964"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129963"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
+</span><a href="#local-6989586621679132421"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-290"></span><span>                </span><span class="hs-special">(</span><span id="local-6989586621679132431"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132431"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679132432"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132432"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132431"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><span class="hs-number">0</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129963"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; NonEmpty Integer
+</span><a href="#local-6989586621679132431"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; NonEmpty Integer
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129964"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; [Integer]
+</span><a href="#local-6989586621679132432"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; [Integer]
 forall a. a -&gt; [a] -&gt; [a]
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span>  </span><span class="annot"><span class="annottext">[Integer] -&gt; [Integer]
-</span><a href="#local-6989586621679129965"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129961"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span>  </span><span class="annot"><span class="annottext">[Integer] -&gt; [Integer]
+</span><a href="#local-6989586621679132433"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132429"><span class="hs-identifier hs-var">ns</span></a></span><span>
 </span><span id="line-291"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>      </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129964"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; NonEmpty Integer
+</span><a href="#local-6989586621679132432"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; NonEmpty Integer
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">[Integer] -&gt; [Integer]
-</span><a href="#local-6989586621679129965"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129961"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><a href="#local-6989586621679132433"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132429"><span class="hs-identifier hs-var">ns</span></a></span><span>
 </span><span id="line-292"></span><span>
-</span><span id="line-293"></span><span>        </span><span id="local-6989586621679129965"><span class="annot"><span class="annottext">splitb :: [Integer] -&gt; [Integer]
-</span><a href="#local-6989586621679129965"><span class="hs-identifier hs-var hs-var">splitb</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-294"></span><span>        </span><span class="annot"><a href="#local-6989586621679129965"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679129967"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129967"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-type">:</span></a></span><span id="local-6989586621679129968"><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129968"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129967"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
+</span><span id="line-293"></span><span>        </span><span id="local-6989586621679132433"><span class="annot"><span class="annottext">splitb :: [Integer] -&gt; [Integer]
+</span><a href="#local-6989586621679132433"><span class="hs-identifier hs-var hs-var">splitb</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-294"></span><span>        </span><span class="annot"><a href="#local-6989586621679132433"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679132435"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132435"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-type">:</span></a></span><span id="local-6989586621679132436"><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132436"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132435"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`quotRem`</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129953"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-295"></span><span>                            </span><span class="hs-special">(</span><span id="local-6989586621679129969"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129969"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679129970"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129970"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129969"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; [Integer]
+</span><a href="#local-6989586621679132421"><span class="hs-identifier hs-var">pow10</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-295"></span><span>                            </span><span class="hs-special">(</span><span id="local-6989586621679132437"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132437"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679132438"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132438"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132437"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; [Integer]
 forall a. a -&gt; [a] -&gt; [a]
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129970"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; [Integer]
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132438"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [Integer] -&gt; [Integer]
 forall a. a -&gt; [a] -&gt; [a]
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer] -&gt; [Integer]
-</span><a href="#local-6989586621679129965"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129968"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer] -&gt; [Integer]
+</span><a href="#local-6989586621679132433"><span class="hs-identifier hs-var">splitb</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132436"><span class="hs-identifier hs-var">ns</span></a></span><span>
 </span><span id="line-296"></span><span>
-</span><span id="line-297"></span><span>    </span><span class="annot"><a href="#local-6989586621679129945"><span class="hs-identifier hs-type">putH</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
-</span><span id="line-298"></span><span>    </span><span id="local-6989586621679129945"><span class="annot"><span class="annottext">putH :: NonEmpty Integer -&gt; NonEmpty Int
-</span><a href="#local-6989586621679129945"><span class="hs-identifier hs-var hs-var">putH</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679129971"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129971"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679129972"><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129972"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129971"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
+</span><span id="line-297"></span><span>    </span><span class="annot"><a href="#local-6989586621679132413"><span class="hs-identifier hs-type">putH</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-298"></span><span>    </span><span id="local-6989586621679132413"><span class="annot"><span class="annottext">putH :: NonEmpty Integer -&gt; NonEmpty Int
+</span><a href="#local-6989586621679132413"><span class="hs-identifier hs-var hs-var">putH</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679132439"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132439"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679132440"><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132440"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132439"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`quotRem`</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><a href="Data.ByteString.Builder.ASCII.html#maxPow10"><span class="hs-identifier hs-var">maxPow10</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-299"></span><span>                    </span><span class="hs-special">(</span><span id="local-6989586621679129973"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129973"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679129974"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129974"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-299"></span><span>                    </span><span class="hs-special">(</span><span id="local-6989586621679132441"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132441"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679132442"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132442"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-300"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129975"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679132443"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Classes.html/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3E"><span class="hs-operator hs-var">&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129975"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; NonEmpty Int
+</span><a href="#local-6989586621679132443"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; NonEmpty Int
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129976"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
+</span><a href="#local-6989586621679132444"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
 forall a. a -&gt; [a] -&gt; [a]
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span>  </span><span class="annot"><span class="annottext">[Integer] -&gt; [Int]
-</span><a href="#local-6989586621679129977"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129972"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span>  </span><span class="annot"><span class="annottext">[Integer] -&gt; [Int]
+</span><a href="#local-6989586621679132445"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132440"><span class="hs-identifier hs-var">ns</span></a></span><span>
 </span><span id="line-301"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>      </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679129976"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; NonEmpty Int
+</span><a href="#local-6989586621679132444"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; NonEmpty Int
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">[Integer] -&gt; [Int]
-</span><a href="#local-6989586621679129977"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129972"><span class="hs-identifier hs-var">ns</span></a></span><span>
-</span><span id="line-302"></span><span>                        </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679129975"><span class="annot"><span class="annottext">q :: Int
-</span><a href="#local-6989586621679129975"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
+</span><a href="#local-6989586621679132445"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132440"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><span id="line-302"></span><span>                        </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679132443"><span class="annot"><span class="annottext">q :: Int
+</span><a href="#local-6989586621679132443"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
 forall a. Num a =&gt; Integer -&gt; a
 </span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129973"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-303"></span><span>                              </span><span id="local-6989586621679129976"><span class="annot"><span class="annottext">r :: Int
-</span><a href="#local-6989586621679129976"><span class="hs-identifier hs-var hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
+</span><a href="#local-6989586621679132441"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-303"></span><span>                              </span><span id="local-6989586621679132444"><span class="annot"><span class="annottext">r :: Int
+</span><a href="#local-6989586621679132444"><span class="hs-identifier hs-var hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
 forall a. Num a =&gt; Integer -&gt; a
 </span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129974"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621679132442"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-304"></span><span>
-</span><span id="line-305"></span><span>    </span><span class="annot"><a href="#local-6989586621679129977"><span class="hs-identifier hs-type">putB</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-306"></span><span>    </span><span id="local-6989586621679129977"><span class="annot"><span class="annottext">putB :: [Integer] -&gt; [Int]
-</span><a href="#local-6989586621679129977"><span class="hs-identifier hs-var hs-var">putB</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-307"></span><span>    </span><span class="annot"><a href="#local-6989586621679129977"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679129980"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129980"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-type">:</span></a></span><span id="local-6989586621679129981"><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129981"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129980"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
+</span><span id="line-305"></span><span>    </span><span class="annot"><a href="#local-6989586621679132445"><span class="hs-identifier hs-type">putB</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-306"></span><span>    </span><span id="local-6989586621679132445"><span class="annot"><span class="annottext">putB :: [Integer] -&gt; [Int]
+</span><a href="#local-6989586621679132445"><span class="hs-identifier hs-var hs-var">putB</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-307"></span><span>    </span><span class="annot"><a href="#local-6989586621679132445"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679132448"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132448"><span class="hs-identifier hs-var">n</span></a></span></span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-type">:</span></a></span><span id="local-6989586621679132449"><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132449"><span class="hs-identifier hs-var">ns</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132448"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; (Integer, Integer)
 forall a. Integral a =&gt; a -&gt; a -&gt; (a, a)
 </span><span class="hs-operator hs-var">`quotRem`</span></span><span> </span><span class="annot"><span class="annottext">Integer
 </span><a href="Data.ByteString.Builder.ASCII.html#maxPow10"><span class="hs-identifier hs-var">maxPow10</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-308"></span><span>                    </span><span class="hs-special">(</span><span id="local-6989586621679129982"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129982"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679129983"><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129983"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
+</span><span id="line-308"></span><span>                    </span><span class="hs-special">(</span><span id="local-6989586621679132450"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132450"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679132451"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679132451"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
 forall a. Num a =&gt; Integer -&gt; a
 </span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129982"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
+</span><a href="#local-6989586621679132450"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
 forall a. a -&gt; [a] -&gt; [a]
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Int
 forall a. Num a =&gt; Integer -&gt; a
 </span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679129983"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
+</span><a href="#local-6989586621679132451"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
 forall a. a -&gt; [a] -&gt; [a]
-</span><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer] -&gt; [Int]
-</span><a href="#local-6989586621679129977"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679129981"><span class="hs-identifier hs-var">ns</span></a></span><span>
+</span><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#%3A"><span class="hs-glyph hs-var">:</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer] -&gt; [Int]
+</span><a href="#local-6989586621679132445"><span class="hs-identifier hs-var">putB</span></a></span><span> </span><span class="annot"><span class="annottext">[Integer]
+</span><a href="#local-6989586621679132449"><span class="hs-identifier hs-var">ns</span></a></span><span>
 </span><span id="line-309"></span><span>
 </span><span id="line-310"></span><span>
 </span><span id="line-311"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#intDecPadded"><span class="hs-pragma hs-type">intDecPadded</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-312"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#intDecPadded"><span class="hs-identifier hs-type">intDecPadded</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Prim.Internal.html#BoundedPrim"><span class="hs-identifier hs-type">P.BoundedPrim</span></a></span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-312"></span><span class="annot"><a href="Data.ByteString.Builder.ASCII.html#intDecPadded"><span class="hs-identifier hs-type">intDecPadded</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.ByteString.Builder.Prim.Internal.html#BoundedPrim"><span class="hs-identifier hs-type">P.BoundedPrim</span></a></span><span> </span><span class="annot"><a href="../../ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
 </span><span id="line-313"></span><span id="intDecPadded"><span class="annot"><span class="annottext">intDecPadded :: BoundedPrim Int
 </span><a href="Data.ByteString.Builder.ASCII.html#intDecPadded"><span class="hs-identifier hs-var hs-var">intDecPadded</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim Int -&gt; BoundedPrim Int
 forall a. FixedPrim a -&gt; BoundedPrim a

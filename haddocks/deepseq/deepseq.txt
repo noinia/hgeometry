@@ -18,7 +18,7 @@
 --   different data types. See module documentation in
 --   <a>Control.DeepSeq</a> for more details.
 @package deepseq
-@version 1.5.0.0
+@version 1.5.1.0
 
 
 -- | This module provides overloaded functions, such as <a>deepseq</a> and
@@ -171,7 +171,7 @@ rnf :: NFData a => a -> ()
 deepseq :: NFData a => a -> b -> b
 infixr 0 `deepseq`
 
--- | a variant of <a>deepseq</a> that is useful in some circumstances:
+-- | A variant of <a>deepseq</a> that is useful in some circumstances:
 --   
 --   <pre>
 --   force x = x `deepseq` x
@@ -217,9 +217,13 @@ infixr 0 `deepseq`
 --   </pre>
 force :: NFData a => a -> a
 
--- | the deep analogue of <a>$!</a>. In the expression <tt>f $!! x</tt>,
---   <tt>x</tt> is fully evaluated before the function <tt>f</tt> is
---   applied to it.
+-- | The deep analogue of <a>$!</a>. <tt>f $!! x</tt> fully evaluates
+--   <tt>x</tt> before returning <tt>f x</tt>.
+--   
+--   There is no guarantee about the ordering of evaluation. <tt>f x</tt>
+--   may be evaluated before <tt>x</tt> is fully evaluated. To impose an
+--   actual order on evaluation, use <tt>pseq</tt> from
+--   <a>Control.Parallel</a> in the <tt>parallel</tt> package.
 ($!!) :: NFData a => (a -> b) -> a -> b
 infixr 0 $!!
 
@@ -238,6 +242,41 @@ infixl 4 <$!!>
 --   instance NFData T where rnf = rwhnf
 --   </pre>
 rwhnf :: a -> ()
+
+-- | A monoid with <tt>(&lt;&gt;) = seq</tt>.
+--   
+--   Its purpose is to allow reducing structures to normal form using
+--   <a>foldMap</a>-like functions.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   data Three a = Three a a a
+--   
+--   instance Foldable Three where
+--     foldMap f (Three x1 x2 x3) = f x1 &lt;&gt; f x2 &lt;&gt; f x3
+--   
+--   instance NFData a =&gt; NFData (Three a) where
+--     rnf = runUnit . foldMap (Unit . rnf)
+--   </pre>
+--   
+--   <pre>
+--   data Tree a b
+--     = NodeA a [Tree a b]
+--     | NodeB b [Tree a b]
+--   
+--   foldMapTree :: Monoid m =&gt; (a -&gt; m) -&gt; (b -&gt; m) -&gt; Tree a b -&gt; m
+--   foldMapTree f g = go
+--     where
+--       go (NodeA x ts) = f x &lt;&gt; foldMap go ts
+--       go (NodeB y ts) = g y &lt;&gt; foldMap go ts
+--   
+--   instance NFData2 Tree where
+--     liftRnf2 r r' = runUnit . foldMapTree (Unit . r) (Unit . r')
+--   </pre>
+newtype Unit
+Unit :: () -> Unit
+[runUnit] :: Unit -> ()
 
 -- | A class of functors that can be fully evaluated.
 --   
@@ -281,6 +320,7 @@ instance Control.DeepSeq.GNFData arity a => Control.DeepSeq.GNFData arity (GHC.I
 instance Control.DeepSeq.GNFData arity GHC.Internal.Generics.U1
 instance Control.DeepSeq.GNFData arity (GHC.Internal.Generics.URec a)
 instance Control.DeepSeq.GNFData arity GHC.Internal.Generics.V1
+instance GHC.Internal.Base.Monoid Control.DeepSeq.Unit
 instance Control.DeepSeq.NFData1 ((GHC.Internal.Data.Type.Equality.:~:) a)
 instance forall k1 (a :: k1). Control.DeepSeq.NFData1 ((GHC.Internal.Data.Type.Equality.:~~:) a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData1 (Data.Semigroup.Arg a)
@@ -448,3 +488,4 @@ instance Control.DeepSeq.NFData GHC.Internal.Word.Word64
 instance Control.DeepSeq.NFData GHC.Internal.Word.Word8
 instance Control.DeepSeq.NFData m => Control.DeepSeq.NFData (Data.Semigroup.WrappedMonoid m)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (GHC.Internal.Functor.ZipList.ZipList a)
+instance GHC.Internal.Base.Semigroup Control.DeepSeq.Unit

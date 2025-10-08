@@ -7,7 +7,7 @@
 --   This package provides functionality for manipulating <tt>OsString</tt>
 --   values, and is shipped with <a>GHC</a>.
 @package os-string
-@version 2.0.2
+@version 2.0.7
 
 
 -- | Internal low-level utilities mostly for <a>Word16</a>, such as
@@ -1154,6 +1154,12 @@ useAsCWString :: ShortByteString -> (Ptr Word16 -> IO a) -> IO a
 --   subcomputation finishes.
 useAsCWStringLen :: ShortByteString -> ((Ptr Word16, Int) -> IO a) -> IO a
 
+module System.OsString.Internal.Exception
+
+-- | Like <tt>try</tt>, but rethrows async exceptions.
+trySafe :: Exception e => IO a -> IO (Either e a)
+isAsyncException :: Exception e => e -> Bool
+
 module System.OsString.Encoding.Internal
 ucs2le :: TextEncoding
 mkUcs2le :: CodingFailureMode -> TextEncoding
@@ -1182,7 +1188,9 @@ charsToCWchars :: [Char] -> [Word16]
 withWindowsString :: String -> (Int -> Ptr Word16 -> IO a) -> IO a
 peekWindowsString :: (Ptr Word16, Int) -> IO String
 withPosixString :: String -> (CStringLen -> IO a) -> IO a
+withPosixString' :: String -> (CStringLen -> IO a) -> IO a
 peekPosixString :: CStringLen -> IO String
+peekPosixString' :: CStringLen -> IO String
 
 -- | Decode with the given <a>TextEncoding</a>.
 decodeWithTE :: TextEncoding -> ShortByteString -> Either EncodingException String
@@ -1190,15 +1198,25 @@ decodeWithTE :: TextEncoding -> ShortByteString -> Either EncodingException Stri
 -- | Encode with the given <a>TextEncoding</a>.
 encodeWithTE :: TextEncoding -> String -> Either EncodingException ShortByteString
 
--- | This mimics the filepath decoder base uses on unix, with the small
---   distinction that we're not truncating at NUL bytes (because we're not
---   at the outer FFI layer).
+-- | This mimics the filepath decoder base uses on unix (using PEP-383),
+--   with the small distinction that we're not truncating at NUL bytes
+--   (because we're not at the outer FFI layer).
 decodeWithBasePosix :: ShortByteString -> IO String
 
--- | This mimics the filepath dencoder base uses on unix, with the small
+-- | This mimics the string decoder base uses on unix, with the small
 --   distinction that we're not truncating at NUL bytes (because we're not
 --   at the outer FFI layer).
+decodeWithBasePosix' :: ShortByteString -> IO String
+
+-- | This mimics the filepath encoder base uses on unix (using PEP-383),
+--   with the small distinction that we're not truncating at NUL bytes
+--   (because we're not at the outer FFI layer).
 encodeWithBasePosix :: String -> IO ShortByteString
+
+-- | This mimics the string encoder base uses on unix, with the small
+--   distinction that we're not truncating at NUL bytes (because we're not
+--   at the outer FFI layer).
+encodeWithBasePosix' :: String -> IO ShortByteString
 
 -- | This mimics the filepath decoder base uses on windows, with the small
 --   distinction that we're not truncating at NUL bytes (because we're not
@@ -1250,15 +1268,25 @@ utf16le_b_EF :: CodingFailureMode -> IO (TextEncoder ())
 utf16le_b_decode :: DecodeBuffer
 utf16le_b_encode :: EncodeBuffer
 
--- | This mimics the filepath dencoder base uses on unix, with the small
---   distinction that we're not truncating at NUL bytes (because we're not
---   at the outer FFI layer).
+-- | This mimics the filepath encoder base uses on unix (using PEP-383),
+--   with the small distinction that we're not truncating at NUL bytes
+--   (because we're not at the outer FFI layer).
 encodeWithBasePosix :: String -> IO ShortByteString
 
--- | This mimics the filepath decoder base uses on unix, with the small
+-- | This mimics the filepath decoder base uses on unix (using PEP-383),
+--   with the small distinction that we're not truncating at NUL bytes
+--   (because we're not at the outer FFI layer).
+decodeWithBasePosix :: ShortByteString -> IO String
+
+-- | This mimics the string encoder base uses on unix, with the small
 --   distinction that we're not truncating at NUL bytes (because we're not
 --   at the outer FFI layer).
-decodeWithBasePosix :: ShortByteString -> IO String
+encodeWithBasePosix' :: String -> IO ShortByteString
+
+-- | This mimics the string decoder base uses on unix, with the small
+--   distinction that we're not truncating at NUL bytes (because we're not
+--   at the outer FFI layer).
+decodeWithBasePosix' :: ShortByteString -> IO String
 
 -- | This mimics the filepath dencoder base uses on windows, with the small
 --   distinction that we're not truncating at NUL bytes (because we're not
@@ -1348,9 +1376,9 @@ instance GHC.Internal.Generics.Generic System.OsString.Internal.Types.PosixChar
 instance GHC.Internal.Generics.Generic System.OsString.Internal.Types.PosixString
 instance GHC.Internal.Generics.Generic System.OsString.Internal.Types.WindowsChar
 instance GHC.Internal.Generics.Generic System.OsString.Internal.Types.WindowsString
-instance Language.Haskell.TH.Syntax.Lift System.OsString.Internal.Types.OsString
-instance Language.Haskell.TH.Syntax.Lift System.OsString.Internal.Types.PosixString
-instance Language.Haskell.TH.Syntax.Lift System.OsString.Internal.Types.WindowsString
+instance GHC.Internal.TH.Lift.Lift System.OsString.Internal.Types.OsString
+instance GHC.Internal.TH.Lift.Lift System.OsString.Internal.Types.PosixString
+instance GHC.Internal.TH.Lift.Lift System.OsString.Internal.Types.WindowsString
 instance GHC.Internal.Base.Monoid System.OsString.Internal.Types.OsString
 instance GHC.Internal.Base.Monoid System.OsString.Internal.Types.PosixString
 instance GHC.Internal.Base.Monoid System.OsString.Internal.Types.WindowsString
@@ -1400,20 +1428,40 @@ unsafeEncodeUtf :: HasCallStack => String -> PosixString
 encodeWith :: TextEncoding -> String -> Either EncodingException PosixString
 
 -- | This mimics the behavior of the base library when doing filesystem
---   operations, which uses shady PEP 383 style encoding (based on the
---   current locale, but PEP 383 only works properly on UTF-8 encodings, so
---   good luck).
+--   operations (usually filepaths), which uses shady PEP 383 style
+--   encoding (based on the current locale, but PEP 383 only works properly
+--   on UTF-8 encodings, so good luck).
 --   
 --   Looking up the locale requires IO. If you're not worried about calls
 --   to <tt>setFileSystemEncoding</tt>, then <a>unsafePerformIO</a> may be
 --   feasible (make sure to deeply evaluate the result to catch
 --   exceptions).
+
+-- | <i>Deprecated: Use System.OsPath.Posix.encodeFS from filepath</i>
 encodeFS :: String -> IO PosixString
+
+-- | This mimics the behavior of the base library when doing string
+--   operations, which uses <tt>getLocaleEncoding</tt>.
+--   
+--   Looking up the locale requires IO. If you're not worried about calls
+--   to <tt>setFileSystemEncoding</tt>, then <a>unsafePerformIO</a> may be
+--   feasible (make sure to deeply evaluate the result to catch
+--   exceptions).
+encodeLE :: String -> IO PosixString
 
 -- | Constructs a platform string from a ByteString.
 --   
 --   This is a no-op.
 fromBytes :: MonadThrow m => ByteString -> m PosixString
+
+-- | Like <a>fromBytes</a>, but not in IO.
+--   
+--   <a>fromBytes</a> was designed to have a symmetric type signature on
+--   unix and windows, but morally the function has no IO effects on unix,
+--   so we provide this variant without breaking existing API.
+--   
+--   This function does not exist on windows.
+fromBytestring :: ByteString -> PosixString
 
 -- | QuasiQuote a <a>PosixString</a>. This accepts Unicode characters and
 --   encodes as UTF-8 on unix.
@@ -1442,15 +1490,26 @@ decodeUtf :: MonadThrow m => PosixString -> m String
 decodeWith :: TextEncoding -> PosixString -> Either EncodingException String
 
 -- | This mimics the behavior of the base library when doing filesystem
---   operations, which uses shady PEP 383 style encoding (based on the
---   current locale, but PEP 383 only works properly on UTF-8 encodings, so
---   good luck).
+--   operations (usually filepaths), which uses shady PEP 383 style
+--   encoding (based on the current locale, but PEP 383 only works properly
+--   on UTF-8 encodings, so good luck).
 --   
 --   Looking up the locale requires IO. If you're not worried about calls
 --   to <tt>setFileSystemEncoding</tt>, then <a>unsafePerformIO</a> may be
 --   feasible (make sure to deeply evaluate the result to catch
 --   exceptions).
+
+-- | <i>Deprecated: Use System.OsPath.Posix.decodeFS from filepath</i>
 decodeFS :: PosixString -> IO String
+
+-- | This mimics the behavior of the base library when doing filesystem
+--   operations, which uses <tt>getLocaleEncoding</tt>.
+--   
+--   Looking up the locale requires IO. If you're not worried about calls
+--   to <tt>setFileSystemEncoding</tt>, then <a>unsafePerformIO</a> may be
+--   feasible (make sure to deeply evaluate the result to catch
+--   exceptions).
+decodeLE :: PosixString -> IO String
 
 -- | Unpack a platform string to a list of platform words.
 unpack :: PosixString -> [PosixChar]
@@ -1507,6 +1566,14 @@ unsnoc :: PosixString -> Maybe (PosixString, PosixChar)
 null :: PosixString -> Bool
 
 -- | <i>O(1)</i> The length of a <tt>OsString</tt>.
+--   
+--   This returns the number of code units (<tt>Word8</tt> on unix and
+--   <tt>Word16</tt> on windows), not bytes.
+--   
+--   <pre>
+--   &gt;&gt;&gt; length "abc"
+--   3
+--   </pre>
 length :: PosixString -> Int
 
 -- | <i>O(n)</i> <a>map</a> <tt>f xs</tt> is the OsString obtained by
@@ -1901,11 +1968,16 @@ encodeUtf :: MonadThrow m => String -> m OsString
 --   surrogate chars. For sanitized input, this can be useful.
 unsafeEncodeUtf :: HasCallStack => String -> OsString
 
--- | Encode an <a>OsString</a> given the platform specific encodings.
+-- | Encode a <a>FilePath</a> with the specified encoding.
+--   
+--   Note: on windows, we expect a "wide char" encoding (e.g. UCS-2 or
+--   UTF-16). Anything that works with <tt>Word16</tt> boundaries. Picking
+--   an incompatible encoding may crash filepath operations.
 encodeWith :: TextEncoding -> TextEncoding -> String -> Either EncodingException OsString
 
 -- | Like <a>encodeUtf</a>, except this mimics the behavior of the base
---   library when doing filesystem operations, which is:
+--   library when doing filesystem operations (usually filepaths), which
+--   is:
 --   
 --   <ol>
 --   <li>on unix, uses shady PEP 383 style encoding (based on the current
@@ -1920,6 +1992,21 @@ encodeWith :: TextEncoding -> TextEncoding -> String -> Either EncodingException
 --   be feasible (make sure to deeply evaluate the result to catch
 --   exceptions).
 encodeFS :: String -> IO OsString
+
+-- | Like <a>encodeUtf</a>, except this mimics the behavior of the base
+--   library when doing string operations, which is:
+--   
+--   <ol>
+--   <li>on unix this uses <tt>getLocaleEncoding</tt></li>
+--   <li>on windows does permissive UTF-16 encoding, where coding errors
+--   generate Chars in the surrogate range</li>
+--   </ol>
+--   
+--   Looking up the locale requires IO. If you're not worried about calls
+--   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
+--   be feasible (make sure to deeply evaluate the result to catch
+--   exceptions).
+encodeLE :: String -> IO OsString
 
 -- | Partial unicode friendly decoding.
 --   
@@ -1936,7 +2023,8 @@ decodeUtf :: MonadThrow m => OsString -> m String
 decodeWith :: TextEncoding -> TextEncoding -> OsString -> Either EncodingException String
 
 -- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
---   library when doing filesystem operations, which is:
+--   library when doing filesystem operations (usually filepaths), which
+--   is:
 --   
 --   <ol>
 --   <li>on unix, uses shady PEP 383 style encoding (based on the current
@@ -1951,6 +2039,21 @@ decodeWith :: TextEncoding -> TextEncoding -> OsString -> Either EncodingExcepti
 --   be feasible (make sure to deeply evaluate the result to catch
 --   exceptions).
 decodeFS :: OsString -> IO String
+
+-- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
+--   library when doing string operations, which is:
+--   
+--   <ol>
+--   <li>on unix this uses <tt>getLocaleEncoding</tt></li>
+--   <li>on windows does permissive UTF-16 encoding, where coding errors
+--   generate Chars in the surrogate range</li>
+--   </ol>
+--   
+--   Looking up the locale requires IO. If you're not worried about calls
+--   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
+--   be feasible (make sure to deeply evaluate the result to catch
+--   exceptions).
+decodeLE :: OsString -> IO String
 
 -- | Constructs an <tt>OsString</tt> from a ByteString.
 --   
@@ -2448,11 +2551,16 @@ encodeUtf :: MonadThrow m => String -> m OsString
 --   surrogate chars. For sanitized input, this can be useful.
 unsafeEncodeUtf :: HasCallStack => String -> OsString
 
--- | Encode an <a>OsString</a> given the platform specific encodings.
+-- | Encode a <a>FilePath</a> with the specified encoding.
+--   
+--   Note: on windows, we expect a "wide char" encoding (e.g. UCS-2 or
+--   UTF-16). Anything that works with <tt>Word16</tt> boundaries. Picking
+--   an incompatible encoding may crash filepath operations.
 encodeWith :: TextEncoding -> TextEncoding -> String -> Either EncodingException OsString
 
 -- | Like <a>encodeUtf</a>, except this mimics the behavior of the base
---   library when doing filesystem operations, which is:
+--   library when doing filesystem operations (usually filepaths), which
+--   is:
 --   
 --   <ol>
 --   <li>on unix, uses shady PEP 383 style encoding (based on the current
@@ -2466,7 +2574,24 @@ encodeWith :: TextEncoding -> TextEncoding -> String -> Either EncodingException
 --   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
 --   be feasible (make sure to deeply evaluate the result to catch
 --   exceptions).
+
+-- | <i>Deprecated: Use System.OsPath.encodeFS from filepath</i>
 encodeFS :: String -> IO OsString
+
+-- | Like <a>encodeUtf</a>, except this mimics the behavior of the base
+--   library when doing string operations, which is:
+--   
+--   <ol>
+--   <li>on unix this uses <tt>getLocaleEncoding</tt></li>
+--   <li>on windows does permissive UTF-16 encoding, where coding errors
+--   generate Chars in the surrogate range</li>
+--   </ol>
+--   
+--   Looking up the locale requires IO. If you're not worried about calls
+--   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
+--   be feasible (make sure to deeply evaluate the result to catch
+--   exceptions).
+encodeLE :: String -> IO OsString
 
 -- | QuasiQuote an <a>OsString</a>. This accepts Unicode characters and
 --   encodes as UTF-8 on unix and UTF-16 on windows. If used as pattern,
@@ -2497,7 +2622,8 @@ decodeUtf :: MonadThrow m => OsString -> m String
 decodeWith :: TextEncoding -> TextEncoding -> OsString -> Either EncodingException String
 
 -- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
---   library when doing filesystem operations, which is:
+--   library when doing filesystem operations (usually filepaths), which
+--   is:
 --   
 --   <ol>
 --   <li>on unix, uses shady PEP 383 style encoding (based on the current
@@ -2511,7 +2637,24 @@ decodeWith :: TextEncoding -> TextEncoding -> OsString -> Either EncodingExcepti
 --   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
 --   be feasible (make sure to deeply evaluate the result to catch
 --   exceptions).
+
+-- | <i>Deprecated: Use System.OsPath.encodeFS from filepath</i>
 decodeFS :: OsString -> IO String
+
+-- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
+--   library when doing string operations, which is:
+--   
+--   <ol>
+--   <li>on unix this uses <tt>getLocaleEncoding</tt></li>
+--   <li>on windows does permissive UTF-16 encoding, where coding errors
+--   generate Chars in the surrogate range</li>
+--   </ol>
+--   
+--   Looking up the locale requires IO. If you're not worried about calls
+--   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
+--   be feasible (make sure to deeply evaluate the result to catch
+--   exceptions).
+decodeLE :: OsString -> IO String
 
 -- | Unpack an <a>OsString</a> to a list of <a>OsChar</a>.
 unpack :: OsString -> [OsChar]
@@ -2981,16 +3124,42 @@ encodeUtf :: MonadThrow m => String -> m WindowsString
 unsafeEncodeUtf :: HasCallStack => String -> WindowsString
 
 -- | Encode a <a>String</a> with the specified encoding.
+--   
+--   Note: We expect a "wide char" encoding (e.g. UCS-2 or UTF-16).
+--   Anything that works with <tt>Word16</tt> boundaries. Picking an
+--   incompatible encoding may crash filepath operations.
 encodeWith :: TextEncoding -> String -> Either EncodingException WindowsString
 
 -- | This mimics the behavior of the base library when doing filesystem
+--   operations (usually filepaths), which does permissive UTF-16 encoding,
+--   where coding errors generate Chars in the surrogate range.
+--   
+--   The reason this is in IO is because it unifies with the Posix
+--   counterpart, which does require IO. This is safe to
+--   <a>unsafePerformIO</a>/<tt>unsafeDupablePerformIO</tt>.
+
+-- | <i>Deprecated: Use System.OsPath.Windows.encodeFS from filepath</i>
+encodeFS :: String -> IO WindowsString
+
+-- | This mimics the behavior of the base library when doing string
 --   operations, which does permissive UTF-16 encoding, where coding errors
 --   generate Chars in the surrogate range.
 --   
 --   The reason this is in IO is because it unifies with the Posix
 --   counterpart, which does require IO. This is safe to
 --   <a>unsafePerformIO</a>/<tt>unsafeDupablePerformIO</tt>.
-encodeFS :: String -> IO WindowsString
+encodeLE :: String -> IO WindowsString
+
+-- | Like 'encodeLE but not in IO.
+--   
+--   <a>encodeLE</a> was designed to have a symmetric type signature on
+--   unix and windows, but morally the function has no IO effects on
+--   windows, so we provide this variant without breaking existing API.
+--   
+--   On windows, <a>encodeLE</a> is equivalent to <a>encodeFS</a>.
+--   
+--   This function does not exist on unix.
+fromString :: String -> WindowsString
 
 -- | Constructs a platform string from a ByteString.
 --   
@@ -3027,6 +3196,19 @@ decodeUtf :: MonadThrow m => WindowsString -> m String
 decodeWith :: TextEncoding -> WindowsString -> Either EncodingException String
 
 -- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
+--   library when doing filesystem operations (usually filepaths), which
+--   does permissive UTF-16 encoding, where coding errors generate Chars in
+--   the surrogate range.
+--   
+--   The reason this is in IO is because it unifies with the Posix
+--   counterpart, which does require IO.
+--   <a>unsafePerformIO</a>/<tt>unsafeDupablePerformIO</tt> are safe,
+--   however.
+
+-- | <i>Deprecated: Use System.OsPath.Windows.decodeFS from filepath</i>
+decodeFS :: WindowsString -> IO String
+
+-- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
 --   library when doing filesystem operations, which does permissive UTF-16
 --   encoding, where coding errors generate Chars in the surrogate range.
 --   
@@ -3034,7 +3216,7 @@ decodeWith :: TextEncoding -> WindowsString -> Either EncodingException String
 --   counterpart, which does require IO.
 --   <a>unsafePerformIO</a>/<tt>unsafeDupablePerformIO</tt> are safe,
 --   however.
-decodeFS :: WindowsString -> IO String
+decodeLE :: WindowsString -> IO String
 
 -- | Unpack a platform string to a list of platform words.
 unpack :: WindowsString -> [WindowsChar]
@@ -3091,6 +3273,14 @@ unsnoc :: WindowsString -> Maybe (WindowsString, WindowsChar)
 null :: WindowsString -> Bool
 
 -- | <i>O(1)</i> The length of a <tt>OsString</tt>.
+--   
+--   This returns the number of code units (<tt>Word8</tt> on unix and
+--   <tt>Word16</tt> on windows), not bytes.
+--   
+--   <pre>
+--   &gt;&gt;&gt; length "abc"
+--   3
+--   </pre>
 length :: WindowsString -> Int
 
 -- | <i>O(n)</i> <a>map</a> <tt>f xs</tt> is the OsString obtained by

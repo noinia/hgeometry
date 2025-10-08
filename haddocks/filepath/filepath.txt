@@ -39,7 +39,7 @@
 --   An introduction into the new API can be found in this <a>blog
 --   post</a>. Code examples for the new API can be found <a>here</a>.
 @package filepath
-@version 1.5.2.0
+@version 1.5.4.0
 
 
 -- | A library for <a>FilePath</a> manipulations, using Posix style paths
@@ -277,7 +277,6 @@ infixr 7 <.>
 --   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   uncurry (&lt;&gt;) (splitExtensions x) == x
 --   Valid x =&gt; uncurry addExtension (splitExtensions x) == x
---   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   </pre>
 splitExtensions :: FilePath -> (FilePath, String)
 
@@ -1039,7 +1038,6 @@ infixr 7 <.>
 --   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   uncurry (&lt;&gt;) (splitExtensions x) == x
 --   Valid x =&gt; uncurry addExtension (splitExtensions x) == x
---   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   </pre>
 splitExtensions :: FilePath -> (FilePath, String)
 
@@ -1798,7 +1796,6 @@ infixr 7 <.>
 --   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   uncurry (&lt;&gt;) (splitExtensions x) == x
 --   Valid x =&gt; uncurry addExtension (splitExtensions x) == x
---   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   </pre>
 splitExtensions :: FilePath -> (FilePath, String)
 
@@ -2350,14 +2347,14 @@ utf16le_b_EF :: CodingFailureMode -> IO (TextEncoder ())
 utf16le_b_decode :: DecodeBuffer
 utf16le_b_encode :: EncodeBuffer
 
--- | This mimics the filepath dencoder base uses on unix, with the small
---   distinction that we're not truncating at NUL bytes (because we're not
---   at the outer FFI layer).
+-- | This mimics the filepath encoder base uses on unix (using PEP-383),
+--   with the small distinction that we're not truncating at NUL bytes
+--   (because we're not at the outer FFI layer).
 encodeWithBasePosix :: String -> IO ShortByteString
 
--- | This mimics the filepath decoder base uses on unix, with the small
---   distinction that we're not truncating at NUL bytes (because we're not
---   at the outer FFI layer).
+-- | This mimics the filepath decoder base uses on unix (using PEP-383),
+--   with the small distinction that we're not truncating at NUL bytes
+--   (because we're not at the outer FFI layer).
 decodeWithBasePosix :: ShortByteString -> IO String
 
 -- | This mimics the filepath dencoder base uses on windows, with the small
@@ -2602,7 +2599,6 @@ infixr 7 <.>
 --   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   uncurry (&lt;&gt;) (splitExtensions x) == x
 --   Valid x =&gt; uncurry addExtension (splitExtensions x) == x
---   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   </pre>
 splitExtensions :: ShortByteString -> (ShortByteString, ShortByteString)
 
@@ -3193,17 +3189,7 @@ unsafeEncodeUtf :: HasCallStack => String -> PosixString
 
 -- | Encode a <a>String</a> with the specified encoding.
 encodeWith :: TextEncoding -> String -> Either EncodingException PosixString
-
--- | This mimics the behavior of the base library when doing filesystem
---   operations, which uses shady PEP 383 style encoding (based on the
---   current locale, but PEP 383 only works properly on UTF-8 encodings, so
---   good luck).
---   
---   Looking up the locale requires IO. If you're not worried about calls
---   to <tt>setFileSystemEncoding</tt>, then <a>unsafePerformIO</a> may be
---   feasible (make sure to deeply evaluate the result to catch
---   exceptions).
-encodeFS :: String -> IO PosixString
+encodeFS :: String -> IO PosixPath
 
 -- | QuasiQuote a <a>PosixPath</a>. This accepts Unicode characters and
 --   encodes as UTF-8. Runs <a>isValid</a> on the input.
@@ -3228,17 +3214,7 @@ decodeUtf :: MonadThrow m => PosixString -> m String
 --   
 --   The String is forced into memory to catch all exceptions.
 decodeWith :: TextEncoding -> PosixString -> Either EncodingException String
-
--- | This mimics the behavior of the base library when doing filesystem
---   operations, which uses shady PEP 383 style encoding (based on the
---   current locale, but PEP 383 only works properly on UTF-8 encodings, so
---   good luck).
---   
---   Looking up the locale requires IO. If you're not worried about calls
---   to <tt>setFileSystemEncoding</tt>, then <a>unsafePerformIO</a> may be
---   feasible (make sure to deeply evaluate the result to catch
---   exceptions).
-decodeFS :: PosixString -> IO String
+decodeFS :: PosixPath -> IO String
 
 -- | Unpack a platform string to a list of platform words.
 unpack :: PosixString -> [PosixChar]
@@ -3864,6 +3840,10 @@ encodeUtf :: MonadThrow m => FilePath -> m OsPath
 unsafeEncodeUtf :: HasCallStack => String -> OsString
 
 -- | Encode a <a>FilePath</a> with the specified encoding.
+--   
+--   Note: on windows, we expect a "wide char" encoding (e.g. UCS-2 or
+--   UTF-16). Anything that works with <tt>Word16</tt> boundaries. Picking
+--   an incompatible encoding may crash filepath operations.
 encodeWith :: TextEncoding -> TextEncoding -> FilePath -> Either EncodingException OsPath
 
 -- | Like <a>encodeUtf</a>, except this mimics the behavior of the base
@@ -4044,24 +4024,12 @@ encodeUtf :: MonadThrow m => FilePath -> m OsPath
 unsafeEncodeUtf :: HasCallStack => String -> OsString
 
 -- | Encode a <a>FilePath</a> with the specified encoding.
+--   
+--   Note: on windows, we expect a "wide char" encoding (e.g. UCS-2 or
+--   UTF-16). Anything that works with <tt>Word16</tt> boundaries. Picking
+--   an incompatible encoding may crash filepath operations.
 encodeWith :: TextEncoding -> TextEncoding -> FilePath -> Either EncodingException OsPath
-
--- | Like <a>encodeUtf</a>, except this mimics the behavior of the base
---   library when doing filesystem operations, which is:
---   
---   <ol>
---   <li>on unix, uses shady PEP 383 style encoding (based on the current
---   locale, but PEP 383 only works properly on UTF-8 encodings, so good
---   luck)</li>
---   <li>on windows does permissive UTF-16 encoding, where coding errors
---   generate Chars in the surrogate range</li>
---   </ol>
---   
---   Looking up the locale requires IO. If you're not worried about calls
---   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
---   be feasible (make sure to deeply evaluate the result to catch
---   exceptions).
-encodeFS :: FilePath -> IO OsPath
+encodeFS :: String -> IO OsPath
 
 -- | QuasiQuote an <a>OsPath</a>. This accepts Unicode characters and
 --   encodes as UTF-8 on unix and UTF-16LE on windows. Runs <a>isValid</a>
@@ -4086,23 +4054,7 @@ decodeUtf :: MonadThrow m => OsPath -> m FilePath
 
 -- | Decode an <a>OsPath</a> with the specified encoding.
 decodeWith :: TextEncoding -> TextEncoding -> OsPath -> Either EncodingException FilePath
-
--- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
---   library when doing filesystem operations, which is:
---   
---   <ol>
---   <li>on unix, uses shady PEP 383 style encoding (based on the current
---   locale, but PEP 383 only works properly on UTF-8 encodings, so good
---   luck)</li>
---   <li>on windows does permissive UTF-16 encoding, where coding errors
---   generate Chars in the surrogate range</li>
---   </ol>
---   
---   Looking up the locale requires IO. If you're not worried about calls
---   to <tt>setFileSystemEncoding</tt>, then <tt>unsafePerformIO</tt> may
---   be feasible (make sure to deeply evaluate the result to catch
---   exceptions).
-decodeFS :: OsPath -> IO FilePath
+decodeFS :: OsPath -> IO String
 
 -- | Unpack an <a>OsPath</a> to a list of <a>OsChar</a>.
 unpack :: OsPath -> [OsChar]
@@ -5064,7 +5016,6 @@ infixr 7 <.>
 --   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   uncurry (&lt;&gt;) (splitExtensions x) == x
 --   Valid x =&gt; uncurry addExtension (splitExtensions x) == x
---   splitExtensions "file.tar.gz" == ("file",".tar.gz")
 --   </pre>
 splitExtensions :: ShortByteString -> (ShortByteString, ShortByteString)
 
@@ -5612,16 +5563,12 @@ encodeUtf :: MonadThrow m => String -> m WindowsString
 unsafeEncodeUtf :: HasCallStack => String -> WindowsString
 
 -- | Encode a <a>String</a> with the specified encoding.
-encodeWith :: TextEncoding -> String -> Either EncodingException WindowsString
-
--- | This mimics the behavior of the base library when doing filesystem
---   operations, which does permissive UTF-16 encoding, where coding errors
---   generate Chars in the surrogate range.
 --   
---   The reason this is in IO is because it unifies with the Posix
---   counterpart, which does require IO. This is safe to
---   <a>unsafePerformIO</a>/<tt>unsafeDupablePerformIO</tt>.
-encodeFS :: String -> IO WindowsString
+--   Note: We expect a "wide char" encoding (e.g. UCS-2 or UTF-16).
+--   Anything that works with <tt>Word16</tt> boundaries. Picking an
+--   incompatible encoding may crash filepath operations.
+encodeWith :: TextEncoding -> String -> Either EncodingException WindowsString
+encodeFS :: String -> IO WindowsPath
 
 -- | QuasiQuote a <a>WindowsPath</a>. This accepts Unicode characters and
 --   encodes as UTF-16LE. Runs <a>isValid</a> on the input.
@@ -5645,16 +5592,7 @@ decodeUtf :: MonadThrow m => WindowsString -> m String
 --   
 --   The String is forced into memory to catch all exceptions.
 decodeWith :: TextEncoding -> WindowsString -> Either EncodingException String
-
--- | Like <a>decodeUtf</a>, except this mimics the behavior of the base
---   library when doing filesystem operations, which does permissive UTF-16
---   encoding, where coding errors generate Chars in the surrogate range.
---   
---   The reason this is in IO is because it unifies with the Posix
---   counterpart, which does require IO.
---   <a>unsafePerformIO</a>/<tt>unsafeDupablePerformIO</tt> are safe,
---   however.
-decodeFS :: WindowsString -> IO String
+decodeFS :: WindowsPath -> IO String
 
 -- | Unpack a platform string to a list of platform words.
 unpack :: WindowsString -> [WindowsChar]

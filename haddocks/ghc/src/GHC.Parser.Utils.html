@@ -20,9 +20,9 @@
 </span><span id="line-20"></span><span class="annot"><span class="hs-comment">-- | Returns @True@ if passed string is a statement.</span></span><span>
 </span><span id="line-21"></span><span class="annot"><a href="GHC.Parser.Utils.html#isStmt"><span class="hs-identifier hs-type">isStmt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParserOpts"><span class="hs-identifier hs-type">ParserOpts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-22"></span><span id="isStmt"><span class="annot"><span class="annottext">isStmt :: ParserOpts -&gt; String -&gt; Bool
-</span><a href="GHC.Parser.Utils.html#isStmt"><span class="hs-identifier hs-var hs-var">isStmt</span></a></span></span><span> </span><span id="local-6989586621682601103"><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601103"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682601104"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601104"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Parser.Utils.html#isStmt"><span class="hs-identifier hs-var hs-var">isStmt</span></a></span></span><span> </span><span id="local-6989586621682797407"><span class="annot"><span class="annottext">ParserOpts
+</span><a href="#local-6989586621682797407"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682797408"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797408"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-23"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">P (Maybe
      (GenLocated
         SrcSpanAnnA
@@ -40,8 +40,8 @@ forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
         SrcSpanAnnA
         (StmtLR GhcPs GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs)))))
 </span><a href="GHC.Parser.html#parseStmt"><span class="hs-identifier hs-var">Parser.parseStmt</span></a></span><span> </span><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601103"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601104"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682797407"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797408"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-24"></span><span>    </span><span class="annot"><a href="GHC.Parser.Lexer.html#POk"><span class="hs-identifier hs-type">Lexer.POk</span></a></span><span> </span><span class="annot"><span class="annottext">PState
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Maybe
   (GenLocated
@@ -56,28 +56,28 @@ forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
 </span><span id="line-27"></span><span class="annot"><span class="hs-comment">-- | Returns @True@ if passed string has an import declaration.</span></span><span>
 </span><span id="line-28"></span><span class="annot"><a href="GHC.Parser.Utils.html#hasImport"><span class="hs-identifier hs-type">hasImport</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParserOpts"><span class="hs-identifier hs-type">ParserOpts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-29"></span><span id="hasImport"><span class="annot"><span class="annottext">hasImport :: ParserOpts -&gt; String -&gt; Bool
-</span><a href="GHC.Parser.Utils.html#hasImport"><span class="hs-identifier hs-var hs-var">hasImport</span></a></span></span><span> </span><span id="local-6989586621682601108"><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601108"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682601109"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601109"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Parser.Utils.html#hasImport"><span class="hs-identifier hs-var hs-var">hasImport</span></a></span></span><span> </span><span id="local-6989586621682797412"><span class="annot"><span class="annottext">ParserOpts
+</span><a href="#local-6989586621682797412"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682797413"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797413"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-30"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">P (Located (HsModule GhcPs))
 -&gt; ParserOpts -&gt; String -&gt; ParseResult (Located (HsModule GhcPs))
 forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
 </span><a href="GHC.Parser.Utils.html#parseThing"><span class="hs-identifier hs-var">parseThing</span></a></span><span> </span><span class="annot"><span class="annottext">P (Located (HsModule GhcPs))
 </span><a href="GHC.Parser.html#parseModule"><span class="hs-identifier hs-var">Parser.parseModule</span></a></span><span> </span><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601108"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601109"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682797412"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797413"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-31"></span><span>    </span><span class="annot"><a href="GHC.Parser.Lexer.html#POk"><span class="hs-identifier hs-type">Lexer.POk</span></a></span><span> </span><span class="annot"><span class="annottext">PState
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682601110"><span class="annot"><span class="annottext">Located (HsModule GhcPs)
-</span><a href="#local-6989586621682601110"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Located (HsModule GhcPs) -&gt; Bool
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682797414"><span class="annot"><span class="annottext">Located (HsModule GhcPs)
+</span><a href="#local-6989586621682797414"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Located (HsModule GhcPs) -&gt; Bool
 forall {l} {p}. GenLocated l (HsModule p) -&gt; Bool
-</span><a href="#local-6989586621682601111"><span class="hs-identifier hs-var">hasImports</span></a></span><span> </span><span class="annot"><span class="annottext">Located (HsModule GhcPs)
-</span><a href="#local-6989586621682601110"><span class="hs-identifier hs-var">thing</span></a></span><span>
+</span><a href="#local-6989586621682797415"><span class="hs-identifier hs-var">hasImports</span></a></span><span> </span><span class="annot"><span class="annottext">Located (HsModule GhcPs)
+</span><a href="#local-6989586621682797414"><span class="hs-identifier hs-var">thing</span></a></span><span>
 </span><span id="line-32"></span><span>    </span><span class="annot"><a href="GHC.Parser.Lexer.html#PFailed"><span class="hs-identifier hs-type">Lexer.PFailed</span></a></span><span> </span><span class="annot"><span class="annottext">PState
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
 </span><span id="line-33"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-34"></span><span>    </span><span id="local-6989586621682601111"><span class="annot"><span class="annottext">hasImports :: GenLocated l (HsModule p) -&gt; Bool
-</span><a href="#local-6989586621682601111"><span class="hs-identifier hs-var hs-var">hasImports</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span id="line-34"></span><span>    </span><span id="local-6989586621682797415"><span class="annot"><span class="annottext">hasImports :: GenLocated l (HsModule p) -&gt; Bool
+</span><a href="#local-6989586621682797415"><span class="hs-identifier hs-var hs-var">hasImports</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool)
 -&gt; (GenLocated l (HsModule p) -&gt; Bool)
 -&gt; GenLocated l (HsModule p)
@@ -105,9 +105,9 @@ forall l e. GenLocated l e -&gt; e
 </span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- | Returns @True@ if passed string is an import declaration.</span></span><span>
 </span><span id="line-37"></span><span class="annot"><a href="GHC.Parser.Utils.html#isImport"><span class="hs-identifier hs-type">isImport</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParserOpts"><span class="hs-identifier hs-type">ParserOpts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-38"></span><span id="isImport"><span class="annot"><span class="annottext">isImport :: ParserOpts -&gt; String -&gt; Bool
-</span><a href="GHC.Parser.Utils.html#isImport"><span class="hs-identifier hs-var hs-var">isImport</span></a></span></span><span> </span><span id="local-6989586621682601119"><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601119"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682601120"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601120"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Parser.Utils.html#isImport"><span class="hs-identifier hs-var hs-var">isImport</span></a></span></span><span> </span><span id="local-6989586621682797423"><span class="annot"><span class="annottext">ParserOpts
+</span><a href="#local-6989586621682797423"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682797424"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797424"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-39"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">P (GenLocated SrcSpanAnnA (ImportDecl GhcPs))
 -&gt; ParserOpts
 -&gt; String
@@ -115,8 +115,8 @@ forall l e. GenLocated l e -&gt; e
 forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
 </span><a href="GHC.Parser.Utils.html#parseThing"><span class="hs-identifier hs-var">parseThing</span></a></span><span> </span><span class="annot"><span class="annottext">P (GenLocated SrcSpanAnnA (ImportDecl GhcPs))
 </span><a href="GHC.Parser.html#parseImport"><span class="hs-identifier hs-var">Parser.parseImport</span></a></span><span> </span><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601119"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601120"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682797423"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797424"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-40"></span><span>    </span><span class="annot"><a href="GHC.Parser.Lexer.html#POk"><span class="hs-identifier hs-type">Lexer.POk</span></a></span><span> </span><span class="annot"><span class="annottext">PState
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">GenLocated SrcSpanAnnA (ImportDecl GhcPs)
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -128,9 +128,9 @@ forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
 </span><span id="line-43"></span><span class="annot"><span class="hs-comment">-- | Returns @True@ if passed string is a declaration but __/not a splice/__.</span></span><span>
 </span><span id="line-44"></span><span class="annot"><a href="GHC.Parser.Utils.html#isDecl"><span class="hs-identifier hs-type">isDecl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParserOpts"><span class="hs-identifier hs-type">ParserOpts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-45"></span><span id="isDecl"><span class="annot"><span class="annottext">isDecl :: ParserOpts -&gt; String -&gt; Bool
-</span><a href="GHC.Parser.Utils.html#isDecl"><span class="hs-identifier hs-var hs-var">isDecl</span></a></span></span><span> </span><span id="local-6989586621682601121"><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601121"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682601122"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601122"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="GHC.Parser.Utils.html#isDecl"><span class="hs-identifier hs-var hs-var">isDecl</span></a></span></span><span> </span><span id="local-6989586621682797425"><span class="annot"><span class="annottext">ParserOpts
+</span><a href="#local-6989586621682797425"><span class="hs-identifier hs-var">pflags</span></a></span></span><span> </span><span id="local-6989586621682797426"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797426"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-46"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">P (GenLocated SrcSpanAnnA (HsDecl GhcPs))
 -&gt; ParserOpts
 -&gt; String
@@ -138,15 +138,15 @@ forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
 forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
 </span><a href="GHC.Parser.Utils.html#parseThing"><span class="hs-identifier hs-var">parseThing</span></a></span><span> </span><span class="annot"><span class="annottext">P (GenLocated SrcSpanAnnA (HsDecl GhcPs))
 </span><a href="GHC.Parser.html#parseDeclaration"><span class="hs-identifier hs-var">Parser.parseDeclaration</span></a></span><span> </span><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601121"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601122"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682797425"><span class="hs-identifier hs-var">pflags</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797426"><span class="hs-identifier hs-var">stmt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-47"></span><span>    </span><span class="annot"><a href="GHC.Parser.Lexer.html#POk"><span class="hs-identifier hs-type">Lexer.POk</span></a></span><span> </span><span class="annot"><span class="annottext">PState
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682601123"><span class="annot"><span class="annottext">GenLocated SrcSpanAnnA (HsDecl GhcPs)
-</span><a href="#local-6989586621682601123"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682797427"><span class="annot"><span class="annottext">GenLocated SrcSpanAnnA (HsDecl GhcPs)
+</span><a href="#local-6989586621682797427"><span class="hs-identifier hs-var">thing</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-48"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">GenLocated SrcSpanAnnA (HsDecl GhcPs) -&gt; HsDecl GhcPs
 forall l e. GenLocated l e -&gt; e
 </span><a href="GHC.Types.SrcLoc.html#unLoc"><span class="hs-identifier hs-var">unLoc</span></a></span><span> </span><span class="annot"><span class="annottext">GenLocated SrcSpanAnnA (HsDecl GhcPs)
-</span><a href="#local-6989586621682601123"><span class="hs-identifier hs-var">thing</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682797427"><span class="hs-identifier hs-var">thing</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-49"></span><span>        </span><span class="annot"><a href="Language.Haskell.Syntax.Decls.html#SpliceD"><span class="hs-identifier hs-type">SpliceD</span></a></span><span> </span><span class="annot"><span class="annottext">XSpliceD GhcPs
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">SpliceDecl GhcPs
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -158,18 +158,18 @@ forall l e. GenLocated l e -&gt; e
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span>
 </span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span id="local-6989586621682601068"><span class="annot"><a href="GHC.Parser.Utils.html#parseThing"><span class="hs-identifier hs-type">parseThing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#P"><span class="hs-identifier hs-type">Lexer.P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682601068"><span class="hs-identifier hs-type">thing</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParserOpts"><span class="hs-identifier hs-type">ParserOpts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParseResult"><span class="hs-identifier hs-type">Lexer.ParseResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682601068"><span class="hs-identifier hs-type">thing</span></a></span></span><span>
+</span><span id="line-53"></span><span id="local-6989586621682797372"><span class="annot"><a href="GHC.Parser.Utils.html#parseThing"><span class="hs-identifier hs-type">parseThing</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#P"><span class="hs-identifier hs-type">Lexer.P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682797372"><span class="hs-identifier hs-type">thing</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParserOpts"><span class="hs-identifier hs-type">ParserOpts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Parser.Lexer.html#ParseResult"><span class="hs-identifier hs-type">Lexer.ParseResult</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682797372"><span class="hs-identifier hs-type">thing</span></a></span></span><span>
 </span><span id="line-54"></span><span id="parseThing"><span class="annot"><span class="annottext">parseThing :: forall thing. P thing -&gt; ParserOpts -&gt; String -&gt; ParseResult thing
-</span><a href="GHC.Parser.Utils.html#parseThing"><span class="hs-identifier hs-var hs-var">parseThing</span></a></span></span><span> </span><span id="local-6989586621682601125"><span class="annot"><span class="annottext">P thing
-</span><a href="#local-6989586621682601125"><span class="hs-identifier hs-var">parser</span></a></span></span><span> </span><span id="local-6989586621682601126"><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601126"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span id="local-6989586621682601127"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601127"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-55"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682601128"><span class="annot"><span class="annottext">buf :: StringBuffer
-</span><a href="#local-6989586621682601128"><span class="hs-identifier hs-var hs-var">buf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; StringBuffer
+</span><a href="GHC.Parser.Utils.html#parseThing"><span class="hs-identifier hs-var hs-var">parseThing</span></a></span></span><span> </span><span id="local-6989586621682797429"><span class="annot"><span class="annottext">P thing
+</span><a href="#local-6989586621682797429"><span class="hs-identifier hs-var">parser</span></a></span></span><span> </span><span id="local-6989586621682797430"><span class="annot"><span class="annottext">ParserOpts
+</span><a href="#local-6989586621682797430"><span class="hs-identifier hs-var">opts</span></a></span></span><span> </span><span id="local-6989586621682797431"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621682797431"><span class="hs-identifier hs-var">stmt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621682797432"><span class="annot"><span class="annottext">buf :: StringBuffer
+</span><a href="#local-6989586621682797432"><span class="hs-identifier hs-var hs-var">buf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; StringBuffer
 </span><a href="GHC.Data.StringBuffer.html#stringToStringBuffer"><span class="hs-identifier hs-var">stringToStringBuffer</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621682601127"><span class="hs-identifier hs-var">stmt</span></a></span><span>
-</span><span id="line-56"></span><span>      </span><span id="local-6989586621682601130"><span class="annot"><span class="annottext">loc :: RealSrcLoc
-</span><a href="#local-6989586621682601130"><span class="hs-identifier hs-var hs-var">loc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FastString -&gt; Int -&gt; Int -&gt; RealSrcLoc
+</span><a href="#local-6989586621682797431"><span class="hs-identifier hs-var">stmt</span></a></span><span>
+</span><span id="line-56"></span><span>      </span><span id="local-6989586621682797434"><span class="annot"><span class="annottext">loc :: RealSrcLoc
+</span><a href="#local-6989586621682797434"><span class="hs-identifier hs-var hs-var">loc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FastString -&gt; Int -&gt; Int -&gt; RealSrcLoc
 </span><a href="GHC.Types.SrcLoc.html#mkRealSrcLoc"><span class="hs-identifier hs-var">mkRealSrcLoc</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; FastString
 </span><a href="GHC.Data.FastString.html#fsLit"><span class="hs-identifier hs-var">fsLit</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&lt;interactive&gt;&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
@@ -179,9 +179,9 @@ forall l e. GenLocated l e -&gt; e
 </span><span id="line-58"></span><span>  </span><span class="annot"><span class="annottext">P thing -&gt; PState -&gt; ParseResult thing
 forall a. P a -&gt; PState -&gt; ParseResult a
 </span><a href="GHC.Parser.Lexer.html#unP"><span class="hs-identifier hs-var">Lexer.unP</span></a></span><span> </span><span class="annot"><span class="annottext">P thing
-</span><a href="#local-6989586621682601125"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ParserOpts -&gt; StringBuffer -&gt; RealSrcLoc -&gt; PState
+</span><a href="#local-6989586621682797429"><span class="hs-identifier hs-var">parser</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ParserOpts -&gt; StringBuffer -&gt; RealSrcLoc -&gt; PState
 </span><a href="GHC.Parser.Lexer.html#initParserState"><span class="hs-identifier hs-var">Lexer.initParserState</span></a></span><span> </span><span class="annot"><span class="annottext">ParserOpts
-</span><a href="#local-6989586621682601126"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">StringBuffer
-</span><a href="#local-6989586621682601128"><span class="hs-identifier hs-var">buf</span></a></span><span> </span><span class="annot"><span class="annottext">RealSrcLoc
-</span><a href="#local-6989586621682601130"><span class="hs-identifier hs-var">loc</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682797430"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">StringBuffer
+</span><a href="#local-6989586621682797432"><span class="hs-identifier hs-var">buf</span></a></span><span> </span><span class="annot"><span class="annottext">RealSrcLoc
+</span><a href="#local-6989586621682797434"><span class="hs-identifier hs-var">loc</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-59"></span></pre></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679500090"><span id="local-6989586621679500091"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679518931"><span id="local-6989586621679518932"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
 </span><span id="line-3"></span><span>
 </span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html"><span class="hs-identifier">Distribution.Types.Dependency</span></a></span><span>
@@ -12,7 +12,7 @@
 </span><span id="line-12"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-13"></span><span>
 </span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.html"><span class="hs-identifier">Distribution.Types.VersionRange</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.VersionRange.html#isAnyVersionLight"><span class="hs-identifier">isAnyVersionLight</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier">VersionRange</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#anyVersion"><span class="hs-identifier">anyVersion</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Version.html#simplifyVersionRange"><span class="hs-identifier">simplifyVersionRange</span></a></span><span class="hs-special">)</span><span>
@@ -27,25 +27,21 @@
 </span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html"><span class="hs-identifier">Distribution.Types.UnqualComponentName</span></a></span><span>
 </span><span id="line-28"></span><span>
 </span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html"><span class="hs-identifier">Distribution.Compat.NonEmptySet</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NES</span></span><span>
-</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PP</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PP</span></span><span>
 </span><span id="line-31"></span><span>
 </span><span id="line-32"></span><span class="hs-comment">-- | Describes a dependency on a source package (API)</span><span>
 </span><span id="line-33"></span><span class="hs-comment">--</span><span>
 </span><span id="line-34"></span><span class="hs-comment">-- /Invariant:/ package name does not appear as 'LSubLibName' in</span><span>
 </span><span id="line-35"></span><span class="hs-comment">-- set of library names.</span><span>
-</span><span id="line-36"></span><span class="hs-comment">--</span><span>
-</span><span id="line-37"></span><span class="hs-comment">-- /Note:/ 'Dependency' is not an instance of 'Ord', and so it cannot be used</span><span>
-</span><span id="line-38"></span><span class="hs-comment">-- in 'Set' or as the key to a 'Map'.  For these and similar use cases see</span><span>
-</span><span id="line-39"></span><span class="hs-comment">-- 'DependencyMap'.</span><span>
-</span><span id="line-40"></span><span class="hs-keyword">data</span><span> </span><span id="Dependency"><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-var">Dependency</span></a></span></span><span>
-</span><span id="line-41"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-comment">-- | The set of libraries required from the package.</span><span>
-</span><span id="line-42"></span><span>    </span><span class="hs-comment">-- Only the selected libraries will be built.</span><span>
-</span><span id="line-43"></span><span>    </span><span class="hs-comment">-- It does not affect the cabal-install solver yet.</span><span>
-</span><span id="line-44"></span><span>    </span><span id="Dependency"><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-var">Dependency</span></a></span></span><span>
-</span><span id="line-45"></span><span>      </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
-</span><span id="line-46"></span><span>      </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span>
-</span><span id="line-47"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-48"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679500112"><span id="local-6989586621679500114"><span class="annot"><span class="annottext">(forall x. Dependency -&gt; Rep Dependency x)
+</span><span id="line-36"></span><span class="hs-keyword">data</span><span> </span><span id="Dependency"><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-var">Dependency</span></a></span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-comment">-- | The set of libraries required from the package.</span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-comment">-- Only the selected libraries will be built.</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-comment">-- It does not affect the cabal-install solver yet.</span><span>
+</span><span id="line-40"></span><span>    </span><span id="Dependency"><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-var">Dependency</span></a></span></span><span>
+</span><span id="line-41"></span><span>      </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
+</span><span id="line-42"></span><span>      </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span>
+</span><span id="line-43"></span><span>      </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679518951"><span id="local-6989586621679518953"><span class="annot"><span class="annottext">(forall x. Dependency -&gt; Rep Dependency x)
 -&gt; (forall x. Rep Dependency x -&gt; Dependency) -&gt; Generic Dependency
 forall x. Rep Dependency x -&gt; Dependency
 forall x. Dependency -&gt; Rep Dependency x
@@ -55,7 +51,7 @@ $cfrom :: forall x. Dependency -&gt; Rep Dependency x
 from :: forall x. Dependency -&gt; Rep Dependency x
 $cto :: forall x. Rep Dependency x -&gt; Dependency
 to :: forall x. Rep Dependency x -&gt; Dependency
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679500120"><span id="local-6989586621679500124"><span id="local-6989586621679500127"><span id="local-6989586621679500142"><span class="annot"><span class="annottext">ReadPrec [Dependency]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679518959"><span id="local-6989586621679518963"><span id="local-6989586621679518966"><span id="local-6989586621679518981"><span class="annot"><span class="annottext">ReadPrec [Dependency]
 ReadPrec Dependency
 Int -&gt; ReadS Dependency
 ReadS [Dependency]
@@ -75,7 +71,7 @@ $creadPrec :: ReadPrec Dependency
 readPrec :: ReadPrec Dependency
 $creadListPrec :: ReadPrec [Dependency]
 readListPrec :: ReadPrec [Dependency]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679500150"><span id="local-6989586621679500161"><span id="local-6989586621679500165"><span class="annot"><span class="annottext">Int -&gt; Dependency -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679518989"><span id="local-6989586621679519000"><span id="local-6989586621679519004"><span class="annot"><span class="annottext">Int -&gt; Dependency -&gt; ShowS
 [Dependency] -&gt; ShowS
 Dependency -&gt; String
 (Int -&gt; Dependency -&gt; ShowS)
@@ -90,7 +86,7 @@ $cshow :: Dependency -&gt; String
 show :: Dependency -&gt; String
 $cshowList :: [Dependency] -&gt; ShowS
 showList :: [Dependency] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679500171"><span id="local-6989586621679500180"><span class="annot"><span class="annottext">Dependency -&gt; Dependency -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679519010"><span id="local-6989586621679519019"><span class="annot"><span class="annottext">Dependency -&gt; Dependency -&gt; Bool
 (Dependency -&gt; Dependency -&gt; Bool)
 -&gt; (Dependency -&gt; Dependency -&gt; Bool) -&gt; Eq Dependency
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -98,7 +94,7 @@ $c== :: Dependency -&gt; Dependency -&gt; Bool
 == :: Dependency -&gt; Dependency -&gt; Bool
 $c/= :: Dependency -&gt; Dependency -&gt; Bool
 /= :: Dependency -&gt; Dependency -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679500188"><span id="local-6989586621679500196"><span id="local-6989586621679500201"><span id="local-6989586621679500205"><span id="local-6989586621679500208"><span id="local-6989586621679500211"><span id="local-6989586621679500214"><span class="annot"><span class="annottext">Eq Dependency
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679519027"><span id="local-6989586621679519035"><span id="local-6989586621679519040"><span id="local-6989586621679519044"><span id="local-6989586621679519047"><span id="local-6989586621679519050"><span id="local-6989586621679519053"><span class="annot"><span class="annottext">Eq Dependency
 Eq Dependency =&gt;
 (Dependency -&gt; Dependency -&gt; Ordering)
 -&gt; (Dependency -&gt; Dependency -&gt; Bool)
@@ -135,7 +131,7 @@ $cmax :: Dependency -&gt; Dependency -&gt; Dependency
 max :: Dependency -&gt; Dependency -&gt; Dependency
 $cmin :: Dependency -&gt; Dependency -&gt; Dependency
 min :: Dependency -&gt; Dependency -&gt; Dependency
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679500224"><span id="local-6989586621679500233"><span id="local-6989586621679500239"><span id="local-6989586621679500241"><span id="local-6989586621679500243"><span id="local-6989586621679500249"><span id="local-6989586621679500254"><span id="local-6989586621679500257"><span id="local-6989586621679500260"><span id="local-6989586621679500263"><span id="local-6989586621679500266"><span id="local-6989586621679500269"><span id="local-6989586621679500274"><span id="local-6989586621679500279"><span class="annot"><span class="annottext">Typeable Dependency
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679519063"><span id="local-6989586621679519072"><span id="local-6989586621679519078"><span id="local-6989586621679519080"><span id="local-6989586621679519082"><span id="local-6989586621679519088"><span id="local-6989586621679519093"><span id="local-6989586621679519096"><span id="local-6989586621679519099"><span id="local-6989586621679519102"><span id="local-6989586621679519105"><span id="local-6989586621679519108"><span id="local-6989586621679519113"><span id="local-6989586621679519118"><span class="annot"><span class="annottext">Typeable Dependency
 Typeable Dependency =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -299,232 +295,232 @@ gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d) -&gt; Dependency -&gt; m Dependency
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span class="annot"><a href="Distribution.Types.Dependency.html#depPkgName"><span class="hs-identifier hs-type">depPkgName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
-</span><span id="line-51"></span><span id="depPkgName"><span class="annot"><span class="annottext">depPkgName :: Dependency -&gt; PackageName
-</span><a href="Distribution.Types.Dependency.html#depPkgName"><span class="hs-identifier hs-var hs-var">depPkgName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span id="local-6989586621679500289"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500289"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span class="annot"><span class="annottext">VersionRange
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><a href="Distribution.Types.Dependency.html#depPkgName"><span class="hs-identifier hs-type">depPkgName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
+</span><span id="line-47"></span><span id="depPkgName"><span class="annot"><span class="annottext">depPkgName :: Dependency -&gt; PackageName
+</span><a href="Distribution.Types.Dependency.html#depPkgName"><span class="hs-identifier hs-var hs-var">depPkgName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span id="local-6989586621679519128"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679519128"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span class="annot"><span class="annottext">VersionRange
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500289"><span class="hs-identifier hs-var">pn</span></a></span><span>
-</span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span class="annot"><a href="Distribution.Types.Dependency.html#depVerRange"><span class="hs-identifier hs-type">depVerRange</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span>
-</span><span id="line-54"></span><span id="depVerRange"><span class="annot"><span class="annottext">depVerRange :: Dependency -&gt; VersionRange
+</span><a href="#local-6989586621679519128"><span class="hs-identifier hs-var">pn</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="annot"><a href="Distribution.Types.Dependency.html#depVerRange"><span class="hs-identifier hs-type">depVerRange</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span>
+</span><span id="line-50"></span><span id="depVerRange"><span class="annot"><span class="annottext">depVerRange :: Dependency -&gt; VersionRange
 </span><a href="Distribution.Types.Dependency.html#depVerRange"><span class="hs-identifier hs-var hs-var">depVerRange</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679500290"><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500290"><span class="hs-identifier hs-var">vr</span></a></span></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679519129"><span class="annot"><span class="annottext">VersionRange
+</span><a href="#local-6989586621679519129"><span class="hs-identifier hs-var">vr</span></a></span></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500290"><span class="hs-identifier hs-var">vr</span></a></span><span>
-</span><span id="line-55"></span><span>
-</span><span id="line-56"></span><span class="annot"><a href="Distribution.Types.Dependency.html#depLibraries"><span class="hs-identifier hs-type">depLibraries</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span>
-</span><span id="line-57"></span><span id="depLibraries"><span class="annot"><span class="annottext">depLibraries :: Dependency -&gt; NonEmptySet LibraryName
+</span><a href="#local-6989586621679519129"><span class="hs-identifier hs-var">vr</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="annot"><a href="Distribution.Types.Dependency.html#depLibraries"><span class="hs-identifier hs-type">depLibraries</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span>
+</span><span id="line-53"></span><span id="depLibraries"><span class="annot"><span class="annottext">depLibraries :: Dependency -&gt; NonEmptySet LibraryName
 </span><a href="Distribution.Types.Dependency.html#depLibraries"><span class="hs-identifier hs-var hs-var">depLibraries</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679500291"><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500291"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500291"><span class="hs-identifier hs-var">cs</span></a></span><span>
-</span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span class="hs-comment">-- | Smart constructor of 'Dependency'.</span><span>
-</span><span id="line-60"></span><span class="hs-comment">--</span><span>
-</span><span id="line-61"></span><span class="hs-comment">-- If 'PackageName' is appears as 'LSubLibName' in a set of sublibraries,</span><span>
-</span><span id="line-62"></span><span class="hs-comment">-- it is automatically converted to 'LMainLibName'.</span><span>
-</span><span id="line-63"></span><span class="hs-comment">--</span><span>
-</span><span id="line-64"></span><span class="hs-comment">-- @since 3.4.0.0</span><span>
-</span><span id="line-65"></span><span class="annot"><a href="Distribution.Types.Dependency.html#mkDependency"><span class="hs-identifier hs-type">mkDependency</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span>
-</span><span id="line-66"></span><span id="mkDependency"><span class="annot"><span class="annottext">mkDependency :: PackageName
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679519130"><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><a href="#local-6989586621679519130"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><a href="#local-6989586621679519130"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- | Smart constructor of 'Dependency'.</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- If 'PackageName' is appears as 'LSubLibName' in a set of sublibraries,</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- it is automatically converted to 'LMainLibName'.</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- @since 3.4.0.0</span><span>
+</span><span id="line-61"></span><span class="annot"><a href="Distribution.Types.Dependency.html#mkDependency"><span class="hs-identifier hs-type">mkDependency</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span>
+</span><span id="line-62"></span><span id="mkDependency"><span class="annot"><span class="annottext">mkDependency :: PackageName
 -&gt; VersionRange -&gt; NonEmptySet LibraryName -&gt; Dependency
-</span><a href="Distribution.Types.Dependency.html#mkDependency"><span class="hs-identifier hs-var hs-var">mkDependency</span></a></span></span><span> </span><span id="local-6989586621679500293"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500293"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span id="local-6989586621679500294"><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500294"><span class="hs-identifier hs-var">vr</span></a></span></span><span> </span><span id="local-6989586621679500295"><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500295"><span class="hs-identifier hs-var">lb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName
+</span><a href="Distribution.Types.Dependency.html#mkDependency"><span class="hs-identifier hs-var hs-var">mkDependency</span></a></span></span><span> </span><span id="local-6989586621679519132"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679519132"><span class="hs-identifier hs-var">pn</span></a></span></span><span> </span><span id="local-6989586621679519133"><span class="annot"><span class="annottext">VersionRange
+</span><a href="#local-6989586621679519133"><span class="hs-identifier hs-var">vr</span></a></span></span><span> </span><span id="local-6989586621679519134"><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><a href="#local-6989586621679519134"><span class="hs-identifier hs-var">lb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName
 -&gt; VersionRange -&gt; NonEmptySet LibraryName -&gt; Dependency
 </span><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-var">Dependency</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500293"><span class="hs-identifier hs-var">pn</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500294"><span class="hs-identifier hs-var">vr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(LibraryName -&gt; LibraryName)
+</span><a href="#local-6989586621679519132"><span class="hs-identifier hs-var">pn</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
+</span><a href="#local-6989586621679519133"><span class="hs-identifier hs-var">vr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(LibraryName -&gt; LibraryName)
 -&gt; NonEmptySet LibraryName -&gt; NonEmptySet LibraryName
 forall b a. Ord b =&gt; (a -&gt; b) -&gt; NonEmptySet a -&gt; NonEmptySet b
 </span><a href="Distribution.Compat.NonEmptySet.html#map"><span class="hs-identifier hs-var">NES.map</span></a></span><span> </span><span class="annot"><span class="annottext">LibraryName -&gt; LibraryName
-</span><a href="#local-6989586621679500297"><span class="hs-identifier hs-var">conv</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500295"><span class="hs-identifier hs-var">lb</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-67"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-68"></span><span>    </span><span id="local-6989586621679500298"><span class="annot"><span class="annottext">pn' :: UnqualComponentName
-</span><a href="#local-6989586621679500298"><span class="hs-identifier hs-var hs-var">pn'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; UnqualComponentName
+</span><a href="#local-6989586621679519136"><span class="hs-identifier hs-var">conv</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><a href="#local-6989586621679519134"><span class="hs-identifier hs-var">lb</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679519137"><span class="annot"><span class="annottext">pn' :: UnqualComponentName
+</span><a href="#local-6989586621679519137"><span class="hs-identifier hs-var hs-var">pn'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; UnqualComponentName
 </span><a href="Distribution.Types.UnqualComponentName.html#packageNameToUnqualComponentName"><span class="hs-identifier hs-var">packageNameToUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500293"><span class="hs-identifier hs-var">pn</span></a></span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679500297"><span class="annot"><span class="annottext">conv :: LibraryName -&gt; LibraryName
-</span><a href="#local-6989586621679500297"><span class="hs-identifier hs-var hs-var">conv</span></a></span></span><span> </span><span id="local-6989586621679500302"><span class="annot"><span class="annottext">l :: LibraryName
-</span><a href="#local-6989586621679500302"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="annottext">LibraryName
+</span><a href="#local-6989586621679519132"><span class="hs-identifier hs-var">pn</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span>    </span><span id="local-6989586621679519136"><span class="annot"><span class="annottext">conv :: LibraryName -&gt; LibraryName
+</span><a href="#local-6989586621679519136"><span class="hs-identifier hs-var hs-var">conv</span></a></span></span><span> </span><span id="local-6989586621679519141"><span class="annot"><span class="annottext">l :: LibraryName
+</span><a href="#local-6989586621679519141"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="annottext">LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LMainLibName"><span class="hs-identifier hs-var">LMainLibName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LibraryName
-</span><a href="#local-6989586621679500302"><span class="hs-identifier hs-var">l</span></a></span><span>
-</span><span id="line-71"></span><span>    </span><span class="annot"><a href="#local-6989586621679500297"><span class="hs-identifier hs-var">conv</span></a></span><span> </span><span id="local-6989586621679500303"><span class="annot"><span class="annottext">l :: LibraryName
-</span><a href="#local-6989586621679500303"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679500304"><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679500304"><span class="hs-identifier hs-var">ln</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-72"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679500304"><span class="hs-identifier hs-var">ln</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; UnqualComponentName -&gt; Bool
+</span><a href="#local-6989586621679519141"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="annot"><a href="#local-6989586621679519136"><span class="hs-identifier hs-var">conv</span></a></span><span> </span><span id="local-6989586621679519142"><span class="annot"><span class="annottext">l :: LibraryName
+</span><a href="#local-6989586621679519142"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679519143"><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679519143"><span class="hs-identifier hs-var">ln</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679519143"><span class="hs-identifier hs-var">ln</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; UnqualComponentName -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679500298"><span class="hs-identifier hs-var">pn'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LibraryName
+</span><a href="#local-6989586621679519137"><span class="hs-identifier hs-var">pn'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LMainLibName"><span class="hs-identifier hs-var">LMainLibName</span></a></span><span>
-</span><span id="line-73"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-69"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LibraryName
-</span><a href="#local-6989586621679500303"><span class="hs-identifier hs-var">l</span></a></span><span>
-</span><span id="line-74"></span><span>
-</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679500306"><span id="local-6989586621679500313"><span id="local-6989586621679500319"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span></span></span></span><span>
-</span><span id="line-76"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679500361"><span id="local-6989586621679500368"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span></span></span><span>
-</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679500435"><span class="annot"><span class="annottext">rnf :: Dependency -&gt; ()
-</span><a href="#local-6989586621679500435"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dependency -&gt; ()
+</span><a href="#local-6989586621679519142"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679519145"><span id="local-6989586621679519152"><span id="local-6989586621679519158"><span class="annot"><a href="../../binary-0.8.9.3-25e5/src/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span></span></span></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679519200"><span id="local-6989586621679519207"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span></span></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679519274"><span class="annot"><span class="annottext">rnf :: Dependency -&gt; ()
+</span><a href="#local-6989586621679519274"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Dependency -&gt; ()
 forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><a href="Distribution.Compat.Prelude.html#genericRnf"><span class="hs-identifier hs-var">genericRnf</span></a></span><span>
-</span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-80"></span><span class="hs-comment">--</span><span>
-</span><span id="line-81"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion mainLibSet</span><span>
-</span><span id="line-82"></span><span class="hs-comment">-- &quot;pkg&quot;</span><span>
-</span><span id="line-83"></span><span class="hs-comment">--</span><span>
-</span><span id="line-84"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion $ NES.insert (LSubLibName $ mkUnqualComponentName &quot;sublib&quot;) mainLibSet</span><span>
-</span><span id="line-85"></span><span class="hs-comment">-- &quot;pkg:{pkg, sublib}&quot;</span><span>
-</span><span id="line-86"></span><span class="hs-comment">--</span><span>
-</span><span id="line-87"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion $ NES.singleton (LSubLibName $ mkUnqualComponentName &quot;sublib&quot;)</span><span>
-</span><span id="line-88"></span><span class="hs-comment">-- &quot;pkg:sublib&quot;</span><span>
-</span><span id="line-89"></span><span class="hs-comment">--</span><span>
-</span><span id="line-90"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion $ NES.insert (LSubLibName $ mkUnqualComponentName &quot;sublib-b&quot;) $ NES.singleton (LSubLibName $ mkUnqualComponentName &quot;sublib-a&quot;)</span><span>
-</span><span id="line-91"></span><span class="hs-comment">-- &quot;pkg:{sublib-a, sublib-b}&quot;</span><span>
-</span><span id="line-92"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679500440"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-93"></span><span>  </span><span id="local-6989586621679500446"><span class="annot"><span class="annottext">pretty :: Dependency -&gt; Doc
-</span><a href="#local-6989586621679500446"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span id="local-6989586621679500448"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500448"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679500449"><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500449"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span id="local-6989586621679500450"><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500450"><span class="hs-identifier hs-var">sublibs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc
-</span><a href="#local-6989586621679500451"><span class="hs-identifier hs-var">withSubLibs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageName -&gt; Doc
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion mainLibSet</span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- &quot;pkg&quot;</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion $ NES.insert (LSubLibName $ mkUnqualComponentName &quot;sublib&quot;) mainLibSet</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- &quot;pkg:{pkg, sublib}&quot;</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion $ NES.singleton (LSubLibName $ mkUnqualComponentName &quot;sublib&quot;)</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- &quot;pkg:sublib&quot;</span><span>
+</span><span id="line-85"></span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; prettyShow $ Dependency (mkPackageName &quot;pkg&quot;) anyVersion $ NES.insert (LSubLibName $ mkUnqualComponentName &quot;sublib-b&quot;) $ NES.singleton (LSubLibName $ mkUnqualComponentName &quot;sublib-a&quot;)</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- &quot;pkg:{sublib-a, sublib-b}&quot;</span><span>
+</span><span id="line-88"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679519279"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621679519285"><span class="annot"><span class="annottext">pretty :: Dependency -&gt; Doc
+</span><a href="#local-6989586621679519285"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span id="local-6989586621679519287"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679519287"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679519288"><span class="annot"><span class="annottext">VersionRange
+</span><a href="#local-6989586621679519288"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span id="local-6989586621679519289"><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><a href="#local-6989586621679519289"><span class="hs-identifier hs-var">sublibs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc
+</span><a href="#local-6989586621679519290"><span class="hs-identifier hs-var">withSubLibs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageName -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500448"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679500453"><span class="hs-identifier hs-var">pver</span></a></span><span>
-</span><span id="line-94"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-95"></span><span>      </span><span class="hs-comment">-- TODO: change to isAnyVersion after #6736</span><span>
-</span><span id="line-96"></span><span>      </span><span id="local-6989586621679500453"><span class="annot"><span class="annottext">pver :: Doc
-</span><a href="#local-6989586621679500453"><span class="hs-identifier hs-var hs-var">pver</span></a></span></span><span>
-</span><span id="line-97"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; Bool
+</span><a href="#local-6989586621679519287"><span class="hs-identifier hs-var">name</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679519292"><span class="hs-identifier hs-var">pver</span></a></span><span>
+</span><span id="line-90"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-91"></span><span>      </span><span class="hs-comment">-- TODO: change to isAnyVersion after #6736</span><span>
+</span><span id="line-92"></span><span>      </span><span id="local-6989586621679519292"><span class="annot"><span class="annottext">pver :: Doc
+</span><a href="#local-6989586621679519292"><span class="hs-identifier hs-var hs-var">pver</span></a></span></span><span>
+</span><span id="line-93"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; Bool
 </span><a href="Distribution.Types.VersionRange.html#isAnyVersionLight"><span class="hs-identifier hs-var">isAnyVersionLight</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500449"><span class="hs-identifier hs-var">ver</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#empty"><span class="hs-identifier hs-var">PP.empty</span></a></span><span>
-</span><span id="line-98"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679519288"><span class="hs-identifier hs-var">ver</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#empty"><span class="hs-identifier hs-var">PP.empty</span></a></span><span>
+</span><span id="line-94"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500449"><span class="hs-identifier hs-var">ver</span></a></span><span>
-</span><span id="line-99"></span><span>
-</span><span id="line-100"></span><span>      </span><span id="local-6989586621679500451"><span class="annot"><span class="annottext">withSubLibs :: Doc -&gt; Doc
-</span><a href="#local-6989586621679500451"><span class="hs-identifier hs-var hs-var">withSubLibs</span></a></span></span><span> </span><span id="local-6989586621679500459"><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679500459"><span class="hs-identifier hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName -&gt; [LibraryName]
+</span><a href="#local-6989586621679519288"><span class="hs-identifier hs-var">ver</span></a></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span>      </span><span id="local-6989586621679519290"><span class="annot"><span class="annottext">withSubLibs :: Doc -&gt; Doc
+</span><a href="#local-6989586621679519290"><span class="hs-identifier hs-var hs-var">withSubLibs</span></a></span></span><span> </span><span id="local-6989586621679519298"><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679519298"><span class="hs-identifier hs-var">doc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName -&gt; [LibraryName]
 forall a. NonEmptySet a -&gt; [a]
 </span><a href="Distribution.Compat.NonEmptySet.html#toList"><span class="hs-identifier hs-var">NES.toList</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500450"><span class="hs-identifier hs-var">sublibs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-101"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">LibraryName
+</span><a href="#local-6989586621679519289"><span class="hs-identifier hs-var">sublibs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-97"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LMainLibName"><span class="hs-identifier hs-var">LMainLibName</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679500459"><span class="hs-identifier hs-var">doc</span></a></span><span>
-</span><span id="line-102"></span><span>        </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679500461"><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679500461"><span class="hs-identifier hs-var">uq</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679500459"><span class="hs-identifier hs-var">doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="#local-6989586621679519298"><span class="hs-identifier hs-var">doc</span></a></span><span>
+</span><span id="line-98"></span><span>        </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679519300"><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679519300"><span class="hs-identifier hs-var">uq</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679519298"><span class="hs-identifier hs-var">doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">PP.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">PP.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679500461"><span class="hs-identifier hs-var">uq</span></a></span><span>
-</span><span id="line-103"></span><span>        </span><span class="annot"><span class="annottext">[LibraryName]
+</span><a href="#local-6989586621679519300"><span class="hs-identifier hs-var">uq</span></a></span><span>
+</span><span id="line-99"></span><span>        </span><span class="annot"><span class="annottext">[LibraryName]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679500459"><span class="hs-identifier hs-var">doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="#local-6989586621679519298"><span class="hs-identifier hs-var">doc</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">PP.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">PP.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#braces"><span class="hs-identifier hs-var">PP.braces</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679500465"><span class="hs-identifier hs-var">prettySublibs</span></a></span><span>
-</span><span id="line-104"></span><span>
-</span><span id="line-105"></span><span>      </span><span id="local-6989586621679500465"><span class="annot"><span class="annottext">prettySublibs :: Doc
-</span><a href="#local-6989586621679500465"><span class="hs-identifier hs-var hs-var">prettySublibs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Doc] -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#hsep"><span class="hs-identifier hs-var">PP.hsep</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; Doc) -&gt; [Doc] -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#braces"><span class="hs-identifier hs-var">PP.braces</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679519304"><span class="hs-identifier hs-var">prettySublibs</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>      </span><span id="local-6989586621679519304"><span class="annot"><span class="annottext">prettySublibs :: Doc
+</span><a href="#local-6989586621679519304"><span class="hs-identifier hs-var hs-var">prettySublibs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Doc] -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#hsep"><span class="hs-identifier hs-var">PP.hsep</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; Doc) -&gt; [Doc] -&gt; Doc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; [Doc] -&gt; [Doc]
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#punctuate"><span class="hs-identifier hs-var">PP.punctuate</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#comma"><span class="hs-identifier hs-var">PP.comma</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; [Doc]) -&gt; [Doc] -&gt; [Doc]
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#punctuate"><span class="hs-identifier hs-var">PP.punctuate</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#comma"><span class="hs-identifier hs-var">PP.comma</span></a></span><span> </span><span class="annot"><span class="annottext">([Doc] -&gt; [Doc]) -&gt; [Doc] -&gt; [Doc]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">LibraryName -&gt; Doc
-</span><a href="#local-6989586621679500471"><span class="hs-identifier hs-var">prettySublib</span></a></span><span> </span><span class="annot"><span class="annottext">(LibraryName -&gt; Doc) -&gt; [LibraryName] -&gt; [Doc]
+</span><a href="#local-6989586621679519310"><span class="hs-identifier hs-var">prettySublib</span></a></span><span> </span><span class="annot"><span class="annottext">(LibraryName -&gt; Doc) -&gt; [LibraryName] -&gt; [Doc]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName -&gt; [LibraryName]
 forall a. NonEmptySet a -&gt; [a]
 </span><a href="Distribution.Compat.NonEmptySet.html#toList"><span class="hs-identifier hs-var">NES.toList</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500450"><span class="hs-identifier hs-var">sublibs</span></a></span><span>
-</span><span id="line-106"></span><span>
-</span><span id="line-107"></span><span>      </span><span id="local-6989586621679500471"><span class="annot"><span class="annottext">prettySublib :: LibraryName -&gt; Doc
-</span><a href="#local-6989586621679500471"><span class="hs-identifier hs-var hs-var">prettySublib</span></a></span></span><span> </span><span class="annot"><span class="annottext">LibraryName
+</span><a href="#local-6989586621679519289"><span class="hs-identifier hs-var">sublibs</span></a></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span>      </span><span id="local-6989586621679519310"><span class="annot"><span class="annottext">prettySublib :: LibraryName -&gt; Doc
+</span><a href="#local-6989586621679519310"><span class="hs-identifier hs-var hs-var">prettySublib</span></a></span></span><span> </span><span class="annot"><span class="annottext">LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LMainLibName"><span class="hs-identifier hs-var">LMainLibName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">PP.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">PP.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; String -&gt; Doc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; String
 </span><a href="Distribution.Types.PackageName.html#unPackageName"><span class="hs-identifier hs-var">unPackageName</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500448"><span class="hs-identifier hs-var">name</span></a></span><span>
-</span><span id="line-108"></span><span>      </span><span class="annot"><a href="#local-6989586621679500471"><span class="hs-identifier hs-var">prettySublib</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679500475"><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679500475"><span class="hs-identifier hs-var">un</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
-</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">PP.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; String -&gt; Doc
+</span><a href="#local-6989586621679519287"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-104"></span><span>      </span><span class="annot"><a href="#local-6989586621679519310"><span class="hs-identifier hs-var">prettySublib</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-type">LSubLibName</span></a></span><span> </span><span id="local-6989586621679519314"><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679519314"><span class="hs-identifier hs-var">un</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-fe44/src/Text.PrettyPrint.HughesPJ.html#text"><span class="hs-identifier hs-var">PP.text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Doc) -&gt; String -&gt; Doc
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; String
 </span><a href="Distribution.Types.UnqualComponentName.html#unUnqualComponentName"><span class="hs-identifier hs-var">unUnqualComponentName</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679500475"><span class="hs-identifier hs-var">un</span></a></span><span>
-</span><span id="line-109"></span><span>
-</span><span id="line-110"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-111"></span><span class="hs-comment">--</span><span>
-</span><span id="line-112"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:sub&quot; :: Maybe Dependency</span><span>
-</span><span id="line-113"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub&quot;) :| [])))</span><span>
-</span><span id="line-114"></span><span class="hs-comment">--</span><span>
-</span><span id="line-115"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{sub1,sub2}&quot; :: Maybe Dependency</span><span>
-</span><span id="line-116"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub1&quot;) :| [LSubLibName (UnqualComponentName &quot;sub2&quot;)])))</span><span>
-</span><span id="line-117"></span><span class="hs-comment">--</span><span>
-</span><span id="line-118"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{ sub1 , sub2 }&quot; :: Maybe Dependency</span><span>
-</span><span id="line-119"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub1&quot;) :| [LSubLibName (UnqualComponentName &quot;sub2&quot;)])))</span><span>
-</span><span id="line-120"></span><span class="hs-comment">--</span><span>
-</span><span id="line-121"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{ sub1 , sub2 } ^&gt;= 42&quot; :: Maybe Dependency</span><span>
-</span><span id="line-122"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (MajorBoundVersion (mkVersion [42])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub1&quot;) :| [LSubLibName (UnqualComponentName &quot;sub2&quot;)])))</span><span>
-</span><span id="line-123"></span><span class="hs-comment">--</span><span>
-</span><span id="line-124"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{ } ^&gt;= 42&quot; :: Maybe Dependency</span><span>
-</span><span id="line-125"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-126"></span><span class="hs-comment">--</span><span>
-</span><span id="line-127"></span><span class="hs-comment">-- &gt;&gt;&gt; traverse_ print (map simpleParsec [&quot;mylib:mylib&quot;, &quot;mylib:{mylib}&quot;, &quot;mylib:{mylib,sublib}&quot; ] :: [Maybe Dependency])</span><span>
-</span><span id="line-128"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LMainLibName :| [])))</span><span>
-</span><span id="line-129"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LMainLibName :| [])))</span><span>
-</span><span id="line-130"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LMainLibName :| [LSubLibName (UnqualComponentName &quot;sublib&quot;)])))</span><span>
-</span><span id="line-131"></span><span class="hs-comment">--</span><span>
-</span><span id="line-132"></span><span class="hs-comment">-- Spaces around colon are not allowed:</span><span>
-</span><span id="line-133"></span><span class="hs-comment">--</span><span>
-</span><span id="line-134"></span><span class="hs-comment">-- &gt;&gt;&gt; map simpleParsec [&quot;mylib: sub&quot;, &quot;mylib :sub&quot;, &quot;mylib: {sub1,sub2}&quot;, &quot;mylib :{sub1,sub2}&quot;] :: [Maybe Dependency]</span><span>
-</span><span id="line-135"></span><span class="hs-comment">-- [Nothing,Nothing,Nothing,Nothing]</span><span>
-</span><span id="line-136"></span><span class="hs-comment">--</span><span>
-</span><span id="line-137"></span><span class="hs-comment">-- Sublibrary syntax is accepted since @cabal-version: 3.0@</span><span>
-</span><span id="line-138"></span><span class="hs-comment">--</span><span>
-</span><span id="line-139"></span><span class="hs-comment">-- &gt;&gt;&gt; map (`simpleParsec'` &quot;mylib:sub&quot;) [CabalSpecV2_4, CabalSpecV3_0] :: [Maybe Dependency]</span><span>
-</span><span id="line-140"></span><span class="hs-comment">-- [Nothing,Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub&quot;) :| [])))]</span><span>
-</span><span id="line-141"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-142"></span><span>  </span><span id="local-6989586621679500519"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m Dependency
-</span><a href="#local-6989586621679500519"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-143"></span><span>    </span><span id="local-6989586621679500521"><span class="annot"><a href="#local-6989586621679500521"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m PackageName
+</span><a href="#local-6989586621679519314"><span class="hs-identifier hs-var">un</span></a></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-107"></span><span class="hs-comment">--</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:sub&quot; :: Maybe Dependency</span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub&quot;) :| [])))</span><span>
+</span><span id="line-110"></span><span class="hs-comment">--</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{sub1,sub2}&quot; :: Maybe Dependency</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub1&quot;) :| [LSubLibName (UnqualComponentName &quot;sub2&quot;)])))</span><span>
+</span><span id="line-113"></span><span class="hs-comment">--</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{ sub1 , sub2 }&quot; :: Maybe Dependency</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub1&quot;) :| [LSubLibName (UnqualComponentName &quot;sub2&quot;)])))</span><span>
+</span><span id="line-116"></span><span class="hs-comment">--</span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{ sub1 , sub2 } ^&gt;= 42&quot; :: Maybe Dependency</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (MajorBoundVersion (mkVersion [42])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub1&quot;) :| [LSubLibName (UnqualComponentName &quot;sub2&quot;)])))</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;mylib:{ } ^&gt;= 42&quot; :: Maybe Dependency</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- &gt;&gt;&gt; traverse_ print (map simpleParsec [&quot;mylib:mylib&quot;, &quot;mylib:{mylib}&quot;, &quot;mylib:{mylib,sublib}&quot; ] :: [Maybe Dependency])</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LMainLibName :| [])))</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LMainLibName :| [])))</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LMainLibName :| [LSubLibName (UnqualComponentName &quot;sublib&quot;)])))</span><span>
+</span><span id="line-127"></span><span class="hs-comment">--</span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- Spaces around colon are not allowed:</span><span>
+</span><span id="line-129"></span><span class="hs-comment">--</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- &gt;&gt;&gt; map simpleParsec [&quot;mylib: sub&quot;, &quot;mylib :sub&quot;, &quot;mylib: {sub1,sub2}&quot;, &quot;mylib :{sub1,sub2}&quot;] :: [Maybe Dependency]</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- [Nothing,Nothing,Nothing,Nothing]</span><span>
+</span><span id="line-132"></span><span class="hs-comment">--</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- Sublibrary syntax is accepted since @cabal-version: 3.0@</span><span>
+</span><span id="line-134"></span><span class="hs-comment">--</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- &gt;&gt;&gt; map (`simpleParsec'` &quot;mylib:sub&quot;) [CabalSpecV2_4, CabalSpecV3_0] :: [Maybe Dependency]</span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- [Nothing,Just (Dependency (PackageName &quot;mylib&quot;) (OrLaterVersion (mkVersion [0])) (fromNonEmpty (LSubLibName (UnqualComponentName &quot;sub&quot;) :| [])))]</span><span>
+</span><span id="line-137"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621679519358"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m Dependency
+</span><a href="#local-6989586621679519358"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-139"></span><span>    </span><span id="local-6989586621679519360"><span class="annot"><a href="#local-6989586621679519360"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m PackageName
 forall a (m :: * -&gt; *). (Parsec a, CabalParsing m) =&gt; m a
 forall (m :: * -&gt; *). CabalParsing m =&gt; m PackageName
 </span><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-var">parsec</span></a></span><span>
-</span><span id="line-144"></span><span>
-</span><span id="line-145"></span><span>    </span><span id="local-6989586621679500522"><span class="annot"><a href="#local-6989586621679500522"><span class="hs-identifier hs-var">libs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Compat.Parsing.html#option"><span class="hs-identifier hs-type">option</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#mainLibSet"><span class="hs-identifier hs-type">mainLibSet</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-146"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-type">char</span></a></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span>
-</span><span id="line-147"></span><span>      </span><span class="annot"><a href="Distribution.Types.Dependency.html#versionGuardMultilibs"><span class="hs-identifier hs-type">versionGuardMultilibs</span></a></span><span>
-</span><span id="line-148"></span><span>      </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#singleton"><span class="hs-identifier hs-type">NES.singleton</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679500525"><span class="hs-identifier hs-type">parseLib</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;|&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679500527"><span class="hs-identifier hs-type">parseMultipleLibs</span></a></span><span>
-</span><span id="line-149"></span><span>
-</span><span id="line-150"></span><span>    </span><span class="annot"><a href="Distribution.Compat.CharParsing.html#spaces"><span class="hs-identifier hs-type">spaces</span></a></span><span> </span><span class="hs-comment">-- https://github.com/haskell/cabal/issues/5846</span><span>
-</span><span id="line-151"></span><span>    </span><span id="local-6989586621679500528"><span class="annot"><a href="#local-6989586621679500528"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#anyVersion"><span class="hs-identifier hs-type">anyVersion</span></a></span><span>
-</span><span id="line-152"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#mkDependency"><span class="hs-identifier hs-type">mkDependency</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500521"><span class="hs-identifier hs-type">name</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500528"><span class="hs-identifier hs-type">ver</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500522"><span class="hs-identifier hs-type">libs</span></a></span><span>
-</span><span id="line-153"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-154"></span><span>      </span><span id="local-6989586621679500525"><span class="annot"><span class="annottext">parseLib :: m LibraryName
-</span><a href="#local-6989586621679500525"><span class="hs-identifier hs-var hs-var">parseLib</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; LibraryName
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span>    </span><span id="local-6989586621679519361"><span class="annot"><a href="#local-6989586621679519361"><span class="hs-identifier hs-var">libs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Compat.Parsing.html#option"><span class="hs-identifier hs-type">option</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#mainLibSet"><span class="hs-identifier hs-type">mainLibSet</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-142"></span><span>      </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-type">char</span></a></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span>
+</span><span id="line-143"></span><span>      </span><span class="annot"><a href="Distribution.Types.Dependency.html#versionGuardMultilibs"><span class="hs-identifier hs-type">versionGuardMultilibs</span></a></span><span>
+</span><span id="line-144"></span><span>      </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#singleton"><span class="hs-identifier hs-type">NES.singleton</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679519364"><span class="hs-identifier hs-type">parseLib</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;|&gt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679519366"><span class="hs-identifier hs-type">parseMultipleLibs</span></a></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span>    </span><span class="annot"><a href="Distribution.Compat.CharParsing.html#spaces"><span class="hs-identifier hs-type">spaces</span></a></span><span> </span><span class="hs-comment">-- https://github.com/haskell/cabal/issues/5846</span><span>
+</span><span id="line-147"></span><span>    </span><span id="local-6989586621679519367"><span class="annot"><a href="#local-6989586621679519367"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#anyVersion"><span class="hs-identifier hs-type">anyVersion</span></a></span><span>
+</span><span id="line-148"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#mkDependency"><span class="hs-identifier hs-type">mkDependency</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679519360"><span class="hs-identifier hs-type">name</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679519367"><span class="hs-identifier hs-type">ver</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679519361"><span class="hs-identifier hs-type">libs</span></a></span><span>
+</span><span id="line-149"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-150"></span><span>      </span><span id="local-6989586621679519364"><span class="annot"><span class="annottext">parseLib :: m LibraryName
+</span><a href="#local-6989586621679519364"><span class="hs-identifier hs-var hs-var">parseLib</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LSubLibName"><span class="hs-identifier hs-var">LSubLibName</span></a></span><span> </span><span class="annot"><span class="annottext">(UnqualComponentName -&gt; LibraryName)
 -&gt; m UnqualComponentName -&gt; m LibraryName
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -532,9 +528,9 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall a (m :: * -&gt; *). (Parsec a, CabalParsing m) =&gt; m a
 forall (m :: * -&gt; *). CabalParsing m =&gt; m UnqualComponentName
 </span><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-var">parsec</span></a></span><span>
-</span><span id="line-155"></span><span>      </span><span id="local-6989586621679500527"><span class="annot"><span class="annottext">parseMultipleLibs :: m (NonEmptySet LibraryName)
-</span><a href="#local-6989586621679500527"><span class="hs-identifier hs-var hs-var">parseMultipleLibs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-156"></span><span>        </span><span class="annot"><span class="annottext">m ()
+</span><span id="line-151"></span><span>      </span><span id="local-6989586621679519366"><span class="annot"><span class="annottext">parseMultipleLibs :: m (NonEmptySet LibraryName)
+</span><a href="#local-6989586621679519366"><span class="hs-identifier hs-var hs-var">parseMultipleLibs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-152"></span><span>        </span><span class="annot"><span class="annottext">m ()
 -&gt; m Char
 -&gt; m (NonEmptySet LibraryName)
 -&gt; m (NonEmptySet LibraryName)
@@ -542,7 +538,7 @@ forall (m :: * -&gt; *) bra ket a.
 Applicative m =&gt;
 m bra -&gt; m ket -&gt; m a -&gt; m a
 </span><a href="Distribution.Compat.Parsing.html#between"><span class="hs-identifier hs-var">between</span></a></span><span>
-</span><span id="line-157"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; m Char
+</span><span id="line-153"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'{'</span></span><span> </span><span class="annot"><span class="annottext">m Char -&gt; m () -&gt; m ()
@@ -551,7 +547,7 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 </span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">m ()
 forall (m :: * -&gt; *). CharParsing m =&gt; m ()
 </span><a href="Distribution.Compat.CharParsing.html#spaces"><span class="hs-identifier hs-var">spaces</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-158"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m ()
+</span><span id="line-154"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m ()
 forall (m :: * -&gt; *). CharParsing m =&gt; m ()
 </span><a href="Distribution.Compat.CharParsing.html#spaces"><span class="hs-identifier hs-var">spaces</span></a></span><span> </span><span class="annot"><span class="annottext">m () -&gt; m Char -&gt; m Char
 forall a b. m a -&gt; m b -&gt; m b
@@ -560,7 +556,7 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'}'</span></span><span class="hs-special">)</span><span>
-</span><span id="line-159"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty LibraryName -&gt; NonEmptySet LibraryName
+</span><span id="line-155"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty LibraryName -&gt; NonEmptySet LibraryName
 forall a. Ord a =&gt; NonEmpty a -&gt; NonEmptySet a
 </span><a href="Distribution.Compat.NonEmptySet.html#fromNonEmpty"><span class="hs-identifier hs-var">NES.fromNonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty LibraryName -&gt; NonEmptySet LibraryName)
 -&gt; m (NonEmpty LibraryName) -&gt; m (NonEmptySet LibraryName)
@@ -568,46 +564,46 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">m LibraryName -&gt; m (NonEmpty LibraryName)
 forall (m :: * -&gt; *) a. CabalParsing m =&gt; m a -&gt; m (NonEmpty a)
 </span><a href="Distribution.Parsec.html#parsecCommaNonEmpty"><span class="hs-identifier hs-var">parsecCommaNonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">m LibraryName
-</span><a href="#local-6989586621679500525"><span class="hs-identifier hs-var">parseLib</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-160"></span><span>
-</span><span id="line-161"></span><span id="local-6989586621679500048"><span class="annot"><a href="Distribution.Types.Dependency.html#versionGuardMultilibs"><span class="hs-identifier hs-type">versionGuardMultilibs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500048"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679500048"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-162"></span><span id="versionGuardMultilibs"><span class="annot"><span class="annottext">versionGuardMultilibs :: forall (m :: * -&gt; *). CabalParsing m =&gt; m ()
+</span><a href="#local-6989586621679519364"><span class="hs-identifier hs-var">parseLib</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span id="local-6989586621679518889"><span class="annot"><a href="Distribution.Types.Dependency.html#versionGuardMultilibs"><span class="hs-identifier hs-type">versionGuardMultilibs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#CabalParsing"><span class="hs-identifier hs-type">CabalParsing</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679518889"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679518889"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-158"></span><span id="versionGuardMultilibs"><span class="annot"><span class="annottext">versionGuardMultilibs :: forall (m :: * -&gt; *). CabalParsing m =&gt; m ()
 </span><a href="Distribution.Types.Dependency.html#versionGuardMultilibs"><span class="hs-identifier hs-var hs-var">versionGuardMultilibs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-163"></span><span>  </span><span id="local-6989586621679500594"><span class="annot"><a href="#local-6989586621679500594"><span class="hs-identifier hs-var">csv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m CabalSpecVersion
+</span><span id="line-159"></span><span>  </span><span id="local-6989586621679519433"><span class="annot"><a href="#local-6989586621679519433"><span class="hs-identifier hs-var">csv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m CabalSpecVersion
 forall (m :: * -&gt; *). CabalParsing m =&gt; m CabalSpecVersion
 </span><a href="Distribution.Parsec.html#askCabalSpecVersion"><span class="hs-identifier hs-var">askCabalSpecVersion</span></a></span><span>
-</span><span id="line-164"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679500594"><span class="hs-identifier hs-type">csv</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;</span></span><span> </span><span class="annot"><a href="Distribution.CabalSpecVersion.html#CabalSpecV3_0"><span class="hs-identifier hs-type">CabalSpecV3_0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
-</span><span id="line-165"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">fail</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
-</span><span id="line-166"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">unwords</span></span><span>
-</span><span id="line-167"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-string">&quot;Sublibrary dependency syntax used.&quot;</span></span><span>
-</span><span id="line-168"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;To use this syntax the package needs to specify at least 'cabal-version: 3.0'.&quot;</span></span><span>
-</span><span id="line-169"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;Alternatively, if you are depending on an internal library, you can write&quot;</span></span><span>
-</span><span id="line-170"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;directly the library name as it were a package.&quot;</span></span><span>
-</span><span id="line-171"></span><span>        </span><span class="hs-special">]</span><span>
-</span><span id="line-172"></span><span>
-</span><span id="line-173"></span><span class="hs-comment">-- | Library set with main library.</span><span>
-</span><span id="line-174"></span><span class="hs-comment">--</span><span>
-</span><span id="line-175"></span><span class="hs-comment">-- @since 3.4.0.0</span><span>
-</span><span id="line-176"></span><span class="annot"><a href="Distribution.Types.Dependency.html#mainLibSet"><span class="hs-identifier hs-type">mainLibSet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span>
-</span><span id="line-177"></span><span id="mainLibSet"><span class="annot"><span class="annottext">mainLibSet :: NonEmptySet LibraryName
+</span><span id="line-160"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679519433"><span class="hs-identifier hs-type">csv</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;</span></span><span> </span><span class="annot"><a href="Distribution.CabalSpecVersion.html#CabalSpecV3_0"><span class="hs-identifier hs-type">CabalSpecV3_0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-161"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">fail</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span>
+</span><span id="line-162"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">unwords</span></span><span>
+</span><span id="line-163"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-string">&quot;Sublibrary dependency syntax used.&quot;</span></span><span>
+</span><span id="line-164"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;To use this syntax the package needs to specify at least 'cabal-version: 3.0'.&quot;</span></span><span>
+</span><span id="line-165"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;Alternatively, if you are depending on an internal library, you can write&quot;</span></span><span>
+</span><span id="line-166"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;directly the library name as it were a package.&quot;</span></span><span>
+</span><span id="line-167"></span><span>        </span><span class="hs-special">]</span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span class="hs-comment">-- | Library set with main library.</span><span>
+</span><span id="line-170"></span><span class="hs-comment">--</span><span>
+</span><span id="line-171"></span><span class="hs-comment">-- @since 3.4.0.0</span><span>
+</span><span id="line-172"></span><span class="annot"><a href="Distribution.Types.Dependency.html#mainLibSet"><span class="hs-identifier hs-type">mainLibSet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Compat.NonEmptySet.html#NonEmptySet"><span class="hs-identifier hs-type">NonEmptySet</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.LibraryName.html#LibraryName"><span class="hs-identifier hs-type">LibraryName</span></a></span><span>
+</span><span id="line-173"></span><span id="mainLibSet"><span class="annot"><span class="annottext">mainLibSet :: NonEmptySet LibraryName
 </span><a href="Distribution.Types.Dependency.html#mainLibSet"><span class="hs-identifier hs-var hs-var">mainLibSet</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LibraryName -&gt; NonEmptySet LibraryName
 forall a. a -&gt; NonEmptySet a
 </span><a href="Distribution.Compat.NonEmptySet.html#singleton"><span class="hs-identifier hs-var">NES.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">LibraryName
 </span><a href="Distribution.Types.LibraryName.html#LMainLibName"><span class="hs-identifier hs-var">LMainLibName</span></a></span><span>
-</span><span id="line-178"></span><span>
-</span><span id="line-179"></span><span class="hs-comment">-- | Simplify the 'VersionRange' expression in a 'Dependency'.</span><span>
-</span><span id="line-180"></span><span class="hs-comment">-- See 'simplifyVersionRange'.</span><span>
-</span><span id="line-181"></span><span class="annot"><a href="Distribution.Types.Dependency.html#simplifyDependency"><span class="hs-identifier hs-type">simplifyDependency</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span>
-</span><span id="line-182"></span><span id="simplifyDependency"><span class="annot"><span class="annottext">simplifyDependency :: Dependency -&gt; Dependency
-</span><a href="Distribution.Types.Dependency.html#simplifyDependency"><span class="hs-identifier hs-var hs-var">simplifyDependency</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span id="local-6989586621679500599"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500599"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679500600"><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500600"><span class="hs-identifier hs-var">range</span></a></span></span><span> </span><span id="local-6989586621679500601"><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500601"><span class="hs-identifier hs-var">comps</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-183"></span><span>  </span><span class="annot"><span class="annottext">PackageName
+</span><span id="line-174"></span><span>
+</span><span id="line-175"></span><span class="hs-comment">-- | Simplify the 'VersionRange' expression in a 'Dependency'.</span><span>
+</span><span id="line-176"></span><span class="hs-comment">-- See 'simplifyVersionRange'.</span><span>
+</span><span id="line-177"></span><span class="annot"><a href="Distribution.Types.Dependency.html#simplifyDependency"><span class="hs-identifier hs-type">simplifyDependency</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span>
+</span><span id="line-178"></span><span id="simplifyDependency"><span class="annot"><span class="annottext">simplifyDependency :: Dependency -&gt; Dependency
+</span><a href="Distribution.Types.Dependency.html#simplifyDependency"><span class="hs-identifier hs-var hs-var">simplifyDependency</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-type">Dependency</span></a></span><span> </span><span id="local-6989586621679519438"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679519438"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679519439"><span class="annot"><span class="annottext">VersionRange
+</span><a href="#local-6989586621679519439"><span class="hs-identifier hs-var">range</span></a></span></span><span> </span><span id="local-6989586621679519440"><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><a href="#local-6989586621679519440"><span class="hs-identifier hs-var">comps</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-179"></span><span>  </span><span class="annot"><span class="annottext">PackageName
 -&gt; VersionRange -&gt; NonEmptySet LibraryName -&gt; Dependency
 </span><a href="Distribution.Types.Dependency.html#Dependency"><span class="hs-identifier hs-var">Dependency</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679500599"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VersionRange -&gt; VersionRange
+</span><a href="#local-6989586621679519438"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VersionRange -&gt; VersionRange
 </span><a href="Distribution.Version.html#simplifyVersionRange"><span class="hs-identifier hs-var">simplifyVersionRange</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679500600"><span class="hs-identifier hs-var">range</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
-</span><a href="#local-6989586621679500601"><span class="hs-identifier hs-var">comps</span></a></span><span>
-</span><span id="line-184"></span></pre></body></html>
+</span><a href="#local-6989586621679519439"><span class="hs-identifier hs-var">range</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmptySet LibraryName
+</span><a href="#local-6989586621679519440"><span class="hs-identifier hs-var">comps</span></a></span><span>
+</span><span id="line-180"></span></pre></body></html>

@@ -40,9 +40,13 @@
 
 #if defined(PROFILING)
 </span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Exts.Heap.FFIClosures_ProfilingEnabled</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Reexport</span><span>
-</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Exts.Heap.FFIClosures_ProfilingDisabled</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Exts.Heap.FFIClosures_ProfilingDisabled</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-comment">-- See Note [No way-dependent imports] in GHC.Exts.Heap.Closures</span><span class="hs-cpp">
+
 #else
 </span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Exts.Heap.FFIClosures_ProfilingDisabled.html"><span class="hs-identifier">GHC.Exts.Heap.FFIClosures_ProfilingDisabled</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Reexport</span></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Exts.Heap.FFIClosures_ProfilingEnabled.html"><span class="hs-identifier">GHC.Exts.Heap.FFIClosures_ProfilingEnabled</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Exts.Heap.FFIClosures_ProfilingEnabled.html"><span class="hs-identifier">GHC.Exts.Heap.FFIClosures_ProfilingEnabled</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-comment">-- See Note [No way-dependent imports] in GHC.Exts.Heap.Closures</span><span class="hs-cpp">
+
 #endif
 </span></pre></body></html>

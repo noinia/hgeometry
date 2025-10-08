@@ -20,7 +20,7 @@
 </span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Array classes</span></span><span>
 </span><span id="line-21"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#IArray"><span class="hs-identifier">IArray</span></a></span><span class="hs-special">,</span><span>     </span><span class="hs-comment">-- :: (* -&gt; * -&gt; *) -&gt; * -&gt; class</span><span>
 </span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Ix.html/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Immutable non-strict (boxed) arrays</span></span><span>
 </span><span id="line-26"></span><span>    </span><span class="annot"><span class="hs-identifier">Array</span></span><span class="hs-special">,</span><span>
@@ -39,17 +39,27 @@
 </span><span id="line-39"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#elems"><span class="hs-identifier">elems</span></a></span><span class="hs-special">,</span><span>      </span><span class="hs-comment">-- :: (IArray a e, Ix i) =&gt; a i e -&gt; [e]</span><span>
 </span><span id="line-40"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#assocs"><span class="hs-identifier">assocs</span></a></span><span class="hs-special">,</span><span>     </span><span class="hs-comment">-- :: (IArray a e, Ix i) =&gt; a i e -&gt; [(i, e)]</span><span>
 </span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Incremental array updates</span></span><span>
-</span><span id="line-43"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#%2F%2F"><span class="hs-operator">(//)</span></a></span><span class="hs-special">,</span><span>       </span><span class="hs-comment">-- :: (IArray a e, Ix i) =&gt; a i e -&gt; [(i, e)] -&gt; a i e</span><span>
-</span><span id="line-44"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#accum"><span class="hs-identifier">accum</span></a></span><span class="hs-special">,</span><span>      </span><span class="hs-comment">-- :: (IArray a e, Ix i) =&gt; (e -&gt; e' -&gt; e) -&gt; a i e -&gt; [(i, e')] -&gt; a i e</span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Derived arrays</span></span><span>
-</span><span id="line-47"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#amap"><span class="hs-identifier">amap</span></a></span><span class="hs-special">,</span><span>       </span><span class="hs-comment">-- :: (IArray a e', IArray a e, Ix i) =&gt; (e' -&gt; e) -&gt; a i e' -&gt; a i e</span><span>
-</span><span id="line-48"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#ixmap"><span class="hs-identifier">ixmap</span></a></span><span class="hs-special">,</span><span>      </span><span class="hs-comment">-- :: (IArray a e, Ix i, Ix j) =&gt; (i,i) -&gt; (i -&gt; j) -&gt; a j e -&gt; a i e</span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Ix.html/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Array.html"><span class="hs-identifier">Data.Array</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Array</span></span><span class="hs-special">)</span><span>
-</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Array.Base.html"><span class="hs-identifier">Data.Array.Base</span></a></span><span>
-</span><span id="line-54"></span><span>
-</span><span id="line-55"></span></pre></body></html>
+</span><span id="line-42"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Array folds</span></span><span>
+</span><span id="line-43"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#foldrArray"><span class="hs-identifier">foldrArray</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#foldlArray%27"><span class="hs-identifier">foldlArray'</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-45"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#foldlArray"><span class="hs-identifier">foldlArray</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-46"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#foldrArray%27"><span class="hs-identifier">foldrArray'</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-47"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#traverseArray_"><span class="hs-identifier">traverseArray_</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#forArray_"><span class="hs-identifier">forArray_</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#foldlArrayM%27"><span class="hs-identifier">foldlArrayM'</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#foldrArrayM%27"><span class="hs-identifier">foldrArrayM'</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Incremental array updates</span></span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#%2F%2F"><span class="hs-operator">(//)</span></a></span><span class="hs-special">,</span><span>       </span><span class="hs-comment">-- :: (IArray a e, Ix i) =&gt; a i e -&gt; [(i, e)] -&gt; a i e</span><span>
+</span><span id="line-54"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#accum"><span class="hs-identifier">accum</span></a></span><span class="hs-special">,</span><span>      </span><span class="hs-comment">-- :: (IArray a e, Ix i) =&gt; (e -&gt; e' -&gt; e) -&gt; a i e -&gt; [(i, e')] -&gt; a i e</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Derived arrays</span></span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#amap"><span class="hs-identifier">amap</span></a></span><span class="hs-special">,</span><span>       </span><span class="hs-comment">-- :: (IArray a e', IArray a e, Ix i) =&gt; (e' -&gt; e) -&gt; a i e' -&gt; a i e</span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#ixmap"><span class="hs-identifier">ixmap</span></a></span><span class="hs-special">,</span><span>      </span><span class="hs-comment">-- :: (IArray a e, Ix i, Ix j) =&gt; (i,i) -&gt; (i -&gt; j) -&gt; a j e -&gt; a i e</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.21.0.0-ae91/src/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Array.html"><span class="hs-identifier">Data.Array</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Array</span></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Array.Base.html"><span class="hs-identifier">Data.Array.Base</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span></pre></body></html>
