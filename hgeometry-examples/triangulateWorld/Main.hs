@@ -5,14 +5,9 @@
 module Main(main) where
 
 import           Control.Lens
-import           Control.Monad
-import           Data.Data
 import qualified Data.Foldable as F
-import           Data.Maybe (mapMaybe)
-import           Data.Semigroup
 import qualified Data.Set as Set
 import           HGeometry.Ext
-import           HGeometry.LineSegment
 import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
@@ -20,8 +15,6 @@ import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation (triangulate)
-import           HGeometry.Polygon.Triangulation.MakeMonotone (makeMonotone)
-import           HGeometry.Properties
 import           Ipe
 import           Options.Applicative
 import           System.OsPath
@@ -48,7 +41,7 @@ options = info (helper <*> parser)
                          <> short 'o'
                         )
 
-data PX = PX
+data PX
 
 main :: IO ()
 main = execParser options >>= mainWith
@@ -72,7 +65,7 @@ mainWith (Options inFile outFile) = do
           polies  = readAllDeep page
           -- TODO: I guess I want to flatten the page first; unpacking any groups
           polies' = filter (hasNoSelfIntersections . (^.core)) polies
-          nonPolies = filter (not . hasNoSelfIntersections . (^.core)) polies
+          -- nonPolies = filter (not . hasNoSelfIntersections . (^.core)) polies
 
 
 
@@ -89,8 +82,8 @@ mainWith (Options inFile outFile) = do
             -- mapMaybe (^?_2.core._Left)
             --          . concatMap (F.toList. internalFacePolygons) $ subdivs
 
-          segs :: [ClosedLineSegment (Point 2 R)]
-          segs = subdivs^..folded.edgeSegments
+          -- segs :: [ClosedLineSegment (Point 2 R)]
+          -- segs = subdivs^..folded.edgeSegments
 
           out     = mconcat [ [ iO $ ipePolygon pg ! ats  | (pg :+ ats) <- polies ]
                             -- , [ iO' s  | s  <- segs ]

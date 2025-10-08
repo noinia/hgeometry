@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
@@ -59,7 +60,7 @@ updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
   where
-    addPoint = noEff $ case m^.partialSeg of
+    addPoint = put $ case m^.partialSeg of
       Nothing -> m&partialSeg .~ m^.canvas.mouseCoordinates
       Just p  -> case m^.canvas.mouseCoordinates of
                    Nothing -> m

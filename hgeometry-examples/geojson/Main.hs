@@ -4,20 +4,14 @@ module Main(main) where
 import           Control.Lens
 import           Data.Aeson
 import           Data.Geospatial
-import           Data.Maybe
 import           HGeometry.GeoJSON
-import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.WithHoles
--- import           HGeometry.Vector ()
 import           Ipe
-import           Paths_hgeometry_examples
+-- import           Paths_hgeometry_examples
 import qualified System.File.OsPath as File
 import           System.OsPath
 --------------------------------------------------------------------------------
 
-type R = Double
+-- type R = Double
 
 parseGeoJSONFile :: OsPath -> IO (Either String (GeoFeatureCollection Value))
 parseGeoJSONFile = fmap eitherDecode . File.readFile
