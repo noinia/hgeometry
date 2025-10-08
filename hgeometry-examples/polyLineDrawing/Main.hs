@@ -13,18 +13,17 @@
 --------------------------------------------------------------------------------
 module Main (main) where
 
-import           Control.Monad.IO.Class
-
+-- import           Control.Monad.IO.Class
 import           Control.Lens hiding (view, element)
 import           Data.Colour.SRGB
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import qualified Data.Map as Map
 import           Data.Maybe (maybeToList)
-import qualified Data.Sequence as Sequence
+-- import qualified Data.Sequence as Sequence
 import           Data.Word
 import           GHC.TypeNats
 import           HGeometry.Ext
@@ -73,7 +72,7 @@ switchMode = \case
 
 type Color = RGB Word8
 
-
+{-
 -- | default color presets in goodnotes
 colorPresets :: NonEmpty Color
 colorPresets = NonEmpty.fromList
@@ -95,6 +94,7 @@ colorPresets = NonEmpty.fromList
                , RGB 142 196 79 -- lightgreen
                , RGB 254 255 149
                ]
+-}
 
 defaultQuickColors :: Vector 4 Color
 defaultQuickColors = Vector4 black' red blue green
@@ -191,14 +191,14 @@ updateModel m = \case
     CanvasAction ca    -> traceShow ("canvas act: ",ca) $
       zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
       -- m&canvas %%~ flip
-    WindowResize dims -> noEff $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
-    SwitchMode         -> noEff $ m&mode %~ switchMode
+    WindowResize dims -> put $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
+    SwitchMode         -> put $ m&mode %~ switchMode
     CanvasClicked      -> case m^.mode of
                             PolyLineMode -> m <# pure AddPoint
-                            PenMode      -> noEff m
+                            PenMode      -> put m
     CanvasRightClicked -> case m^.mode of
                             PolyLineMode -> m <# pure AddPoly
-                            PenMode      -> noEff m
+                            PenMode      -> put m
 
     StartMouseDown     -> startMouseDown
     MouseMove          -> mouseMove
@@ -212,26 +212,26 @@ updateModel m = \case
     AddPoly            -> addPoly
     SelectColor i c    -> let setColor a = a&color      .~ c
                                             &colorIndex .~ i
-                          in noEff $ m&currentAttrs     %~ setColor
+                          in put $ m&currentAttrs     %~ setColor
                                       &quickColors.ix i .~ c
 
   where
     startMouseDown = case m^.mode of
-        PolyLineMode -> noEff m
-        PenMode      -> noEff $ m&currentPoly .~ extend Nothing
+        PolyLineMode -> put m
+        PenMode      -> put $ m&currentPoly .~ extend Nothing
     mouseMove      = case m^.mode of
-        PolyLineMode -> noEff m
-        PenMode      -> noEff $ m&currentPoly %~ \mp -> case mp of
+        PolyLineMode -> put m
+        PenMode      -> put $ m&currentPoly %~ \mp -> case mp of
                                                           Nothing -> Nothing
                                                           Just _  -> extend mp
     stopMouseDown  = case m^.mode of
-        PolyLineMode -> noEff m
+        PolyLineMode -> put m
         PenMode      -> m <# pure AddPoly
 
     extend = extendWith (m^.canvas.mouseCoordinates)
-    addPoint = noEff $ m&currentPoly %~ extend
+    addPoint = put $ m&currentPoly %~ extend
 
-    addPoly  = noEff $ m&polyLines   %~ insert' (extend (m^.currentPoly))
+    addPoly  = put $ m&polyLines   %~ insert' (extend (m^.currentPoly))
                         &currentPoly .~ Nothing
 
     insert' = \case
@@ -445,13 +445,13 @@ main = JSaddle.run 8080 $
                 , logLevel      = Off
                 }
 
-textAt                    :: ToMisoString r
-                          => Point 2 r
-                          -> [Attribute action] -> MisoString -> View action
-textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
-                                  , y_ $ ms y
-                                  ] <> ats
-                                  ) [text t]
+-- textAt                    :: ToMisoString r
+--                           => Point 2 r
+--                           -> [Attribute action] -> MisoString -> View action
+-- textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
+--                                   , y_ $ ms y
+--                                   ] <> ats
+--                                   ) [text t]
 
 
 -- | Subscription that gets the window dimensions.

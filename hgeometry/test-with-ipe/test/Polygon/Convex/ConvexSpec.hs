@@ -74,7 +74,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly | (poly :+ _) <- polies ]
       where
-        polies = page^..content.traverse._withAttrs _IpePath _asConvexPolygon
+        polies = page^..content.folded._withAttrs _IpePath _asConvexPolygon
 
 
 toSingleSpec        :: (Num r, Ord r, Show r)

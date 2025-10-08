@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# OPTIONS_GHC -fno-warn-orphans -fno-warn-unused-binds #-}
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
 import qualified Data.IntMap as IntMap
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
 import           GHC.TypeNats
 import           HGeometry.Box
 import           HGeometry.Duality
@@ -13,7 +12,6 @@ import           HGeometry.Ext
 import           HGeometry.Intersection
 import           HGeometry.Transformation
 import           HGeometry.Line
-import           HGeometry.LineSegment
 import           HGeometry.Viewport
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Miso.Svg
@@ -24,9 +22,10 @@ import           HGeometry.Point
 import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso hiding (style_)
-import           Miso.Style(style_,(=:))
+import           Miso.Style (style_,(=:))
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
+import           Prelude hiding (lines)
 
 --------------------------------------------------------------------------------
 
@@ -80,8 +79,8 @@ updateModel   :: Model -> Action -> Effect Model Action
 updateModel m = \case
     PrimalCanvasAction ca -> zoom primalCanvas $ wrap Canvas.handleInternalCanvasAction ca
     DualCanvasAction ca   -> zoom dualCanvas   $ wrap Canvas.handleInternalCanvasAction ca
-    PrimalClick           -> noEff addPrimalPoint
-    DualClick             -> noEff addDualPoint
+    PrimalClick           -> put addPrimalPoint
+    DualClick             -> put addDualPoint
   where
     color = "red"
     addPrimalPoint = case m^.primalCanvas.mouseCoordinates of
@@ -124,13 +123,13 @@ viewModel m = div_ [ ]
                           [text . ms . show $ m^.primalLines ]
                     ]
   where
-    partialPrimalLine = []
-    partialDualLine = []
+    -- partialPrimalLine = []
+    -- partialDualLine = []
 
     primalBody = drawWorld primalPoints primalLines (m^.primalCanvas.mouseCoordinates)
     dualBody   = drawWorld dualPoints   dualLines   (m^.dualCanvas.mouseCoordinates)
 
-    drawWorld points lines mousePos =
+    drawWorld points lines _mousePos =
          [ g_ [] [ draw p [ fill_ color
                           ]
                  ]
@@ -148,6 +147,7 @@ instance Drawable (LineEQ R) where
                 Just (Line_x_Box_LineSegment s) -> draw s
                 _                               -> flip g_ []
 
+large :: R
 large = 100000
 
 --------------------------------------------------------------------------------
@@ -166,14 +166,6 @@ main = JSaddle.run 8080 $
                 , mountPoint    = Nothing
                 , logLevel      = Off
                 }
-
-textAt                    :: ToMisoString r
-                          => Point 2 r
-                          -> [Attribute action] -> MisoString -> View action
-textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
-                                  , y_ $ ms y
-                                  ] <> ats
-                                  ) [text t]
 
 wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
 wrap f act = get >>= flip f act

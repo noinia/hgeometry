@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
 import           GHC.TypeNats
 import           HGeometry.ConvexHull.GrahamScan
 import           HGeometry.Ext
@@ -55,9 +55,9 @@ updateModel   :: Model -> Action -> Effect Model Action
 updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
-    Select p         -> noEff $ m&selected ?~ p
+    Select p         -> put $ m&selected ?~ p
   where
-    addPoint = noEff $ recomputeHull m'
+    addPoint = put $ recomputeHull m'
        where
           m' = case m^.canvas.mouseCoordinates of
                  Nothing -> m

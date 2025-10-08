@@ -2,7 +2,7 @@ module Settings where
 
 import Control.Lens
 import Data.Colour
-import Data.Colour.Names
+-- import Data.Colour.Names
 import Data.Colour.SRGB (sRGB)
 import Data.Default.Class
 import HGeometry.Graphics.Camera
