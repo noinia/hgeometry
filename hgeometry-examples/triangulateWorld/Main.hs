@@ -84,13 +84,13 @@ mainWith (Options inFile outFile) = do
 
           triangles' :: [SimplePolygon (Point 2 R :+ _)]
           triangles' = -- concatMap (^..interiorFacePolygons) subdivs
-                       subdivs^..traverse.outerBoundaryPolygons
+                       subdivs^..folded.outerBoundaryPolygons
 
             -- mapMaybe (^?_2.core._Left)
             --          . concatMap (F.toList. internalFacePolygons) $ subdivs
 
           segs :: [ClosedLineSegment (Point 2 R)]
-          segs = subdivs^..traverse.edgeSegments
+          segs = subdivs^..folded.edgeSegments
 
           out     = mconcat [ [ iO $ ipePolygon pg ! ats  | (pg :+ ats) <- polies ]
                             -- , [ iO' s  | s  <- segs ]

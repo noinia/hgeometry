@@ -88,7 +88,7 @@ readInput fp = fmap f <$> readSinglePageFile fp
              | pSet <- byStrokeColour' syms
              ]
       where
-        syms = page^..content.traverse._IpeUse
+        syms = page^..content.folded._IpeUse
         byStrokeColour' = mapMaybe NonEmpty.nonEmpty . byStrokeColour
 
 

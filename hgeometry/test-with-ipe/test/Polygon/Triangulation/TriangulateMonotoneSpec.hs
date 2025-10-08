@@ -100,8 +100,8 @@ readInput fp = fmap f <$> readSinglePageFile fp
       where
         g x@(pg :+ _) = pg :+ lookupColor x
 
-        polies = page^..content.traverse._withAttrs _IpePath _asSimplePolygon
-        segs   = page^..content.traverse._withAttrs _IpePath _asClosedLineSegment
+        polies = page^..content.folded._withAttrs _IpePath _asSimplePolygon
+        segs   = page^..content.folded._withAttrs _IpePath _asClosedLineSegment
 
         solutionOf (_ :+ c) = map (^.core) . filter ((== c) . lookupColor)
 

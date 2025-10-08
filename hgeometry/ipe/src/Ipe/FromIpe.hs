@@ -180,7 +180,7 @@ _asTriangle :: Prism' (Path r) (Triangle (Point 2 r))
 _asTriangle = prism' triToPath path2tri
   where
     triToPath = polygonToPath @NonEmptyVector . uncheckedFromCCWPoints
-    path2tri p = case p^..pathSegments.traverse._PolygonPath._2 of
+    path2tri p = case p^..pathSegments.folded._PolygonPath._2 of
                     []   -> Nothing
                     [pg] -> case pg^..vertices of
                               [a,b,c] -> Just $ Triangle a b c
@@ -197,7 +197,7 @@ _asEllipse :: Prism' (Path r) (Ellipse r)
 _asEllipse = prism' toPath toEllipse
   where
     toPath      = Path . fromSingleton  . EllipseSegment
-    toEllipse p = case p^..pathSegments.traverse._EllipseSegment of
+    toEllipse p = case p^..pathSegments.folded._EllipseSegment of
                     [e] -> Just e
                     _   -> Nothing
 
@@ -232,7 +232,7 @@ polygonToPath (MkSimplePolygon vs) = Path . fromSingleton . PolygonPath AsIs
 --                                    $ vs :| hs
 
 pathToPolygon   :: Path r -> Maybe (SimplePolygon (Point 2 r))
-pathToPolygon p = case p^..pathSegments.traverse._PolygonPath._2 of
+pathToPolygon p = case p^..pathSegments.folded._PolygonPath._2 of
                     [pg]  -> Just pg
                     _     -> Nothing
                     -- vs:hs -> Just . Right $ MultiPolygon vs hs
@@ -357,12 +357,12 @@ instance HasDefaultFromIpe (Triangle (Point 2 r)) where
 -- | Read all g's from some ipe page(s).
 readAll   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
           => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
-readAll p = p^..content.traverse.defaultFromIpe
+readAll p = p^..content.folded.defaultFromIpe
 
 -- | Read all 'a's looking into groups
 readAllDeep   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
               => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
-readAllDeep p = p^..content.to flattenContent.traverse.defaultFromIpe
+readAllDeep p = p^..content.to flattenContent.folded.defaultFromIpe
 
 -- | Convenience function from reading all g's from an ipe file. If there
 -- is an error reading or parsing the file the error is "thrown away".

@@ -477,7 +477,7 @@ menuBar_ _ = navBar_
   --   canvasBody = [ g_ [] [ draw v [ fill_ "red"
   --                                 ]
   --                        ]
-  --                | v <- m^..diagram.traverse.traverse ]
+  --                | v <- m^..diagram.folded.traverse ]
   --             <> [ g_ [] [ draw p [ fill_ "black"
   --                                 ]
   --                        , textAt p [] (ms i)

@@ -56,7 +56,7 @@ _asPolyLine :: Prism' (Path r) (PolyLine (Point 2 r))
 _asPolyLine = prism' poly2path path2poly
   where
     poly2path = Path . fromSingleton  . PolyLineSegment
-    path2poly = preview (pathSegments.traverse._PolyLineSegment)
+    path2poly = preview (pathSegments.folded._PolyLineSegment)
     -- TODO: Check that the path actually is a polyline, rather
     -- than ignoring everything that does not fit
 

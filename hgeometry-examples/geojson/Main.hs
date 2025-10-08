@@ -28,7 +28,7 @@ main = do
   case res of
     Left err          -> print err
     Right fCollection -> do
-      let pgs = fCollection^..geofeatures.traverse.geometry._Polygon._GeoPolygonPolygonalDomain
+      let pgs = fCollection^..geofeatures.folded.geometry._Polygon._GeoPolygonPolygonalDomain
       let outFp = [osp|foo.ipe|]
           out   = [ iO $ ipePolygon pg
                   | pg <- pgs
