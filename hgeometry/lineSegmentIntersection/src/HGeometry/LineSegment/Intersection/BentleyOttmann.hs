@@ -14,21 +14,23 @@ module HGeometry.LineSegment.Intersection.BentleyOttmann
   ( intersections
   , interiorIntersections
 
-  , Intersections
-  , intersectionPoints
-  , Associated, startPointOf, endPointOf, interiorTo
-  , associatedSegments
+  , module HGeometry.LineSegment.Intersection.Types
+  -- , Intersections
+  -- , intersectionPoints
+  -- , Associated, empty
+  -- , startPointOf, endPointOf, interiorTo
+  -- , associatedSegments
 
-  , AroundEnd, AroundStart, AroundIntersection
-  , isInteriorIntersection
+  -- , AroundEnd, AroundStart, AroundIntersection
+  -- , isInteriorIntersection
 
-  , IntersectionPoint
-  , intersectionPointOf
+  -- , IntersectionPoint
+  -- , intersectionPointOf
 
-  , intersectionPoint, associatedSegs
+  -- , intersectionPoint, associatedSegs
 
-  , IntersectConstraints
-  , OrdArounds
+  -- , IntersectConstraints
+  -- , OrdArounds
   ) where
 
 import           Control.Lens hiding (contains)

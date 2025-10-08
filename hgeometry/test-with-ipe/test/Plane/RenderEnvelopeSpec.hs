@@ -40,6 +40,7 @@ import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Ipe.Color
 import HGeometry.LineSegment.Intersection.BentleyOttmann
+import HGeometry.LineSegment.Intersection.Types
 
 --------------------------------------------------------------------------------
 
@@ -175,7 +176,7 @@ assignIndex = undefined
 
 
 (<>>)        :: Ord k => MonoidalNEMap k v -> Map.Map k v -> MonoidalNEMap k v
-base <>> new = foldr (curry NEMap.insert) base $ Map.toAscList new
+base <>> new = foldr (curry MMap.insert) base $ Map.toAscList new
 
 
 -- connected at least again
