@@ -21,6 +21,7 @@ module HGeometry.Map.NonEmpty.Monoidal
   , (!?), (!)
   ) where
 
+import Control.Lens
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Foldable1
 import Data.Map.NonEmpty (NEMap)
@@ -46,6 +47,22 @@ instance (Ord k, Semigroup v) => Semigroup (MonoidalNEMap k v) where
 -- instance Ord k => At (MonoidalNEMap k v) where
 --   at k f = NEMap.alterF f k
 --   {-# INLINE at #-}
+
+instance Traversable (MonoidalNEMap k) where
+  traverse f = fmap MonoidalNEMap . traverse f . getNEMap
+
+instance Traversable1 (MonoidalNEMap k) where
+  traverse1 f = fmap MonoidalNEMap . traverse1 f . getNEMap
+
+instance FunctorWithIndex k (MonoidalNEMap k) where
+  imap f = MonoidalNEMap . NEMap.mapWithKey f . getNEMap
+
+instance FoldableWithIndex k (MonoidalNEMap k) where
+  ifoldMap f = NEMap.foldMapWithKey f . getNEMap
+
+instance TraversableWithIndex k (MonoidalNEMap k) where
+  itraverse f = fmap MonoidalNEMap . NEMap.traverseWithKey f . getNEMap
+
 
 --------------------------------------------------------------------------------
 

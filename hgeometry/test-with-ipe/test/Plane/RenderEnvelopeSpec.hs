@@ -35,12 +35,13 @@ import HGeometry.Map.NonEmpty.Monoidal qualified as MMap
 import HGeometry.Vector
 import Data.Set qualified as Set
 import HGeometry.Transformation
+import HGeometry.Intersection
 import HGeometry.Graphics.Camera
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Ipe.Color
 import HGeometry.LineSegment.Intersection.BentleyOttmann
-import HGeometry.LineSegment.Intersection.Types
+import Hiraffe.PlanarGraph.Connected
 
 --------------------------------------------------------------------------------
 
@@ -175,8 +176,9 @@ assignIndex = undefined
   -- snd . Map.mapAccumWithKey (\i k _ -> (succ i, i)) 0
 
 
-(<>>)        :: Ord k => MonoidalNEMap k v -> Map.Map k v -> MonoidalNEMap k v
-base <>> new = foldr (curry MMap.insert) base $ Map.toAscList new
+(<>>)        :: (Ord k, Semigroup v) => MonoidalNEMap k v -> Map.Map k v -> MonoidalNEMap k v
+base <>> new = foldr (uncurry MMap.insert) base $ Map.toAscList new
+
 
 
 -- connected at least again
@@ -185,6 +187,11 @@ fromIntersections                 :: forall s nonEmpty lineSegment r point plane
                                        , LineSegment_ lineSegment point
                                        , Point_ point 2 r, Ord r, Num r
                                        , planeGraph ~ CPlaneGraph s (Point 2 r) () ()
+                                       , Intersection lineSegment lineSegment
+                                          ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                                       , IsIntersectableWith lineSegment lineSegment
+                                       , Eq lineSegment
+                                       , OrdArounds lineSegment
                                        )
                                   => nonEmpty lineSegment
                                   -> Intersections r lineSegment
