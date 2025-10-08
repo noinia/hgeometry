@@ -13,8 +13,9 @@ module HGeometry.LineSegment.Intersection.Types
   ( Intersections
   , intersectionPoints
 
-  , Associated(Associated), startPointOf, endPointOf, interiorTo
-  , mkAssociated
+  , Associated(Associated)
+  , startPointOf, endPointOf, interiorTo
+  , empty, mkAssociated, mkAroundStart, mkAroundEnd
   , associatedSegments
 
   , AroundEnd(..), AroundStart(..), AroundIntersection(..)
@@ -172,7 +173,12 @@ deriving stock instance ( Read lineSegment
                         , OrdArounds lineSegment
                         ) => Read (Associated lineSegment)
 
+-- | Constructs an empty associated
+empty :: Associated lineSegment
+empty = Associated Set.empty Set.empty Set.empty
 
+
+-- | Shorthand for the required Ord instances
 type OrdArounds lineSegment = ( Ord (AroundStart lineSegment)
                               , Ord (AroundIntersection lineSegment)
                               , Ord (AroundEnd lineSegment)
@@ -217,6 +223,15 @@ isInteriorIntersection :: Associated lineSegment -> Bool
 isInteriorIntersection = not . null . _interiorTo
 
 
+-- | Constructs an around start
+mkAroundStart   :: lineSegment -> Associated lineSegment
+mkAroundStart s = empty&startPointOf .~  Set.singleton (AroundStart s)
+
+-- | Constructs an ArroundEnd
+mkAroundEnd   :: lineSegment -> Associated lineSegment
+mkAroundEnd s = empty&endPointOf   .~  Set.singleton (AroundEnd s)
+
+
 -- | test if the given segment has p as its endpoint, an construct the
 -- appropriate associated representing that.
 --
@@ -225,13 +240,12 @@ mkAssociated      :: ( LineSegment_ lineSegment point
                      , Point_ point 2 r
                      , Point_ point' 2 r
                      , Eq r
-                     , OrdArounds lineSegment
                      )
                   => point' -> lineSegment -> Associated lineSegment
 mkAssociated p s
-  | p^.asPoint == s^.start.asPoint = mempty&startPointOf .~  Set.singleton (AroundStart s)
-  | p^.asPoint == s^.end.asPoint   = mempty&endPointOf   .~  Set.singleton (AroundEnd s)
-  | otherwise                      = mempty&interiorTo   .~  Set.singleton (AroundIntersection s)
+  | p^.asPoint == s^.start.asPoint = empty&startPointOf .~  Set.singleton (AroundStart s)
+  | p^.asPoint == s^.end.asPoint   = empty&endPointOf   .~  Set.singleton (AroundEnd s)
+  | otherwise                      = empty&interiorTo   .~  Set.singleton (AroundIntersection s)
 
 
 ---- | test if the given segment has p as its endpoint, an construct the
@@ -253,7 +267,7 @@ instance OrdArounds lineSegment => Semigroup (Associated lineSegment) where
     Associated (ss <> ss') (es <> es') (is <> is')
 
 instance OrdArounds lineSegment => Monoid (Associated lineSegment) where
-  mempty = Associated mempty mempty mempty
+  mempty = empty
 
 instance (NFData lineSegment) => NFData (Associated lineSegment)
 

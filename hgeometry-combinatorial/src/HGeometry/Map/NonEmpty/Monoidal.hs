@@ -16,14 +16,16 @@ module HGeometry.Map.NonEmpty.Monoidal
   , mapWithKeyMerge1
 
 
+  , insert, insertReplace
   , assocs
+  , (!?), (!)
   ) where
 
-
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Foldable1
-import           Data.Map.NonEmpty (NEMap)
-import qualified Data.Map.NonEmpty as NEMap
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Foldable1
+import Data.Map.NonEmpty (NEMap)
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Coerce
 
 --------------------------------------------------------------------------------
 
@@ -35,6 +37,17 @@ newtype MonoidalNEMap k v = MonoidalNEMap { getNEMap :: NEMap k v }
 
 instance (Ord k, Semigroup v) => Semigroup (MonoidalNEMap k v) where
   (MonoidalNEMap ma) <> (MonoidalNEMap mb) = MonoidalNEMap $ NEMap.unionWith (<>) ma mb
+
+-- type instance Index   (MonoidalNEMap k v) = k
+-- type instance IxValue (MonoidalNEMap k v) = v
+
+-- instance Ord k => Ixed (MonoidalNEMap k v)
+
+-- instance Ord k => At (MonoidalNEMap k v) where
+--   at k f = NEMap.alterF f k
+--   {-# INLINE at #-}
+
+--------------------------------------------------------------------------------
 
 -- | Create a singleton MonoidalNE Map
 singleton     :: k -> v -> MonoidalNEMap k v
@@ -57,3 +70,28 @@ mapWithKeyMerge1 f = getNEMap . NEMap.foldMapWithKey (\k v -> MonoidalNEMap $ f 
 -- \(O(n)\)
 assocs :: MonoidalNEMap k v -> NonEmpty (k, v)
 assocs = NEMap.assocs . getNEMap
+
+-- | Insert an new key,value pair into the Map
+--
+-- \(O(\log n)\)
+insert     :: (Ord k, Semigroup v) => k -> v -> MonoidalNEMap k v -> MonoidalNEMap k v
+insert k v = coerce $ NEMap.insertWith (<>) k v
+
+-- | Insert an new key,value pair into the Map
+-- \(O(\log n)\)
+insertReplace     :: Ord k => k -> v -> MonoidalNEMap k v -> MonoidalNEMap k v
+insertReplace k v = coerce $ NEMap.insert k v
+
+
+infixl 9 !?
+infixl 9 !
+
+-- | Lookup in the Map
+-- \(O(\log n)\)
+(!?)   :: Ord k => MonoidalNEMap k v -> k -> Maybe v
+(!?) m = (NEMap.!?) (coerce m)
+
+-- | unsafe lookup in the Map
+-- \(O(\log n)\)
+(!)   :: Ord k => MonoidalNEMap k v -> k -> v
+(!) m = (NEMap.!) (coerce m)

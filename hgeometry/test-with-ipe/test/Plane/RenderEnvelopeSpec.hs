@@ -2,28 +2,38 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Coerce
+import Data.Foldable1
 import Control.Lens
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Ipe
 import Ipe.Color
 import System.OsPath
+import Data.Map qualified as Map
 import Test.Hspec.WithTempFile
 import Golden
 import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Instances ()
 import HGeometry.Ext
+import HGeometry.LineSegment
+import HGeometry.Polygon
 import HGeometry.Polygon.Convex.Instances ()
 import HGeometry.Number.Real.Rational
 import HGeometry.Plane.LowerEnvelope
 import HGeometry.VoronoiDiagram
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import HGeometry.Triangle
+import HGeometry.PlaneGraph
 import HGeometry.Point
 import HGeometry.VoronoiDiagram qualified as VD
 import HGeometry.Box as Box
+import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
+import HGeometry.Map.NonEmpty.Monoidal qualified as MMap
 import HGeometry.Vector
+import Data.Set qualified as Set
 import HGeometry.Transformation
 import HGeometry.Graphics.Camera
 import Data.List.NonEmpty (NonEmpty(..))
@@ -104,7 +114,7 @@ asTrianglePairAbove rect h = Vector2 (Triangle tl tr br :+ h)
   where
     Corners tl tr br bl = (\p@(Point2 x y) -> Point3 x y (evalAt p h)) <$> Box.corners rect
 
-
+-- todo; just map to polygons/quads directly
 
 -- theTransform =
 
@@ -137,9 +147,9 @@ spec = describe "Plane.RenderEnvelope"  $ do
 -- in the end this should be a planeGraph rather than a
 
 -- | Construct a connected Plane Graph out of a bunch of triangles.
-constructCPlaneGraph      :: forall nonEmpty simplePolygon vertex r.
+constructCPlaneGraph      :: forall nonEmpty s simplePolygon vertex r.
                                (Foldable1 nonEmpty, Point_ vertex 2 r
-                               , SimplePolygon_ simplePolygon vertex
+                               , SimplePolygon_ simplePolygon vertex r
                                )
                           => nonEmpty simplePolygon
                           -> CPlaneGraph s (Point 2 r :+ [vertex]) () [simplePolygon]
@@ -147,12 +157,70 @@ constructCPlaneGraph tris = undefined
   -- where
   --   allEdgeSegments = foldMap1
 
+theIntersections :: forall nonEmpty s simplePolygon vertex r.
+                      (Foldable1 nonEmpty, Point_ vertex 2 r
+                        , SimplePolygon_ simplePolygon vertex r
+                        , Ord r, Fractional r, Ord vertex
+                      )
+                 => nonEmpty simplePolygon
+                 -> Intersections r (ClosedLineSegment vertex)
+theIntersections = intersections . foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments)
+
+
+-- | Assign each element in the map a unique Integer key (in the range \([0,n)\) )
+assignIndex :: MonoidalNEMap k v -> MonoidalNEMap k Int
+assignIndex = undefined
+
+  -- snd . Map.mapAccumWithKey (\i k _ -> (succ i, i)) 0
+
+
+(<>>)        :: Ord k => MonoidalNEMap k v -> Map.Map k v -> MonoidalNEMap k v
+base <>> new = foldr (curry NEMap.insert) base $ Map.toAscList new
+
 
 -- connected at least again
-fromIntersections                 :: nonEmpty lineSegment
+fromIntersections                 :: forall s nonEmpty lineSegment r point planeGraph.
+                                       ( Foldable1 nonEmpty
+                                       , LineSegment_ lineSegment point
+                                       , Point_ point 2 r, Ord r, Num r
+                                       , planeGraph ~ CPlaneGraph s (Point 2 r) () ()
+                                       )
+                                  => nonEmpty lineSegment
                                   -> Intersections r lineSegment
-                                  -> CPlaneGraph s (Point 2 r) () ()
-fromIntersections segs intersects = undefined
+                                  -> planeGraph
+fromIntersections segs intersects = fromAdjacencyLists adjLists
+     -- FIXME: this currrently generates assymetric edges (I think)
+  where
+    -- | Map every Point to its vertexId
+    vertexMapping :: MonoidalNEMap (Point 2 r) (VertexIx planeGraph)
+    vertexMapping = coerce $ assignIndex vertexLocations
+
+    vertexLocations :: MonoidalNEMap (Point 2 r) (Associated lineSegment)
+    vertexLocations = foldMap1 (\seg -> MMap.singleton (seg^.start.asPoint) (mkAroundStart seg)
+                                     <> MMap.singleton (seg^.end.asPoint)   (mkAroundEnd seg)
+                               ) segs
+                    <>> intersects
+
+    adjLists :: MonoidalNEMap _
+                  (VertexIx planeGraph, Point 2 r, NonEmpty (VertexIx planeGraph, () ))
+    adjLists = imap buildVertex vertexLocations
+
+    buildVertex p assocs = (vertexMapping MMap.! p, p, buildNeighbours assocs)
+
+    buildNeighbours assocs = undefined
+
+    -- endPointVertices = foldMap1 endPointVertex segs
+    -- endPointVertex
+
+
+-- fromAdjacencyLists :: (Foldable1 nonEmpty, Functor nonEmpty, Foldable h, Functor h, vi ~ VertexIx graph, v ~ Vertex graph, e ~ Edge graph, GraphFromAdjListExtraConstraints graph h)
+
+--                        => nonEmpty (vi, v, h (vi, e)) -> graph
+
+
+    -- adjLists =
+    --   Map.keys intersects
+
 
 
 --------------------------------------------------------------------------------
