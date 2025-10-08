@@ -45,7 +45,7 @@ module Ipe(
   , Group(Group), groupItems
   , TextLabel(..)
   , MiniPage(..), width
-  , Image(Image), imageData, rect
+  , Image(Image), imageData, imageRect
   , IpeBitmap
   -- ** Attributes
   , IpeAttributes

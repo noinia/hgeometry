@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Ipe.Content(
-    Image(Image), imageData, rect
+    Image(Image), imageData, imageRect
   , TextLabel(..)
   , MiniPage(..), width
 
@@ -52,7 +52,7 @@ import           Ipe.Path
 
 -- | bitmap image objects in Ipe
 data Image r = Image { _imageData :: ()
-                     , _rect      :: Rectangle (Point 2 r)
+                     , _imageRect      :: Rectangle (Point 2 r)
                      } deriving (Show,Eq,Ord,Generic)
 
 -- | Lens to access the image data
@@ -61,15 +61,15 @@ imageData f (Image i r) = fmap (\i' -> Image i' r) (f i)
 {-# INLINE imageData #-}
 
 -- | Lens to access the rectangle of the image
-rect :: Lens (Image r) (Image r') (Rectangle (Point 2 r)) (Rectangle (Point 2 r'))
-rect f (Image i r) = fmap (\r' -> Image i r') (f r)
-{-# INLINE rect #-}
+imageRect :: Lens (Image r) (Image r') (Rectangle (Point 2 r)) (Rectangle (Point 2 r'))
+imageRect f (Image i r) = fmap (\r' -> Image i r') (f r)
+{-# INLINE imageRect #-}
 
 type instance NumType   (Image r) = r
 type instance Dimension (Image r) = 2
 
 instance Fractional r => IsTransformable (Image r) where
-  transformBy t = over rect (transformBy t)
+  transformBy t = over imageRect (transformBy t)
 
 instance Functor Image where
   fmap = fmapDefault
