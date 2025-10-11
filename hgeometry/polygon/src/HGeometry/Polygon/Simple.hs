@@ -25,29 +25,30 @@ module HGeometry.Polygon.Simple
   , module HGeometry.Polygon.Simple.Class
   ) where
 
-import           Control.Lens
-import qualified Data.Foldable as F
-import           Data.Foldable1
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe)
-import           HGeometry.Boundary
-import           HGeometry.Cyclic
-import           HGeometry.Foldable.Util
-import           HGeometry.HalfSpace
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
-import           HGeometry.LineSegment.Intersection.BentleyOttmann
-import           HGeometry.Point
-import           HGeometry.Line
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Simple.Implementation
-import           HGeometry.Polygon.Simple.InPolygon
-import           HGeometry.Polygon.Simple.Type
-import           HGeometry.Transformation
-import           HGeometry.Vector.NonEmpty.Util ()
+import HGeometry.Ext
+import Control.Lens
+import Data.Foldable qualified as F
+import Data.Foldable1
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Map qualified as Map
+import Data.Maybe (fromMaybe)
+import HGeometry.Boundary
+import HGeometry.Cyclic
+import HGeometry.Foldable.Util
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane.Class
+import HGeometry.Intersection
+import HGeometry.LineSegment.Intersection.BentleyOttmann
+import HGeometry.Point
+import HGeometry.Line
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Simple.Class
+import HGeometry.Polygon.Simple.Implementation
+import HGeometry.Polygon.Simple.InPolygon
+import HGeometry.Polygon.Simple.Type
+import HGeometry.Transformation
+import HGeometry.Vector.NonEmpty.Util ()
 --------------------------------------------------------------------------------
 
 
@@ -235,3 +236,12 @@ hasNoSelfIntersections vs = let vs' = (\p -> (p^.asPoint)&coordinates %~ toRatio
                                 pg = uncheckedFromCCWPoints vs'
                             in Map.null $ interiorIntersections $ pg^..outerBoundaryEdgeSegments
   -- outerBoundaryEdgeSegments interiorIntersections pg
+
+
+
+--------------------------------------------------------------------------------
+-- * Instances involving Ext
+
+instance HasIntersectionWith geom (SimplePolygonF f vertex)
+         => HasIntersectionWith geom (SimplePolygonF f vertex :+ extra) where
+  q `intersects` (pg :+ _) = q `intersects` pg

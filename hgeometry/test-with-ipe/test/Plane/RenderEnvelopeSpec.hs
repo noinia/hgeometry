@@ -241,35 +241,10 @@ maximumOn f = maximumByOf folded (comparing f)
 
 --------------------------------------------------------------------------------
 
-data StartEnd = Start | End
-  deriving (Show,Eq,Ord)
-
-instance ( IxValue (endPoint vertex) ~ vertex, EndPoint_ (endPoint vertex)
-         ) => HasVertices' (LineSegment endPoint vertex) where
-  type Vertex   (LineSegment endPoint vertex) = vertex
-  type VertexIx (LineSegment endPoint vertex) = StartEnd
-  vertexAt = \case
-    Start -> \paFa -> start (indexed paFa Start)
-    End   -> \paFa -> end   (indexed paFa End)
-  {-# INLINE vertexAt #-}
-  numVertices = const 2
-
-instance ( Traversable1 endPoint, EndPoint_ (endPoint v)
-         , IxValue (endPoint v) ~ v
-         )
-           => HasVertices (LineSegment endPoint v) (LineSegment endPoint v') where
-  vertices = conjoined traverse1 (itrav.indexed)
-    where
-      itrav f (LineSegment s t) =
-        LineSegment <$> traverse1 (f Start) s Apply.<.> traverse1 (f End) t
-  {-# INLINE vertices #-}
 
 
 
 
-instance HasIntersectionWith geom (SimplePolygonF f vertex)
-         => HasIntersectionWith geom (SimplePolygonF f vertex :+ extra) where
-  q `intersects` (pg :+ _) = q `intersects` pg
 
 --------------------------------------------------------------------------------
 
