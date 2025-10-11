@@ -2,6 +2,7 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import Data.Foldable1.WithIndex
 import Data.Semialign
 import Prelude hiding (zipWith)
 import Data.Map.NonEmpty qualified as NEMap
@@ -48,7 +49,7 @@ import Ipe.Color
 import HGeometry.LineSegment.Intersection.BentleyOttmann
 import Hiraffe.PlanarGraph.Connected
 import Data.Map.Monoidal qualified as MonoidalMap
-import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1)
+import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1, singletonL1)
 
 import PlaneGraph.RenderSpec
 --------------------------------------------------------------------------------
@@ -171,9 +172,13 @@ spec = describe "Plane.RenderEnvelope"  $ do
 --------------------------------------------------------------------------------
 
 
+-- newtype PolygonEdge = PolygonEdge
+--   (ClosedLineSegment vertex )
+
+
 -- in the end this should be a planeGraph rather than a
 
--- | Construct a connected Plane Graph out of a bunch of triangles.
+-- | Construct a connected Plane Graph out of a bunch of polygons
 constructCPlaneGraph      :: forall nonEmpty s simplePolygon vertex r.
                                (Foldable1 nonEmpty, Point_ vertex 2 r
                                , SimplePolygon_ simplePolygon vertex r
@@ -244,7 +249,6 @@ fromIntersectingSegments                 :: forall s nonEmpty lineSegment r poin
                                        ( Foldable1 nonEmpty, Functor nonEmpty
                                        , LineSegment_ lineSegment point
                                        , Point_ point 2 r, Ord r, Fractional r
-                                       , planeGraph ~ CPlaneGraph s (Point 2 r) () ()
                                        , Intersection lineSegment lineSegment
                                          ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
                                        , IsIntersectableWith lineSegment lineSegment
@@ -253,6 +257,10 @@ fromIntersectingSegments                 :: forall s nonEmpty lineSegment r poin
                                        , Ord lineSegment
                                        , HasOnSegment lineSegment 2
                                        , StartPointOf lineSegment ~ EndPointOf lineSegment
+
+                                       , planeGraph ~ CPlaneGraph s (Point 2 r)
+                                                                    (ViewL1 lineSegment)
+                                                                    ()
                                        )
                               => nonEmpty lineSegment
                               -> planeGraph
@@ -268,19 +276,21 @@ fromIntersections                 :: forall s nonEmpty lineSegment r point plane
                                        ( Foldable1 nonEmpty
                                        , LineSegment_ lineSegment point
                                        , Point_ point 2 r, Ord r, Num r
-                                       , planeGraph ~ CPlaneGraph s (Point 2 r) () ()
                                        , Intersection lineSegment lineSegment
                                          ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
                                        , IsIntersectableWith lineSegment lineSegment
                                        , Eq lineSegment
                                        , OrdArounds lineSegment
                                        , Ord lineSegment
+
+                                       , planeGraph ~ CPlaneGraph s (Point 2 r)
+                                                                    (ViewL1 lineSegment)
+                                                                    ()
                                        )
                                   => nonEmpty lineSegment
                                   -> Intersections r lineSegment
                                   -> planeGraph
 fromIntersections segs intersects = fromAdjacencyLists adjLists
-     -- FIXME: this currrently generates assymetric edges (I think)
   where
     -- | Map every Point to its vertexId
     vertexMapping :: MonoidalNEMap (Point 2 r) (VertexIx planeGraph)
@@ -313,14 +323,17 @@ fromIntersections segs intersects = fromAdjacencyLists adjLists
                  | otherwise                            -> negate . view yCoord
 
     -- | For every vertex, collect its neighbours
-    neighbours :: MonoidalNEMap (VertexIx planeGraph) (NESet (VertexIx planeGraph))
-    neighbours = foldMap1 collect verticesBySegment
+    neighbours :: MonoidalNEMap (VertexIx planeGraph)
+                                (MonoidalNEMap (VertexIx planeGraph) (ViewL1 lineSegment))
+    neighbours = ifoldMap1 collect verticesBySegment
       where
-        collect verts@(_ :<< rest') = case asViewL1 rest' of
-          Nothing   -> error "fromIntersections. absurd. every seg should have at least 2 verts"
-          Just rest -> fold1 $ zipWith f verts rest
-        f u v = MonoidalNEMap.singleton u (NESet.singleton v)
-             <> MonoidalNEMap.singleton v (NESet.singleton u)
+        collect seg verts@(_ :<< rest') = case asViewL1 rest' of
+            Nothing   ->
+              error "fromIntersections. absurd. every seg should have at least 2 vertices"
+            Just rest -> fold1 $ zipWith f verts rest
+          where
+            f u v = MonoidalNEMap.singleton u (MonoidalNEMap.singleton v $ singletonL1 seg)
+                 <> MonoidalNEMap.singleton v (MonoidalNEMap.singleton u $ singletonL1 seg)
 
     -- I think this already automatically takes care of colinear semgnets as well, as we
     -- are using a NESet to collect the neighbours of each vertex.
@@ -328,11 +341,13 @@ fromIntersections segs intersects = fromAdjacencyLists adjLists
 
     -- | Construct the final adjacency lists
     adjLists :: MonoidalNEMap _
-                  (VertexIx planeGraph, Point 2 r, NonEmpty (VertexIx planeGraph, () ))
+                  (VertexIx planeGraph, Point 2 r, NonEmpty ( VertexIx planeGraph
+                                                            , ViewL1 lineSegment
+                                                            )
+                  )
     adjLists = imap buildVertex vertexMapping
+    buildVertex v vi = (vi, v, MonoidalNEMap.assocs $ neighbours MonoidalNEMap.! vi)
 
-    buildVertex v vi = let withExtra = NESet.toAscList . NESet.mapMonotonic (\w -> (w, ()))
-                       in (vi, v, withExtra $ neighbours MonoidalNEMap.! vi)
 
 --------------------------------------------------------------------------------
 

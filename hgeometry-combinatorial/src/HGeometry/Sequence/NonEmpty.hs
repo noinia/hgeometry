@@ -9,13 +9,19 @@
 --------------------------------------------------------------------------------
 module HGeometry.Sequence.NonEmpty
   ( ViewL1(..)
+  , viewl1
+  , asViewL1
+  , singletonL1
+  , splitL1At
+
   , ViewR1(..)
-  , viewl1, viewr1
-  , asViewL1, asViewR1
+  , viewr1
+  , asViewR1
+  , singletonR1
   , (|>>)
+
   , (<>>)
   -- , (<<>)
-  , splitL1At
   , splitR1At
   ) where
 
@@ -123,6 +129,10 @@ asViewL1 = \case
   x :<| xs -> Just (x :<< xs)
   _        -> Nothing
 
+-- | Construct an L1 with exactly one element
+singletonL1   :: a -> ViewL1 a
+singletonL1 x = x :<< mempty
+
 --------------------------------------------------------------------------------
 
 -- | NonEmpty ViewR
@@ -225,6 +235,11 @@ asViewR1 :: Seq a -> Maybe (ViewR1 a)
 asViewR1 = \case
   xs :|> x -> Just (xs :>> x)
   _        -> Nothing
+
+-- | Construct an L1 with exactly one element
+singletonR1   :: a -> ViewR1 a
+singletonR1 x = mempty :>> x
+
 
 --------------------------------------------------------------------------------
 

@@ -22,6 +22,7 @@ module HGeometry.Map.NonEmpty.Monoidal
   , (!?), (!)
   ) where
 
+import Data.Foldable1.WithIndex
 import Control.Lens
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Foldable1
@@ -60,10 +61,13 @@ instance FunctorWithIndex k (MonoidalNEMap k) where
   imap f = MonoidalNEMap . NEMap.mapWithKey f . getNEMap
 
 instance FoldableWithIndex k (MonoidalNEMap k) where
-  ifoldMap f = NEMap.foldMapWithKey f . getNEMap
+  ifoldMap = ifoldMap1
 
 instance TraversableWithIndex k (MonoidalNEMap k) where
   itraverse f = fmap MonoidalNEMap . NEMap.traverseWithKey f . getNEMap
+
+instance Foldable1WithIndex k (MonoidalNEMap k) where
+  ifoldMap1 f = NEMap.foldMapWithKey f . getNEMap
 
 --------------------------------------------------------------------------------
 
