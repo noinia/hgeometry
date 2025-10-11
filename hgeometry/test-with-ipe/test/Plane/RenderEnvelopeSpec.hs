@@ -56,10 +56,10 @@ import Data.Map.Monoidal qualified as MonoidalMap
 import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1, singletonL1)
 import HGeometry.Polygon.WithHoles
 import HGeometry.Foldable.Util
-
+import Plane.Overlay
 import HGeometry.Polygon.Simple
 import Data.Functor.Apply as Apply
-
+import HGeometry.Properties
 import PlaneGraph.RenderSpec
 --------------------------------------------------------------------------------
 
@@ -126,11 +126,13 @@ asTrianglesAbove rect = foldMap (foldMap (:[]) . asTrianglePairAbove rect)
 
 -- | Given a rectangular domain, and a plane h, generate two triangles
 -- that represent the plane above the domain.
+--
+-- The triangles are in counterclockwise order.
 asTrianglePairAbove        :: (Plane_ plane r, Num r)
                            => Rectangle (Point 2 r)
                            -> plane -> Vector 2 (Triangle (Point 3 r) :+ plane)
-asTrianglePairAbove rect h = Vector2 (Triangle tl tr br :+ h)
-                                     (Triangle tl br bl :+ h)
+asTrianglePairAbove rect h = Vector2 (Triangle tl br tr :+ h)
+                                     (Triangle tl bl br :+ h)
   where
     Corners tl tr br bl = (\p@(Point2 x y) -> Point3 x y (evalAt p h)) <$> Box.corners rect
 
@@ -153,62 +155,78 @@ asTrianglePairAbove rect h = Vector2 (Triangle tl tr br :+ h)
 
 
 
-instance Default (IpeColor Double) where
-  def = black
+instance Default Props where
+  def = Props 0 black black
 
 instance Default (Seq.Seq a) where
   -- this is just for drawing to ipe purposes
   def = mempty
 
+
+
+
 fromTriangle :: Point_ vertex 2 r => Triangle vertex -> SimplePolygon vertex
 fromTriangle = uncheckedFromCCWPoints
+-- TODO: we should just coerce to a SimplePolygonF (Cyclic Vector3)
+
+data Props = Props { heightVal :: {-#UNPACK#-} !Int
+                   , _fillColor   :: IpeColor Double
+                   , _strokeColor :: IpeColor Double
+                   }
+  deriving (Show)
+
+
+
 
 spec :: Spec
-spec = describe "Plane.RenderEnvelope"  $ do
-         goldenWith [osp|data/test-with-ipe/golden/PlaneGraph/|]
-              (ipeFileGolden { name = [osp|planeGraphFromIntersectingSegments|]
-                             }
-              )
-              ( let myTriangles2 :: NonEmpty (Triangle (Point 2 R) :+ (Int, IpeColor Double))
-                    myTriangles2 = NonEmpty.fromList
-                      [ Triangle origin (Point2 100 0) (Point2 100 100) :+ (1, red)
-                      , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200) :+ (2,blue)
-                      ]
-                    myPolygons = myTriangles2&mapped.core %~ fromTriangle
-                    myPlaneGraph = polygonOverlay myPolygons
-                    content' = drawGraph' (topMostColor myPlaneGraph)
-                in addStyleSheet opacitiesStyle $ singlePageFromContent content'
-              )
+spec =
+    describe "Plane.RenderEnvelope"  $ do
+      goldenWith [osp|data/test-with-ipe/golden/PlaneGraph/|]
+            (ipeFileGolden { name = [osp|planeGraphFromIntersectingSegments|]
+                           }
+            )
+            ( let myTriangles2 :: NonEmpty (Triangle (Point 2 R) :+ Props)
+                  myTriangles2 = NonEmpty.fromList
+                    [ Triangle origin (Point2 100 0) (Point2 100 100)            :+ Props 1 red black
+                    , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200) :+ Props 2 blue green
+                    ] -- these triangles are indeed in CCW order....
+                  myPolygons = myTriangles2&mapped.core %~ fromTriangle
+                  myPlaneGraph = polygonOverlay myPolygons
+                  content' = renderGraph (firstColor myPlaneGraph)
+              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+            )
 
 
-         goldenWith [osp|data/test-with-ipe/golden/Plane/|]
-           (ipeFileGolden { name = [osp|lowerEnvelopeRender|]
-                          }
-           )
-           ( let content' = let tris = renderToIpe myCamera triangles
-                                t    = uniformScaling 1000
-                                      --- fitToBoxTransform screenBox  tris -- TODO
-                            in transformBy t tris
-             in addStyleSheet opacitiesStyle $ singlePageFromContent content'
-           )
+      goldenWith [osp|data/test-with-ipe/golden/Plane/|]
+        (ipeFileGolden { name = [osp|lowerEnvelopeRender|]
+                       }
+        )
+        ( let content' = let tris = renderToIpe myCamera triangles
+                             t    = uniformScaling 1000
+                                   --- fitToBoxTransform screenBox  tris -- TODO
+                         in transformBy t tris
+          in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+        )
 
 
 --------------------------------------------------------------------------------
--- * Some testing stuff
 
-
-drawGraph'    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
-                 , Point_ vertex 2 r, Real r
-                 , Face planeGraph ~ Maybe (IpeColor Double)
-                 , Eq (FaceIx planeGraph)
-                 , HasInnerComponents planeGraph
-                 -- , IsTransformable vertex
-                -- , ConstructablePoint_ vertex 2 r, Ord r, Real r
-                -- , Fractional r, Show r,
-                -- , Show (Vertex planeGraph), Show (Face planeGraph)
-                -- , Show (EdgeIx planeGraph), Show (Edge planeGraph)
-                ) => planeGraph -> [IpeObject Double]
-drawGraph' gr = theEdges <> theFaces
+-- | Function to draw a plane graph whose faces may have some color associated them.
+--
+-- draws the edges in black as well.
+renderGraph    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
+                  , Point_ vertex 2 r, Real r
+                  , Face planeGraph ~ Maybe (IpeColor Double)
+                  , Edge planeGraph ~ Maybe (IpeColor Double)
+                  , Eq (FaceIx planeGraph)
+                  , HasInnerComponents planeGraph
+                  -- , IsTransformable vertex
+                  -- , ConstructablePoint_ vertex 2 r, Ord r, Real r
+                  -- , Fractional r, Show r,
+                  -- , Show (Vertex planeGraph), Show (Face planeGraph)
+                  -- , Show (EdgeIx planeGraph), Show (Edge planeGraph)
+                  ) => planeGraph -> [IpeObject Double]
+renderGraph gr = theFaces <> theEdges
   where
     theEdges = ifoldMapOf edgeSegments         drawEdge' gr
     theFaces = ifoldMapOf interiorFacePolygons drawFace' gr
@@ -220,7 +238,9 @@ drawGraph' gr = theEdges <> theFaces
           pg' :: PolygonalDomain _
           pg' = pg&vertices %~ toPoint
 
-    drawEdge' _ s = [ iO $ ipeLineSegment s' ]
+    drawEdge' d s = case gr^?!edgeAt d of
+        Nothing    -> []
+        Just color -> [ iO $ ipeLineSegment s' ! attr SStroke color ]
       where
         s' :: ClosedLineSegment (Point 2 Double)
         s' = s&vertices %~ toPoint
@@ -229,15 +249,36 @@ drawGraph' gr = theEdges <> theFaces
     toPoint   :: (Point_ point 2 r, Real r) => point -> Point 2 Double
     toPoint p = (p^.asPoint)&coordinates %~ realToFrac
 
+-- | Lables the faces with the first value, according to the 'b'
+-- value.
+firstColor :: (Foldable f, Foldable e)
+           => CPlaneGraph s v (E (e (a :+ Props))) (f (b :+ Props))
+           -> CPlaneGraph s v
+                            (Maybe (IpeColor Double))
+                            (Maybe (IpeColor Double))
+firstColor = firstColorFaces . firstColorEdges
 
-topMostColor    :: (Foldable f, Ord b)
-                => CPlaneGraph s v e (f (a :+ (b, IpeColor Double)))
-                -> CPlaneGraph s v e (Maybe (IpeColor Double))
-topMostColor gr = gr&faces %~ \xs -> (^.extra._2) <$> maximumOn (^.extra._1) xs
+
+firstColorFaces    :: (Foldable f)
+                   => CPlaneGraph s v e (f (a :+ Props))
+                   -> CPlaneGraph s v e (Maybe (IpeColor Double))
+firstColorFaces gr = gr&faces %~ \xs -> (^.extra.to _fillColor)
+                                        <$> minimumOn (^.extra.to heightVal) xs
 
 
-maximumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
-maximumOn f = maximumByOf folded (comparing f)
+-- | Lables the faces with the first value, according to the 'b'
+-- value.
+firstColorEdges    :: (Foldable e)
+                   => CPlaneGraph s v (e (a :+ Props)) f
+                   -> CPlaneGraph s v (Maybe (IpeColor Double)) f
+firstColorEdges gr = gr&edges %~ \xs -> (^.extra.to _strokeColor)
+                                        <$> minimumOn (^.extra.to heightVal) xs
+
+
+
+-- | Compute the minimum using a given function
+minimumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
+minimumOn f = minimumByOf folded (comparing f)
 
 --------------------------------------------------------------------------------
 
@@ -247,6 +288,7 @@ maximumOn f = maximumByOf folded (comparing f)
 
 
 --------------------------------------------------------------------------------
+{-
 
 myTriangles2 :: NonEmpty (Triangle (Point 2 R))
 myTriangles2 = NonEmpty.fromList
@@ -260,13 +302,17 @@ foo = MonoidalNEMap.assocs $
 
 bar = fromIntersectingSegments mySegments
 
-
+-}
 --------------------------------------------------------------------------------
 
--- | Given a set of polygons, constructs a plane graph whose faces are
--- tagged with the polygons that cover that face.
+
+-- | Given a set of polygons, constructs a plane graph whose vertices,
+-- edges, and faces are tagged with the polygons that cover that face.
 --
--- running time: this is very expensive!
+-- The current running time is \(O( (N+k) + \log (N+k) + (N+k)*m )\),
+-- where \(N\) is the total complexity of all polygons, \(k\) is the
+-- number of intersections between the polygons, and \(m\) is the
+-- maximum complexity of a single polygon.
 --
 -- pre: everything forms a connected graph
 polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
@@ -277,28 +323,45 @@ polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
                            , HasIntersectionWith (Point 2 r) simplePolygon
                            )
                         => nonEmpty simplePolygon
-                        -> CPlaneGraph s (Point 2 r :+ Seq.Seq vertex)
-                                         ()
+                        -> CPlaneGraph s (V simplePolygon)
+                                         (E simplePolygon)
                                          (Seq.Seq simplePolygon)
-polygonOverlay polygons = gr' &faces .@~ overlappingPolygons
+polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCoveringVertices p)
   where
-    gr      = fromIntersectingSegments segs
+    gr  = fromIntersectingSegments segs
 
-    gr' :: CPlaneGraph s (Point 2 r :+ Seq.Seq vertex) () ()
-    gr' = gr&edges .~ ()
+    gr1 :: CPlaneGraph s (Point 2 r :+ Seq.Seq vertex) (E simplePolygon) ()
+    gr1 = gr&edges %@~ polygonsCoveringEdges
+
+    gr2 :: CPlaneGraph s (Point 2 r :+ Seq.Seq vertex)
+                         (E simplePolygon)
+                         (Seq.Seq simplePolygon)
+    gr2 = gr1&faces .@~ polygonsCoveringFaces
+
 
     segs :: NonEmpty (ClosedLineSegment vertex)
     segs = foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments) polygons
 
     outerId = outerFaceId gr
 
-    overlappingPolygons fi
+    polygonsCoveringFaces fi
       | fi == outerId = mempty
       | otherwise     = filter' (pointIn fi `intersects`) polygons
 
     filter' p = foldMap (\x -> if p x then Seq.singleton x else mempty)
 
     pointIn fi = pointInteriorTo $ gr^?!interiorFacePolygonAt fi
+
+    polygonsCoveringEdges d defs = E defs $ filter' (midPoint d `intersects`) polygons
+    midPoint d = let ClosedLineSegment s t = (^.asPoint) <$> gr^?!edgeSegmentAt d
+                 in s .+^ ((t .-. s) ^/ 2)
+
+    polygonsCoveringVertices v = filter' (v `intersects`) polygons
+
+-- FIXME: we should remember the polygons defining the edges as well
+
+-- I guess we could build point location structures on the polygons to
+-- speed things up, if need be.
 
 --------------------------------------------------------------------------------
 
