@@ -19,20 +19,23 @@ module HGeometry.Sequence.NonEmpty
   , splitR1At
   ) where
 
-import           Control.DeepSeq
-import           Control.Lens
-import qualified Data.Foldable as F
-import           Data.Foldable1
-import           Data.Foldable1.WithIndex
-import           Data.Functor.Apply
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Traversable
-import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Sequence
-import           GHC.Exts (IsList(..))
-import           GHC.Generics
-import           HGeometry.Foldable.Util (HasFromFoldable1(..))
+import Prelude hiding (zipWith, unzip)
+import Data.These
+import Data.Semialign
+import Control.DeepSeq
+import Control.Lens
+import Data.Foldable qualified as F
+import Data.Foldable1
+import Data.Foldable1.WithIndex
+import Data.Functor.Apply
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Semigroup.Traversable
+import Data.Sequence (Seq(..))
+import Data.Sequence qualified as Sequence
+import GHC.Exts (IsList(..))
+import GHC.Generics
+import HGeometry.Foldable.Util (HasFromFoldable1(..))
 
 --------------------------------------------------------------------------------
 
@@ -99,6 +102,20 @@ instance IsList (ViewL1 a) where
 
 instance Reversing (ViewL1 a) where
   reversing (x :<< s) = viewl1 $ Sequence.reverse s :>> x
+
+instance Semialign ViewL1 where
+  align (x :<< s) (x' :<< s') = These x x' :<< align s s'
+
+instance Zip ViewL1 where
+  zipWith f (x :<< s) (x' :<< s') = f x x' :<< zipWith f s s'
+
+instance Unzip ViewL1 where
+  unzipWith f (c :<< s) = let (sx,sy) = unzipWith f s
+                              (x,y)   = f c
+                          in (x :<< sx, y :<< sy)
+  unzip ((x,y) :<< s) = let (sx,sy) = unzip s
+                        in (x :<< sx, y :<< sy)
+
 
 -- | Try to parse a Seq into a ViewL1
 asViewL1 :: Seq a -> Maybe (ViewL1 a)

@@ -2,6 +2,8 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import Data.Semialign
+import Prelude hiding (zipWith)
 import Data.Map.NonEmpty qualified as NEMap
 import Data.Coerce
 import Data.Foldable1
@@ -26,14 +28,17 @@ import HGeometry.Plane.LowerEnvelope
 import HGeometry.VoronoiDiagram
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import HGeometry.Triangle
+import Data.Sequence qualified as Seq
 import HGeometry.PlaneGraph
 import HGeometry.Point
 import HGeometry.VoronoiDiagram qualified as VD
 import HGeometry.Box as Box
 import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
-import HGeometry.Map.NonEmpty.Monoidal qualified as MMap
+import HGeometry.Map.NonEmpty.Monoidal qualified as MonoidalNEMap
 import HGeometry.Vector
 import Data.Set qualified as Set
+import Data.Set.NonEmpty qualified as NESet
+import Data.Set.NonEmpty (NESet)
 import HGeometry.Transformation
 import HGeometry.Intersection
 import HGeometry.Graphics.Camera
@@ -42,6 +47,8 @@ import Data.List.NonEmpty qualified as NonEmpty
 import Ipe.Color
 import HGeometry.LineSegment.Intersection.BentleyOttmann
 import Hiraffe.PlanarGraph.Connected
+import Data.Map.Monoidal qualified as MonoidalMap
+import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1)
 
 --------------------------------------------------------------------------------
 
@@ -171,27 +178,85 @@ theIntersections = intersections . foldMap1 (toNonEmptyOf outerBoundaryEdgeSegme
 
 -- | Assign each element in the map a unique Integer key (in the range \([0,n)\) )
 assignIndex :: MonoidalNEMap k v -> MonoidalNEMap k Int
-assignIndex = undefined
-
-  -- snd . Map.mapAccumWithKey (\i k _ -> (succ i, i)) 0
+assignIndex = snd . MonoidalNEMap.mapAccumWithKey (\i k _ -> (succ i, i)) 0
 
 
 (<>>)        :: (Ord k, Semigroup v) => MonoidalNEMap k v -> Map.Map k v -> MonoidalNEMap k v
-base <>> new = foldr (uncurry MMap.insert) base $ Map.toAscList new
+base <>> new = foldr (uncurry MonoidalNEMap.insert) base $ Map.toAscList new
 
 
+myTriangles2 :: NonEmpty (Triangle (Point 2 R))
+myTriangles2 = NonEmpty.fromList
+              [ Triangle origin (Point2 100 0) (Point2 100 100)
+              , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200)
+              ]
+mySegments = foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments) myTriangles2
 
--- connected at least again
+foo = MonoidalNEMap.assocs $
+  interiorIntersectionsBySegment mySegments (intersections mySegments)
+
+bar = fromIntersectingSegments mySegments
+
+
+-- | Computes the interior intersections on each segment.
+--
+-- O((n+k)\log n)
+interiorIntersectionsBySegment                    :: ( Ord lineSegment
+                                                     , Foldable1 nonEmpty
+                                                     )
+                                                  => nonEmpty lineSegment
+                                                     -- ^ all input segments
+                                                  -> Intersections r lineSegment
+                                                  -> MonoidalNEMap lineSegment (Seq.Seq (Point 2 r))
+interiorIntersectionsBySegment segs intersections =
+        foldMap1 (flip MonoidalNEMap.singleton mempty) segs
+    <>> coerce (ifoldMap construct intersections)
+  where
+    construct p assoc = foldMap (\seg -> MonoidalMap.singleton (coerce seg) (Seq.singleton p))
+                                (assoc^.interiorTo)
+
+
+-- |  Construct A connected PlaneGraph from a set of intersecting segments.
+--
+-- \( O((n+k)\log n) \), where \(n\) is the number of segments, and \(k\) is the number
+-- of intersections.
+--
+-- pre: the segments actually form a connected graph.
+fromIntersectingSegments                 :: forall s nonEmpty lineSegment r point planeGraph.
+                                       ( Foldable1 nonEmpty, Functor nonEmpty
+                                       , LineSegment_ lineSegment point
+                                       , Point_ point 2 r, Ord r, Fractional r
+                                       , planeGraph ~ CPlaneGraph s (Point 2 r) () ()
+                                       , Intersection lineSegment lineSegment
+                                         ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                                       , IsIntersectableWith lineSegment lineSegment
+                                       , Eq lineSegment
+                                       , OrdArounds lineSegment
+                                       , Ord lineSegment
+                                       , HasOnSegment lineSegment 2
+                                       , StartPointOf lineSegment ~ EndPointOf lineSegment
+                                       )
+                              => nonEmpty lineSegment
+                              -> planeGraph
+fromIntersectingSegments segs = fromIntersections segs (intersections segs)
+
+-- |  Construct A connected PlaneGraph from a set of intersecting segments.
+--
+-- \( O((n+k)\log n) \), where \(n\) is the number of segments, and \(k\) is the number
+-- of intersections.
+--
+-- pre: the segments actually form a connected graph.
 fromIntersections                 :: forall s nonEmpty lineSegment r point planeGraph.
                                        ( Foldable1 nonEmpty
                                        , LineSegment_ lineSegment point
                                        , Point_ point 2 r, Ord r, Num r
                                        , planeGraph ~ CPlaneGraph s (Point 2 r) () ()
                                        , Intersection lineSegment lineSegment
-                                          ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                                         ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
                                        , IsIntersectableWith lineSegment lineSegment
                                        , Eq lineSegment
                                        , OrdArounds lineSegment
+                                       , Ord lineSegment
                                        )
                                   => nonEmpty lineSegment
                                   -> Intersections r lineSegment
@@ -204,32 +269,52 @@ fromIntersections segs intersects = fromAdjacencyLists adjLists
     vertexMapping = coerce $ assignIndex vertexLocations
 
     vertexLocations :: MonoidalNEMap (Point 2 r) (Associated lineSegment)
-    vertexLocations = foldMap1 (\seg -> MMap.singleton (seg^.start.asPoint) (mkAroundStart seg)
-                                     <> MMap.singleton (seg^.end.asPoint)   (mkAroundEnd seg)
+    vertexLocations = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^.start.asPoint) (mkAroundStart seg)
+                                     <> MonoidalNEMap.singleton (seg^.end.asPoint)   (mkAroundEnd seg)
                                ) segs
                     <>> intersects
 
+    -- | Computes the vertices along each segment
+    verticesBySegment :: MonoidalNEMap lineSegment (ViewL1 (VertexIx planeGraph))
+    verticesBySegment = imap collect $ interiorIntersectionsBySegment segs intersects
+      where
+        collect seg interiorPts = (vertexMapping MonoidalNEMap.!) <$>
+              (seg^.start.asPoint) :<< (interiorPts' Seq.|> seg^.end.asPoint)
+          where
+            interiorPts' = Seq.sortOn alongSegment interiorPts
+            -- | We want to sort the points, which all lie on the segment, along the segment
+            -- to this end we essentially compare their distance to the starting point.
+            -- however, instead of explicitly computing this distance, it suffices to compare
+            -- the x-coordinates or y-coordiantes of the points themselves, depending on the
+            -- orientation of the segment. (since a segment is xy-monotone)
+            alongSegment :: Point 2 r -> r
+            alongSegment = case (seg^.start.xCoord) `compare` (seg^.end.xCoord) of
+              LT                                        -> view xCoord
+              GT                                        -> negate . view xCoord
+              EQ | seg^.start.yCoord <= seg^.end.yCoord -> view yCoord
+                 | otherwise                            -> negate . view yCoord
+
+    -- | For every vertex, collect its neighbours
+    neighbours :: MonoidalNEMap (VertexIx planeGraph) (NESet (VertexIx planeGraph))
+    neighbours = foldMap1 collect verticesBySegment
+      where
+        collect verts@(_ :<< rest') = case asViewL1 rest' of
+          Nothing   -> error "fromIntersections. absurd. every seg should have at least 2 verts"
+          Just rest -> fold1 $ zipWith f verts rest
+        f u v = MonoidalNEMap.singleton u (NESet.singleton v)
+             <> MonoidalNEMap.singleton v (NESet.singleton u)
+
+    -- I think this already automatically takes care of colinear semgnets as well, as we
+    -- are using a NESet to collect the neighbours of each vertex.
+
+
+    -- | Construct the final adjacency lists
     adjLists :: MonoidalNEMap _
                   (VertexIx planeGraph, Point 2 r, NonEmpty (VertexIx planeGraph, () ))
-    adjLists = imap buildVertex vertexLocations
+    adjLists = imap buildVertex vertexMapping
 
-    buildVertex p assocs = (vertexMapping MMap.! p, p, buildNeighbours assocs)
-
-    buildNeighbours assocs = undefined
-
-    -- endPointVertices = foldMap1 endPointVertex segs
-    -- endPointVertex
-
-
--- fromAdjacencyLists :: (Foldable1 nonEmpty, Functor nonEmpty, Foldable h, Functor h, vi ~ VertexIx graph, v ~ Vertex graph, e ~ Edge graph, GraphFromAdjListExtraConstraints graph h)
-
---                        => nonEmpty (vi, v, h (vi, e)) -> graph
-
-
-    -- adjLists =
-    --   Map.keys intersects
-
-
+    buildVertex v vi = let withExtra = NESet.toAscList . NESet.mapMonotonic (\w -> (w, ()))
+                       in (vi, v, withExtra $ neighbours MonoidalNEMap.! vi)
 
 --------------------------------------------------------------------------------
 
