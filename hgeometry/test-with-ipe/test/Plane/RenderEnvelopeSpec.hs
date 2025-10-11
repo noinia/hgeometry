@@ -4,6 +4,7 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import Control.Monad
 import Data.Ord(comparing)
 import Data.Default.Class
 import Data.Foldable1.WithIndex
@@ -61,6 +62,8 @@ import HGeometry.Polygon.Simple
 import Data.Functor.Apply as Apply
 import HGeometry.Properties
 import PlaneGraph.RenderSpec
+import Plane.RenderProps
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -155,8 +158,8 @@ asTrianglePairAbove rect h = Vector2 (Triangle tl br tr :+ h)
 
 
 
-instance Default Props where
-  def = Props 0 black black
+-- instance Default Props where
+--   def = Props 0 black black
 
 instance Default (Seq.Seq a) where
   -- this is just for drawing to ipe purposes
@@ -169,33 +172,40 @@ fromTriangle :: Point_ vertex 2 r => Triangle vertex -> SimplePolygon vertex
 fromTriangle = uncheckedFromCCWPoints
 -- TODO: we should just coerce to a SimplePolygonF (Cyclic Vector3)
 
-data Props = Props { heightVal :: {-#UNPACK#-} !Int
-                   , _fillColor   :: IpeColor Double
-                   , _strokeColor :: IpeColor Double
-                   }
-  deriving (Show)
+-- data Props = Props { heightVal :: {-#UNPACK#-} !Int
+--                    , _fillColor   :: IpeColor Double
+--                    , _strokeColor :: IpeColor Double
+--                    }
+--   deriving (Show)
 
 
+
+
+overlaySpec :: Spec
+overlaySpec = describe "OverlaySpec" $ do
+      goldenWith [osp|data/test-with-ipe/golden/PlaneGraph/|]
+            (ipeFileGolden { name = [osp|planeGraphFromIntersectingSegments|]
+                           }
+            )
+            ( let myPlaneGraph = polygonOverlay myPolygons
+                  content'     = renderGraph (assignRenderingAttributes myPlaneGraph)
+              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+            )
+  where
+    myTriangles2 :: NonEmpty (Triangle (Point 2 R) :+ (Int, RenderProps))
+    myTriangles2 = NonEmpty.fromList
+      [ Triangle origin (Point2 100 0) (Point2 100 100)            :+ props 1 black  red
+      , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200) :+ props 2 green blue
+      ] -- these triangles are indeed in CCW order....
+    myPolygons = myTriangles2&mapped.core %~ fromTriangle
+
+    props i s f = (i, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
 
 
 spec :: Spec
 spec =
     describe "Plane.RenderEnvelope"  $ do
-      goldenWith [osp|data/test-with-ipe/golden/PlaneGraph/|]
-            (ipeFileGolden { name = [osp|planeGraphFromIntersectingSegments|]
-                           }
-            )
-            ( let myTriangles2 :: NonEmpty (Triangle (Point 2 R) :+ Props)
-                  myTriangles2 = NonEmpty.fromList
-                    [ Triangle origin (Point2 100 0) (Point2 100 100)            :+ Props 1 red black
-                    , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200) :+ Props 2 blue green
-                    ] -- these triangles are indeed in CCW order....
-                  myPolygons = myTriangles2&mapped.core %~ fromTriangle
-                  myPlaneGraph = polygonOverlay myPolygons
-                  content' = renderGraph (firstColor myPlaneGraph)
-              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
-            )
-
+      overlaySpec
 
       goldenWith [osp|data/test-with-ipe/golden/Plane/|]
         (ipeFileGolden { name = [osp|lowerEnvelopeRender|]
@@ -211,13 +221,12 @@ spec =
 
 --------------------------------------------------------------------------------
 
--- | Function to draw a plane graph whose faces may have some color associated them.
---
--- draws the edges in black as well.
+-- | Function to draw a plane graph whose faces may have some
+-- attributes associated them.
 renderGraph    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                   , Point_ vertex 2 r, Real r
-                  , Face planeGraph ~ Maybe (IpeColor Double)
-                  , Edge planeGraph ~ Maybe (IpeColor Double)
+                  , Face planeGraph ~ Maybe (IpeAttributes Path Double)
+                  , Edge planeGraph ~ Maybe (IpeAttributes Path Double)
                   , Eq (FaceIx planeGraph)
                   , HasInnerComponents planeGraph
                   -- , IsTransformable vertex
@@ -231,16 +240,15 @@ renderGraph gr = theFaces <> theEdges
     theEdges = ifoldMapOf edgeSegments         drawEdge' gr
     theFaces = ifoldMapOf interiorFacePolygons drawFace' gr
     drawFace' fi pg = case gr^?!faceAt fi of
-        Nothing    -> []
-        Just color -> [ iO $ ipePolygon pg' ! attr SFill color
-                      ]
+        Nothing  -> []
+        Just ats -> [ iO $ ipePolygon pg' ! ats ]
       where
           pg' :: PolygonalDomain _
           pg' = pg&vertices %~ toPoint
 
     drawEdge' d s = case gr^?!edgeAt d of
-        Nothing    -> []
-        Just color -> [ iO $ ipeLineSegment s' ! attr SStroke color ]
+        Nothing  -> []
+        Just ats -> [ iO $ ipeLineSegment s' ! ats ]
       where
         s' :: ClosedLineSegment (Point 2 Double)
         s' = s&vertices %~ toPoint
@@ -249,30 +257,45 @@ renderGraph gr = theFaces <> theEdges
     toPoint   :: (Point_ point 2 r, Real r) => point -> Point 2 Double
     toPoint p = (p^.asPoint)&coordinates %~ realToFrac
 
--- | Lables the faces with the first value, according to the 'b'
--- value.
-firstColor :: (Foldable f, Foldable e)
-           => CPlaneGraph s v (E (e (a :+ Props))) (f (b :+ Props))
-           -> CPlaneGraph s v
-                            (Maybe (IpeColor Double))
-                            (Maybe (IpeColor Double))
-firstColor = firstColorFaces . firstColorEdges
+-- | Lables the faces and edges with the attributes to use in rendering
+assignRenderingAttributes    :: forall s v polygon z.
+                                (Ord z, Num z) -- TODO: remove the numZ constraint
+                             => CPlaneGraph s v
+                                              (E (polygon :+ (z, RenderProps)))
+                                              (Seq.Seq (polygon :+ (z, RenderProps)))
+                             -> CPlaneGraph s v
+                                              (Maybe (IpeAttributes Path Double))
+                                              (Maybe (IpeAttributes Path Double))
+assignRenderingAttributes gr = gr1&faces %~ \xs -> do x <- minimumOn (^.extra._1) xs
+                                                      x^.extra._2.faceAttrs
+  where
+    gr1 :: CPlaneGraph s v
+                         (Maybe (IpeAttributes Path Double))
+                         (Seq.Seq (polygon :+ (z, RenderProps)))
+    gr1 = gr&edges %~ \(E defs covering) -> do
+                          _ :+ (z,props) <- minimumOn (^.extra._1) covering
+                          if z < zVal defs then props^.edgeAttrs
+                                           else Nothing
+
+    zVal = const 0  -- todo
+
+--   = assignColorsFaces . firstColorEdges
 
 
-firstColorFaces    :: (Foldable f)
-                   => CPlaneGraph s v e (f (a :+ Props))
-                   -> CPlaneGraph s v e (Maybe (IpeColor Double))
-firstColorFaces gr = gr&faces %~ \xs -> (^.extra.to _fillColor)
-                                        <$> minimumOn (^.extra.to heightVal) xs
+-- firstColorFaces    :: (Foldable f)
+--                    => CPlaneGraph s v e (f (a :+ Props))
+--                    -> CPlaneGraph s v e (Maybe (IpeColor Double))
+-- firstColorFaces gr = gr&faces %~ \xs -> (^.extra.to _fillColor)
+--                                         <$> minimumOn (^.extra.to heightVal) xs
 
 
--- | Lables the faces with the first value, according to the 'b'
--- value.
-firstColorEdges    :: (Foldable e)
-                   => CPlaneGraph s v (e (a :+ Props)) f
-                   -> CPlaneGraph s v (Maybe (IpeColor Double)) f
-firstColorEdges gr = gr&edges %~ \xs -> (^.extra.to _strokeColor)
-                                        <$> minimumOn (^.extra.to heightVal) xs
+-- -- | Lables the faces with the first value, according to the 'b'
+-- -- value.
+-- firstColorEdges    :: (Foldable e)
+--                    => CPlaneGraph s v (e (a :+ Props)) f
+--                    -> CPlaneGraph s v (Maybe (IpeColor Double)) f
+-- firstColorEdges gr = gr&edges %~ \xs -> (^.extra.to _strokeColor)
+--                                         <$> minimumOn (^.extra.to heightVal) xs
 
 
 
@@ -328,6 +351,9 @@ polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
                                          (Seq.Seq simplePolygon)
 polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCoveringVertices p)
   where
+    segs :: NonEmpty (ClosedLineSegment vertex)
+    segs = foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments) polygons
+
     gr  = fromIntersectingSegments segs
 
     gr1 :: CPlaneGraph s (Point 2 r :+ Seq.Seq vertex) (E simplePolygon) ()
@@ -338,9 +364,6 @@ polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCove
                          (Seq.Seq simplePolygon)
     gr2 = gr1&faces .@~ polygonsCoveringFaces
 
-
-    segs :: NonEmpty (ClosedLineSegment vertex)
-    segs = foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments) polygons
 
     outerId = outerFaceId gr
 
