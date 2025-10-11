@@ -50,6 +50,7 @@ import Hiraffe.PlanarGraph.Connected
 import Data.Map.Monoidal qualified as MonoidalMap
 import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1)
 
+import PlaneGraph.RenderSpec
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -138,6 +139,23 @@ asTrianglePairAbove rect h = Vector2 (Triangle tl tr br :+ h)
 
 spec :: Spec
 spec = describe "Plane.RenderEnvelope"  $ do
+         goldenWith [osp|data/test-with-ipe/golden/PlaneGraph/|]
+              (ipeFileGolden { name = [osp|planeGraphFromIntersectingSegments|]
+                             }
+              )
+              ( let myTriangles2 :: NonEmpty (Triangle (Point 2 R))
+                    myTriangles2 = NonEmpty.fromList
+                      [ Triangle origin (Point2 100 0) (Point2 100 100)
+                      , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200)
+                      ]
+                    mySegments = foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments) myTriangles2
+                    myPlaneGraph = fromIntersectingSegments mySegments
+
+                    content' = drawGraph myPlaneGraph
+                in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+              )
+
+
          goldenWith [osp|data/test-with-ipe/golden/Plane/|]
            (ipeFileGolden { name = [osp|lowerEnvelopeRender|]
                           }
