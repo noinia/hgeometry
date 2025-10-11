@@ -60,7 +60,7 @@ _drawGraph    :: ( PlaneGraph_ planeGraph vertex
                  , HasOuterBoundaryOf planeGraph, HasInnerComponents planeGraph
                  , ConstructablePoint_ vertex 2 r, Ord r, Real r, Fractional r, Show r, Eq (FaceIx planeGraph)
                  , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
-                 , Show (EdgeIx planeGraph)
+                 , Show (EdgeIx planeGraph), Show (Edge planeGraph)
                  ) => planeGraph -> [IpeObject r]
 _drawGraph gr = theVertices <> theEdges <> theFaces
   where

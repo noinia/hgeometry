@@ -2,6 +2,7 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import Data.Default.Class
 import Data.Foldable1.WithIndex
 import Data.Semialign
 import Prelude hiding (zipWith)
@@ -138,6 +139,11 @@ asTrianglePairAbove rect h = Vector2 (Triangle tl tr br :+ h)
 --     IpeUse u       -> boundingBox u
 --     IpePath p      -> boundingBox p
 
+
+instance Default (Seq.Seq a) where
+  -- this is just for drawing to ipe purposes
+  def = mempty
+
 spec :: Spec
 spec = describe "Plane.RenderEnvelope"  $ do
          goldenWith [osp|data/test-with-ipe/golden/PlaneGraph/|]
@@ -258,7 +264,7 @@ fromIntersectingSegments                 :: forall s nonEmpty lineSegment r poin
                                        , HasOnSegment lineSegment 2
                                        , StartPointOf lineSegment ~ EndPointOf lineSegment
 
-                                       , planeGraph ~ CPlaneGraph s (Point 2 r)
+                                       , planeGraph ~ CPlaneGraph s (Point 2 r :+ Seq.Seq point)
                                                                     (ViewL1 lineSegment)
                                                                     ()
                                        )
@@ -283,7 +289,7 @@ fromIntersections                 :: forall s nonEmpty lineSegment r point plane
                                        , OrdArounds lineSegment
                                        , Ord lineSegment
 
-                                       , planeGraph ~ CPlaneGraph s (Point 2 r)
+                                       , planeGraph ~ CPlaneGraph s (Point 2 r :+ Seq.Seq point)
                                                                     (ViewL1 lineSegment)
                                                                     ()
                                        )
@@ -295,6 +301,13 @@ fromIntersections segs intersects = fromAdjacencyLists adjLists
     -- | Map every Point to its vertexId
     vertexMapping :: MonoidalNEMap (Point 2 r) (VertexIx planeGraph)
     vertexMapping = coerce $ assignIndex vertexLocations
+
+    -- | For each vertex location, collect the segment endpoints
+    segmentEndPoints :: MonoidalNEMap (Point 2 r) (ViewL1 point)
+    segmentEndPoints = foldMap1 (\(LineSegment_ s t) ->
+                                   MonoidalNEMap.singleton (s^.asPoint) (singletonL1 s)
+                                <> MonoidalNEMap.singleton (t^.asPoint) (singletonL1 t)
+                                ) segs
 
     vertexLocations :: MonoidalNEMap (Point 2 r) (Associated lineSegment)
     vertexLocations = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^.start.asPoint) (mkAroundStart seg)
@@ -341,13 +354,17 @@ fromIntersections segs intersects = fromAdjacencyLists adjLists
 
     -- | Construct the final adjacency lists
     adjLists :: MonoidalNEMap _
-                  (VertexIx planeGraph, Point 2 r, NonEmpty ( VertexIx planeGraph
-                                                            , ViewL1 lineSegment
-                                                            )
+                  (VertexIx planeGraph, Point 2 r :+ Seq.Seq point
+                  , NonEmpty ( VertexIx planeGraph
+                             , ViewL1 lineSegment
+                             )
                   )
     adjLists = imap buildVertex vertexMapping
-    buildVertex v vi = (vi, v, MonoidalNEMap.assocs $ neighbours MonoidalNEMap.! vi)
-
+    buildVertex v vi = (vi, v :+ segEndpts, MonoidalNEMap.assocs $ neighbours MonoidalNEMap.! vi)
+      where
+        segEndpts = case segmentEndPoints MonoidalNEMap.!? v of
+                      Nothing -> mempty
+                      Just (x :<< rest) -> x Seq.<| rest
 
 --------------------------------------------------------------------------------
 
