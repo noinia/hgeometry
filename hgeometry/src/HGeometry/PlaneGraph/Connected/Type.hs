@@ -105,7 +105,7 @@ instance HasEdges' (CPlaneGraph s v e f) where
   type EdgeIx (CPlaneGraph s v e f) = DartId s
   edgeAt d = _CPlanarGraph.edgeAt d
 
-instance HasEdges (CPlaneGraph s v e f) (CPlaneGraph s v e f) where
+instance HasEdges (CPlaneGraph s v e f) (CPlaneGraph s v e' f) where
   edges = _CPlanarGraph.edges
 
 ----------------------------------------

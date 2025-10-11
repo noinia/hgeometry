@@ -85,7 +85,7 @@ instance HasEdges' (PlaneGraph s v e f) where
   type EdgeIx (PlaneGraph s v e f) = DartId s
   edgeAt d = _PlanarGraph.edgeAt d
 
-instance HasEdges (PlaneGraph s v e f) (PlaneGraph s v e f) where
+instance HasEdges (PlaneGraph s v e f) (PlaneGraph s v e' f) where
   edges = _PlanarGraph.edges
 
 ----------------------------------------
