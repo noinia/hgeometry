@@ -259,7 +259,7 @@ renderGraph gr = theFaces <> theEdges
 
 -- | Lables the faces and edges with the attributes to use in rendering
 assignRenderingAttributes    :: forall s v polygon z.
-                                (Ord z, Num z) -- TODO: remove the numZ constraint
+                                Ord z
                              => CPlaneGraph s v
                                               (E (polygon :+ (z, RenderProps)))
                                               (Seq.Seq (polygon :+ (z, RenderProps)))
@@ -273,49 +273,18 @@ assignRenderingAttributes gr = gr1&faces %~ \xs -> do x <- minimumOn (^.extra._1
                          (Maybe (IpeAttributes Path Double))
                          (Seq.Seq (polygon :+ (z, RenderProps)))
     gr1 = gr&edges %~ \(E defs covering) -> do
-                          _ :+ (z,props) <- minimumOn (^.extra._1) covering
-                          if z < zVal defs then props^.edgeAttrs
-                                           else Nothing
+                          _ :+ (_ :+ (z,props)) <- minimumOn (^.extra.extra._1) defs
+                          _ :+ (zCovering,_)    <- minimumOn (^.extra._1) covering
+                          if z <= zCovering then props^.edgeAttrs
+                                            else Nothing
+  -- We compute the first defining polygon and its z-value, and the
+  -- props corresponding to this edge. Similarly, we compute the
+  -- minimum zvalue of the covering regions. If the covering z-value
+  -- is smaller than the one among the definers, then we show Nothing;
+  -- as the edge is hidden. Otherwise we show the definer's value
 
-    zVal = const 0  -- todo
-
--- FIXME:
--- shoudn't this  be the other way around? I.e. I guess we compute the minimum z-value, andits props among the definers.
-
--- then we compute the minimum zvalue of the covering regions. If the
--- covering z-value is smaller than the one among the definers, then we show Nothing; as the edge is hidden. Otherwise we show the definer's value
-
--- TODO: To assign a useful z-value here, we need to somehow know the polygon associated
--- with this edge. Since we need its z-value I guess.
-
--- actually, I guess we do have those now. so maybe we can actually
--- try and implement this zVal function to do something more sensible.
-
--- i..e we compute the minimum zvalue among the definers. If this minimum zvalue
---
-
-
-
-
---   = assignColorsFaces . firstColorEdges
-
-
--- firstColorFaces    :: (Foldable f)
---                    => CPlaneGraph s v e (f (a :+ Props))
---                    -> CPlaneGraph s v e (Maybe (IpeColor Double))
--- firstColorFaces gr = gr&faces %~ \xs -> (^.extra.to _fillColor)
---                                         <$> minimumOn (^.extra.to heightVal) xs
-
-
--- -- | Lables the faces with the first value, according to the 'b'
--- -- value.
--- firstColorEdges    :: (Foldable e)
---                    => CPlaneGraph s v (e (a :+ Props)) f
---                    -> CPlaneGraph s v (Maybe (IpeColor Double)) f
--- firstColorEdges gr = gr&edges %~ \xs -> (^.extra.to _strokeColor)
---                                         <$> minimumOn (^.extra.to heightVal) xs
-
-
+-- TODO: maybe we still want to store the z-value, and still draw them in ipe in
+-- back to front order.
 
 -- | Compute the minimum using a given function
 minimumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
