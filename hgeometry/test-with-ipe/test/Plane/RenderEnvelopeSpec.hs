@@ -491,7 +491,7 @@ fromIntersectingSegments segs = gr&edges.mapped %~ view theValue
 --
 -- note: this implementation uses that the lineSegment type is Orderable. Consider using
 -- 'ByIndex Int segment' to order by some Identifier, rather than ordering by the raw segments.
-fromIntersections             :: forall s nonEmpty lineSegment r point planeGraph seg.
+fromIntersections             :: forall s nonEmpty lineSegment r point planeGraph.
                                    ( Foldable1 nonEmpty
                                    , LineSegment_ lineSegment point
                                    , Point_ point 2 r, Ord r, Num r
