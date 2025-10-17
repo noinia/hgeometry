@@ -172,14 +172,8 @@ fromTriangle :: Point_ vertex 2 r => Triangle vertex -> SimplePolygon vertex
 fromTriangle = uncheckedFromCCWPoints
 -- TODO: we should just coerce to a SimplePolygonF (Cyclic Vector3)
 
--- data Props = Props { heightVal :: {-#UNPACK#-} !Int
---                    , _fillColor   :: IpeColor Double
---                    , _strokeColor :: IpeColor Double
---                    }
---   deriving (Show)
-
-
-
+--------------------------------------------------------------------------------
+-- TODO: Move to a PlaneGraph.RenderOverlaySpec module
 
 overlaySpec :: Spec
 overlaySpec = describe "OverlaySpec" $ do
@@ -200,6 +194,8 @@ overlaySpec = describe "OverlaySpec" $ do
     myPolygons = myTriangles2&mapped.core %~ fromTriangle
 
     props i s f = (i, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
+
+--------------------------------------------------------------------------------
 
 
 spec :: Spec
@@ -315,9 +311,6 @@ bar = fromIntersectingSegments mySegments
 -}
 --------------------------------------------------------------------------------
 
--- newtype WithDefiningPoly core extra = WithDefiningPoly (core :+ extra)
-
-
 -- | Given a set of polygons, constructs a plane graph whose vertices,
 -- edges, and faces are tagged with the polygons that cover that face.
 --
@@ -392,9 +385,8 @@ instance ( VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ ve
   -- FIXME: this is simply not true
 
 --------------------------------------------------------------------------------
-
--- newtype PolygonEdge = PolygonEdge
---   (ClosedLineSegment vertex )
+-- *  The stuff in this section is unsused
+{-
 
 -- | Helper data type to implement 'constructCPlanegraph' from a bunch of polygons
 data PolygonEdge vertex left =
@@ -412,9 +404,6 @@ instance Eq (PolygonEdge vertex left) where
 instance Ord (PolygonEdge vertex left) where
   a `compare` b = let f x = (polygonId x, edgeId x)
                   in f a `compare` f b
-
-
-
 
 -- in the end this should be a planeGraph rather than a, connected plane graph graph,
 
@@ -454,27 +443,10 @@ constructCPlaneGraph polygons = undefined
 --                  -> Intersections r (ClosedLineSegment vertex)
 -- theIntersections = intersections . foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments)
 
-
+-}
 
 --------------------------------------------------------------------------------
-
--- | Computes the interior intersections on each segment.
---
--- O((n+k)\log n)
-interiorIntersectionsBySegment                    :: ( Ord lineSegment
-                                                     , Foldable1 nonEmpty
-                                                     )
-                                                  => nonEmpty lineSegment
-                                                     -- ^ all input segments
-                                                  -> Intersections r lineSegment
-                                                  -> MonoidalNEMap lineSegment (Seq.Seq (Point 2 r))
-interiorIntersectionsBySegment segs inters =
-        foldMap1 (flip MonoidalNEMap.singleton mempty) segs
-    <>> coerce (ifoldMap construct inters)
-  where
-    construct p assoc = foldMap (\seg -> MonoidalMap.singleton (coerce seg) (Seq.singleton p))
-                                (assoc^.interiorTo)
-
+-- * Computing a Connected Plane graph from a set of intersecting line segments
 
 -- |  Construct A connected PlaneGraph from a set of intersecting segments.
 --
@@ -508,28 +480,21 @@ fromIntersectingSegments segs = gr&edges.mapped %~ view theValue
 
 ----------------------------------------
 
--- type instance Intersection (ByIndex ix a) (ByIndex ix b) = Intersection a b
-
--- instance (geomA `IsIntersectableWith` geomB
---          ) => ByIndex ix geomA `IsIntersectableWith` ByIndex ix geomB where
---   a `intersect` b = (a^.theValue) `intersect` (b^.theValue)
-
-
-----------------------------------------
-
--- | Construct A connected PlaneGraph from a set of intersecting segments. This assumes
--- we are actually given the intersections as well.
+-- | Construct A connected PlaneGraph from a set of intersecting
+-- segments. This assumes we are actually given the intersections as
+-- well.
 --
 -- \( O((n+k)\log n) \), where \(n\) is the number of segments, and \(k\) is the number
 -- of intersections.
 --
 -- pre: the segments actually form a connected graph.
+--
+-- note: this implementation uses that the lineSegment type is Orderable. Consider using
+-- 'ByIndex Int segment' to order by some Identifier, rather than ordering by the raw segments.
 fromIntersections             :: forall s nonEmpty lineSegment r point planeGraph seg.
                                    ( Foldable1 nonEmpty
                                    , LineSegment_ lineSegment point
                                    , Point_ point 2 r, Ord r, Num r
-                                   -- , Intersection lineSegment lineSegment
-                                   --   ~ Maybe (LineSegmentLineSegmentIntersection seg)
                                    , IsIntersectableWith lineSegment lineSegment
                                    , OrdArounds lineSegment
                                    , Ord lineSegment
@@ -593,9 +558,8 @@ fromIntersections segs inters = fromAdjacencyLists adjLists
             f u v = MonoidalNEMap.singleton u (MonoidalNEMap.singleton v $ singletonL1 seg)
                  <> MonoidalNEMap.singleton v (MonoidalNEMap.singleton u $ singletonL1 seg)
 
-    -- I think this already automatically takes care of colinear semgnets as well, as we
+    -- I think this already automatically takes care of colinear semgents as well, as we
     -- are using a NESet to collect the neighbours of each vertex.
-
 
     -- | Construct the final adjacency lists
     adjLists :: MonoidalNEMap _
@@ -612,6 +576,22 @@ fromIntersections segs inters = fromAdjacencyLists adjLists
                       Just (x :<< rest) -> x Seq.<| rest
 
 
+-- | Computes the interior intersections on each segment.
+--
+-- O((n+k)\log n)
+interiorIntersectionsBySegment             :: ( Ord lineSegment, Foldable1 nonEmpty)
+                                           => nonEmpty lineSegment
+                                              -- ^ all input segments
+                                           -> Intersections r lineSegment
+                                           -> MonoidalNEMap lineSegment (Seq.Seq (Point 2 r))
+interiorIntersectionsBySegment segs inters =
+        foldMap1 (flip MonoidalNEMap.singleton mempty) segs
+    <>> coerce (ifoldMap construct inters)
+  where
+    construct p assoc = foldMap (\seg -> MonoidalMap.singleton (coerce seg) (Seq.singleton p))
+                                (assoc^.interiorTo)
+
+
 -- | Assign each element in the map a unique Integer key (in the range \([0,n)\) )
 assignIndex :: MonoidalNEMap k v -> MonoidalNEMap k Int
 assignIndex = snd . MonoidalNEMap.mapAccumWithKey (\i _ _ -> (succ i, i)) 0
@@ -623,18 +603,22 @@ base <>> new = foldr (uncurry MonoidalNEMap.insert) base $ Map.toAscList new
 
 --------------------------------------------------------------------------------
 
-renderToIpe       :: forall point r r' f.
-                       (Foldable f, Functor f, Point_ point 3 r, Real r, Real r')
-                   => Camera r -> f (Triangle point :+ IpeColor r') -> [IpeObject Double]
+-- | Given a camera and a set of colored triangles in R^3, renders the
+-- triangles as they are visible from the camera
+renderToIpe       :: forall set point r r'.
+                     ( Foldable set, Functor set
+                     , Point_ point 3 r, Real r, Real r'
+                     )
+                   => Camera r -> set (Triangle point :+ IpeColor r') -> [IpeObject Double]
 renderToIpe camera = foldMap asIpe . render camera
   where
     asIpe (triangle :+ col) = [iO $ defIO triangle ! attr SFill (realToFrac <$> col)]
 
 -- | Render a scene; i..e a set of triangles
-render        :: forall point r r' f. (Functor f, Point_ point 3 r, Real r)
+render        :: forall point r r' set. (Functor set, Point_ point 3 r, Real r)
               => Camera r
-              -> f (Triangle point :+ IpeColor r')
-              -> f (Triangle (Point 2 Double) :+ IpeColor r')
+              -> set (Triangle point :+ IpeColor r')
+              -> set (Triangle (Point 2 Double) :+ IpeColor r')
 render camera = over (mapped.core) $ \triangle ->
     triangle&vertices %~
             projectPoint . transformBy (cameraTransform camera') . f
@@ -642,3 +626,7 @@ render camera = over (mapped.core) $ \triangle ->
     camera' = realToFrac <$> camera
     f   :: point -> Point 3 Double
     f p = over coordinates realToFrac (p^.asPoint)
+
+-- next thing to do is somehow make it so that 'render' actually computes
+-- the overlay, and renders it. This probably requires some rewiring making sure
+-- we can compute the minimum zValue on the fly
