@@ -42,7 +42,8 @@ intersections :: ( Ord r, Fractional r
                  , LineSegment_ lineSegment point
                  , Eq lineSegment
                  , Point_ point 2 r
-                 , IntersectConstraints lineSegment
+                 , IntersectConstraints seg lineSegment
+                 , LineSegment_ seg point
                  , Foldable f
                  )
               => f lineSegment -> Intersections r lineSegment

@@ -33,6 +33,7 @@ import Control.Lens
 import Data.Default.Class
 import Data.Type.Ord
 import HGeometry.Ext
+import HGeometry.ByIndex
 import HGeometry.Interval.Class
 import HGeometry.Point.Class
 import HGeometry.Properties
@@ -245,3 +246,8 @@ instance ( OpenLineSegment_ segment point
 
 instance HasOnSegment lineSegment d =>  HasOnSegment (lineSegment :+ extra) d where
   onSegment q (s :+ _) = q `onSegment` s
+
+instance LineSegment_ lineSegment point => LineSegment_ (ByIndex ix lineSegment) point
+
+instance HasOnSegment lineSegment d => HasOnSegment (ByIndex ix lineSegment) d where
+  onSegment q = onSegment q . view theValue

@@ -43,6 +43,7 @@ import           Data.Ord (comparing, Down(..))
 import qualified Data.Set as Set
 import           GHC.Generics
 import           HGeometry.Intersection
+import           HGeometry.Properties
 import           HGeometry.Interval
 import           HGeometry.LineSegment
 import           HGeometry.Point
@@ -117,7 +118,8 @@ instance ( LineSegment_ lineSegment point
          , Eq lineSegment
          , IsIntersectableWith lineSegment lineSegment
          , Intersection lineSegment lineSegment ~
-           Maybe (LineSegmentLineSegmentIntersection lineSegment)
+           Maybe (LineSegmentLineSegmentIntersection lineSegment')
+         , NumType lineSegment' ~ r
          ) => Ord (AroundIntersection lineSegment) where
   -- | ccw ordered around their common intersection point.
   (AroundIntersection s) `compare` (AroundIntersection s') = case s `intersect` s' of
@@ -352,9 +354,10 @@ ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
 -- | Given two segments, compute an IntersectionPoint representing their intersection (if
 -- such an intersection exists).
 intersectionPointOf      :: ( LineSegment_ lineSegment point
+                            , LineSegment_ seg point
                             , Point_ point 2 r
                             , Ord r, Fractional r
-                            , IntersectConstraints lineSegment
+                            , IntersectConstraints seg lineSegment
                             )
                          => lineSegment -> lineSegment
                          -> Maybe (IntersectionPoint (Point 2 r) lineSegment)
@@ -366,8 +369,10 @@ intersectionPointOf s s' = s `intersect` s' <&> \case
     topEndPoint seg = List.minimumBy ordPoints [seg^.start.asPoint, seg^.end.asPoint]
 
 -- | Shorthand for the more-or-less standard constraints that we need on LineSegments
-type IntersectConstraints lineSegment =
+type IntersectConstraints seg lineSegment =
   ( OrdArounds lineSegment
   , IsIntersectableWith lineSegment lineSegment
-  , Intersection lineSegment lineSegment ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+  , Intersection lineSegment lineSegment ~ Maybe (LineSegmentLineSegmentIntersection seg)
+  , NumType seg ~ NumType lineSegment
+  , Dimension seg ~ Dimension lineSegment
   )

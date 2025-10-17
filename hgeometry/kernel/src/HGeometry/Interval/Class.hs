@@ -53,6 +53,7 @@ import HGeometry.Boundary
 import HGeometry.Ext
 import HGeometry.Interval.EndPoint
 import HGeometry.Properties
+import HGeometry.ByIndex
 
 --------------------------------------------------------------------------------
 
@@ -327,6 +328,7 @@ duration i = i^.end - i^.start
 
 
 --------------------------------------------------------------------------------
+-- * Instances for :+
 
 instance HasStart seg p => HasStart (seg :+ extra) p where
   start = core.start
@@ -366,3 +368,30 @@ instance ( ConstructableOpenInterval_ interval r
          , Default extra
          ) => ConstructableOpenInterval_ (interval :+ extra) r where
   mkOpenInterval s t = mkOpenInterval s t :+ def
+
+--------------------------------------------------------------------------------
+-- * Instances for WithIndex
+
+instance HasStart seg p => HasStart (ByIndex ix seg) p where
+  start = theValue.start
+instance HasEnd seg p => HasEnd (ByIndex ix seg) p where
+  end = theValue.end
+instance HasStartPoint seg p => HasStartPoint (ByIndex ix seg) p where
+  startPoint = theValue.startPoint
+instance HasEndPoint seg p => HasEndPoint (ByIndex ix seg) p where
+  endPoint = theValue.endPoint
+
+instance ( IntervalLike_ interval point
+         ) => IntervalLike_ (ByIndex ix interval) point where
+
+instance ( Interval_ interval r
+         ) => Interval_ (ByIndex ix interval) r
+
+instance ( ClosedInterval_ interval r
+         ) => ClosedInterval_ (ByIndex ix interval) r
+
+instance ( OpenInterval_ interval r
+         ) => OpenInterval_ (ByIndex ix interval) r
+
+type instance StartPointOf (ByIndex ix interval) = StartPointOf interval
+type instance EndPointOf   (ByIndex ix interval) = EndPointOf interval

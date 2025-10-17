@@ -90,7 +90,7 @@ samePointsAsNaive      :: ( LineSegment_ lineSegment point
                           , Eq lineSegment
                           , Ord r, Fractional r
                           , HasOnSegment lineSegment 2
-                          , IntersectConstraints lineSegment
+                          , IntersectConstraints lineSegment lineSegment
                           , StartPointOf lineSegment ~ EndPointOf lineSegment
                           , Show lineSegment, Show r
                           , Show point
@@ -105,7 +105,7 @@ sameAsNaive      :: ( LineSegment_ lineSegment point
                     , Eq lineSegment
                     , Ord r, Fractional r
                     , HasOnSegment lineSegment 2
-                    , IntersectConstraints lineSegment
+                    , IntersectConstraints lineSegment lineSegment
                     , StartPointOf lineSegment ~ EndPointOf lineSegment
                     , Show lineSegment, Show r
                     , Show point
