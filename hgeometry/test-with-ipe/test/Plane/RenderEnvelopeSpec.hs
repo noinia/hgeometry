@@ -4,65 +4,65 @@
 module Plane.RenderEnvelopeSpec
   where
 
-import Control.Monad
-import Data.Ord(comparing)
-import Data.Default.Class
-import Data.Foldable1.WithIndex
-import Data.Semialign
-import Prelude hiding (zipWith)
-import Data.Map.NonEmpty qualified as NEMap
-import Data.Coerce
-import Data.Foldable1
+import HGeometry.ByIndex
 import Control.Lens
-import Test.Hspec
-import Test.Hspec.QuickCheck
-import Ipe
-import Ipe.Color
-import System.OsPath
-import Data.Map qualified as Map
-import Test.Hspec.WithTempFile
-import Golden
-import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
-import HGeometry.HyperPlane.NonVertical
-import HGeometry.Instances ()
-import HGeometry.Ext
-import HGeometry.LineSegment
-import HGeometry.Polygon
-import HGeometry.Polygon.Convex.Instances ()
-import HGeometry.Number.Real.Rational
-import HGeometry.Plane.LowerEnvelope
-import HGeometry.VoronoiDiagram
-import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
-import HGeometry.Triangle
-import Data.Sequence qualified as Seq
-import HGeometry.PlaneGraph
-import HGeometry.Point
-import HGeometry.VoronoiDiagram qualified as VD
-import HGeometry.Box as Box
-import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
-import HGeometry.Map.NonEmpty.Monoidal qualified as MonoidalNEMap
-import HGeometry.Vector
-import Data.Set qualified as Set
-import Data.Set.NonEmpty qualified as NESet
-import Data.Set.NonEmpty (NESet)
-import HGeometry.Transformation
-import HGeometry.Intersection
-import HGeometry.Graphics.Camera
+import Control.Monad
+import Data.Coerce
+import Data.Default.Class
+import Data.Foldable1
+import Data.Foldable1.WithIndex
+import Data.Functor.Apply as Apply
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
-import Ipe.Color
-import HGeometry.LineSegment.Intersection.BentleyOttmann
-import Hiraffe.PlanarGraph.Connected
+import Data.Map qualified as Map
 import Data.Map.Monoidal qualified as MonoidalMap
-import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1, singletonL1)
-import HGeometry.Polygon.WithHoles
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Ord (comparing)
+import Data.Semialign
+import Data.Sequence qualified as Seq
+import Data.Set qualified as Set
+import Data.Set.NonEmpty (NESet)
+import Data.Set.NonEmpty qualified as NESet
+import Golden
+import HGeometry.Box as Box
+import HGeometry.Ext
 import HGeometry.Foldable.Util
-import Plane.Overlay
+import HGeometry.Graphics.Camera
+import HGeometry.HyperPlane.NonVertical
+import HGeometry.Instances ()
+import HGeometry.Intersection
+import HGeometry.LineSegment
+import HGeometry.LineSegment.Intersection.BentleyOttmann
+import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
+import HGeometry.Map.NonEmpty.Monoidal qualified as MonoidalNEMap
+import HGeometry.Number.Real.Rational
+import HGeometry.Plane.LowerEnvelope
+import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
+import HGeometry.PlaneGraph
+import HGeometry.Point
+import HGeometry.Polygon
+import HGeometry.Polygon.Convex.Instances ()
 import HGeometry.Polygon.Simple
-import Data.Functor.Apply as Apply
+import HGeometry.Polygon.WithHoles
 import HGeometry.Properties
-import PlaneGraph.RenderSpec
+import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1, singletonL1)
+import HGeometry.Transformation
+import HGeometry.Triangle
+import HGeometry.Vector
+import HGeometry.VoronoiDiagram
+import HGeometry.VoronoiDiagram qualified as VD
+import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
+import Hiraffe.PlanarGraph.Connected
+import Ipe
+import Ipe.Color
+import Plane.Overlay
 import Plane.RenderProps
+import PlaneGraph.RenderSpec
+import Prelude hiding (zipWith)
+import System.OsPath
+import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.Hspec.WithTempFile
 
 --------------------------------------------------------------------------------
 
@@ -279,6 +279,24 @@ assignRenderingAttributes gr = gr1&faces %~ \xs -> do x <- minimumOn (^.extra._1
 
     zVal = const 0  -- todo
 
+-- FIXME:
+-- shoudn't this  be the other way around? I.e. I guess we compute the minimum z-value, andits props among the definers.
+
+-- then we compute the minimum zvalue of the covering regions. If the
+-- covering z-value is smaller than the one among the definers, then we show Nothing; as the edge is hidden. Otherwise we show the definer's value
+
+-- TODO: To assign a useful z-value here, we need to somehow know the polygon associated
+-- with this edge. Since we need its z-value I guess.
+
+-- actually, I guess we do have those now. so maybe we can actually
+-- try and implement this zVal function to do something more sensible.
+
+-- i..e we compute the minimum zvalue among the definers. If this minimum zvalue
+--
+
+
+
+
 --   = assignColorsFaces . firstColorEdges
 
 
@@ -328,6 +346,8 @@ bar = fromIntersectingSegments mySegments
 -}
 --------------------------------------------------------------------------------
 
+-- newtype WithDefiningPoly core extra = WithDefiningPoly (core :+ extra)
+
 
 -- | Given a set of polygons, constructs a plane graph whose vertices,
 -- edges, and faces are tagged with the polygons that cover that face.
@@ -351,8 +371,8 @@ polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
                                          (Seq.Seq simplePolygon)
 polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCoveringVertices p)
   where
-    segs :: NonEmpty (ClosedLineSegment vertex)
-    segs = foldMap1 (toNonEmptyOf outerBoundaryEdgeSegments) polygons
+    segs :: NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
+    segs = foldMap1 (\poly -> (:+ poly) <$> toNonEmptyOf outerBoundaryEdgeSegments poly) polygons
 
     gr  = fromIntersectingSegments segs
 
@@ -380,8 +400,6 @@ polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCove
                  in s .+^ ((t .-. s) ^/ 2)
 
     polygonsCoveringVertices v = filter' (v `intersects`) polygons
-
--- FIXME: we should remember the polygons defining the edges as well
 
 -- I guess we could build point location structures on the polygons to
 -- speed things up, if need be.
@@ -495,16 +513,17 @@ interiorIntersectionsBySegment segs inters =
 -- of intersections.
 --
 -- pre: the segments actually form a connected graph.
-fromIntersectingSegments      :: forall s nonEmpty lineSegment r point.
-                                 ( Foldable1 nonEmpty, Functor nonEmpty
+fromIntersectingSegments      :: forall s nonEmpty ix lineSegment segment r point.
+                                 ( Foldable1 nonEmpty
+                                 , FunctorWithIndex ix nonEmpty
+
                                  , LineSegment_ lineSegment point
                                  , Point_ point 2 r, Ord r, Fractional r
                                  , Intersection lineSegment lineSegment
-                                   ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                                   ~ Maybe (LineSegmentLineSegmentIntersection segment)
+                                 , LineSegment_ segment point
                                  , IsIntersectableWith lineSegment lineSegment
-                                 , Eq lineSegment
-                                 , OrdArounds lineSegment
-                                 , Ord lineSegment
+                                 , Ord ix
                                  , HasOnSegment lineSegment 2
                                  , StartPointOf lineSegment ~ EndPointOf lineSegment
                                  )
@@ -512,7 +531,22 @@ fromIntersectingSegments      :: forall s nonEmpty lineSegment r point.
                               -> CPlaneGraph s (Point 2 r :+ Seq.Seq point)
                                                (ViewL1 lineSegment)
                                                ()
-fromIntersectingSegments segs = fromIntersections segs (intersections segs)
+fromIntersectingSegments segs = gr&edges.mapped %~ view theValue
+  where
+    segs' = imap ByIndex segs
+    gr    :: CPlaneGraph s _ _ _
+    gr    = fromIntersections segs' (intersections segs')
+
+----------------------------------------
+
+-- type instance Intersection (ByIndex ix a) (ByIndex ix b) = Intersection a b
+
+-- instance (geomA `IsIntersectableWith` geomB
+--          ) => ByIndex ix geomA `IsIntersectableWith` ByIndex ix geomB where
+--   a `intersect` b = (a^.theValue) `intersect` (b^.theValue)
+
+
+----------------------------------------
 
 -- | Construct A connected PlaneGraph from a set of intersecting segments. This assumes
 -- we are actually given the intersections as well.
@@ -521,14 +555,13 @@ fromIntersectingSegments segs = fromIntersections segs (intersections segs)
 -- of intersections.
 --
 -- pre: the segments actually form a connected graph.
-fromIntersections             :: forall s nonEmpty lineSegment r point planeGraph.
+fromIntersections             :: forall s nonEmpty lineSegment r point planeGraph seg.
                                    ( Foldable1 nonEmpty
                                    , LineSegment_ lineSegment point
                                    , Point_ point 2 r, Ord r, Num r
-                                   , Intersection lineSegment lineSegment
-                                     ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                                   -- , Intersection lineSegment lineSegment
+                                   --   ~ Maybe (LineSegmentLineSegmentIntersection seg)
                                    , IsIntersectableWith lineSegment lineSegment
-                                   , Eq lineSegment
                                    , OrdArounds lineSegment
                                    , Ord lineSegment
 
