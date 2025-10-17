@@ -52,7 +52,7 @@ data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
                        , _rawViewUp          :: !(Vector 3 r)
                        -- ^ viewUp; assumed to be unit vector
                        , _focalDepth         :: !r
-                       -- ^ Distnace from the camera position to the viewport/viewplane
+                       -- ^ Distance from the camera position to the viewport/viewplane
                        , _nearDist           :: !r
                        -- ^ Near distance; everything closer than this distance is ignored
                        , _farDist            :: !r
@@ -62,6 +62,39 @@ data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
                        -- (i.e. the size of the screen on which we draw, in terms of world
                        -- coordinates)
                        } deriving (Show,Eq,Ord)
+
+----------------------------------------
+-- * Field Accessor Lenses
+
+-- | Camera position.
+cameraPosition :: Lens' (Camera r) (Point 3 r)
+cameraPosition = lens _cameraPosition (\cam p -> cam {_cameraPosition=p})
+
+-- | Raw camera normal, i.e. a vector into the center of the screen.
+rawCameraNormal :: Lens' (Camera r) (Vector 3 r)
+rawCameraNormal = lens _rawCameraNormal (\cam r -> cam {_rawCameraNormal=r})
+
+-- | Raw view up vector indicating which side points "upwards" in the scene.
+rawViewUp :: Lens' (Camera r) (Vector 3 r)
+rawViewUp = lens _rawViewUp (\cam r -> cam {_rawViewUp=r})
+
+-- | The focal length (i.e. distance from the camera position to the plane on which we
+-- project.) Also known as viewplane depth.
+focalDepth :: Lens' (Camera r) r
+focalDepth = lens _focalDepth (\cam v -> cam {_focalDepth=v})
+
+-- | Near distance (everything closer than this is clipped).
+nearDist :: Lens' (Camera r) r
+nearDist = lens _nearDist (\cam n -> cam {_nearDist=n})
+
+-- | Far distance (everything further away than this is clipped).
+farDist :: Lens' (Camera r) r
+farDist = lens _farDist (\cam f -> cam {_farDist=f})
+
+-- | The viewport dimensions. (i.e. the size of the screen on which we
+-- draw, in terms of world coordinates)
+viewportDimensions :: Lens' (Camera r) (Vector 2 r)
+viewportDimensions = lens _viewportDimensions (\cam d -> cam {_viewportDimensions=d})
 
 --------------------------------------------------------------------------------
 
@@ -90,7 +123,7 @@ instance Fractional r => Default (Camera r) where
   -- ^ A default camera, placed at the origin, looking along the y-axis. The view-up
   -- vector is the z-axis. The focalDepth is 1.
   def = Camera { _cameraPosition     = origin
-               , _rawCameraNormal    = Vector3 0 1 0 -- We are looking itnto the y-direction
+               , _rawCameraNormal    = Vector3 0 1 0 -- We are looking into the y-direction
                , _rawViewUp          = Vector3 0 0 1 -- up in the z-direction
                , _focalDepth         = 1
                , _nearDist           = 0.1
@@ -121,42 +154,6 @@ blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7
     fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
 
     toRadians deg = pi * (deg / 180.0)
-
-
-----------------------------------------
--- * Field Accessor Lenses
-
--- Lemmih: Writing out the lenses by hand so they can be documented.
--- makeLenses ''Camera
-
--- | Camera position.
-cameraPosition :: Lens' (Camera r) (Point 3 r)
-cameraPosition = lens _cameraPosition (\cam p -> cam {_cameraPosition=p})
-
--- | Raw camera normal, i.e. a vector into the center of the screen.
-rawCameraNormal :: Lens' (Camera r) (Vector 3 r)
-rawCameraNormal = lens _rawCameraNormal (\cam r -> cam {_rawCameraNormal=r})
-
--- | Raw view up vector indicating which side points "upwards" in the scene.
-rawViewUp :: Lens' (Camera r) (Vector 3 r)
-rawViewUp = lens _rawViewUp (\cam r -> cam {_rawViewUp=r})
-
--- | The focal length (i.e. distance from the camera position to the plane on which we
--- project.) Also known as viewplane depth.
-focalDepth :: Lens' (Camera r) r
-focalDepth = lens _focalDepth (\cam v -> cam {_focalDepth=v})
-
--- | Near distance (everything closer than this is clipped).
-nearDist :: Lens' (Camera r) r
-nearDist = lens _nearDist (\cam n -> cam {_nearDist=n})
-
--- | Far distance (everything further away than this is clipped).
-farDist :: Lens' (Camera r) r
-farDist = lens _farDist (\cam f -> cam {_farDist=f})
-
--- | The viewport dimensions.
-viewportDimensions :: Lens' (Camera r) (Vector 2 r)
-viewportDimensions = lens _viewportDimensions (\cam d -> cam {_viewportDimensions=d})
 
 --------------------------------------------------------------------------------
 -- * Accessor Lenses

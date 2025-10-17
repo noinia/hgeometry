@@ -84,8 +84,8 @@ common all-setup
       , these                     >= 1.0.1         && < 1.3
       , subcategories             >= 0.2           && < 0.3
 
-      , ghc-typelits-natnormalise >= 0.7.7         && < 0.8
-      , ghc-typelits-knownnat     >= 0.7.6         && < 0.8
+      , ghc-typelits-natnormalise >= 0.9           && < 0.10
+      , ghc-typelits-knownnat     >= 0.8.2         && < 0.9
 
       -- , entropy                   >= 0.4.1.10      && < 0.5
       -- , pretty-simple             >= 4.1.2.0       && < 5
@@ -900,6 +900,7 @@ test-suite with-ipe-hspec
       LineSegment.Intersection.BentleyOttmannSpec
       PlaneGraph.RenderSpec
       PlaneGraph.FromPolygonsSpec
+      PlaneGraph.RenderOverlaySpec
       HalfPlane.CommonIntersectionSpec
       Line.LowerEnvelopeSpec
       Paths_hgeometry
@@ -910,9 +911,11 @@ test-suite with-ipe-hspec
       Paths_hgeometry
   hs-source-dirs:   test-with-ipe/test
   build-depends:
-        hspec-with-tempfile >= 0.1
+        hspec-with-tempfile    >= 0.1
       , hgeometry:ipe
       , hgeometry:quickcheck
+      , wavefront              >= 0.7.1.5 && < 0.8
+
 
 --------------------------------------------------------------------------------
 -- ** Ipe Tests
