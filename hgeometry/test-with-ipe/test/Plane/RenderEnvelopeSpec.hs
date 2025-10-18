@@ -4,6 +4,8 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import Data.Foldable
+import Wavefront qualified
 import HGeometry.ByIndex
 import Control.Lens
 import Control.Monad
@@ -630,3 +632,8 @@ render camera = over (mapped.core) $ \triangle ->
 -- next thing to do is somehow make it so that 'render' actually computes
 -- the overlay, and renders it. This probably requires some rewiring making sure
 -- we can compute the minimum zValue on the fly
+
+
+loadObj = Wavefront.fromFile [osp|data/test-with-ipe/golden/Render/cube/cube.obj|] >>= \case
+            Left err  -> print err
+            Right obj -> traverse_ print $ Wavefront.allTriangles obj
