@@ -1,9 +1,12 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Plane.RenderEnvelopeSpec
   where
 
+import Data.Proxy
+import Data.Maybe
 import Data.Foldable
 import Wavefront qualified
 import HGeometry.ByIndex
@@ -70,40 +73,45 @@ import Test.Hspec.WithTempFile
 
 type R = RealNumber 5
 
-triangles :: [Triangle (Point 3 Double) :+ IpeColor Double]
+triangles :: NonEmpty (Triangle (Point 3 Double) :+ RenderProps)
 triangles = -- scaleUniformlyBy 5 <$>
+            NonEmpty.fromList $
         [ -- ground plane
-          Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ blue
-        , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ blue
+          Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props blue
+        , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ props blue
         -- left side
-        , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ green
-        , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ green
+        , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ props green
+        , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ props green
         -- front plane
         -- , Triangle origin (Point3 1 0 0) (Point3 1 0 1) :+ red
         -- , Triangle origin (Point3 1 0 1) (Point3 0 1 1) :+ red
 
+
         -- back plane
-        , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ orange
-        , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ orange
+        , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ props orange
+        , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ props orange
         ] <> ((\tri -> tri&extra %~ getColor
                          &vertices.coordinates %~ realToFrac
               ) <$> myTriangles
              )
 
-getColor :: core :+ IpeColor Double -> IpeColor Double
+props c = RenderProps Nothing (Just $ attr SFill c)
+
+getColor :: core :+ RenderProps -> RenderProps
 getColor = view extra
 
-myTriangles :: [Triangle (Point 3 R) :+ (Plane R :+ IpeColor Double)]
+myTriangles :: [Triangle (Point 3 R) :+ (Plane R :+ RenderProps)]
 myTriangles = asTrianglesAbove domain planes
 
-planes :: NonEmpty (Plane R :+ IpeColor Double)
+planes :: NonEmpty (Plane R :+ RenderProps)
 planes = NonEmpty.fromList
-           [ Plane 0 0 (0.5)   :+ red
-           , Plane 0 (-0.25) 1 :+ gray
+           [ Plane 0 0 (0.5)   :+ props red
+           , Plane 0 (-0.25) 1 :+ props gray
            ]
+
 -- planes = points&mapped.core %~ pointToPlane
 
-points :: NonEmpty (Point 2 R :+ IpeColor Double)
+points :: NonEmpty (Point 2 R :+ IpeColor R)
 points = NonEmpty.fromList
          [ Point2 (1/2) (1/3) :+ red
          ]
@@ -168,12 +176,14 @@ instance Default (Seq.Seq a) where
   def = mempty
 
 
+fromTriangle :: (Point_ vertex 2 r, Ord r, Num r) => Triangle vertex -> SimplePolygon vertex
+fromTriangle = fromMaybe (error "fromTriangle: absurd") . fromPoints
 
-
+{-
 fromTriangle :: Point_ vertex 2 r => Triangle vertex -> SimplePolygon vertex
 fromTriangle = uncheckedFromCCWPoints
 -- TODO: we should just coerce to a SimplePolygonF (Cyclic Vector3)
-
+-}
 --------------------------------------------------------------------------------
 -- TODO: Move to a PlaneGraph.RenderOverlaySpec module
 
@@ -194,8 +204,7 @@ overlaySpec = describe "OverlaySpec" $ do
       , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200) :+ props 2 green blue
       ] -- these triangles are indeed in CCW order....
     myPolygons = myTriangles2&mapped.core %~ fromTriangle
-
-    props i s f = (i, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
+    props z s f = (z, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
 
 --------------------------------------------------------------------------------
 
@@ -221,10 +230,13 @@ spec =
 
 -- | Function to draw a plane graph whose faces may have some
 -- attributes associated them.
-renderGraph    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
-                  , Point_ vertex 2 r, Real r
-                  , Face planeGraph ~ Maybe (IpeAttributes Path Double)
-                  , Edge planeGraph ~ Maybe (IpeAttributes Path Double)
+renderGraph    :: forall planeGraph vertex r r'.
+                  ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
+                  , Point_ vertex 2 r
+                  , Ord r, Fractional r
+                  , Real r'
+                  , Face planeGraph ~ Maybe (IpeAttributes Path r')
+                  , Edge planeGraph ~ Maybe (IpeAttributes Path r')
                   , Eq (FaceIx planeGraph)
                   , HasInnerComponents planeGraph
                   -- , IsTransformable vertex
@@ -232,28 +244,50 @@ renderGraph    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                   -- , Fractional r, Show r,
                   -- , Show (Vertex planeGraph), Show (Face planeGraph)
                   -- , Show (EdgeIx planeGraph), Show (Edge planeGraph)
-                  ) => planeGraph -> [IpeObject Double]
+                  ) => planeGraph -> [IpeObject r]
 renderGraph gr = theFaces <> theEdges
   where
     theEdges = ifoldMapOf edgeSegments         drawEdge' gr
     theFaces = ifoldMapOf interiorFacePolygons drawFace' gr
-    drawFace' fi pg = case gr^?!faceAt fi of
+    drawFace' fi pg = case attrToR <$> gr^?!faceAt fi of
         Nothing  -> []
         Just ats -> [ iO $ ipePolygon pg' ! ats ]
       where
           pg' :: PolygonalDomain _
           pg' = pg&vertices %~ toPoint
 
-    drawEdge' d s = case gr^?!edgeAt d of
+    drawEdge' d s = case attrToR <$> gr^?!edgeAt d of
         Nothing  -> []
         Just ats -> [ iO $ ipeLineSegment s' ! ats ]
       where
-        s' :: ClosedLineSegment (Point 2 Double)
+        s' :: ClosedLineSegment (Point 2 r)
         s' = s&vertices %~ toPoint
 
+    toPoint :: Point_ point 2 r => point -> Point 2 r
+    toPoint = view asPoint
 
-    toPoint   :: (Point_ point 2 r, Real r) => point -> Point 2 Double
-    toPoint p = (p^.asPoint)&coordinates %~ realToFrac
+    attrToR = mapIpeAttrs (Proxy @Path) realToFrac
+
+renderSkeleton    :: forall s v polygon.
+                     CPlaneGraph s v
+                                   (E (polygon :+ RenderProps))
+                                   (Seq.Seq (polygon :+ RenderProps))
+                  -> CPlaneGraph s v
+                                   (Maybe (IpeAttributes Path Double))
+                                   (Maybe (IpeAttributes Path Double))
+renderSkeleton gr = gr1&faces .~ Nothing
+  where
+    gr1 :: CPlaneGraph s v
+                         (Maybe (IpeAttributes Path Double))
+                         (Seq.Seq (polygon :+ RenderProps))
+    gr1 = gr&edges .~ Just def
+      -- \(E defs covering) -> do
+      --                     _ :+ (_ :+ (z,props)) <- minimumOn (^.extra.extra._1) defs
+      --                     _ :+ (zCovering,_)    <- minimumOn (^.extra._1) covering
+      --                     if z <= zCovering then props^.edgeAttrs
+      --                                       else Nothing
+
+
 
 -- | Lables the faces and edges with the attributes to use in rendering
 assignRenderingAttributes    :: forall s v polygon z.
@@ -275,6 +309,7 @@ assignRenderingAttributes gr = gr1&faces %~ \xs -> do x <- minimumOn (^.extra._1
                           _ :+ (zCovering,_)    <- minimumOn (^.extra._1) covering
                           if z <= zCovering then props^.edgeAttrs
                                             else Nothing
+
   -- We compute the first defining polygon and its z-value, and the
   -- props corresponding to this edge. Similarly, we compute the
   -- minimum zvalue of the covering regions. If the covering z-value
@@ -283,6 +318,7 @@ assignRenderingAttributes gr = gr1&faces %~ \xs -> do x <- minimumOn (^.extra._1
 
 -- TODO: maybe we still want to store the z-value, and still draw them in ipe in
 -- back to front order.
+
 
 -- | Compute the minimum using a given function
 minimumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
@@ -607,27 +643,39 @@ base <>> new = foldr (uncurry MonoidalNEMap.insert) base $ Map.toAscList new
 
 -- | Given a camera and a set of colored triangles in R^3, renders the
 -- triangles as they are visible from the camera
-renderToIpe       :: forall set point r r'.
-                     ( Foldable set, Functor set
-                     , Point_ point 3 r, Real r, Real r'
+renderToIpe       :: forall set point r.
+                     ( Foldable1 set, Functor set
+                     , Point_ point 3 r, Real r, Fractional r
                      )
-                   => Camera r -> set (Triangle point :+ IpeColor r') -> [IpeObject Double]
-renderToIpe camera = foldMap asIpe . render camera
+                   => Camera Double -> set (Triangle point :+ RenderProps) -> [IpeObject R]
+renderToIpe camera scene =
+    [ -- iO $ ipeGroup (renderGraph (assignRenderingAttributes subdiv)) ! attr SLayer "render"
+     iO $ ipeGroup (renderGraph (renderSkeleton subdiv))            ! attr SLayer "skeleton"
+    ]
   where
-    asIpe (triangle :+ col) = [iO $ defIO triangle ! attr SFill (realToFrac <$> col)]
+    triangles = render camera scene
+    subdiv    = polygonOverlay $ triangles&mapped.core %~ fromTriangle
+    -- sudbdiv    = traceShow (numEdges subdiv') subdiv'
 
 -- | Render a scene; i..e a set of triangles
-render        :: forall point r r' set. (Functor set, Point_ point 3 r, Real r)
-              => Camera r
-              -> set (Triangle point :+ IpeColor r')
-              -> set (Triangle (Point 2 Double) :+ IpeColor r')
+--
+-- this intermediately uses doubles to apply the camera transform
+render        :: forall point r set extra. (Functor set, Point_ point 3 r, Real r, Fractional r)
+              => Camera Double
+              -> set (Triangle point :+ extra)
+              -> set (Triangle (Point 2 R) :+ extra)
 render camera = over (mapped.core) $ \triangle ->
     triangle&vertices %~
-            projectPoint . transformBy (cameraTransform camera') . f
+            f2 . projectPoint . transformBy (cameraTransform camera') . f3
   where
     camera' = realToFrac <$> camera
-    f   :: point -> Point 3 Double
-    f p = over coordinates realToFrac (p^.asPoint)
+
+    f2 :: Point 2 Double -> Point 2 R
+    f2 = over coordinates realToFrac
+
+    f3   :: point -> Point 3 Double
+    f3 p = over coordinates realToFrac (p^.asPoint)
+
 
 -- next thing to do is somehow make it so that 'render' actually computes
 -- the overlay, and renders it. This probably requires some rewiring making sure
