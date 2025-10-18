@@ -19,7 +19,7 @@ module Ipe.Content(
 
   , IpeAttributes
   , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, traverseIpeAttrs
+  , attributes, mapIpeAttrs, traverseIpeAttrs
   , commonAttributes
 
   , flattenGroups
@@ -304,7 +304,12 @@ type IpeObject' g r = g r :+ IpeAttributes g r
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 attributes = extra
 
--- | traverse for ipe attributes
+-- | Map some function over the coordinates of the ipe Attributes
+mapIpeAttrs      :: AllConstrained TraverseIpeAttr (AttributesOf g)
+                 => proxy g -> (r -> s) -> IpeAttributes g r -> IpeAttributes g s
+mapIpeAttrs px f = runIdentity . traverseIpeAttrs px (Identity . f)
+
+-- | Traverse for ipe attributes
 traverseIpeAttrs               :: ( Applicative f
                                   , AllConstrained TraverseIpeAttr (AttributesOf g)
                                   ) => proxy g -> (r -> f s) -> IpeAttributes g r -> f (IpeAttributes g s)

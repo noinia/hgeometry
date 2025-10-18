@@ -50,7 +50,7 @@ module Ipe(
   -- ** Attributes
   , IpeAttributes
   , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, traverseIpeAttrs
+  , attributes, mapIpeAttrs, traverseIpeAttrs
   , commonAttributes
   -- * Layers and Views
   , LayerName(LayerName), layerName
