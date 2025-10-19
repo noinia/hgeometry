@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Plane.RenderProps
-  ( RenderProps(RenderProps), edgeAttrs, faceAttrs
+  ( RenderProps(RenderProps)
+  , HasRenderProps(..)
   ) where
 
 import Ipe
@@ -13,6 +14,7 @@ import Data.Default.Class
 data RenderProps = RenderProps { _edgeAttrs :: Maybe (IpeAttributes Path Double)
                                , _faceAttrs :: Maybe (IpeAttributes Path Double)
                                }
+                   deriving (Show,Eq)
 
 makeClassy ''RenderProps
 

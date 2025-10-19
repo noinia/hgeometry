@@ -1,8 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Plane.Overlay
-  ( V(V), location, definingVertices, coveringPolygonsV
-  , E(E), definingEdges, coveringPolygons
+  ( HasCoveringPolygons(..)
+  , V(V), location, definingVertices
+  , E(E), definingEdges, pointInEdge
+  , F(F), pointInFace
   ) where
 -- TODO: rename the module
 
@@ -17,6 +19,7 @@ import HGeometry.LineSegment
 import Hiraffe.Graph.Class
 
 --------------------------------------------------------------------------------
+
 
 -- | Vertices in the overlay
 data V polygon = V { _location          :: Point 2 (NumType polygon)
@@ -37,18 +40,57 @@ instance HasCoordinates (V polygon) (V polygon)
 
 instance (Point_ (Vertex polygon) 2 r, NumType polygon ~ r) => Point_ (V polygon) 2 r
 
+deriving instance (Show polygon, Show (NumType polygon), Show (Vertex polygon)) => Show (V polygon)
+
 --------------------------------------------------------------------------------
 
 -- | The data associated with edges in the overlay.
 --
 -- An edge in the overlay corresponds to some line segment uv.
-data E polygon = E { _definingEdges    :: ViewL1 (ClosedLineSegment (Vertex polygon) :+ polygon)
+data E polygon = E { _definingEdges     :: ViewL1 (ClosedLineSegment (Vertex polygon) :+ polygon)
                    -- ^ The defining polygon edges; i.e. each such an edge (e :+ P) contains
                    -- the line segment uv representing this edge.  Furthermore, each such a
                    -- segment is tagged with the polygon P that defines it. I.e. e is a
                    -- counterclockwise edge in P.
-                   , _coveringPolygons :: Seq.Seq polygon
+                   , _coveringPolygonsE :: Seq.Seq polygon
                    -- ^ The polygons from our set that completely cover this edge uv.
+                   , _pointInEdge :: Point 2 (NumType polygon)
+                   -- ^ A point in the interior of the edge.
                    }
 
 makeLenses ''E
+
+deriving instance (Show polygon, Show (NumType polygon), Show (Vertex polygon)) => Show (E polygon)
+
+
+--------------------------------------------------------------------------------
+
+-- | The data associated with a face in the overlay.
+data F polygon = F { _coveringPolygonsF :: Seq.Seq polygon
+                   -- ^  the polgyons covering this face.
+                   , _pointInFace       :: Maybe (Point 2 (NumType polygon))
+                   -- ^ A point strictly inside the face. For internal
+                   -- faces this value should be a Just point
+                   }
+
+makeLenses ''F
+
+deriving instance (Show polygon, Show (NumType polygon)) => Show (F polygon)
+
+--------------------------------------------------------------------------------
+
+-- | Class for types that have some polygons covering the object.
+class HasCoveringPolygons geom polygon | geom -> polygon where
+  -- | Get the polygons covering this geometry
+  coveringPolygons :: Lens' geom (Seq.Seq polygon)
+
+instance HasCoveringPolygons (V polygon) polygon where
+  coveringPolygons = coveringPolygonsV
+
+instance HasCoveringPolygons (E polygon) polygon where
+  coveringPolygons = coveringPolygonsE
+
+instance HasCoveringPolygons (F polygon) polygon where
+  coveringPolygons = coveringPolygonsF
+
+--------------------------------------------------------------------------------

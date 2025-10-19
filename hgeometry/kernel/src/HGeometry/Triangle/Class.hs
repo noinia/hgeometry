@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Triangle.Class
@@ -10,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Triangle.Class
   ( Triangle_(..), pattern Triangle_
+  , ConstructableTriangle_(..)
   , toCounterClockwiseTriangle
   , triangleSignedArea2X
   , intersectingHalfPlanes
@@ -18,6 +20,8 @@ module HGeometry.Triangle.Class
   , HasVertices(..), HasVertices'(..)
   ) where
 
+import Data.Default.Class
+import HGeometry.Ext
 import Control.Lens
 import HGeometry.HalfSpace
 import HGeometry.Line.PointAndVector
@@ -38,20 +42,30 @@ class ( Point_   point (Dimension point) (NumType point)
       , Vertex triangle ~ point
       )
      => Triangle_ triangle point | triangle -> point where
-
-  -- | Construct a triangle from its three vertices.
-  mkTriangle :: point -> point -> point -> triangle
-
   -- | Lens to access the corners of the triangle.
   corners :: Lens' triangle (Vector 3 point)
 
-    -- IndexedTraversal1' Int triangle point
+-- | Class representing constructable triangles
+class Triangle_ triangle point => ConstructableTriangle_ triangle point where
+  -- | Construct a triangle from its three vertices.
+  mkTriangle :: point -> point -> point -> triangle
 
--- | Constructs a triangle
+--------------------------------------------------------------------------------
+-- * Ext instances
+
+instance Triangle_ triangle point => Triangle_ (triangle :+ extra) point where
+  corners = core.corners
+
+instance ( ConstructableTriangle_ triangle point
+         , Default extra
+         ) => ConstructableTriangle_ (triangle :+ extra) point where
+  mkTriangle a b c = mkTriangle a b c :+ def
+
+--------------------------------------------------------------------------------
+
+-- | Pattern match on a triangle
 pattern Triangle_ :: Triangle_ triangle point => point -> point -> point -> triangle
 pattern Triangle_ u v w <- (view corners -> Vector3 u v w)
-  where
-    Triangle_ u v w = mkTriangle u v w
 {-# COMPLETE Triangle_ #-}
 {-# INLINE Triangle_ #-}
 
@@ -82,7 +96,7 @@ toCounterClockwiseTriangle :: ( Num r, Eq r
                               ) => triangle -> triangle
 toCounterClockwiseTriangle t@(Triangle_ a b c)
     | isCounterClockwise t = t
-    | otherwise            = mkTriangle a c b
+    | otherwise            = t&corners .~ Vector3 a c b
   where
     isCounterClockwise = (\x -> x == abs x) . triangleSignedArea2X
 

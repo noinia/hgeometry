@@ -5,6 +5,7 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import HGeometry.Unbounded
 import Data.Proxy
 import Data.Maybe
 import Data.Foldable
@@ -69,6 +70,7 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.Hspec.WithTempFile
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -77,20 +79,22 @@ triangles :: NonEmpty (Triangle (Point 3 Double) :+ RenderProps)
 triangles = -- scaleUniformlyBy 5 <$>
             NonEmpty.fromList $
         [ -- ground plane
-          Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props blue
-        , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ props blue
+          -- Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props blue
+        -- , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ props blue
+
         -- left side
-        , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ props green
-        , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ props green
+        -- , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ props green
+        -- , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ props green
         -- front plane
         -- , Triangle origin (Point3 1 0 0) (Point3 1 0 1) :+ red
         -- , Triangle origin (Point3 1 0 1) (Point3 0 1 1) :+ red
 
 
         -- back plane
-        , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ props orange
-        , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ props orange
-        ] <> ((\tri -> tri&extra %~ getColor
+         Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ props orange
+        -- , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ props orange
+        ]
+        <> ((\tri -> tri&extra %~ getColor
                          &vertices.coordinates %~ realToFrac
               ) <$> myTriangles
              )
@@ -106,7 +110,7 @@ myTriangles = asTrianglesAbove domain planes
 planes :: NonEmpty (Plane R :+ RenderProps)
 planes = NonEmpty.fromList
            [ Plane 0 0 (0.5)   :+ props red
-           , Plane 0 (-0.25) 1 :+ props gray
+           -- , Plane 0 (-0.25) 1 :+ props gray
            ]
 
 -- planes = points&mapped.core %~ pointToPlane
@@ -194,7 +198,8 @@ overlaySpec = describe "OverlaySpec" $ do
                            }
             )
             ( let myPlaneGraph = polygonOverlay myPolygons
-                  content'     = renderGraph (assignRenderingAttributes myPlaneGraph)
+                  getZ       _ = view (extra._1)
+                  content'     = renderGraph (assignRenderingAttributes getZ myPlaneGraph)
               in addStyleSheet opacitiesStyle $ singlePageFromContent content'
             )
   where
@@ -207,6 +212,17 @@ overlaySpec = describe "OverlaySpec" $ do
     props z s f = (z, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
 
 --------------------------------------------------------------------------------
+
+-- instance HasRenderProps (triangle :+ RenderProps) where
+--   renderProps = extra
+
+-- ‘HasRenderProps
+--                           (SimplePolygon (Point 2 R) :+ triangle)
+instance HasRenderProps extra => HasRenderProps (polygon, extra) where
+  renderProps = _2.renderProps
+
+instance HasRenderProps extra => HasRenderProps (polygon :+ extra) where
+  renderProps = extra.renderProps
 
 
 spec :: Spec
@@ -239,11 +255,6 @@ renderGraph    :: forall planeGraph vertex r r'.
                   , Edge planeGraph ~ Maybe (IpeAttributes Path r')
                   , Eq (FaceIx planeGraph)
                   , HasInnerComponents planeGraph
-                  -- , IsTransformable vertex
-                  -- , ConstructablePoint_ vertex 2 r, Ord r, Real r
-                  -- , Fractional r, Show r,
-                  -- , Show (Vertex planeGraph), Show (Face planeGraph)
-                  -- , Show (EdgeIx planeGraph), Show (Edge planeGraph)
                   ) => planeGraph -> [IpeObject r]
 renderGraph gr = theFaces <> theEdges
   where
@@ -270,8 +281,8 @@ renderGraph gr = theFaces <> theEdges
 
 renderSkeleton    :: forall s v polygon.
                      CPlaneGraph s v
-                                   (E (polygon :+ RenderProps))
-                                   (Seq.Seq (polygon :+ RenderProps))
+                                   (E polygon)
+                                   (F polygon)
                   -> CPlaneGraph s v
                                    (Maybe (IpeAttributes Path Double))
                                    (Maybe (IpeAttributes Path Double))
@@ -279,7 +290,7 @@ renderSkeleton gr = gr1&faces .~ Nothing
   where
     gr1 :: CPlaneGraph s v
                          (Maybe (IpeAttributes Path Double))
-                         (Seq.Seq (polygon :+ RenderProps))
+                         (F polygon)
     gr1 = gr&edges .~ Just def
       -- \(E defs covering) -> do
       --                     _ :+ (_ :+ (z,props)) <- minimumOn (^.extra.extra._1) defs
@@ -289,27 +300,35 @@ renderSkeleton gr = gr1&faces .~ Nothing
 
 
 
+
+
 -- | Lables the faces and edges with the attributes to use in rendering
-assignRenderingAttributes    :: forall s v polygon z.
-                                Ord z
-                             => CPlaneGraph s v
-                                              (E (polygon :+ (z, RenderProps)))
-                                              (Seq.Seq (polygon :+ (z, RenderProps)))
-                             -> CPlaneGraph s v
-                                              (Maybe (IpeAttributes Path Double))
-                                              (Maybe (IpeAttributes Path Double))
-assignRenderingAttributes gr = gr1&faces %~ \xs -> do x <- minimumOn (^.extra._1) xs
-                                                      x^.extra._2.faceAttrs
+--
+-- the z-values attached to the edgess/faces determine how to render the edge/face.
+-- in particular, we take the value corresponding to the smallest z-value.
+assignRenderingAttributes         :: forall s v polygon z r.
+                                     (HasRenderProps polygon, Ord z, r ~ NumType polygon)
+                                  => (Point 2 r -> polygon -> z)
+                                  -> CPlaneGraph s v
+                                                   (E polygon)
+                                                   (F polygon)
+                                  -> CPlaneGraph s v
+                                                   (Maybe (IpeAttributes Path Double))
+                                                   (Maybe (IpeAttributes Path Double))
+assignRenderingAttributes getZ gr = gr1&faces %~ \(F covering mp) ->
+                                                   do p    <- mp
+                                                      poly <- minimumOn (getZ p) covering
+                                                      poly^.faceAttrs
   where
     gr1 :: CPlaneGraph s v
                          (Maybe (IpeAttributes Path Double))
-                         (Seq.Seq (polygon :+ (z, RenderProps)))
-    gr1 = gr&edges %~ \(E defs covering) -> do
-                          _ :+ (_ :+ (z,props)) <- minimumOn (^.extra.extra._1) defs
-                          _ :+ (zCovering,_)    <- minimumOn (^.extra._1) covering
-                          if z <= zCovering then props^.edgeAttrs
-                                            else Nothing
-
+                         (F polygon)
+    gr1 = gr&edges %~ \(E defs covering p) -> do
+                          _ :+ definer <- minimumOn (getZ p . view extra) defs
+                          let zCovering = maybe Top (ValT . getZ p) $ minimumOn (getZ p) covering
+                          if ValT (getZ p definer) <= zCovering
+                            then definer^.renderProps.edgeAttrs
+                            else Nothing
   -- We compute the first defining polygon and its z-value, and the
   -- props corresponding to this edge. Similarly, we compute the
   -- minimum zvalue of the covering regions. If the covering z-value
@@ -318,6 +337,8 @@ assignRenderingAttributes gr = gr1&faces %~ \xs -> do x <- minimumOn (^.extra._1
 
 -- TODO: maybe we still want to store the z-value, and still draw them in ipe in
 -- back to front order.
+
+-- TODO: we are computing getZ on the minimum twice. That seems wasteful
 
 
 -- | Compute the minimum using a given function
@@ -349,6 +370,16 @@ bar = fromIntersectingSegments mySegments
 -}
 --------------------------------------------------------------------------------
 
+
+newtype SegmentWith vertex extra = SegmentWith (ClosedLineSegment vertex :+ extra)
+  deriving newtype (Show)
+
+instance Eq vertex => Eq (SegmentWith vertex extra) where
+  (SegmentWith (segA :+ _)) == (SegmentWith (segB :+ _)) = segA == segB
+instance Ord vertex => Ord (SegmentWith vertex extra) where
+  (SegmentWith (segA :+ _)) `compare` (SegmentWith (segB :+ _)) = segA `compare` segB
+
+
 -- | Given a set of polygons, constructs a plane graph whose vertices,
 -- edges, and faces are tagged with the polygons that cover that face.
 --
@@ -364,11 +395,13 @@ polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
                            , Fractional r, Ord r
                            , Ord vertex
                            , HasIntersectionWith (Point 2 r) simplePolygon
+
+                           , Show r, Show vertex, Show simplePolygon
                            )
                         => nonEmpty simplePolygon
                         -> CPlaneGraph s (V simplePolygon)
                                          (E simplePolygon)
-                                         (Seq.Seq simplePolygon)
+                                         (F simplePolygon)
 polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCoveringVertices p)
   where
     segs :: NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
@@ -381,21 +414,26 @@ polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCove
 
     gr2 :: CPlaneGraph s (Point 2 r :+ Seq.Seq vertex)
                          (E simplePolygon)
-                         (Seq.Seq simplePolygon)
+                         (F simplePolygon)
     gr2 = gr1&faces .@~ polygonsCoveringFaces
-
 
     outerId = outerFaceId gr
 
     polygonsCoveringFaces fi
-      | fi == outerId = mempty
-      | otherwise     = filter' (pointIn fi `intersects`) polygons
+      | fi == outerId = F mempty Nothing -- its impossible for polygons to cover the outerface
+      | otherwise     = let p        = pointIn fi
+                            covering = filter' (p `intersects`) polygons
+                        in F covering (Just p)
 
     filter' p = foldMap (\x -> if p x then Seq.singleton x else mempty)
 
-    pointIn fi = pointInteriorTo $ gr^?!interiorFacePolygonAt fi
+    pointIn fi = pointInteriorTo $ traceShowWith ("pointIn",outerFaceId gr1, numFaces gr1, fi," -> ",)
+                 $ gr^?!interiorFacePolygonAt (traceShowWith ("PI",) fi)
 
-    polygonsCoveringEdges d defs = E defs $ filter' (midPoint d `intersects`) polygons
+    polygonsCoveringEdges d defs = let p        = midPoint d
+                                       covering = filter' (midPoint d `intersects`) polygons
+                                   in E defs covering p
+
     midPoint d = let ClosedLineSegment s t = (^.asPoint) <$> gr^?!edgeSegmentAt d
                  in s .+^ ((t .-. s) ^/ 2)
 
@@ -505,16 +543,27 @@ fromIntersectingSegments      :: forall s nonEmpty ix lineSegment segment r poin
                                  , Ord ix
                                  , HasOnSegment lineSegment 2
                                  , StartPointOf lineSegment ~ EndPointOf lineSegment
+
+
+                                 , Ord lineSegment
                                  )
                               => nonEmpty lineSegment
                               -> CPlaneGraph s (Point 2 r :+ Seq.Seq point)
                                                (ViewL1 lineSegment)
                                                ()
-fromIntersectingSegments segs = gr&edges.mapped %~ view theValue
+fromIntersectingSegments segs = fromIntersections segs (intersections segs)
+
+{-
+  gr&edges.mapped %~ view theValue
   where
     segs' = imap ByIndex segs
     gr    :: CPlaneGraph s _ _ _
     gr    = fromIntersections segs' (intersections segs')
+-}
+-- OK: so there is an issue if we have two copies of the same segment somehow.
+-- I think using the ID's  makes that into an actual issue.
+
+
 
 ----------------------------------------
 
@@ -641,34 +690,69 @@ base <>> new = foldr (uncurry MonoidalNEMap.insert) base $ Map.toAscList new
 
 --------------------------------------------------------------------------------
 
+instance Default (Triangle (Point 3 Double)) where
+  def = undefined -- this is nonense
+
+
 -- | Given a camera and a set of colored triangles in R^3, renders the
 -- triangles as they are visible from the camera
-renderToIpe       :: forall set point r.
-                     ( Foldable1 set, Functor set
-                     , Point_ point 3 r, Real r, Fractional r
-                     )
-                   => Camera Double -> set (Triangle point :+ RenderProps) -> [IpeObject R]
+renderToIpe              :: forall set triangle point r.
+                            ( Foldable1 set, Functor set
+                            , Triangle_ triangle point
+                            , Point_ point 3 r, Real r, Fractional r
+                            , HasRenderProps triangle
+
+                            , Default triangle
+                            , Show triangle
+                            )
+                          => Camera Double
+                         -> set triangle
+                         -> [IpeObject R]
 renderToIpe camera scene =
-    [ -- iO $ ipeGroup (renderGraph (assignRenderingAttributes subdiv)) ! attr SLayer "render"
-     iO $ ipeGroup (renderGraph (renderSkeleton subdiv))            ! attr SLayer "skeleton"
+    replicate k (iO $ defIO (Point2 5 5))
+    <>
+    [ iO $ ipeGroup (renderGraph (renderSkeleton subdiv))                 ! attr SLayer "skeleton"
+    -- -- , iO $ ipeGroup (renderGraph (assignRenderingAttributes getZ subdiv)) ! attr SLayer "render"
     ]
+    -- drawGraphWithDarts subdiv
   where
     triangles = render camera scene
-    subdiv    = polygonOverlay $ triangles&mapped.core %~ fromTriangle
-    -- sudbdiv    = traceShow (numEdges subdiv') subdiv'
+    subdiv    = trace'  $
+      polygonOverlay $ triangles&mapped.core %~ fromTriangle
+
+    getZ p poly = 3
+
+    k = traceShowWith ("withNums", numVertices subdiv, numEdges subdiv,
+                      ) $ numFaces subdiv
+
+
+trace' sdiv = trace ( unlines $ "edges:" : map show (sdiv^..edgeSegments.withIndex))
+                    (trace "before" sdiv)
+
+-- data ProjectedTriangle triangle =
+--   ProjectedTriangle { _triangle2D :: Triangle (Point 2 R)
+--                     , _triangle3D :: Triangle point
+
+--                     }
+
+
+-- zValueAtEdge :: Point 2 r ->
+
 
 -- | Render a scene; i..e a set of triangles
 --
 -- this intermediately uses doubles to apply the camera transform
-render        :: forall point r set extra. (Functor set, Point_ point 3 r, Real r, Fractional r)
+render        :: forall triangle point r set.
+                 ( Functor set
+                 , Triangle_ triangle point, Point_ point 3 r
+                 , Real r, Fractional r
+                 )
               => Camera Double
-              -> set (Triangle point :+ extra)
-              -> set (Triangle (Point 2 R) :+ extra)
-render camera = over (mapped.core) $ \triangle ->
-    triangle&vertices %~
-            f2 . projectPoint . transformBy (cameraTransform camera') . f3
+              -> set triangle
+              -> set (Triangle (Point 2 R) :+ triangle)
+render camera = fmap $ \orig@(Triangle_ a b c) -> Triangle (f a) (f b) (f c) :+ orig
   where
-    camera' = realToFrac <$> camera
+    f = f2 . projectPoint . transformBy (cameraTransform camera) . f3
 
     f2 :: Point 2 Double -> Point 2 R
     f2 = over coordinates realToFrac
