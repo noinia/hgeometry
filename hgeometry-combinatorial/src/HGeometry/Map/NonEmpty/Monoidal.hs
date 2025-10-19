@@ -18,7 +18,10 @@ module HGeometry.Map.NonEmpty.Monoidal
   , mapAccumWithKey
 
   , insert, insertReplace
-  , assocs
+
+  , assocs, toAscList, keysSet
+
+
   , (!?), (!)
   ) where
 
@@ -108,6 +111,22 @@ mapAccumWithKey =
 assocs :: MonoidalNEMap k v -> NonEmpty (k, v)
 assocs = NEMap.assocs . getNEMap
 {-# INLINE assocs #-}
+
+-- | Return all key/value pairs in the map in ascending key order.
+--
+-- \(O(n)\)
+toAscList :: MonoidalNEMap k v -> NonEmpty (k, v)
+toAscList = NEMap.toAscList . getNEMap
+{-# INLINE toAscList  #-}
+
+-- | Return all keys in ascending order
+--
+-- \(O(n)\)
+keysSet :: MonoidalNEMap k v -> NESet k
+keysSet = NEMap.keysSet . getNEMap
+{-# INLINE keysSet #-}
+
+--------------------------------------------------------------------------------
 
 -- | Insert an new key,value pair into the Map
 --

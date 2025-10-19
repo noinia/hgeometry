@@ -64,11 +64,11 @@ import qualified HGeometry.Set.Util as SS -- status struct
 -- | Compute all intersections
 --
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
-intersections :: forall set lineSegment seg point r.
+intersections :: forall bag lineSegment seg point r.
                  ( LineSegment_ lineSegment point
                  , Point_ point 2 r
                  , Ord r, Fractional r
-                 , Foldable set, Functor set
+                 , Foldable bag, Functor bag
 
                  , Eq lineSegment
                  , HasOnSegment lineSegment 2
@@ -76,7 +76,7 @@ intersections :: forall set lineSegment seg point r.
                  , LineSegment_ seg point
                  , StartPointOf lineSegment ~ EndPointOf lineSegment
                  )
-              => set lineSegment -> Intersections r lineSegment
+              => bag lineSegment -> Intersections r lineSegment
 intersections = fmap unflipSegs . intersections' . fmap tagFlipped
 
 
