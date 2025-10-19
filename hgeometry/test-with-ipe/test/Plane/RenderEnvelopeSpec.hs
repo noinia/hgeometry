@@ -54,6 +54,7 @@ import HGeometry.Properties
 import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1, singletonL1)
 import HGeometry.Transformation
 import HGeometry.Triangle
+import HGeometry.Interval.Class
 import HGeometry.Vector
 import HGeometry.VoronoiDiagram
 import HGeometry.VoronoiDiagram qualified as VD
@@ -79,20 +80,21 @@ triangles :: NonEmpty (Triangle (Point 3 Double) :+ RenderProps)
 triangles = -- scaleUniformlyBy 5 <$>
             NonEmpty.fromList $
         [ -- ground plane
-          -- Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props blue
-        -- , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ props blue
+          Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props blue
+        , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ props blue
 
         -- left side
-        -- , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ props green
-        -- , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ props green
+        , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ props green
+        , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ props green
+
         -- front plane
         -- , Triangle origin (Point3 1 0 0) (Point3 1 0 1) :+ red
         -- , Triangle origin (Point3 1 0 1) (Point3 0 1 1) :+ red
 
 
         -- back plane
-         Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ props orange
-        -- , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ props orange
+        , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ props orange
+        , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ props orange
         ]
         <> ((\tri -> tri&extra %~ getColor
                          &vertices.coordinates %~ realToFrac
@@ -370,14 +372,56 @@ bar = fromIntersectingSegments mySegments
 -}
 --------------------------------------------------------------------------------
 
-
+{-
 newtype SegmentWith vertex extra = SegmentWith (ClosedLineSegment vertex :+ extra)
   deriving newtype (Show)
 
+_unSegmentWith :: Iso' (SegmentWith vertex extra) (ClosedLineSegment vertex :+ extra)
+_unSegmentWith = coerced
+
+type instance NumType      (SegmentWith vertex extra) = NumType vertex
+type instance Dimension    (SegmentWith vertex extra) = Dimension vertex
+type instance StartPointOf (SegmentWith vertex extra) = StartPointOf (ClosedLineSegment vertex)
+type instance EndPointOf   (SegmentWith vertex extra) = EndPointOf   (ClosedLineSegment vertex)
+
+instance HasStart (SegmentWith vertex extra) vertex where
+  start = _unSegmentWith.start
+instance HasEnd (SegmentWith vertex extra) vertex where
+  end = _unSegmentWith.end
+instance HasStartPoint (SegmentWith vertex extra) (EndPoint Closed vertex) where
+  startPoint = _unSegmentWith.startPoint
+instance HasEndPoint (SegmentWith vertex extra) (EndPoint Closed vertex) where
+  endPoint = _unSegmentWith.endPoint
+
+instance Point_ vertex d r => IntervalLike_      (SegmentWith vertex extra) vertex
+instance Point_ vertex d r => LineSegment_       (SegmentWith vertex extra) vertex
+--instance Point_ vertex d r => ClosedLineSegment_ (SegmentWith vertex extra) vertex
+instance (Point_ vertex 2 r, Num r) => HasOnSegment       (SegmentWith vertex extra) 2 where
+  onSegment q seg = onSegment q (seg^._unSegmentWith)
+
+instance HasIntersectionWith (ClosedLineSegment vertex :+ simplePolygon)
+                             (ClosedLineSegment vertex :+ simplePolygon)
+         => HasIntersectionWith (SegmentWith vertex simplePolygon)
+                             (SegmentWith vertex simplePolygon) where
+  segA `intersects` segB = (segA^._unSegmentWith) `intersects` (segA^._unSegmentWith)
+
+instance IsIntersectableWith (ClosedLineSegment vertex :+ simplePolygon)
+                             (ClosedLineSegment vertex :+ simplePolygon)
+         => IsIntersectableWith (SegmentWith vertex simplePolygon)
+                                (SegmentWith vertex simplePolygon) where
+  segA `intersect` segB = (segA^._unSegmentWith) `intersect` (segA^._unSegmentWith)
+
+type instance Intersection (SegmentWith vertex extra) (SegmentWith vertex extra) =
+  Intersection (ClosedLineSegment vertex :+ extra) (ClosedLineSegment vertex :+ extra)
+
 instance Eq vertex => Eq (SegmentWith vertex extra) where
   (SegmentWith (segA :+ _)) == (SegmentWith (segB :+ _)) = segA == segB
+
 instance Ord vertex => Ord (SegmentWith vertex extra) where
   (SegmentWith (segA :+ _)) `compare` (SegmentWith (segB :+ _)) = segA `compare` segB
+-}
+
+
 
 
 -- | Given a set of polygons, constructs a plane graph whose vertices,
@@ -397,6 +441,7 @@ polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
                            , HasIntersectionWith (Point 2 r) simplePolygon
 
                            , Show r, Show vertex, Show simplePolygon
+                           , Eq simplePolygon
                            )
                         => nonEmpty simplePolygon
                         -> CPlaneGraph s (V simplePolygon)
@@ -405,7 +450,8 @@ polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
 polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCoveringVertices p)
   where
     segs :: NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
-    segs = foldMap1 (\poly -> (:+ poly) <$> toNonEmptyOf outerBoundaryEdgeSegments poly) polygons
+    segs = foldMap1 (\poly -> (:+ poly) <$> toNonEmptyOf outerBoundaryEdgeSegments poly
+                    ) polygons
 
     gr  = fromIntersectingSegments segs
 
@@ -545,21 +591,33 @@ fromIntersectingSegments      :: forall s nonEmpty ix lineSegment segment r poin
                                  , StartPointOf lineSegment ~ EndPointOf lineSegment
 
 
-                                 , Ord lineSegment
+                                 , Eq lineSegment -- FIXME
                                  )
                               => nonEmpty lineSegment
                               -> CPlaneGraph s (Point 2 r :+ Seq.Seq point)
                                                (ViewL1 lineSegment)
                                                ()
 fromIntersectingSegments segs = fromIntersections segs (intersections segs)
-
 {-
   gr&edges.mapped %~ view theValue
   where
+    -- collect the seggments.
+    segs' = foldMap (\seg -> MonoidalNEMap.singleton (key seg) (NonEmpty.singleton seg)
+                    ) segs
+    key (LineSegment_ s t) | s <= t = Vector2 s t
+                           | otherwise = Vector
+
+
+
+
     segs' = imap ByIndex segs
+
+
+    -- we have to collect the segments into a set; i.e. no duplicates are allowed.
     gr    :: CPlaneGraph s _ _ _
     gr    = fromIntersections segs' (intersections segs')
 -}
+
 -- OK: so there is an issue if we have two copies of the same segment somehow.
 -- I think using the ID's  makes that into an actual issue.
 
@@ -584,7 +642,9 @@ fromIntersections             :: forall s nonEmpty lineSegment r point planeGrap
                                    , Point_ point 2 r, Ord r, Num r
                                    , IsIntersectableWith lineSegment lineSegment
                                    , OrdArounds lineSegment
-                                   , Ord lineSegment
+                                   -- , Ord lineSegment
+
+                                   , Eq lineSegment -- FIXME: not sure where this is coming from
 
                                    , planeGraph ~ CPlaneGraph s (Point 2 r :+ Seq.Seq point)
                                                                 (ViewL1 lineSegment)
@@ -612,9 +672,27 @@ fromIntersections segs inters = fromAdjacencyLists adjLists
                                ) segs
                     <>> inters
 
-    -- | Computes the vertices along each segment
-    verticesBySegment :: MonoidalNEMap lineSegment (ViewL1 (VertexIx planeGraph))
-    verticesBySegment = imap collect $ interiorIntersectionsBySegment segs inters
+    -- | Compute, for each input segment its canonical line segment;
+    -- i.e. if there are duplicate segments; we all represent them using the same ClosedLineSegment
+    canonicalSegmentMap :: MonoidalNEMap (ClosedLineSegment (Point 2 r)) (ViewL1 lineSegment)
+    canonicalSegmentMap =
+      foldMap1 (\seg -> MonoidalNEMap.singleton (toKey seg) (singletonL1 seg)) segs
+
+    toKey seg = let s = seg^.start.asPoint
+                    t = seg^.end.asPoint
+                in if s <= t then ClosedLineSegment s t else ClosedLineSegment t s
+
+    -- the canonical segments themselves
+    canonicalSegments = MonoidalNEMap.keysSet canonicalSegmentMap
+
+    -- | Computes the vertices along each segment.
+    --
+    -- We actually represent every original input segment by a canonical ClosedLineSegment
+    -- to appropriately handle duplicate input segments.
+    verticesBySegment :: MonoidalNEMap (ClosedLineSegment (Point 2 r))
+                                       (ViewL1 (VertexIx planeGraph))
+    verticesBySegment =
+        imap collect $ interiorIntersectionsBySegment toKey canonicalSegments inters
       where
         collect seg interiorPts = (vertexMapping MonoidalNEMap.!) <$>
               (seg^.start.asPoint) :<< (interiorPts' Seq.|> seg^.end.asPoint)
@@ -637,13 +715,17 @@ fromIntersections segs inters = fromAdjacencyLists adjLists
                                 (MonoidalNEMap (VertexIx planeGraph) (ViewL1 lineSegment))
     neighbours = ifoldMap1 collect verticesBySegment
       where
-        collect seg verts@(_ :<< rest') = case asViewL1 rest' of
+        collect canonicalSeg verts@(_ :<< rest') = case asViewL1 rest' of
             Nothing   ->
               error "fromIntersections. absurd. every seg should have at least 2 vertices"
             Just rest -> fold1 $ zipWith f verts rest
           where
-            f u v = MonoidalNEMap.singleton u (MonoidalNEMap.singleton v $ singletonL1 seg)
-                 <> MonoidalNEMap.singleton v (MonoidalNEMap.singleton u $ singletonL1 seg)
+            -- This canonical segment represents a bunch of actual segments, associate
+            -- the vertices with those line segments (rather than the canonical one)
+            theSegs = canonicalSegmentMap MonoidalNEMap.! canonicalSeg
+
+            f u v = MonoidalNEMap.singleton u (MonoidalNEMap.singleton v theSegs)
+                 <> MonoidalNEMap.singleton v (MonoidalNEMap.singleton u theSegs)
 
     -- I think this already automatically takes care of colinear semgents as well, as we
     -- are using a NESet to collect the neighbours of each vertex.
@@ -663,20 +745,24 @@ fromIntersections segs inters = fromAdjacencyLists adjLists
                       Just (x :<< rest) -> x Seq.<| rest
 
 
+
 -- | Computes the interior intersections on each segment.
 --
 -- O((n+k)\log n)
-interiorIntersectionsBySegment             :: ( Ord lineSegment, Foldable1 nonEmpty)
-                                           => nonEmpty lineSegment
-                                              -- ^ all input segments
-                                           -> Intersections r lineSegment
-                                           -> MonoidalNEMap lineSegment (Seq.Seq (Point 2 r))
-interiorIntersectionsBySegment segs inters =
+interiorIntersectionsBySegment                   :: ( Ord lineSegment
+                                                    , Foldable1 nonEmpty)
+                                                 => (richSegment -> lineSegment)
+                                                 -> nonEmpty lineSegment
+                                                    -- ^ all input segments
+                                                 -> Intersections r richSegment
+                                                 -> MonoidalNEMap lineSegment (Seq.Seq (Point 2 r))
+interiorIntersectionsBySegment toKey segs inters =
         foldMap1 (flip MonoidalNEMap.singleton mempty) segs
     <>> coerce (ifoldMap construct inters)
   where
-    construct p assoc = foldMap (\seg -> MonoidalMap.singleton (coerce seg) (Seq.singleton p))
-                                (assoc^.interiorTo)
+    construct p assoc =
+      foldMap (\seg -> MonoidalMap.singleton (toKey $ coerce seg) (Seq.singleton p))
+              (assoc^.interiorTo)
 
 
 -- | Assign each element in the map a unique Integer key (in the range \([0,n)\) )
@@ -703,22 +789,21 @@ renderToIpe              :: forall set triangle point r.
                             , HasRenderProps triangle
 
                             , Default triangle
-                            , Show triangle
+                            , Show triangle, Eq triangle
                             )
                           => Camera Double
                          -> set triangle
                          -> [IpeObject R]
 renderToIpe camera scene =
-    replicate k (iO $ defIO (Point2 5 5))
-    <>
+    -- replicate k (iO $ defIO (Point2 5 5))
+    -- <>
     [ iO $ ipeGroup (renderGraph (renderSkeleton subdiv))                 ! attr SLayer "skeleton"
-    -- -- , iO $ ipeGroup (renderGraph (assignRenderingAttributes getZ subdiv)) ! attr SLayer "render"
+    , iO $ ipeGroup (renderGraph (assignRenderingAttributes getZ subdiv)) ! attr SLayer "render"
     ]
     -- drawGraphWithDarts subdiv
   where
     triangles = render camera scene
-    subdiv    = trace'  $
-      polygonOverlay $ triangles&mapped.core %~ fromTriangle
+    subdiv    = polygonOverlay $ triangles&mapped.core %~ fromTriangle
 
     getZ p poly = 3
 
