@@ -244,6 +244,35 @@ spec =
                          in transformBy t tris
           in addStyleSheet opacitiesStyle $ singlePageFromContent content'
         )
+      testRenderObj [osp|data/test-with-ipe/golden/Render/cube/|]
+                    [osp|cube.obj|]
+      testRenderObj [osp|data/test-with-ipe/golden/Render/cornellbox/|]
+                    [osp|CornellBox-Mirror.obj|]
+
+
+testRenderObj                :: OsPath -> OsPath -> Spec
+testRenderObj objDir objFile = do
+    triangles <- runIO $ Wavefront.fromFile (objDir </> objFile) >>= \case
+                           Left err  -> error err
+                           Right obj -> case NonEmpty.nonEmpty (toList $ Wavefront.allTriangles obj) of
+                             Nothing  -> error "no triangles?"
+                             Just res -> pure res
+
+    goldenWith [osp|data/test-with-ipe/golden/Plane/|]
+        (ipeFileGolden { name = objFile
+                       }
+        )
+        ( let triangles'= triangles&mapped %~ (:+ def @RenderProps) -- assign default render properties
+
+              cornellCamera = blenderCamera
+              -- somehow rotate the scene
+
+              content'  = let tris = renderToIpe cornellCamera triangles'
+                              t    = uniformScaling 1000
+                                   --- fitToBoxTransform screenBox  tris -- TODO
+                          in transformBy t tris
+          in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+        )
 
 
 --------------------------------------------------------------------------------
@@ -778,7 +807,8 @@ base <>> new = foldr (uncurry MonoidalNEMap.insert) base $ Map.toAscList new
 --------------------------------------------------------------------------------
 
 
-
+instance Default (Triangle (Point 3 Float)) where
+  def = undefined
 instance Default (Triangle (Point 3 Double)) where
   def = undefined
 instance Default ProjectedTriangle where
@@ -814,6 +844,7 @@ renderToIpe camera scene =
                                    let poly = fromTriangle $ toTriangle2 pt
                                    in poly :+ (pt, orig)
 
+    -- | Compute the z-coordinate at the given location. We render the closest triangle
     getZ         :: Point 2 R -> triangle2d :+ (ProjectedTriangle, triangle) -> R
     getZ q poly = case supportingPlane (poly^.extra._1.triangle3) of
       Nothing -> error "getZ: unhandled degeneracy; we hit the side of the triangle"
@@ -826,9 +857,6 @@ supportingPlane   :: forall triangle point r.
 supportingPlane t = asNonVerticalHyperPlane @(HyperPlane 3 r) $ hyperPlaneThrough (t^.corners)
 
 
-
-trace' sdiv = trace ( unlines $ "edges:" : map show (sdiv^..edgeSegments.withIndex))
-                    (trace "before" sdiv)
 
 
 -- | Represent the projection of a 3D triangle in 2D space.  i.e. this
@@ -844,13 +872,10 @@ triangle3 = coerced
 type instance NumType   ProjectedTriangle = R
 type instance Dimension ProjectedTriangle = 2
 
+-- | Renders a Projected Triangle as a 2D Triangle
 toTriangle2 :: ProjectedTriangle -> Triangle (Point 2 R)
 toTriangle2 = fmap projectPoint . coerce
 
--- instance Triangle_ ProjectedTriangle (Point 2 R) where
---   corners = lens (\t3 -> )
-
--- zValueAtEdge :: Point 2 r ->
 
 
 -- | Render a scene; i..e a set of triangles

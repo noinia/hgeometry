@@ -41,15 +41,24 @@ fromFile fp = decodeUtf fp >>= Codec.Wavefront.IO.fromFile
 --------------------------------------------------------------------------------
 
 
--- | Produce a vector with all Triangles in the OBJ File
-allTriangles        :: WavefrontOBJ -> Vector.Vector (Triangle (Point 3 Float))
-allTriangles objFile = Vector.mapMaybe (toTriangle . elValue) $ objFaces objFile
+-- | Produce a vector with all Triangles in the OBJ File. This will
+-- assume all faces are convex, and convert them into triangles as
+-- well.
+allTriangles        :: WavefrontOBJ -> [Triangle (Point 3 Float)]
+
+allTriangles objFile = foldMap (toTriangle . elValue) $ objFaces objFile
   where
     toTriangle = \case
-      Face.Triangle i j k -> Just $ Triangle (vtx i) (vtx j) (vtx k)
-      _                   -> Nothing
+      Face.Face i j k is  -> let vi  = vtx i
+                                 vj  = vtx j
+                                 vk  = vtx k
+                                 vis = map vtx is
+                             in Triangle vi vj vk : map (Triangle vi vk) vis
 
     vtx i = toPoint $ objLocations objFile Vector.! (Face.faceLocIndex i)
 
-    toPoint (Location x y z _w) = Point3 x y z
+    toPoint (Location x y z _w) = Point3 x z y
     -- we ignore the _w value, if they exist
+    --
+    -- TODO: not sure why, but at least for the Cornel box we seem to
+    -- need to flip the y and z coordinates.
