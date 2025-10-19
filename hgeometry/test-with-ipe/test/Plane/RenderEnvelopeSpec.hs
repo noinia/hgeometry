@@ -5,6 +5,7 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import HGeometry.HyperPlane
 import HGeometry.Unbounded
 import Data.Proxy
 import Data.Maybe
@@ -30,7 +31,8 @@ import Data.Set qualified as Set
 import Data.Set.NonEmpty (NESet)
 import Data.Set.NonEmpty qualified as NESet
 import Golden
-import HGeometry.Box as Box
+import HGeometry.Box (Box(..), Rectangle, Corners(..))
+import HGeometry.Box qualified as Box
 import HGeometry.Ext
 import HGeometry.Foldable.Util
 import HGeometry.Graphics.Camera
@@ -473,8 +475,7 @@ polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCove
 
     filter' p = foldMap (\x -> if p x then Seq.singleton x else mempty)
 
-    pointIn fi = pointInteriorTo $ traceShowWith ("pointIn",outerFaceId gr1, numFaces gr1, fi," -> ",)
-                 $ gr^?!interiorFacePolygonAt (traceShowWith ("PI",) fi)
+    pointIn fi = pointInteriorTo $ gr^?!interiorFacePolygonAt fi
 
     polygonsCoveringEdges d defs = let p        = midPoint d
                                        covering = filter' (midPoint d `intersects`) polygons
@@ -776,7 +777,11 @@ base <>> new = foldr (uncurry MonoidalNEMap.insert) base $ Map.toAscList new
 
 --------------------------------------------------------------------------------
 
+
+
 instance Default (Triangle (Point 3 Double)) where
+  def = undefined
+instance Default ProjectedTriangle where
   def = undefined -- this is nonense
 
 
@@ -788,8 +793,10 @@ renderToIpe              :: forall set triangle point r.
                             , Point_ point 3 r, Real r, Fractional r
                             , HasRenderProps triangle
 
-                            , Default triangle
                             , Show triangle, Eq triangle
+
+                            -- , r ~ R
+                            , Default triangle -- TODO: remove this
                             )
                           => Camera Double
                          -> set triangle
@@ -803,23 +810,45 @@ renderToIpe camera scene =
     -- drawGraphWithDarts subdiv
   where
     triangles = render camera scene
-    subdiv    = polygonOverlay $ triangles&mapped.core %~ fromTriangle
+    subdiv    = polygonOverlay $ triangles&mapped %~ \(pt :+ orig) ->
+                                   let poly = fromTriangle $ toTriangle2 pt
+                                   in poly :+ (pt, orig)
 
-    getZ p poly = 3
+    getZ         :: Point 2 R -> triangle2d :+ (ProjectedTriangle, triangle) -> R
+    getZ q poly = case supportingPlane (poly^.extra._1.triangle3) of
+      Nothing -> error "getZ: unhandled degeneracy; we hit the side of the triangle"
+      Just h  -> evalAt q h
 
-    k = traceShowWith ("withNums", numVertices subdiv, numEdges subdiv,
-                      ) $ numFaces subdiv
+-- | Get the supporting plane of the triangle (as a non-vertical plane)
+supportingPlane   :: forall triangle point r.
+                     (Triangle_ triangle point, Point_ point 3 r, Fractional r, Eq r)
+                  => triangle -> Maybe (Plane r)
+supportingPlane t = asNonVerticalHyperPlane @(HyperPlane 3 r) $ hyperPlaneThrough (t^.corners)
+
 
 
 trace' sdiv = trace ( unlines $ "edges:" : map show (sdiv^..edgeSegments.withIndex))
                     (trace "before" sdiv)
 
--- data ProjectedTriangle triangle =
---   ProjectedTriangle { _triangle2D :: Triangle (Point 2 R)
---                     , _triangle3D :: Triangle point
 
---                     }
+-- | Represent the projection of a 3D triangle in 2D space.  i.e. this
+-- triangle acts as a triangle in R^2, but also has the information
+-- from where it came from.
+newtype ProjectedTriangle = ProjectedTriangle {_triangle3 :: Triangle (Point 3 R) }
+  deriving stock (Show,Eq)
 
+-- | Access the 3D triagnle
+triangle3 :: Iso' ProjectedTriangle (Triangle (Point 3 R))
+triangle3 = coerced
+
+type instance NumType   ProjectedTriangle = R
+type instance Dimension ProjectedTriangle = 2
+
+toTriangle2 :: ProjectedTriangle -> Triangle (Point 2 R)
+toTriangle2 = fmap projectPoint . coerce
+
+-- instance Triangle_ ProjectedTriangle (Point 2 R) where
+--   corners = lens (\t3 -> )
 
 -- zValueAtEdge :: Point 2 r ->
 
@@ -834,16 +863,18 @@ render        :: forall triangle point r set.
                  )
               => Camera Double
               -> set triangle
-              -> set (Triangle (Point 2 R) :+ triangle)
-render camera = fmap $ \orig@(Triangle_ a b c) -> Triangle (f a) (f b) (f c) :+ orig
+              -> set (ProjectedTriangle :+ triangle)
+render camera = fmap $ \orig@(Triangle_ a b c) ->
+                         ProjectedTriangle (Triangle (f a) (f b) (f c)) :+ orig
   where
-    f = f2 . projectPoint . transformBy (cameraTransform camera) . f3
+    f = f2 . transformBy (cameraTransform camera) . f3
 
-    f2 :: Point 2 Double -> Point 2 R
+    f2 :: Point 3 Double -> Point 3 R
     f2 = over coordinates realToFrac
 
     f3   :: point -> Point 3 Double
     f3 p = over coordinates realToFrac (p^.asPoint)
+    -- TODO: clean up
 
 
 -- next thing to do is somehow make it so that 'render' actually computes
