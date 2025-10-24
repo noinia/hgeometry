@@ -5,12 +5,16 @@
 module Plane.RenderEnvelopeSpec
   where
 
+import Data.Colour.SRGB (RGB(..))
 import HGeometry.HyperPlane
 import HGeometry.Unbounded
 import Data.Proxy
 import Data.Maybe
 import Data.Foldable
 import Wavefront qualified
+import Wavefront(elValue, elMtl)
+import Codec.Wavefront.Element qualified as Element
+import Codec.Wavefront.Material.Type qualified as Material
 import HGeometry.ByIndex
 import Control.Lens
 import Control.Monad
@@ -262,8 +266,7 @@ testRenderObj objDir objFile = do
         (ipeFileGolden { name = objFile
                        }
         )
-        ( let triangles'= triangles&mapped %~ (:+ def @RenderProps) -- assign default render properties
-
+        ( let triangles'= triangles&mapped %~ \el -> el^.elValue :+ fromMaterial (el^.elMtl)
               cornellCamera = blenderCamera
               -- somehow rotate the scene
 
@@ -813,7 +816,38 @@ instance Default (Triangle (Point 3 Double)) where
   def = undefined
 instance Default ProjectedTriangle where
   def = undefined -- this is nonense
+instance Default Material.Material where
+  def = Material.defaultMaterial "default"
 
+instance (Default material, Default a) => Default (Element.ElementF material a) where
+  def = Element.Element { Element.elObject         = Nothing
+                        , Element.elGroups         = []
+                        , Element.elMtl            = def
+                        , Element.elSmoothingGroup = 0
+                        , Element.elValue          = def
+                        }
+
+fromMaterial    :: Maybe Material.Material -> RenderProps
+fromMaterial mm = case mRefl of
+    Nothing   -> def
+    Just refl -> case refl of
+      Material.ReflexicityRGB rgb -> let c = IpeColor (Valued $ convert rgb)
+                                     in RenderProps def (Just $ attr SFill c)
+  where
+    mRefl = do m <- mm
+               guard (traceShowId (Material.materialName m) `elem` [ "leftWall"
+                                                     , "rightWall"
+                                                     , "floor"
+                                                     , "ceiling"
+                                                     , "tallBox"
+                                                     , "shortBox"
+                                                     ])
+               Material.ambientReflexivity m
+
+
+
+convert                      :: Material.RGB -> RGB Double
+convert (Material.RGB r g b) = realToFrac <$> RGB r g b
 
 -- | Given a camera and a set of colored triangles in R^3, renders the
 -- triangles as they are visible from the camera
