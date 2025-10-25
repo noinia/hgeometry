@@ -197,28 +197,6 @@ fromTriangle :: Point_ vertex 2 r => Triangle vertex -> SimplePolygon vertex
 fromTriangle = uncheckedFromCCWPoints
 -- TODO: we should just coerce to a SimplePolygonF (Cyclic Vector3)
 -}
---------------------------------------------------------------------------------
--- TODO: Move to a PlaneGraph.RenderOverlaySpec module
-
-overlaySpec :: Spec
-overlaySpec = describe "OverlaySpec" $ do
-      goldenWith [osp|data/test-with-ipe/golden/PlaneGraph/|]
-            (ipeFileGolden { name = [osp|planeGraphFromIntersectingSegments|]
-                           }
-            )
-            ( let myPlaneGraph = polygonOverlay myPolygons
-                  getZ       _ = view (extra._1)
-                  content'     = renderGraph (assignRenderingAttributes getZ myPlaneGraph)
-              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
-            )
-  where
-    myTriangles2 :: NonEmpty (Triangle (Point 2 R) :+ (Int, RenderProps))
-    myTriangles2 = NonEmpty.fromList
-      [ Triangle origin (Point2 100 0) (Point2 100 100)            :+ props 1 black  red
-      , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200) :+ props 2 green blue
-      ] -- these triangles are indeed in CCW order....
-    myPolygons = myTriangles2&mapped.core %~ fromTriangle
-    props z s f = (z, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
 
 --------------------------------------------------------------------------------
 
@@ -237,7 +215,6 @@ instance HasRenderProps extra => HasRenderProps (polygon :+ extra) where
 spec :: Spec
 spec =
     describe "Plane.RenderEnvelope"  $ do
-      overlaySpec
 
       goldenWith [osp|data/test-with-ipe/golden/Plane/|]
         (ipeFileGolden { name = [osp|lowerEnvelopeRender|]
@@ -538,15 +515,7 @@ polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCove
 
 --------------------------------------------------------------------------------
 
--- | A Class for polygon types that support returning a point inside the polygon.
-class HasPickPoint polygon r | polygon -> r where
-  -- | Returns a point in the interior of the polygon
-  pointInteriorTo :: polygon -> Point 2 r
 
-instance ( VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ vertex 2 r
-         , Fractional r
-         ) => HasPickPoint (SimplePolygonF nonEmpty vertex) r where
-  pointInteriorTo = centroid
 
 instance ( VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ vertex 2 r
          , Fractional r
