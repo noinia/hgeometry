@@ -212,7 +212,7 @@ spec =
     describe "Plane.RenderEnvelope"  $ do
 
       goldenWith [osp|data/test-with-ipe/golden/Plane/|]
-        (ipeFileGolden { name = [osp|lowerEnvelopeRender|]
+        (ipeFileGolden { name = [osp|manual|]
                        }
         )
         ( let content' = let tris = renderToIpe myCamera triangles
