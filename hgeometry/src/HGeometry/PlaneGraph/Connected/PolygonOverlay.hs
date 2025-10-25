@@ -34,6 +34,7 @@ import Hiraffe.PlanarGraph.Connected
 import Data.List.NonEmpty (NonEmpty(..))
 import Prelude hiding (zipWith)
 import Data.Coerce
+import HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
 
 --------------------------------------------------------------------------------
 
