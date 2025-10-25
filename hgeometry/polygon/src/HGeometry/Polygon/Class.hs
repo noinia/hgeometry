@@ -24,6 +24,9 @@ module HGeometry.Polygon.Class
 
   , HasVertices(..), HasVertices'(..)
   , HasEdges(..), HasEdges'(..)
+
+
+  , HasPickPoint(..)
   ) where
 
 import           Control.Lens hiding (holes)
@@ -361,3 +364,11 @@ traverseTriangleFrom i = conjoined trav (itrav . indexed)
 
 {-
 -}
+
+
+--------------------------------------------------------------------------------
+
+-- | A Class for polygon types that support returning a point inside the polygon.
+class HasPickPoint polygon r | polygon -> r where
+  -- | Returns a point in the interior of the polygon
+  pointInteriorTo :: polygon -> Point 2 r

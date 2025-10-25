@@ -167,6 +167,12 @@ instance (SimplePolygon_ (SimplePolygonF f) point r, Fractional r, Ord r)
   pointClosestToWithDistance = pointClosestToWithDistanceSimplePolygon
 -}
 
+
+instance ( VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ vertex 2 r
+         , Fractional r
+         ) => HasPickPoint (SimplePolygonF nonEmpty vertex) r where
+  pointInteriorTo = centroid
+
 --------------------------------------------------------------------------------
 
 _testPoly :: SimplePolygon (Point 2 Int)
