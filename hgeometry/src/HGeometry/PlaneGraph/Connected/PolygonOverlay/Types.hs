@@ -1,6 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Plane.Overlay
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Helper types for polygon overlay
+--
+--------------------------------------------------------------------------------
+module HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
   ( HasCoveringPolygons(..)
   , V(V), location, definingVertices
   , E(E), definingEdges, pointInEdge

@@ -1,5 +1,10 @@
 {-# LANGUAGE QuasiQuotes #-}
-module PlaneGraph.PolygonOverlaySpec where
+module PlaneGraph.PolygonOverlaySpec
+  ( spec
+
+  , assignRenderingAttributes
+  , renderGraph
+  ) where
 
 import Data.Colour.SRGB (RGB(..))
 import HGeometry.HyperPlane
@@ -73,6 +78,7 @@ import System.OsPath
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.Hspec.WithTempFile
+import HGeometry.PlaneGraph.Connected.PolygonOverlay
 
 --------------------------------------------------------------------------------
 
@@ -98,5 +104,94 @@ spec = describe "Overlaying Polygons" $ do
       ] -- these triangles are indeed in CCW order....
     myPolygons = myTriangles2&mapped.core %~ fromTriangle
     props z s f = (z, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
+
+--------------------------------------------------------------------------------
+
+-- | Convert a triangle into a simple polygon
+fromTriangle :: (Point_ vertex 2 r, Ord r, Num r) => Triangle vertex -> SimplePolygon vertex
+fromTriangle = fromMaybe (error "fromTriangle: absurd") . fromPoints
+
+--------------------------------------------------------------------------------
+
+-- | Function to draw a plane graph whose faces may have some
+-- attributes associated them.
+renderGraph    :: forall planeGraph vertex r r'.
+                  ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
+                  , Point_ vertex 2 r
+                  , Ord r, Fractional r
+                  , Real r'
+                  , Face planeGraph ~ Maybe (IpeAttributes Path r')
+                  , Edge planeGraph ~ Maybe (IpeAttributes Path r')
+                  , Eq (FaceIx planeGraph)
+                  , HasInnerComponents planeGraph
+                  ) => planeGraph -> [IpeObject r]
+renderGraph gr = theFaces <> theEdges
+  where
+    theEdges = ifoldMapOf edgeSegments         drawEdge' gr
+    theFaces = ifoldMapOf interiorFacePolygons drawFace' gr
+    drawFace' fi pg = case attrToR <$> gr^?!faceAt fi of
+        Nothing  -> []
+        Just ats -> [ iO $ ipePolygon pg' ! ats ]
+      where
+          pg' :: PolygonalDomain _
+          pg' = pg&vertices %~ toPoint
+
+    drawEdge' d s = case attrToR <$> gr^?!edgeAt d of
+        Nothing  -> []
+        Just ats -> [ iO $ ipeLineSegment s' ! ats ]
+      where
+        s' :: ClosedLineSegment (Point 2 r)
+        s' = s&vertices %~ toPoint
+
+    toPoint :: Point_ point 2 r => point -> Point 2 r
+    toPoint = view asPoint
+
+    attrToR = mapIpeAttrs (Proxy @Path) realToFrac
+
+--------------------------------------------------------------------------------
+
+-- | Lables the faces and edges with the attributes to use in rendering
+--
+-- the z-values attached to the edgess/faces determine how to render the edge/face.
+-- in particular, we take the value corresponding to the smallest z-value.
+assignRenderingAttributes         :: forall s v polygon z r.
+                                     (HasRenderProps polygon, Ord z, r ~ NumType polygon)
+                                  => (Point 2 r -> polygon -> z)
+                                  -> CPlaneGraph s v
+                                                   (E polygon)
+                                                   (F polygon)
+                                  -> CPlaneGraph s v
+                                                   (Maybe (IpeAttributes Path Double))
+                                                   (Maybe (IpeAttributes Path Double))
+assignRenderingAttributes getZ gr = gr1&faces %~ \(F covering mp) ->
+                                                   do p    <- mp
+                                                      poly <- minimumOn (getZ p) covering
+                                                      poly^.faceAttrs
+  where
+    gr1 :: CPlaneGraph s v
+                         (Maybe (IpeAttributes Path Double))
+                         (F polygon)
+    gr1 = gr&edges %~ \(E defs covering p) -> do
+                          _ :+ definer <- minimumOn (getZ p . view extra) defs
+                          let zCovering = maybe Top (ValT . getZ p) $ minimumOn (getZ p) covering
+                          if ValT (getZ p definer) <= zCovering
+                            then definer^.renderProps.edgeAttrs
+                            else Nothing
+  -- We compute the first defining polygon and its z-value, and the
+  -- props corresponding to this edge. Similarly, we compute the
+  -- minimum zvalue of the covering regions. If the covering z-value
+  -- is smaller than the one among the definers, then we show Nothing;
+  -- as the edge is hidden. Otherwise we show the definer's value
+
+-- TODO: maybe we still want to store the z-value, and still draw them in ipe in
+-- back to front order.
+
+-- TODO: we are computing getZ on the minimum twice. That seems wasteful
+
+
+-- | Compute the minimum using a given function
+minimumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
+minimumOn f = minimumByOf folded (comparing f)
+
 
 --------------------------------------------------------------------------------

@@ -12,7 +12,7 @@ import Data.Proxy
 import Data.Maybe
 import Data.Foldable
 import Wavefront qualified
-import Wavefront(elValue, elMtl)
+import Wavefront (elValue, elMtl)
 import Codec.Wavefront.Element qualified as Element
 import Codec.Wavefront.Material.Type qualified as Material
 import HGeometry.ByIndex
@@ -69,7 +69,6 @@ import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import Hiraffe.PlanarGraph.Connected
 import Ipe
 import Ipe.Color
-import Plane.Overlay
 import Plane.RenderProps
 import PlaneGraph.RenderSpec
 import Prelude hiding (zipWith)
@@ -77,7 +76,7 @@ import System.OsPath
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.Hspec.WithTempFile
-
+import PlaneGraph.PolygonOverlaySpec (assignRenderingAttributes, renderGraph)
 import Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -272,40 +271,6 @@ testRenderObj objDir objFile = do
 
 --------------------------------------------------------------------------------
 
--- | Function to draw a plane graph whose faces may have some
--- attributes associated them.
-renderGraph    :: forall planeGraph vertex r r'.
-                  ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
-                  , Point_ vertex 2 r
-                  , Ord r, Fractional r
-                  , Real r'
-                  , Face planeGraph ~ Maybe (IpeAttributes Path r')
-                  , Edge planeGraph ~ Maybe (IpeAttributes Path r')
-                  , Eq (FaceIx planeGraph)
-                  , HasInnerComponents planeGraph
-                  ) => planeGraph -> [IpeObject r]
-renderGraph gr = theFaces <> theEdges
-  where
-    theEdges = ifoldMapOf edgeSegments         drawEdge' gr
-    theFaces = ifoldMapOf interiorFacePolygons drawFace' gr
-    drawFace' fi pg = case attrToR <$> gr^?!faceAt fi of
-        Nothing  -> []
-        Just ats -> [ iO $ ipePolygon pg' ! ats ]
-      where
-          pg' :: PolygonalDomain _
-          pg' = pg&vertices %~ toPoint
-
-    drawEdge' d s = case attrToR <$> gr^?!edgeAt d of
-        Nothing  -> []
-        Just ats -> [ iO $ ipeLineSegment s' ! ats ]
-      where
-        s' :: ClosedLineSegment (Point 2 r)
-        s' = s&vertices %~ toPoint
-
-    toPoint :: Point_ point 2 r => point -> Point 2 r
-    toPoint = view asPoint
-
-    attrToR = mapIpeAttrs (Proxy @Path) realToFrac
 
 renderSkeleton    :: forall s v polygon.
                      CPlaneGraph s v
@@ -319,7 +284,7 @@ renderSkeleton gr = gr1&faces .~ Nothing
     gr1 :: CPlaneGraph s v
                          (Maybe (IpeAttributes Path Double))
                          (F polygon)
-    gr1 = gr&edges .~ Just def
+    gr1 = gr&edges ?~ def
       -- \(E defs covering) -> do
       --                     _ :+ (_ :+ (z,props)) <- minimumOn (^.extra.extra._1) defs
       --                     _ :+ (zCovering,_)    <- minimumOn (^.extra._1) covering
@@ -330,48 +295,6 @@ renderSkeleton gr = gr1&faces .~ Nothing
 
 
 
--- | Lables the faces and edges with the attributes to use in rendering
---
--- the z-values attached to the edgess/faces determine how to render the edge/face.
--- in particular, we take the value corresponding to the smallest z-value.
-assignRenderingAttributes         :: forall s v polygon z r.
-                                     (HasRenderProps polygon, Ord z, r ~ NumType polygon)
-                                  => (Point 2 r -> polygon -> z)
-                                  -> CPlaneGraph s v
-                                                   (E polygon)
-                                                   (F polygon)
-                                  -> CPlaneGraph s v
-                                                   (Maybe (IpeAttributes Path Double))
-                                                   (Maybe (IpeAttributes Path Double))
-assignRenderingAttributes getZ gr = gr1&faces %~ \(F covering mp) ->
-                                                   do p    <- mp
-                                                      poly <- minimumOn (getZ p) covering
-                                                      poly^.faceAttrs
-  where
-    gr1 :: CPlaneGraph s v
-                         (Maybe (IpeAttributes Path Double))
-                         (F polygon)
-    gr1 = gr&edges %~ \(E defs covering p) -> do
-                          _ :+ definer <- minimumOn (getZ p . view extra) defs
-                          let zCovering = maybe Top (ValT . getZ p) $ minimumOn (getZ p) covering
-                          if ValT (getZ p definer) <= zCovering
-                            then definer^.renderProps.edgeAttrs
-                            else Nothing
-  -- We compute the first defining polygon and its z-value, and the
-  -- props corresponding to this edge. Similarly, we compute the
-  -- minimum zvalue of the covering regions. If the covering z-value
-  -- is smaller than the one among the definers, then we show Nothing;
-  -- as the edge is hidden. Otherwise we show the definer's value
-
--- TODO: maybe we still want to store the z-value, and still draw them in ipe in
--- back to front order.
-
--- TODO: we are computing getZ on the minimum twice. That seems wasteful
-
-
--- | Compute the minimum using a given function
-minimumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
-minimumOn f = minimumByOf folded (comparing f)
 
 --------------------------------------------------------------------------------
 
@@ -450,68 +373,6 @@ instance Ord vertex => Ord (SegmentWith vertex extra) where
 
 
 
--- | Given a set of polygons, constructs a plane graph whose vertices,
--- edges, and faces are tagged with the polygons that cover that face.
---
--- The current running time is \(O( (N+k) + \log (N+k) + (N+k)*m )\),
--- where \(N\) is the total complexity of all polygons, \(k\) is the
--- number of intersections between the polygons, and \(m\) is the
--- maximum complexity of a single polygon.
---
--- pre: everything forms a connected graph
-polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
-                           ( Foldable1 nonEmpty, Point_ vertex 2 r
-                           , SimplePolygon_ simplePolygon vertex r
-                           , Fractional r, Ord r
-                           , Ord vertex
-                           , HasIntersectionWith (Point 2 r) simplePolygon
-
-                           , Show r, Show vertex, Show simplePolygon
-                           , Eq simplePolygon
-                           )
-                        => nonEmpty simplePolygon
-                        -> CPlaneGraph s (V simplePolygon)
-                                         (E simplePolygon)
-                                         (F simplePolygon)
-polygonOverlay polygons = gr2&vertices %~ \(p :+ defs) -> V p defs (polygonsCoveringVertices p)
-  where
-    segs :: NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
-    segs = foldMap1 (\poly -> (:+ poly) <$> toNonEmptyOf outerBoundaryEdgeSegments poly
-                    ) polygons
-
-    gr  = fromIntersectingSegments segs
-
-    gr1 :: CPlaneGraph s (Point 2 r :+ Seq.Seq vertex) (E simplePolygon) ()
-    gr1 = gr&edges %@~ polygonsCoveringEdges
-
-    gr2 :: CPlaneGraph s (Point 2 r :+ Seq.Seq vertex)
-                         (E simplePolygon)
-                         (F simplePolygon)
-    gr2 = gr1&faces .@~ polygonsCoveringFaces
-
-    outerId = outerFaceId gr
-
-    polygonsCoveringFaces fi
-      | fi == outerId = F mempty Nothing -- its impossible for polygons to cover the outerface
-      | otherwise     = let p        = pointIn fi
-                            covering = filter' (p `intersects`) polygons
-                        in F covering (Just p)
-
-    filter' p = foldMap (\x -> if p x then Seq.singleton x else mempty)
-
-    pointIn fi = pointInteriorTo $ gr^?!interiorFacePolygonAt fi
-
-    polygonsCoveringEdges d defs = let p        = midPoint d
-                                       covering = filter' (midPoint d `intersects`) polygons
-                                   in E defs covering p
-
-    midPoint d = let ClosedLineSegment s t = (^.asPoint) <$> gr^?!edgeSegmentAt d
-                 in s .+^ ((t .-. s) ^/ 2)
-
-    polygonsCoveringVertices v = filter' (v `intersects`) polygons
-
--- I guess we could build point location structures on the polygons to
--- speed things up, if need be.
 
 --------------------------------------------------------------------------------
 
@@ -585,211 +446,8 @@ constructCPlaneGraph polygons = undefined
 -}
 
 --------------------------------------------------------------------------------
--- * Computing a Connected Plane graph from a set of intersecting line segments
+-- *
 
--- |  Construct A connected PlaneGraph from a set of intersecting segments.
---
--- \( O((n+k)\log n) \), where \(n\) is the number of segments, and \(k\) is the number
--- of intersections.
---
--- pre: the segments actually form a connected graph.
-fromIntersectingSegments      :: forall s nonEmpty ix lineSegment segment r point.
-                                 ( Foldable1 nonEmpty
-                                 , FunctorWithIndex ix nonEmpty
-
-                                 , LineSegment_ lineSegment point
-                                 , Point_ point 2 r, Ord r, Fractional r
-                                 , Intersection lineSegment lineSegment
-                                   ~ Maybe (LineSegmentLineSegmentIntersection segment)
-                                 , LineSegment_ segment point
-                                 , IsIntersectableWith lineSegment lineSegment
-                                 , Ord ix
-                                 , HasOnSegment lineSegment 2
-                                 , StartPointOf lineSegment ~ EndPointOf lineSegment
-
-
-                                 , Eq lineSegment -- FIXME
-                                 )
-                              => nonEmpty lineSegment
-                              -> CPlaneGraph s (Point 2 r :+ Seq.Seq point)
-                                               (ViewL1 lineSegment)
-                                               ()
-fromIntersectingSegments segs = fromIntersections segs (intersections segs)
-{-
-  gr&edges.mapped %~ view theValue
-  where
-    -- collect the seggments.
-    segs' = foldMap (\seg -> MonoidalNEMap.singleton (key seg) (NonEmpty.singleton seg)
-                    ) segs
-    key (LineSegment_ s t) | s <= t = Vector2 s t
-                           | otherwise = Vector
-
-
-
-
-    segs' = imap ByIndex segs
-
-
-    -- we have to collect the segments into a set; i.e. no duplicates are allowed.
-    gr    :: CPlaneGraph s _ _ _
-    gr    = fromIntersections segs' (intersections segs')
--}
-
--- OK: so there is an issue if we have two copies of the same segment somehow.
--- I think using the ID's  makes that into an actual issue.
-
-
-
-----------------------------------------
-
--- | Construct A connected PlaneGraph from a set of intersecting
--- segments. This assumes we are actually given the intersections as
--- well.
---
--- \( O((n+k)\log n) \), where \(n\) is the number of segments, and \(k\) is the number
--- of intersections.
---
--- pre: the segments actually form a connected graph.
---
--- note: this implementation uses that the lineSegment type is Orderable. Consider using
--- 'ByIndex Int segment' to order by some Identifier, rather than ordering by the raw segments.
-fromIntersections             :: forall s nonEmpty lineSegment r point planeGraph.
-                                   ( Foldable1 nonEmpty
-                                   , LineSegment_ lineSegment point
-                                   , Point_ point 2 r, Ord r, Num r
-                                   , IsIntersectableWith lineSegment lineSegment
-                                   , OrdArounds lineSegment
-                                   -- , Ord lineSegment
-
-                                   , Eq lineSegment -- FIXME: not sure where this is coming from
-
-                                   , planeGraph ~ CPlaneGraph s (Point 2 r :+ Seq.Seq point)
-                                                                (ViewL1 lineSegment)
-                                                                ()
-                                   )
-                              => nonEmpty lineSegment
-                              -> Intersections r lineSegment
-                              -> planeGraph
-fromIntersections segs inters = fromAdjacencyLists adjLists
-  where
-    -- | Map every Point to its vertexId
-    vertexMapping :: MonoidalNEMap (Point 2 r) (VertexIx planeGraph)
-    vertexMapping = coerce $ assignIndex vertexLocations
-
-    -- | For each vertex location, collect the segment endpoints
-    segmentEndPoints :: MonoidalNEMap (Point 2 r) (ViewL1 point)
-    segmentEndPoints = foldMap1 (\(LineSegment_ s t) ->
-                                   MonoidalNEMap.singleton (s^.asPoint) (singletonL1 s)
-                                <> MonoidalNEMap.singleton (t^.asPoint) (singletonL1 t)
-                                ) segs
-
-    vertexLocations :: MonoidalNEMap (Point 2 r) (Associated lineSegment)
-    vertexLocations = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^.start.asPoint) (mkAroundStart seg)
-                                     <> MonoidalNEMap.singleton (seg^.end.asPoint)   (mkAroundEnd seg)
-                               ) segs
-                    <>> inters
-
-    -- | Compute, for each input segment its canonical line segment;
-    -- i.e. if there are duplicate segments; we all represent them using the same ClosedLineSegment
-    canonicalSegmentMap :: MonoidalNEMap (ClosedLineSegment (Point 2 r)) (ViewL1 lineSegment)
-    canonicalSegmentMap =
-      foldMap1 (\seg -> MonoidalNEMap.singleton (toKey seg) (singletonL1 seg)) segs
-
-    toKey seg = let s = seg^.start.asPoint
-                    t = seg^.end.asPoint
-                in if s <= t then ClosedLineSegment s t else ClosedLineSegment t s
-
-    -- the canonical segments themselves
-    canonicalSegments = MonoidalNEMap.keysSet canonicalSegmentMap
-
-    -- | Computes the vertices along each segment.
-    --
-    -- We actually represent every original input segment by a canonical ClosedLineSegment
-    -- to appropriately handle duplicate input segments.
-    verticesBySegment :: MonoidalNEMap (ClosedLineSegment (Point 2 r))
-                                       (ViewL1 (VertexIx planeGraph))
-    verticesBySegment =
-        imap collect $ interiorIntersectionsBySegment toKey canonicalSegments inters
-      where
-        collect seg interiorPts = (vertexMapping MonoidalNEMap.!) <$>
-              (seg^.start.asPoint) :<< (interiorPts' Seq.|> seg^.end.asPoint)
-          where
-            interiorPts' = Seq.sortOn alongSegment interiorPts
-            -- | We want to sort the points, which all lie on the segment, along the segment
-            -- to this end we essentially compare their distance to the starting point.
-            -- however, instead of explicitly computing this distance, it suffices to compare
-            -- the x-coordinates or y-coordiantes of the points themselves, depending on the
-            -- orientation of the segment. (since a segment is xy-monotone)
-            alongSegment :: Point 2 r -> r
-            alongSegment = case (seg^.start.xCoord) `compare` (seg^.end.xCoord) of
-              LT                                        -> view xCoord
-              GT                                        -> negate . view xCoord
-              EQ | seg^.start.yCoord <= seg^.end.yCoord -> view yCoord
-                 | otherwise                            -> negate . view yCoord
-
-    -- | For every vertex, collect its neighbours
-    neighbours :: MonoidalNEMap (VertexIx planeGraph)
-                                (MonoidalNEMap (VertexIx planeGraph) (ViewL1 lineSegment))
-    neighbours = ifoldMap1 collect verticesBySegment
-      where
-        collect canonicalSeg verts@(_ :<< rest') = case asViewL1 rest' of
-            Nothing   ->
-              error "fromIntersections. absurd. every seg should have at least 2 vertices"
-            Just rest -> fold1 $ zipWith f verts rest
-          where
-            -- This canonical segment represents a bunch of actual segments, associate
-            -- the vertices with those line segments (rather than the canonical one)
-            theSegs = canonicalSegmentMap MonoidalNEMap.! canonicalSeg
-
-            f u v = MonoidalNEMap.singleton u (MonoidalNEMap.singleton v theSegs)
-                 <> MonoidalNEMap.singleton v (MonoidalNEMap.singleton u theSegs)
-
-    -- I think this already automatically takes care of colinear semgents as well, as we
-    -- are using a NESet to collect the neighbours of each vertex.
-
-    -- | Construct the final adjacency lists
-    adjLists :: MonoidalNEMap _
-                  (VertexIx planeGraph, Point 2 r :+ Seq.Seq point
-                  , NonEmpty ( VertexIx planeGraph
-                             , ViewL1 lineSegment
-                             )
-                  )
-    adjLists = imap buildVertex vertexMapping
-    buildVertex v vi = (vi, v :+ segEndpts, MonoidalNEMap.assocs $ neighbours MonoidalNEMap.! vi)
-      where
-        segEndpts = case segmentEndPoints MonoidalNEMap.!? v of
-                      Nothing -> mempty
-                      Just (x :<< rest) -> x Seq.<| rest
-
-
-
--- | Computes the interior intersections on each segment.
---
--- O((n+k)\log n)
-interiorIntersectionsBySegment                   :: ( Ord lineSegment
-                                                    , Foldable1 nonEmpty)
-                                                 => (richSegment -> lineSegment)
-                                                 -> nonEmpty lineSegment
-                                                    -- ^ all input segments
-                                                 -> Intersections r richSegment
-                                                 -> MonoidalNEMap lineSegment (Seq.Seq (Point 2 r))
-interiorIntersectionsBySegment toKey segs inters =
-        foldMap1 (flip MonoidalNEMap.singleton mempty) segs
-    <>> coerce (ifoldMap construct inters)
-  where
-    construct p assoc =
-      foldMap (\seg -> MonoidalMap.singleton (toKey $ coerce seg) (Seq.singleton p))
-              (assoc^.interiorTo)
-
-
--- | Assign each element in the map a unique Integer key (in the range \([0,n)\) )
-assignIndex :: MonoidalNEMap k v -> MonoidalNEMap k Int
-assignIndex = snd . MonoidalNEMap.mapAccumWithKey (\i _ _ -> (succ i, i)) 0
-
-
--- | Helper to combine a nonempty monoidal map with an additional map
-(<>>)        :: (Ord k, Semigroup v) => MonoidalNEMap k v -> Map.Map k v -> MonoidalNEMap k v
-base <>> new = foldr (uncurry MonoidalNEMap.insert) base $ Map.toAscList new
 
 --------------------------------------------------------------------------------
 

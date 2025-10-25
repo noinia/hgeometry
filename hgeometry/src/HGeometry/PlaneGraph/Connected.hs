@@ -15,6 +15,7 @@ module HGeometry.PlaneGraph.Connected
   , CPlaneGraph
   , fromAdjacencyRep
   , fromConnectedSegments
+  , fromIntersectingSegments
   , fromSimplePolygon
   , fromSimplePolygonWith
   -- * Unchecked ways of accessing the underlying PlanarGraph
@@ -25,6 +26,6 @@ import HGeometry.PlaneGraph.Class
 import HGeometry.PlaneGraph.Connected.Type
 import Hiraffe.Graph.Class
 import Hiraffe.PlanarGraph.Class
-
+import HGeometry.PlaneGraph.Connected.FromIntersectingSegments
 
 --------------------------------------------------------------------------------
