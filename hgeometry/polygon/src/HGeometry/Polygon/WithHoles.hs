@@ -230,6 +230,14 @@ instance Semigroup Monoid where
 
 -}
 
+
+instance ( VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ vertex 2 r
+         , Fractional r
+         ) => HasPickPoint (PolygonalDomainF h nonEmpty vertex) r where
+  pointInteriorTo = pointInteriorTo . view outerBoundaryPolygon
+  -- FIXME: this is simply not true
+
+
 --------------------------------------------------------------------------------
 
 

@@ -70,9 +70,8 @@ import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import Hiraffe.PlanarGraph.Connected
 import Ipe
 import Ipe.Color
-import Plane.Overlay
 import Plane.RenderProps
-import PlaneGraph.RenderSpec
+import PlaneGraph.RenderSpec()
 import Prelude hiding (zipWith)
 import System.OsPath
 import Test.Hspec
@@ -195,3 +194,9 @@ minimumOn f = minimumByOf folded (comparing f)
 
 
 --------------------------------------------------------------------------------
+
+instance HasRenderProps extra => HasRenderProps (polygon, extra) where
+  renderProps = _2.renderProps
+
+instance HasRenderProps extra => HasRenderProps (polygon :+ extra) where
+  renderProps = extra.renderProps

@@ -16,8 +16,6 @@ module HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
   , E(E), definingEdges, pointInEdge
   , F(F), pointInFace
   ) where
--- TODO: rename the module
-
 
 import Control.Lens
 import Data.Sequence qualified as Seq

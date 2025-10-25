@@ -10,30 +10,21 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Connected.PolygonOverlay
   ( polygonOverlay
+  , module HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
   ) where
 
-
 import Data.Foldable1
-import Data.Foldable1.WithIndex
-import Data.Map qualified as Map
-import Data.Map.Monoidal qualified as MonoidalMap
-import Data.Semialign
 import Data.Sequence qualified as Seq
 import Control.Lens
 import HGeometry.Intersection
 import HGeometry.LineSegment
-import HGeometry.LineSegment.Intersection.BentleyOttmann
-import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import HGeometry.PlaneGraph
 import HGeometry.Point
+import HGeometry.Vector
 import HGeometry.Polygon
 import HGeometry.Ext
-import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1, singletonL1)
-import HGeometry.Map.NonEmpty.Monoidal qualified as MonoidalNEMap
-import Hiraffe.PlanarGraph.Connected
 import Data.List.NonEmpty (NonEmpty(..))
 import Prelude hiding (zipWith)
-import Data.Coerce
 import HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
 
 --------------------------------------------------------------------------------
@@ -55,7 +46,7 @@ polygonOverlay          :: forall nonEmpty s simplePolygon vertex r.
                            , HasIntersectionWith (Point 2 r) simplePolygon
 
                            -- , Show r, Show vertex, Show simplePolygon
-                           -- , Eq simplePolygon
+                           , Eq simplePolygon -- FIXME
                            )
                         => nonEmpty simplePolygon
                         -> CPlaneGraph s (V simplePolygon)

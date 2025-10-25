@@ -76,6 +76,7 @@ import System.OsPath
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.Hspec.WithTempFile
+import HGeometry.PlaneGraph.Connected.PolygonOverlay
 import PlaneGraph.PolygonOverlaySpec (assignRenderingAttributes, renderGraph)
 import Debug.Trace
 --------------------------------------------------------------------------------
@@ -204,11 +205,6 @@ fromTriangle = uncheckedFromCCWPoints
 
 -- ‘HasRenderProps
 --                           (SimplePolygon (Point 2 R) :+ triangle)
-instance HasRenderProps extra => HasRenderProps (polygon, extra) where
-  renderProps = _2.renderProps
-
-instance HasRenderProps extra => HasRenderProps (polygon :+ extra) where
-  renderProps = extra.renderProps
 
 
 spec :: Spec
@@ -376,13 +372,6 @@ instance Ord vertex => Ord (SegmentWith vertex extra) where
 
 --------------------------------------------------------------------------------
 
-
-
-instance ( VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ vertex 2 r
-         , Fractional r
-         ) => HasPickPoint (PolygonalDomainF h nonEmpty vertex) r where
-  pointInteriorTo = pointInteriorTo . view outerBoundaryPolygon
-  -- FIXME: this is simply not true
 
 --------------------------------------------------------------------------------
 -- *  The stuff in this section is unsused
