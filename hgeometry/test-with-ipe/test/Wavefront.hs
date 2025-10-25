@@ -83,7 +83,7 @@ allTriangles objFile = foldMap (traverse toTriangle) $ objFaces objFile
 
     vtx i = toPoint $ objLocations objFile Vector.! (Face.faceLocIndex i)
 
-    toPoint (Location x y z _w) = Point3 x z y
+    toPoint (Location x y z _w) = Point3 x (negate z) y
     -- we ignore the _w value, if they exist
     --
     -- TODO: not sure why, but at least for the Cornel box we seem to

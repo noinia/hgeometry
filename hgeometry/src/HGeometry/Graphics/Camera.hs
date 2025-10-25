@@ -14,7 +14,7 @@ module HGeometry.Graphics.Camera
 
   , cameraNormal, viewUp
 
-  , blenderCamera
+  , blenderCamera, blenderCameraAt
 
   , cameraTransform, worldToView
 
@@ -132,19 +132,31 @@ instance Fractional r => Default (Camera r) where
                }
 
 -- | This is the default camera position used in Blender
-blenderCamera :: forall r. (Floating r, Radical r) => Camera r
-blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7.35 (-34) (4.95)
-                   &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
-                   &viewUp             .~ fromRotate (Vector3 0 1 0)
-                   &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
-                   &nearDist           .~ 0.1
-                   &focalDepth         .~ 0.05
+blenderCamera :: (Floating r, Radical r) => Camera r
+blenderCamera = blenderCameraAt (Point3 7.35 (-6.92) (4.95))
+                                (Vector3 (-63.559) 0 46.692)
+
+-- | Construct a "default" blender camera at the given position and rotation angles
+--
+-- The rotation angles are given in degrees with respect to:
+--
+-- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
+-- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
+blenderCameraAt                    :: forall r. (Floating r, Radical r)
+                                   => Point 3 r -- ^ Initial position
+                                   -> Vector 3 r -- ^ Rotation angles in degrees
+                                   -> Camera r
+blenderCameraAt pos rotationAngles =
+    def&cameraPosition     .~ pos
+       &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
+       &viewUp             .~ fromRotate (Vector3 0 1 0)
+       &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
+       &nearDist           .~ 0.1
+       &focalDepth         .~ 0.05
   where
     -- in degrees with respect to?
     -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
     -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
-
-    rotationAngles = Vector3 (-63.559) 0 46.692
 
     fromRotate :: Vector 3 r -> Vector 3 r
     fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)

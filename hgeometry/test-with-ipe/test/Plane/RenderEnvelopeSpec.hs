@@ -48,6 +48,7 @@ import HGeometry.LineSegment.Intersection.BentleyOttmann
 import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import HGeometry.Map.NonEmpty.Monoidal qualified as MonoidalNEMap
 import HGeometry.Number.Real.Rational
+import HGeometry.Number.Radical
 import HGeometry.Plane.LowerEnvelope
 import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
 import HGeometry.PlaneGraph
@@ -266,17 +267,31 @@ testRenderObj objDir objFile = do
         (ipeFileGolden { name = objFile
                        }
         )
-        ( let triangles'= triangles&mapped %~ \el -> el^.elValue :+ fromMaterial (el^.elMtl)
+        ( let triangles'= triangles <&> \el -> el^.elValue :+ fromMaterial (el^.elMtl)
               cornellCamera = blenderCamera
-              -- somehow rotate the scene
+              -- cornellCamera = blenderCameraAt (Point3 6.82743 (-15.8002) 5.22068)
+              --                                 (Vector3 73.1268 0.000008 23.3696)
 
-              content'  = let tris = renderToIpe cornellCamera triangles'
-                              t    = uniformScaling 1000
-                                   --- fitToBoxTransform screenBox  tris -- TODO
-                          in transformBy t tris
-          in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+              cameras    = NonEmpty.fromList [cornellCamera]
+              -- cameras = NonEmpty.fromList . take 10
+              --         $ iterate (\cam -> -- let transform = transformBy (rotateX (toRadians 1))
+              --                            let transform = transformBy
+              --                                            (translation $ Vector3 1 0 0)
+              --                            in cam&cameraNormal %~ transform
+              --                                  &viewUp       %~ transform
+                      --           )
+                      -- cornellCamera
+              pages = renderPage triangles' <$> cameras
+          in addStyleSheet opacitiesStyle $ ipeFile pages
         )
 
+  where
+    renderPage triangles camera = fromContent content'
+      where
+        content'  = let tris = renderToIpe camera triangles
+                        t    = uniformScaling 1000
+                               --- fitToBoxTransform screenBox  tris -- TODO
+                    in transformBy t tris
 
 --------------------------------------------------------------------------------
 
@@ -835,13 +850,13 @@ fromMaterial mm = case mRefl of
                                      in RenderProps def (Just $ attr SFill c)
   where
     mRefl = do m <- mm
-               guard (traceShowId (Material.materialName m) `elem` [ "leftWall"
-                                                     , "rightWall"
-                                                     , "floor"
-                                                     , "ceiling"
-                                                     , "tallBox"
-                                                     , "shortBox"
-                                                     ])
+               -- guard (traceShowId (Material.materialName m) `elem` [ "leftWall"
+               --                                                     , "rightWall"
+               --                                       , "floor"
+               --                                       , "ceiling"
+               --                                       , "tallBox"
+               --                                       , "shortBox"
+               --                                       ])
                Material.ambientReflexivity m
 
 
