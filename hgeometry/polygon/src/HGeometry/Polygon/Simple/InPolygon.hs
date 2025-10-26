@@ -45,21 +45,7 @@ let simplePoly :: SimplePolygon (Point 2 Int)
 :}
 -}
 
--- simpleTriangle :: SimplePolygon (Point 2 Int)
--- simpleTriangle = uncheckedFromCCWPoints . NonEmpty.fromList $ [ Point2 0 0, Point2 2 0, Point2 1 1]
--- test = Point2 1 1 `inPolygon` simplePoly
 
-data AboveCount seg = OnEdge !seg
-                    | NumStrictlyAbove {-# UNPACK #-} !Int
-                    deriving (Show,Eq)
-
-instance Semigroup (AboveCount seg) where
-  l@(OnEdge _)         <> _                    = l -- ^ prefers the first segment
-  _                    <> r@(OnEdge _)         = r -- ^ already found a boundary
-  (NumStrictlyAbove l) <> (NumStrictlyAbove r) = NumStrictlyAbove (l+r)
-
-instance Monoid (AboveCount seg) where
-  mempty = NumStrictlyAbove 0
 
 -- | Types that implement a point-in-polygon test.
 class HasInPolygon polygon point r | polygon -> point, point -> r where
@@ -76,6 +62,40 @@ class HasInPolygon polygon point r | polygon -> point, point -> r where
                     => queryPoint -> polygon
                     -> PointLocationResultWith (VertexIx polygon)
   inPolygon = inSimplePolygon
+
+
+-- instance HasInPolygon (Triangle vertex) vertex r where
+--   q `inPolygon` tri =
+
+
+    -- (Triangle u v w)
+
+
+
+--------------------------------------------------------------------------------
+-- * The Implementation
+
+-- simpleTriangle :: SimplePolygon (Point 2 Int)
+-- simpleTriangle = uncheckedFromCCWPoints . NonEmpty.fromList $ [ Point2 0 0, Point2 2 0, Point2 1 1]
+-- test = Point2 1 1 `inPolygon` simplePoly
+
+data AboveCount seg = OnEdge !seg
+                    | NumStrictlyAbove {-# UNPACK #-} !Int
+                    deriving (Show,Eq)
+
+instance Semigroup (AboveCount seg) where
+  l@(OnEdge _)         <> _                    = l -- ^ prefers the first segment
+  _                    <> r@(OnEdge _)         = r -- ^ already found a boundary
+  (NumStrictlyAbove l) <> (NumStrictlyAbove r) = NumStrictlyAbove (l+r)
+
+instance Monoid (AboveCount seg) where
+  mempty = NumStrictlyAbove 0
+
+
+
+
+
+
 
 -- rename the thing below to InSimplePolygon?
 

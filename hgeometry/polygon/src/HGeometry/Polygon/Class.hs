@@ -372,3 +372,16 @@ traverseTriangleFrom i = conjoined trav (itrav . indexed)
 class HasPickPoint polygon r | polygon -> r where
   -- | Returns a point in the interior of the polygon
   pointInteriorTo :: polygon -> Point 2 r
+
+
+instance (Point_ vertex 2 r, Fractional r, Eq r) => HasPickPoint (Triangle vertex) r where
+  pointInteriorTo = centroid'
+    where
+      -- TODO: this is just the definition of centroid, copied over from
+      -- the simple polygon class. Avoid the code duplication, by splititng the SimplePolygon_
+      -- class
+      centroid' poly = fromVector $ sum' xs ^/ (3 * signedArea2X poly)
+        where
+           xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
+                | (p,q) <- poly ^..outerBoundaryEdges   ]
+           sum' = foldl' (^+^) zero
