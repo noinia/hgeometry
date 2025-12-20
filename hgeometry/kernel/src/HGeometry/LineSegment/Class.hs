@@ -30,7 +30,7 @@ module HGeometry.LineSegment.Class
   ) where
 
 import Control.Lens
-import Data.Default.Class
+import Data.Default
 import Data.Type.Ord
 import HGeometry.Ext
 import HGeometry.ByIndex

@@ -47,7 +47,7 @@ module HGeometry.Interval.Class
   ) where
 
 import Control.Lens
-import Data.Default.Class
+import Data.Default
 import Data.Kind (Type,Constraint)
 import HGeometry.Boundary
 import HGeometry.Ext

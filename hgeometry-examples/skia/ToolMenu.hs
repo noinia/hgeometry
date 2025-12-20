@@ -9,7 +9,7 @@ module ToolMenu
 import Action
 import Color
 import Control.Lens hiding (view, element)
-import Data.Default.Class
+import Data.Default
 import HGeometry.Viewport (currentLevel)
 import Miso hiding (style_)
 import Miso.Bulma.Generic

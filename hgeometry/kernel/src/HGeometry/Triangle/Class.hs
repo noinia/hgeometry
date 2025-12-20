@@ -20,7 +20,7 @@ module HGeometry.Triangle.Class
   , HasVertices(..), HasVertices'(..)
   ) where
 
-import Data.Default.Class
+import Data.Default
 import HGeometry.Ext
 import Control.Lens
 import HGeometry.HalfSpace

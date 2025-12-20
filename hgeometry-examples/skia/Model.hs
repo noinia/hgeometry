@@ -26,7 +26,7 @@ import           Attributes
 import           Base
 import           Color
 import           Control.Lens hiding (view, element)
-import           Data.Default.Class
+import           Data.Default
 import qualified Data.IntMap as IntMap
 import qualified Data.Set as Set
 import           Data.List.NonEmpty (NonEmpty(..))

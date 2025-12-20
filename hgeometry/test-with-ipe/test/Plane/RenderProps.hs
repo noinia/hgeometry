@@ -7,7 +7,7 @@ module Plane.RenderProps
 import Ipe
 import Ipe.Color (black)
 import Control.Lens
-import Data.Default.Class
+import Data.Default
 
 --------------------------------------------------------------------------------
 

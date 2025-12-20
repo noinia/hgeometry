@@ -22,7 +22,7 @@ module Modes
 import Base
 import Control.Lens
 import Control.Lens.Extras (is)
-import Data.Default.Class
+import Data.Default
 import PolyLineMode
 import PolygonMode
 import RectangleMode

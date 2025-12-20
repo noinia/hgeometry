@@ -20,7 +20,7 @@ import HGeometry.ByIndex
 import Control.Lens
 import Control.Monad
 import Data.Coerce
-import Data.Default.Class
+import Data.Default
 import Data.Foldable1
 import Data.Foldable1.WithIndex
 import Data.Functor.Apply as Apply

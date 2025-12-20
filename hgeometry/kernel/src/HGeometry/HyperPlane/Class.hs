@@ -26,7 +26,7 @@ module HGeometry.HyperPlane.Class
   ) where
 
 import Control.Lens hiding (snoc, cons, uncons, unsnoc)
-import Data.Default.Class
+import Data.Default
 import Data.Kind (Constraint)
 import Data.Type.Ord
 import GHC.TypeNats

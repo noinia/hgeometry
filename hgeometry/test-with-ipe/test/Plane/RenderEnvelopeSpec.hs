@@ -19,7 +19,7 @@ import HGeometry.ByIndex
 import Control.Lens
 import Control.Monad
 import Data.Coerce
-import Data.Default.Class
+import Data.Default
 import Data.Foldable1
 import Data.Foldable1.WithIndex
 import Data.Functor.Apply as Apply
@@ -184,9 +184,9 @@ asTrianglePairAbove rect h = Vector2 (Triangle tl br tr :+ h)
 -- instance Default Props where
 --   def = Props 0 black black
 
-instance Default (Seq.Seq a) where
-  -- this is just for drawing to ipe purposes
-  def = mempty
+-- instance Default (Seq.Seq a) where
+--   -- this is just for drawing to ipe purposes
+--   def = mempty
 
 
 fromTriangle :: (Point_ vertex 2 r, Ord r, Num r) => Triangle vertex -> SimplePolygon vertex

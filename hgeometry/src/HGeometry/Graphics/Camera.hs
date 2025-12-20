@@ -24,7 +24,7 @@ module HGeometry.Graphics.Camera
   ) where
 
 import Control.Lens
-import Data.Default.Class
+import Data.Default
 import HGeometry.Box
 import HGeometry.Matrix
 import HGeometry.Number.Radical

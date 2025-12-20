@@ -17,7 +17,7 @@ import           Control.Monad.IO.Class
 
 import           Control.Lens hiding (view, element)
 import           Data.Colour.SRGB
-import           Data.Default.Class
+import           Data.Default
 import qualified Data.IntMap as IntMap
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
