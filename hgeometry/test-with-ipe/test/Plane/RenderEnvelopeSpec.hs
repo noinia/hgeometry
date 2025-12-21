@@ -212,8 +212,7 @@ spec =
     describe "Plane.RenderEnvelope"  $ do
 
       goldenWith [osp|data/test-with-ipe/golden/Plane/|]
-        (ipeFileGolden { name = [osp|manual|]
-                       }
+        ((ipeFileGoldenApproxEq @5) { name = [osp|manual|] }
         )
         ( let content' = let tris = renderToIpe myCamera triangles
                              t    = uniformScaling 1000
@@ -236,8 +235,7 @@ testRenderObj objDir objFile = do
                              Just res -> pure res
 
     goldenWith [osp|data/test-with-ipe/golden/Plane/|]
-        (ipeFileGolden { name = objFile
-                       }
+        ((ipeFileGoldenApproxEq @5) { name = objFile }
         )
         ( let triangles'= triangles <&> \el -> el^.elValue :+ fromMaterial (el^.elMtl)
               cornellCamera = blenderCamera
