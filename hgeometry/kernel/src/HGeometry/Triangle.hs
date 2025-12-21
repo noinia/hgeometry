@@ -68,8 +68,11 @@ _TriangleVector = iso (\(MkTriangle v) -> v) MkTriangle
 
 instance ( Point_ point (Dimension point) (NumType point)
          ) => Triangle_ (Triangle point) point where
-  mkTriangle = Triangle
   corners = _TriangleVector
+
+instance ( Point_ point (Dimension point) (NumType point)
+         ) => ConstructableTriangle_ (Triangle point) point where
+  mkTriangle = Triangle
 
 instance HasVertices' (Triangle point) where
   type Vertex   (Triangle point) = point

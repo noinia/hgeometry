@@ -25,6 +25,7 @@ import           Control.Lens (view, review, (^.), (^..), toNonEmptyOf, IxValue)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as C
 import           Data.Colour.SRGB (RGB (..))
+import           Data.Eq.Approximate
 import           Data.Fixed
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty (..))
@@ -128,6 +129,9 @@ instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
 
 instance (IpeWriteText l, IpeWriteText r) => IpeWriteText (Either l r) where
   ipeWriteText = either ipeWriteText ipeWriteText
+
+instance IpeWriteText r => IpeWriteText (AbsolutelyApproximateValue tol r) where
+  ipeWriteText = ipeWriteText . unwrapAbsolutelyApproximateValue
 
 
 -- | Functon to write all attributes in a Rec

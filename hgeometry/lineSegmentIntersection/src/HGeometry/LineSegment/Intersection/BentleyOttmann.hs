@@ -14,21 +14,23 @@ module HGeometry.LineSegment.Intersection.BentleyOttmann
   ( intersections
   , interiorIntersections
 
-  , Intersections
-  , intersectionPoints
-  , Associated, startPointOf, endPointOf, interiorTo
-  , associatedSegments
+  , module HGeometry.LineSegment.Intersection.Types
+  -- , Intersections
+  -- , intersectionPoints
+  -- , Associated, empty
+  -- , startPointOf, endPointOf, interiorTo
+  -- , associatedSegments
 
-  , AroundEnd, AroundStart, AroundIntersection
-  , isInteriorIntersection
+  -- , AroundEnd, AroundStart, AroundIntersection
+  -- , isInteriorIntersection
 
-  , IntersectionPoint
-  , intersectionPointOf
+  -- , IntersectionPoint
+  -- , intersectionPointOf
 
-  , intersectionPoint, associatedSegs
+  -- , intersectionPoint, associatedSegs
 
-  , IntersectConstraints
-  , OrdArounds
+  -- , IntersectConstraints
+  -- , OrdArounds
   ) where
 
 import           Control.Lens hiding (contains)
@@ -62,21 +64,20 @@ import qualified HGeometry.Set.Util as SS -- status struct
 -- | Compute all intersections
 --
 -- \(O((n+k)\log n)\), where \(k\) is the number of intersections.
-intersections      :: forall lineSegment point r f.
-                      ( LineSegment_ lineSegment point
-                      , Point_ point 2 r
-                      , Eq lineSegment
-                      , Ord r, Fractional r
-                      , HasOnSegment lineSegment 2
-                      , IntersectConstraints lineSegment
-                      , Foldable f, Functor f
-                      , StartPointOf lineSegment ~ EndPointOf lineSegment
-                      )
-                   => f lineSegment -> Intersections r lineSegment
+intersections :: forall bag lineSegment seg point r.
+                 ( LineSegment_ lineSegment point
+                 , Point_ point 2 r
+                 , Ord r, Fractional r
+                 , Foldable bag, Functor bag
+
+                 , Eq lineSegment
+                 , HasOnSegment lineSegment 2
+                 , IntersectConstraints seg lineSegment
+                 , LineSegment_ seg point
+                 , StartPointOf lineSegment ~ EndPointOf lineSegment
+                 )
+              => bag lineSegment -> Intersections r lineSegment
 intersections = fmap unflipSegs . intersections' . fmap tagFlipped
-  -- where
-  --   intersections'' :: f (Flipped lineSegment) -> Intersections r (Flipped lineSegment)
-  --   intersections'' = intersections'
 
 
 -- intersections segs = fmap unflipSegs . merge $ sweep pts SS.empty
@@ -84,16 +85,21 @@ intersections = fmap unflipSegs . intersections' . fmap tagFlipped
 --     pts = EQ.fromAscList . groupStarts . sort . foldMap (asEventPts . tagFlipped) $ segs
 
 
+-- | Computes all intersections
+--
+-- pre: all segments are oriented from top-to-bottom; i.e. the start
+-- lies above (and/or left) of the end point.
 intersections'      :: ( LineSegment_ lineSegment point
-                      , Point_ point 2 r
-                      , Eq lineSegment
-                      , Ord r, Fractional r
-                      , HasOnSegment lineSegment 2
-                      , IntersectConstraints lineSegment
-                      , StartPointOf lineSegment ~ EndPointOf lineSegment
-                      , Foldable f
-                      )
-                   => f lineSegment -> Intersections r lineSegment
+                       , Point_ point 2 r
+                       , Eq lineSegment
+                       , Ord r, Fractional r
+                       , HasOnSegment lineSegment 2
+                       , IntersectConstraints seg lineSegment
+                       , LineSegment_ seg point
+                       , StartPointOf lineSegment ~ EndPointOf lineSegment
+                       , Foldable f
+                       )
+                    => f lineSegment -> Intersections r lineSegment
 intersections' segs = merge $ sweep pts SS.empty
   where
     pts = EQ.fromAscList . groupStarts . sort . foldMap asEventPts $ segs
@@ -107,7 +113,8 @@ interiorIntersections :: ( LineSegment_ lineSegment point
                          , Point_ point 2 r
                          , Eq lineSegment
                          , Ord r, Fractional r
-                         , IntersectConstraints lineSegment
+                         , IntersectConstraints seg lineSegment
+                         , LineSegment_ seg point
                          , StartPointOf lineSegment ~ EndPointOf lineSegment
                          , HasOnSegment lineSegment 2
                          , Foldable f, Functor f
@@ -193,8 +200,9 @@ type StatusStructure r lineSegment = SS.Set lineSegment
 sweep       :: ( LineSegment_ lineSegment point
                , Point_ point 2 r
                , Ord r, Fractional r
-               , IntersectConstraints lineSegment
+               , IntersectConstraints seg lineSegment
                , HasOnSegment lineSegment 2
+               , LineSegment_ seg point
                )
             => EventQueue r lineSegment -> StatusStructure r lineSegment
             -> [IntersectionPoint (Point 2 r) lineSegment]
@@ -212,8 +220,9 @@ isClosed = (== Closed) . endPointType
 handle                           :: ( LineSegment_ lineSegment point
                                     , Point_ point 2 r
                                     , Ord r, Fractional r
-                                    , IntersectConstraints lineSegment
+                                    , IntersectConstraints seg lineSegment
                                     , HasOnSegment lineSegment 2
+                                    , LineSegment_ seg point
                                     )
                                  => Event r lineSegment
                                  -> EventQueue r lineSegment -> StatusStructure r lineSegment
@@ -331,10 +340,11 @@ endsAt p seg = seg^.end.asPoint == p
 
 -- | Find all events
 findNewEvent       :: ( LineSegment_ lineSegment point
+                      , LineSegment_ seg point
                       , Point_ point 2 r, Ord r, Fractional r
                       , IsIntersectableWith lineSegment lineSegment
                       , Intersection lineSegment lineSegment ~
-                              Maybe (LineSegmentLineSegmentIntersection lineSegment)
+                              Maybe (LineSegmentLineSegmentIntersection seg)
                       )
                    =>  Point 2 r -> lineSegment -> lineSegment
                    -> Maybe (Event r lineSegment)
@@ -401,7 +411,8 @@ type instance NumType   (Flipped segment) = NumType segment
 type instance Dimension (Flipped segment) = Dimension segment
 
 type instance Intersection (Flipped segment) (Flipped segment) =
-  Maybe (LineSegmentLineSegmentIntersection (Flipped segment))
+  Intersection segment segment
+  -- Maybe (LineSegmentLineSegmentIntersection segment)
 
 instance HasStart lineSegment point => HasStart (Flipped lineSegment) point where
   start = rawSegment.start
@@ -432,24 +443,14 @@ instance segment `HasIntersectionWith` segment
 instance HasOnSegment segment 2 => HasOnSegment (Flipped segment) 2 where
   onSegment q s = onSegment q (s^.rawSegment)
 
-instance (segment `IsIntersectableWith` segment
-         , Intersection segment segment ~ Maybe (LineSegmentLineSegmentIntersection segment)
+instance ( segment `IsIntersectableWith` segment
+         -- , Intersection segment segment ~ Maybe (LineSegmentLineSegmentIntersection segment')
          ) => (Flipped segment) `IsIntersectableWith` (Flipped segment) where
-  a `intersect` b = intersect (a^.rawSegment) (b^.rawSegment) <&> \case
-    LineSegment_x_LineSegment_Point p         -> LineSegment_x_LineSegment_Point p
-    LineSegment_x_LineSegment_LineSegment seg ->
-      LineSegment_x_LineSegment_LineSegment $ NotFlipped seg
-    -- TODO: maybe we should actually unflip segments a and b rather than use rawSegment
+  a `intersect` b = intersect (a^.rawSegment) (b^.rawSegment)
 
-
--- type instance Intersection (geom :+ Flipped) (geom :+ Flipped) =
---   Maybe (LineSegmentLineSegmentIntersection (geom :+ Flipped))
-
--- instance IsIntersectableWith geomA geomB
---          => IsIntersectableWith (geomA :+ extra) (geomB :+ extra) where
---   ga `intersect` gb = (ga^.core) `intersect` (gb^.core)
-
-
+    -- <&> \case
+    -- LineSegment_x_LineSegment_Point p         -> LineSegment_x_LineSegment_Point p
+    -- LineSegment_x_LineSegment_LineSegment seg -> LineSegment_x_LineSegment_LineSegment seg
 
 -- | Make sure the 'start' endpoint occurs before the end-endpoints in
 -- terms of the sweep order.
@@ -482,7 +483,7 @@ isFlipped = (\case
 unflipSegs                       :: ( LineSegment_ lineSegment point
                                     , Point_ point 2 r
                                     , Fractional r, Ord r
-                                    , IntersectConstraints lineSegment
+                                    , IntersectConstraints seg lineSegment
                                     , StartPointOf lineSegment ~ EndPointOf lineSegment
                                     )
                                  => Associated (Flipped lineSegment)

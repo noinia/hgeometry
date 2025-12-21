@@ -13,8 +13,9 @@ module HGeometry.LineSegment.Intersection.Types
   ( Intersections
   , intersectionPoints
 
-  , Associated(Associated), startPointOf, endPointOf, interiorTo
-  , mkAssociated
+  , Associated(Associated)
+  , startPointOf, endPointOf, interiorTo
+  , empty, mkAssociated, mkAroundStart, mkAroundEnd
   , associatedSegments
 
   , AroundEnd(..), AroundStart(..), AroundIntersection(..)
@@ -42,6 +43,7 @@ import           Data.Ord (comparing, Down(..))
 import qualified Data.Set as Set
 import           GHC.Generics
 import           HGeometry.Intersection
+import           HGeometry.Properties
 import           HGeometry.Interval
 import           HGeometry.LineSegment
 import           HGeometry.Point
@@ -116,7 +118,8 @@ instance ( LineSegment_ lineSegment point
          , Eq lineSegment
          , IsIntersectableWith lineSegment lineSegment
          , Intersection lineSegment lineSegment ~
-           Maybe (LineSegmentLineSegmentIntersection lineSegment)
+           Maybe (LineSegmentLineSegmentIntersection lineSegment')
+         , NumType lineSegment' ~ r
          ) => Ord (AroundIntersection lineSegment) where
   -- | ccw ordered around their common intersection point.
   (AroundIntersection s) `compare` (AroundIntersection s') = case s `intersect` s' of
@@ -172,7 +175,12 @@ deriving stock instance ( Read lineSegment
                         , OrdArounds lineSegment
                         ) => Read (Associated lineSegment)
 
+-- | Constructs an empty associated
+empty :: Associated lineSegment
+empty = Associated Set.empty Set.empty Set.empty
 
+
+-- | Shorthand for the required Ord instances
 type OrdArounds lineSegment = ( Ord (AroundStart lineSegment)
                               , Ord (AroundIntersection lineSegment)
                               , Ord (AroundEnd lineSegment)
@@ -217,6 +225,15 @@ isInteriorIntersection :: Associated lineSegment -> Bool
 isInteriorIntersection = not . null . _interiorTo
 
 
+-- | Constructs an around start
+mkAroundStart   :: lineSegment -> Associated lineSegment
+mkAroundStart s = empty&startPointOf .~  Set.singleton (AroundStart s)
+
+-- | Constructs an ArroundEnd
+mkAroundEnd   :: lineSegment -> Associated lineSegment
+mkAroundEnd s = empty&endPointOf   .~  Set.singleton (AroundEnd s)
+
+
 -- | test if the given segment has p as its endpoint, an construct the
 -- appropriate associated representing that.
 --
@@ -225,13 +242,12 @@ mkAssociated      :: ( LineSegment_ lineSegment point
                      , Point_ point 2 r
                      , Point_ point' 2 r
                      , Eq r
-                     , OrdArounds lineSegment
                      )
                   => point' -> lineSegment -> Associated lineSegment
 mkAssociated p s
-  | p^.asPoint == s^.start.asPoint = mempty&startPointOf .~  Set.singleton (AroundStart s)
-  | p^.asPoint == s^.end.asPoint   = mempty&endPointOf   .~  Set.singleton (AroundEnd s)
-  | otherwise                      = mempty&interiorTo   .~  Set.singleton (AroundIntersection s)
+  | p^.asPoint == s^.start.asPoint = empty&startPointOf .~  Set.singleton (AroundStart s)
+  | p^.asPoint == s^.end.asPoint   = empty&endPointOf   .~  Set.singleton (AroundEnd s)
+  | otherwise                      = empty&interiorTo   .~  Set.singleton (AroundIntersection s)
 
 
 ---- | test if the given segment has p as its endpoint, an construct the
@@ -253,7 +269,7 @@ instance OrdArounds lineSegment => Semigroup (Associated lineSegment) where
     Associated (ss <> ss') (es <> es') (is <> is')
 
 instance OrdArounds lineSegment => Monoid (Associated lineSegment) where
-  mempty = Associated mempty mempty mempty
+  mempty = empty
 
 instance (NFData lineSegment) => NFData (Associated lineSegment)
 
@@ -338,9 +354,10 @@ ordPoints a b = let f p = (Down $ p^.yCoord, p^.xCoord) in comparing f a b
 -- | Given two segments, compute an IntersectionPoint representing their intersection (if
 -- such an intersection exists).
 intersectionPointOf      :: ( LineSegment_ lineSegment point
+                            , LineSegment_ seg point
                             , Point_ point 2 r
                             , Ord r, Fractional r
-                            , IntersectConstraints lineSegment
+                            , IntersectConstraints seg lineSegment
                             )
                          => lineSegment -> lineSegment
                          -> Maybe (IntersectionPoint (Point 2 r) lineSegment)
@@ -352,8 +369,10 @@ intersectionPointOf s s' = s `intersect` s' <&> \case
     topEndPoint seg = List.minimumBy ordPoints [seg^.start.asPoint, seg^.end.asPoint]
 
 -- | Shorthand for the more-or-less standard constraints that we need on LineSegments
-type IntersectConstraints lineSegment =
+type IntersectConstraints seg lineSegment =
   ( OrdArounds lineSegment
   , IsIntersectableWith lineSegment lineSegment
-  , Intersection lineSegment lineSegment ~ Maybe (LineSegmentLineSegmentIntersection lineSegment)
+  , Intersection lineSegment lineSegment ~ Maybe (LineSegmentLineSegmentIntersection seg)
+  , NumType seg ~ NumType lineSegment
+  , Dimension seg ~ Dimension lineSegment
   )

@@ -22,6 +22,7 @@ module Ipe.PathParser
 
 import           Data.Bifunctor
 import           Data.Char (isSpace)
+import           Data.Eq.Approximate
 import           Data.Fixed
 import           Data.Functor (($>))
 import           Data.Ratio
@@ -62,6 +63,11 @@ instance Coordinate Double
 instance Coordinate Float
 instance Coordinate (Ratio Integer)
 instance Coordinate (RealNumber p)
+
+instance ( Coordinate r, Ord r
+         , AbsoluteTolerance tol
+         ) => Coordinate (AbsolutelyApproximateValue tol r)
+
 
 -----------------------------------------------------------------------
 -- | Running the parsers

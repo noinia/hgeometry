@@ -18,9 +18,12 @@ allow-newer:
     geojson:text,
     geojson:containers,
     -- servant:base,
-    websockets:containers,
-    websockets:random,
+    -- websockets:containers,
+    -- websockets:random,
     -- http-api-data:base,
+    -- wavefront:base,
+    -- wavefront:filepath,
+    -- wavefront:text,
 
 source-repository-package
     type: git
@@ -33,6 +36,15 @@ source-repository-package
 source-repository-package
     type: git
     location: https://github.com/noinia/miso-bulma
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/wavefront
+
+-- for the approximate  equality that supports typelits
+source-repository-package
+    type: git
+    location: https://github.com/noinia/approximate-equality
 
 -- source-repository-package
 --     type: git

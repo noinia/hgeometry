@@ -19,6 +19,8 @@ module HGeometry.LineSegment.Internal
   , spanIn
   , EndPoint_(..)
   , asALineSegment
+
+  , StartEnd(..)
   ) where
 
 
@@ -39,6 +41,7 @@ import Text.Read
 import Data.Foldable1
 import GHC.Generics (Generic)
 import Control.DeepSeq
+import Hiraffe.Graph.Class(HasVertices'(..), HasVertices(..))
 
 -- import HGeometry.Number.Real.Rational
 -- import Debug.Trace
@@ -362,6 +365,34 @@ instance ( Point_ point d r
          ) => IsTransformable (LineSegment endPoint point) where
   transformBy t s = s&start %~ transformBy t
                      &end   %~ transformBy t
+
+
+
+-- | Data type modelling the index type for Line Segments
+data StartEnd = Start | End
+  deriving (Show,Eq,Ord)
+
+instance ( IxValue (endPoint vertex) ~ vertex, EndPoint_ (endPoint vertex)
+         ) => HasVertices' (LineSegment endPoint vertex) where
+  type Vertex   (LineSegment endPoint vertex) = vertex
+  type VertexIx (LineSegment endPoint vertex) = StartEnd
+  vertexAt = \case
+    Start -> \paFa -> start (indexed paFa Start)
+    End   -> \paFa -> end   (indexed paFa End)
+  {-# INLINE vertexAt #-}
+  numVertices = const 2
+
+instance ( Traversable1 endPoint, EndPoint_ (endPoint v)
+         , IxValue (endPoint v) ~ v
+         )
+           => HasVertices (LineSegment endPoint v) (LineSegment endPoint v') where
+  vertices = conjoined traverse1 (itrav.indexed)
+    where
+      itrav f (LineSegment s t) =
+        LineSegment <$> traverse1 (f Start) s Apply.<.> traverse1 (f End) t
+  {-# INLINE vertices #-}
+
+
 
 
   -- traverse1' f xs =

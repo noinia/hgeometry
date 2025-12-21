@@ -12,18 +12,27 @@
 module HGeometry.Map.NonEmpty.Monoidal
   ( MonoidalNEMap(..)
   , singleton
+  , fromSet
   , unions1WithKey
   , mapWithKeyMerge1
+  , mapAccumWithKey
+
+  , insert, insertReplace
+
+  , assocs, toAscList, keysSet
 
 
-  , assocs
+  , (!?), (!)
   ) where
 
-
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Foldable1
-import           Data.Map.NonEmpty (NEMap)
-import qualified Data.Map.NonEmpty as NEMap
+import Data.Foldable1.WithIndex
+import Control.Lens
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Foldable1
+import Data.Map.NonEmpty (NEMap)
+import Data.Set.NonEmpty (NESet)
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Coerce
 
 --------------------------------------------------------------------------------
 
@@ -36,19 +45,63 @@ newtype MonoidalNEMap k v = MonoidalNEMap { getNEMap :: NEMap k v }
 instance (Ord k, Semigroup v) => Semigroup (MonoidalNEMap k v) where
   (MonoidalNEMap ma) <> (MonoidalNEMap mb) = MonoidalNEMap $ NEMap.unionWith (<>) ma mb
 
+-- type instance Index   (MonoidalNEMap k v) = k
+-- type instance IxValue (MonoidalNEMap k v) = v
+
+-- instance Ord k => Ixed (MonoidalNEMap k v)
+
+-- instance Ord k => At (MonoidalNEMap k v) where
+--   at k f = NEMap.alterF f k
+--   {-# INLINE at #-}
+
+instance Traversable (MonoidalNEMap k) where
+  traverse f = fmap MonoidalNEMap . traverse f . getNEMap
+
+instance Traversable1 (MonoidalNEMap k) where
+  traverse1 f = fmap MonoidalNEMap . traverse1 f . getNEMap
+
+instance FunctorWithIndex k (MonoidalNEMap k) where
+  imap f = MonoidalNEMap . NEMap.mapWithKey f . getNEMap
+
+instance FoldableWithIndex k (MonoidalNEMap k) where
+  ifoldMap = ifoldMap1
+
+instance TraversableWithIndex k (MonoidalNEMap k) where
+  itraverse f = fmap MonoidalNEMap . NEMap.traverseWithKey f . getNEMap
+
+instance Foldable1WithIndex k (MonoidalNEMap k) where
+  ifoldMap1 f = NEMap.foldMapWithKey f . getNEMap
+
+--------------------------------------------------------------------------------
+
 -- | Create a singleton MonoidalNE Map
 singleton     :: k -> v -> MonoidalNEMap k v
 singleton k v = MonoidalNEMap $ NEMap.singleton k v
+{-# INLINE singleton #-}
+
+-- | Creates a non-empty Map from a nonempty Set
+-- \(O(n)\)
+fromSet   :: (k -> v) -> NESet k -> MonoidalNEMap k v
+fromSet f = coerce (NEMap.fromSet f)
+{-# INLINE fromSet #-}
 
 -- | Merge a bunch of non-empty maps with the given mergin function
 unions1WithKey   :: (Foldable1 f, Ord k) => (k -> a-> a ->a) -> f (NEMap k a) -> NEMap k a
 unions1WithKey f = foldl1' (NEMap.unionWithKey f)
+{-# INLINE unions1WithKey #-}
 
 -- | Merge the maps. When they share a key, combine their values using a semigroup.
 mapWithKeyMerge1   :: (Ord k', Semigroup v')
                    => (k -> v -> NEMap k' v') -> NEMap k v -> NEMap k' v'
 mapWithKeyMerge1 f = getNEMap . NEMap.foldMapWithKey (\k v -> MonoidalNEMap $ f k v)
+{-# INLINE mapWithKeyMerge1 #-}
 
+-- | Map with some accumulator function
+mapAccumWithKey :: forall k a b c.
+                   (a -> k -> b -> (a, c)) -> a -> MonoidalNEMap k b -> (a, MonoidalNEMap k c)
+mapAccumWithKey =
+  coerce (NEMap.mapAccumWithKey :: (a -> k -> b -> (a, c)) -> a -> NEMap k b -> (a, NEMap k c))
+{-# INLINE mapAccumWithKey #-}
 
 --------------------------------------------------------------------------------
 
@@ -57,3 +110,49 @@ mapWithKeyMerge1 f = getNEMap . NEMap.foldMapWithKey (\k v -> MonoidalNEMap $ f 
 -- \(O(n)\)
 assocs :: MonoidalNEMap k v -> NonEmpty (k, v)
 assocs = NEMap.assocs . getNEMap
+{-# INLINE assocs #-}
+
+-- | Return all key/value pairs in the map in ascending key order.
+--
+-- \(O(n)\)
+toAscList :: MonoidalNEMap k v -> NonEmpty (k, v)
+toAscList = NEMap.toAscList . getNEMap
+{-# INLINE toAscList  #-}
+
+-- | Return all keys in ascending order
+--
+-- \(O(n)\)
+keysSet :: MonoidalNEMap k v -> NESet k
+keysSet = NEMap.keysSet . getNEMap
+{-# INLINE keysSet #-}
+
+--------------------------------------------------------------------------------
+
+-- | Insert an new key,value pair into the Map
+--
+-- \(O(\log n)\)
+insert     :: (Ord k, Semigroup v) => k -> v -> MonoidalNEMap k v -> MonoidalNEMap k v
+insert k v = coerce $ NEMap.insertWith (<>) k v
+{-# INLINE insert #-}
+
+-- | Insert an new key,value pair into the Map
+-- \(O(\log n)\)
+insertReplace     :: Ord k => k -> v -> MonoidalNEMap k v -> MonoidalNEMap k v
+insertReplace k v = coerce $ NEMap.insert k v
+{-# INLINE insertReplace #-}
+
+
+infixl 9 !?
+infixl 9 !
+
+-- | Lookup in the Map
+-- \(O(\log n)\)
+(!?)   :: Ord k => MonoidalNEMap k v -> k -> Maybe v
+(!?) m = (NEMap.!?) (coerce m)
+{-# INLINE (!?) #-}
+
+-- | unsafe lookup in the Map
+-- \(O(\log n)\)
+(!)   :: Ord k => MonoidalNEMap k v -> k -> v
+(!) m = (NEMap.!) (coerce m)
+{-# INLINE (!) #-}

@@ -9,14 +9,11 @@ import qualified ConvexHull.GrahamV2 as GrahamV2
 import qualified ConvexHull.GrahamInt as GrahamInt
 import qualified ConvexHull.GrahamFastest as GrahamFastest
   -- hand written implementation for Int, this should be the fastest possible somehow.
-
-import           Control.DeepSeq
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector.Unboxed as UV
 import           HGeometry.Foldable.Sort
 import           HGeometry.Point
-import           HGeometry.Polygon.Convex
 import           System.Random
 import           Test.Tasty.Bench
 import           Util
@@ -39,6 +36,7 @@ the -fspecialise-aggressively -fexpose-all-unfoldings flags are
 curcial in making sure this benchmark is sufficiently fast.
 -}
 
+{-
 sort' :: NonEmpty      (Point 2 Int) ->
          NonEmpty      (Point 2 Int)
 sort' = NonEmpty.fromList . UV.toList . sortBy incXdecY
@@ -46,6 +44,7 @@ sort' = NonEmpty.fromList . UV.toList . sortBy incXdecY
 incXdecY :: (Ord r, Point_ point 2 r) => point -> point -> Ordering
 incXdecY (Point2_ px py) (Point2_ qx qy) =
   compare px qx <> compare qy py
+-}
 
 -- this already seems to make a difference versus just using Point 2 Int:
 

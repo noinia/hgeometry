@@ -31,12 +31,12 @@ module Ipe.Types(
   , Group(Group), groupItems
   , TextLabel(..)
   , MiniPage(..), width
-  , Image(Image), imageData, rect
+  , Image(Image), imageData, imageRect
   , IpeBitmap
   -- * Attributes
   , IpeAttributes
   , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, traverseIpeAttrs
+  , attributes, mapIpeAttrs, traverseIpeAttrs
   , commonAttributes
   -- * Layers and Views
   , LayerName(LayerName), layerName

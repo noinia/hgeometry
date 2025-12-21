@@ -20,24 +20,30 @@ module HGeometry.Polygon.WithHoles
   , HoleContainer
   ) where
 
-import           Control.DeepSeq (NFData)
-import           Control.Lens hiding (holes)
-import           Data.Foldable1
-import           Data.Functor.Apply ((<.*>), MaybeApply(..))
-import           Data.Kind (Type)
-import           Data.Semigroup.Traversable
-import           Data.Vector (Vector)
-import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import           GHC.Generics (Generic)
-import           HGeometry.Box
-import           HGeometry.Cyclic
-import           HGeometry.Foldable.Util
-import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple
-import           HGeometry.Properties
-import           HGeometry.Transformation
-import           HGeometry.Vector.NonEmpty.Util ()
+import Data.Semigroup
+import Control.DeepSeq (NFData)
+import Control.Lens hiding (holes)
+import Data.Foldable1
+import Data.Functor.Apply ((<.*>), MaybeApply(..))
+import Data.Kind (Type)
+import Data.Semigroup.Traversable
+import Data.Vector (Vector)
+import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import GHC.Generics (Generic)
+import HGeometry.Box
+import HGeometry.Cyclic
+import HGeometry.Foldable.Util
+import HGeometry.Point
+import Data.Ord (comparing)
+import HGeometry.Vector (lerp)
+import HGeometry.Triangle
+import HGeometry.Line.PointAndVector
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Simple
+import HGeometry.Properties
+import HGeometry.Transformation
+import HGeometry.Boundary
+import HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
 
@@ -229,6 +235,44 @@ instance Semigroup Monoid where
   mempty = Intersect Outside
 
 -}
+
+
+instance ( HoleContainer h nonEmpty vertex
+         , VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ vertex 2 r
+         , Fractional r, Ord r
+         ) => HasPickPoint (PolygonalDomainF h nonEmpty vertex) r where
+  pointInteriorTo pg = case foldMapOf vertices farthest pg of
+      Nothing              -> pointInteriorTo tri
+      Just (Max (Arg _ p)) -> Point $ lerp (1/2) (v^.vector) (p^.vector)
+    where
+      outer  = pg^.outerBoundaryPolygon
+      (i, v) = first1Of (minimumVertexBy (comparing (^.xCoord)).withIndex) outer
+      u      = outer^.outerBoundaryVertexAt (succ i)
+      w      = outer^.outerBoundaryVertexAt (pred i)
+
+      tri    = Triangle u v w
+      diag   = LinePV (u^.asPoint) (w .-. u)
+      farthest p
+        | p `inTriangle` tri == StrictlyInside =
+            Just (Max (Arg (p `squaredEuclideanDistTo` diag) p))
+        | otherwise         = Nothing
+  -- The overall strategy follows the "a polygon can be triangulated
+  -- argument". I.e. the idea is as follows: we find the leftmost
+  -- vertex v, and its two neighbours u and w. If uwv is a triangle of
+  -- the polygon (i.e. uw is a diagonal), then one can just pick a
+  -- point sticly inside the triangle. If uwv is not a valid triangle
+  -- of the polgyon, then there must be an other vertex inside the
+  -- triangle [*], we find the vertex farthest from uw then it follows
+  -- that the linesegment vp is a diagonal of the polygon, and hence
+  -- we can just return the midpoint of v and p.
+  --
+  -- [*] it could be that there is a vertex on the interior of the
+  -- segment uw (and no vertices strictly in the interior). However, then
+  -- picking a point inside the triangle is also fine.
+      inTriangle q tr = q `inPolygon` (uncheckedFromCCWPoints tr :: SimplePolygon _)
+      -- TOOD: just make triangle an instance of SimplePolygon_
+
+
 
 --------------------------------------------------------------------------------
 

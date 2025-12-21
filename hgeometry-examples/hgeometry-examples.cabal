@@ -66,7 +66,7 @@ common setup
       , witherable                >= 0.4
       , linear                    >= 1.21
       , data-clist                >= 0.2
-      , data-default-class        ^>= 0.1
+      , data-default              >= 0.8           && < 1
       , array                     >= 0.5
       , aeson                     >= 2.0
       , colour                    >= 2.3.6
@@ -314,3 +314,13 @@ executable hgeometry-lowerEnv
 
   -- other-modules:
   --       Options
+
+--------------------------------------------------------------------------------
+
+-- Renders a 3D model of the lower envelope of a set of planes
+executable hgeometry-3dviewer
+  import:         setup, miso-setup
+  hs-source-dirs: 3dviewer
+  main-is:        Main.hs
+  -- build-depends:
+  --    hgeometry:

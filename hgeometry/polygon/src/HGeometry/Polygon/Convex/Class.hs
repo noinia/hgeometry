@@ -14,7 +14,7 @@ module HGeometry.Polygon.Convex.Class
 
 import HGeometry.Polygon.Simple.Class
 import HGeometry.Ext
-import Data.Default.Class
+import Data.Default
 
 --------------------------------------------------------------------------------
 
