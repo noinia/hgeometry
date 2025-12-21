@@ -79,13 +79,6 @@ ipeFileGoldenApproxEq = ipeFileGolden { actualWriter   = WriteActual writeIpeFil
 
 
 
--- | Mapping function to transform the golden
-mapGolden          :: (golden -> golden')
-                   -> (golden' -> golden)
-                   -> Golden golden actual -> Golden golden' actual
-mapGolden f g spec = dimapWith (\osPath glden' -> writeGolden  spec osPath (g glden'))
-                               (\glden'        -> prettyGolden spec        (g glden'))
-                               id f spec
 
 
 
