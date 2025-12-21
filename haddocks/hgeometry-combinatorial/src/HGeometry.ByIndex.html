@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  HGeometry.ByIndex</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Types that have an Index, which is used to distinguish the</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- items. Hence, Eq and Ord are *only* based on the Index.</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.ByIndex.html"><span class="hs-identifier">HGeometry.ByIndex</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier">ByIndex</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier">ByIndex</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.ByIndex.html#theIndex"><span class="hs-identifier">theIndex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.ByIndex.html#theValue"><span class="hs-identifier">theValue</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- | Helper data type for which the Ord and Eq instance are by index.</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- Note that one may use the index as some sort of optimization.</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- i.e. if the indices are the same, then the values are considerd the</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- same</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">data</span><span> </span><span id="ByIndex"><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-var">ByIndex</span></a></span></span><span> </span><span id="local-6989586621679228922"><span class="annot"><a href="#local-6989586621679228922"><span class="hs-identifier hs-type">ix</span></a></span></span><span> </span><span id="local-6989586621679228923"><span class="annot"><a href="#local-6989586621679228923"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ByIndex"><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-var">ByIndex</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_theIndex"><span class="annot"><span class="annottext">forall ix a. ByIndex ix a -&gt; ix
+</span><a href="HGeometry.ByIndex.html#_theIndex"><span class="hs-identifier hs-var hs-var">_theIndex</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679228922"><span class="hs-identifier hs-type">ix</span></a></span><span>
+</span><span id="line-30"></span><span>                            </span><span class="hs-special">,</span><span> </span><span id="_theValue"><span class="annot"><span class="annottext">forall ix a. ByIndex ix a -&gt; a
+</span><a href="HGeometry.ByIndex.html#_theValue"><span class="hs-identifier hs-var hs-var">_theValue</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679228923"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-31"></span><span>                            </span><span class="hs-special">}</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679229044"><span id="local-6989586621679229046"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; ByIndex ix a -&gt; ByIndex ix b)
+-&gt; (forall a b. a -&gt; ByIndex ix b -&gt; ByIndex ix a)
+-&gt; Functor (ByIndex ix)
+forall a b. a -&gt; ByIndex ix b -&gt; ByIndex ix a
+forall a b. (a -&gt; b) -&gt; ByIndex ix a -&gt; ByIndex ix b
+forall ix a b. a -&gt; ByIndex ix b -&gt; ByIndex ix a
+forall ix a b. (a -&gt; b) -&gt; ByIndex ix a -&gt; ByIndex ix b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall ix a b. (a -&gt; b) -&gt; ByIndex ix a -&gt; ByIndex ix b
+fmap :: forall a b. (a -&gt; b) -&gt; ByIndex ix a -&gt; ByIndex ix b
+$c&lt;$ :: forall ix a b. a -&gt; ByIndex ix b -&gt; ByIndex ix a
+&lt;$ :: forall a b. a -&gt; ByIndex ix b -&gt; ByIndex ix a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229051"><span id="local-6989586621679229057"><span id="local-6989586621679229060"><span id="local-6989586621679229065"><span id="local-6989586621679229067"><span id="local-6989586621679229070"><span id="local-6989586621679229073"><span id="local-6989586621679229076"><span id="local-6989586621679229079"><span id="local-6989586621679229082"><span id="local-6989586621679229085"><span id="local-6989586621679229087"><span id="local-6989586621679229090"><span id="local-6989586621679229095"><span id="local-6989586621679229100"><span id="local-6989586621679229105"><span id="local-6989586621679229110"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; ByIndex ix m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a)
+-&gt; (forall a. ByIndex ix a -&gt; [a])
+-&gt; (forall a. ByIndex ix a -&gt; Bool)
+-&gt; (forall a. ByIndex ix a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; ByIndex ix a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; ByIndex ix a -&gt; a)
+-&gt; (forall a. Ord a =&gt; ByIndex ix a -&gt; a)
+-&gt; (forall a. Num a =&gt; ByIndex ix a -&gt; a)
+-&gt; (forall a. Num a =&gt; ByIndex ix a -&gt; a)
+-&gt; Foldable (ByIndex ix)
+forall a. Eq a =&gt; a -&gt; ByIndex ix a -&gt; Bool
+forall a. Num a =&gt; ByIndex ix a -&gt; a
+forall a. Ord a =&gt; ByIndex ix a -&gt; a
+forall m. Monoid m =&gt; ByIndex ix m -&gt; m
+forall a. ByIndex ix a -&gt; Bool
+forall a. ByIndex ix a -&gt; Int
+forall a. ByIndex ix a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a
+forall ix a. Eq a =&gt; a -&gt; ByIndex ix a -&gt; Bool
+forall ix a. Num a =&gt; ByIndex ix a -&gt; a
+forall ix a. Ord a =&gt; ByIndex ix a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+forall ix m. Monoid m =&gt; ByIndex ix m -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+forall ix a. ByIndex ix a -&gt; Bool
+forall ix a. ByIndex ix a -&gt; Int
+forall ix a. ByIndex ix a -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+forall ix a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a
+forall ix m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+forall ix b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+forall ix a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall ix m. Monoid m =&gt; ByIndex ix m -&gt; m
+fold :: forall m. Monoid m =&gt; ByIndex ix m -&gt; m
+$cfoldMap :: forall ix m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+$cfoldMap' :: forall ix m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+$cfoldr :: forall ix a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+$cfoldr' :: forall ix a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+$cfoldl :: forall ix b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+$cfoldl' :: forall ix b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ByIndex ix a -&gt; b
+$cfoldr1 :: forall ix a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a
+$cfoldl1 :: forall ix a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; ByIndex ix a -&gt; a
+$ctoList :: forall ix a. ByIndex ix a -&gt; [a]
+toList :: forall a. ByIndex ix a -&gt; [a]
+$cnull :: forall ix a. ByIndex ix a -&gt; Bool
+null :: forall a. ByIndex ix a -&gt; Bool
+$clength :: forall ix a. ByIndex ix a -&gt; Int
+length :: forall a. ByIndex ix a -&gt; Int
+$celem :: forall ix a. Eq a =&gt; a -&gt; ByIndex ix a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; ByIndex ix a -&gt; Bool
+$cmaximum :: forall ix a. Ord a =&gt; ByIndex ix a -&gt; a
+maximum :: forall a. Ord a =&gt; ByIndex ix a -&gt; a
+$cminimum :: forall ix a. Ord a =&gt; ByIndex ix a -&gt; a
+minimum :: forall a. Ord a =&gt; ByIndex ix a -&gt; a
+$csum :: forall ix a. Num a =&gt; ByIndex ix a -&gt; a
+sum :: forall a. Num a =&gt; ByIndex ix a -&gt; a
+$cproduct :: forall ix a. Num a =&gt; ByIndex ix a -&gt; a
+product :: forall a. Num a =&gt; ByIndex ix a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229123"><span id="local-6989586621679229128"><span id="local-6989586621679229134"><span id="local-6989586621679229139"><span class="annot"><span class="annottext">Functor (ByIndex ix)
+Foldable (ByIndex ix)
+(Functor (ByIndex ix), Foldable (ByIndex ix)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; ByIndex ix a -&gt; f (ByIndex ix b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    ByIndex ix (f a) -&gt; f (ByIndex ix a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; ByIndex ix a -&gt; m (ByIndex ix b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    ByIndex ix (m a) -&gt; m (ByIndex ix a))
+-&gt; Traversable (ByIndex ix)
+forall ix. Functor (ByIndex ix)
+forall ix. Foldable (ByIndex ix)
+forall ix (m :: * -&gt; *) a.
+Monad m =&gt;
+ByIndex ix (m a) -&gt; m (ByIndex ix a)
+forall ix (f :: * -&gt; *) a.
+Applicative f =&gt;
+ByIndex ix (f a) -&gt; f (ByIndex ix a)
+forall ix (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; ByIndex ix a -&gt; m (ByIndex ix b)
+forall ix (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ByIndex ix a -&gt; f (ByIndex ix b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+ByIndex ix (m a) -&gt; m (ByIndex ix a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+ByIndex ix (f a) -&gt; f (ByIndex ix a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; ByIndex ix a -&gt; m (ByIndex ix b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ByIndex ix a -&gt; f (ByIndex ix b)
+$ctraverse :: forall ix (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ByIndex ix a -&gt; f (ByIndex ix b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ByIndex ix a -&gt; f (ByIndex ix b)
+$csequenceA :: forall ix (f :: * -&gt; *) a.
+Applicative f =&gt;
+ByIndex ix (f a) -&gt; f (ByIndex ix a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+ByIndex ix (f a) -&gt; f (ByIndex ix a)
+$cmapM :: forall ix (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; ByIndex ix a -&gt; m (ByIndex ix b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; ByIndex ix a -&gt; m (ByIndex ix b)
+$csequence :: forall ix (m :: * -&gt; *) a.
+Monad m =&gt;
+ByIndex ix (m a) -&gt; m (ByIndex ix a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+ByIndex ix (m a) -&gt; m (ByIndex ix a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span id="local-6989586621679228922"><span id="local-6989586621679228923"><span id="local-6989586621679228980"><span id="local-6989586621679228981"><span id="theIndex"><span id="theValue"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">ByIndex</span></span></span></span></span></span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679228993"><span id="local-6989586621679228994"><span id="local-6989586621679229162"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679228993"><span class="hs-identifier hs-type">ix</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-type">ByIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228993"><span class="hs-identifier hs-type">ix</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228994"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>  </span><span id="local-6989586621679229167"><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229167"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679229168"><span class="annot"><span class="annottext">== :: ByIndex ix a -&gt; ByIndex ix a -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span id="local-6989586621679229169"><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229169"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByIndex ix a -&gt; ix
+forall ix a. ByIndex ix a -&gt; ix
+</span><a href="HGeometry.ByIndex.html#_theIndex"><span class="hs-identifier hs-var">_theIndex</span></a></span><span> </span><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229167"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">ix -&gt; ix -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">ByIndex ix a -&gt; ix
+forall ix a. ByIndex ix a -&gt; ix
+</span><a href="HGeometry.ByIndex.html#_theIndex"><span class="hs-identifier hs-var">_theIndex</span></a></span><span> </span><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229169"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679228998"><span id="local-6989586621679228999"><span id="local-6989586621679229176"><span id="local-6989586621679229180"><span id="local-6989586621679229183"><span id="local-6989586621679229186"><span id="local-6989586621679229189"><span id="local-6989586621679229192"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679228998"><span class="hs-identifier hs-type">ix</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-type">ByIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228998"><span class="hs-identifier hs-type">ix</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679229197"><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229197"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679229198"><span class="annot"><span class="annottext">compare :: ByIndex ix a -&gt; ByIndex ix a -&gt; Ordering
+</span><a href="#local-6989586621679229198"><span class="hs-operator hs-var hs-var hs-var">`compare`</span></a></span></span><span> </span><span id="local-6989586621679229200"><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229200"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByIndex ix a -&gt; ix
+forall ix a. ByIndex ix a -&gt; ix
+</span><a href="HGeometry.ByIndex.html#_theIndex"><span class="hs-identifier hs-var">_theIndex</span></a></span><span> </span><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229197"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">ix -&gt; ix -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">ByIndex ix a -&gt; ix
+forall ix a. ByIndex ix a -&gt; ix
+</span><a href="HGeometry.ByIndex.html#_theIndex"><span class="hs-identifier hs-var">_theIndex</span></a></span><span> </span><span class="annot"><span class="annottext">ByIndex ix a
+</span><a href="#local-6989586621679229200"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679229017"><span id="local-6989586621679229204"><span id="local-6989586621679229211"><span id="local-6989586621679229216"><span id="local-6989586621679229219"><span id="local-6989586621679229224"><span id="local-6989586621679229229"><span id="local-6989586621679229232"><span id="local-6989586621679229235"><span id="local-6989586621679229238"><span id="local-6989586621679229241"><span id="local-6989586621679229244"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-type">ByIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679229017"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679229248"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; ByIndex ix a -&gt; m
+</span><a href="#local-6989586621679229248"><span class="hs-identifier hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679229250"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679229250"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-type">ByIndex</span></a></span><span> </span><span class="annot"><span class="annottext">ix
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679229251"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229251"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679229250"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229251"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679229030"><span id="local-6989586621679229258"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-211fa6e880027a6eed340531b5cc5442a9c75924011128ea7558a48b1d6183a4/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-type">ByIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679229030"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679229268"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; ByIndex ix a -&gt; f (ByIndex ix b)
+</span><a href="#local-6989586621679229268"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679229270"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679229270"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-type">ByIndex</span></a></span><span> </span><span id="local-6989586621679229271"><span class="annot"><span class="annottext">ix
+</span><a href="#local-6989586621679229271"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679229272"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229272"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ix -&gt; b -&gt; ByIndex ix b
+forall ix a. ix -&gt; a -&gt; ByIndex ix a
+</span><a href="HGeometry.ByIndex.html#ByIndex"><span class="hs-identifier hs-var">ByIndex</span></a></span><span> </span><span class="annot"><span class="annottext">ix
+</span><a href="#local-6989586621679229271"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; ByIndex ix b) -&gt; f b -&gt; f (ByIndex ix b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679229270"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229272"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-47"></span></pre></body></html>

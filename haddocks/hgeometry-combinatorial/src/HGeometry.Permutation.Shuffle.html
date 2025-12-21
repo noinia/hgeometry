@@ -17,7 +17,7 @@
 </span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleSeq"><span class="hs-identifier">shuffleSeq</span></a></span><span>
 </span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-19"></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Traversal.html#singular"><span class="hs-identifier">singular</span></a></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier">ix</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-operator">(&amp;)</span></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator">(%%~)</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">bimap</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Traversal.html#singular"><span class="hs-identifier">singular</span></a></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier">ix</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-operator">(&amp;)</span></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator">(%%~)</span></a></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">bimap</span></span><span class="hs-special">)</span><span>
 </span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
 </span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">)</span><span>
@@ -40,14 +40,14 @@
 </span><span id="line-40"></span><span class="hs-comment">-- | Fisher&#8211;Yates shuffle, which shuffles a list/foldable uniformly at random.</span><span>
 </span><span id="line-41"></span><span class="hs-comment">--</span><span>
 </span><span id="line-42"></span><span class="hs-comment">-- running time: \(O(n)\).</span><span>
-</span><span id="line-43"></span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffle"><span class="hs-identifier hs-type">shuffle</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679230757"><span class="annot"><a href="#local-6989586621679230757"><span class="hs-identifier hs-type">vector</span></a></span></span><span> </span><span id="local-6989586621679230761"><span class="annot"><a href="#local-6989586621679230761"><span class="hs-identifier hs-type">gen</span></a></span></span><span> </span><span id="local-6989586621679230758"><span class="annot"><a href="#local-6989586621679230758"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679230760"><span class="annot"><a href="#local-6989586621679230760"><span class="hs-identifier hs-type">f</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-44"></span><span>                </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.Generic.Base.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230757"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230758"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679230760"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230761"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679230761"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679230760"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230758"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679230757"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230758"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-43"></span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffle"><span class="hs-identifier hs-type">shuffle</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679234971"><span class="annot"><a href="#local-6989586621679234971"><span class="hs-identifier hs-type">vector</span></a></span></span><span> </span><span id="local-6989586621679234975"><span class="annot"><a href="#local-6989586621679234975"><span class="hs-identifier hs-type">gen</span></a></span></span><span> </span><span id="local-6989586621679234972"><span class="annot"><a href="#local-6989586621679234972"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679234974"><span class="annot"><a href="#local-6989586621679234974"><span class="hs-identifier hs-type">f</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-44"></span><span>                </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.Generic.Base.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679234971"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679234972"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679234974"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679234975"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679234975"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679234974"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679234972"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679234971"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679234972"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-45"></span><span id="shuffle"><span class="annot"><span class="annottext">shuffle :: forall (vector :: * -&gt; *) gen a (f :: * -&gt; *).
 (Vector vector a, Foldable f, RandomGen gen) =&gt;
 gen -&gt; f a -&gt; vector a
-</span><a href="HGeometry.Permutation.Shuffle.html#shuffle"><span class="hs-identifier hs-var hs-var">shuffle</span></a></span></span><span> </span><span id="local-6989586621679230964"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679230964"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; vector a
-</span><a href="#local-6989586621679230965"><span class="hs-identifier hs-var">construct</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder a -&gt; vector a) -&gt; (f a -&gt; Builder a) -&gt; f a -&gt; vector a
+</span><a href="HGeometry.Permutation.Shuffle.html#shuffle"><span class="hs-identifier hs-var hs-var">shuffle</span></a></span></span><span> </span><span id="local-6989586621679235178"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235178"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; vector a
+</span><a href="#local-6989586621679235179"><span class="hs-identifier hs-var">construct</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder a -&gt; vector a) -&gt; (f a -&gt; Builder a) -&gt; f a -&gt; vector a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f a -&gt; Builder a
 forall (foldable :: * -&gt; *) element.
@@ -55,9 +55,9 @@ Foldable foldable =&gt;
 foldable element -&gt; Builder element
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-builder-0.3.8.6-93147509535fc304ca540a620aee34b927f00cd5dbf26451151070ec258ba8c0/share/doc/html/src/VectorBuilder.Core.Builder.html#foldable"><span class="hs-identifier hs-var">Builder.foldable</span></a></span><span>
 </span><span id="line-46"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-47"></span><span>    </span><span id="local-6989586621679230965"><span class="annot"><span class="annottext">construct :: Builder a -&gt; vector a
-</span><a href="#local-6989586621679230965"><span class="hs-identifier hs-var hs-var">construct</span></a></span></span><span> </span><span id="local-6989586621679230968"><span class="annot"><span class="annottext">Builder a
-</span><a href="#local-6989586621679230968"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (Mutable vector s a)) -&gt; vector a
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679235179"><span class="annot"><span class="annottext">construct :: Builder a -&gt; vector a
+</span><a href="#local-6989586621679235179"><span class="hs-identifier hs-var hs-var">construct</span></a></span></span><span> </span><span id="local-6989586621679235182"><span class="annot"><span class="annottext">Builder a
+</span><a href="#local-6989586621679235182"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (Mutable vector s a)) -&gt; vector a
 forall (v :: * -&gt; *) a.
 Vector v a =&gt;
 (forall s. ST s (Mutable v s a)) -&gt; v a
@@ -65,49 +65,49 @@ Vector v a =&gt;
 -&gt; (forall s. ST s (Mutable vector s a)) -&gt; vector a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-48"></span><span>                    </span><span id="local-6989586621679230984"><span class="annot"><a href="#local-6989586621679230984"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; ST s (Mutable vector s a)
+</span><span id="line-48"></span><span>                    </span><span id="local-6989586621679235198"><span class="annot"><a href="#local-6989586621679235198"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; ST s (Mutable vector s a)
 forall (vector :: * -&gt; * -&gt; *) element s.
 MVector vector element =&gt;
 Builder element -&gt; ST s (vector s element)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-builder-0.3.8.6-93147509535fc304ca540a620aee34b927f00cd5dbf26451151070ec258ba8c0/share/doc/html/src/VectorBuilder.MVector.html#build"><span class="hs-identifier hs-var">Builder.build</span></a></span><span> </span><span class="annot"><span class="annottext">Builder a
-</span><a href="#local-6989586621679230968"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-49"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">for_</span></span><span> </span><span class="annot"><a href="#local-6989586621679230987"><span class="hs-identifier hs-type">swaps</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679230988"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679230988"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679230989"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679230989"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679235182"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-49"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">for_</span></span><span> </span><span class="annot"><a href="#local-6989586621679235201"><span class="hs-identifier hs-type">swaps</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679235202"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235202"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235203"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235203"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-50"></span><span>                      </span><span class="annot"><span class="annottext">Mutable vector (PrimState (ST s)) a -&gt; Int -&gt; Int -&gt; ST s ()
 forall (m :: * -&gt; *) (v :: * -&gt; * -&gt; *) a.
 (HasCallStack, PrimMonad m, MVector v a) =&gt;
 v (PrimState m) a -&gt; Int -&gt; Int -&gt; m ()
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.Generic.Mutable.html#swap"><span class="hs-identifier hs-var">MV.swap</span></a></span><span> </span><span class="annot"><span class="annottext">Mutable vector s a
 Mutable vector (PrimState (ST s)) a
-</span><a href="#local-6989586621679230984"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679230988"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679230989"><span class="hs-identifier hs-var">j</span></a></span><span>
-</span><span id="line-51"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621679230984"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><a href="#local-6989586621679235198"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235202"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235203"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-51"></span><span>                    </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621679235198"><span class="hs-identifier hs-type">v</span></a></span><span>
 </span><span id="line-52"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-53"></span><span>        </span><span id="local-6989586621679230987"><span class="annot"><span class="annottext">swaps :: [(Int, Int)]
-</span><a href="#local-6989586621679230987"><span class="hs-identifier hs-var hs-var">swaps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, gen) -&gt; Maybe ((Int, Int), (Int, gen)))
+</span><span id="line-53"></span><span>        </span><span id="local-6989586621679235201"><span class="annot"><span class="annottext">swaps :: [(Int, Int)]
+</span><a href="#local-6989586621679235201"><span class="hs-identifier hs-var hs-var">swaps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, gen) -&gt; Maybe ((Int, Int), (Int, gen)))
 -&gt; (Int, gen) -&gt; [(Int, Int)]
 forall b a. (b -&gt; Maybe (a, b)) -&gt; b -&gt; [a]
 </span><span class="hs-identifier hs-var">List.unfoldr</span></span><span> </span><span class="annot"><span class="annottext">(Int, gen) -&gt; Maybe ((Int, Int), (Int, gen))
 forall {a} {c}.
 (Ord a, Num a, Enum a, UniformRange a, RandomGen c) =&gt;
 (a, c) -&gt; Maybe ((a, a), (a, c))
-</span><a href="#local-6989586621679230992"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><a href="#local-6989586621679235206"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a. Enum a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int) -&gt; Int -&gt; Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Builder a -&gt; Int
 forall element. Builder element -&gt; Int
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-builder-0.3.8.6-93147509535fc304ca540a620aee34b927f00cd5dbf26451151070ec258ba8c0/share/doc/html/src/VectorBuilder.Core.Builder.html#size"><span class="hs-identifier hs-var">Builder.size</span></a></span><span> </span><span class="annot"><span class="annottext">Builder a
-</span><a href="#local-6989586621679230968"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679230964"><span class="hs-identifier hs-var">gen0</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-54"></span><span>        </span><span id="local-6989586621679230992"><span class="annot"><span class="annottext">f :: (a, c) -&gt; Maybe ((a, a), (a, c))
-</span><a href="#local-6989586621679230992"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679231011"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231011"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679231012"><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679231012"><span class="hs-identifier hs-var">gen</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679235182"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235178"><span class="hs-identifier hs-var">gen0</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>        </span><span id="local-6989586621679235206"><span class="annot"><span class="annottext">f :: (a, c) -&gt; Maybe ((a, a), (a, c))
+</span><a href="#local-6989586621679235206"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679235225"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235225"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235226"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679235226"><span class="hs-identifier hs-var">gen</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-55"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231011"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679235225"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">1</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ((a, a), (a, c))
@@ -125,18 +125,18 @@ forall (p :: * -&gt; * -&gt; *) a b c d.
 Bifunctor p =&gt;
 (a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
 </span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231011"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679235225"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
 forall a. Enum a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231011"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((a, c) -&gt; Maybe ((a, a), (a, c)))
+</span><a href="#local-6989586621679235225"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((a, c) -&gt; Maybe ((a, a), (a, c)))
 -&gt; (a, c) -&gt; Maybe ((a, a), (a, c))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a, a) -&gt; c -&gt; (a, c)
 forall a g. (UniformRange a, RandomGen g) =&gt; (a, a) -&gt; g -&gt; (a, g)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#uniformR"><span class="hs-identifier hs-var">uniformR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231011"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679231012"><span class="hs-identifier hs-var">gen</span></a></span><span>
+</span><a href="#local-6989586621679235225"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679235226"><span class="hs-identifier hs-var">gen</span></a></span><span>
 </span><span id="line-57"></span><span>
 </span><span id="line-58"></span><span>
 </span><span id="line-59"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
@@ -151,15 +151,15 @@ forall a g. (UniformRange a, RandomGen g) =&gt; (a, a) -&gt; g -&gt; (a, g)
 </span><span id="line-68"></span><span class="hs-comment">-- for details.</span><span>
 </span><span id="line-69"></span><span class="hs-comment">--</span><span>
 </span><span id="line-70"></span><span class="hs-comment">-- O(n\log n)</span><span>
-</span><span id="line-71"></span><span id="local-6989586621679230822"><span id="local-6989586621679230823"><span id="local-6989586621679230824"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOut"><span class="hs-identifier hs-type">shuffleSeqInOut</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230822"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679230823"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679230822"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679230823"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230824"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679230824"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-71"></span><span id="local-6989586621679235036"><span id="local-6989586621679235037"><span id="local-6989586621679235038"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOut"><span class="hs-identifier hs-type">shuffleSeqInOut</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235036"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679235037"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235036"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235037"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235038"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679235038"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
 </span><span id="line-72"></span><span id="shuffleSeqInOut"><span class="annot"><span class="annottext">shuffleSeqInOut :: forall gen (f :: * -&gt; *) a.
 (RandomGen gen, Foldable f) =&gt;
 gen -&gt; f a -&gt; Seq a
-</span><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOut"><span class="hs-identifier hs-var hs-var">shuffleSeqInOut</span></a></span></span><span> </span><span id="local-6989586621679231021"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231021"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679231023"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231023"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231023"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Acc gen (Seq a) -&gt; Seq a)
+</span><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOut"><span class="hs-identifier hs-var hs-var">shuffleSeqInOut</span></a></span></span><span> </span><span id="local-6989586621679235235"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235235"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679235237"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235237"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235237"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Acc gen (Seq a) -&gt; Seq a)
 -&gt; (f a -&gt; Acc gen (Seq a)) -&gt; f a -&gt; Seq a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a))
@@ -172,72 +172,72 @@ Foldable t =&gt;
 forall {gen} {a}.
 RandomGen gen =&gt;
 Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a)
-</span><a href="#local-6989586621679231025"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">gen -&gt; Seq a -&gt; Acc gen (Seq a)
+</span><a href="#local-6989586621679235239"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">gen -&gt; Seq a -&gt; Acc gen (Seq a)
 forall gen s. gen -&gt; s -&gt; Acc gen s
 </span><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231021"><span class="hs-identifier hs-var">gen0</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235235"><span class="hs-identifier hs-var">gen0</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
 </span><span id="line-73"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-74"></span><span>    </span><span class="hs-comment">-- | sets the value at position i to x, and retrieves its current value.</span><span>
-</span><span id="line-75"></span><span>    </span><span id="local-6989586621679231026"><span class="annot"><span class="annottext">setAndRetrieve :: Int -&gt; a -&gt; Seq a -&gt; (a, Seq a)
-</span><a href="#local-6989586621679231026"><span class="hs-identifier hs-var hs-var">setAndRetrieve</span></a></span></span><span> </span><span id="local-6989586621679231027"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231027"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679231028"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231028"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679231029"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231029"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231029"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; Int -&gt; Maybe a
+</span><span id="line-75"></span><span>    </span><span id="local-6989586621679235240"><span class="annot"><span class="annottext">setAndRetrieve :: Int -&gt; a -&gt; Seq a -&gt; (a, Seq a)
+</span><a href="#local-6989586621679235240"><span class="hs-identifier hs-var hs-var">setAndRetrieve</span></a></span></span><span> </span><span id="local-6989586621679235241"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235241"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679235242"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235242"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679235243"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235243"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235243"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; Int -&gt; Maybe a
 forall a. Seq a -&gt; Int -&gt; Maybe a
 </span><span class="hs-operator hs-var">Seq.!?</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231027"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679235241"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-76"></span><span>      </span><span class="annot"><span class="annottext">Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231028"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231029"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-77"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679231031"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231031"><span class="hs-identifier hs-var">y</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231031"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Seq a -&gt; Seq a
+</span><a href="#local-6989586621679235242"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235243"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679235245"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235245"><span class="hs-identifier hs-var">y</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235245"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Seq a -&gt; Seq a
 forall a. Int -&gt; a -&gt; Seq a -&gt; Seq a
 </span><span class="hs-identifier hs-var">Seq.update</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231027"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231028"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231029"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-78"></span><span>    </span><span id="local-6989586621679231025"><span class="annot"><span class="annottext">step :: Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a)
-</span><a href="#local-6989586621679231025"><span class="hs-identifier hs-var hs-var">step</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span id="local-6989586621679231039"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231039"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679231040"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231040"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679231041"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231041"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679231042"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231042"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679231043"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231043"><span class="hs-identifier hs-var">gen'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; gen -&gt; (Int, gen)
+</span><a href="#local-6989586621679235241"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235242"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235243"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679235239"><span class="annot"><span class="annottext">step :: Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a)
+</span><a href="#local-6989586621679235239"><span class="hs-identifier hs-var hs-var">step</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span id="local-6989586621679235253"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235253"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679235254"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235254"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679235255"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235255"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679235256"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235256"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235257"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235257"><span class="hs-identifier hs-var">gen'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; gen -&gt; (Int, gen)
 forall a g. (UniformRange a, RandomGen g) =&gt; (a, a) -&gt; g -&gt; (a, g)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#uniformR"><span class="hs-identifier hs-var">uniformR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Seq a -&gt; Int
 forall a. Seq a -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231040"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231039"><span class="hs-identifier hs-var">gen</span></a></span><span>
-</span><span id="line-79"></span><span>                             </span><span class="hs-special">(</span><span id="local-6989586621679231045"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231045"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679231046"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231046"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Seq a -&gt; (a, Seq a)
+</span><a href="#local-6989586621679235254"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235253"><span class="hs-identifier hs-var">gen</span></a></span><span>
+</span><span id="line-79"></span><span>                             </span><span class="hs-special">(</span><span id="local-6989586621679235259"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235259"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235260"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235260"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Seq a -&gt; (a, Seq a)
 forall {a}. Int -&gt; a -&gt; Seq a -&gt; (a, Seq a)
-</span><a href="#local-6989586621679231026"><span class="hs-identifier hs-var">setAndRetrieve</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231042"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231041"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231040"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><a href="#local-6989586621679235240"><span class="hs-identifier hs-var">setAndRetrieve</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235256"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235255"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235254"><span class="hs-identifier hs-var">s</span></a></span><span>
 </span><span id="line-80"></span><span>                         </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">gen -&gt; Seq a -&gt; Acc gen (Seq a)
 forall gen s. gen -&gt; s -&gt; Acc gen s
 </span><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231043"><span class="hs-identifier hs-var">gen'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231046"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; a -&gt; Seq a
+</span><a href="#local-6989586621679235257"><span class="hs-identifier hs-var">gen'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235260"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; a -&gt; Seq a
 forall a. Seq a -&gt; a -&gt; Seq a
 </span><span class="hs-operator hs-var">|&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231045"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679235259"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-81"></span><span>    </span><span class="hs-comment">-- main idea: for every next element x at position i, we generate a random index j &lt;=</span><span>
 </span><span id="line-82"></span><span>    </span><span class="hs-comment">-- i and place x at position j, and store the element y that was at position j at the</span><span>
 </span><span id="line-83"></span><span>    </span><span class="hs-comment">-- new position i</span><span>
 </span><span id="line-84"></span><span>
-</span><span id="line-85"></span><span class="hs-keyword">data</span><span> </span><span id="Acc"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span></span><span> </span><span id="local-6989586621679230836"><span class="annot"><a href="#local-6989586621679230836"><span class="hs-identifier hs-type">gen</span></a></span></span><span> </span><span id="local-6989586621679230837"><span class="annot"><a href="#local-6989586621679230837"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Acc"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679230836"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679230837"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-86"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679231048"><span id="local-6989586621679231050"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Acc gen a -&gt; Acc gen b)
+</span><span id="line-85"></span><span class="hs-keyword">data</span><span> </span><span id="Acc"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span></span><span> </span><span id="local-6989586621679235050"><span class="annot"><a href="#local-6989586621679235050"><span class="hs-identifier hs-type">gen</span></a></span></span><span> </span><span id="local-6989586621679235051"><span class="annot"><a href="#local-6989586621679235051"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Acc"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679235050"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679235051"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621679235262"><span id="local-6989586621679235264"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Acc gen a -&gt; Acc gen b)
 -&gt; (forall a b. a -&gt; Acc gen b -&gt; Acc gen a) -&gt; Functor (Acc gen)
 forall a b. a -&gt; Acc gen b -&gt; Acc gen a
 forall a b. (a -&gt; b) -&gt; Acc gen a -&gt; Acc gen b
@@ -261,15 +261,15 @@ $c&lt;$ :: forall gen a b. a -&gt; Acc gen b -&gt; Acc gen a
 </span><span id="line-94"></span><span class="hs-comment">-- for details.</span><span>
 </span><span id="line-95"></span><span class="hs-comment">--</span><span>
 </span><span id="line-96"></span><span class="hs-comment">-- O(n\log n)</span><span>
-</span><span id="line-97"></span><span id="local-6989586621679231054"><span id="local-6989586621679231055"><span id="local-6989586621679231056"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOutOrig"><span class="hs-identifier hs-type">shuffleSeqInOutOrig</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679231054"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679231055"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679231054"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679231055"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679231056"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679231056"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-97"></span><span id="local-6989586621679235268"><span id="local-6989586621679235269"><span id="local-6989586621679235270"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOutOrig"><span class="hs-identifier hs-type">shuffleSeqInOutOrig</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235268"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679235269"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235268"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235269"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235270"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679235270"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
 </span><span id="line-98"></span><span id="shuffleSeqInOutOrig"><span class="annot"><span class="annottext">shuffleSeqInOutOrig :: forall gen (f :: * -&gt; *) a.
 (RandomGen gen, Foldable f) =&gt;
 gen -&gt; f a -&gt; Seq a
-</span><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOutOrig"><span class="hs-identifier hs-var hs-var">shuffleSeqInOutOrig</span></a></span></span><span> </span><span id="local-6989586621679231062"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231062"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679231063"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231063"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231063"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Acc gen (Seq a) -&gt; Seq a)
+</span><a href="HGeometry.Permutation.Shuffle.html#shuffleSeqInOutOrig"><span class="hs-identifier hs-var hs-var">shuffleSeqInOutOrig</span></a></span></span><span> </span><span id="local-6989586621679235276"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235276"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679235277"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235277"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235277"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Acc gen (Seq a) -&gt; Seq a)
 -&gt; (f a -&gt; Acc gen (Seq a)) -&gt; f a -&gt; Seq a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a))
@@ -282,91 +282,91 @@ Foldable t =&gt;
 forall {gen} {a}.
 RandomGen gen =&gt;
 Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a)
-</span><a href="#local-6989586621679231064"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">gen -&gt; Seq a -&gt; Acc gen (Seq a)
+</span><a href="#local-6989586621679235278"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">gen -&gt; Seq a -&gt; Acc gen (Seq a)
 forall gen s. gen -&gt; s -&gt; Acc gen s
 </span><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231062"><span class="hs-identifier hs-var">gen0</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235276"><span class="hs-identifier hs-var">gen0</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
 </span><span id="line-99"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-100"></span><span>    </span><span class="hs-comment">-- | sets the value at position i to x, and retrieves its current value.</span><span>
-</span><span id="line-101"></span><span>    </span><span id="local-6989586621679231069"><span class="annot"><span class="annottext">setAndRetrieve :: Index t -&gt; IxValue t -&gt; t -&gt; SP (IxValue t) t
-</span><a href="#local-6989586621679231069"><span class="hs-identifier hs-var hs-var">setAndRetrieve</span></a></span></span><span> </span><span id="local-6989586621679231070"><span class="annot"><span class="annottext">Index t
-</span><a href="#local-6989586621679231070"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679231071"><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231071"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679231072"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231072"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231072"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">t -&gt; (t -&gt; SP (IxValue t) t) -&gt; SP (IxValue t) t
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621679235283"><span class="annot"><span class="annottext">setAndRetrieve :: Index t -&gt; IxValue t -&gt; t -&gt; SP (IxValue t) t
+</span><a href="#local-6989586621679235283"><span class="hs-identifier hs-var hs-var">setAndRetrieve</span></a></span></span><span> </span><span id="local-6989586621679235284"><span class="annot"><span class="annottext">Index t
+</span><a href="#local-6989586621679235284"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679235285"><span class="annot"><span class="annottext">IxValue t
+</span><a href="#local-6989586621679235285"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679235286"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235286"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235286"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">t -&gt; (t -&gt; SP (IxValue t) t) -&gt; SP (IxValue t) t
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">Index t -&gt; Traversal' t (IxValue t)
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Index t
-</span><a href="#local-6989586621679231070"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">((IxValue t -&gt; SP (IxValue t) (IxValue t))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Index t
+</span><a href="#local-6989586621679235284"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">((IxValue t -&gt; SP (IxValue t) (IxValue t))
  -&gt; t -&gt; SP (IxValue t) t)
 -&gt; (IxValue t -&gt; SP (IxValue t) (IxValue t))
 -&gt; t
 -&gt; SP (IxValue t) t
 forall {k} (f :: k -&gt; *) s (t :: k) a (b :: k).
 LensLike f s t a b -&gt; LensLike f s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator hs-var">%%~</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679231073"><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231073"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (IxValue t) -&gt; IxValue t -&gt; SP (IxValue t) (IxValue t)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator hs-var">%%~</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679235287"><span class="annot"><span class="annottext">IxValue t
+</span><a href="#local-6989586621679235287"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (IxValue t) -&gt; IxValue t -&gt; SP (IxValue t) (IxValue t)
 forall a b. Maybe a -&gt; b -&gt; SP a b
 </span><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-var">SP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IxValue t -&gt; Maybe (IxValue t)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231073"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231071"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679235287"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IxValue t
+</span><a href="#local-6989586621679235285"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-102"></span><span>      </span><span class="hs-comment">-- the SP here is very important; if we use a lazy pair this about 4x lower</span><span>
 </span><span id="line-103"></span><span>      </span><span class="hs-comment">-- same for the ! on y below here.</span><span>
 </span><span id="line-104"></span><span>
-</span><span id="line-105"></span><span>    </span><span id="local-6989586621679231064"><span class="annot"><span class="annottext">step :: Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a)
-</span><a href="#local-6989586621679231064"><span class="hs-identifier hs-var hs-var">step</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span id="local-6989586621679231082"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231082"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679231083"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231083"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679231084"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231084"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">!</span><span id="local-6989586621679231085"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231085"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679231086"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231086"><span class="hs-identifier hs-var">gen'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; gen -&gt; (Int, gen)
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679235278"><span class="annot"><span class="annottext">step :: Acc gen (Seq a) -&gt; a -&gt; Acc gen (Seq a)
+</span><a href="#local-6989586621679235278"><span class="hs-identifier hs-var hs-var">step</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span id="local-6989586621679235296"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235296"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679235297"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235297"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679235298"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235298"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">!</span><span id="local-6989586621679235299"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235299"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235300"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235300"><span class="hs-identifier hs-var">gen'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; gen -&gt; (Int, gen)
 forall a g. (UniformRange a, RandomGen g) =&gt; (a, a) -&gt; g -&gt; (a, g)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#uniformR"><span class="hs-identifier hs-var">uniformR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Seq a -&gt; Int
 forall a. Seq a -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231083"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231082"><span class="hs-identifier hs-var">gen</span></a></span><span>
-</span><span id="line-106"></span><span>                             </span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span id="local-6989586621679231087"><span class="annot"><span class="annottext">Maybe (IxValue (Seq a))
-</span><a href="#local-6989586621679231087"><span class="hs-identifier hs-var">my</span></a></span></span><span> </span><span id="local-6989586621679231088"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231088"><span class="hs-identifier hs-var">s'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index (Seq a)
+</span><a href="#local-6989586621679235297"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235296"><span class="hs-identifier hs-var">gen</span></a></span><span>
+</span><span id="line-106"></span><span>                             </span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span id="local-6989586621679235301"><span class="annot"><span class="annottext">Maybe (IxValue (Seq a))
+</span><a href="#local-6989586621679235301"><span class="hs-identifier hs-var">my</span></a></span></span><span> </span><span id="local-6989586621679235302"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235302"><span class="hs-identifier hs-var">s'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index (Seq a)
 -&gt; IxValue (Seq a) -&gt; Seq a -&gt; SP (IxValue (Seq a)) (Seq a)
 forall {t}. Ixed t =&gt; Index t -&gt; IxValue t -&gt; t -&gt; SP (IxValue t) t
-</span><a href="#local-6989586621679231069"><span class="hs-identifier hs-var">setAndRetrieve</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235283"><span class="hs-identifier hs-var">setAndRetrieve</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 Index (Seq a)
-</span><a href="#local-6989586621679231085"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235299"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">a
 IxValue (Seq a)
-</span><a href="#local-6989586621679231084"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231083"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-107"></span><span>                             </span><span class="hs-glyph">!</span><span id="local-6989586621679231089"><span class="annot"><span class="annottext">y :: a
-</span><a href="#local-6989586621679231089"><span class="hs-identifier hs-var hs-var">y</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a -&gt; a
+</span><a href="#local-6989586621679235298"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235297"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-107"></span><span>                             </span><span class="hs-glyph">!</span><span id="local-6989586621679235303"><span class="annot"><span class="annottext">y :: a
+</span><a href="#local-6989586621679235303"><span class="hs-identifier hs-var hs-var">y</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a -&gt; a
 forall a. a -&gt; Maybe a -&gt; a
 </span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231084"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><a href="#local-6989586621679235298"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a
 Maybe (IxValue (Seq a))
-</span><a href="#local-6989586621679231087"><span class="hs-identifier hs-var">my</span></a></span><span>
+</span><a href="#local-6989586621679235301"><span class="hs-identifier hs-var">my</span></a></span><span>
 </span><span id="line-108"></span><span>                         </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">gen -&gt; Seq a -&gt; Acc gen (Seq a)
 forall gen s. gen -&gt; s -&gt; Acc gen s
 </span><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231086"><span class="hs-identifier hs-var">gen'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231088"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; a -&gt; Seq a
+</span><a href="#local-6989586621679235300"><span class="hs-identifier hs-var">gen'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235302"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; a -&gt; Seq a
 forall a. Seq a -&gt; a -&gt; Seq a
 </span><span class="hs-operator hs-var">|&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231089"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679235303"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-109"></span><span>    </span><span class="hs-comment">-- main idea: for every next element x at position i, we generate a random index j &lt;=</span><span>
 </span><span id="line-110"></span><span>    </span><span class="hs-comment">-- i and place x at position j, and store the element y that was at position j at the</span><span>
 </span><span id="line-111"></span><span>    </span><span class="hs-comment">-- new position i</span><span>
 </span><span id="line-112"></span><span>
 </span><span id="line-113"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-114"></span><span>
-</span><span id="line-115"></span><span class="hs-keyword">data</span><span> </span><span id="SP"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-var">SP</span></a></span></span><span> </span><span id="local-6989586621679230872"><span class="annot"><a href="#local-6989586621679230872"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679230873"><span class="annot"><a href="#local-6989586621679230873"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SP"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-var">SP</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679230872"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679230873"><span class="hs-identifier hs-type">b</span></a></span><span>
-</span><span id="line-116"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679231091"><span id="local-6989586621679231093"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; SP a a -&gt; SP a b)
+</span><span id="line-115"></span><span class="hs-keyword">data</span><span> </span><span id="SP"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-var">SP</span></a></span></span><span> </span><span id="local-6989586621679235086"><span class="annot"><a href="#local-6989586621679235086"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679235087"><span class="annot"><a href="#local-6989586621679235087"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="SP"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-var">SP</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679235086"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679235087"><span class="hs-identifier hs-type">b</span></a></span><span>
+</span><span id="line-116"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679235305"><span id="local-6989586621679235307"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; SP a a -&gt; SP a b)
 -&gt; (forall a b. a -&gt; SP a b -&gt; SP a a) -&gt; Functor (SP a)
 forall a b. a -&gt; SP a b -&gt; SP a a
 forall a b. (a -&gt; b) -&gt; SP a a -&gt; SP a b
@@ -381,39 +381,39 @@ $c&lt;$ :: forall a a b. a -&gt; SP a b -&gt; SP a a
 &lt;$ :: forall a b. a -&gt; SP a b -&gt; SP a a
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-117"></span><span>
-</span><span id="line-118"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679230859"><span id="local-6989586621679231100"><span id="local-6989586621679231103"><span id="local-6989586621679231106"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230859"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-119"></span><span>  </span><span id="local-6989586621679231109"><span class="annot"><span class="annottext">pure :: forall a. a -&gt; SP a a
-</span><span class="hs-identifier hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621679231110"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231110"><span class="hs-identifier hs-var">x</span></a></span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; a -&gt; SP a a
+</span><span id="line-118"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679235073"><span id="local-6989586621679235314"><span id="local-6989586621679235317"><span id="local-6989586621679235320"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235073"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-119"></span><span>  </span><span id="local-6989586621679235323"><span class="annot"><span class="annottext">pure :: forall a. a -&gt; SP a a
+</span><span class="hs-identifier hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621679235324"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235324"><span class="hs-identifier hs-var">x</span></a></span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; a -&gt; SP a a
 forall a b. Maybe a -&gt; b -&gt; SP a b
 </span><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-var">SP</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231110"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-120"></span><span>  </span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span id="local-6989586621679231111"><span class="annot"><span class="annottext">Maybe a
-</span><a href="#local-6989586621679231111"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679231112"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679231112"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679231113"><span class="annot"><span class="annottext">&lt;*&gt; :: forall a b. SP a (a -&gt; b) -&gt; SP a a -&gt; SP a b
+</span><a href="#local-6989586621679235324"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-120"></span><span>  </span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span id="local-6989586621679235325"><span class="annot"><span class="annottext">Maybe a
+</span><a href="#local-6989586621679235325"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679235326"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679235326"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679235327"><span class="annot"><span class="annottext">&lt;*&gt; :: forall a b. SP a (a -&gt; b) -&gt; SP a a -&gt; SP a b
 </span><span class="hs-operator hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679231114"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231114"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; b -&gt; SP a b
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679235328"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235328"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a -&gt; b -&gt; SP a b
 forall a b. Maybe a -&gt; b -&gt; SP a b
 </span><a href="HGeometry.Permutation.Shuffle.html#SP"><span class="hs-identifier hs-var">SP</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe a
-</span><a href="#local-6989586621679231111"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679231112"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231114"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679235325"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679235326"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235328"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-121"></span><span>
 </span><span id="line-122"></span><span>
 </span><span id="line-123"></span><span>
 </span><span id="line-124"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-125"></span><span>
 </span><span id="line-126"></span><span class="annot"><span class="hs-comment">-- | Returns a strict IntMap</span></span><span>
-</span><span id="line-127"></span><span id="local-6989586621679230893"><span id="local-6989586621679230894"><span id="local-6989586621679230895"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleIntMap"><span class="hs-identifier hs-type">shuffleIntMap</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230893"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679230894"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679230893"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679230894"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679230895"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IntMap.IntMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679230895"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-127"></span><span id="local-6989586621679235107"><span id="local-6989586621679235108"><span id="local-6989586621679235109"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleIntMap"><span class="hs-identifier hs-type">shuffleIntMap</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235107"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679235108"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235107"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235108"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235109"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IntMap.IntMap</span></span><span> </span><span class="annot"><a href="#local-6989586621679235109"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
 </span><span id="line-128"></span><span id="shuffleIntMap"><span class="annot"><span class="annottext">shuffleIntMap :: forall gen (f :: * -&gt; *) a.
 (RandomGen gen, Foldable f) =&gt;
 gen -&gt; f a -&gt; IntMap a
-</span><a href="HGeometry.Permutation.Shuffle.html#shuffleIntMap"><span class="hs-identifier hs-var hs-var">shuffleIntMap</span></a></span></span><span> </span><span id="local-6989586621679231127"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231127"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; IntMap a
-</span><a href="#local-6989586621679231128"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; IntMap a) -&gt; (f a -&gt; IntMap a) -&gt; f a -&gt; IntMap a
+</span><a href="HGeometry.Permutation.Shuffle.html#shuffleIntMap"><span class="hs-identifier hs-var hs-var">shuffleIntMap</span></a></span></span><span> </span><span id="local-6989586621679235341"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235341"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; IntMap a
+</span><a href="#local-6989586621679235342"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; IntMap a) -&gt; (f a -&gt; IntMap a) -&gt; f a -&gt; IntMap a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[(Int, a)] -&gt; IntMap a
 forall a. [(Int, a)] -&gt; IntMap a
@@ -429,9 +429,9 @@ forall a. f a -&gt; [a]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">toList</span></span><span>
 </span><span id="line-129"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-130"></span><span>    </span><span id="local-6989586621679231128"><span class="annot"><span class="annottext">build :: IntMap a -&gt; IntMap a
-</span><a href="#local-6989586621679231128"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679231131"><span class="annot"><span class="annottext">IntMap a
-</span><a href="#local-6989586621679231131"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; (Int, Int) -&gt; IntMap a)
+</span><span id="line-130"></span><span>    </span><span id="local-6989586621679235342"><span class="annot"><span class="annottext">build :: IntMap a -&gt; IntMap a
+</span><a href="#local-6989586621679235342"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679235345"><span class="annot"><span class="annottext">IntMap a
+</span><a href="#local-6989586621679235345"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; (Int, Int) -&gt; IntMap a)
 -&gt; IntMap a -&gt; [(Int, Int)] -&gt; IntMap a
 forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) b a.
@@ -439,8 +439,8 @@ Foldable t =&gt;
 (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
 </span><span class="hs-identifier hs-var">foldl'</span></span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; (Int, Int) -&gt; IntMap a
 forall {a}. IntMap a -&gt; (Int, Int) -&gt; IntMap a
-</span><a href="#local-6989586621679231132"><span class="hs-identifier hs-var">swap</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap a
-</span><a href="#local-6989586621679231131"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">([(Int, Int)] -&gt; IntMap a) -&gt; [(Int, Int)] -&gt; IntMap a
+</span><a href="#local-6989586621679235346"><span class="hs-identifier hs-var">swap</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap a
+</span><a href="#local-6989586621679235345"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">([(Int, Int)] -&gt; IntMap a) -&gt; [(Int, Int)] -&gt; IntMap a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((Int, gen) -&gt; Maybe ((Int, Int), (Int, gen)))
 -&gt; (Int, gen) -&gt; [(Int, Int)]
@@ -449,22 +449,22 @@ forall b a. (b -&gt; Maybe (a, b)) -&gt; b -&gt; [a]
 forall {a} {c}.
 (Ord a, Num a, Enum a, UniformRange a, RandomGen c) =&gt;
 (a, c) -&gt; Maybe ((a, a), (a, c))
-</span><a href="#local-6989586621679231133"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><a href="#local-6989586621679235347"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a. Enum a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int) -&gt; Int -&gt; Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; Int
 forall a. IntMap a -&gt; Int
 </span><span class="hs-identifier hs-var">IntMap.size</span></span><span> </span><span class="annot"><span class="annottext">IntMap a
-</span><a href="#local-6989586621679231131"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231127"><span class="hs-identifier hs-var">gen0</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679235345"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235341"><span class="hs-identifier hs-var">gen0</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-131"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-132"></span><span>        </span><span id="local-6989586621679231133"><span class="annot"><span class="annottext">f :: (a, c) -&gt; Maybe ((a, a), (a, c))
-</span><a href="#local-6989586621679231133"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679231149"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231149"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679231150"><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679231150"><span class="hs-identifier hs-var">gen</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>        </span><span id="local-6989586621679235347"><span class="annot"><span class="annottext">f :: (a, c) -&gt; Maybe ((a, a), (a, c))
+</span><a href="#local-6989586621679235347"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679235363"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235363"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235364"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679235364"><span class="hs-identifier hs-var">gen</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-133"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231149"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679235363"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">1</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ((a, a), (a, c))
@@ -482,60 +482,60 @@ forall (p :: * -&gt; * -&gt; *) a b c d.
 Bifunctor p =&gt;
 (a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
 </span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231149"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679235363"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a
 forall a. Enum a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">pred</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231149"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((a, c) -&gt; Maybe ((a, a), (a, c)))
+</span><a href="#local-6989586621679235363"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((a, c) -&gt; Maybe ((a, a), (a, c)))
 -&gt; (a, c) -&gt; Maybe ((a, a), (a, c))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a, a) -&gt; c -&gt; (a, c)
 forall a g. (UniformRange a, RandomGen g) =&gt; (a, a) -&gt; g -&gt; (a, g)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#uniformR"><span class="hs-identifier hs-var">uniformR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231149"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679231150"><span class="hs-identifier hs-var">gen</span></a></span><span>
+</span><a href="#local-6989586621679235363"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679235364"><span class="hs-identifier hs-var">gen</span></a></span><span>
 </span><span id="line-135"></span><span>
-</span><span id="line-136"></span><span>    </span><span id="local-6989586621679231132"><span class="annot"><span class="annottext">swap :: IntMap a -&gt; (Int, Int) -&gt; IntMap a
-</span><a href="#local-6989586621679231132"><span class="hs-identifier hs-var hs-var">swap</span></a></span></span><span> </span><span id="local-6989586621679231151"><span class="annot"><span class="annottext">IntMap a
-</span><a href="#local-6989586621679231151"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679231152"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231152"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679231153"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231153"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; IntMap a -&gt; IntMap a
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679235346"><span class="annot"><span class="annottext">swap :: IntMap a -&gt; (Int, Int) -&gt; IntMap a
+</span><a href="#local-6989586621679235346"><span class="hs-identifier hs-var hs-var">swap</span></a></span></span><span> </span><span id="local-6989586621679235365"><span class="annot"><span class="annottext">IntMap a
+</span><a href="#local-6989586621679235365"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679235366"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235366"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235367"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235367"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; IntMap a -&gt; IntMap a
 forall a. Int -&gt; a -&gt; IntMap a -&gt; IntMap a
 </span><span class="hs-identifier hs-var">IntMap.insert</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231152"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntMap a
-</span><a href="#local-6989586621679231151"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; Int -&gt; a
+</span><a href="#local-6989586621679235366"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntMap a
+</span><a href="#local-6989586621679235365"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; Int -&gt; a
 forall a. IntMap a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">IntMap.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231153"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; IntMap a)
+</span><a href="#local-6989586621679235367"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; IntMap a)
 -&gt; (IntMap a -&gt; IntMap a) -&gt; IntMap a -&gt; IntMap a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; IntMap a -&gt; IntMap a
 forall a. Int -&gt; a -&gt; IntMap a -&gt; IntMap a
 </span><span class="hs-identifier hs-var">IntMap.insert</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231153"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntMap a
-</span><a href="#local-6989586621679231151"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; Int -&gt; a
+</span><a href="#local-6989586621679235367"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntMap a
+</span><a href="#local-6989586621679235365"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">IntMap a -&gt; Int -&gt; a
 forall a. IntMap a -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">IntMap.!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231152"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; IntMap a) -&gt; IntMap a -&gt; IntMap a
+</span><a href="#local-6989586621679235366"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IntMap a -&gt; IntMap a) -&gt; IntMap a -&gt; IntMap a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IntMap a
-</span><a href="#local-6989586621679231151"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><a href="#local-6989586621679235365"><span class="hs-identifier hs-var">m</span></a></span><span>
 </span><span id="line-137"></span><span>
 </span><span id="line-138"></span><span>
 </span><span id="line-139"></span><span class="hs-comment">-- | Version of Fissher-Yates shuffle that returns a Seq.</span><span>
 </span><span id="line-140"></span><span class="hs-comment">--</span><span>
 </span><span id="line-141"></span><span class="hs-comment">-- O(n\log n)</span><span>
-</span><span id="line-142"></span><span id="local-6989586621679231156"><span id="local-6989586621679231157"><span id="local-6989586621679231158"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleSeq"><span class="hs-identifier hs-type">shuffleSeq</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679231156"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679231157"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679231156"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679231157"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679231158"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679231158"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-142"></span><span id="local-6989586621679235370"><span id="local-6989586621679235371"><span id="local-6989586621679235372"><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#shuffleSeq"><span class="hs-identifier hs-type">shuffleSeq</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235370"><span class="hs-identifier hs-type">gen</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679235371"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235370"><span class="hs-identifier hs-type">gen</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679235371"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679235372"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679235372"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
 </span><span id="line-143"></span><span id="shuffleSeq"><span class="annot"><span class="annottext">shuffleSeq :: forall gen (f :: * -&gt; *) a.
 (RandomGen gen, Foldable f) =&gt;
 gen -&gt; f a -&gt; Seq a
-</span><a href="HGeometry.Permutation.Shuffle.html#shuffleSeq"><span class="hs-identifier hs-var hs-var">shuffleSeq</span></a></span></span><span> </span><span id="local-6989586621679231165"><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231165"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; gen -&gt; Seq a -&gt; Seq a
+</span><a href="HGeometry.Permutation.Shuffle.html#shuffleSeq"><span class="hs-identifier hs-var hs-var">shuffleSeq</span></a></span></span><span> </span><span id="local-6989586621679235379"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679235379"><span class="hs-identifier hs-var">gen0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; gen -&gt; Seq a -&gt; Seq a
 forall {t} {a}. RandomGen t =&gt; Seq a -&gt; t -&gt; Seq a -&gt; Seq a
-</span><a href="#local-6989586621679231166"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235380"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">gen
-</span><a href="#local-6989586621679231165"><span class="hs-identifier hs-var">gen0</span></a></span><span> </span><span class="annot"><span class="annottext">(Seq a -&gt; Seq a) -&gt; (f a -&gt; Seq a) -&gt; f a -&gt; Seq a
+</span><a href="#local-6989586621679235379"><span class="hs-identifier hs-var">gen0</span></a></span><span> </span><span class="annot"><span class="annottext">(Seq a -&gt; Seq a) -&gt; (f a -&gt; Seq a) -&gt; f a -&gt; Seq a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Seq a) -&gt; f a -&gt; Seq a
 forall m a. Monoid m =&gt; (a -&gt; m) -&gt; f a -&gt; m
@@ -546,12 +546,12 @@ forall (t :: * -&gt; *) m a.
 forall a. a -&gt; Seq a
 </span><span class="hs-identifier hs-var">Seq.singleton</span></span><span>
 </span><span id="line-144"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-145"></span><span>    </span><span id="local-6989586621679231178"><span class="annot"><span class="annottext">setAndRetrieve :: Index t -&gt; IxValue t -&gt; t -&gt; Acc (IxValue t) t
-</span><a href="#local-6989586621679231178"><span class="hs-identifier hs-var hs-var">setAndRetrieve</span></a></span></span><span> </span><span id="local-6989586621679231179"><span class="annot"><span class="annottext">Index t
-</span><a href="#local-6989586621679231179"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679231180"><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231180"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679231181"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231181"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231181"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">t -&gt; (t -&gt; Acc (IxValue t) t) -&gt; Acc (IxValue t) t
+</span><span id="line-145"></span><span>    </span><span id="local-6989586621679235392"><span class="annot"><span class="annottext">setAndRetrieve :: Index t -&gt; IxValue t -&gt; t -&gt; Acc (IxValue t) t
+</span><a href="#local-6989586621679235392"><span class="hs-identifier hs-var hs-var">setAndRetrieve</span></a></span></span><span> </span><span id="local-6989586621679235393"><span class="annot"><span class="annottext">Index t
+</span><a href="#local-6989586621679235393"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679235394"><span class="annot"><span class="annottext">IxValue t
+</span><a href="#local-6989586621679235394"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679235395"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235395"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235395"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">t -&gt; (t -&gt; Acc (IxValue t) t) -&gt; Acc (IxValue t) t
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">Traversing (-&gt;) (Acc (IxValue t)) t t (IxValue t) (IxValue t)
 -&gt; (IxValue t -&gt; Acc (IxValue t) (IxValue t))
@@ -560,76 +560,76 @@ forall a b. a -&gt; (a -&gt; b) -&gt; b
 forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s t a.
 (HasCallStack, Conjoined p, Functor f) =&gt;
 Traversing p f s t a a -&gt; Over p f s t a a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Traversal.html#singular"><span class="hs-identifier hs-var">singular</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Index t -&gt; Traversal' t (IxValue t)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Traversal.html#singular"><span class="hs-identifier hs-var">singular</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Index t -&gt; Traversal' t (IxValue t)
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Index t
-</span><a href="#local-6989586621679231179"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((IxValue t -&gt; Acc (IxValue t) (IxValue t))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Index t
+</span><a href="#local-6989586621679235393"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((IxValue t -&gt; Acc (IxValue t) (IxValue t))
  -&gt; t -&gt; Acc (IxValue t) t)
 -&gt; (IxValue t -&gt; Acc (IxValue t) (IxValue t))
 -&gt; t
 -&gt; Acc (IxValue t) t
 forall {k} (f :: k -&gt; *) s (t :: k) a (b :: k).
 LensLike f s t a b -&gt; LensLike f s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-a899d5c5a01627aaa8ea220757a4162fe451c1e9a71c0227ccef47377048bb9c/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator hs-var">%%~</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679231182"><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231182"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IxValue t -&gt; IxValue t -&gt; Acc (IxValue t) (IxValue t)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator hs-var">%%~</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679235396"><span class="annot"><span class="annottext">IxValue t
+</span><a href="#local-6989586621679235396"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IxValue t -&gt; IxValue t -&gt; Acc (IxValue t) (IxValue t)
 forall gen s. gen -&gt; s -&gt; Acc gen s
 </span><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231182"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">IxValue t
-</span><a href="#local-6989586621679231180"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-146"></span><span>    </span><span id="local-6989586621679231166"><span class="annot"><span class="annottext">build :: Seq a -&gt; t -&gt; Seq a -&gt; Seq a
-</span><a href="#local-6989586621679231166"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679231191"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231191"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679231192"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231192"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><a href="#local-6989586621679235396"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">IxValue t
+</span><a href="#local-6989586621679235394"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679235380"><span class="annot"><span class="annottext">build :: Seq a -&gt; t -&gt; Seq a -&gt; Seq a
+</span><a href="#local-6989586621679235380"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679235405"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235405"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679235406"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235406"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
 </span><span id="line-147"></span><span>      </span><span class="annot"><span class="annottext">Seq a
 </span><span class="hs-identifier hs-var">Empty</span></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231191"><span class="hs-identifier hs-var">s</span></a></span><span>
-</span><span id="line-148"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679231194"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231194"><span class="hs-identifier hs-var">remaining</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|&gt;</span></span><span> </span><span id="local-6989586621679231196"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231196"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679231197"><span class="annot"><span class="annottext">i :: Int
-</span><a href="#local-6989586621679231197"><span class="hs-identifier hs-var hs-var">i</span></a></span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; Int
+</span><a href="#local-6989586621679235405"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-148"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679235408"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235408"><span class="hs-identifier hs-var">remaining</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|&gt;</span></span><span> </span><span id="local-6989586621679235410"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235410"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679235411"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679235411"><span class="hs-identifier hs-var hs-var">i</span></a></span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; Int
 forall a. Seq a -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231194"><span class="hs-identifier hs-var">remaining</span></a></span><span>
-</span><span id="line-149"></span><span>                               </span><span class="hs-special">(</span><span id="local-6989586621679231198"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231198"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679231199"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231199"><span class="hs-identifier hs-var">gen'</span></a></span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; t -&gt; (Int, t)
+</span><a href="#local-6989586621679235408"><span class="hs-identifier hs-var">remaining</span></a></span><span>
+</span><span id="line-149"></span><span>                               </span><span class="hs-special">(</span><span id="local-6989586621679235412"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235412"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679235413"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235413"><span class="hs-identifier hs-var">gen'</span></a></span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; t -&gt; (Int, t)
 forall a g. (UniformRange a, RandomGen g) =&gt; (a, a) -&gt; g -&gt; (a, g)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#uniformR"><span class="hs-identifier hs-var">uniformR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231197"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231192"><span class="hs-identifier hs-var">gen</span></a></span><span>
-</span><span id="line-150"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span id="local-6989586621679231200"><span class="annot"><span class="annottext">IxValue (Seq a)
-</span><a href="#local-6989586621679231200"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679231201"><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231201"><span class="hs-identifier hs-var">remaining'</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679235411"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235406"><span class="hs-identifier hs-var">gen</span></a></span><span>
+</span><span id="line-150"></span><span>                               </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-type">Acc</span></a></span><span> </span><span id="local-6989586621679235414"><span class="annot"><span class="annottext">IxValue (Seq a)
+</span><a href="#local-6989586621679235414"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679235415"><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235415"><span class="hs-identifier hs-var">remaining'</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-151"></span><span>                                 </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231197"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679235411"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679231198"><span class="hs-identifier hs-var">j</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index (Seq a)
+</span><a href="#local-6989586621679235412"><span class="hs-identifier hs-var">j</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index (Seq a)
 -&gt; IxValue (Seq a) -&gt; Seq a -&gt; Acc (IxValue (Seq a)) (Seq a)
 forall {t}.
 Ixed t =&gt;
 Index t -&gt; IxValue t -&gt; t -&gt; Acc (IxValue t) t
-</span><a href="#local-6989586621679231178"><span class="hs-identifier hs-var">setAndRetrieve</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679235392"><span class="hs-identifier hs-var">setAndRetrieve</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 Index (Seq a)
-</span><a href="#local-6989586621679231198"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235412"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">a
 IxValue (Seq a)
-</span><a href="#local-6989586621679231196"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231194"><span class="hs-identifier hs-var">remaining</span></a></span><span>
+</span><a href="#local-6989586621679235410"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235408"><span class="hs-identifier hs-var">remaining</span></a></span><span>
 </span><span id="line-152"></span><span>                                 </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Seq a -&gt; Acc a (Seq a)
 forall gen s. gen -&gt; s -&gt; Acc gen s
 </span><a href="HGeometry.Permutation.Shuffle.html#Acc"><span class="hs-identifier hs-var">Acc</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679231196"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231194"><span class="hs-identifier hs-var">remaining</span></a></span><span>
+</span><a href="#local-6989586621679235410"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235408"><span class="hs-identifier hs-var">remaining</span></a></span><span>
 </span><span id="line-153"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Seq a -&gt; t -&gt; Seq a -&gt; Seq a
-</span><a href="#local-6989586621679231166"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679235380"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
 IxValue (Seq a)
-</span><a href="#local-6989586621679231200"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Seq a -&gt; Seq a
+</span><a href="#local-6989586621679235414"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Seq a -&gt; Seq a
 forall a. a -&gt; Seq a -&gt; Seq a
 </span><span class="hs-operator hs-var">&lt;|</span></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231191"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679231199"><span class="hs-identifier hs-var">gen'</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
-</span><a href="#local-6989586621679231201"><span class="hs-identifier hs-var">remaining'</span></a></span><span>
+</span><a href="#local-6989586621679235405"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679235413"><span class="hs-identifier hs-var">gen'</span></a></span><span> </span><span class="annot"><span class="annottext">Seq a
+</span><a href="#local-6989586621679235415"><span class="hs-identifier hs-var">remaining'</span></a></span><span>
 </span><span id="line-154"></span></pre></body></html>

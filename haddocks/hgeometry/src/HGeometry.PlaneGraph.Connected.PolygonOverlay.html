@@ -1,0 +1,671 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.PlaneGraph.Connected.PolygonOverlay</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Computes the Overlay of a bunch of simple polygon</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.html"><span class="hs-identifier">HGeometry.PlaneGraph.Connected.PolygonOverlay</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.html#polygonOverlay"><span class="hs-identifier">polygonOverlay</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html"><span class="hs-identifier">HGeometry.PlaneGraph.Connected.PolygonOverlay.Types</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Seq</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.html"><span class="hs-identifier">HGeometry.PlaneGraph</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">zipWith</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html"><span class="hs-identifier">HGeometry.PlaneGraph.Connected.PolygonOverlay.Types</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- | Given a set of polygons, constructs a plane graph whose vertices,</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- edges, and faces are tagged with the polygons that cover that face.</span><span>
+</span><span id="line-34"></span><span class="hs-comment">--</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- The current running time is \(O( (N+k) + \log (N+k) + (N+k)*m )\),</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- where \(N\) is the total complexity of all polygons, \(k\) is the</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- number of intersections between the polygons, and \(m\) is the</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- maximum complexity of a single polygon.</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- pre: everything forms a connected graph</span><span>
+</span><span id="line-41"></span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.html#polygonOverlay"><span class="hs-identifier hs-type">polygonOverlay</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679485943"><span class="annot"><a href="#local-6989586621679485943"><span class="hs-identifier hs-type">nonEmpty</span></a></span></span><span> </span><span id="local-6989586621679485952"><span class="annot"><a href="#local-6989586621679485952"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679485948"><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span><span> </span><span id="local-6989586621679485945"><span class="annot"><a href="#local-6989586621679485945"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679485946"><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-42"></span><span>                           </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679485943"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679485945"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-43"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon_</span></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485945"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-44"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-45"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679485945"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-46"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasIntersectionWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>                           </span><span class="hs-comment">-- , Show r, Show vertex, Show simplePolygon</span><span>
+</span><span id="line-49"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="hs-comment">-- FIXME</span><span>
+</span><span id="line-50"></span><span>                           </span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>                        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679485943"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span>
+</span><span id="line-52"></span><span>                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485952"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#V"><span class="hs-identifier hs-type">V</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>                                         </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#E"><span class="hs-identifier hs-type">E</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                                         </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#F"><span class="hs-identifier hs-type">F</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span id="polygonOverlay"><span class="annot"><span class="annottext">polygonOverlay :: forall {k} (nonEmpty :: * -&gt; *) (s :: k) simplePolygon vertex r.
+(Foldable1 nonEmpty, Point_ vertex 2 r,
+ SimplePolygon_ simplePolygon vertex r, Fractional r, Ord r,
+ Ord vertex, HasIntersectionWith (Point 2 r) simplePolygon,
+ Eq simplePolygon) =&gt;
+nonEmpty simplePolygon
+-&gt; CPlaneGraph
+     s (V simplePolygon) (E simplePolygon) (F simplePolygon)
+</span><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.html#polygonOverlay"><span class="hs-identifier hs-var hs-var">polygonOverlay</span></a></span></span><span> </span><span id="local-6989586621679486810"><span class="annot"><span class="annottext">nonEmpty simplePolygon
+</span><a href="#local-6989586621679486810"><span class="hs-identifier hs-var">polygons</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+</span><a href="#local-6989586621679486811"><span class="hs-identifier hs-var">gr2</span></a></span><span class="annot"><span class="annottext">CPlaneGraph
+  s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+-&gt; (CPlaneGraph
+      s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+    -&gt; CPlaneGraph
+         s (V simplePolygon) (E simplePolygon) (F simplePolygon))
+-&gt; CPlaneGraph
+     s (V simplePolygon) (E simplePolygon) (F simplePolygon)
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">((Point 2 r :+ Seq vertex) -&gt; Identity (V simplePolygon))
+-&gt; CPlaneGraph
+     s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+-&gt; Identity
+     (CPlaneGraph
+        s (V simplePolygon) (E simplePolygon) (F simplePolygon))
+(Vertex
+   (CPlaneGraph
+      s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon))
+ -&gt; Identity
+      (Vertex
+         (CPlaneGraph
+            s (V simplePolygon) (E simplePolygon) (F simplePolygon))))
+-&gt; CPlaneGraph
+     s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+-&gt; Identity
+     (CPlaneGraph
+        s (V simplePolygon) (E simplePolygon) (F simplePolygon))
+forall graph graph'.
+HasVertices graph graph' =&gt;
+IndexedTraversal1
+  (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+IndexedTraversal1
+  (VertexIx
+     (CPlaneGraph
+        s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)))
+  (CPlaneGraph
+     s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon))
+  (CPlaneGraph
+     s (V simplePolygon) (E simplePolygon) (F simplePolygon))
+  (Vertex
+     (CPlaneGraph
+        s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)))
+  (Vertex
+     (CPlaneGraph
+        s (V simplePolygon) (E simplePolygon) (F simplePolygon)))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ Seq vertex) -&gt; Identity (V simplePolygon))
+ -&gt; CPlaneGraph
+      s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+ -&gt; Identity
+      (CPlaneGraph
+         s (V simplePolygon) (E simplePolygon) (F simplePolygon)))
+-&gt; ((Point 2 r :+ Seq vertex) -&gt; V simplePolygon)
+-&gt; CPlaneGraph
+     s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+-&gt; CPlaneGraph
+     s (V simplePolygon) (E simplePolygon) (F simplePolygon)
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679486815"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486815"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679486817"><span class="annot"><span class="annottext">Seq vertex
+</span><a href="#local-6989586621679486817"><span class="hs-identifier hs-var">defs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 (NumType simplePolygon)
+-&gt; Seq (Vertex simplePolygon)
+-&gt; Seq simplePolygon
+-&gt; V simplePolygon
+forall polygon.
+Point 2 (NumType polygon)
+-&gt; Seq (Vertex polygon) -&gt; Seq polygon -&gt; V polygon
+</span><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#V"><span class="hs-identifier hs-var">V</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+Point 2 (NumType simplePolygon)
+</span><a href="#local-6989586621679486815"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Seq vertex
+Seq (Vertex simplePolygon)
+</span><a href="#local-6989586621679486817"><span class="hs-identifier hs-var">defs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Seq simplePolygon
+</span><a href="#local-6989586621679486819"><span class="hs-identifier hs-var">polygonsCoveringVertices</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486815"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><a href="#local-6989586621679486820"><span class="hs-identifier hs-type">segs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679485945"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679486820"><span class="annot"><span class="annottext">segs :: NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
+</span><a href="#local-6989586621679486820"><span class="hs-identifier hs-var hs-var">segs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(simplePolygon
+ -&gt; NonEmpty (ClosedLineSegment vertex :+ simplePolygon))
+-&gt; nonEmpty simplePolygon
+-&gt; NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; nonEmpty a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679486822"><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679486822"><span class="hs-identifier hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; simplePolygon -&gt; ClosedLineSegment vertex :+ simplePolygon
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679486822"><span class="hs-identifier hs-var">poly</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ClosedLineSegment vertex
+ -&gt; ClosedLineSegment vertex :+ simplePolygon)
+-&gt; NonEmpty (ClosedLineSegment vertex)
+-&gt; NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (NonEmptyDList (ClosedLineSegment vertex))
+  simplePolygon
+  (ClosedLineSegment vertex)
+-&gt; simplePolygon -&gt; NonEmpty (ClosedLineSegment vertex)
+forall a s. Getting (NonEmptyDList a) s a -&gt; s -&gt; NonEmpty a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Fold.html#toNonEmptyOf"><span class="hs-identifier hs-var">toNonEmptyOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
+  (NonEmptyDList (ClosedLineSegment vertex))
+  simplePolygon
+  (ClosedLineSegment vertex)
+forall polygon point r.
+(HasOuterBoundary polygon, Vertex polygon ~ point,
+ Point_ point 2 r) =&gt;
+IndexedFold1
+  (VertexIx polygon, VertexIx polygon)
+  polygon
+  (ClosedLineSegment point)
+IndexedFold1
+  (VertexIx simplePolygon, VertexIx simplePolygon)
+  simplePolygon
+  (ClosedLineSegment vertex)
+</span><span class="hs-identifier hs-var">outerBoundaryEdgeSegments</span></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679486822"><span class="hs-identifier hs-var">poly</span></a></span><span>
+</span><span id="line-59"></span><span>                    </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">nonEmpty simplePolygon
+</span><a href="#local-6989586621679486810"><span class="hs-identifier hs-var">polygons</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679486826"><span class="annot"><span class="annottext">gr :: CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+</span><a href="#local-6989586621679486826"><span class="hs-identifier hs-var hs-var">gr</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
+-&gt; CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ()
+forall {k} (s :: k) (nonEmpty :: * -&gt; *) ix lineSegment segment r
+       point.
+(Foldable1 nonEmpty, FunctorWithIndex ix nonEmpty,
+ LineSegment_ lineSegment point, Point_ point 2 r, Ord r,
+ Fractional r,
+ Intersection lineSegment lineSegment
+ ~ Maybe (LineSegmentLineSegmentIntersection segment),
+ LineSegment_ segment point,
+ IsIntersectableWith lineSegment lineSegment, Ord ix,
+ HasOnSegment lineSegment 2,
+ StartPointOf lineSegment ~ EndPointOf lineSegment,
+ Eq lineSegment) =&gt;
+nonEmpty lineSegment
+-&gt; CPlaneGraph s (Point 2 r :+ Seq point) (ViewL1 lineSegment) ()
+</span><a href="HGeometry.PlaneGraph.Connected.FromIntersectingSegments.html#fromIntersectingSegments"><span class="hs-identifier hs-var">fromIntersectingSegments</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (ClosedLineSegment vertex :+ simplePolygon)
+</span><a href="#local-6989586621679486820"><span class="hs-identifier hs-var">segs</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span>    </span><span class="annot"><a href="#local-6989586621679486828"><span class="hs-identifier hs-type">gr1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485952"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679485945"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#E"><span class="hs-identifier hs-type">E</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679486828"><span class="annot"><span class="annottext">gr1 :: CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+</span><a href="#local-6989586621679486828"><span class="hs-identifier hs-var hs-var">gr1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+</span><a href="#local-6989586621679486826"><span class="hs-identifier hs-var">gr</span></a></span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+-&gt; (CPlaneGraph
+      s
+      (Point 2 r :+ Seq vertex)
+      (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+      ()
+    -&gt; CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ())
+-&gt; CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">Indexed
+  (DartId s)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  (Identity (E simplePolygon))
+-&gt; CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ()
+-&gt; Identity
+     (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ())
+Indexed
+  (DartId s)
+  (Edge
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ()))
+  (Identity
+     (Edge
+        (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ())))
+-&gt; CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ()
+-&gt; Identity
+     (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ())
+forall graph graph'.
+HasEdges graph graph' =&gt;
+IndexedTraversal
+  (EdgeIx graph) graph graph' (Edge graph) (Edge graph')
+IndexedTraversal
+  (EdgeIx
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ()))
+  (CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ())
+  (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ())
+  (Edge
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ()))
+  (Edge
+     (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#edges"><span class="hs-identifier hs-var">edges</span></a></span><span> </span><span class="annot"><span class="annottext">(Indexed
+   (DartId s)
+   (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+   (Identity (E simplePolygon))
+ -&gt; CPlaneGraph
+      s
+      (Point 2 r :+ Seq vertex)
+      (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+      ()
+ -&gt; Identity
+      (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()))
+-&gt; (DartId s
+    -&gt; ViewL1 (ClosedLineSegment vertex :+ simplePolygon)
+    -&gt; E simplePolygon)
+-&gt; CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ()
+-&gt; CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+forall i s t a b.
+AnIndexedSetter i s t a b -&gt; (i -&gt; a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Setter.html#%25%40~"><span class="hs-operator hs-var">%@~</span></a></span><span> </span><span class="annot"><span class="annottext">DartId s
+-&gt; ViewL1 (ClosedLineSegment vertex :+ simplePolygon)
+-&gt; E simplePolygon
+</span><a href="#local-6989586621679486831"><span class="hs-identifier hs-var">polygonsCoveringEdges</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><a href="#local-6989586621679486811"><span class="hs-identifier hs-type">gr2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485952"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679485946"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679485945"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#E"><span class="hs-identifier hs-type">E</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#F"><span class="hs-identifier hs-type">F</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679485948"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>    </span><span id="local-6989586621679486811"><span class="annot"><span class="annottext">gr2 :: CPlaneGraph
+  s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+</span><a href="#local-6989586621679486811"><span class="hs-identifier hs-var hs-var">gr2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+</span><a href="#local-6989586621679486828"><span class="hs-identifier hs-var">gr1</span></a></span><span class="annot"><span class="annottext">CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+-&gt; (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+    -&gt; CPlaneGraph
+         s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon))
+-&gt; CPlaneGraph
+     s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">Indexed (FaceId s) () (Identity (F simplePolygon))
+-&gt; CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+-&gt; Identity
+     (CPlaneGraph
+        s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon))
+Indexed
+  (FaceId s)
+  (Face
+     (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()))
+  (Identity
+     (Face
+        (CPlaneGraph
+           s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon))))
+-&gt; CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+-&gt; Identity
+     (CPlaneGraph
+        s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon))
+forall graph graph'.
+HasFaces graph graph' =&gt;
+IndexedTraversal1
+  (FaceIx graph) graph graph' (Face graph) (Face graph')
+IndexedTraversal1
+  (FaceIx
+     (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()))
+  (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ())
+  (CPlaneGraph
+     s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon))
+  (Face
+     (CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()))
+  (Face
+     (CPlaneGraph
+        s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.PlanarGraph.Class.html#faces"><span class="hs-identifier hs-var">faces</span></a></span><span> </span><span class="annot"><span class="annottext">(Indexed (FaceId s) () (Identity (F simplePolygon))
+ -&gt; CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+ -&gt; Identity
+      (CPlaneGraph
+         s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)))
+-&gt; (FaceId s -&gt; F simplePolygon)
+-&gt; CPlaneGraph s (Point 2 r :+ Seq vertex) (E simplePolygon) ()
+-&gt; CPlaneGraph
+     s (Point 2 r :+ Seq vertex) (E simplePolygon) (F simplePolygon)
+forall i s t a b. AnIndexedSetter i s t a b -&gt; (i -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Setter.html#.%40~"><span class="hs-operator hs-var">.@~</span></a></span><span> </span><span class="annot"><span class="annottext">FaceId s -&gt; F simplePolygon
+</span><a href="#local-6989586621679486834"><span class="hs-identifier hs-var">polygonsCoveringFaces</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679486835"><span class="annot"><span class="annottext">outerId :: FaceIx
+  (CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ())
+</span><a href="#local-6989586621679486835"><span class="hs-identifier hs-var hs-var">outerId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+-&gt; FaceIx
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ())
+forall planeGraph.
+HasOuterFace planeGraph =&gt;
+planeGraph -&gt; FaceIx planeGraph
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.PlanarGraph.Class.html#outerFaceId"><span class="hs-identifier hs-var">outerFaceId</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+</span><a href="#local-6989586621679486826"><span class="hs-identifier hs-var">gr</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679486834"><span class="annot"><span class="annottext">polygonsCoveringFaces :: FaceId s -&gt; F simplePolygon
+</span><a href="#local-6989586621679486834"><span class="hs-identifier hs-var hs-var">polygonsCoveringFaces</span></a></span></span><span> </span><span id="local-6989586621679486837"><span class="annot"><span class="annottext">FaceId s
+</span><a href="#local-6989586621679486837"><span class="hs-identifier hs-var">fi</span></a></span></span><span>
+</span><span id="line-74"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">FaceId s
+</span><a href="#local-6989586621679486837"><span class="hs-identifier hs-var">fi</span></a></span><span> </span><span class="annot"><span class="annottext">FaceId s -&gt; FaceId s -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">FaceId s
+FaceIx
+  (CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ())
+</span><a href="#local-6989586621679486835"><span class="hs-identifier hs-var">outerId</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq simplePolygon
+-&gt; Maybe (Point 2 (NumType simplePolygon)) -&gt; F simplePolygon
+forall polygon.
+Seq polygon -&gt; Maybe (Point 2 (NumType polygon)) -&gt; F polygon
+</span><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#F"><span class="hs-identifier hs-var">F</span></a></span><span> </span><span class="annot"><span class="annottext">Seq simplePolygon
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r)
+Maybe (Point 2 (NumType simplePolygon))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- its impossible for polygons to cover the outerface</span><span>
+</span><span id="line-75"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679486839"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679486839"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FaceId s -&gt; Point 2 r
+</span><a href="#local-6989586621679486840"><span class="hs-identifier hs-var">pointIn</span></a></span><span> </span><span class="annot"><span class="annottext">FaceId s
+</span><a href="#local-6989586621679486837"><span class="hs-identifier hs-var">fi</span></a></span><span>
+</span><span id="line-76"></span><span>                            </span><span id="local-6989586621679486841"><span class="annot"><span class="annottext">covering :: Seq simplePolygon
+</span><a href="#local-6989586621679486841"><span class="hs-identifier hs-var hs-var">covering</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(simplePolygon -&gt; Bool)
+-&gt; nonEmpty simplePolygon -&gt; Seq simplePolygon
+forall {t :: * -&gt; *} {a}. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Seq a
+</span><a href="#local-6989586621679486842"><span class="hs-identifier hs-var">filter'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486839"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; simplePolygon -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">nonEmpty simplePolygon
+</span><a href="#local-6989586621679486810"><span class="hs-identifier hs-var">polygons</span></a></span><span>
+</span><span id="line-77"></span><span>                        </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Seq simplePolygon
+-&gt; Maybe (Point 2 (NumType simplePolygon)) -&gt; F simplePolygon
+forall polygon.
+Seq polygon -&gt; Maybe (Point 2 (NumType polygon)) -&gt; F polygon
+</span><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#F"><span class="hs-identifier hs-var">F</span></a></span><span> </span><span class="annot"><span class="annottext">Seq simplePolygon
+</span><a href="#local-6989586621679486841"><span class="hs-identifier hs-var">covering</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Maybe (Point 2 r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486839"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621679486842"><span class="annot"><span class="annottext">filter' :: (a -&gt; Bool) -&gt; t a -&gt; Seq a
+</span><a href="#local-6989586621679486842"><span class="hs-identifier hs-var hs-var">filter'</span></a></span></span><span> </span><span id="local-6989586621679486848"><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679486848"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Seq a) -&gt; t a -&gt; Seq a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679486850"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679486850"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679486848"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679486850"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">a -&gt; Seq a
+forall a. a -&gt; Seq a
+</span><span class="hs-identifier hs-var">Seq.singleton</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679486850"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Seq a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679486840"><span class="annot"><span class="annottext">pointIn :: FaceId s -&gt; Point 2 r
+</span><a href="#local-6989586621679486840"><span class="hs-identifier hs-var hs-var">pointIn</span></a></span></span><span> </span><span id="local-6989586621679486852"><span class="annot"><span class="annottext">FaceId s
+</span><a href="#local-6989586621679486852"><span class="hs-identifier hs-var">fi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PolygonalDomain ((Point 2 r :+ Seq vertex) :+ VertexId s)
+-&gt; Point 2 r
+forall polygon r. HasPickPoint polygon r =&gt; polygon -&gt; Point 2 r
+</span><span class="hs-identifier hs-var">pointInteriorTo</span></span><span> </span><span class="annot"><span class="annottext">(PolygonalDomain ((Point 2 r :+ Seq vertex) :+ VertexId s)
+ -&gt; Point 2 r)
+-&gt; PolygonalDomain ((Point 2 r :+ Seq vertex) :+ VertexId s)
+-&gt; Point 2 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+</span><a href="#local-6989586621679486826"><span class="hs-identifier hs-var">gr</span></a></span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+-&gt; Getting
+     (Endo (PolygonalDomain ((Point 2 r :+ Seq vertex) :+ VertexId s)))
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ())
+     (PolygonalDomain ((Point 2 r :+ Seq vertex) :+ VertexId s))
+-&gt; PolygonalDomain ((Point 2 r :+ Seq vertex) :+ VertexId s)
+forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">FaceIx
+  (CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ())
+-&gt; IndexedFold
+     (FaceIx
+        (CPlaneGraph
+           s
+           (Point 2 r :+ Seq vertex)
+           (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+           ()))
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ())
+     (PolygonalDomain
+        ((Point 2 r :+ Seq vertex)
+         :+ VertexIx
+              (CPlaneGraph
+                 s
+                 (Point 2 r :+ Seq vertex)
+                 (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+                 ())))
+forall planeGraph vertex.
+(PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph,
+ HasInnerComponents planeGraph, Point_ vertex 2 (NumType vertex)) =&gt;
+FaceIx planeGraph
+-&gt; IndexedFold
+     (FaceIx planeGraph)
+     planeGraph
+     (PolygonalDomain (vertex :+ VertexIx planeGraph))
+</span><a href="HGeometry.PlaneGraph.Class.html#interiorFacePolygonAt"><span class="hs-identifier hs-var">interiorFacePolygonAt</span></a></span><span> </span><span class="annot"><span class="annottext">FaceId s
+FaceIx
+  (CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ())
+</span><a href="#local-6989586621679486852"><span class="hs-identifier hs-var">fi</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>    </span><span id="local-6989586621679486831"><span class="annot"><span class="annottext">polygonsCoveringEdges :: DartId s
+-&gt; ViewL1 (ClosedLineSegment vertex :+ simplePolygon)
+-&gt; E simplePolygon
+</span><a href="#local-6989586621679486831"><span class="hs-identifier hs-var hs-var">polygonsCoveringEdges</span></a></span></span><span> </span><span id="local-6989586621679486856"><span class="annot"><span class="annottext">DartId s
+</span><a href="#local-6989586621679486856"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679486857"><span class="annot"><span class="annottext">ViewL1 (ClosedLineSegment vertex :+ simplePolygon)
+</span><a href="#local-6989586621679486857"><span class="hs-identifier hs-var">defs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679486858"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679486858"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DartId s -&gt; Point 2 r
+</span><a href="#local-6989586621679486859"><span class="hs-identifier hs-var">midPoint</span></a></span><span> </span><span class="annot"><span class="annottext">DartId s
+</span><a href="#local-6989586621679486856"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-84"></span><span>                                       </span><span id="local-6989586621679486860"><span class="annot"><span class="annottext">covering :: Seq simplePolygon
+</span><a href="#local-6989586621679486860"><span class="hs-identifier hs-var hs-var">covering</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(simplePolygon -&gt; Bool)
+-&gt; nonEmpty simplePolygon -&gt; Seq simplePolygon
+forall {t :: * -&gt; *} {a}. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Seq a
+</span><a href="#local-6989586621679486842"><span class="hs-identifier hs-var">filter'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DartId s -&gt; Point 2 r
+</span><a href="#local-6989586621679486859"><span class="hs-identifier hs-var">midPoint</span></a></span><span> </span><span class="annot"><span class="annottext">DartId s
+</span><a href="#local-6989586621679486856"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; simplePolygon -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">nonEmpty simplePolygon
+</span><a href="#local-6989586621679486810"><span class="hs-identifier hs-var">polygons</span></a></span><span>
+</span><span id="line-85"></span><span>                                   </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">ViewL1 (ClosedLineSegment (Vertex simplePolygon) :+ simplePolygon)
+-&gt; Seq simplePolygon
+-&gt; Point 2 (NumType simplePolygon)
+-&gt; E simplePolygon
+forall polygon.
+ViewL1 (ClosedLineSegment (Vertex polygon) :+ polygon)
+-&gt; Seq polygon -&gt; Point 2 (NumType polygon) -&gt; E polygon
+</span><a href="HGeometry.PlaneGraph.Connected.PolygonOverlay.Types.html#E"><span class="hs-identifier hs-var">E</span></a></span><span> </span><span class="annot"><span class="annottext">ViewL1 (ClosedLineSegment vertex :+ simplePolygon)
+ViewL1 (ClosedLineSegment (Vertex simplePolygon) :+ simplePolygon)
+</span><a href="#local-6989586621679486857"><span class="hs-identifier hs-var">defs</span></a></span><span> </span><span class="annot"><span class="annottext">Seq simplePolygon
+</span><a href="#local-6989586621679486860"><span class="hs-identifier hs-var">covering</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+Point 2 (NumType simplePolygon)
+</span><a href="#local-6989586621679486858"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679486859"><span class="annot"><span class="annottext">midPoint :: DartId s -&gt; Point 2 r
+</span><a href="#local-6989586621679486859"><span class="hs-identifier hs-var hs-var">midPoint</span></a></span></span><span> </span><span id="local-6989586621679486862"><span class="annot"><span class="annottext">DartId s
+</span><a href="#local-6989586621679486862"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span id="local-6989586621679486864"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486864"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679486865"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486865"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ Seq vertex)
+-&gt; Getting (Point 2 r) (Point 2 r :+ Seq vertex) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ Seq vertex) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (Point 2 r :+ Seq vertex) (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ Seq vertex) -&gt; Point 2 r)
+-&gt; LineSegment (EndPoint 'Closed) (Point 2 r :+ Seq vertex)
+-&gt; ClosedLineSegment (Point 2 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+</span><a href="#local-6989586621679486826"><span class="hs-identifier hs-var">gr</span></a></span><span class="annot"><span class="annottext">CPlaneGraph
+  s
+  (Point 2 r :+ Seq vertex)
+  (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+  ()
+-&gt; Getting
+     (Endo (LineSegment (EndPoint 'Closed) (Point 2 r :+ Seq vertex)))
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ())
+     (LineSegment (EndPoint 'Closed) (Point 2 r :+ Seq vertex))
+-&gt; LineSegment (EndPoint 'Closed) (Point 2 r :+ Seq vertex)
+forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">EdgeIx
+  (CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ())
+-&gt; IndexedFold
+     (EdgeIx
+        (CPlaneGraph
+           s
+           (Point 2 r :+ Seq vertex)
+           (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+           ()))
+     (CPlaneGraph
+        s
+        (Point 2 r :+ Seq vertex)
+        (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+        ())
+     (LineSegment (EndPoint 'Closed) (Point 2 r :+ Seq vertex))
+forall planeGraph vertex.
+(PlaneGraph_ planeGraph vertex,
+ Point_ vertex 2 (NumType vertex)) =&gt;
+EdgeIx planeGraph
+-&gt; IndexedFold
+     (EdgeIx planeGraph) planeGraph (ClosedLineSegment vertex)
+</span><a href="HGeometry.PlaneGraph.Class.html#edgeSegmentAt"><span class="hs-identifier hs-var">edgeSegmentAt</span></a></span><span> </span><span class="annot"><span class="annottext">EdgeIx
+  (CPlaneGraph
+     s
+     (Point 2 r :+ Seq vertex)
+     (ViewL1 (ClosedLineSegment vertex :+ simplePolygon))
+     ())
+DartId s
+</span><a href="#local-6989586621679486862"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-88"></span><span>                 </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486864"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; Point 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486865"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Vector 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486864"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; r -&gt; Vector 2 r
+forall vector (d :: Nat) r.
+(Vector_ vector d r, Fractional r) =&gt;
+vector -&gt; r -&gt; vector
+</span><span class="hs-operator hs-var">^/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679486819"><span class="annot"><span class="annottext">polygonsCoveringVertices :: Point 2 r -&gt; Seq simplePolygon
+</span><a href="#local-6989586621679486819"><span class="hs-identifier hs-var hs-var">polygonsCoveringVertices</span></a></span></span><span> </span><span id="local-6989586621679486872"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486872"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(simplePolygon -&gt; Bool)
+-&gt; nonEmpty simplePolygon -&gt; Seq simplePolygon
+forall {t :: * -&gt; *} {a}. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Seq a
+</span><a href="#local-6989586621679486842"><span class="hs-identifier hs-var">filter'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679486872"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; simplePolygon -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">nonEmpty simplePolygon
+</span><a href="#local-6989586621679486810"><span class="hs-identifier hs-var">polygons</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- I guess we could build point location structures on the polygons to</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- speed things up, if need be.</span><span>
+</span><span id="line-94"></span></pre></body></html>
