@@ -12,7 +12,7 @@ module HGeometry.Plane.LowerEnvelope.Connected
   ( MinimizationDiagram(..)
   , asMap
   , mapVertices
-  , Region(..)
+  , Region, RegionF(..)
   , MDVertex(MDVertex), location, vertexData
   , toConvexPolygonIn
   , module HGeometry.Plane.LowerEnvelope.Connected.Primitives

@@ -13,7 +13,7 @@
 module HGeometry.Plane.LowerEnvelope.Connected.Type
   ( MinimizationDiagram(..)
   , asMap
-  , Region(..)
+  , Region, RegionF(..)
   , toConvexPolygonIn
 
   , mapVertices

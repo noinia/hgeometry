@@ -153,17 +153,17 @@ mergeDefiners v defs0 defs1 = case extractH0 v (toSet defs0 <> toSet defs1) of
 -- | Compute a clipped minimization diagram within the given triangle
 --
 -- The result is essentially a 'ClippedMinimizationDiagram'.
-fromMinimizationDiagramIn                :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
-                                            , Point_ corner 2 r
-                                            , Foldable1 set
-                                            , Ord vtxData
-                                            , Show r, Show corner, Show plane, Show vtxData
-                                            )
-                                         => Triangle corner
-                                         -> set plane
-                                         -> Maybe (MinimizationDiagram r (MDVertex r plane vtxData) plane)
-                                         -> NEMap plane (ClippedMDCell r plane vtxData)
-fromMinimizationDiagramIn tri planes env = case env of
+fromMinimizationDiagramIn            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
+                                        , Point_ corner 2 r
+                                        , Foldable1 set
+                                        , Ord vtxData
+                                        , Show r, Show corner, Show plane, Show vtxData
+                                        )
+                                     => Triangle corner
+                                     -> set plane
+                                     -> Maybe (MinimizationDiagram r (MDVertex r plane vtxData) plane)
+                                     -> NEMap plane (ClippedMDCell r plane vtxData)
+fromMinimizationDiagramIn tri planes = \case
     Nothing      -> lowestPlane
     Just diagram -> case Map.mapMaybe (tri `intersect`) (asMap diagram) of
                       IsEmpty                   -> lowestPlane
