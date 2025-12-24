@@ -274,3 +274,19 @@ instance (Point_ point 2 r, Point_ vertex 2 r, Num r, Ord r
       seg  :: ClosedLineSegment (Point 2 r)
       seg  = seg0&allPoints %~ view asPoint
       edges' = [ClosedLineSegment a b, ClosedLineSegment b c, ClosedLineSegment c a]
+
+
+instance ( Point_ corner 2 r, Point_ vertex 2 r, Num r, Ord r
+         ) => HasIntersectionWith (Triangle corner) (Triangle vertex) where
+  triA `intersects` triB = anyOf (vertices.asPoint) (`intersects` triB) triA
+                        || anyOf edgeSegments'      (`intersects` triA) triB
+    -- triangleA intersects triangleB if either:
+    --  1) triangleA has a vertex inside triangleB, or
+    --  2) the edges of triangle B intersect triangleA; this may include the case
+           -- where the vertices of triangleB lie inside A (or when their boundaries intersect)
+    where
+      edgeSegments' = folding (\(Triangle a b c) -> [ ClosedLineSegment a b
+                                                    , ClosedLineSegment b c
+                                                    , ClosedLineSegment c a
+                                                    ]
+                              )
