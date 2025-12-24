@@ -59,6 +59,7 @@ import           HGeometry.Triangle
 import qualified HGeometry.Triangle as Triangle
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
+import           Data.Functor.Classes
 
 --------------------------------------------------------------------------------
 
@@ -67,7 +68,7 @@ newtype ConvexPolygonF f point =
   ConvexPolygon { toSimplePolygon :: SimplePolygonF f point
                 -- ^ Convert to a simple polygon, i.e. forget the polygon is convex.
                 }
-  deriving newtype (NFData, Eq, Functor, Foldable, Foldable1)
+  deriving newtype (NFData, Eq, Functor, Foldable, Foldable1, Eq1)
   deriving stock (Traversable)
 
 
