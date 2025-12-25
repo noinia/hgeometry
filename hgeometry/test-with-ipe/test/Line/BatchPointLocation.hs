@@ -6,6 +6,9 @@ module Line.BatchPointLocation
   , query
   ) where
 
+import Data.Foldable
+import Data.Foldable1
+import Control.Lens
 import HGeometry.Sequence.Alternating
 import Data.Vector qualified as Vector
 import Data.Set qualified as Set
@@ -14,10 +17,26 @@ import Data.Maybe
 import Data.Map qualified as Map
 import Data.Set qualified as Set
 import Data.IntMap.Monoidal qualified as IntMap
+import HGeometry.PlaneGraph.Connected
+import HGeometry.Sequence.NonEmpty
+import HGeometry.Ext
+import HGeometry.Kernel
+import HGeometry.Box
+import Data.Sequence as Seq
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.List.NonEmpty (NonEmpty(..))
+import Prelude hiding (lines)
 
 --------------------------------------------------------------------------------
 
-type PointLocationDS r line = ()
+type PointLocationDS r line =
+  CPlaneGraph () (Point 2 r :+ Seq.Seq (Point 2 r))
+                 (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+                 ()
+
+
+
+
 
 -- -- | Given a set of lines; split it into interior disjoint linesegments
 -- splitIntoSegments          :: Sides r
@@ -92,6 +111,37 @@ pointLocationStructure lines = undefined -- pointLocationStructureFrom inters li
     inters = undefined
 
 
+-- | Construct a point location data structure in a given bounding rectangle.
+pointLocationStructureIn            :: forall set line r.
+                                       (Foldable set , Line_ line 2 r, Fractional r, Ord r
+                                       , Eq line
+
+                                       , IsIntersectableWith line (Rectangle (Point 2 r))
+                                       , Intersection line (Rectangle (Point 2 r)) ~
+                                         Maybe (LineBoxIntersection 2 r)
+                                       )
+                                    => Rectangle (Point 2 r)
+                                       -- ^ bounding rectangle
+                                    -> set line
+                                    -> PointLocationDS r line
+pointLocationStructureIn rect lines = pointLocationStructureFrom gr
+  where
+    -- | Construct a plane graph
+    gr :: CPlaneGraph () _ _ _
+    gr = fromIntersectingSegments segs
+
+    segs :: NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+    segs = (toNonEmpty $ (:+ Nothing) <$> sides rect)
+         <<> mapMaybe clip (toList lines)
+
+    clip l = l `intersect` rect <&> \case
+      Line_x_Box_LineSegment seg -> seg :+ Just l
+      Line_x_Box_Point _         -> error "pointLocationStructureIn: unhandled"
+
+
+pointLocationStructureFrom = id
+
+
 -- pointLocationStructureFrom         :: Intersections r lineSegment
 --                                    -> set lineSegment
 --                                    -> PointLocationDS r lineSegment
@@ -108,3 +158,8 @@ pointLocationStructure lines = undefined -- pointLocationStructureFrom inters li
 -- \(O(\log n)\)
 -- query :: queryPoint -> PointLocationDS r line -> (Interval (Unbounded r), Maybe line)
 query = undefined
+
+--------------------------------------------------------------------------------
+
+
+(x :| xs) <<> ys = x :| (xs ++ ys)

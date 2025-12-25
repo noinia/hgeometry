@@ -20,7 +20,6 @@ import           Data.Aeson (eitherDecodeFileStrict)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (maybeToList)
 import           HGeometry
-import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Monotone

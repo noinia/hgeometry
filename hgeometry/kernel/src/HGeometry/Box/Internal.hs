@@ -11,7 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Box.Internal
   ( Box(Box,Rectangle,Rect)
-  , Rectangle
+  , type Rectangle
   , fromExtent
   ) where
 

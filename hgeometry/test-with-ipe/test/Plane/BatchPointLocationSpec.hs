@@ -12,6 +12,7 @@ import HGeometry.Number.Real.Rational
 import Test.Hspec.WithTempFile
 import Golden
 
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -24,12 +25,17 @@ spec = describe "Plane.BatchedPointlocation" $ do
            )
            ( let myLines'     = (iO . defIO) <$> myLines
                  queryPoints' = (iO . defIO) <$> queryPoints
-                 content' =
+                 content' = transformBy t
                    [ iO $ ipeGroup myLines'     ! attr SLayer "lines"
                    , iO $ ipeGroup queryPoints' ! attr SLayer "queries"
                    ]
+                 t    = uniformScaling 10
              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
            )
+
+-- | fit to something that fits in this rectangle
+screenBox :: Rectangle (Point 2 R)
+screenBox = Rectangle origin (Point2 500 500)
 
 
 myLines :: [VerticalOrLineEQ R]
@@ -41,6 +47,8 @@ myLines = [ NonVertical $ LineEQ 0 2
 
 queryPoints :: [Point 2 R]
 queryPoints = [ origin
-              , Point2 1 5
+              , Point2 1 8
               , Point2 (-1) 0
+              , Point2 10 4
+              , Point2 (-30) (-23)
               ]
