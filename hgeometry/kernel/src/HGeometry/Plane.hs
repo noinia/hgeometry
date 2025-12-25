@@ -11,7 +11,7 @@
 module HGeometry.Plane
   ( Plane
   , NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
-  , intersectionLine
+  , projectedIntersectionLine
   , module HGeometry.HyperPlane.Class
   ) where
 
@@ -23,9 +23,10 @@ import HGeometry.Line.General
 
 --------------------------------------------------------------------------------
 
--- | Given two planes, computes the line in which they intersect.
-intersectionLine      :: (Plane_ plane r, Fractional r, Eq r)
-                      => plane -> plane
-                      -> Maybe (VerticalOrLineEQ r)
-intersectionLine h h' = do Plane_x_Plane_Line l <- planePlaneIntersection h h'
-                           pure l
+-- | Given two planes, computes the downward projection of line in
+-- which they intersect.
+projectedIntersectionLine      :: (Plane_ plane r, Fractional r, Eq r)
+                               => plane -> plane
+                               -> Maybe (VerticalOrLineEQ r)
+projectedIntersectionLine h h' = do Plane_x_Plane_Line l <- planePlaneIntersection h h'
+                                    pure l

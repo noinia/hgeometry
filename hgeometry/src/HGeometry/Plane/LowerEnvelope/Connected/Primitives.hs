@@ -21,7 +21,7 @@ import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.General
 import           HGeometry.Point
-import           HGeometry.Plane(intersectionLine)
+import           HGeometry.Plane(projectedIntersectionLine)
 import           HGeometry.Vector
 import           HGeometry.HyperPlane.Intersection
 
@@ -29,6 +29,11 @@ import           HGeometry.HyperPlane.Intersection
 -- * Geometric Primitives
 
 
+-- | Given two planes, computes the downward projection of line in
+-- which they intersect.
+intersectionLine  :: (Plane_ plane r, Fractional r, Eq r)
+                  => plane -> plane -> Maybe (VerticalOrLineEQ r)
+intersectionLine = projectedIntersectionLine
 
 -- -- | Computes the directed line in which the two planes h and h' intersect. The returned
 -- -- line will have h to its left and h' to its right.

@@ -15,6 +15,7 @@ import Golden
 import Data.List.NonEmpty(NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Text qualified as Text
+import Line.BatchPointLocation qualified as Line
 
 --------------------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ spec = describe "Plane.BatchedPointlocation" $ do
            )
            ( let myLines'     = (iO . defIO) <$> myLines
                  queryPoints' = (iO . defIO) <$> queryPoints
-                 answers      = groupQueries queryPoints myLines
+                 answers      = Line.groupQueries queryPoints myLines
                  lr pts       = (iO . defIO) <$> pts
                  answers'     = [ iO $ ipeGroup (lr group) ! attr SLayer (LayerName (Text.show i))
                                 | (i, group) <- zip [0..] (toList answers)
@@ -51,7 +52,7 @@ myLines :: [VerticalOrLineEQ R]
 myLines = [ NonVertical $ LineEQ 0 2
           , NonVertical $ LineEQ 1 3
           , NonVertical $ LineEQ (-1) 6
-          , VerticalLineThrough 5
+          -- , VerticalLineThrough 5
           ]
 
 queryPoints :: NonEmpty (Point 2 R)

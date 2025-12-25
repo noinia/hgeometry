@@ -12,6 +12,7 @@ import HGeometry.Ext
 import HGeometry.Point
 import HGeometry.LineSegment
 import HGeometry.PlaneGraph.Connected
+import HGeometry.Properties
 import HGeometry.VerticalRayShooting.PersistentSweep
 
 --------------------------------------------------------------------------------
@@ -21,11 +22,14 @@ type Subdiv v e f = CPlaneGraph () v e f
 -- | The Point Location Data structure
 data PointLocationDS v e f  =
   PointLocationDS { _subdivision :: Subdiv v e f
-                  , _vrStructure :: VerticalRayShootingStructure (e :+ DartIx (Subdiv v e f))
+                  , _vrStructure :: VerticalRayShootingStructure
+                                    (ClosedLineSegment v :+ DartIx (Subdiv v e f))
                   , _outerFaceIx :: FaceIx (Subdiv v e f)
                   }
 
 makeLenses ''PointLocationDS
+
+deriving instance (Show v, Show e, Show f, Show (NumType v)) => Show (PointLocationDS v e f)
 
 -- TODO: make the edge type in the VRS something that is strict in extra
 

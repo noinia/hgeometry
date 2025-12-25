@@ -18,15 +18,14 @@ import HGeometry.Point
 import HGeometry.Ext
 import HGeometry.Foldable.Sort
 import HGeometry.Combinatorial.Util
+import Line.BatchPointLocation qualified as Line
+import HGeometry.Map.NonEmpty.Monoidal(MonoidalNEMap)
+import HGeometry.PlaneGraph.Connected
 import Data.Ord
 import Data.Maybe
-import HGeometry.Set.Util qualified as SS -- status struct
-import Data.Set qualified as SS -- status struct
 import Prelude hiding (lines)
 
 --------------------------------------------------------------------------------
-
-
 
 -- | Given a set of \(n\) queries, and a set of \(r\) planes H computes for each
 -- query q the subset of planes above q, in increasing order.
@@ -35,12 +34,13 @@ import Prelude hiding (lines)
 batchedPointLocation                :: ( Point_ queryPoint 3 r
                                        , Plane_ plane r
                                        , Foldable set
-                                       , Ord r, Num r
+                                       , Ord r, Fractional r
+
+                                       , Show r -- TODO
                                        )
                                     => NonEmpty queryPoint -> set plane -> NonEmpty (Int, [plane])
 batchedPointLocation queries planes = foldMap1 (answerBatch planes)
                                     $ groupQueries (imap (\i x -> x :+ i) queries) planes
-
 
 --------------------------------------------------------------------------------
 
@@ -73,16 +73,16 @@ answerBatch planes queries = scan queries' (Vector.toList planes')
     -- essentially merge and output the lists. for eqch query we output the remaining list.
     scan                      :: NonEmpty (queryPoint :+ Int) -> [plane]  -> NonEmpty (Int,[plane])
     scan qs@((q :+ i) :| qs') = \case
-      []                           -> fmap (\(q' :+ i') -> (i',[])) qs
-      hs@(h:hs') | q `liesBelow` h -> (i, hs) :| scan' qs' hs
-                 | otherwise       -> scan qs hs'
+      []                            -> fmap (\(q' :+ i') -> (i',[])) qs
+      hs@(h:hs') | q `liesBelow'` h -> (i, hs) :| scan' qs' hs
+                 | otherwise        -> scan qs hs'
 
     scan' qs hs = case NonEmpty.nonEmpty qs of
                     Nothing  -> []
                     Just qs' -> NonEmpty.toList $ scan qs' hs
 
-    liesBelow       :: queryPoint -> plane -> Bool
-    q `liesBelow` h = verticalSideTest q h /= GT
+    liesBelow        :: queryPoint -> plane -> Bool
+    q `liesBelow'` h = verticalSideTest q h /= GT
 
 
 --------------------------------------------------------------------------------
@@ -96,19 +96,21 @@ answerBatch planes queries = scan queries' (Vector.toList planes')
 -- the same order as the vertical line through q'.
 --
 -- running time: \(O(n\log n + r^4 \log r)\)
-groupQueries                :: (
+groupQueries                :: ( Point_ queryPoint 3 r
+                               , Plane_ plane r
+                               , Foldable set
+                               , Ord r, Fractional r
 
+                               , Show r -- TODO
                                )
-                            => NonEmpty queryPoint -> set plane -> NonEmpty (NonEmpty queryPoint)
-groupQueries queries planes = undefined
-  -- NonEmpty.fromList . snd $ foldlMap1' initialize handle events
-  --                             -- the fromList is safe, since each query is an event, and such
-  --                             -- an event prdocues output
-  -- where
-  --   lines    = mapMaybe (\(Two h1 h2) -> intersectionLine h1 h2) $ uniquePairs planes
-
-
-
+                            => NonEmpty queryPoint -> set plane
+                            -> NonEmpty (NonEmpty queryPoint)
+groupQueries queries planes = case NonEmpty.nonEmpty lines of
+    Nothing     -> NonEmpty.singleton queries -- apparently all planes are parallel
+    Just lines' -> fmap (fmap (^.extra)) . toNonEmpty
+                 $ Line.groupQueries ((\q -> (projectPoint (q^.asPoint) :+ q)) <$> queries) lines'
+  where
+    lines    = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
 
 
     -- vertices = mapMaybe asVertex $ uniquePairs lines

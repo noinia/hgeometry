@@ -2,7 +2,8 @@ module Line.BatchPointLocation
   (
 
     PointLocationDS
-  , pointLocationStructure
+  , PointLocationDS'
+  -- , pointLocationStructure
 
   , groupQueries
   ) where
@@ -23,12 +24,13 @@ import HGeometry.Sequence.NonEmpty
 import HGeometry.Ext
 import HGeometry.Kernel
 import HGeometry.Box
-import Data.Sequence as Seq
+import Data.Sequence qualified as Seq
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.List.NonEmpty (NonEmpty(..))
 import Prelude hiding (lines)
 import Line.PointLocation.Type
-
+import HGeometry.Map.NonEmpty.Monoidal(MonoidalNEMap, singleton)
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Given a set of \(n\) query points, and a set of \(r\) lines H computes for each
@@ -41,6 +43,8 @@ groupQueries               :: ( Point_ queryPoint 2 r
                               , Ord r, Fractional r
 
 
+                              , Show line, Show r -- FIXME: Remoe theese
+
                               , Eq line
                               , IsBoxable queryPoint
 
@@ -50,15 +54,15 @@ groupQueries               :: ( Point_ queryPoint 2 r
                               )
                            => NonEmpty queryPoint
                            -> set line
-                           -> NonEmpty (NonEmpty queryPoint)
-groupQueries queries lines = fmap (\(Answer _ q) -> q)
-                          <$> NonEmpty.groupWith1 (\(Answer f _) -> f) answers
+                           -> MonoidalNEMap (FaceIx (PointLocationDS' r line)) (NonEmpty queryPoint)
+groupQueries queries lines | traceShow "groupQueries" False = undefined
+groupQueries queries lines = foldMap1 (\q -> singleton (pointLocate q pointLocDS)
+                                                       (NonEmpty.singleton q)
+                                      ) queries
   where
     bx         = grow 1 $ boundingBox queries
-    pointLocDS = pointLocationStructureIn bx lines
-    answers   = (\q -> Answer (pointLocate q pointLocDS) q) <$> queries
-
-data Answer f q = Answer f q
+    pointLocDS = traceShowId $
+      pointLocationStructureIn bx lines
 
  -- queries planes = foldMap1 (answerBatch planes)
  --                                    $ groupQueries (imap (\i x -> x :+ i) queries) planes
@@ -139,10 +143,7 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 
 
 
-
--- newtype PointLocationDS r line =
---   PointLocationDS (Alternating Vector.Vector r (Set.Set line))
-
+{-
 
 -- | Given a set of n lines, builds a point location data structure.
 --
@@ -150,11 +151,13 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 pointLocationStructure       :: set line
                              -> PointLocationDS' r line
 pointLocationStructure lines = undefined -- pointLocationStructureFrom inters lines
-  where
-    inters = undefined
 
+-}
 
--- | Construct a point location data structure in a given bounding rectangle.
+-- | Construct a point location data structure on the given set of n
+-- lines in a given bounding rectangle.
+--
+-- O(n^2 \log n)
 pointLocationStructureIn            :: forall set line r.
                                        (Foldable set , Line_ line 2 r, Fractional r, Ord r
                                        , Eq line
@@ -167,6 +170,7 @@ pointLocationStructureIn            :: forall set line r.
                                        -- ^ bounding rectangle
                                     -> set line
                                     -> PointLocationDS' r line
+pointLocationStructureIn rect lines | traceShow "called" False = undefined
 pointLocationStructureIn rect lines = pointLocationStructureFrom gr
   where
     gr :: CPlaneGraph () (Point 2 r)
@@ -191,16 +195,31 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
       Line_x_Box_Point _         -> error "pointLocationStructureIn: unhandled"
 
 
+-- | Builds the point location data structure (by building a structure
+-- for vertical ray shooting).
+--
+-- pre: there the input graph has at least one edge.
+--
+-- \(O(n\log n)\), where \(n)\ is the number of vertices of the plane graph.
+pointLocationStructureFrom    :: ( LineSegment_ edge vertex
+                                 , Point_ vertex 2 r
+                                 , Ord r, Fractional r
+                                 )
+                              => CPlaneGraph () vertex edge face
+                              -> PointLocationDS vertex edge face
+pointLocationStructureFrom gr = PointLocationDS gr vrDS (gr^.outerFace.asIndex)
+  where
+    vrDS = verticalRayShootingStructure
+         . fmap orientLR'
+         . NonEmpty.fromList -- Note: by the precondition this is safe.
+         $ gr^..edgeSegments.asIndexedExt
+
+    orientLR' e'@(e :+ d) | e^.start.asPoint <= e^.end.asPoint = e'
+                          | otherwise                          = e :+ gr^.twinOf d
+
+    -- we want the dart corresponding to the left-to-right oreintation of the segment
 
 
-
-pointLocationStructureFrom :: CPlaneGraph () vertex
-                                             seg
-                                             face
-                           -> PointLocationDS _ _ _
-pointLocationStructureFrom = undefined
---   where
---     theDS = verticalRayShootingStructure
 
 -- pointLocationStructureFrom         :: Intersections r lineSegment
 --                                    -> set lineSegment
