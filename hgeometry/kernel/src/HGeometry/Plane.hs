@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Plane
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Non-vertical planes in R^3
+--
+--------------------------------------------------------------------------------
+module HGeometry.Plane
+  ( Plane
+  , NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
+  , intersectionLine
+  , module HGeometry.HyperPlane.Class
+  ) where
+
+
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.NonVertical
+import HGeometry.Properties
+import HGeometry.Line.General
+
+--------------------------------------------------------------------------------
+
+-- | Given two planes, computes the line in which they intersect.
+intersectionLine      :: (Plane_ plane r, Fractional r, Eq r)
+                      => plane -> plane
+                      -> Maybe (VerticalOrLineEQ r)
+intersectionLine h h' = do Plane_x_Plane_Line l <- planePlaneIntersection h h'
+                           pure l

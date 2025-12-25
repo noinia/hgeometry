@@ -334,6 +334,8 @@ library kernel
 
         HGeometry.Intersection
 
+        HGeometry.Plane
+
         HGeometry.Triangle
         HGeometry.Triangle.Class
 
@@ -893,6 +895,12 @@ test-suite with-ipe-hspec
       Plane.RenderProps
           -- TODO: move these ones
 
+      Plane.BatchPointLocationSpec
+
+      Plane.BatchedPointLocation
+      Line.BatchPointLocation
+
+
       LineSegmentSpec
       LineSegment.Intersection.WithHalfSpaceSpec
       LPTypeSpec
@@ -907,6 +915,8 @@ test-suite with-ipe-hspec
       PlaneGraph.FromPolygonsSpec
       PlaneGraph.RenderOverlaySpec
       PlaneGraph.PolygonOverlaySpec
+
+
 
       HalfPlane.CommonIntersectionSpec
       Line.LowerEnvelopeSpec
