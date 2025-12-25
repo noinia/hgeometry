@@ -17,7 +17,7 @@ import Data.IntMap.Monoidal qualified as IntMap
 
 --------------------------------------------------------------------------------
 
-type PointLocationDS = ()
+type PointLocationDS r line = ()
 
 -- -- | Given a set of lines; split it into interior disjoint linesegments
 -- splitIntoSegments          :: Sides r
@@ -87,7 +87,7 @@ type PointLocationDS = ()
 --
 -- \(O(n^2 \log n)\)
 pointLocationStructure       :: set line -> PointLocationDS r line
-pointLocationStructure lines = pointLocationStructureFrom inters lines
+pointLocationStructure lines = undefined -- pointLocationStructureFrom inters lines
   where
     inters = undefined
 

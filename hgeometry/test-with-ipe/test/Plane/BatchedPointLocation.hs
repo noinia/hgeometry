@@ -3,19 +3,26 @@ module Plane.BatchedPointLocation
   , groupQueries
   ) where
 
+import Data.Foldable1
 import Data.Foldable (toList)
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
+import Data.Vector qualified as Vector
 import Control.Lens
-import HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import HGeometry.Plane
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Line
 import HGeometry.Line.General
 import HGeometry.Point
+import HGeometry.Ext
 import HGeometry.Foldable.Sort
+import HGeometry.Combinatorial.Util
+import Data.Ord
+import Data.Maybe
 import HGeometry.Set.Util qualified as SS -- status struct
 import Data.Set qualified as SS -- status struct
+import Prelude hiding (lines)
 
 --------------------------------------------------------------------------------
 
@@ -32,7 +39,8 @@ batchedPointLocation                :: ( Point_ queryPoint 3 r
                                        )
                                     => NonEmpty queryPoint -> set plane -> NonEmpty (Int, [plane])
 batchedPointLocation queries planes = foldMap1 (answerBatch planes)
-                                    $ groupQueries (zipWith (:+) queries [0..]) planes
+                                    $ groupQueries (imap (\i x -> x :+ i) queries) planes
+
 
 --------------------------------------------------------------------------------
 
@@ -42,16 +50,23 @@ batchedPointLocation queries planes = foldMap1 (answerBatch planes)
 --
 -- running time: \(O(n\log n + r\log r + K)\), where \(K\) is the output size.
 --
-answerBatch                :: ( Foldable set
+answerBatch                :: forall set plane queryPoint r.
+                              ( Foldable set
                               , Point_ queryPoint 3 r
                               , Plane_ plane r
                               , Ord r, Num r
                               )
                            => set plane -> NonEmpty (queryPoint :+ Int) -> NonEmpty (Int, [plane])
-answerBatch planes queries = scan queries' (toList planes')
+answerBatch planes queries = scan queries' (Vector.toList planes')
   where
+    q0 :: Point 2 r
+    q0 = projectPoint $ (NonEmpty.head queries)^.asPoint
+
+
+
     -- the planes, sorted from bottom to top
-    planes'  = sortOn (evalAt (projectPoint $ NonEmpty.head queries)) planes
+    planes'  :: Vector.Vector plane
+    planes'  = sortOn (evalAt q0 :: plane -> r) planes
     -- the queries, sorted from bottom to top
     queries' = NonEmpty.sortWith (^.zCoord) queries
 
@@ -60,12 +75,13 @@ answerBatch planes queries = scan queries' (toList planes')
     scan qs@((q :+ i) :| qs') = \case
       []                           -> fmap (\(q' :+ i') -> (i',[])) qs
       hs@(h:hs') | q `liesBelow` h -> (i, hs) :| scan' qs' hs
-                 | oterwise        -> scan qs hs'
+                 | otherwise       -> scan qs hs'
 
     scan' qs hs = case NonEmpty.nonEmpty qs of
                     Nothing  -> []
                     Just qs' -> NonEmpty.toList $ scan qs' hs
 
+    liesBelow       :: queryPoint -> plane -> Bool
     q `liesBelow` h = verticalSideTest q h /= GT
 
 
@@ -84,15 +100,12 @@ groupQueries                :: (
 
                                )
                             => NonEmpty queryPoint -> set plane -> NonEmpty (NonEmpty queryPoint)
-groupQueries queries planes =
-
-
-
-  NonEmpty.fromlist . snd $ foldlMap1' initialize handle events
-                              -- the fromList is safe, since each query is an event, and such
-                              -- an event prdocues output
-  where
-    lines    = mapMaybe (\(Two h1 h2) -> intersectionLine h1 h2) $ uniquePairs planes
+groupQueries queries planes = undefined
+  -- NonEmpty.fromList . snd $ foldlMap1' initialize handle events
+  --                             -- the fromList is safe, since each query is an event, and such
+  --                             -- an event prdocues output
+  -- where
+  --   lines    = mapMaybe (\(Two h1 h2) -> intersectionLine h1 h2) $ uniquePairs planes
 
 
 
@@ -123,28 +136,32 @@ groupQueries queries planes =
 
 
 --------------------------------------------------------------------------------
-data Event r query line = Query query
-                        | Vertex !(Point 2 r)
-                                 line -- ^ the line that is lower on the left
-                                 line -- ^ the line that is lower on the right
+-- data Event r query line = Query query
+--                         | Vertex !(Point 2 r)
+--                                  line -- ^ the line that is lower on the left
+--                                  line -- ^ the line that is lower on the right
 
--- | Get the "time" at which the event occurs
-eventTime :: Point_ query 3 r => Event r query line -> r
-eventTime = \case
-  Query q      -> q^.xCoord
-  Vertex v _ _ -> v^.xCoord
+-- -- | Get the "time" at which the event occurs
+-- eventTime :: Point_ query 3 r => Event r query line -> r
+-- eventTime = \case
+--   Query q      -> q^.xCoord
+--   Vertex v _ _ -> v^.xCoord
 
 
--- | Construct an event
-vertexEvent                       :: Point 2 r -> line -> line -> Event r query line
-vertexEvent v l1 l2 | f l1 < f l2 = Vertex v l1 l2
-                    | otherwise   = Vertex v l2 l1
-  where
-    f l = evalAt (v^.xCoord - 1) l
+-- -- | Construct an event
+-- vertexEvent                       :: forall point line query r.
+--                                      ( Num r
+--                                      , Line_ line 2 r
+--                                      )
+--                                    => Point 2 r -> line -> line -> Event r query line
+-- vertexEvent v l1 l2 | f l1 < f l2 = Vertex v l1 l2
+--                     | otherwise   = Vertex v l2 l1
+--   where
+--     f   :: line -> r
+--     f l = evalAt (Point $ v^.xCoord - 1) l
 
 
 
 
 
 --------------------------------------------------------------------------------
-sortOn = sortBy . comparing

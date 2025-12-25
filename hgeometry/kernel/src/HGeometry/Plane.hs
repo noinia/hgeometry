@@ -17,8 +17,8 @@ module HGeometry.Plane
 
 
 import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.Intersection
 import HGeometry.HyperPlane.NonVertical
-import HGeometry.Properties
 import HGeometry.Line.General
 
 --------------------------------------------------------------------------------

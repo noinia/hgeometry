@@ -13,6 +13,7 @@ module HGeometry.Line
   ( module HGeometry.Line.Class
   , module HGeometry.Line.LineEQ
   , module HGeometry.Line.PointAndVector
+  , module HGeometry.Line.General
   , LineLineIntersection, LineLineIntersectionG(..)
   , fromLineEQ
   ) where
@@ -25,6 +26,7 @@ import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.Point
 import HGeometry.Vector
+import HGeometry.Line.General
 
 --------------------------------------------------------------------------------
 
