@@ -26,13 +26,46 @@ import Data.Sequence as Seq
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.List.NonEmpty (NonEmpty(..))
 import Prelude hiding (lines)
+import Line.PointLocation.Type
 
 --------------------------------------------------------------------------------
 
-type PointLocationDS r line =
-  CPlaneGraph () (Point 2 r :+ Seq.Seq (Point 2 r))
-                 (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
-                 ()
+-- | Given a set of \(n\) query points, and a set of \(r\) lines H computes for each
+-- query q the subset of lines above q, in increasing order.
+--
+-- running time: \(O(n\log n + r^5\log r)\)
+groupQueries               :: ( Point_ queryPoint 2 r
+                              , Line_ line 2 r
+                              , Foldable set
+                              , Ord r, Num r
+                              )
+                           => NonEmpty queryPoint
+                           -> set line
+                           -> NonEmpty (NonEmpty queryPoint)
+groupQueries queries lines = fmap (\(Answer _ q) -> q)
+                          <$> NonEmpty.groupWith1 (\(Answer f _) -> f) answers
+  where
+    bx         = grow 1 $ boundingBox queries
+    pointLocDS = pointLocationStructureIn bx lines
+    answers   = (\q -> Answer q (pointLocate q pointLocDS)) <$> queries
+
+data Answer f q = Answer f q
+
+ -- queries planes = foldMap1 (answerBatch planes)
+ --                                    $ groupQueries (imap (\i x -> x :+ i) queries) planes
+
+
+grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
+grow d (Box p q) = Box (p&coordinates %~ subtract d)
+                       (q&coordinates %~ (+d))
+
+--------------------------------------------------------------------------------
+
+
+-- type PointLocationDS r line =
+--   CPlaneGraph () (Point 2 r :+ Seq.Seq (Point 2 r))
+--                  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+--                  ()
 
 
 
@@ -105,7 +138,7 @@ type PointLocationDS r line =
 -- | Given a set of n lines, builds a point location data structure.
 --
 -- \(O(n^2 \log n)\)
-pointLocationStructure       :: set line -> PointLocationDS r line
+pointLocationStructure       :: set line -> PointLocationDS' r line
 pointLocationStructure lines = undefined -- pointLocationStructureFrom inters lines
   where
     inters = undefined
@@ -123,7 +156,7 @@ pointLocationStructureIn            :: forall set line r.
                                     => Rectangle (Point 2 r)
                                        -- ^ bounding rectangle
                                     -> set line
-                                    -> PointLocationDS r line
+                                    -> PointLocationDS' r line
 pointLocationStructureIn rect lines = pointLocationStructureFrom gr
   where
     -- | Construct a plane graph
@@ -139,8 +172,16 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
       Line_x_Box_Point _         -> error "pointLocationStructureIn: unhandled"
 
 
-pointLocationStructureFrom = id
 
+
+
+-- pointLocationStructureFrom :: CPlaneGraph () vertex
+--                                              seg
+--                                              face
+--                            -> VerticalRayShootingStructure seg
+-- pointLocationStructureFrom = theDS
+--   where
+--     theDS = verticalRayShootingStructure
 
 -- pointLocationStructureFrom         :: Intersections r lineSegment
 --                                    -> set lineSegment
@@ -156,8 +197,14 @@ pointLocationStructureFrom = id
 -- directly above the query point (if such a line exists).
 --
 -- \(O(\log n)\)
--- query :: queryPoint -> PointLocationDS r line -> (Interval (Unbounded r), Maybe line)
-query = undefined
+pointLocate      :: (Point_ queryPoint 2 r, Num r, Ord r
+                    ) => queryPoint -> PointLocationDS v e f -> FaceIx (PointLocationDS v e f)
+pointLocate q ds = case segmentAbove q (ds^.vrStructure) of
+  Nothing       -> ds^.outerFaceIx
+  Just (_ :+ d) -> ds^.subDivision.incidentFaceOf d
+
+
+
 
 --------------------------------------------------------------------------------
 
