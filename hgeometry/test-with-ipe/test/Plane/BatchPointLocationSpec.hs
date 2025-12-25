@@ -10,8 +10,11 @@ import System.OsPath
 import Control.Lens
 import HGeometry.Number.Real.Rational
 import Test.Hspec.WithTempFile
+import Data.Foldable
 import Golden
-
+import Data.List.NonEmpty(NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Text qualified as Text
 
 --------------------------------------------------------------------------------
 
@@ -25,10 +28,16 @@ spec = describe "Plane.BatchedPointlocation" $ do
            )
            ( let myLines'     = (iO . defIO) <$> myLines
                  queryPoints' = (iO . defIO) <$> queryPoints
-                 content' = transformBy t
+                 answers      = groupQueries queryPoints myLines
+                 lr pts       = (iO . defIO) <$> pts
+                 answers'     = [ iO $ ipeGroup (lr group) ! attr SLayer (LayerName (Text.show i))
+                                | (i, group) <- zip [0..] (toList answers)
+                                ]
+
+                 content' = transformBy t $
                    [ iO $ ipeGroup myLines'     ! attr SLayer "lines"
                    , iO $ ipeGroup queryPoints' ! attr SLayer "queries"
-                   ]
+                   ] <> answers'
                  t    = uniformScaling 10
              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
            )
@@ -45,8 +54,9 @@ myLines = [ NonVertical $ LineEQ 0 2
           , VerticalLineThrough 5
           ]
 
-queryPoints :: [Point 2 R]
-queryPoints = [ origin
+queryPoints :: NonEmpty (Point 2 R)
+queryPoints = NonEmpty.fromList
+              [ origin
               , Point2 1 8
               , Point2 (-1) 0
               , Point2 10 4

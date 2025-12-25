@@ -3,7 +3,8 @@ module Line.BatchPointLocation
 
     PointLocationDS
   , pointLocationStructure
-  , query
+
+  , groupQueries
   ) where
 
 import Data.Foldable
@@ -37,7 +38,15 @@ import Line.PointLocation.Type
 groupQueries               :: ( Point_ queryPoint 2 r
                               , Line_ line 2 r
                               , Foldable set
-                              , Ord r, Num r
+                              , Ord r, Fractional r
+
+
+                              , Eq line
+                              , IsBoxable queryPoint
+
+                              , IsIntersectableWith line (Rectangle (Point 2 r))
+                              , Intersection line (Rectangle (Point 2 r)) ~
+                                Maybe (LineBoxIntersection 2 r)
                               )
                            => NonEmpty queryPoint
                            -> set line
@@ -47,7 +56,7 @@ groupQueries queries lines = fmap (\(Answer _ q) -> q)
   where
     bx         = grow 1 $ boundingBox queries
     pointLocDS = pointLocationStructureIn bx lines
-    answers   = (\q -> Answer q (pointLocate q pointLocDS)) <$> queries
+    answers   = (\q -> Answer (pointLocate q pointLocDS) q) <$> queries
 
 data Answer f q = Answer f q
 
@@ -138,7 +147,8 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 -- | Given a set of n lines, builds a point location data structure.
 --
 -- \(O(n^2 \log n)\)
-pointLocationStructure       :: set line -> PointLocationDS' r line
+pointLocationStructure       :: set line
+                             -> PointLocationDS' r line
 pointLocationStructure lines = undefined -- pointLocationStructureFrom inters lines
   where
     inters = undefined
@@ -159,9 +169,18 @@ pointLocationStructureIn            :: forall set line r.
                                     -> PointLocationDS' r line
 pointLocationStructureIn rect lines = pointLocationStructureFrom gr
   where
+    gr :: CPlaneGraph () (Point 2 r)
+                         (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+    gr = gr' & vertices %~ view core
+
     -- | Construct a plane graph
-    gr :: CPlaneGraph () _ _ _
-    gr = fromIntersectingSegments segs
+    gr' :: CPlaneGraph () (Point 2 r :+ Seq.Seq (Point 2 r))
+                          (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+    gr' =  gr'' & edges %~ view head1
+
+    gr'' :: CPlaneGraph () _ _ _
+    gr'' = fromIntersectingSegments segs
+
 
     segs :: NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
     segs = (toNonEmpty $ (:+ Nothing) <$> sides rect)
@@ -175,11 +194,11 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
 
 
 
--- pointLocationStructureFrom :: CPlaneGraph () vertex
---                                              seg
---                                              face
---                            -> VerticalRayShootingStructure seg
--- pointLocationStructureFrom = theDS
+pointLocationStructureFrom :: CPlaneGraph () vertex
+                                             seg
+                                             face
+                           -> PointLocationDS _ _ _
+pointLocationStructureFrom = undefined
 --   where
 --     theDS = verticalRayShootingStructure
 
@@ -197,11 +216,15 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
 -- directly above the query point (if such a line exists).
 --
 -- \(O(\log n)\)
-pointLocate      :: (Point_ queryPoint 2 r, Num r, Ord r
-                    ) => queryPoint -> PointLocationDS v e f -> FaceIx (PointLocationDS v e f)
+pointLocate      :: ( Point_ queryPoint 2 r, Num r, Ord r
+                    , LineSegment_ edge vertex, Point_ vertex 2 r
+                    , HasSupportingLine edge
+                    )
+                 => queryPoint -> PointLocationDS vertex edge f
+                 -> FaceIx (PointLocationDS vertex edge f)
 pointLocate q ds = case segmentAbove q (ds^.vrStructure) of
   Nothing       -> ds^.outerFaceIx
-  Just (_ :+ d) -> ds^.subDivision.incidentFaceOf d
+  Just (_ :+ d) -> ds^.subdivision.incidentFaceOf d.asIndex
 
 
 

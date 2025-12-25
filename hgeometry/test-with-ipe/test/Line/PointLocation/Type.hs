@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Line.PointLocation.Type
   ( PointLocationDS(PointLocationDS), subdivision, vrStructure, outerFaceIx
   , PointLocationDS'
@@ -7,6 +8,9 @@ module Line.PointLocation.Type
 
 
 import Control.Lens
+import HGeometry.Ext
+import HGeometry.Point
+import HGeometry.LineSegment
 import HGeometry.PlaneGraph.Connected
 import HGeometry.VerticalRayShooting.PersistentSweep
 
@@ -23,6 +27,8 @@ data PointLocationDS v e f  =
 
 makeLenses ''PointLocationDS
 
+-- TODO: make the edge type in the VRS something that is strict in extra
+
 instance HasFaces' (PointLocationDS v e f) where
   type FaceIx (PointLocationDS v e f) = FaceIx (Subdiv v e f)
   type Face   (PointLocationDS v e f) = Face   (Subdiv v e f)
@@ -34,6 +40,6 @@ instance HasFaces' (PointLocationDS v e f) where
 --------------------------------------------------------------------------------
 
 type PointLocationDS' r line =
-  PointLocationDS (Point 2 r :+ Seq.Seq (Point 2 r))
-                  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+  PointLocationDS (Point 2 r)
+                  (ClosedLineSegment (Point 2 r) :+ Maybe line)
                   ()
