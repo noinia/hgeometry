@@ -1,8 +1,9 @@
 module Line.BatchPointLocation
   (
 
-    PointLocationDS
+    PointLocationDS, subdivision, vrStructure, outerFaceIx
   , PointLocationDS'
+  , buildPointLocationStructure
   -- , pointLocationStructure
 
   , groupQueries
@@ -44,6 +45,7 @@ groupQueries               :: ( Point_ queryPoint 2 r
 
 
                               , Show line, Show r -- FIXME: Remoe theese
+                              , Show queryPoint
 
                               , Eq line
                               , IsBoxable queryPoint
@@ -55,22 +57,29 @@ groupQueries               :: ( Point_ queryPoint 2 r
                            => NonEmpty queryPoint
                            -> set line
                            -> MonoidalNEMap (FaceIx (PointLocationDS' r line)) (NonEmpty queryPoint)
-groupQueries queries lines | traceShow "groupQueries" False = undefined
 groupQueries queries lines = foldMap1 (\q -> singleton (pointLocate q pointLocDS)
                                                        (NonEmpty.singleton q)
                                       ) queries
   where
-    bx         = grow 1 $ boundingBox queries
-    pointLocDS = traceShowId $
-      pointLocationStructureIn bx lines
+    pointLocDS = buildPointLocationStructure queries lines
 
- -- queries planes = foldMap1 (answerBatch planes)
- --                                    $ groupQueries (imap (\i x -> x :+ i) queries) planes
-
-
-grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
-grow d (Box p q) = Box (p&coordinates %~ subtract d)
-                       (q&coordinates %~ (+d))
+-- | Construct the point location structure (restricted to the)
+-- bounding box of the query points
+--
+buildPointLocationStructure         :: ( IsBoxable query
+                                       , NumType query ~ r, Dimension query ~ 2
+                                       , Ord r, Fractional r
+                                       , Line_ line 2 r
+                                       , Foldable set, Eq line
+                                       , IsIntersectableWith line (Rectangle (Point 2 r))
+                                       , Intersection line (Rectangle (Point 2 r)) ~
+                                         Maybe (LineBoxIntersection 2 r)
+                                       )
+                                    => query -> set line -> PointLocationDS' r line
+buildPointLocationStructure queries = pointLocationStructureIn (grow 1 $ boundingBox queries)
+  where
+    grow d (Box p q) = Box (p&coordinates %~ subtract d)
+                           (q&coordinates %~ (+d))
 
 --------------------------------------------------------------------------------
 
@@ -214,10 +223,13 @@ pointLocationStructureFrom gr = PointLocationDS gr vrDS (gr^.outerFace.asIndex)
          . NonEmpty.fromList -- Note: by the precondition this is safe.
          $ gr^..edgeSegments.asIndexedExt
 
-    orientLR' e'@(e :+ d) | e^.start.asPoint <= e^.end.asPoint = e'
-                          | otherwise                          = e :+ gr^.twinOf d
-
-    -- we want the dart corresponding to the left-to-right oreintation of the segment
+    orientLR' e'@(e :+ d) | e^.start.asPoint <= e^.end.asPoint = e :+ gr^.twinOf d
+                          | otherwise                          = e'
+    -- given an upward vertical ray, we want to get the dart corresponding to the line segment
+    -- we hit. If this line segment is oriented left to right then its DartIx itself
+    -- corresponds to the "top"-side (i.e. this particular dart d) would store a pointer
+    -- to the face above the segment. Hence, in that case we take the twin dart (by which we can)
+    -- then get the face below the edge.
 
 
 
@@ -238,12 +250,14 @@ pointLocationStructureFrom gr = PointLocationDS gr vrDS (gr^.outerFace.asIndex)
 pointLocate      :: ( Point_ queryPoint 2 r, Num r, Ord r
                     , LineSegment_ edge vertex, Point_ vertex 2 r
                     , HasSupportingLine edge
+
+                    , Show queryPoint, Show r, Show edge, Show vertex
                     )
                  => queryPoint -> PointLocationDS vertex edge f
                  -> FaceIx (PointLocationDS vertex edge f)
 pointLocate q ds = case segmentAbove q (ds^.vrStructure) of
   Nothing       -> ds^.outerFaceIx
-  Just (_ :+ d) -> ds^.subdivision.incidentFaceOf d.asIndex
+  Just (e :+ d) -> traceShowWith (q,"->",e :+ d,) $ ds^.subdivision.incidentFaceOf d.asIndex
 
 
 

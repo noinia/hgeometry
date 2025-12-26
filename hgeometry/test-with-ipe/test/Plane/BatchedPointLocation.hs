@@ -37,6 +37,7 @@ batchedPointLocation                :: ( Point_ queryPoint 3 r
                                        , Ord r, Fractional r
 
                                        , Show r -- TODO
+                                       , Show queryPoint, Show r --FIXME: remove
                                        )
                                     => NonEmpty queryPoint -> set plane -> NonEmpty (Int, [plane])
 batchedPointLocation queries planes = foldMap1 (answerBatch planes)
@@ -55,6 +56,8 @@ answerBatch                :: forall set plane queryPoint r.
                               , Point_ queryPoint 3 r
                               , Plane_ plane r
                               , Ord r, Num r
+
+                              , Show queryPoint, Show r --FIXME: remove
                               )
                            => set plane -> NonEmpty (queryPoint :+ Int) -> NonEmpty (Int, [plane])
 answerBatch planes queries = scan queries' (Vector.toList planes')
@@ -81,7 +84,7 @@ answerBatch planes queries = scan queries' (Vector.toList planes')
                     Nothing  -> []
                     Just qs' -> NonEmpty.toList $ scan qs' hs
 
-    liesBelow        :: queryPoint -> plane -> Bool
+    liesBelow'       :: queryPoint -> plane -> Bool
     q `liesBelow'` h = verticalSideTest q h /= GT
 
 
@@ -101,7 +104,7 @@ groupQueries                :: ( Point_ queryPoint 3 r
                                , Foldable set
                                , Ord r, Fractional r
 
-                               , Show r -- TODO
+                               , Show queryPoint , Show r -- TODO
                                )
                             => NonEmpty queryPoint -> set plane
                             -> NonEmpty (NonEmpty queryPoint)

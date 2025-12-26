@@ -20,6 +20,7 @@ module HGeometry.Kernel
   , module HGeometry.Triangle
   , module HGeometry.Transformation
   , module HGeometry.Intersection
+  , module HGeometry.Properties
   ) where
 
 import HGeometry.Point
@@ -33,3 +34,4 @@ import HGeometry.HalfSpace
 import HGeometry.Transformation
 import HGeometry.Intersection
 import HGeometry.Triangle (Triangle(..))
+import HGeometry.Properties
