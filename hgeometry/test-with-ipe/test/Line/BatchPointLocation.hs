@@ -44,7 +44,7 @@ groupQueries               :: ( Point_ queryPoint 2 r
                               , Ord r, Fractional r
 
 
-                              , Show line, Show r -- FIXME: Remoe theese
+                              , Show line, Show r -- FIXME: Remove theese
                               , Show queryPoint
 
                               , Eq line
@@ -78,8 +78,11 @@ buildPointLocationStructure         :: ( IsBoxable query
                                     => query -> set line -> PointLocationDS' r line
 buildPointLocationStructure queries = pointLocationStructureIn (grow 1 $ boundingBox queries)
   where
-    grow d (Box p q) = Box (p&coordinates %~ subtract d)
-                           (q&coordinates %~ (+d))
+    grow _ _  = Box (Point2 (-1) (-1))
+                    (Point2 101 101)
+    -- grow d (Box p q) = Box (p&coordinates %~ subtract d)
+    --                        (q&coordinates %~ (+d))
+  -- FIXME!!
 
 --------------------------------------------------------------------------------
 
@@ -179,7 +182,6 @@ pointLocationStructureIn            :: forall set line r.
                                        -- ^ bounding rectangle
                                     -> set line
                                     -> PointLocationDS' r line
-pointLocationStructureIn rect lines | traceShow "called" False = undefined
 pointLocationStructureIn rect lines = pointLocationStructureFrom gr
   where
     gr :: CPlaneGraph () (Point 2 r)

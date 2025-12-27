@@ -19,7 +19,8 @@ import HGeometry.Ext
 import HGeometry.Foldable.Sort
 import HGeometry.Combinatorial.Util
 import Line.BatchPointLocation qualified as Line
-import HGeometry.Map.NonEmpty.Monoidal(MonoidalNEMap)
+import Data.Map qualified as Map
+import Data.Map.NonEmpty qualified as NEMap
 import HGeometry.PlaneGraph.Connected
 import Data.Ord
 import Data.Maybe
@@ -33,15 +34,16 @@ import Prelude hiding (lines)
 -- running time: \(O(n\log n + r^5\log r)\)
 batchedPointLocation                :: ( Point_ queryPoint 3 r
                                        , Plane_ plane r
-                                       , Foldable set
+                                       , Foldable set, Foldable1 set'
                                        , Ord r, Fractional r
+                                       , Ord queryPoint
 
-                                       , Show r -- TODO
                                        , Show queryPoint, Show r --FIXME: remove
                                        )
-                                    => NonEmpty queryPoint -> set plane -> NonEmpty (Int, [plane])
+                                    => set' queryPoint -> set plane
+                                    -> NEMap.NEMap queryPoint [plane]
 batchedPointLocation queries planes = foldMap1 (answerBatch planes)
-                                    $ groupQueries (imap (\i x -> x :+ i) queries) planes
+                                    $ groupQueries queries planes
 
 --------------------------------------------------------------------------------
 
@@ -51,38 +53,37 @@ batchedPointLocation queries planes = foldMap1 (answerBatch planes)
 --
 -- running time: \(O(n\log n + r\log r + K)\), where \(K\) is the output size.
 --
-answerBatch                :: forall set plane queryPoint r.
-                              ( Foldable set
+answerBatch                :: forall set set' plane queryPoint r.
+                              ( Foldable set, Foldable1 set'
                               , Point_ queryPoint 3 r
                               , Plane_ plane r
                               , Ord r, Num r
+                              , Ord queryPoint
 
                               , Show queryPoint, Show r --FIXME: remove
                               )
-                           => set plane -> NonEmpty (queryPoint :+ Int) -> NonEmpty (Int, [plane])
-answerBatch planes queries = scan queries' (Vector.toList planes')
+                           => set plane -> set' queryPoint
+                           -> NEMap.NEMap queryPoint [plane]
+answerBatch planes queries = NEMap.unsafeFromMap $ scan (Vector.toList planes') queries'
+                             -- note: this is safe, since the input set is nonEmpty
   where
     q0 :: Point 2 r
-    q0 = projectPoint $ (NonEmpty.head queries)^.asPoint
-
-
+    q0 = projectPoint $ (NonEmpty.head $ toNonEmpty queries)^.asPoint
 
     -- the planes, sorted from bottom to top
     planes'  :: Vector.Vector plane
     planes'  = sortOn (evalAt q0 :: plane -> r) planes
     -- the queries, sorted from bottom to top
-    queries' = NonEmpty.sortWith (^.zCoord) queries
+    queries' = Vector.toList . sortOnCheap (^.zCoord) $ queries
 
     -- essentially merge and output the lists. for eqch query we output the remaining list.
-    scan                      :: NonEmpty (queryPoint :+ Int) -> [plane]  -> NonEmpty (Int,[plane])
-    scan qs@((q :+ i) :| qs') = \case
-      []                            -> fmap (\(q' :+ i') -> (i',[])) qs
-      hs@(h:hs') | q `liesBelow'` h -> (i, hs) :| scan' qs' hs
-                 | otherwise        -> scan qs hs'
-
-    scan' qs hs = case NonEmpty.nonEmpty qs of
-                    Nothing  -> []
-                    Just qs' -> NonEmpty.toList $ scan qs' hs
+    scan    :: [plane] -> [queryPoint] -> Map.Map queryPoint [plane]
+    scan hs = \case
+      []         -> mempty
+      qs@(q:qs') -> case hs of
+        [] -> foldMap (flip Map.singleton []) qs
+        (h:hs') | q `liesBelow'` h -> Map.insert q hs $ scan hs qs'
+                | otherwise        -> scan hs' qs
 
     liesBelow'       :: queryPoint -> plane -> Bool
     q `liesBelow'` h = verticalSideTest q h /= GT
@@ -101,20 +102,20 @@ answerBatch planes queries = scan queries' (Vector.toList planes')
 -- running time: \(O(n\log n + r^4 \log r)\)
 groupQueries                :: ( Point_ queryPoint 3 r
                                , Plane_ plane r
-                               , Foldable set
+                               , Foldable set, Foldable1 nonEmpty
                                , Ord r, Fractional r
 
                                , Show queryPoint , Show r -- TODO
                                )
-                            => NonEmpty queryPoint -> set plane
+                            => nonEmpty queryPoint -> set plane
                             -> NonEmpty (NonEmpty queryPoint)
 groupQueries queries planes = case NonEmpty.nonEmpty lines of
-    Nothing     -> NonEmpty.singleton queries -- apparently all planes are parallel
+    Nothing     -> NonEmpty.singleton (toNonEmpty queries) -- apparently all planes are parallel
     Just lines' -> fmap (fmap (^.extra)) . toNonEmpty
-                 $ Line.groupQueries ((\q -> (projectPoint (q^.asPoint) :+ q)) <$> queries) lines'
+                 $ Line.groupQueries queries' lines'
   where
     lines    = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
-
+    queries' = fmap (\q -> (projectPoint (q^.asPoint) :+ q)) . toNonEmpty $ queries
 
     -- vertices = mapMaybe asVertex $ uniquePairs lines
 
