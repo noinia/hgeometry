@@ -712,7 +712,7 @@ renderToIpe fp mkEnv hs =
         defIO' reg = defIO reg ! attr SFill    color
                                ! attr SOpacity (Text.pack "10%")
         centroid' reg = centerPoint (boundingBox $ toPoly reg)
-        toPoly reg = case toConvexPolygonIn rect' region of
+        toPoly reg = case toConvexPolygonIn rect' reg of
             Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))
             Right pg -> pg&vertices %~ view asPoint
 
