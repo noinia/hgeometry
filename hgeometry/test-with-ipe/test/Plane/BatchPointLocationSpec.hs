@@ -257,7 +257,7 @@ data Input = Input (NonEmpty QueryPoint)
 
 instance Arbitrary Input where
   arbitrary = Input <$> scale (*2) arbitrary
-                    <*> scale (`div` 2) arbitrary -- TODO: adjust if needed
+                    <*> arbitrary
   shrink (Input qs hs) = concat [ Input qs <$> shrink hs
                                 , [Input qs' hs | qs' <- shrink qs ]
                                 ]

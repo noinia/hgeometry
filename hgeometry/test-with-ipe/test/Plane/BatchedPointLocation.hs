@@ -38,8 +38,6 @@ batchedPointLocation                :: ( Point_ queryPoint 3 r
                                        , Foldable set, Foldable1 set'
                                        , Ord r, Fractional r
                                        , Ord queryPoint
-
-                                       , Show queryPoint, Show r --FIXME: remove
                                        )
                                     => set' queryPoint -> set plane
                                     -> NEMap.NEMap queryPoint (Vector.Vector plane)
@@ -60,8 +58,6 @@ answerBatch                :: forall set set' plane queryPoint r.
                               , Plane_ plane r
                               , Ord r, Num r
                               , Ord queryPoint
-
-                              , Show queryPoint, Show r --FIXME: remove
                               )
                            => set plane -> set' queryPoint
                            -> NEMap.NEMap queryPoint (Vector.Vector plane)
@@ -96,8 +92,6 @@ groupQueries                :: ( Point_ queryPoint 3 r
                                , Plane_ plane r
                                , Foldable set, Foldable1 nonEmpty
                                , Ord r, Fractional r
-
-                               , Show queryPoint , Show r -- TODO
                                )
                             => nonEmpty queryPoint -> set plane
                             -> NonEmpty (NonEmpty queryPoint)

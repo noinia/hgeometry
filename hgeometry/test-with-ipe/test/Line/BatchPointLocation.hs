@@ -31,7 +31,7 @@ import Data.List.NonEmpty (NonEmpty(..))
 import Prelude hiding (lines)
 import Line.PointLocation.Type
 import HGeometry.Map.NonEmpty.Monoidal(MonoidalNEMap, singleton)
-import Debug.Trace
+
 --------------------------------------------------------------------------------
 
 -- | Given a set of \(n\) query points, and a set of \(r\) lines H computes for each
@@ -42,14 +42,8 @@ groupQueries               :: ( Point_ queryPoint 2 r
                               , Line_ line 2 r
                               , Foldable set
                               , Ord r, Fractional r
-
-
-                              , Show line, Show r -- FIXME: Remove theese
-                              , Show queryPoint
-
                               , Eq line
                               , IsBoxable queryPoint
-
                               , IsIntersectableWith line (Rectangle (Point 2 r))
                               , Intersection line (Rectangle (Point 2 r)) ~
                                 Maybe (LineBoxIntersection 2 r)
@@ -258,14 +252,12 @@ pointLocationStructureFrom gr = PointLocationDS gr vrDS (gr^.outerFace.asIndex)
 pointLocate      :: ( Point_ queryPoint 2 r, Num r, Ord r
                     , LineSegment_ edge vertex, Point_ vertex 2 r
                     , HasSupportingLine edge
-
-                    , Show queryPoint, Show r, Show edge, Show vertex
                     )
                  => queryPoint -> PointLocationDS vertex edge f
                  -> FaceIx (PointLocationDS vertex edge f)
 pointLocate q ds = case segmentAbove q (ds^.vrStructure) of
-  Nothing       -> traceShowWith ("outside?",q,ds^.vrStructure, ) $ ds^.outerFaceIx
-  Just (e :+ d) -> traceShowWith (q,"->",e :+ d,) $ ds^.subdivision.incidentFaceOf d.asIndex
+  Nothing       -> ds^.outerFaceIx
+  Just (e :+ d) -> ds^.subdivision.incidentFaceOf d.asIndex
 
 
 
