@@ -4,6 +4,9 @@
 
 module Plane.BatchPointLocationSpec where
 
+import HGeometry.Plane
+import Data.Maybe(mapMaybe)
+import HGeometry.Combinatorial.Util
 import Data.Set qualified as Set
 import Data.Foldable1
 import Data.Default
@@ -67,6 +70,32 @@ spec = describe "Plane.BatchedPointlocation" $ do
                 `shouldBe`
                 naivePlanesAbove myQueryPoints myPlanes
 
+         goldenWith [osp|data/test-with-ipe/golden/Plane/|]
+           (ipeFileGolden { name      = [osp|batchpointlocate_debug|] }
+           )
+           ( let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2)
+                       $ uniquePairs myPlanes
+                 theQueryPoints = (\q -> projectPoint (q^.asPoint)) <$> myQueryPoints
+                 myLines'     = (iO . defIO) <$> lines
+                 queryPoints' = (iO . defIO) <$> theQueryPoints
+                 answers      = Line.groupQueries theQueryPoints lines
+                 lr pts       = (iO . defIO) <$> pts
+                 answers'     = [ iO $ ipeGroup (lr group) ! attr SLayer (LayerName (Text.show i))
+                                | (i, group) <- zip [0..] (toList answers)
+                                ]
+                 subdiv = Line.buildPointLocationStructure theQueryPoints lines
+
+                 gr :: CPlaneGraph () (Point 2 R) (ClosedLineSegment (Point 2 R) :+ Maybe (VerticalOrLineEQ R)) String
+                 gr = (subdiv^.Line.subdivision) & faces %@~ \i _ -> show i
+                 faces' = ifoldMapOf interiorFacePolygons (drawFace gr) gr
+                 content' = transformBy t $
+                   [ iO $ ipeGroup myLines'     ! attr SLayer "lines"
+                   , iO $ ipeGroup queryPoints' ! attr SLayer "queries"
+                   , iO $ ipeGroup (renderGraph (renderSubdiv subdiv)) ! attr SLayer "subdiv"
+                   ] <> faces' <> answers'
+                 t    = uniformScaling 10
+             in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+           )
 
          -- prop "show /read for plane'" $
          --   \(h :: Plane' Int)  -> (read (show h) :: Plane' Int) === h

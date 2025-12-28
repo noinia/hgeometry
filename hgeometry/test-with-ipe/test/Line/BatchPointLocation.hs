@@ -209,7 +209,7 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
 -- | Builds the point location data structure (by building a structure
 -- for vertical ray shooting).
 --
--- pre: there the input graph has at least one edge.
+-- pre: there the input graph has at least one non-vertical edge.
 --
 -- \(O(n\log n)\), where \(n)\ is the number of vertices of the plane graph.
 pointLocationStructureFrom    :: ( LineSegment_ edge vertex
@@ -220,7 +220,8 @@ pointLocationStructureFrom    :: ( LineSegment_ edge vertex
                               -> PointLocationDS vertex edge face
 pointLocationStructureFrom gr = PointLocationDS gr vrDS (gr^.outerFace.asIndex)
   where
-    vrDS = verticalRayShootingStructure
+    vrDS = fromMaybe (error "pointLocationStructureFrom. precondition failed")
+         . verticalRayShootingStructure'
          . fmap orientLR'
          . NonEmpty.fromList -- Note: by the precondition this is safe.
          $ gr^..edgeSegments.asIndexedExt
@@ -258,7 +259,7 @@ pointLocate      :: ( Point_ queryPoint 2 r, Num r, Ord r
                  => queryPoint -> PointLocationDS vertex edge f
                  -> FaceIx (PointLocationDS vertex edge f)
 pointLocate q ds = case segmentAbove q (ds^.vrStructure) of
-  Nothing       -> ds^.outerFaceIx
+  Nothing       -> traceShowWith ("outside?",q,ds^.vrStructure, ) $ ds^.outerFaceIx
   Just (e :+ d) -> traceShowWith (q,"->",e :+ d,) $ ds^.subdivision.incidentFaceOf d.asIndex
 
 
