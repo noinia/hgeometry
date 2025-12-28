@@ -5,12 +5,12 @@
 module Plane.BatchPointLocationSpec where
 
 import HGeometry.Plane
-import Data.Maybe(mapMaybe)
+import Data.Maybe (mapMaybe)
 import HGeometry.Combinatorial.Util
 import Data.Set qualified as Set
 import Data.Foldable1
 import Data.Default
-import Plane.BatchedPointLocation
+import HGeometry.Plane.BatchPointLocation
 import Test.Hspec
 import HGeometry.Kernel
 import Ipe
@@ -27,7 +27,7 @@ import Golden
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Text qualified as Text
-import Line.BatchPointLocation qualified as Line
+import HGeometry.Line.BatchPointLocation qualified as Line
 import PlaneGraph.PolygonOverlaySpec
 import PlaneGraph.RenderSpec
 import Data.Map.NonEmpty qualified as NEMap

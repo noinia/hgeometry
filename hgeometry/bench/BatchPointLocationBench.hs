@@ -12,7 +12,7 @@ import Data.List qualified as List
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Test.Tasty.Bench
-import Plane.BatchedPointLocation
+import HGeometry.Plane.BatchedPointLocation
 
 --------------------------------------------------------------------------------
 

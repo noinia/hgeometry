@@ -523,6 +523,9 @@ library
         HGeometry.Polygon.Triangulation.MakeMonotone
 
         HGeometry.Line.LowerEnvelope
+        HGeometry.Line.BatchPointLocation
+
+        HGeometry.Plane.BatchPointLocation
 
 
         HGeometry.Plane.LowerEnvelope
@@ -569,6 +572,7 @@ library
         HGeometry.PlaneGraph.Connected.FromIntersectingSegments
         HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
 
+        HGeometry.PointLocation.Type
 
         HGeometry.Plane.LowerEnvelope.Type
         -- HGeometry.Plane.LowerEnvelope.Sample
@@ -896,10 +900,6 @@ test-suite with-ipe-hspec
           -- TODO: move these ones
 
       Plane.BatchPointLocationSpec
-
-      Plane.BatchedPointLocation
-      Line.BatchPointLocation
-      Line.PointLocation.Type
 
       LineSegmentSpec
       LineSegment.Intersection.WithHalfSpaceSpec

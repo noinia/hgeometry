@@ -1,11 +1,18 @@
-module Line.BatchPointLocation
-  (
-
-    PointLocationDS, subdivision, vrStructure, outerFaceIx
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Line.BatchPointLocation
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of Batched point location among a set of lines.
+--
+--------------------------------------------------------------------------------
+module HGeometry.Line.BatchPointLocation
+  ( PointLocationDS, subdivision, vrStructure, outerFaceIx
   , PointLocationDS'
   , buildPointLocationStructure
   -- , pointLocationStructure
-
   , groupQueries
   ) where
 
@@ -29,8 +36,8 @@ import Data.Sequence qualified as Seq
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.List.NonEmpty (NonEmpty(..))
 import Prelude hiding (lines)
-import Line.PointLocation.Type
-import HGeometry.Map.NonEmpty.Monoidal(MonoidalNEMap, singleton)
+import HGeometry.PointLocation.Type
+import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap, singleton)
 
 --------------------------------------------------------------------------------
 

@@ -1,6 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Line.PointLocation.Type
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.PointLocation.Type
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- The data type representing a point location data structure
+--
+--------------------------------------------------------------------------------
+module HGeometry.PointLocation.Type
   ( PointLocationDS(PointLocationDS), subdivision, vrStructure, outerFaceIx
   , PointLocationDS'
   , Subdiv

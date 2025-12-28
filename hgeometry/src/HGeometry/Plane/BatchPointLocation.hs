@@ -1,4 +1,14 @@
-module Plane.BatchedPointLocation
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Plane.BatchPointLocation
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Implementation of Batched point location among a set of planes.
+--
+--------------------------------------------------------------------------------
+module HGeometry.Plane.BatchedPointLocation
   ( batchedPointLocation
   , groupQueries
   ) where
@@ -19,7 +29,7 @@ import HGeometry.Point
 import HGeometry.Ext
 import HGeometry.Foldable.Sort
 import HGeometry.Combinatorial.Util
-import Line.BatchPointLocation qualified as Line
+import HGeometry.Line.BatchPointLocation qualified as Line
 import Data.Map qualified as Map
 import Data.Map.NonEmpty qualified as NEMap
 import HGeometry.PlaneGraph.Connected
