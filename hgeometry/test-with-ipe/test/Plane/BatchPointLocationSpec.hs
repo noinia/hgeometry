@@ -70,6 +70,18 @@ spec = describe "Plane.BatchedPointlocation" $ do
                 `shouldBe`
                 naivePlanesAbove myQueryPoints myPlanes
 
+         -- prop "show /read for plane'" $
+         --   \(h :: Plane' Int)  -> (read (show h) :: Plane' Int) === h
+
+         prop "same as naive" $
+           \(Input queries planes) ->
+             let toSet = foldMap Set.singleton
+             in (toSet <$> batchedPointLocation queries planes)
+                ===
+                naivePlanesAbove queries planes
+
+debug :: Spec
+debug = describe "debug" $ do
          goldenWith [osp|data/test-with-ipe/golden/Plane/|]
            (ipeFileGolden { name      = [osp|batchpointlocate_debug|] }
            )
@@ -96,16 +108,6 @@ spec = describe "Plane.BatchedPointlocation" $ do
                  t    = uniformScaling 10
              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
            )
-
-         -- prop "show /read for plane'" $
-         --   \(h :: Plane' Int)  -> (read (show h) :: Plane' Int) === h
-
-         -- prop "same as naive" $
-         --   \(Input queries planes) ->
-         --     let toSet = foldMap Set.singleton
-         --     in (toSet <$> batchedPointLocation queries planes)
-         --        ===
-         --        naivePlanesAbove queries planes
 
 
 -- | fit to something that fits in this rectangle
