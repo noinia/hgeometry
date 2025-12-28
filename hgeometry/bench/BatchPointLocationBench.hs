@@ -1,8 +1,7 @@
-module BatchPointLocationBench( main ) where
+module Main( main ) where
 
 import Control.DeepSeq
 import Data.Word
-import HGeometry.Plane.LowerEnvelope.Connected.Randomized qualified as Randomized
 import HGeometry.Number.Real.Rational
 import HGeometry.Kernel
 import Control.Lens
@@ -12,7 +11,9 @@ import Data.List qualified as List
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Test.Tasty.Bench
-import HGeometry.Plane.BatchedPointLocation
+import HGeometry.Plane.BatchPointLocation
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Set qualified as Set
 
 --------------------------------------------------------------------------------
 
@@ -29,25 +30,28 @@ randomPoints n = NonEmpty.fromList . take n . points <$> getStdGen
   where
     points = List.unfoldr (Just . uniform)
 
--- | Helper function to generate uniformly random points at integer
--- coordinates in an [0,127]^2 grid.
-fromPoint   :: Point 2 Word8 -> Point 2 R
-fromPoint p = p&coordinates %~ fromIntegral
-
 -- | Generates random planes
-randomPlanes   :: forall r. Uniform r  => Int -> IO (NonEmpty (Plane r))
+randomPlanes   :: Int -> IO (NonEmpty (Plane R))
 randomPlanes n = NonEmpty.fromList . take n . planes <$> getStdGen
   where
     planes = List.unfoldr (Just . genPlane)
 
-    genPlane     :: RandomGen gen => gen -> (Plane r, gen)
+    genPlane     :: RandomGen gen => gen -> (Plane R, gen)
     genPlane gen = let (pts, gen') = uniform gen
-                   in case fromPoints pts of
+                   in case fromPoints (pts&mapped %~ fromPoint) of
                         Nothing -> genPlane gen'
                         Just h  -> (h,gen')
 
-fromPoints :: Vector 3 (Point 3 r) -> Maybe (Plane r)
-fromPoints = asNonVerticalHyperPlane . hyperPlaneThrough
+fromPoints :: forall r. (Ord r, Fractional r) => Vector 3 (Point 3 r) -> Maybe (Plane r)
+fromPoints = asNonVerticalHyperPlane @(HyperPlane 3 r) . hyperPlaneThrough
+
+
+--------------------------------------------------------------------------------
+
+-- | Helper function to generate uniformly random points at integer
+-- coordinates in an [0,127]^3 grid.
+fromPoint   :: Point 3 Word8 -> Point 3 R
+fromPoint p = p&coordinates %~ fromIntegral
 
 
 --------------------------------------------------------------------------------
@@ -77,15 +81,15 @@ naivePlanesAbove queries planes =
 
 main :: IO ()
 main = do
-  let r = 50
+  let r = 10
       n = 1000
-  planes  <- force . fmap fromPoint <$> randomPlanes r
-  queries <- force . fmap fromPoint <$> randomPoints n
+  planes  <- force                      <$> randomPlanes r
+  queries <- force . fmap fromPoint     <$> randomPoints n
   -- let vd = voronoiDiagram pts
   -- print vd
   defaultMain
     [ bgroup "Batched point location/computing conflict lists Benchmarks"
-        [ bench "Via Batched PointLoc" $ nf batchedPointLocation queries planes
-        , bench "Brute Force"          $ nf naivePlanesAbove queries planes
+        [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
+        , bench "Brute Force"          $ nf (uncurry naivePlanesAbove)     (queries, planes)
         ]
     ]

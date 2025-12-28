@@ -8,31 +8,24 @@
 -- Implementation of Batched point location among a set of planes.
 --
 --------------------------------------------------------------------------------
-module HGeometry.Plane.BatchedPointLocation
+module HGeometry.Plane.BatchPointLocation
   ( batchedPointLocation
   , groupQueries
   ) where
 
 import Data.Foldable1
-import Data.Foldable (toList)
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Vector qualified as Vector
 import Control.Lens
 import HGeometry.Plane
 import HGeometry.Algorithms.BinarySearch
-import HGeometry.HyperPlane.Class
-import HGeometry.Intersection
-import HGeometry.Line
-import HGeometry.Line.General
 import HGeometry.Point
 import HGeometry.Ext
 import HGeometry.Foldable.Sort
 import HGeometry.Combinatorial.Util
 import HGeometry.Line.BatchPointLocation qualified as Line
-import Data.Map qualified as Map
 import Data.Map.NonEmpty qualified as NEMap
-import HGeometry.PlaneGraph.Connected
 import Data.Ord
 import Data.Maybe
 import Prelude hiding (lines)
