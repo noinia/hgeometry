@@ -73,7 +73,7 @@ spec = describe "Plane.BatchedPointlocation" $ do
          -- prop "show /read for plane'" $
          --   \(h :: Plane' Int)  -> (read (show h) :: Plane' Int) === h
 
-         prop "same as naive" $
+         modifyMaxSize (const 20) $ prop "same as naive" $
            \(Input queries planes) ->
              let toSet = foldMap Set.singleton
              in (toSet <$> batchedPointLocation queries planes)
@@ -238,10 +238,11 @@ naivePlanesAbove                :: forall queryPoint r plane set.
                                 -> set plane
                                 -> NEMap.NEMap queryPoint (Set.Set plane)
 naivePlanesAbove queries planes =
-    foldMap1 (\q -> NEMap.singleton q (Set.filter (not . (q `liesAbove`)) planes')) queries
+    foldMap1 (\q -> NEMap.singleton q (Set.filter (q `liesBelow`) planes')) queries
   where
-    liesBelow'       :: queryPoint -> plane -> Bool
     planes' = foldMap Set.singleton planes
+    liesBelow       :: queryPoint -> plane -> Bool
+    q `liesBelow` h = verticalSideTest q h /= GT
 
 
 

@@ -36,9 +36,9 @@ fromPoint p = p&coordinates %~ fromIntegral
 
 -- | Generates random planes
 randomPlanes   :: forall r. Uniform r  => Int -> IO (NonEmpty (Plane r))
-randomPlanes n = NonEmpty.fromList . take n .
+randomPlanes n = NonEmpty.fromList . take n . planes <$> getStdGen
   where
-    points = List.unfoldr (Just . genPlane)
+    planes = List.unfoldr (Just . genPlane)
 
     genPlane     :: RandomGen gen => gen -> (Plane r, gen)
     genPlane gen = let (pts, gen') = uniform gen
@@ -65,11 +65,12 @@ naivePlanesAbove                :: forall queryPoint r plane set.
                                 -> set plane
                                 -> NEMap.NEMap queryPoint (Set.Set plane)
 naivePlanesAbove queries planes =
-    foldMap1 (\q -> NEMap.singleton q (Set.filter (not . (q `liesAbove`)) planes')) queries
+    foldMap1 (\q -> NEMap.singleton q (Set.filter (q `liesBelow`) planes')) queries
   where
-    liesBelow'       :: queryPoint -> plane -> Bool
     planes' = foldMap Set.singleton planes
 
+    liesBelow       :: queryPoint -> plane -> Bool
+    q `liesBelow` h = verticalSideTest q h /= GT
 
 --------------------------------------------------------------------------------
 
