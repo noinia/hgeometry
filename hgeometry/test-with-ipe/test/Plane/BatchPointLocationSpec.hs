@@ -233,17 +233,14 @@ naivePlanesAbove                :: forall queryPoint r plane set.
                                    , Ord r, Fractional r
                                    , Ord plane
                                    , Ord queryPoint
-
-                                   , Show queryPoint, Show r --FIXME: remove
                                    )
                                 => NonEmpty queryPoint
                                 -> set plane
                                 -> NEMap.NEMap queryPoint (Set.Set plane)
 naivePlanesAbove queries planes =
-    foldMap1 (\q -> NEMap.singleton q (Set.filter (q `liesBelow'`) planes')) queries
+    foldMap1 (\q -> NEMap.singleton q (Set.filter (not . (q `liesAbove`)) planes')) queries
   where
     liesBelow'       :: queryPoint -> plane -> Bool
-    q `liesBelow'` h = verticalSideTest q h /= GT
     planes' = foldMap Set.singleton planes
 
 
@@ -258,8 +255,8 @@ data Input = Input (NonEmpty QueryPoint)
              deriving (Show,Eq)
 
 instance Arbitrary Input where
-  arbitrary = Input <$> (NonEmpty.singleton <$> arbitrary)
-                    <*> arbitrary
+  arbitrary = Input <$> scale (*2) arbitrary
+                    <*> scale (`div` 2) arbitrary -- TODO: adjust if needed
   shrink (Input qs hs) = concat [ Input qs <$> shrink hs
                                 , [Input qs' hs | qs' <- shrink qs ]
                                 ]

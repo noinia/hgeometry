@@ -78,11 +78,10 @@ buildPointLocationStructure         :: ( IsBoxable query
                                     => query -> set line -> PointLocationDS' r line
 buildPointLocationStructure queries = pointLocationStructureIn (grow 1 $ boundingBox queries)
   where
-    grow _ _  = Box (Point2 (-1) (-1))
-                    (Point2 101 101)
-    -- grow d (Box p q) = Box (p&coordinates %~ subtract d)
-    --                        (q&coordinates %~ (+d))
-  -- FIXME!!
+    -- grow _ _  = Box (Point2 (-1) (-1))
+    --                 (Point2 101 101)
+    grow d (Box p q) = Box (p&coordinates %~ subtract d)
+                           (q&coordinates %~ (+d))
 
 --------------------------------------------------------------------------------
 
@@ -169,6 +168,9 @@ pointLocationStructure lines = undefined -- pointLocationStructureFrom inters li
 -- | Construct a point location data structure on the given set of n
 -- lines in a given bounding rectangle.
 --
+-- Note that we can answer point location queries for points only
+-- within the given bounding rectangle.
+--
 -- O(n^2 \log n)
 pointLocationStructureIn            :: forall set line r.
                                        (Foldable set , Line_ line 2 r, Fractional r, Ord r
@@ -201,9 +203,10 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
     segs = (toNonEmpty $ (:+ Nothing) <$> sides rect)
          <<> mapMaybe clip (toList lines)
 
-    clip l = l `intersect` rect <&> \case
-      Line_x_Box_LineSegment seg -> seg :+ Just l
-      Line_x_Box_Point _         -> error "pointLocationStructureIn: unhandled"
+    clip l = l `intersect` rect >>= \case
+      Line_x_Box_LineSegment seg -> Just $ seg :+ Just l
+      Line_x_Box_Point _         -> Nothing
+    -- if the line intersects the box in a point; we just ignore the line
 
 
 -- | Builds the point location data structure (by building a structure
@@ -248,6 +251,8 @@ pointLocationStructureFrom gr = PointLocationDS gr vrDS (gr^.outerFace.asIndex)
 --
 -- reports the interval/slab containing the query point, and the line
 -- directly above the query point (if such a line exists).
+--
+-- pre: the query point lies inside the rectangle on which the data structure was constructed.
 --
 -- \(O(\log n)\)
 pointLocate      :: ( Point_ queryPoint 2 r, Num r, Ord r

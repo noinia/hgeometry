@@ -10,6 +10,7 @@ import Data.List.NonEmpty qualified as NonEmpty
 import Data.Vector qualified as Vector
 import Control.Lens
 import HGeometry.Plane
+import HGeometry.Algorithms.BinarySearch
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Line
@@ -41,7 +42,7 @@ batchedPointLocation                :: ( Point_ queryPoint 3 r
                                        , Show queryPoint, Show r --FIXME: remove
                                        )
                                     => set' queryPoint -> set plane
-                                    -> NEMap.NEMap queryPoint [plane]
+                                    -> NEMap.NEMap queryPoint (Vector.Vector plane)
 batchedPointLocation queries planes = foldMap1 (answerBatch planes)
                                     $ groupQueries queries planes
 
@@ -63,31 +64,22 @@ answerBatch                :: forall set set' plane queryPoint r.
                               , Show queryPoint, Show r --FIXME: remove
                               )
                            => set plane -> set' queryPoint
-                           -> NEMap.NEMap queryPoint [plane]
-answerBatch planes queries = NEMap.unsafeFromMap $ scan (Vector.toList planes') queries'
-                             -- note: this is safe, since the input set is nonEmpty
+                           -> NEMap.NEMap queryPoint (Vector.Vector plane)
+answerBatch planes queries = foldMap1 query queries
   where
+    query q = NEMap.singleton q $ case binarySearchFirstIdxIn (q `liesBelow'`) sortedPlanes of
+                                    Nothing -> Vector.empty
+                                    Just i  -> Vector.drop i sortedPlanes
+
     q0 :: Point 2 r
     q0 = projectPoint $ (NonEmpty.head $ toNonEmpty queries)^.asPoint
 
     -- the planes, sorted from bottom to top
-    planes'  :: Vector.Vector plane
-    planes'  = sortOn (evalAt q0 :: plane -> r) planes
-    -- the queries, sorted from bottom to top
-    queries' = Vector.toList . sortOnCheap (^.zCoord) $ queries
-
-    -- essentially merge and output the lists. for eqch query we output the remaining list.
-    scan    :: [plane] -> [queryPoint] -> Map.Map queryPoint [plane]
-    scan hs = \case
-      []         -> mempty
-      qs@(q:qs') -> case hs of
-        [] -> foldMap (flip Map.singleton []) qs
-        (h:hs') | q `liesBelow'` h -> Map.insert q hs $ scan hs qs'
-                | otherwise        -> scan hs' qs
+    sortedPlanes  :: Vector.Vector plane
+    sortedPlanes  = sortOn (evalAt q0 :: plane -> r) planes
 
     liesBelow'       :: queryPoint -> plane -> Bool
     q `liesBelow'` h = verticalSideTest q h /= GT
-
 
 --------------------------------------------------------------------------------
 
