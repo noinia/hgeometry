@@ -1016,6 +1016,13 @@ benchmark lowerEnv
   --   -rtsopts "-with-rtsopts=-p"
   other-modules:
 
+benchmark batchedPointLocation
+  import: all-setup, hgeometry-setup, bench-setup
+  hs-source-dirs: bench
+  main-is:
+    BatchPointLocationBench.hs
+  type: exitcode-stdio-1.0
+
 benchmark vector-bench
     import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
     hs-source-dirs: vector/bench
