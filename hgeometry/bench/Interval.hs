@@ -1,11 +1,14 @@
-module HGeometry.Number.Real.Interval
+module Interval
   ( IntervalReal
   ) where
 
 -- import Numeric.Rounded.Hardware
+import Numeric.Rounded.Hardware
+import Numeric.Rounded.Hardware.Interval.Class
 import Numeric.Rounded.Hardware.Interval.NonEmpty
 import GHC.Generics(Generic)
 import Control.DeepSeq
+
 --------------------------------------------------------------------------------
 
 
@@ -31,18 +34,24 @@ instance Ord r => Ord (IntervalReal r)  where
     | otherwise              = x `compare` y
     -- we could maybe do something more interesting here
 
-instance Num r => Num (IntervalReal r) where
+instance (Num r, Ord r) => Num (IntervalReal r) where
   (IR ix x) + (IR iy y) = IR (ix + iy) (x + y)
   (IR ix x) - (IR iy y) = IR (ix - iy) (x - y)
   (IR ix x) * (IR iy y) = IR (ix * iy) (x * y)
   abs (IR ix x)    = IR (abs ix) (abs x)
-  signum (IR (Interval l u) x)
+  signum (IR (I l u) x)
     | 0 < getRounded l = 1
     | 0 > getRounded u = -1
-    | otherwise        = signum x
+    | otherwise        = case 0 `compare` x of
+                           LT -> 1
+                           EQ -> 0
+                           GT -> (-1)
   fromInteger i    = IR (fromInteger i) (fromInteger i)
   negate (IR ix x) = IR (negate ix) (negate x)
 
-instance Fractional r => Fractional (IntervalReal r) where
+instance (Fractional r, Ord r) => Fractional (IntervalReal r) where
   fromRational x = IR (fromRational x) (fromRational x)
   (IR ix x) / (IR iy y) = IR (ix / iy) (x / y)
+
+
+-- instance Uniform r => Uniform (IntervalReal r) where

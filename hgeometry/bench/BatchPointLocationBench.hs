@@ -20,6 +20,9 @@ import Data.Set qualified as Set
 import HGeometry.Line.BatchPointLocation qualified as Line
 import Data.Time
 
+-- import Data.Fixed
+
+import Interval
 import HGeometry.Plane
 import HGeometry.Combinatorial.Util
 import Ipe
@@ -27,7 +30,8 @@ import System.OsPath
 
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
+type R = IntervalReal (RealNumber 5)
+-- type R = Pico
 
 --------------------------------------------------------------------------------
 
@@ -118,7 +122,7 @@ timed x = do
     pure $ diffUTCTime after before
 
 main :: IO ()
-main = traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
+main = traverse_ (\r -> runExperiment r (r^5)) [20] -- [10, 15, 20]
   -- defaultMain
   --   [ bgroup "Batched point location/computing conflict lists Benchmarks"
   --       [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
