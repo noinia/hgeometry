@@ -334,6 +334,8 @@ library kernel
 
         HGeometry.Intersection
 
+        HGeometry.Plane
+
         HGeometry.Triangle
         HGeometry.Triangle.Class
 
@@ -521,6 +523,9 @@ library
         HGeometry.Polygon.Triangulation.MakeMonotone
 
         HGeometry.Line.LowerEnvelope
+        HGeometry.Line.BatchPointLocation
+
+        HGeometry.Plane.BatchPointLocation
 
 
         HGeometry.Plane.LowerEnvelope
@@ -567,6 +572,7 @@ library
         HGeometry.PlaneGraph.Connected.FromIntersectingSegments
         HGeometry.PlaneGraph.Connected.PolygonOverlay.Types
 
+        HGeometry.PointLocation.Type
 
         HGeometry.Plane.LowerEnvelope.Type
         -- HGeometry.Plane.LowerEnvelope.Sample
@@ -893,6 +899,8 @@ test-suite with-ipe-hspec
       Plane.RenderProps
           -- TODO: move these ones
 
+      Plane.BatchPointLocationSpec
+
       LineSegmentSpec
       LineSegment.Intersection.WithHalfSpaceSpec
       LPTypeSpec
@@ -907,6 +915,8 @@ test-suite with-ipe-hspec
       PlaneGraph.FromPolygonsSpec
       PlaneGraph.RenderOverlaySpec
       PlaneGraph.PolygonOverlaySpec
+
+
 
       HalfPlane.CommonIntersectionSpec
       Line.LowerEnvelopeSpec
@@ -1005,6 +1015,16 @@ benchmark lowerEnv
   --   -fprof-auto
   --   -rtsopts "-with-rtsopts=-p"
   other-modules:
+
+benchmark batchPointLocation
+  import: all-setup, hgeometry-setup, bench-setup
+  hs-source-dirs: bench
+  main-is:
+    BatchPointLocationBench.hs
+  type: exitcode-stdio-1.0
+  build-depends:
+         hgeometry:ipe
+       , time                    >= 1.14 && < 1.16
 
 benchmark vector-bench
     import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup

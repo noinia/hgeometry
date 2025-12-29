@@ -18,14 +18,20 @@ module HGeometry.Kernel
   , module HGeometry.Box
   , module HGeometry.Ball
   , module HGeometry.Triangle
+  , module HGeometry.Transformation
+  , module HGeometry.Intersection
+  , module HGeometry.Properties
   ) where
 
 import HGeometry.Point
 import HGeometry.Vector
 import HGeometry.Line
 import HGeometry.LineSegment
-import HGeometry.Box(Box(..), Box_(..), IsBoxable(..))
+import HGeometry.Box(Box(..), type Rectangle, Box_(..), IsBoxable(..))
 import HGeometry.Ball
 import HGeometry.HyperPlane
 import HGeometry.HalfSpace
+import HGeometry.Transformation
+import HGeometry.Intersection
 import HGeometry.Triangle (Triangle(..))
+import HGeometry.Properties

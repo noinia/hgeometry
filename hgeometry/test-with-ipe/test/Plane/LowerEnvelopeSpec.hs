@@ -26,14 +26,12 @@ import           Golden
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Ext
-import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
 import           HGeometry.Polygon.Convex.Instances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
-import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Plane.LowerEnvelope.Clipped (foldMapVertices, ClippedMDCell, ClippedMDCell''(..))
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
@@ -48,7 +46,7 @@ import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
-import           Hiraffe.Graph.Class
+-- import           Hiraffe.Graph.Class
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
@@ -689,35 +687,34 @@ verifyStartWithUp env =  let startWithUp        :: Point 3 R -> Definers MyPlane
 
 renderToIpe             :: (Plane_ plane R, Ord plane, Show plane
                            ) => OsPath -> _ -> NonEmpty plane -> IO _
-renderToIpe fp mkEnv hs =
-   do writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
-      pure env
-  where
-    Just env = connectedLowerEnvelopeWith mkEnv hs
+renderToIpe fp mkEnv hs = case connectedLowerEnvelopeWith mkEnv hs of
+  Nothing  -> error "renderToIpe: absurd"
+  Just env -> do writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
+                 pure env
+    where
+      out :: [IpeObject R]
+      out = zipWith render (cycle $ drop 3 basicNamedColors)
+          . toList . NEMap.assocs . HGeometry.Plane.LowerEnvelope.asMap $ env
 
-    out :: [IpeObject R]
-    out = zipWith render (cycle $ drop 3 basicNamedColors)
-        . toList . NEMap.assocs . HGeometry.Plane.LowerEnvelope.asMap $ env
+      -- render :: IpeColor R -> (Point 3 R, Definers plane) -> IpeObject R
+      -- render color (p, _defs) = iO $ defIO (projectPoint @2 p) ! attr SStroke color
 
-    -- render :: IpeColor R -> (Point 3 R, Definers plane) -> IpeObject R
-    -- render color (p, _defs) = iO $ defIO (projectPoint @2 p) ! attr SStroke color
+      render color (h, region) = iO' $ ipeGroup
+                                 [ iO $ labelled centroid' defIO' (region :+ h)
+                                 -- , iO $ ipeLabel (c :+ h)
+                                 -- , iO $ defIO (site^.asPoint) ! attr SStroke  color
+                                 -- ,
+                                 ]
+        where
+          defIO' reg = defIO reg ! attr SFill    color
+                                 ! attr SOpacity (Text.pack "10%")
+          centroid' reg = centerPoint (boundingBox $ toPoly reg)
+          toPoly reg = case toConvexPolygonIn rect' reg of
+              Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))
+              Right pg -> pg&vertices %~ view asPoint
 
-    render color (h, region) = iO' $ ipeGroup
-                               [ iO $ labelled centroid' defIO' (region :+ h)
-                               -- , iO $ ipeLabel (c :+ h)
-                               -- , iO $ defIO (site^.asPoint) ! attr SStroke  color
-                               -- ,
-                               ]
-      where
-        defIO' reg = defIO reg ! attr SFill    color
-                               ! attr SOpacity (Text.pack "10%")
-        centroid' reg = centerPoint (boundingBox $ toPoly reg)
-        toPoly reg = case toConvexPolygonIn rect' region of
-            Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))
-            Right pg -> pg&vertices %~ view asPoint
-
-          where
-            rect' = grow 1000 $ boundingBox region
+            where
+              rect' = grow 1000 $ boundingBox region
 
 
 

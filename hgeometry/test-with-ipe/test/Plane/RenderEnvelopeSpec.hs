@@ -260,9 +260,9 @@ testRenderObj objDir objFile = do
         )
 
   where
-    renderPage triangles camera = fromContent content'
+    renderPage triangles' camera = fromContent content'
       where
-        content'  = let tris = renderToIpe camera triangles
+        content'  = let tris = renderToIpe camera triangles'
                         t    = uniformScaling 1000
                                --- fitToBoxTransform screenBox  tris -- TODO
                     in transformBy t tris
@@ -466,6 +466,7 @@ fromMaterial mm = case mRefl of
     Just refl -> case refl of
       Material.ReflexicityRGB rgb -> let c = IpeColor (Valued $ convert rgb)
                                      in RenderProps def (Just $ attr SFill c)
+      _                           -> error "fromMaterial: not matched"
   where
     mRefl = do m <- mm
                -- guard (traceShowId (Material.materialName m) `elem` [ "leftWall"
@@ -506,8 +507,8 @@ renderToIpe camera scene =
     ]
     -- drawGraphWithDarts subdiv
   where
-    triangles = render camera scene
-    subdiv    = polygonOverlay $ triangles&mapped %~ \(pt :+ orig) ->
+    triangles' = render camera scene
+    subdiv    = polygonOverlay $ triangles'&mapped %~ \(pt :+ orig) ->
                                    let poly = fromTriangle $ toTriangle2 pt
                                    in poly :+ (pt, orig)
 

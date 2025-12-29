@@ -54,7 +54,7 @@ instance (Arbitrary a, Num a, Eq a) => Arbitrary (GRatio a) where
 
 instance KnownNat p => Arbitrary (RealNumber p) where
   arbitrary = fromFixed <$> arbitrary
-  shrink = genericShrink
+  shrink (RealNumber r) = RealNumber <$> shrink r
 
 instance Arbitrary Sign.Sign where
   arbitrary = (\b -> if b then Sign.Positive else Sign.Negative) <$> arbitrary

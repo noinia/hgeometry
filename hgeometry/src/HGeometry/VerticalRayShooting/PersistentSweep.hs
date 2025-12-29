@@ -12,12 +12,15 @@ module HGeometry.VerticalRayShooting.PersistentSweep
 
   -- * Building the Data Structure
   , verticalRayShootingStructure
+  , verticalRayShootingStructure'
   -- * Querying the Data Structure
   , segmentAbove, segmentAboveOrOn
   , findSlab
   , lookupAbove, lookupAboveOrOn, searchInSlab
   ) where
 
+import           Control.DeepSeq
+import           GHC.Generics (Generic)
 import           Control.Lens hiding (contains, below)
 import           Data.Foldable (toList)
 import           Data.Functor.Contravariant (phantom)
@@ -48,10 +51,11 @@ data VerticalRayShootingStructure' r lineSegment =
                                  , _sweepStruct :: V.Vector (r :+ StatusStructure lineSegment)
                                    -- ^ entry (r :+ s) means that "just" left of "r" the
                                    -- status structure is 's', i.e up to 'r'
-                                 } deriving (Show,Eq)
+                                 } deriving (Show,Eq,Generic)
 
 -- TODO this is very similar to the 'Alternating' sequence structure; so see if we can reuse code
 
+instance (NFData r, NFData lineSegment) => NFData (VerticalRayShootingStructure' r lineSegment)
 
 -- | The status structure
 type StatusStructure lineSegment = SS.Set lineSegment
@@ -80,12 +84,13 @@ sweepStruct f (VerticalRayShootingStructure _ ss) = phantom (f ss)
 --
 -- running time: \(O(n\log n)\).
 -- space: \(O(n\log n)\).
-verticalRayShootingStructure   :: ( LineSegment_ lineSegment point
-                                  , Point_ point 2 r
-                                  , Ord r, Fractional r, Foldable1 f)
-                               => f lineSegment
-                               -> VerticalRayShootingStructure lineSegment
-verticalRayShootingStructure ss = VerticalRayShootingStructure (eventX e) (sweep' events)
+verticalRayShootingStructure    :: ( LineSegment_ lineSegment point
+                                   , Point_ point 2 r
+                                   , Ord r, Fractional r, Foldable1 nonEmpty)
+                                => nonEmpty lineSegment
+                                -> VerticalRayShootingStructure lineSegment
+verticalRayShootingStructure ss =
+    VerticalRayShootingStructure (eventX e) (sweep' events)
   where
     events@(e :| _) = fmap combine
                     . NonEmpty.groupAllWith1 eventX
@@ -96,6 +101,27 @@ verticalRayShootingStructure ss = VerticalRayShootingStructure (eventX e) (sweep
     toEvents seg = NonEmpty.fromList [ (seg^.start.xCoord) :+ Insert seg :| []
                                      , (seg^.end.xCoord)   :+ Delete seg :| []
                                      ]
+
+
+-- | Given a set of \(n\) interiorly pairwise disjoint *closed*
+-- segments, try to construct a vertical ray shooting data
+-- structure. This function will remove all vertical line segments. If
+-- there are no non-vertical segments, we return a Nothing.
+--
+-- The endpoints of the segments are allowed to coincide.
+--
+-- running time: \(O(n\log n)\).
+-- space: \(O(n\log n)\).
+verticalRayShootingStructure' :: ( LineSegment_ lineSegment point
+                                , Point_ point 2 r
+                                , Ord r, Fractional r, Foldable1 nonEmpty)
+                              => nonEmpty lineSegment
+                              -> Maybe (VerticalRayShootingStructure lineSegment)
+verticalRayShootingStructure' =
+    fmap verticalRayShootingStructure . witherNE isNonVertical . toNonEmpty
+  where
+    witherNE p = NonEmpty.nonEmpty . NonEmpty.filter p
+    isNonVertical seg = seg^.start.xCoord /= seg^.end.xCoord
 
 
 -- | Given a bunch of events happening at the same time, merge them into a single event

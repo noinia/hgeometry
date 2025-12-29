@@ -15,7 +15,6 @@ import           Data.Maybe
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Line
-import           HGeometry.Line.General
 import qualified HGeometry.Line.LowerEnvelope as Line
 import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Plane.LowerEnvelope.Type
