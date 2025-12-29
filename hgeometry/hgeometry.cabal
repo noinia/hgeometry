@@ -1022,6 +1022,9 @@ benchmark batchPointLocation
   main-is:
     BatchPointLocationBench.hs
   type: exitcode-stdio-1.0
+  build-depends:
+         hgeometry:ipe
+       , time                    >= 1.14 && < 1.16
 
 benchmark vector-bench
     import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup

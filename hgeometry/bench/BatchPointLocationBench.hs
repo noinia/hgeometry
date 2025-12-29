@@ -1,5 +1,8 @@
+{-# LANGUAGE QuasiQuotes #-}
 module Main( main ) where
 
+import Data.Maybe
+import Data.Foldable
 import Control.DeepSeq
 import Data.Word
 import HGeometry.Number.Real.Rational
@@ -14,6 +17,13 @@ import Test.Tasty.Bench
 import HGeometry.Plane.BatchPointLocation
 import Data.Map.NonEmpty qualified as NEMap
 import Data.Set qualified as Set
+import HGeometry.Line.BatchPointLocation qualified as Line
+import Data.Time
+
+import HGeometry.Plane
+import HGeometry.Combinatorial.Util
+import Ipe
+import System.OsPath
 
 --------------------------------------------------------------------------------
 
@@ -78,13 +88,49 @@ naivePlanesAbove queries planes =
 
 --------------------------------------------------------------------------------
 
+runExperiment r n = do
+    putStrLn $ "r = " <> show r <> ", n = " <> show n
+    planes  <- force                      <$> randomPlanes r
+    queries <- force . fmap fromPoint     <$> randomPoints n
+
+    let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
+        ds    = Line.pointLocationStructureIn (Rect (-1) (-1) 128 128) lines
+        -- res = Line.groupQueries (projectPoint @2 <$> queries) lines
+    ds `seq` (pure ())
+    -- print ds
+    -- print res
+    -- print "========="
+    -- let grs = groupQueries queries planes
+    -- print grs
+    -- print "==== results ======"
+    -- traverse_ (print . answerBatch planes) grs
+    before <- getCurrentTime
+    batchedPointLocation queries planes `deepseq` (pure ())
+    after <- getCurrentTime
+    putStrLn $ "running time: " <> show (diffUTCTime after before)
+    putStrLn "========="
 
 main :: IO ()
-main = do
-  let r = 10
-      n = 1000
-  planes  <- force                      <$> randomPlanes r
-  queries <- force . fmap fromPoint     <$> randomPoints n
+main = traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
+  -- defaultMain
+  --   [ bgroup "Batched point location/computing conflict lists Benchmarks"
+  --       [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
+  --       , bench "Brute Force"          $ nf (uncurry naivePlanesAbove)     (queries, planes)
+  --       ]
+  --   ]
+
+
+{-
+  let content = concat [ (iO . defIO . projectPoint @2) <$> toList queries
+                       , (iO . defIO)                   <$> toList lines
+                       ]
+  writeIpeFile [osp|bench_points.ipe|] $ singlePageFromContent content
+-}
+-- -}
+--   print $ batchedPointLocation queries planes
+
+
+{-
   -- let vd = voronoiDiagram pts
   -- print vd
   defaultMain
@@ -93,3 +139,5 @@ main = do
         , bench "Brute Force"          $ nf (uncurry naivePlanesAbove)     (queries, planes)
         ]
     ]
+
+-}
