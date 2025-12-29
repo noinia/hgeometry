@@ -20,8 +20,8 @@
 </span><span id="line-20"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span class="annot"><span class="hs-comment">-- | At most two elements</span></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">data</span><span> </span><span id="OneOrTwo"><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-var">OneOrTwo</span></a></span></span><span> </span><span id="local-6989586621679242759"><span class="annot"><a href="#local-6989586621679242759"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="One"><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-var">One</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679242759"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Two"><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-var">Two</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679242759"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679242759"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-24"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679242771"><span id="local-6989586621679242779"><span id="local-6989586621679242783"><span class="annot"><span class="annottext">Int -&gt; OneOrTwo a -&gt; ShowS
+</span><span id="line-23"></span><span class="hs-keyword">data</span><span> </span><span id="OneOrTwo"><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-var">OneOrTwo</span></a></span></span><span> </span><span id="local-6989586621679242963"><span class="annot"><a href="#local-6989586621679242963"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="One"><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-var">One</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679242963"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Two"><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-var">Two</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679242963"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679242963"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679242975"><span id="local-6989586621679242983"><span id="local-6989586621679242987"><span class="annot"><span class="annottext">Int -&gt; OneOrTwo a -&gt; ShowS
 [OneOrTwo a] -&gt; ShowS
 OneOrTwo a -&gt; String
 (Int -&gt; OneOrTwo a -&gt; ShowS)
@@ -39,7 +39,7 @@ $cshow :: forall a. Show a =&gt; OneOrTwo a -&gt; String
 show :: OneOrTwo a -&gt; String
 $cshowList :: forall a. Show a =&gt; [OneOrTwo a] -&gt; ShowS
 showList :: [OneOrTwo a] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679242789"><span id="local-6989586621679242793"><span id="local-6989586621679242796"><span id="local-6989586621679242809"><span class="annot"><span class="annottext">ReadPrec [OneOrTwo a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679242993"><span id="local-6989586621679242997"><span id="local-6989586621679243000"><span id="local-6989586621679243013"><span class="annot"><span class="annottext">ReadPrec [OneOrTwo a]
 ReadPrec (OneOrTwo a)
 Int -&gt; ReadS (OneOrTwo a)
 ReadS [OneOrTwo a]
@@ -63,7 +63,7 @@ $creadPrec :: forall a. Read a =&gt; ReadPrec (OneOrTwo a)
 readPrec :: ReadPrec (OneOrTwo a)
 $creadListPrec :: forall a. Read a =&gt; ReadPrec [OneOrTwo a]
 readListPrec :: ReadPrec [OneOrTwo a]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679242817"><span id="local-6989586621679242825"><span class="annot"><span class="annottext">OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679243021"><span id="local-6989586621679243029"><span class="annot"><span class="annottext">OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
 (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool)
 -&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool) -&gt; Eq (OneOrTwo a)
 forall a. Eq a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
@@ -72,7 +72,7 @@ $c== :: forall a. Eq a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
 == :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
 $c/= :: forall a. Eq a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
 /= :: OneOrTwo a -&gt; OneOrTwo a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679242834"><span id="local-6989586621679242839"><span id="local-6989586621679242844"><span id="local-6989586621679242848"><span id="local-6989586621679242851"><span id="local-6989586621679242854"><span id="local-6989586621679242857"><span class="annot"><span class="annottext">Eq (OneOrTwo a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679243038"><span id="local-6989586621679243043"><span id="local-6989586621679243048"><span id="local-6989586621679243052"><span id="local-6989586621679243055"><span id="local-6989586621679243058"><span id="local-6989586621679243061"><span class="annot"><span class="annottext">Eq (OneOrTwo a)
 Eq (OneOrTwo a) =&gt;
 (OneOrTwo a -&gt; OneOrTwo a -&gt; Ordering)
 -&gt; (OneOrTwo a -&gt; OneOrTwo a -&gt; Bool)
@@ -113,7 +113,7 @@ $cmax :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
 max :: OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
 $cmin :: forall a. Ord a =&gt; OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
 min :: OneOrTwo a -&gt; OneOrTwo a -&gt; OneOrTwo a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679242866"><span id="local-6989586621679242868"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679243070"><span id="local-6989586621679243072"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b)
 -&gt; (forall a b. a -&gt; OneOrTwo b -&gt; OneOrTwo a) -&gt; Functor OneOrTwo
 forall a b. a -&gt; OneOrTwo b -&gt; OneOrTwo a
 forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b
@@ -124,7 +124,7 @@ $cfmap :: forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b
 fmap :: forall a b. (a -&gt; b) -&gt; OneOrTwo a -&gt; OneOrTwo b
 $c&lt;$ :: forall a b. a -&gt; OneOrTwo b -&gt; OneOrTwo a
 &lt;$ :: forall a b. a -&gt; OneOrTwo b -&gt; OneOrTwo a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679242873"><span id="local-6989586621679242879"><span id="local-6989586621679242883"><span id="local-6989586621679242888"><span id="local-6989586621679242890"><span id="local-6989586621679242893"><span id="local-6989586621679242896"><span id="local-6989586621679242899"><span id="local-6989586621679242902"><span id="local-6989586621679242905"><span id="local-6989586621679242908"><span id="local-6989586621679242910"><span id="local-6989586621679242913"><span id="local-6989586621679242918"><span id="local-6989586621679242923"><span id="local-6989586621679242928"><span id="local-6989586621679242933"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; OneOrTwo m -&gt; m)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679243077"><span id="local-6989586621679243083"><span id="local-6989586621679243087"><span id="local-6989586621679243092"><span id="local-6989586621679243094"><span id="local-6989586621679243097"><span id="local-6989586621679243100"><span id="local-6989586621679243103"><span id="local-6989586621679243106"><span id="local-6989586621679243109"><span id="local-6989586621679243112"><span id="local-6989586621679243114"><span id="local-6989586621679243117"><span id="local-6989586621679243122"><span id="local-6989586621679243127"><span id="local-6989586621679243132"><span id="local-6989586621679243137"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; OneOrTwo m -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m)
 -&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; OneOrTwo a -&gt; b)
@@ -206,7 +206,7 @@ $csum :: forall a. Num a =&gt; OneOrTwo a -&gt; a
 sum :: forall a. Num a =&gt; OneOrTwo a -&gt; a
 $cproduct :: forall a. Num a =&gt; OneOrTwo a -&gt; a
 product :: forall a. Num a =&gt; OneOrTwo a -&gt; a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679242946"><span id="local-6989586621679242952"><span id="local-6989586621679242958"><span id="local-6989586621679242963"><span class="annot"><span class="annottext">Functor OneOrTwo
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679243150"><span id="local-6989586621679243156"><span id="local-6989586621679243162"><span id="local-6989586621679243167"><span class="annot"><span class="annottext">Functor OneOrTwo
 Foldable OneOrTwo
 (Functor OneOrTwo, Foldable OneOrTwo) =&gt;
 (forall (f :: * -&gt; *) a b.
@@ -265,60 +265,60 @@ $csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; OneOrTwo (m a) -&gt; m (O
 sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; OneOrTwo (m a) -&gt; m (OneOrTwo a)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-25"></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679242974"><span class="annot"><span class="hs-identifier hs-type">Show1</span></span><span> </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-27"></span><span>  </span><span id="local-6989586621679242978"><span class="annot"><span class="annottext">liftShowsPrec :: forall a.
+</span><span id="line-26"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679243178"><span class="annot"><span class="hs-identifier hs-type">Show1</span></span><span> </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>  </span><span id="local-6989586621679243182"><span class="annot"><span class="annottext">liftShowsPrec :: forall a.
 (Int -&gt; a -&gt; ShowS) -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; OneOrTwo a -&gt; ShowS
-</span><a href="#local-6989586621679242978"><span class="hs-identifier hs-var hs-var hs-var">liftShowsPrec</span></a></span></span><span> </span><span id="local-6989586621679242980"><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679242980"><span class="hs-identifier hs-var">sp</span></a></span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ShowS
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679242981"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679242981"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-28"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679242982"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242982"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679243182"><span class="hs-identifier hs-var hs-var hs-var">liftShowsPrec</span></a></span></span><span> </span><span id="local-6989586621679243184"><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
+</span><a href="#local-6989586621679243184"><span class="hs-identifier hs-var">sp</span></a></span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ShowS
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679243185"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679243185"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-28"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243186"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243186"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-29"></span><span>      </span><span class="annot"><span class="annottext">(Int -&gt; a -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; ShowS
 forall a. (Int -&gt; a -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsUnaryWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679242980"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679243184"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;One&quot;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679242981"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242982"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-30"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679242984"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242984"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679242985"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242985"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679243185"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243186"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-30"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243188"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243188"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243189"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243189"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-31"></span><span>      </span><span class="annot"><span class="annottext">(Int -&gt; a -&gt; ShowS)
 -&gt; (Int -&gt; a -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; a -&gt; ShowS
 forall a b.
 (Int -&gt; a -&gt; ShowS)
 -&gt; (Int -&gt; b -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; b -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsBinaryWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679242980"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679242980"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679243184"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
+</span><a href="#local-6989586621679243184"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Two&quot;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679242981"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242984"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242985"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621679243185"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243188"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243189"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-32"></span><span>
 </span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq1</span></span><span>   </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-34"></span><span>  </span><span id="local-6989586621679242992"><span class="annot"><span class="annottext">liftEq :: forall a b. (a -&gt; b -&gt; Bool) -&gt; OneOrTwo a -&gt; OneOrTwo b -&gt; Bool
-</span><a href="#local-6989586621679242992"><span class="hs-identifier hs-var hs-var hs-var">liftEq</span></a></span></span><span> </span><span id="local-6989586621679242994"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679242994"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679242995"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242995"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679242996"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679242996"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679242994"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242995"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679242996"><span class="hs-identifier hs-var">x'</span></a></span><span>
-</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span id="local-6989586621679242997"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679242997"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679242998"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242998"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679242999"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242999"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243000"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243000"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679243001"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243001"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679242997"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242998"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243000"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621679243196"><span class="annot"><span class="annottext">liftEq :: forall a b. (a -&gt; b -&gt; Bool) -&gt; OneOrTwo a -&gt; OneOrTwo b -&gt; Bool
+</span><a href="#local-6989586621679243196"><span class="hs-identifier hs-var hs-var hs-var">liftEq</span></a></span></span><span> </span><span id="local-6989586621679243198"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679243198"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243199"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243199"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243200"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243200"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679243198"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243199"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243200"><span class="hs-identifier hs-var">x'</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span id="local-6989586621679243201"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679243201"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243202"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243202"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243203"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243203"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243204"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243204"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679243205"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243205"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679243201"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243202"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243204"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679242997"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679242999"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243001"><span class="hs-identifier hs-var">y'</span></a></span><span>
+</span><a href="#local-6989586621679243201"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243203"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243205"><span class="hs-identifier hs-var">y'</span></a></span><span>
 </span><span id="line-36"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">OneOrTwo a
 </span><span class="hs-identifier">_</span></span><span>         </span><span class="annot"><span class="annottext">OneOrTwo b
@@ -326,15 +326,15 @@ forall a b.
 </span><span class="hs-identifier hs-var">False</span></span><span>
 </span><span id="line-37"></span><span>
 </span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord1</span></span><span>  </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-39"></span><span>  </span><span id="local-6989586621679243012"><span class="annot"><span class="annottext">liftCompare :: forall a b.
+</span><span id="line-39"></span><span>  </span><span id="local-6989586621679243216"><span class="annot"><span class="annottext">liftCompare :: forall a b.
 (a -&gt; b -&gt; Ordering) -&gt; OneOrTwo a -&gt; OneOrTwo b -&gt; Ordering
-</span><a href="#local-6989586621679243012"><span class="hs-identifier hs-var hs-var hs-var">liftCompare</span></a></span></span><span> </span><span id="local-6989586621679243014"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679243014"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243015"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243015"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243016"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243016"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679243014"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243015"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243016"><span class="hs-identifier hs-var">x'</span></a></span><span>
+</span><a href="#local-6989586621679243216"><span class="hs-identifier hs-var hs-var hs-var">liftCompare</span></a></span></span><span> </span><span id="local-6989586621679243218"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679243218"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243219"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243219"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243220"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243220"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679243218"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243219"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243220"><span class="hs-identifier hs-var">x'</span></a></span><span>
 </span><span id="line-40"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span class="annot"><span class="annottext">b
@@ -342,61 +342,61 @@ forall a b.
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">LT</span></span><span>
 </span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span id="local-6989586621679243017"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679243017"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243018"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243018"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243019"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243019"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243020"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243020"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679243021"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243021"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679243017"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243018"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243020"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
+</span><span id="line-42"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span id="local-6989586621679243221"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679243221"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243222"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243222"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243223"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243223"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243224"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243224"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679243225"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243225"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679243221"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243222"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243224"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679243017"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243019"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679243021"><span class="hs-identifier hs-var">y'</span></a></span><span>
+</span><a href="#local-6989586621679243221"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243223"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679243225"><span class="hs-identifier hs-var">y'</span></a></span><span>
 </span><span id="line-43"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">OneOrTwo a
 </span><span class="hs-identifier">_</span></span><span>         </span><span class="annot"><span class="annottext">OneOrTwo b
 </span><span class="hs-identifier">_</span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">GT</span></span><span>
 </span><span id="line-44"></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679243025"><span id="local-6989586621679243032"><span id="local-6989586621679243037"><span id="local-6989586621679243040"><span id="local-6989586621679243045"><span id="local-6989586621679243050"><span id="local-6989586621679243053"><span id="local-6989586621679243056"><span id="local-6989586621679243059"><span id="local-6989586621679243062"><span id="local-6989586621679243065"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-46"></span><span>  </span><span id="local-6989586621679243070"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m
-</span><a href="#local-6989586621679243070"><span class="hs-identifier hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679243072"><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679243072"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-47"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243073"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243073"><span class="hs-identifier hs-var">x</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679243072"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243073"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-48"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243074"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243074"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243075"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243075"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679243072"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243074"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+</span><span id="line-45"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679243229"><span id="local-6989586621679243236"><span id="local-6989586621679243241"><span id="local-6989586621679243244"><span id="local-6989586621679243249"><span id="local-6989586621679243254"><span id="local-6989586621679243257"><span id="local-6989586621679243260"><span id="local-6989586621679243263"><span id="local-6989586621679243266"><span id="local-6989586621679243269"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679243274"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; OneOrTwo a -&gt; m
+</span><a href="#local-6989586621679243274"><span class="hs-identifier hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679243276"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679243276"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-47"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243277"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243277"><span class="hs-identifier hs-var">x</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679243276"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243277"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-48"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243278"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243278"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243279"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243279"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679243276"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243278"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679243072"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243075"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621679243276"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243279"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679243082"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-211fa6e880027a6eed340531b5cc5442a9c75924011128ea7558a48b1d6183a4/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-51"></span><span>  </span><span id="local-6989586621679243093"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+</span><span id="line-50"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679243286"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-211fa6e880027a6eed340531b5cc5442a9c75924011128ea7558a48b1d6183a4/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#OneOrTwo"><span class="hs-identifier hs-type">OneOrTwo</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-51"></span><span>  </span><span id="local-6989586621679243297"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
 Apply f =&gt;
 (a -&gt; f b) -&gt; OneOrTwo a -&gt; f (OneOrTwo b)
-</span><a href="#local-6989586621679243093"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679243095"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679243095"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-52"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243096"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243096"><span class="hs-identifier hs-var">x</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; OneOrTwo b
+</span><a href="#local-6989586621679243297"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679243299"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679243299"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-52"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679243300"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243300"><span class="hs-identifier hs-var">x</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; OneOrTwo b
 forall a. a -&gt; OneOrTwo a
 </span><a href="HGeometry.Small.OneOrTwo.html#One"><span class="hs-identifier hs-var">One</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; OneOrTwo b) -&gt; f b -&gt; f (OneOrTwo b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679243095"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243096"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-53"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243098"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243098"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243099"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243099"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(b -&gt; b -&gt; OneOrTwo b) -&gt; f b -&gt; f b -&gt; f (OneOrTwo b)
+</span><a href="#local-6989586621679243299"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243300"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-53"></span><span>    </span><span class="annot"><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679243302"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243302"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679243303"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243303"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(b -&gt; b -&gt; OneOrTwo b) -&gt; f b -&gt; f b -&gt; f (OneOrTwo b)
 forall a b c. (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
 forall (f :: * -&gt; *) a b c.
 Apply f =&gt;
@@ -404,10 +404,10 @@ Apply f =&gt;
 </span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.1-211fa6e880027a6eed340531b5cc5442a9c75924011128ea7558a48b1d6183a4/share/doc/html/src/Data.Functor.Bind.Class.html#liftF2"><span class="hs-identifier hs-var">liftF2</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; OneOrTwo b
 forall a. a -&gt; a -&gt; OneOrTwo a
 </span><a href="HGeometry.Small.OneOrTwo.html#Two"><span class="hs-identifier hs-var">Two</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679243095"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243098"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679243095"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679243099"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679243299"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243302"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679243299"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679243303"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>

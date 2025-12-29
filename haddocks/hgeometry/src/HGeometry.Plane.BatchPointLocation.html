@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Plane.BatchPointLocation</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Implementation of Batched point location among a set of planes.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Plane.BatchPointLocation.html"><span class="hs-identifier">HGeometry.Plane.BatchPointLocation</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Plane.BatchPointLocation.html#batchedPointLocation"><span class="hs-identifier">batchedPointLocation</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.BatchPointLocation.html#groupQueries"><span class="hs-identifier">groupQueries</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.BatchPointLocation.html#answerBatch"><span class="hs-identifier">answerBatch</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Vector</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Plane</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html"><span class="hs-identifier">HGeometry.Algorithms.BinarySearch</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Sort.html"><span class="hs-identifier">HGeometry.Foldable.Sort</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html"><span class="hs-identifier">HGeometry.Combinatorial.Util</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html"><span class="hs-identifier">HGeometry.Line.BatchPointLocation</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Line</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-containers-0.3.5.0-35618b90988862aad37bf29ffa3db43e48dfa8ec92028e8fa712cd3591a57739/share/doc/html/src/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NEMap</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lines</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | Given a set of \(n\) queries, and a set of \(r\) planes H computes for each</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- query q the subset of planes above q, in increasing order.</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- running time: \(O(n\log n + r^5\log r)\)</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679565060"><span id="local-6989586621679565061"><span id="local-6989586621679565063"><span id="local-6989586621679565065"><span id="local-6989586621679565066"><span class="annot"><a href="HGeometry.Plane.BatchPointLocation.html#batchedPointLocation"><span class="hs-identifier hs-type">batchedPointLocation</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679565060"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679565061"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-41"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Plane_</span></span><span> </span><span class="annot"><a href="#local-6989586621679565063"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565061"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-42"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679565065"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679565066"><span class="hs-identifier hs-type">set'</span></a></span><span>
+</span><span id="line-43"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679565061"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679565061"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-44"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679565060"><span class="hs-identifier hs-type">queryPoint</span></a></span><span>
+</span><span id="line-45"></span><span>                                       </span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>                                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565066"><span class="hs-identifier hs-type">set'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565060"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565065"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565063"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-47"></span><span>                                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-containers-0.3.5.0-35618b90988862aad37bf29ffa3db43e48dfa8ec92028e8fa712cd3591a57739/share/doc/html/src/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap.NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565060"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">Vector.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565063"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-48"></span><span id="batchedPointLocation"><span class="annot"><span class="annottext">batchedPointLocation :: forall queryPoint r plane (set :: * -&gt; *) (set' :: * -&gt; *).
+(Point_ queryPoint 3 r, Plane_ plane r, Foldable set,
+ Foldable1 set', Ord r, Fractional r, Ord queryPoint) =&gt;
+set' queryPoint -&gt; set plane -&gt; NEMap queryPoint (Vector plane)
+</span><a href="HGeometry.Plane.BatchPointLocation.html#batchedPointLocation"><span class="hs-identifier hs-var hs-var">batchedPointLocation</span></a></span></span><span> </span><span id="local-6989586621679565471"><span class="annot"><span class="annottext">set' queryPoint
+</span><a href="#local-6989586621679565471"><span class="hs-identifier hs-var">queries</span></a></span></span><span> </span><span id="local-6989586621679565472"><span class="annot"><span class="annottext">set plane
+</span><a href="#local-6989586621679565472"><span class="hs-identifier hs-var">planes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty queryPoint -&gt; NEMap queryPoint (Vector plane))
+-&gt; NonEmpty (NonEmpty queryPoint)
+-&gt; NEMap queryPoint (Vector plane)
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; NonEmpty a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">set plane -&gt; NonEmpty queryPoint -&gt; NEMap queryPoint (Vector plane)
+forall (set :: * -&gt; *) (set' :: * -&gt; *) plane queryPoint r.
+(Foldable set, Foldable1 set', Point_ queryPoint 3 r,
+ Plane_ plane r, Ord r, Num r, Ord queryPoint) =&gt;
+set plane -&gt; set' queryPoint -&gt; NEMap queryPoint (Vector plane)
+</span><a href="HGeometry.Plane.BatchPointLocation.html#answerBatch"><span class="hs-identifier hs-var">answerBatch</span></a></span><span> </span><span class="annot"><span class="annottext">set plane
+</span><a href="#local-6989586621679565472"><span class="hs-identifier hs-var">planes</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>                                    </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty queryPoint) -&gt; NEMap queryPoint (Vector plane))
+-&gt; NonEmpty (NonEmpty queryPoint)
+-&gt; NEMap queryPoint (Vector plane)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">set' queryPoint -&gt; set plane -&gt; NonEmpty (NonEmpty queryPoint)
+forall queryPoint r plane (set :: * -&gt; *) (nonEmpty :: * -&gt; *).
+(Point_ queryPoint 3 r, Plane_ plane r, Foldable set,
+ Foldable1 nonEmpty, Ord r, Fractional r) =&gt;
+nonEmpty queryPoint -&gt; set plane -&gt; NonEmpty (NonEmpty queryPoint)
+</span><a href="HGeometry.Plane.BatchPointLocation.html#groupQueries"><span class="hs-identifier hs-var">groupQueries</span></a></span><span> </span><span class="annot"><span class="annottext">set' queryPoint
+</span><a href="#local-6989586621679565471"><span class="hs-identifier hs-var">queries</span></a></span><span> </span><span class="annot"><span class="annottext">set plane
+</span><a href="#local-6989586621679565472"><span class="hs-identifier hs-var">planes</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Ansers a batch of queries</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- pre: the vertical (w.r.t z) order of the planes is the same for all queries in the batch</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- running time: \(O(n\log n + r\log r + K)\), where \(K\) is the output size.</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span class="annot"><a href="HGeometry.Plane.BatchPointLocation.html#answerBatch"><span class="hs-identifier hs-type">answerBatch</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679565117"><span class="annot"><a href="#local-6989586621679565117"><span class="hs-identifier hs-type">set</span></a></span></span><span> </span><span id="local-6989586621679565118"><span class="annot"><a href="#local-6989586621679565118"><span class="hs-identifier hs-type">set'</span></a></span></span><span> </span><span id="local-6989586621679565121"><span class="annot"><a href="#local-6989586621679565121"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span id="local-6989586621679565119"><span class="annot"><a href="#local-6989586621679565119"><span class="hs-identifier hs-type">queryPoint</span></a></span></span><span> </span><span id="local-6989586621679565120"><span class="annot"><a href="#local-6989586621679565120"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-60"></span><span>                              </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679565117"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679565118"><span class="hs-identifier hs-type">set'</span></a></span><span>
+</span><span id="line-61"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679565119"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679565120"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-62"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Plane_</span></span><span> </span><span class="annot"><a href="#local-6989586621679565121"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565120"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-63"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679565120"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679565120"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-64"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679565119"><span class="hs-identifier hs-type">queryPoint</span></a></span><span>
+</span><span id="line-65"></span><span>                              </span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>                           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565117"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565121"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565118"><span class="hs-identifier hs-type">set'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565119"><span class="hs-identifier hs-type">queryPoint</span></a></span><span>
+</span><span id="line-67"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-containers-0.3.5.0-35618b90988862aad37bf29ffa3db43e48dfa8ec92028e8fa712cd3591a57739/share/doc/html/src/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap.NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565119"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">Vector.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565121"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span id="answerBatch"><span class="annot"><span class="annottext">answerBatch :: forall (set :: * -&gt; *) (set' :: * -&gt; *) plane queryPoint r.
+(Foldable set, Foldable1 set', Point_ queryPoint 3 r,
+ Plane_ plane r, Ord r, Num r, Ord queryPoint) =&gt;
+set plane -&gt; set' queryPoint -&gt; NEMap queryPoint (Vector plane)
+</span><a href="HGeometry.Plane.BatchPointLocation.html#answerBatch"><span class="hs-identifier hs-var hs-var">answerBatch</span></a></span></span><span> </span><span id="local-6989586621679565755"><span class="annot"><span class="annottext">set plane
+</span><a href="#local-6989586621679565755"><span class="hs-identifier hs-var">planes</span></a></span></span><span> </span><span id="local-6989586621679565756"><span class="annot"><span class="annottext">set' queryPoint
+</span><a href="#local-6989586621679565756"><span class="hs-identifier hs-var">queries</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(queryPoint -&gt; NEMap queryPoint (Vector plane))
+-&gt; set' queryPoint -&gt; NEMap queryPoint (Vector plane)
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; set' a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="annot"><span class="annottext">queryPoint -&gt; NEMap queryPoint (Vector plane)
+</span><a href="#local-6989586621679565757"><span class="hs-identifier hs-var">query</span></a></span><span> </span><span class="annot"><span class="annottext">set' queryPoint
+</span><a href="#local-6989586621679565756"><span class="hs-identifier hs-var">queries</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679565757"><span class="annot"><span class="annottext">query :: queryPoint -&gt; NEMap queryPoint (Vector plane)
+</span><a href="#local-6989586621679565757"><span class="hs-identifier hs-var hs-var">query</span></a></span></span><span> </span><span id="local-6989586621679565758"><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679565758"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">queryPoint -&gt; Vector plane -&gt; NEMap queryPoint (Vector plane)
+forall k a. k -&gt; a -&gt; NEMap k a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-containers-0.3.5.0-35618b90988862aad37bf29ffa3db43e48dfa8ec92028e8fa712cd3591a57739/share/doc/html/src/Data.Map.NonEmpty.Internal.html#singleton"><span class="hs-identifier hs-var">NEMap.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679565758"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector plane -&gt; NEMap queryPoint (Vector plane))
+-&gt; Vector plane -&gt; NEMap queryPoint (Vector plane)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(Elem (Vector plane) -&gt; Bool)
+-&gt; Vector plane -&gt; Maybe (Index (Vector plane))
+forall v.
+BinarySearch v =&gt;
+(Elem v -&gt; Bool) -&gt; v -&gt; Maybe (Index v)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#binarySearchFirstIdxIn"><span class="hs-identifier hs-var">binarySearchFirstIdxIn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679565758"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">queryPoint -&gt; plane -&gt; Bool
+</span><a href="#local-6989586621679565761"><span class="hs-operator hs-var">`liesBelow'`</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector plane
+</span><a href="#local-6989586621679565762"><span class="hs-identifier hs-var">sortedPlanes</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-71"></span><span>                                    </span><span class="annot"><span class="annottext">Maybe (Index (Vector plane))
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector plane
+forall a. Vector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.html#empty"><span class="hs-identifier hs-var">Vector.empty</span></a></span><span>
+</span><span id="line-72"></span><span>                                    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679565764"><span class="annot"><span class="annottext">Index (Vector plane)
+</span><a href="#local-6989586621679565764"><span class="hs-identifier hs-var">i</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Vector plane -&gt; Vector plane
+forall a. Int -&gt; Vector a -&gt; Vector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.html#drop"><span class="hs-identifier hs-var">Vector.drop</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+Index (Vector plane)
+</span><a href="#local-6989586621679565764"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Vector plane
+</span><a href="#local-6989586621679565762"><span class="hs-identifier hs-var">sortedPlanes</span></a></span><span>
+</span><span id="line-73"></span><span>                                               </span><span class="hs-comment">-- Vector.slice i 1 sortedPlanes</span><span>
+</span><span id="line-74"></span><span>                                               </span><span class="hs-comment">-- this just reports the single plane; just for</span><span>
+</span><span id="line-75"></span><span>                                               </span><span class="hs-comment">-- profiling purposes</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>    </span><span class="annot"><a href="#local-6989586621679565766"><span class="hs-identifier hs-type">q0</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679565120"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679565766"><span class="annot"><span class="annottext">q0 :: Point 2 r
+</span><a href="#local-6989586621679565766"><span class="hs-identifier hs-var hs-var">q0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 2 r
+forall (i :: Nat) point (d :: Nat) r.
+(Point_ point d r, i &lt;= d, Has_ Vector_ i r) =&gt;
+point -&gt; Point i r
+</span><span class="hs-identifier hs-var">projectPoint</span></span><span> </span><span class="annot"><span class="annottext">(Point 3 r -&gt; Point 2 r) -&gt; Point 3 r -&gt; Point 2 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty queryPoint -&gt; queryPoint
+forall a. NonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var">NonEmpty.head</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty queryPoint -&gt; queryPoint)
+-&gt; NonEmpty queryPoint -&gt; queryPoint
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">set' queryPoint -&gt; NonEmpty queryPoint
+forall a. set' a -&gt; NonEmpty a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">set' queryPoint
+</span><a href="#local-6989586621679565756"><span class="hs-identifier hs-var">queries</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">queryPoint
+-&gt; Getting (Point 3 r) queryPoint (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 3 r) queryPoint (Point 3 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' queryPoint (Point 3 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-comment">-- the planes, sorted from bottom to top</span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><a href="#local-6989586621679565762"><span class="hs-identifier hs-type">sortedPlanes</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">Vector.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565121"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-82"></span><span>    </span><span id="local-6989586621679565762"><span class="annot"><span class="annottext">sortedPlanes :: Vector plane
+</span><a href="#local-6989586621679565762"><span class="hs-identifier hs-var hs-var">sortedPlanes</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(plane -&gt; r) -&gt; set plane -&gt; Vector plane
+forall (f :: * -&gt; *) a b.
+(Foldable f, Ord b) =&gt;
+(a -&gt; b) -&gt; f a -&gt; Vector a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Sort.html#sortOn"><span class="hs-identifier hs-var">sortOn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; plane -&gt; r
+forall point.
+(Num r, 1 &lt;= 3, Point_ point (3 - 1) r) =&gt;
+point -&gt; plane -&gt; r
+forall hyperPlane (d :: Nat) r point.
+(NonVerticalHyperPlane_ hyperPlane d r, Num r, 1 &lt;= d,
+ Point_ point (d - 1) r) =&gt;
+point -&gt; hyperPlane -&gt; r
+</span><span class="hs-identifier hs-var">evalAt</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679565766"><span class="hs-identifier hs-var">q0</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679565121"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565120"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">set plane
+</span><a href="#local-6989586621679565755"><span class="hs-identifier hs-var">planes</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><a href="#local-6989586621679565761"><span class="hs-identifier hs-type">liesBelow'</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679565119"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565121"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621679565774"><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679565774"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679565761"><span class="annot"><span class="annottext">liesBelow' :: queryPoint -&gt; plane -&gt; Bool
+</span><a href="#local-6989586621679565761"><span class="hs-operator hs-var hs-var">`liesBelow'`</span></a></span></span><span> </span><span id="local-6989586621679565775"><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679565775"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">queryPoint -&gt; plane -&gt; Ordering
+forall point.
+(1 &lt;= 3, Point_ point 3 r, Ord r, Num r) =&gt;
+point -&gt; plane -&gt; Ordering
+forall hyperPlane (d :: Nat) r point.
+(NonVerticalHyperPlane_ hyperPlane d r, 1 &lt;= d, Point_ point d r,
+ Ord r, Num r) =&gt;
+point -&gt; hyperPlane -&gt; Ordering
+</span><span class="hs-identifier hs-var">verticalSideTest</span></span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679565774"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679565775"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- | Given a set of \(n\) query points, and the set of \(r\) planes,</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- partitions the queries into at most \(O(r^4)\) non-empty subsets Q_F so that</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- for every pair of query points q,q' in a set Q_F the vertical</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- (w.r.t z) line through q intersects the planes in the input set in</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- the same order as the vertical line through q'.</span><span>
+</span><span id="line-96"></span><span class="hs-comment">--</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- running time: \(O(n\log n + r^4 \log r)\)</span><span>
+</span><span id="line-98"></span><span id="local-6989586621679565126"><span id="local-6989586621679565127"><span id="local-6989586621679565128"><span id="local-6989586621679565129"><span id="local-6989586621679565130"><span class="annot"><a href="HGeometry.Plane.BatchPointLocation.html#groupQueries"><span class="hs-identifier hs-type">groupQueries</span></a></span><span>                </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679565126"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679565127"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-99"></span><span>                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Plane_</span></span><span> </span><span class="annot"><a href="#local-6989586621679565128"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565127"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-100"></span><span>                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679565129"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679565130"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span>
+</span><span id="line-101"></span><span>                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679565127"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679565127"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-102"></span><span>                               </span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>                            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565130"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565126"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679565129"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679565128"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-104"></span><span>                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679565126"><span class="hs-identifier hs-type">queryPoint</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-105"></span><span id="groupQueries"><span class="annot"><span class="annottext">groupQueries :: forall queryPoint r plane (set :: * -&gt; *) (nonEmpty :: * -&gt; *).
+(Point_ queryPoint 3 r, Plane_ plane r, Foldable set,
+ Foldable1 nonEmpty, Ord r, Fractional r) =&gt;
+nonEmpty queryPoint -&gt; set plane -&gt; NonEmpty (NonEmpty queryPoint)
+</span><a href="HGeometry.Plane.BatchPointLocation.html#groupQueries"><span class="hs-identifier hs-var hs-var">groupQueries</span></a></span></span><span> </span><span id="local-6989586621679565984"><span class="annot"><span class="annottext">nonEmpty queryPoint
+</span><a href="#local-6989586621679565984"><span class="hs-identifier hs-var">queries</span></a></span></span><span> </span><span id="local-6989586621679565985"><span class="annot"><span class="annottext">set plane
+</span><a href="#local-6989586621679565985"><span class="hs-identifier hs-var">planes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[VerticalOrLineEQ r] -&gt; Maybe (NonEmpty (VerticalOrLineEQ r))
+forall a. [a] -&gt; Maybe (NonEmpty a)
+</span><span class="hs-identifier hs-var">NonEmpty.nonEmpty</span></span><span> </span><span class="annot"><span class="annottext">[VerticalOrLineEQ r]
+</span><a href="#local-6989586621679565987"><span class="hs-identifier hs-var">lines</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-106"></span><span>    </span><span class="annot"><span class="annottext">Maybe (NonEmpty (VerticalOrLineEQ r))
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty queryPoint -&gt; NonEmpty (NonEmpty queryPoint)
+forall a. a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.singleton</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">nonEmpty queryPoint -&gt; NonEmpty queryPoint
+forall a. nonEmpty a -&gt; NonEmpty a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty queryPoint
+</span><a href="#local-6989586621679565984"><span class="hs-identifier hs-var">queries</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- apparently all planes are parallel</span><span>
+</span><span id="line-107"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679565989"><span class="annot"><span class="annottext">NonEmpty (VerticalOrLineEQ r)
+</span><a href="#local-6989586621679565989"><span class="hs-identifier hs-var">lines'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r :+ queryPoint) -&gt; NonEmpty queryPoint)
+-&gt; NonEmpty (NonEmpty (Point 2 r :+ queryPoint))
+-&gt; NonEmpty (NonEmpty queryPoint)
+forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Point 2 r :+ queryPoint) -&gt; queryPoint)
+-&gt; NonEmpty (Point 2 r :+ queryPoint) -&gt; NonEmpty queryPoint
+forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Point 2 r :+ queryPoint)
+-&gt; Getting queryPoint (Point 2 r :+ queryPoint) queryPoint
+-&gt; queryPoint
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting queryPoint (Point 2 r :+ queryPoint) queryPoint
+forall core extra extra' (f :: * -&gt; *).
+Functor f =&gt;
+(extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty (Point 2 r :+ queryPoint))
+ -&gt; NonEmpty (NonEmpty queryPoint))
+-&gt; (MonoidalNEMap (FaceId ()) (NonEmpty (Point 2 r :+ queryPoint))
+    -&gt; NonEmpty (NonEmpty (Point 2 r :+ queryPoint)))
+-&gt; MonoidalNEMap (FaceId ()) (NonEmpty (Point 2 r :+ queryPoint))
+-&gt; NonEmpty (NonEmpty queryPoint)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">MonoidalNEMap (FaceId ()) (NonEmpty (Point 2 r :+ queryPoint))
+-&gt; NonEmpty (NonEmpty (Point 2 r :+ queryPoint))
+forall a. MonoidalNEMap (FaceId ()) a -&gt; NonEmpty a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span>
+</span><span id="line-108"></span><span>                 </span><span class="annot"><span class="annottext">(MonoidalNEMap (FaceId ()) (NonEmpty (Point 2 r :+ queryPoint))
+ -&gt; NonEmpty (NonEmpty queryPoint))
+-&gt; MonoidalNEMap (FaceId ()) (NonEmpty (Point 2 r :+ queryPoint))
+-&gt; NonEmpty (NonEmpty queryPoint)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ queryPoint)
+-&gt; NonEmpty (VerticalOrLineEQ r)
+-&gt; MonoidalNEMap
+     (FaceIx (PointLocationDS' r (VerticalOrLineEQ r)))
+     (NonEmpty (Point 2 r :+ queryPoint))
+forall queryPoint r line (set :: * -&gt; *).
+(Point_ queryPoint 2 r, Line_ line 2 r, Foldable set, Ord r,
+ Fractional r, Eq line, IsBoxable queryPoint,
+ IsIntersectableWith line (Rectangle (Point 2 r)),
+ Intersection line (Rectangle (Point 2 r))
+ ~ Maybe (LineBoxIntersection 2 r)) =&gt;
+NonEmpty queryPoint
+-&gt; set line
+-&gt; MonoidalNEMap
+     (FaceIx (PointLocationDS' r line)) (NonEmpty queryPoint)
+</span><a href="HGeometry.Line.BatchPointLocation.html#groupQueries"><span class="hs-identifier hs-var">Line.groupQueries</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ queryPoint)
+</span><a href="#local-6989586621679565993"><span class="hs-identifier hs-var">queries'</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (VerticalOrLineEQ r)
+</span><a href="#local-6989586621679565989"><span class="hs-identifier hs-var">lines'</span></a></span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679565987"><span class="annot"><span class="annottext">lines :: [VerticalOrLineEQ r]
+</span><a href="#local-6989586621679565987"><span class="hs-identifier hs-var hs-var">lines</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Two plane -&gt; Maybe (VerticalOrLineEQ r))
+-&gt; [Two plane] -&gt; [VerticalOrLineEQ r]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679565996"><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679565996"><span class="hs-identifier hs-var">h1</span></a></span></span><span> </span><span id="local-6989586621679565997"><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679565997"><span class="hs-identifier hs-var">h2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">plane -&gt; plane -&gt; Maybe (VerticalOrLineEQ r)
+forall plane r.
+(Plane_ plane r, Fractional r, Eq r) =&gt;
+plane -&gt; plane -&gt; Maybe (VerticalOrLineEQ r)
+</span><span class="hs-identifier hs-var">projectedIntersectionLine</span></span><span> </span><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679565996"><span class="hs-identifier hs-var">h1</span></a></span><span> </span><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679565997"><span class="hs-identifier hs-var">h2</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Two plane] -&gt; [VerticalOrLineEQ r])
+-&gt; [Two plane] -&gt; [VerticalOrLineEQ r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">set plane -&gt; [Two plane]
+forall (f :: * -&gt; *) a. Foldable f =&gt; f a -&gt; [Two a]
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#uniquePairs"><span class="hs-identifier hs-var">uniquePairs</span></a></span><span> </span><span class="annot"><span class="annottext">set plane
+</span><a href="#local-6989586621679565985"><span class="hs-identifier hs-var">planes</span></a></span><span>
+</span><span id="line-111"></span><span>    </span><span id="local-6989586621679565993"><span class="annot"><span class="annottext">queries' :: NonEmpty (Point 2 r :+ queryPoint)
+</span><a href="#local-6989586621679565993"><span class="hs-identifier hs-var hs-var">queries'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(queryPoint -&gt; Point 2 r :+ queryPoint)
+-&gt; NonEmpty queryPoint -&gt; NonEmpty (Point 2 r :+ queryPoint)
+forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679566000"><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679566000"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 2 r
+forall (i :: Nat) point (d :: Nat) r.
+(Point_ point d r, i &lt;= d, Has_ Vector_ i r) =&gt;
+point -&gt; Point i r
+</span><span class="hs-identifier hs-var">projectPoint</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679566000"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint
+-&gt; Getting (Point 3 r) queryPoint (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 3 r) queryPoint (Point 3 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' queryPoint (Point 3 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; queryPoint -&gt; Point 2 r :+ queryPoint
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679566000"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NonEmpty queryPoint -&gt; NonEmpty (Point 2 r :+ queryPoint))
+-&gt; (nonEmpty queryPoint -&gt; NonEmpty queryPoint)
+-&gt; nonEmpty queryPoint
+-&gt; NonEmpty (Point 2 r :+ queryPoint)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty queryPoint -&gt; NonEmpty queryPoint
+forall a. nonEmpty a -&gt; NonEmpty a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">(nonEmpty queryPoint -&gt; NonEmpty (Point 2 r :+ queryPoint))
+-&gt; nonEmpty queryPoint -&gt; NonEmpty (Point 2 r :+ queryPoint)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty queryPoint
+</span><a href="#local-6989586621679565984"><span class="hs-identifier hs-var">queries</span></a></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-comment">-- vertices = mapMaybe asVertex $ uniquePairs lines</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>    </span><span class="hs-comment">-- asVertex (Two l1 l2) = l1 `intersect` l2  &gt;&gt;= \case</span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-comment">--                          Line_x_Line_Point v -&gt; Just $ vertexEvent v l1 l2</span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-comment">--                          _                   -&gt; Nothing</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-comment">-- events = sortOn eventTime ((Query &lt;$&gt; NonEmpty.toList queries) &lt;&gt; vertices)</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span>    </span><span class="hs-comment">-- -- | Initializes the status structure</span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-comment">-- initialize   :: Event r queryPoint line -&gt; (Set plane, [NonEmpty queryPoint])</span><span>
+</span><span id="line-125"></span><span>    </span><span class="hs-comment">-- initialize e = let x   = eventTime e - 1</span><span>
+</span><span id="line-126"></span><span>    </span><span class="hs-comment">--                    ss  = undefined -- order the planes at x</span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-comment">--                in handle e (ss, [])</span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>    </span><span class="hs-comment">-- handle :: (Set plane, [NonEmpty queryPoint])</span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-comment">--        -&gt; Event r queryPoint line</span><span>
+</span><span id="line-131"></span><span>    </span><span class="hs-comment">--        -&gt; (Set plane, [NonEmpty queryPoint])</span><span>
+</span><span id="line-132"></span><span>    </span><span class="hs-comment">-- handle e (ss, acc) = case e of</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-comment">--   Query q -&gt; undefined</span><span>
+</span><span id="line-134"></span><span>    </span><span class="hs-comment">--   Vertex v l1 l2 -&gt; undefined -- actually, this could agian be an entire buch of lines</span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- data Event r query line = Query query</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--                         | Vertex !(Point 2 r)</span><span>
+</span><span id="line-140"></span><span class="hs-comment">--                                  line -- ^ the line that is lower on the left</span><span>
+</span><span id="line-141"></span><span class="hs-comment">--                                  line -- ^ the line that is lower on the right</span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- -- | Get the &quot;time&quot; at which the event occurs</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- eventTime :: Point_ query 3 r =&gt; Event r query line -&gt; r</span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- eventTime = \case</span><span>
+</span><span id="line-146"></span><span class="hs-comment">--   Query q      -&gt; q^.xCoord</span><span>
+</span><span id="line-147"></span><span class="hs-comment">--   Vertex v _ _ -&gt; v^.xCoord</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- -- | Construct an event</span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- vertexEvent                       :: forall point line query r.</span><span>
+</span><span id="line-152"></span><span class="hs-comment">--                                      ( Num r</span><span>
+</span><span id="line-153"></span><span class="hs-comment">--                                      , Line_ line 2 r</span><span>
+</span><span id="line-154"></span><span class="hs-comment">--                                      )</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--                                    =&gt; Point 2 r -&gt; line -&gt; line -&gt; Event r query line</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- vertexEvent v l1 l2 | f l1 &lt; f l2 = Vertex v l1 l2</span><span>
+</span><span id="line-157"></span><span class="hs-comment">--                     | otherwise   = Vertex v l2 l1</span><span>
+</span><span id="line-158"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-159"></span><span class="hs-comment">--     f   :: line -&gt; r</span><span>
+</span><span id="line-160"></span><span class="hs-comment">--     f l = evalAt (Point $ v^.xCoord - 1) l</span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span>
+</span><span id="line-166"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-167"></span></pre></body></html>

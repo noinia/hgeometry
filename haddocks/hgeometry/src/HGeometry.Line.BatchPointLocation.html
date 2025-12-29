@@ -1,0 +1,1199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Line.BatchPointLocation</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Implementation of Batched point location among a set of lines.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html"><span class="hs-identifier">HGeometry.Line.BatchPointLocation</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS"><span class="hs-identifier">PointLocationDS</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#subdivision"><span class="hs-identifier">subdivision</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#vrStructure"><span class="hs-identifier">vrStructure</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#outerFaceIx"><span class="hs-identifier">outerFaceIx</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS%27"><span class="hs-identifier">PointLocationDS'</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#buildPointLocationStructure"><span class="hs-identifier">buildPointLocationStructure</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#pointLocationStructureIn"><span class="hs-identifier">pointLocationStructureIn</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#groupQueries"><span class="hs-identifier">groupQueries</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html"><span class="hs-identifier">HGeometry.Sequence.Alternating</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/vector-0.13.2.0-b7c31238fc1798a4714f459ca07971b1aa69fb2e072b2ff74eb91ea2dad3dd53/share/doc/html/src/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Vector</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Set</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.VerticalRayShooting.PersistentSweep.html"><span class="hs-identifier">HGeometry.VerticalRayShooting.PersistentSweep</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Set</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Set</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/monoidal-containers-0.6.6.0-efa6f4160a4331bbf2c109ce2ce1e4ba6e4e12c3a37f388ba98f1a95123091d3/share/doc/html/src/Data.IntMap.Monoidal.html"><span class="hs-identifier">Data.IntMap.Monoidal</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">IntMap</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.html"><span class="hs-identifier">HGeometry.PlaneGraph.Connected</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.NonEmpty.html"><span class="hs-identifier">HGeometry.Sequence.NonEmpty</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Kernel</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Box</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Seq</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lines</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html"><span class="hs-identifier">HGeometry.PointLocation.Type</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Map.NonEmpty.Monoidal.html"><span class="hs-identifier">HGeometry.Map.NonEmpty.Monoidal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier">MonoidalNEMap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Map.NonEmpty.Monoidal.html#singleton"><span class="hs-identifier">singleton</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | Given a set of \(n\) query points, and a set of \(r\) lines H computes for each</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- query q the subset of lines above q, in increasing order.</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- running time: \(O(n\log n + r^5\log r)\)</span><span>
+</span><span id="line-48"></span><span id="local-6989586621679563594"><span id="local-6989586621679563595"><span id="local-6989586621679563597"><span id="local-6989586621679563599"><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#groupQueries"><span class="hs-identifier hs-type">groupQueries</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563594"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-49"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Line_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563597"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-50"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679563599"><span class="hs-identifier hs-type">set</span></a></span><span>
+</span><span id="line-51"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679563597"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-53"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsBoxable</span></span><span> </span><span class="annot"><a href="#local-6989586621679563594"><span class="hs-identifier hs-type">queryPoint</span></a></span><span>
+</span><span id="line-54"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679563597"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679563597"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span>
+</span><span id="line-56"></span><span>                                </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineBoxIntersection</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span>                              </span><span class="hs-comment">-- , Show line, Show r</span><span>
+</span><span id="line-59"></span><span>                              </span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>                           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679563594"><span class="hs-identifier hs-type">queryPoint</span></a></span><span>
+</span><span id="line-61"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679563599"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563597"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-62"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-type">MonoidalNEMap</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.PlanarGraph.Class.html#FaceIx"><span class="hs-identifier hs-type">FaceIx</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS%27"><span class="hs-identifier hs-type">PointLocationDS'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563595"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563597"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>                                            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679563594"><span class="hs-identifier hs-type">queryPoint</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-64"></span><span id="groupQueries"><span class="annot"><span class="annottext">groupQueries :: forall queryPoint r line (set :: * -&gt; *).
+(Point_ queryPoint 2 r, Line_ line 2 r, Foldable set, Ord r,
+ Fractional r, Eq line, IsBoxable queryPoint,
+ IsIntersectableWith line (Rectangle (Point 2 r)),
+ Intersection line (Rectangle (Point 2 r))
+ ~ Maybe (LineBoxIntersection 2 r)) =&gt;
+NonEmpty queryPoint
+-&gt; set line
+-&gt; MonoidalNEMap
+     (FaceIx (PointLocationDS' r line)) (NonEmpty queryPoint)
+</span><a href="HGeometry.Line.BatchPointLocation.html#groupQueries"><span class="hs-identifier hs-var hs-var">groupQueries</span></a></span></span><span> </span><span id="local-6989586621679564206"><span class="annot"><span class="annottext">NonEmpty queryPoint
+</span><a href="#local-6989586621679564206"><span class="hs-identifier hs-var">queries</span></a></span></span><span> </span><span id="local-6989586621679564207"><span class="annot"><span class="annottext">set line
+</span><a href="#local-6989586621679564207"><span class="hs-identifier hs-var">lines</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(queryPoint -&gt; MonoidalNEMap (FaceId ()) (NonEmpty queryPoint))
+-&gt; NonEmpty queryPoint
+-&gt; MonoidalNEMap (FaceId ()) (NonEmpty queryPoint)
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; NonEmpty a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679564209"><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679564209"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FaceId ()
+-&gt; NonEmpty queryPoint
+-&gt; MonoidalNEMap (FaceId ()) (NonEmpty queryPoint)
+forall k v. k -&gt; v -&gt; MonoidalNEMap k v
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Map.NonEmpty.Monoidal.html#singleton"><span class="hs-identifier hs-var">singleton</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+-&gt; PointLocationDS
+     (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+-&gt; FaceIx
+     (PointLocationDS
+        (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ())
+forall queryPoint r edge vertex f.
+(Point_ queryPoint 2 r, Num r, Ord r, LineSegment_ edge vertex,
+ Point_ vertex 2 r, HasSupportingLine edge) =&gt;
+queryPoint
+-&gt; PointLocationDS vertex edge f
+-&gt; FaceIx (PointLocationDS vertex edge f)
+</span><a href="HGeometry.Line.BatchPointLocation.html#pointLocate"><span class="hs-identifier hs-var">pointLocate</span></a></span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679564209"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationDS
+  (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+</span><a href="#local-6989586621679564211"><span class="hs-identifier hs-var">pointLocDS</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>                                                       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint -&gt; NonEmpty queryPoint
+forall a. a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.singleton</span></span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679564209"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>                                      </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty queryPoint
+</span><a href="#local-6989586621679564206"><span class="hs-identifier hs-var">queries</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679564211"><span class="annot"><span class="annottext">pointLocDS :: PointLocationDS
+  (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+</span><a href="#local-6989586621679564211"><span class="hs-identifier hs-var hs-var">pointLocDS</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty queryPoint
+-&gt; set line
+-&gt; PointLocationDS
+     (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+forall geom r line (set :: * -&gt; *).
+(IsBoxable geom, NumType geom ~ r, Dimension geom ~ 2, Ord r,
+ Fractional r, Line_ line 2 r, Foldable set, Eq line,
+ IsIntersectableWith line (Rectangle (Point 2 r)),
+ Intersection line (Rectangle (Point 2 r))
+ ~ Maybe (LineBoxIntersection 2 r)) =&gt;
+geom -&gt; set line -&gt; PointLocationDS' r line
+</span><a href="HGeometry.Line.BatchPointLocation.html#buildPointLocationStructure"><span class="hs-identifier hs-var">buildPointLocationStructure</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty queryPoint
+</span><a href="#local-6989586621679564206"><span class="hs-identifier hs-var">queries</span></a></span><span> </span><span class="annot"><span class="annottext">set line
+</span><a href="#local-6989586621679564207"><span class="hs-identifier hs-var">lines</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- | Construct the point location structure (restricted to the)</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- bounding box of the given object</span><span>
+</span><span id="line-73"></span><span class="hs-comment">--</span><span>
+</span><span id="line-74"></span><span id="local-6989586621679563696"><span id="local-6989586621679563697"><span id="local-6989586621679563698"><span id="local-6989586621679563699"><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#buildPointLocationStructure"><span class="hs-identifier hs-type">buildPointLocationStructure</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsBoxable</span></span><span> </span><span class="annot"><a href="#local-6989586621679563696"><span class="hs-identifier hs-type">geom</span></a></span><span>
+</span><span id="line-75"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679563696"><span class="hs-identifier hs-type">geom</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679563696"><span class="hs-identifier hs-type">geom</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-76"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>                                 </span><span class="hs-comment">-- , Show r, Show line</span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Line_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563698"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-82"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679563699"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679563698"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-83"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679563698"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679563698"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span>
+</span><span id="line-85"></span><span>                                   </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineBoxIntersection</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>                                 </span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>                              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679563696"><span class="hs-identifier hs-type">geom</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679563699"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563698"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS%27"><span class="hs-identifier hs-type">PointLocationDS'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563697"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563698"><span class="hs-identifier hs-type">line</span></a></span></span></span></span></span><span>
+</span><span id="line-88"></span><span id="buildPointLocationStructure"><span class="annot"><span class="annottext">buildPointLocationStructure :: forall geom r line (set :: * -&gt; *).
+(IsBoxable geom, NumType geom ~ r, Dimension geom ~ 2, Ord r,
+ Fractional r, Line_ line 2 r, Foldable set, Eq line,
+ IsIntersectableWith line (Rectangle (Point 2 r)),
+ Intersection line (Rectangle (Point 2 r))
+ ~ Maybe (LineBoxIntersection 2 r)) =&gt;
+geom -&gt; set line -&gt; PointLocationDS' r line
+</span><a href="HGeometry.Line.BatchPointLocation.html#buildPointLocationStructure"><span class="hs-identifier hs-var hs-var">buildPointLocationStructure</span></a></span></span><span> </span><span id="local-6989586621679564257"><span class="annot"><span class="annottext">geom
+</span><a href="#local-6989586621679564257"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r) -&gt; set line -&gt; PointLocationDS' r line
+forall (set :: * -&gt; *) line r.
+(Foldable set, Line_ line 2 r, Fractional r, Ord r, Eq line,
+ IsIntersectableWith line (Rectangle (Point 2 r)),
+ Intersection line (Rectangle (Point 2 r))
+ ~ Maybe (LineBoxIntersection 2 r)) =&gt;
+Rectangle (Point 2 r) -&gt; set line -&gt; PointLocationDS' r line
+</span><a href="HGeometry.Line.BatchPointLocation.html#pointLocationStructureIn"><span class="hs-identifier hs-var">pointLocationStructureIn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NumType (Point 2 r)
+-&gt; Rectangle (Point 2 r) -&gt; Rectangle (Point 2 r)
+forall {a} {point}.
+(NumType a ~ NumType point, HasCoordinates a point,
+ Num (NumType point)) =&gt;
+NumType point -&gt; Box a -&gt; Box point
+</span><a href="#local-6989586621679564258"><span class="hs-identifier hs-var">grow</span></a></span><span> </span><span class="annot"><span class="annottext">r
+NumType (Point 2 r)
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">(Rectangle (Point 2 r) -&gt; Rectangle (Point 2 r))
+-&gt; Rectangle (Point 2 r) -&gt; Rectangle (Point 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">geom -&gt; Rectangle (Point 2 r)
+forall (d :: Nat) r.
+(d ~ Dimension geom, r ~ NumType geom, Ord r) =&gt;
+geom -&gt; Box (Point d r)
+forall g (d :: Nat) r.
+(IsBoxable g, d ~ Dimension g, r ~ NumType g, Ord r) =&gt;
+g -&gt; Box (Point d r)
+</span><span class="hs-identifier hs-var">boundingBox</span></span><span> </span><span class="annot"><span class="annottext">geom
+</span><a href="#local-6989586621679564257"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679564258"><span class="annot"><span class="annottext">grow :: NumType point -&gt; Box a -&gt; Box point
+</span><a href="#local-6989586621679564258"><span class="hs-identifier hs-var hs-var">grow</span></a></span></span><span> </span><span id="local-6989586621679564317"><span class="annot"><span class="annottext">NumType point
+</span><a href="#local-6989586621679564317"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Box</span></span><span> </span><span id="local-6989586621679564319"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679564319"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679564320"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679564320"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Box point
+forall point. point -&gt; point -&gt; Box point
+</span><span class="hs-identifier hs-var">Box</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679564319"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">a -&gt; (a -&gt; point) -&gt; point
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(NumType point -&gt; Identity (NumType point)) -&gt; a -&gt; Identity point
+(NumType a -&gt; Identity (NumType point)) -&gt; a -&gt; Identity point
+forall point point'.
+HasCoordinates point point' =&gt;
+IndexedTraversal1 Int point point' (NumType point) (NumType point')
+IndexedTraversal1 Int a point (NumType a) (NumType point)
+</span><span class="hs-identifier hs-var">coordinates</span></span><span> </span><span class="annot"><span class="annottext">((NumType point -&gt; Identity (NumType point))
+ -&gt; a -&gt; Identity point)
+-&gt; (NumType point -&gt; NumType point) -&gt; a -&gt; point
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">NumType point -&gt; NumType point -&gt; NumType point
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">subtract</span></span><span> </span><span class="annot"><span class="annottext">NumType point
+</span><a href="#local-6989586621679564317"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>                           </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679564320"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">a -&gt; (a -&gt; point) -&gt; point
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(NumType point -&gt; Identity (NumType point)) -&gt; a -&gt; Identity point
+(NumType a -&gt; Identity (NumType point)) -&gt; a -&gt; Identity point
+forall point point'.
+HasCoordinates point point' =&gt;
+IndexedTraversal1 Int point point' (NumType point) (NumType point')
+IndexedTraversal1 Int a point (NumType a) (NumType point)
+</span><span class="hs-identifier hs-var">coordinates</span></span><span> </span><span class="annot"><span class="annottext">((NumType point -&gt; Identity (NumType point))
+ -&gt; a -&gt; Identity point)
+-&gt; (NumType point -&gt; NumType point) -&gt; a -&gt; point
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NumType point -&gt; NumType point -&gt; NumType point
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">NumType point
+</span><a href="#local-6989586621679564317"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- type PointLocationDS r line =</span><span>
+</span><span id="line-97"></span><span class="hs-comment">--   CPlaneGraph () (Point 2 r :+ Seq.Seq (Point 2 r))</span><span>
+</span><span id="line-98"></span><span class="hs-comment">--                  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))</span><span>
+</span><span id="line-99"></span><span class="hs-comment">--                  ()</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- -- | Given a set of lines; split it into interior disjoint linesegments</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- splitIntoSegments          :: Sides r</span><span>
+</span><span id="line-107"></span><span class="hs-comment">--                               -- ^ initial box</span><span>
+</span><span id="line-108"></span><span class="hs-comment">--                            -&gt; set line</span><span>
+</span><span id="line-109"></span><span class="hs-comment">--                            -&gt; [ClosedLineSegment (Point 2 r) :+ line]</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- splitIntoSegments bx lines = undefined</span><span>
+</span><span id="line-111"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--     -- For each line (by index)</span><span>
+</span><span id="line-113"></span><span class="hs-comment">--     verticesPerLine :: IntMap (Map (Point 2 r) [Point 2 r])</span><span>
+</span><span id="line-114"></span><span class="hs-comment">--     verticesPerLine = foldMap asVertex $ uniquePairs (zip [0..] lines)</span><span>
+</span><span id="line-115"></span><span class="hs-comment">--     asVertex (Two (i, l1) (j, l2)) = case l1 `intersect` l2 of</span><span>
+</span><span id="line-116"></span><span class="hs-comment">--         Just (Line_x_Line_Point v) -&gt; IntMap.fromList [ (i, Map.singleton v [v])</span><span>
+</span><span id="line-117"></span><span class="hs-comment">--                                                       , (j, Map.singleton v [v])</span><span>
+</span><span id="line-118"></span><span class="hs-comment">--                                                       ]</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--         Nothing                    -&gt; mempty</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="hs-comment">--     thePoints = foldMap Map.keySet verticesPerLine</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--     maxY = maximumByOf folded (comparing (^.yCoord)) thePoints</span><span>
+</span><span id="line-123"></span><span class="hs-comment">--     minY = minimumByOf folded (comparing (^.yCoord)) thePoints</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>    </span><span class="hs-comment">-- bx = Sides max' max' min' min'</span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-comment">--      &lt;$&gt; bx &lt;*&gt; Sides maxY ((^.xCoord) &lt;$&gt; Set.maxView thePoints)</span><span>
+</span><span id="line-131"></span><span>    </span><span class="hs-comment">--                       minY ((^.xCoord) &lt;$&gt; Set.minView thePoints)</span><span>
+</span><span id="line-132"></span><span>    </span><span class="hs-comment">-- max' a = maybe a (max a)</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-comment">-- min' a = maybe a (min a)</span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-comment">-- Point2 minX _ = minView thePoints</span><span>
+</span><span id="line-136"></span><span>    </span><span class="hs-comment">-- Point2 minX _ = minView thePoints</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span>    </span><span class="hs-comment">-- box =</span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span>    </span><span class="hs-comment">--   boundingBox verticesPerLine</span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- instance Dimension (IntMap.IntMap v) = Dimension v</span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- instance NumType   (IntMap.IntMap v) = NumType v</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- instance Dimension (Map.Map k v) = Dimension v</span><span>
+</span><span id="line-149"></span><span class="hs-comment">-- instance NumType   (Map.Map k v) = NumType v</span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span class="hs-comment">-- instance IsBoxable v =&gt; IsBoxable (IntMap.IntMap k v) where</span><span>
+</span><span id="line-153"></span><span class="hs-comment">--   boundingBox = foldMap boundingBox</span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- instance IsBoxable v =&gt; IsBoxable (Map.Map k v) where</span><span>
+</span><span id="line-156"></span><span class="hs-comment">--   boundingBox = foldMap boundingBox</span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="hs-comment">{-
+
+-- | Given a set of n lines, builds a point location data structure.
+--
+-- \(O(n^2 \log n)\)
+pointLocationStructure       :: set line
+                             -&gt; PointLocationDS' r line
+pointLocationStructure lines = undefined -- pointLocationStructureFrom inters lines
+
+-}</span><span>
+</span><span id="line-174"></span><span>
+</span><span id="line-175"></span><span class="hs-comment">-- | Construct a point location data structure on the given set of n</span><span>
+</span><span id="line-176"></span><span class="hs-comment">-- lines in a given bounding rectangle.</span><span>
+</span><span id="line-177"></span><span class="hs-comment">--</span><span>
+</span><span id="line-178"></span><span class="hs-comment">-- Note that we can answer point location queries for points only</span><span>
+</span><span id="line-179"></span><span class="hs-comment">-- within the given bounding rectangle.</span><span>
+</span><span id="line-180"></span><span class="hs-comment">--</span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- O(n^2 \log n)</span><span>
+</span><span id="line-182"></span><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#pointLocationStructureIn"><span class="hs-identifier hs-type">pointLocationStructureIn</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679563715"><span class="annot"><a href="#local-6989586621679563715"><span class="hs-identifier hs-type">set</span></a></span></span><span> </span><span id="local-6989586621679563716"><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span id="local-6989586621679563717"><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-183"></span><span>                                       </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679563715"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Line_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-184"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-185"></span><span>
+</span><span id="line-186"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span>                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span>
+</span><span id="line-188"></span><span>                                         </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineBoxIntersection</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-189"></span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span>                                       </span><span class="hs-comment">-- , Show r, Show line</span><span>
+</span><span id="line-192"></span><span>                                       </span><span class="hs-special">)</span><span>
+</span><span id="line-193"></span><span>                                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rectangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-194"></span><span>                                       </span><span class="annot"><span class="hs-comment">-- ^ bounding rectangle</span></span><span>
+</span><span id="line-195"></span><span>                                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679563715"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-196"></span><span>                                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS%27"><span class="hs-identifier hs-type">PointLocationDS'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-197"></span><span id="pointLocationStructureIn"><span class="annot"><span class="annottext">pointLocationStructureIn :: forall (set :: * -&gt; *) line r.
+(Foldable set, Line_ line 2 r, Fractional r, Ord r, Eq line,
+ IsIntersectableWith line (Rectangle (Point 2 r)),
+ Intersection line (Rectangle (Point 2 r))
+ ~ Maybe (LineBoxIntersection 2 r)) =&gt;
+Rectangle (Point 2 r) -&gt; set line -&gt; PointLocationDS' r line
+</span><a href="HGeometry.Line.BatchPointLocation.html#pointLocationStructureIn"><span class="hs-identifier hs-var hs-var">pointLocationStructureIn</span></a></span></span><span> </span><span id="local-6989586621679564446"><span class="annot"><span class="annottext">Rectangle (Point 2 r)
+</span><a href="#local-6989586621679564446"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span id="local-6989586621679564447"><span class="annot"><span class="annottext">set line
+</span><a href="#local-6989586621679564447"><span class="hs-identifier hs-var">lines</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+-&gt; PointLocationDS
+     (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+forall edge vertex r face.
+(LineSegment_ edge vertex, Point_ vertex 2 r, Ord r,
+ Fractional r) =&gt;
+CPlaneGraph () vertex edge face -&gt; PointLocationDS vertex edge face
+</span><a href="HGeometry.Line.BatchPointLocation.html#pointLocationStructureFrom"><span class="hs-identifier hs-var">pointLocationStructureFrom</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+</span><a href="#local-6989586621679564449"><span class="hs-identifier hs-var">gr</span></a></span><span>
+</span><span id="line-198"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-199"></span><span>    </span><span class="annot"><a href="#local-6989586621679564449"><span class="hs-identifier hs-type">gr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-200"></span><span>                         </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-201"></span><span>    </span><span id="local-6989586621679564449"><span class="annot"><span class="annottext">gr :: CPlaneGraph
+  () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+</span><a href="#local-6989586621679564449"><span class="hs-identifier hs-var hs-var">gr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  ()
+  (Point 2 r :+ Seq (Point 2 r))
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+  ()
+</span><a href="#local-6989586621679564450"><span class="hs-identifier hs-var">gr'</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  ()
+  (Point 2 r :+ Seq (Point 2 r))
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+  ()
+-&gt; (CPlaneGraph
+      ()
+      (Point 2 r :+ Seq (Point 2 r))
+      (ClosedLineSegment (Point 2 r) :+ Maybe line)
+      ()
+    -&gt; CPlaneGraph
+         () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ())
+-&gt; CPlaneGraph
+     () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 r :+ Seq (Point 2 r)) -&gt; Identity (Point 2 r))
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ClosedLineSegment (Point 2 r) :+ Maybe line)
+     ()
+-&gt; Identity
+     (CPlaneGraph
+        () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ())
+(Vertex
+   (CPlaneGraph
+      ()
+      (Point 2 r :+ Seq (Point 2 r))
+      (ClosedLineSegment (Point 2 r) :+ Maybe line)
+      ())
+ -&gt; Identity
+      (Vertex
+         (CPlaneGraph
+            () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ())))
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ClosedLineSegment (Point 2 r) :+ Maybe line)
+     ()
+-&gt; Identity
+     (CPlaneGraph
+        () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ())
+forall graph graph'.
+HasVertices graph graph' =&gt;
+IndexedTraversal1
+  (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+IndexedTraversal1
+  (VertexIx
+     (CPlaneGraph
+        ()
+        (Point 2 r :+ Seq (Point 2 r))
+        (ClosedLineSegment (Point 2 r) :+ Maybe line)
+        ()))
+  (CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ClosedLineSegment (Point 2 r) :+ Maybe line)
+     ())
+  (CPlaneGraph
+     () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ())
+  (Vertex
+     (CPlaneGraph
+        ()
+        (Point 2 r :+ Seq (Point 2 r))
+        (ClosedLineSegment (Point 2 r) :+ Maybe line)
+        ()))
+  (Vertex
+     (CPlaneGraph
+        () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span> </span><span class="annot"><span class="annottext">(((Point 2 r :+ Seq (Point 2 r)) -&gt; Identity (Point 2 r))
+ -&gt; CPlaneGraph
+      ()
+      (Point 2 r :+ Seq (Point 2 r))
+      (ClosedLineSegment (Point 2 r) :+ Maybe line)
+      ()
+ -&gt; Identity
+      (CPlaneGraph
+         () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()))
+-&gt; ((Point 2 r :+ Seq (Point 2 r)) -&gt; Point 2 r)
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ClosedLineSegment (Point 2 r) :+ Maybe line)
+     ()
+-&gt; CPlaneGraph
+     () (Point 2 r) (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ Seq (Point 2 r)) (Point 2 r)
+-&gt; (Point 2 r :+ Seq (Point 2 r)) -&gt; Point 2 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r :+ Seq (Point 2 r)) (Point 2 r)
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span>    </span><span class="hs-comment">-- | Construct a plane graph</span><span>
+</span><span id="line-204"></span><span>    </span><span class="annot"><a href="#local-6989586621679564450"><span class="hs-identifier hs-type">gr'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-205"></span><span>                          </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-206"></span><span>    </span><span id="local-6989586621679564450"><span class="annot"><span class="annottext">gr' :: CPlaneGraph
+  ()
+  (Point 2 r :+ Seq (Point 2 r))
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+  ()
+</span><a href="#local-6989586621679564450"><span class="hs-identifier hs-var hs-var">gr'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">CPlaneGraph
+  ()
+  (Point 2 r :+ Seq (Point 2 r))
+  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+  ()
+</span><a href="#local-6989586621679564454"><span class="hs-identifier hs-var">gr''</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph
+  ()
+  (Point 2 r :+ Seq (Point 2 r))
+  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+  ()
+-&gt; (CPlaneGraph
+      ()
+      (Point 2 r :+ Seq (Point 2 r))
+      (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+      ()
+    -&gt; CPlaneGraph
+         ()
+         (Point 2 r :+ Seq (Point 2 r))
+         (ClosedLineSegment (Point 2 r) :+ Maybe line)
+         ())
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ClosedLineSegment (Point 2 r) :+ Maybe line)
+     ()
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span> </span><span class="annot"><span class="annottext">(ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line)
+ -&gt; Identity (ClosedLineSegment (Point 2 r) :+ Maybe line))
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+     ()
+-&gt; Identity
+     (CPlaneGraph
+        ()
+        (Point 2 r :+ Seq (Point 2 r))
+        (ClosedLineSegment (Point 2 r) :+ Maybe line)
+        ())
+(Edge
+   (CPlaneGraph
+      ()
+      (Point 2 r :+ Seq (Point 2 r))
+      (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+      ())
+ -&gt; Identity
+      (Edge
+         (CPlaneGraph
+            ()
+            (Point 2 r :+ Seq (Point 2 r))
+            (ClosedLineSegment (Point 2 r) :+ Maybe line)
+            ())))
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+     ()
+-&gt; Identity
+     (CPlaneGraph
+        ()
+        (Point 2 r :+ Seq (Point 2 r))
+        (ClosedLineSegment (Point 2 r) :+ Maybe line)
+        ())
+forall graph graph'.
+HasEdges graph graph' =&gt;
+IndexedTraversal
+  (EdgeIx graph) graph graph' (Edge graph) (Edge graph')
+IndexedTraversal
+  (EdgeIx
+     (CPlaneGraph
+        ()
+        (Point 2 r :+ Seq (Point 2 r))
+        (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+        ()))
+  (CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+     ())
+  (CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ClosedLineSegment (Point 2 r) :+ Maybe line)
+     ())
+  (Edge
+     (CPlaneGraph
+        ()
+        (Point 2 r :+ Seq (Point 2 r))
+        (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+        ()))
+  (Edge
+     (CPlaneGraph
+        ()
+        (Point 2 r :+ Seq (Point 2 r))
+        (ClosedLineSegment (Point 2 r) :+ Maybe line)
+        ()))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#edges"><span class="hs-identifier hs-var">edges</span></a></span><span> </span><span class="annot"><span class="annottext">((ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line)
+  -&gt; Identity (ClosedLineSegment (Point 2 r) :+ Maybe line))
+ -&gt; CPlaneGraph
+      ()
+      (Point 2 r :+ Seq (Point 2 r))
+      (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+      ()
+ -&gt; Identity
+      (CPlaneGraph
+         ()
+         (Point 2 r :+ Seq (Point 2 r))
+         (ClosedLineSegment (Point 2 r) :+ Maybe line)
+         ()))
+-&gt; (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line)
+    -&gt; ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+     ()
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ClosedLineSegment (Point 2 r) :+ Maybe line)
+     ()
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; ClosedLineSegment (Point 2 r) :+ Maybe line
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+Lens'
+  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+  (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall (t :: * -&gt; *) a. Traversable1 t =&gt; Lens' (t a) a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Lens.html#head1"><span class="hs-identifier hs-var">head1</span></a></span><span>
+</span><span id="line-207"></span><span>
+</span><span id="line-208"></span><span>    </span><span class="annot"><a href="#local-6989586621679564454"><span class="hs-identifier hs-type">gr''</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span>
+</span><span id="line-209"></span><span>    </span><span id="local-6989586621679564454"><span class="annot"><span class="annottext">gr'' :: CPlaneGraph
+  ()
+  (Point 2 r :+ Seq (Point 2 r))
+  (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+  ()
+</span><a href="#local-6989586621679564454"><span class="hs-identifier hs-var hs-var">gr''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; CPlaneGraph
+     ()
+     (Point 2 r :+ Seq (Point 2 r))
+     (ViewL1 (ClosedLineSegment (Point 2 r) :+ Maybe line))
+     ()
+forall {k} (s :: k) (nonEmpty :: * -&gt; *) ix lineSegment segment r
+       point.
+(Foldable1 nonEmpty, FunctorWithIndex ix nonEmpty,
+ LineSegment_ lineSegment point, Point_ point 2 r, Ord r,
+ Fractional r,
+ Intersection lineSegment lineSegment
+ ~ Maybe (LineSegmentLineSegmentIntersection segment),
+ LineSegment_ segment point,
+ IsIntersectableWith lineSegment lineSegment, Ord ix,
+ HasOnSegment lineSegment 2,
+ StartPointOf lineSegment ~ EndPointOf lineSegment,
+ Eq lineSegment) =&gt;
+nonEmpty lineSegment
+-&gt; CPlaneGraph s (Point 2 r :+ Seq point) (ViewL1 lineSegment) ()
+</span><a href="HGeometry.PlaneGraph.Connected.FromIntersectingSegments.html#fromIntersectingSegments"><span class="hs-identifier hs-var">fromIntersectingSegments</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+</span><a href="#local-6989586621679564592"><span class="hs-identifier hs-var">segs</span></a></span><span>
+</span><span id="line-210"></span><span>
+</span><span id="line-211"></span><span>
+</span><span id="line-212"></span><span>    </span><span class="annot"><a href="#local-6989586621679564592"><span class="hs-identifier hs-type">segs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563717"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679563716"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-213"></span><span>    </span><span id="local-6989586621679564592"><span class="annot"><span class="annottext">segs :: NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+</span><a href="#local-6989586621679564592"><span class="hs-identifier hs-var hs-var">segs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-214"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Sides (ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall a. Sides a -&gt; NonEmpty a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">(Sides (ClosedLineSegment (Point 2 r) :+ Maybe line)
+ -&gt; NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line))
+-&gt; Sides (ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedLineSegment (Point 2 r)
+-&gt; Maybe line -&gt; ClosedLineSegment (Point 2 r) :+ Maybe line
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe line
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ClosedLineSegment (Point 2 r)
+ -&gt; ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; Sides (ClosedLineSegment (Point 2 r))
+-&gt; Sides (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r) -&gt; Sides (ClosedLineSegment (Point 2 r))
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Sides (ClosedLineSegment point)
+</span><span class="hs-identifier hs-var">sides</span></span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r)
+</span><a href="#local-6989586621679564446"><span class="hs-identifier hs-var">rect</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-215"></span><span>         </span><span class="annot"><span class="annottext">NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; [ClosedLineSegment (Point 2 r) :+ Maybe line]
+-&gt; NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall a. NonEmpty a -&gt; [a] -&gt; NonEmpty a
+</span><a href="HGeometry.Line.BatchPointLocation.html#%3C%3C%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">(line -&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line))
+-&gt; [line] -&gt; [ClosedLineSegment (Point 2 r) :+ Maybe line]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="annot"><span class="annottext">line -&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line)
+</span><a href="#local-6989586621679564599"><span class="hs-identifier hs-var">clip</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">set line -&gt; [line]
+forall a. set a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">set line
+</span><a href="#local-6989586621679564447"><span class="hs-identifier hs-var">lines</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-216"></span><span>
+</span><span id="line-217"></span><span>    </span><span id="local-6989586621679564599"><span class="annot"><span class="annottext">clip :: line -&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line)
+</span><a href="#local-6989586621679564599"><span class="hs-identifier hs-var hs-var">clip</span></a></span></span><span> </span><span id="local-6989586621679564601"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679564601"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679564601"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">line
+-&gt; Rectangle (Point 2 r)
+-&gt; Intersection line (Rectangle (Point 2 r))
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r)
+</span><a href="#local-6989586621679564446"><span class="hs-identifier hs-var">rect</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (LineBoxIntersection 2 r)
+-&gt; (LineBoxIntersection 2 r
+    -&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line))
+-&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-218"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Line_x_Box_LineSegment</span></span><span> </span><span id="local-6989586621679564604"><span class="annot"><span class="annottext">ClosedLineSegment (Point 2 r)
+</span><a href="#local-6989586621679564604"><span class="hs-identifier hs-var">seg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">((ClosedLineSegment (Point 2 r) :+ Maybe line)
+ -&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line))
+-&gt; (ClosedLineSegment (Point 2 r) :+ Maybe line)
+-&gt; Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment (Point 2 r)
+</span><a href="#local-6989586621679564604"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment (Point 2 r)
+-&gt; Maybe line -&gt; ClosedLineSegment (Point 2 r) :+ Maybe line
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">line -&gt; Maybe line
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679564601"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-219"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Line_x_Box_Point</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><span class="hs-identifier">_</span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (ClosedLineSegment (Point 2 r) :+ Maybe line)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-220"></span><span>    </span><span class="hs-comment">-- if the line intersects the box in a point; we just ignore the line</span><span>
+</span><span id="line-221"></span><span>
+</span><span id="line-222"></span><span>
+</span><span id="line-223"></span><span class="hs-comment">-- | Builds the point location data structure (by building a structure</span><span>
+</span><span id="line-224"></span><span class="hs-comment">-- for vertical ray shooting).</span><span>
+</span><span id="line-225"></span><span class="hs-comment">--</span><span>
+</span><span id="line-226"></span><span class="hs-comment">-- pre: there the input graph has at least one non-vertical edge.</span><span>
+</span><span id="line-227"></span><span class="hs-comment">--</span><span>
+</span><span id="line-228"></span><span class="hs-comment">-- \(O(n\log n)\), where \(n)\ is the number of vertices of the plane graph.</span><span>
+</span><span id="line-229"></span><span id="local-6989586621679563782"><span id="local-6989586621679563783"><span id="local-6989586621679563784"><span id="local-6989586621679563785"><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#pointLocationStructureFrom"><span class="hs-identifier hs-type">pointLocationStructureFrom</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LineSegment_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563782"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563783"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-230"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563783"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563784"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-231"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679563784"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679563784"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-232"></span><span>                                 </span><span class="hs-special">)</span><span>
+</span><span id="line-233"></span><span>                              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679563783"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563782"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563785"><span class="hs-identifier hs-type">face</span></a></span><span>
+</span><span id="line-234"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563783"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563782"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563785"><span class="hs-identifier hs-type">face</span></a></span></span></span></span></span><span>
+</span><span id="line-235"></span><span id="pointLocationStructureFrom"><span class="annot"><span class="annottext">pointLocationStructureFrom :: forall edge vertex r face.
+(LineSegment_ edge vertex, Point_ vertex 2 r, Ord r,
+ Fractional r) =&gt;
+CPlaneGraph () vertex edge face -&gt; PointLocationDS vertex edge face
+</span><a href="HGeometry.Line.BatchPointLocation.html#pointLocationStructureFrom"><span class="hs-identifier hs-var hs-var">pointLocationStructureFrom</span></a></span></span><span> </span><span id="local-6989586621679564794"><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+</span><a href="#local-6989586621679564794"><span class="hs-identifier hs-var">gr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+-&gt; VerticalRayShootingStructure
+     (ClosedLineSegment vertex
+      :+ DartIx (CPlaneGraph () vertex edge face))
+-&gt; FaceIx (CPlaneGraph () vertex edge face)
+-&gt; PointLocationDS vertex edge face
+forall v e f.
+Subdiv v e f
+-&gt; VerticalRayShootingStructure
+     (ClosedLineSegment v :+ DartIx (Subdiv v e f))
+-&gt; FaceIx (Subdiv v e f)
+-&gt; PointLocationDS v e f
+</span><a href="HGeometry.PointLocation.Type.html#PointLocationDS"><span class="hs-identifier hs-var">PointLocationDS</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+</span><a href="#local-6989586621679564794"><span class="hs-identifier hs-var">gr</span></a></span><span> </span><span class="annot"><span class="annottext">VerticalRayShootingStructure
+  (ClosedLineSegment vertex
+   :+ DartIx (CPlaneGraph () vertex edge face))
+VerticalRayShootingStructure'
+  (NumType (ClosedLineSegment vertex))
+  (ClosedLineSegment vertex :+ DartId ())
+</span><a href="#local-6989586621679564796"><span class="hs-identifier hs-var">vrDS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+</span><a href="#local-6989586621679564794"><span class="hs-identifier hs-var">gr</span></a></span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+-&gt; Getting
+     (FaceId ()) (CPlaneGraph () vertex edge face) (FaceId ())
+-&gt; FaceId ()
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Indexed (FaceId ()) face (Const (FaceId ()) face)
+-&gt; CPlaneGraph () vertex edge face
+-&gt; Const (FaceId ()) (CPlaneGraph () vertex edge face)
+Indexed
+  (FaceId ())
+  (Face (CPlaneGraph () vertex edge face))
+  (Const (FaceId ()) (Face (CPlaneGraph () vertex edge face)))
+-&gt; CPlaneGraph () vertex edge face
+-&gt; Const (FaceId ()) (CPlaneGraph () vertex edge face)
+forall planeGraph.
+(HasOuterFace planeGraph, Eq (FaceIx planeGraph)) =&gt;
+IndexedLens' (FaceIx planeGraph) planeGraph (Face planeGraph)
+IndexedLens'
+  (FaceIx (CPlaneGraph () vertex edge face))
+  (CPlaneGraph () vertex edge face)
+  (Face (CPlaneGraph () vertex edge face))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.PlanarGraph.Class.html#outerFace"><span class="hs-identifier hs-var">outerFace</span></a></span><span class="annot"><span class="annottext">(Indexed (FaceId ()) face (Const (FaceId ()) face)
+ -&gt; CPlaneGraph () vertex edge face
+ -&gt; Const (FaceId ()) (CPlaneGraph () vertex edge face))
+-&gt; ((FaceId () -&gt; Const (FaceId ()) (FaceId ()))
+    -&gt; Indexed (FaceId ()) face (Const (FaceId ()) face))
+-&gt; Getting
+     (FaceId ()) (CPlaneGraph () vertex edge face) (FaceId ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(FaceId () -&gt; Const (FaceId ()) (FaceId ()))
+-&gt; Indexed (FaceId ()) face (Const (FaceId ()) face)
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s.
+(Indexable i p, Contravariant f, Functor f) =&gt;
+p i (f i) -&gt; Indexed i s (f s)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Internal.Indexed.html#asIndex"><span class="hs-identifier hs-var">asIndex</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-236"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-237"></span><span>    </span><span id="local-6989586621679564796"><span class="annot"><span class="annottext">vrDS :: VerticalRayShootingStructure'
+  (NumType (ClosedLineSegment vertex))
+  (ClosedLineSegment vertex :+ DartId ())
+</span><a href="#local-6989586621679564796"><span class="hs-identifier hs-var hs-var">vrDS</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VerticalRayShootingStructure'
+  (NumType (ClosedLineSegment vertex))
+  (ClosedLineSegment vertex :+ DartId ())
+-&gt; Maybe
+     (VerticalRayShootingStructure'
+        (NumType (ClosedLineSegment vertex))
+        (ClosedLineSegment vertex :+ DartId ()))
+-&gt; VerticalRayShootingStructure'
+     (NumType (ClosedLineSegment vertex))
+     (ClosedLineSegment vertex :+ DartId ())
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char]
+-&gt; VerticalRayShootingStructure'
+     (NumType (ClosedLineSegment vertex))
+     (ClosedLineSegment vertex :+ DartId ())
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;pointLocationStructureFrom. precondition failed&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-238"></span><span>         </span><span class="annot"><span class="annottext">(Maybe
+   (VerticalRayShootingStructure'
+      (NumType (ClosedLineSegment vertex))
+      (ClosedLineSegment vertex :+ DartId ()))
+ -&gt; VerticalRayShootingStructure'
+      (NumType (ClosedLineSegment vertex))
+      (ClosedLineSegment vertex :+ DartId ()))
+-&gt; ([ClosedLineSegment vertex :+ DartId ()]
+    -&gt; Maybe
+         (VerticalRayShootingStructure'
+            (NumType (ClosedLineSegment vertex))
+            (ClosedLineSegment vertex :+ DartId ())))
+-&gt; [ClosedLineSegment vertex :+ DartId ()]
+-&gt; VerticalRayShootingStructure'
+     (NumType (ClosedLineSegment vertex))
+     (ClosedLineSegment vertex :+ DartId ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (ClosedLineSegment vertex :+ DartId ())
+-&gt; Maybe
+     (VerticalRayShootingStructure
+        (ClosedLineSegment vertex :+ DartId ()))
+NonEmpty (ClosedLineSegment vertex :+ DartId ())
+-&gt; Maybe
+     (VerticalRayShootingStructure'
+        (NumType (ClosedLineSegment vertex))
+        (ClosedLineSegment vertex :+ DartId ()))
+forall lineSegment point r (nonEmpty :: * -&gt; *).
+(LineSegment_ lineSegment point, Point_ point 2 r, Ord r,
+ Fractional r, Foldable1 nonEmpty) =&gt;
+nonEmpty lineSegment
+-&gt; Maybe (VerticalRayShootingStructure lineSegment)
+</span><a href="HGeometry.VerticalRayShooting.PersistentSweep.html#verticalRayShootingStructure%27"><span class="hs-identifier hs-var">verticalRayShootingStructure'</span></a></span><span>
+</span><span id="line-239"></span><span>         </span><span class="annot"><span class="annottext">(NonEmpty (ClosedLineSegment vertex :+ DartId ())
+ -&gt; Maybe
+      (VerticalRayShootingStructure'
+         (NumType (ClosedLineSegment vertex))
+         (ClosedLineSegment vertex :+ DartId ())))
+-&gt; ([ClosedLineSegment vertex :+ DartId ()]
+    -&gt; NonEmpty (ClosedLineSegment vertex :+ DartId ()))
+-&gt; [ClosedLineSegment vertex :+ DartId ()]
+-&gt; Maybe
+     (VerticalRayShootingStructure'
+        (NumType (ClosedLineSegment vertex))
+        (ClosedLineSegment vertex :+ DartId ()))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((ClosedLineSegment vertex :+ DartId ())
+ -&gt; ClosedLineSegment vertex :+ DartId ())
+-&gt; NonEmpty (ClosedLineSegment vertex :+ DartId ())
+-&gt; NonEmpty (ClosedLineSegment vertex :+ DartId ())
+forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(ClosedLineSegment vertex :+ DartId ())
+-&gt; ClosedLineSegment vertex :+ DartId ()
+</span><a href="#local-6989586621679564804"><span class="hs-identifier hs-var">orientLR'</span></a></span><span>
+</span><span id="line-240"></span><span>         </span><span class="annot"><span class="annottext">(NonEmpty (ClosedLineSegment vertex :+ DartId ())
+ -&gt; NonEmpty (ClosedLineSegment vertex :+ DartId ()))
+-&gt; ([ClosedLineSegment vertex :+ DartId ()]
+    -&gt; NonEmpty (ClosedLineSegment vertex :+ DartId ()))
+-&gt; [ClosedLineSegment vertex :+ DartId ()]
+-&gt; NonEmpty (ClosedLineSegment vertex :+ DartId ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[ClosedLineSegment vertex :+ DartId ()]
+-&gt; NonEmpty (ClosedLineSegment vertex :+ DartId ())
+forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="hs-comment">-- Note: by the precondition this is safe.</span><span>
+</span><span id="line-241"></span><span>         </span><span class="annot"><span class="annottext">([ClosedLineSegment vertex :+ DartId ()]
+ -&gt; VerticalRayShootingStructure'
+      (NumType (ClosedLineSegment vertex))
+      (ClosedLineSegment vertex :+ DartId ()))
+-&gt; [ClosedLineSegment vertex :+ DartId ()]
+-&gt; VerticalRayShootingStructure'
+     (NumType (ClosedLineSegment vertex))
+     (ClosedLineSegment vertex :+ DartId ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+</span><a href="#local-6989586621679564794"><span class="hs-identifier hs-var">gr</span></a></span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+-&gt; Getting
+     (Endo [ClosedLineSegment vertex :+ DartId ()])
+     (CPlaneGraph () vertex edge face)
+     (ClosedLineSegment vertex :+ DartId ())
+-&gt; [ClosedLineSegment vertex :+ DartId ()]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Indexed
+  (DartId ())
+  (ClosedLineSegment vertex)
+  (Const
+     (Endo [ClosedLineSegment vertex :+ DartId ()])
+     (ClosedLineSegment vertex))
+-&gt; CPlaneGraph () vertex edge face
+-&gt; Const
+     (Endo [ClosedLineSegment vertex :+ DartId ()])
+     (CPlaneGraph () vertex edge face)
+forall planeGraph vertex.
+(HasEdges planeGraph planeGraph, BidirGraph_ planeGraph,
+ vertex ~ Vertex planeGraph, Point_ vertex 2 (NumType vertex)) =&gt;
+IndexedFold
+  (EdgeIx planeGraph) planeGraph (ClosedLineSegment vertex)
+IndexedFold
+  (EdgeIx (CPlaneGraph () vertex edge face))
+  (CPlaneGraph () vertex edge face)
+  (ClosedLineSegment vertex)
+</span><a href="HGeometry.PlaneGraph.Class.html#edgeSegments"><span class="hs-identifier hs-var">edgeSegments</span></a></span><span class="annot"><span class="annottext">(Indexed
+   (DartId ())
+   (ClosedLineSegment vertex)
+   (Const
+      (Endo [ClosedLineSegment vertex :+ DartId ()])
+      (ClosedLineSegment vertex))
+ -&gt; CPlaneGraph () vertex edge face
+ -&gt; Const
+      (Endo [ClosedLineSegment vertex :+ DartId ()])
+      (CPlaneGraph () vertex edge face))
+-&gt; (((ClosedLineSegment vertex :+ DartId ())
+     -&gt; Const
+          (Endo [ClosedLineSegment vertex :+ DartId ()])
+          (ClosedLineSegment vertex :+ DartId ()))
+    -&gt; Indexed
+         (DartId ())
+         (ClosedLineSegment vertex)
+         (Const
+            (Endo [ClosedLineSegment vertex :+ DartId ()])
+            (ClosedLineSegment vertex)))
+-&gt; Getting
+     (Endo [ClosedLineSegment vertex :+ DartId ()])
+     (CPlaneGraph () vertex edge face)
+     (ClosedLineSegment vertex :+ DartId ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((ClosedLineSegment vertex :+ DartId ())
+ -&gt; Const
+      (Endo [ClosedLineSegment vertex :+ DartId ()])
+      (ClosedLineSegment vertex :+ DartId ()))
+-&gt; Indexed
+     (DartId ())
+     (ClosedLineSegment vertex)
+     (Const
+        (Endo [ClosedLineSegment vertex :+ DartId ()])
+        (ClosedLineSegment vertex))
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s t j.
+(Indexable i p, Functor f) =&gt;
+p (s :+ i) (f (t :+ j)) -&gt; Indexed i s (f t)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#asIndexedExt"><span class="hs-identifier hs-var">asIndexedExt</span></a></span><span>
+</span><span id="line-242"></span><span>
+</span><span id="line-243"></span><span>    </span><span id="local-6989586621679564804"><span class="annot"><span class="annottext">orientLR' :: (ClosedLineSegment vertex :+ DartId ())
+-&gt; ClosedLineSegment vertex :+ DartId ()
+</span><a href="#local-6989586621679564804"><span class="hs-identifier hs-var hs-var">orientLR'</span></a></span></span><span> </span><span id="local-6989586621679564809"><span class="annot"><span class="annottext">e' :: ClosedLineSegment vertex :+ DartId ()
+</span><a href="#local-6989586621679564809"><span class="hs-identifier hs-var">e'</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679564810"><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679564810"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679564811"><span class="annot"><span class="annottext">DartId ()
+</span><a href="#local-6989586621679564811"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679564810"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(vertex -&gt; Const (Point 2 r) vertex)
+-&gt; ClosedLineSegment vertex
+-&gt; Const (Point 2 r) (ClosedLineSegment vertex)
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' (ClosedLineSegment vertex) vertex
+</span><span class="hs-identifier hs-var">start</span></span><span class="annot"><span class="annottext">((vertex -&gt; Const (Point 2 r) vertex)
+ -&gt; ClosedLineSegment vertex
+ -&gt; Const (Point 2 r) (ClosedLineSegment vertex))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679564810"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(vertex -&gt; Const (Point 2 r) vertex)
+-&gt; ClosedLineSegment vertex
+-&gt; Const (Point 2 r) (ClosedLineSegment vertex)
+forall seg p. HasEnd seg p =&gt; Lens' seg p
+Lens' (ClosedLineSegment vertex) vertex
+</span><span class="hs-identifier hs-var">end</span></span><span class="annot"><span class="annottext">((vertex -&gt; Const (Point 2 r) vertex)
+ -&gt; ClosedLineSegment vertex
+ -&gt; Const (Point 2 r) (ClosedLineSegment vertex))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679564810"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; DartId () -&gt; ClosedLineSegment vertex :+ DartId ()
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+</span><a href="#local-6989586621679564794"><span class="hs-identifier hs-var">gr</span></a></span><span class="annot"><span class="annottext">CPlaneGraph () vertex edge face
+-&gt; Getting
+     (DartId ()) (CPlaneGraph () vertex edge face) (DartId ())
+-&gt; DartId ()
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">DartIx (CPlaneGraph () vertex edge face)
+-&gt; Getter
+     (CPlaneGraph () vertex edge face)
+     (DartIx (CPlaneGraph () vertex edge face))
+forall graph.
+BidirGraph_ graph =&gt;
+DartIx graph -&gt; Getter graph (DartIx graph)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#twinOf"><span class="hs-identifier hs-var">twinOf</span></a></span><span> </span><span class="annot"><span class="annottext">DartIx (CPlaneGraph () vertex edge face)
+DartId ()
+</span><a href="#local-6989586621679564811"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-244"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex :+ DartId ()
+</span><a href="#local-6989586621679564809"><span class="hs-identifier hs-var">e'</span></a></span><span>
+</span><span id="line-245"></span><span>    </span><span class="hs-comment">-- given an upward vertical ray, we want to get the dart corresponding to the line segment</span><span>
+</span><span id="line-246"></span><span>    </span><span class="hs-comment">-- we hit. If this line segment is oriented left to right then its DartIx itself</span><span>
+</span><span id="line-247"></span><span>    </span><span class="hs-comment">-- corresponds to the &quot;top&quot;-side (i.e. this particular dart d) would store a pointer</span><span>
+</span><span id="line-248"></span><span>    </span><span class="hs-comment">-- to the face above the segment. Hence, in that case we take the twin dart (by which we can)</span><span>
+</span><span id="line-249"></span><span>    </span><span class="hs-comment">-- then get the face below the edge.</span><span>
+</span><span id="line-250"></span><span>
+</span><span id="line-251"></span><span>
+</span><span id="line-252"></span><span>
+</span><span id="line-253"></span><span class="hs-comment">-- pointLocationStructureFrom         :: Intersections r lineSegment</span><span>
+</span><span id="line-254"></span><span class="hs-comment">--                                    -&gt; set lineSegment</span><span>
+</span><span id="line-255"></span><span class="hs-comment">--                                    -&gt; PointLocationDS r lineSegment</span><span>
+</span><span id="line-256"></span><span class="hs-comment">-- pointLocationStructureFrom ix segs = sweep eventw</span><span>
+</span><span id="line-257"></span><span>
+</span><span id="line-258"></span><span>
+</span><span id="line-259"></span><span>
+</span><span id="line-260"></span><span>
+</span><span id="line-261"></span><span class="hs-comment">-- | Given a query point, and the structure</span><span>
+</span><span id="line-262"></span><span class="hs-comment">--</span><span>
+</span><span id="line-263"></span><span class="hs-comment">-- reports the interval/slab containing the query point, and the line</span><span>
+</span><span id="line-264"></span><span class="hs-comment">-- directly above the query point (if such a line exists).</span><span>
+</span><span id="line-265"></span><span class="hs-comment">--</span><span>
+</span><span id="line-266"></span><span class="hs-comment">-- pre: the query point lies inside the rectangle on which the data structure was constructed.</span><span>
+</span><span id="line-267"></span><span class="hs-comment">--</span><span>
+</span><span id="line-268"></span><span class="hs-comment">-- \(O(\log n)\)</span><span>
+</span><span id="line-269"></span><span id="local-6989586621679563690"><span id="local-6989586621679563691"><span id="local-6989586621679563692"><span id="local-6989586621679563693"><span id="local-6989586621679563694"><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#pointLocate"><span class="hs-identifier hs-type">pointLocate</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563690"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563691"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679563691"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679563691"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-270"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LineSegment_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563692"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563693"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679563693"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679563691"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-271"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasSupportingLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679563692"><span class="hs-identifier hs-type">edge</span></a></span><span>
+</span><span id="line-272"></span><span>                    </span><span class="hs-special">)</span><span>
+</span><span id="line-273"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679563690"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563693"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563692"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563694"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-274"></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.PlanarGraph.Class.html#FaceIx"><span class="hs-identifier hs-type">FaceIx</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PointLocation.Type.html#PointLocationDS"><span class="hs-identifier hs-type">PointLocationDS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563693"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563692"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679563694"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-275"></span><span id="pointLocate"><span class="annot"><span class="annottext">pointLocate :: forall queryPoint r edge vertex f.
+(Point_ queryPoint 2 r, Num r, Ord r, LineSegment_ edge vertex,
+ Point_ vertex 2 r, HasSupportingLine edge) =&gt;
+queryPoint
+-&gt; PointLocationDS vertex edge f
+-&gt; FaceIx (PointLocationDS vertex edge f)
+</span><a href="HGeometry.Line.BatchPointLocation.html#pointLocate"><span class="hs-identifier hs-var hs-var">pointLocate</span></a></span></span><span> </span><span id="local-6989586621679565039"><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679565039"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679565040"><span class="annot"><span class="annottext">PointLocationDS vertex edge f
+</span><a href="#local-6989586621679565040"><span class="hs-identifier hs-var">ds</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">queryPoint
+-&gt; VerticalRayShootingStructure
+     (ClosedLineSegment vertex :+ DartId ())
+-&gt; Maybe (ClosedLineSegment vertex :+ DartId ())
+forall lineSegment point r queryPoint.
+(LineSegment_ lineSegment point, Point_ point 2 r,
+ Point_ queryPoint 2 r, Ord r, Num r,
+ HasSupportingLine lineSegment) =&gt;
+queryPoint
+-&gt; VerticalRayShootingStructure lineSegment -&gt; Maybe lineSegment
+</span><a href="HGeometry.VerticalRayShooting.PersistentSweep.html#segmentAbove"><span class="hs-identifier hs-var">segmentAbove</span></a></span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679565039"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PointLocationDS vertex edge f
+</span><a href="#local-6989586621679565040"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS vertex edge f
+-&gt; Getting
+     (VerticalRayShootingStructure'
+        (NumType (ClosedLineSegment vertex))
+        (ClosedLineSegment vertex :+ DartId ()))
+     (PointLocationDS vertex edge f)
+     (VerticalRayShootingStructure'
+        (NumType (ClosedLineSegment vertex))
+        (ClosedLineSegment vertex :+ DartId ()))
+-&gt; VerticalRayShootingStructure'
+     (NumType (ClosedLineSegment vertex))
+     (ClosedLineSegment vertex :+ DartId ())
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(VerticalRayShootingStructure
+   (ClosedLineSegment vertex :+ DartIx (Subdiv vertex edge f))
+ -&gt; Const
+      (VerticalRayShootingStructure'
+         (NumType (ClosedLineSegment vertex))
+         (ClosedLineSegment vertex :+ DartId ()))
+      (VerticalRayShootingStructure
+         (ClosedLineSegment vertex :+ DartIx (Subdiv vertex edge f))))
+-&gt; PointLocationDS vertex edge f
+-&gt; Const
+     (VerticalRayShootingStructure'
+        (NumType (ClosedLineSegment vertex))
+        (ClosedLineSegment vertex :+ DartId ()))
+     (PointLocationDS vertex edge f)
+Getting
+  (VerticalRayShootingStructure'
+     (NumType (ClosedLineSegment vertex))
+     (ClosedLineSegment vertex :+ DartId ()))
+  (PointLocationDS vertex edge f)
+  (VerticalRayShootingStructure'
+     (NumType (ClosedLineSegment vertex))
+     (ClosedLineSegment vertex :+ DartId ()))
+forall v e f1 (f2 :: * -&gt; *).
+Functor f2 =&gt;
+(VerticalRayShootingStructure
+   (ClosedLineSegment v :+ DartIx (Subdiv v e f1))
+ -&gt; f2
+      (VerticalRayShootingStructure
+         (ClosedLineSegment v :+ DartIx (Subdiv v e f1))))
+-&gt; PointLocationDS v e f1 -&gt; f2 (PointLocationDS v e f1)
+</span><a href="HGeometry.PointLocation.Type.html#vrStructure"><span class="hs-identifier hs-var">vrStructure</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-276"></span><span>  </span><span class="annot"><span class="annottext">Maybe (ClosedLineSegment vertex :+ DartId ())
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationDS vertex edge f
+</span><a href="#local-6989586621679565040"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS vertex edge f
+-&gt; Getting (FaceId ()) (PointLocationDS vertex edge f) (FaceId ())
+-&gt; FaceId ()
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (FaceId ()) (PointLocationDS vertex edge f) (FaceId ())
+(FaceIx (Subdiv vertex edge f)
+ -&gt; Const (FaceId ()) (FaceIx (Subdiv vertex edge f)))
+-&gt; PointLocationDS vertex edge f
+-&gt; Const (FaceId ()) (PointLocationDS vertex edge f)
+forall v e f1 (f2 :: * -&gt; *).
+Functor f2 =&gt;
+(FaceIx (Subdiv v e f1) -&gt; f2 (FaceIx (Subdiv v e f1)))
+-&gt; PointLocationDS v e f1 -&gt; f2 (PointLocationDS v e f1)
+</span><a href="HGeometry.PointLocation.Type.html#outerFaceIx"><span class="hs-identifier hs-var">outerFaceIx</span></a></span><span>
+</span><span id="line-277"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679565042"><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679565042"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679565043"><span class="annot"><span class="annottext">DartId ()
+</span><a href="#local-6989586621679565043"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationDS vertex edge f
+</span><a href="#local-6989586621679565040"><span class="hs-identifier hs-var">ds</span></a></span><span class="annot"><span class="annottext">PointLocationDS vertex edge f
+-&gt; Getting (FaceId ()) (PointLocationDS vertex edge f) (FaceId ())
+-&gt; FaceId ()
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Subdiv vertex edge f -&gt; Const (FaceId ()) (Subdiv vertex edge f))
+-&gt; PointLocationDS vertex edge f
+-&gt; Const (FaceId ()) (PointLocationDS vertex edge f)
+forall v e f1 (f2 :: * -&gt; *).
+Functor f2 =&gt;
+(Subdiv v e f1 -&gt; f2 (Subdiv v e f1))
+-&gt; PointLocationDS v e f1 -&gt; f2 (PointLocationDS v e f1)
+</span><a href="HGeometry.PointLocation.Type.html#subdivision"><span class="hs-identifier hs-var">subdivision</span></a></span><span class="annot"><span class="annottext">((Subdiv vertex edge f -&gt; Const (FaceId ()) (Subdiv vertex edge f))
+ -&gt; PointLocationDS vertex edge f
+ -&gt; Const (FaceId ()) (PointLocationDS vertex edge f))
+-&gt; ((FaceId () -&gt; Const (FaceId ()) (FaceId ()))
+    -&gt; Subdiv vertex edge f
+    -&gt; Const (FaceId ()) (Subdiv vertex edge f))
+-&gt; Getting (FaceId ()) (PointLocationDS vertex edge f) (FaceId ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">DartIx (Subdiv vertex edge f)
+-&gt; IndexedLens'
+     (FaceIx (Subdiv vertex edge f))
+     (Subdiv vertex edge f)
+     (Face (Subdiv vertex edge f))
+forall planarGraph.
+PlanarGraph_ planarGraph =&gt;
+DartIx planarGraph
+-&gt; IndexedLens' (FaceIx planarGraph) planarGraph (Face planarGraph)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.PlanarGraph.Class.html#incidentFaceOf"><span class="hs-identifier hs-var">incidentFaceOf</span></a></span><span> </span><span class="annot"><span class="annottext">DartIx (Subdiv vertex edge f)
+DartId ()
+</span><a href="#local-6989586621679565043"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">(Indexed (FaceId ()) f (Const (FaceId ()) f)
+ -&gt; Subdiv vertex edge f
+ -&gt; Const (FaceId ()) (Subdiv vertex edge f))
+-&gt; ((FaceId () -&gt; Const (FaceId ()) (FaceId ()))
+    -&gt; Indexed (FaceId ()) f (Const (FaceId ()) f))
+-&gt; (FaceId () -&gt; Const (FaceId ()) (FaceId ()))
+-&gt; Subdiv vertex edge f
+-&gt; Const (FaceId ()) (Subdiv vertex edge f)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(FaceId () -&gt; Const (FaceId ()) (FaceId ()))
+-&gt; Indexed (FaceId ()) f (Const (FaceId ()) f)
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s.
+(Indexable i p, Contravariant f, Functor f) =&gt;
+p i (f i) -&gt; Indexed i s (f s)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.5-af8f0435b03c00f06f5d03b52ea927527529d0c03b8a7eee42e07e484fdea6cb/share/doc/html/src/Control.Lens.Internal.Indexed.html#asIndex"><span class="hs-identifier hs-var">asIndex</span></a></span><span>
+</span><span id="line-278"></span><span>
+</span><span id="line-279"></span><span>
+</span><span id="line-280"></span><span>
+</span><span id="line-281"></span><span>
+</span><span id="line-282"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-283"></span><span>
+</span><span id="line-284"></span><span class="annot"><span class="hs-comment">-- | Concat a nonEmpty list with a list</span></span><span>
+</span><span id="line-285"></span><span id="local-6989586621679563868"><span class="annot"><a href="HGeometry.Line.BatchPointLocation.html#%3C%3C%3E"><span class="hs-operator hs-type">(&lt;&lt;&gt;)</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679563868"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679563868"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679563868"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-286"></span><span class="hs-special">(</span><span id="local-6989586621679565045"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679565045"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679565047"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679565047"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span id="%3C%3C%3E"><span class="annot"><span class="annottext">&lt;&lt;&gt; :: forall a. NonEmpty a -&gt; [a] -&gt; NonEmpty a
+</span><a href="HGeometry.Line.BatchPointLocation.html#%3C%3C%3E"><span class="hs-operator hs-var hs-var">&lt;&lt;&gt;</span></a></span></span><span> </span><span id="local-6989586621679565048"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679565048"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679565045"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679565047"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [a]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679565048"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-287"></span></pre></body></html>

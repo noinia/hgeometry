@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Plane</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Non-vertical planes in R^3</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Plane.html"><span class="hs-identifier">HGeometry.Plane</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier">Plane</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#NonVerticalHyperPlane"><span class="hs-identifier">NonVerticalHyperPlane</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#NonVerticalHyperPlane"><span class="hs-identifier">NonVerticalHyperPlane</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier">Plane</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.html#projectedIntersectionLine"><span class="hs-identifier">projectedIntersectionLine</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html"><span class="hs-identifier">HGeometry.HyperPlane.Class</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html"><span class="hs-identifier">HGeometry.HyperPlane.Class</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html"><span class="hs-identifier">HGeometry.HyperPlane.Intersection</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html"><span class="hs-identifier">HGeometry.HyperPlane.NonVertical</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.General.html"><span class="hs-identifier">HGeometry.Line.General</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- | Given two planes, computes the downward projection of line in</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- which they intersect.</span><span>
+</span><span id="line-28"></span><span id="local-6989586621679438450"><span id="local-6989586621679438451"><span class="annot"><a href="HGeometry.Plane.html#projectedIntersectionLine"><span class="hs-identifier hs-type">projectedIntersectionLine</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#Plane_"><span class="hs-identifier hs-type">Plane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679438450"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679438451"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679438451"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679438451"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>                               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679438450"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679438450"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-30"></span><span>                               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.General.html#VerticalOrLineEQ"><span class="hs-identifier hs-type">VerticalOrLineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679438451"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-31"></span><span id="projectedIntersectionLine"><span class="annot"><span class="annottext">projectedIntersectionLine :: forall plane r.
+(Plane_ plane r, Fractional r, Eq r) =&gt;
+plane -&gt; plane -&gt; Maybe (VerticalOrLineEQ r)
+</span><a href="HGeometry.Plane.html#projectedIntersectionLine"><span class="hs-identifier hs-var hs-var">projectedIntersectionLine</span></a></span></span><span> </span><span id="local-6989586621679438478"><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679438478"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679438479"><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679438479"><span class="hs-identifier hs-var">h'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-type">Plane_x_Plane_Line</span></a></span><span> </span><span id="local-6989586621679438481"><span class="annot"><a href="#local-6989586621679438481"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">plane
+-&gt; plane
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall plane r.
+(Plane_ plane r, Fractional r, Eq r) =&gt;
+plane
+-&gt; plane
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+</span><a href="HGeometry.HyperPlane.Intersection.html#planePlaneIntersection"><span class="hs-identifier hs-var">planePlaneIntersection</span></a></span><span> </span><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679438478"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679438479"><span class="hs-identifier hs-var">h'</span></a></span><span>
+</span><span id="line-32"></span><span>                                    </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621679438481"><span class="hs-identifier hs-type">l</span></a></span><span>
+</span><span id="line-33"></span></pre></body></html>
