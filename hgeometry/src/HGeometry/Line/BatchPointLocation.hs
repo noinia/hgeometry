@@ -12,7 +12,7 @@ module HGeometry.Line.BatchPointLocation
   ( PointLocationDS, subdivision, vrStructure, outerFaceIx
   , PointLocationDS'
   , buildPointLocationStructure
-  -- , pointLocationStructure
+  , pointLocationStructureIn
   , groupQueries
   ) where
 
@@ -54,30 +54,38 @@ groupQueries               :: ( Point_ queryPoint 2 r
                               , IsIntersectableWith line (Rectangle (Point 2 r))
                               , Intersection line (Rectangle (Point 2 r)) ~
                                 Maybe (LineBoxIntersection 2 r)
+
+                              , Show line, Show r
                               )
                            => NonEmpty queryPoint
                            -> set line
-                           -> MonoidalNEMap (FaceIx (PointLocationDS' r line)) (NonEmpty queryPoint)
+                           -> MonoidalNEMap (FaceIx (PointLocationDS' r line))
+                                            (NonEmpty queryPoint)
 groupQueries queries lines = foldMap1 (\q -> singleton (pointLocate q pointLocDS)
                                                        (NonEmpty.singleton q)
                                       ) queries
   where
-    pointLocDS = buildPointLocationStructure queries lines
+    pointLocDS = traceShowId $ buildPointLocationStructure queries lines
+
 
 -- | Construct the point location structure (restricted to the)
--- bounding box of the query points
+-- bounding box of the given object
 --
-buildPointLocationStructure         :: ( IsBoxable query
-                                       , NumType query ~ r, Dimension query ~ 2
-                                       , Ord r, Fractional r
-                                       , Line_ line 2 r
-                                       , Foldable set, Eq line
-                                       , IsIntersectableWith line (Rectangle (Point 2 r))
-                                       , Intersection line (Rectangle (Point 2 r)) ~
-                                         Maybe (LineBoxIntersection 2 r)
-                                       )
-                                    => query -> set line -> PointLocationDS' r line
-buildPointLocationStructure queries = pointLocationStructureIn (grow 1 $ boundingBox queries)
+buildPointLocationStructure   :: ( IsBoxable geom
+                                 , NumType geom ~ r, Dimension geom ~ 2
+                                 , Ord r, Fractional r
+
+                                 , Show r, Show line
+
+
+                                 , Line_ line 2 r
+                                 , Foldable set, Eq line
+                                 , IsIntersectableWith line (Rectangle (Point 2 r))
+                                 , Intersection line (Rectangle (Point 2 r)) ~
+                                   Maybe (LineBoxIntersection 2 r)
+                                 )
+                              => geom -> set line -> PointLocationDS' r line
+buildPointLocationStructure g = pointLocationStructureIn (grow 1 $ boundingBox g)
   where
     -- grow _ _  = Box (Point2 (-1) (-1))
     --                 (Point2 101 101)
