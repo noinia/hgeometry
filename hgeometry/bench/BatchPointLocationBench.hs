@@ -104,11 +104,18 @@ runExperiment r n = do
     -- print grs
     -- print "==== results ======"
     -- traverse_ (print . answerBatch planes) grs
-    before <- getCurrentTime
-    batchedPointLocation queries planes `deepseq` (pure ())
-    after <- getCurrentTime
-    putStrLn $ "running time: " <> show (diffUTCTime after before)
+    tBatched <- timed $ batchedPointLocation queries planes
+    tNaive   <- timed $ naivePlanesAbove     queries planes
+    putStrLn $ "batched point loc: " <> show tBatched
+    putStrLn $ "naive: " <> show tNaive
     putStrLn "========="
+
+timed    :: NFData a => a -> IO NominalDiffTime
+timed x = do
+    before <- getCurrentTime
+    x `deepseq` (pure ())
+    after <- getCurrentTime
+    pure $ diffUTCTime after before
 
 main :: IO ()
 main = traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
