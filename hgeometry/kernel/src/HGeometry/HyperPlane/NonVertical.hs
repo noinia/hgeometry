@@ -117,7 +117,7 @@ instance {-# OVERLAPPING #-} Read r => Read (NonVerticalHyperPlane 3 r) where
 -- >>> asNonVerticalHyperPlane myOtherLine
 -- Just (NonVerticalHyperPlane [-1.5,-2.0])
 -- >>> asNonVerticalHyperPlane myPlane
--- Just (NonVerticalHyperPlane [2.0,3.0,10.0])
+-- Just (Plane 2.0 3.0 10.0)
 asNonVerticalHyperPlane :: ( HyperPlane_ hyperPlane d r
                            , Fractional r, Eq r, 1 <= d
                            )
