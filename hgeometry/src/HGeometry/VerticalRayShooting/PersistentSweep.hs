@@ -19,6 +19,8 @@ module HGeometry.VerticalRayShooting.PersistentSweep
   , lookupAbove, lookupAboveOrOn, searchInSlab
   ) where
 
+import           Control.DeepSeq
+import           GHC.Generics (Generic)
 import           Control.Lens hiding (contains, below)
 import           Data.Foldable (toList)
 import           Data.Functor.Contravariant (phantom)
@@ -49,10 +51,11 @@ data VerticalRayShootingStructure' r lineSegment =
                                  , _sweepStruct :: V.Vector (r :+ StatusStructure lineSegment)
                                    -- ^ entry (r :+ s) means that "just" left of "r" the
                                    -- status structure is 's', i.e up to 'r'
-                                 } deriving (Show,Eq)
+                                 } deriving (Show,Eq,Generic)
 
 -- TODO this is very similar to the 'Alternating' sequence structure; so see if we can reuse code
 
+instance (NFData r, NFData lineSegment) => NFData (VerticalRayShootingStructure' r lineSegment)
 
 -- | The status structure
 type StatusStructure lineSegment = SS.Set lineSegment

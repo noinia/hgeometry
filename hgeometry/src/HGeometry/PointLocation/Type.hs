@@ -17,6 +17,7 @@ module HGeometry.PointLocation.Type
   ) where
 
 
+import Control.DeepSeq
 import Control.Lens
 import HGeometry.Ext
 import HGeometry.Point
@@ -24,6 +25,7 @@ import HGeometry.LineSegment
 import HGeometry.PlaneGraph.Connected
 import HGeometry.Properties
 import HGeometry.VerticalRayShooting.PersistentSweep
+import GHC.Generics(Generic)
 
 --------------------------------------------------------------------------------
 
@@ -36,10 +38,13 @@ data PointLocationDS v e f  =
                                     (ClosedLineSegment v :+ DartIx (Subdiv v e f))
                   , _outerFaceIx :: FaceIx (Subdiv v e f)
                   }
+  deriving (Generic)
 
 makeLenses ''PointLocationDS
 
 deriving instance (Show v, Show e, Show f, Show (NumType v)) => Show (PointLocationDS v e f)
+
+instance (NFData v, NFData e, NFData f, NFData (NumType v)) => NFData (PointLocationDS v e f)
 
 -- TODO: make the edge type in the VRS something that is strict in extra
 

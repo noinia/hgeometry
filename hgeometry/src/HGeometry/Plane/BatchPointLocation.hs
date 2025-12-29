@@ -11,6 +11,7 @@
 module HGeometry.Plane.BatchPointLocation
   ( batchedPointLocation
   , groupQueries
+  , answerBatch
   ) where
 
 import Data.Foldable1
@@ -69,6 +70,9 @@ answerBatch planes queries = foldMap1 query queries
     query q = NEMap.singleton q $ case binarySearchFirstIdxIn (q `liesBelow'`) sortedPlanes of
                                     Nothing -> Vector.empty
                                     Just i  -> Vector.drop i sortedPlanes
+                                               -- Vector.slice i 1 sortedPlanes
+                                               -- this just reports the single plane; just for
+                                               -- profiling purposes
 
     q0 :: Point 2 r
     q0 = projectPoint $ (NonEmpty.head $ toNonEmpty queries)^.asPoint

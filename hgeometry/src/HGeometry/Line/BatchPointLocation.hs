@@ -55,7 +55,7 @@ groupQueries               :: ( Point_ queryPoint 2 r
                               , Intersection line (Rectangle (Point 2 r)) ~
                                 Maybe (LineBoxIntersection 2 r)
 
-                              , Show line, Show r
+                              -- , Show line, Show r
                               )
                            => NonEmpty queryPoint
                            -> set line
@@ -65,7 +65,7 @@ groupQueries queries lines = foldMap1 (\q -> singleton (pointLocate q pointLocDS
                                                        (NonEmpty.singleton q)
                                       ) queries
   where
-    pointLocDS = traceShowId $ buildPointLocationStructure queries lines
+    pointLocDS = buildPointLocationStructure queries lines
 
 
 -- | Construct the point location structure (restricted to the)
@@ -75,7 +75,7 @@ buildPointLocationStructure   :: ( IsBoxable geom
                                  , NumType geom ~ r, Dimension geom ~ 2
                                  , Ord r, Fractional r
 
-                                 , Show r, Show line
+                                 -- , Show r, Show line
 
 
                                  , Line_ line 2 r
@@ -87,8 +87,6 @@ buildPointLocationStructure   :: ( IsBoxable geom
                               => geom -> set line -> PointLocationDS' r line
 buildPointLocationStructure g = pointLocationStructureIn (grow 1 $ boundingBox g)
   where
-    -- grow _ _  = Box (Point2 (-1) (-1))
-    --                 (Point2 101 101)
     grow d (Box p q) = Box (p&coordinates %~ subtract d)
                            (q&coordinates %~ (+d))
 
@@ -188,6 +186,9 @@ pointLocationStructureIn            :: forall set line r.
                                        , IsIntersectableWith line (Rectangle (Point 2 r))
                                        , Intersection line (Rectangle (Point 2 r)) ~
                                          Maybe (LineBoxIntersection 2 r)
+
+
+                                       -- , Show r, Show line
                                        )
                                     => Rectangle (Point 2 r)
                                        -- ^ bounding rectangle
@@ -209,7 +210,8 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
 
 
     segs :: NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
-    segs = (toNonEmpty $ (:+ Nothing) <$> sides rect)
+    segs =
+      (toNonEmpty $ (:+ Nothing) <$> sides rect)
          <<> mapMaybe clip (toList lines)
 
     clip l = l `intersect` rect >>= \case
@@ -279,5 +281,6 @@ pointLocate q ds = case segmentAbove q (ds^.vrStructure) of
 
 --------------------------------------------------------------------------------
 
-
+-- | Concat a nonEmpty list with a list
+(<<>) :: NonEmpty a -> [a] -> NonEmpty a
 (x :| xs) <<> ys = x :| (xs ++ ys)

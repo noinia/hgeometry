@@ -34,6 +34,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
+import           Control.DeepSeq
 import           GHC.Generics (Generic)
 import           HGeometry.Boundary
 import           HGeometry.Box
@@ -77,6 +78,10 @@ _CPlanarGraph :: Iso (CPlaneGraph s v e f)         (CPlaneGraph s v' e' f')
                      (CPlanarGraph Primal s v e f) (CPlanarGraph Primal s v' e' f')
 _CPlanarGraph = coerced
 {-# INLINE _CPlanarGraph #-}
+
+--------------------------------------------------------------------------------
+
+instance (NFData v, NFData e, NFData f) => NFData (CPlaneGraph s v e f)
 
 ----------------------------------------
 
