@@ -19,7 +19,7 @@ import Data.Map.NonEmpty qualified as NEMap
 import Data.Set qualified as Set
 import HGeometry.Line.BatchPointLocation qualified as Line
 import Data.Time
-
+import Prelude hiding (lines)
 -- import Data.Fixed
 
 import Interval
@@ -63,9 +63,11 @@ fromPoints = asNonVerticalHyperPlane @(HyperPlane 3 r) . hyperPlaneThrough
 --------------------------------------------------------------------------------
 
 -- | Helper function to generate uniformly random points at integer
--- coordinates in an [0,127]^3 grid.
-fromPoint   :: Point 3 Word8 -> Point 3 R
-fromPoint p = p&coordinates %~ fromIntegral
+-- coordinates in an [0,100]^3 grid.
+fromPoint   :: Point 3 Word -> Point 3 R
+fromPoint p = p&coordinates %~ \x -> fromIntegral x / rescale
+  where
+    rescale = fromIntegral $ ((maxBound :: Word) `div` 100)
 
 
 --------------------------------------------------------------------------------
@@ -121,8 +123,24 @@ timed x = do
     after <- getCurrentTime
     pure $ diffUTCTime after before
 
+instance Real r => IpeWriteText (IntervalReal r) where
+  ipeWriteText = ipeWriteText . realToFrac @(IntervalReal r) @Rational
+
+
 main :: IO ()
-main = traverse_ (\r -> runExperiment r (r^5)) [20] -- [10, 15, 20]
+main = do
+  traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
+
+  -- planes  <- force                      <$> randomPlanes 20
+  -- queries <- force . fmap fromPoint     <$> randomPoints 10_000
+  -- let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
+
+  -- let content :: [IpeObject R]
+  --     content = concat [ (iO . defIO . projectPoint @2) <$> toList queries
+  --                      , (iO . defIO)                   <$> toList lines
+  --                      ]
+  -- writeIpeFile [osp|bench_points.ipe|] $ singlePageFromContent content
+
   -- defaultMain
   --   [ bgroup "Batched point location/computing conflict lists Benchmarks"
   --       [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
@@ -132,10 +150,6 @@ main = traverse_ (\r -> runExperiment r (r^5)) [20] -- [10, 15, 20]
 
 
 {-
-  let content = concat [ (iO . defIO . projectPoint @2) <$> toList queries
-                       , (iO . defIO)                   <$> toList lines
-                       ]
-  writeIpeFile [osp|bench_points.ipe|] $ singlePageFromContent content
 -}
 -- -}
 --   print $ batchedPointLocation queries planes

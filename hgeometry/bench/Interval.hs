@@ -53,5 +53,8 @@ instance (Fractional r, Ord r) => Fractional (IntervalReal r) where
   fromRational x = IR (fromRational x) (fromRational x)
   (IR ix x) / (IR iy y) = IR (ix / iy) (x / y)
 
+instance Real r => Real (IntervalReal r) where
+  toRational (IR _ x) = toRational x
+
 
 -- instance Uniform r => Uniform (IntervalReal r) where
