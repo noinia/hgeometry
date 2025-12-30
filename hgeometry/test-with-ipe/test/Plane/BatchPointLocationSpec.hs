@@ -17,7 +17,7 @@ import Ipe
 import System.OsPath
 import Control.Lens
 import HGeometry.Ext
-import HGeometry.Number.Real.Rational
+import R
 import HGeometry.PlaneGraph.Connected
 import Test.Hspec.WithTempFile
 import Test.Hspec.QuickCheck
@@ -35,9 +35,6 @@ import Prelude hiding (lines)
 
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec :: Spec
 spec = describe "Plane.BatchedPointlocation" $ do

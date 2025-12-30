@@ -14,7 +14,7 @@ import           HGeometry.Ext
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
@@ -31,8 +31,6 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 dataPath :: OsPath
 dataPath = [osp|data/test-with-ipe/Triangle/|]

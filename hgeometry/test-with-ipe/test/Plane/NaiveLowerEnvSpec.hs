@@ -16,7 +16,7 @@ import qualified Data.Text as Text
 import           Golden
 import           HGeometry.Ext
 import           HGeometry.Intersection
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Plane.LowerEnvelope.Clipped
 import           HGeometry.Point
 import           HGeometry.Polygon
@@ -34,13 +34,6 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
-
---
-
-
 
 
 -- type ClippedMinimizationDiagram' r plane = NEMap plane (ClippedMDCell r (MDVertex r plane))

@@ -19,7 +19,7 @@ import           HGeometry.HalfSpace
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Point.Either
@@ -35,9 +35,6 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 -- I would have liked to give the following instance for simple polygons,
 -- but recombining the chains is more complicated I initially realized;

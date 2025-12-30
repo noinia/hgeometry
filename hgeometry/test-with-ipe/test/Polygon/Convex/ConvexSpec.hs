@@ -11,7 +11,7 @@ import           Golden
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
@@ -25,10 +25,6 @@ import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
-
---------------------------------------------------------------------------------
-
-type R = RealNumber 10
 
 --------------------------------------------------------------------------------
 

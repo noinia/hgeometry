@@ -15,7 +15,7 @@ import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.LineSegment
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon.Instances ()
 import           Ipe
@@ -24,8 +24,6 @@ import           Test.Hspec
 
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = describe "LineSegment x HalfSpace intersetion tests" $ do

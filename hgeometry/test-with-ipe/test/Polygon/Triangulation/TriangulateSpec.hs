@@ -6,7 +6,7 @@ import           Control.Lens
 -- import           Debug.Trace
 import           HGeometry
 import           HGeometry.Ext
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Triangulation
@@ -21,8 +21,6 @@ import           Test.Hspec
 -- import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = describe "triangulateSpec" $ do

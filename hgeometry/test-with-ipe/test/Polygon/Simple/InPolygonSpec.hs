@@ -12,7 +12,7 @@ import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.LineSegment
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
 import           Ipe
@@ -25,8 +25,6 @@ import           Test.QuickCheck.Instances ()
 -- import           HGeometry.Interval
 -- import           HGeometry.Polygon.Simple.InPolygon
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = do
