@@ -14,10 +14,9 @@ import           HGeometry.Point
 import           HGeometry.RangeTree
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
+import           R
 
 --------------------------------------------------------------------------------
-
-type R = Int
 
 spec :: Spec
 spec = describe "RangeTree tests" $ do
