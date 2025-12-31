@@ -747,6 +747,22 @@ library ply-writer
        , hgeometry:kernel
        , colour                  >= 2.3.6         && < 3
 
+
+--------------------------------------------------------------------------------
+-- * NumType Implementations:
+
+library numtypes
+  import: setup
+  visibility: private
+  hs-source-dirs: numtypes
+  exposed-modules:
+    Int
+    Int32
+    Double
+    Float
+    Rational
+    RawRational
+
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
