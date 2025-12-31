@@ -146,9 +146,12 @@ intersectImpl       :: ( HyperPlane_ line 2 r
                        ) => line -> lineSegment
                     -> Maybe (LineLineSegmentIntersection lineSegment)
 l `intersectImpl` s = l `intersect` supportingLine s >>= \case
-    Line_x_Line_Point p | p `onSegment` s -> Just $ Line_x_LineSegment_Point p
-                        | otherwise       -> Nothing
-    Line_x_Line_Line _  -> Just $ Line_x_LineSegment_LineSegment s
+    Line_x_Line_Point p
+      | p `inPerpendicularSlab` s -> Just $ Line_x_LineSegment_Point p
+      | otherwise                 -> Nothing
+    Line_x_Line_Line _            -> Just $ Line_x_LineSegment_LineSegment s
+    -- Note that a point p that lies (i) on the supporting line of s,
+    -- and (ii) in the slab perpendicular to s must lie *on* s itself.
 {-# INLINE intersectImpl #-}
 
 

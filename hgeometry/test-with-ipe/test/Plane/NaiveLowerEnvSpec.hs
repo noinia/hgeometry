@@ -5,7 +5,7 @@ module Plane.NaiveLowerEnvSpec
   ) where
 
 import           HGeometry.Cyclic
-import           Control.Lens hiding (IsEmpty, IsNonEmpty)
+import           Control.Lens
 import           Data.Foldable
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
