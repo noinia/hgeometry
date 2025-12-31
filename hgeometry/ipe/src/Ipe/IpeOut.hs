@@ -37,7 +37,6 @@ import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Line.General
 import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point

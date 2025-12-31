@@ -885,13 +885,13 @@ test-suite hspec-rational
   mixins:
       hgeometry:numtypes (Rational as R)
 
--- test-suite hspec-intervalreal
---   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
---                     quickcheck-setup, test-fractional
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   mixins:
---       hgeometry:numtypes (IntervalReal as R)
+test-suite hspec-intervalreal
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+                    quickcheck-setup, test-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  mixins:
+      hgeometry:numtypes (IntervalReal as R)
 
 -- test-suite hspec-double
 --   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
@@ -985,7 +985,7 @@ common with-ipe-hspec-fractional
       , wavefront              >= 0.7.1.5 && < 0.8
       , exceptions             >= 0.10.9  && < 0.11
 
--- tests with ipe dependency
+
 test-suite with-ipe-hspec-rational
   import:           all-setup, ipe-setup, all-quickcheck-setup,
                     quickcheck-setup, with-ipe-hspec-fractional
@@ -995,6 +995,14 @@ test-suite with-ipe-hspec-rational
   mixins:
       hgeometry:numtypes (Rational as R)
 
+test-suite with-ipe-hspec-intervalreal
+  import:           all-setup, ipe-setup, all-quickcheck-setup,
+                    quickcheck-setup, with-ipe-hspec-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs:   test-with-ipe/test
+  mixins:
+      hgeometry:numtypes (IntervalReal as R)
 
 --------------------------------------------------------------------------------
 -- ** Ipe Tests
