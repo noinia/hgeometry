@@ -39,7 +39,8 @@ import GHC.TypeLits
 -- If the number cannot be displayed exactly a '~' is printed after
 -- the number.
 newtype RealNumber (p :: Nat) = RealNumber Rational
-  deriving (Eq,Ord,Data,Num,Fractional,Real,RealFrac,Generic,ToJSON,FromJSON,NFData)
+  deriving stock (Eq,Ord,Data,Generic)
+  deriving newtype (NFData,Num,Fractional,Real,RealFrac,ToJSON,FromJSON)
 
 data NatPrec (p :: Nat) = NatPrec
 

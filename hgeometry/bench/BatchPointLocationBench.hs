@@ -5,7 +5,6 @@ import Data.Maybe
 import Data.Foldable
 import Control.DeepSeq
 import Data.Word
-import HGeometry.Number.Real.Rational
 import HGeometry.Kernel
 import Control.Lens
 import System.Random
@@ -26,9 +25,11 @@ import HGeometry.Plane
 import HGeometry.Combinatorial.Util
 import Ipe
 import System.OsPath
-import R
---------------------------------------------------------------------------------
 
+import HGeometry.Number.Real.Rational
+-- import R
+--------------------------------------------------------------------------------
+type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 
@@ -99,7 +100,10 @@ runExperiment r n = do
     let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
         ds    = Line.pointLocationStructureIn (Rect (-1) (-1) 128 128) lines
         -- res = Line.groupQueries (projectPoint @2 <$> queries) lines
-    ds `seq` (pure ())
+    -- ds `seq` (pure ())
+
+
+
     -- print ds
     -- print res
     -- print "========="
@@ -123,6 +127,7 @@ timed x = do
 
 main :: IO ()
 main = do
+  -- traverse_ (\r -> runExperiment r r) [3] -- [10, 15, 20]
   traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
 
   -- planes  <- force                      <$> randomPlanes 20
