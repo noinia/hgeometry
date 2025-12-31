@@ -995,14 +995,14 @@ test-suite with-ipe-hspec-rational
   mixins:
       hgeometry:numtypes (Rational as R)
 
-test-suite with-ipe-hspec-intervalreal
-  import:           all-setup, ipe-setup, all-quickcheck-setup,
-                    quickcheck-setup, with-ipe-hspec-fractional
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  hs-source-dirs:   test-with-ipe/test
-  mixins:
-      hgeometry:numtypes (IntervalReal as R)
+-- test-suite with-ipe-hspec-intervalreal
+--   import:           all-setup, ipe-setup, all-quickcheck-setup,
+--                     quickcheck-setup, with-ipe-hspec-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   hs-source-dirs:   test-with-ipe/test
+--   mixins:
+--       hgeometry:numtypes (IntervalReal as R)
 
 --------------------------------------------------------------------------------
 -- ** Ipe Tests
@@ -1087,7 +1087,8 @@ benchmark batchPointLocation
   main-is:        BatchPointLocationBench.hs
   type:           exitcode-stdio-1.0
   mixins:
-      hgeometry:numtypes (IntervalReal as R)
+      -- hgeometry:numtypes (IntervalReal as R)
+      hgeometry:numtypes (Rational as R)
   build-depends:
          hgeometry:ipe
        , time                    >= 1.14 && < 1.16
