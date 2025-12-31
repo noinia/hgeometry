@@ -21,6 +21,8 @@ module HGeometry.LineSegment.Internal
   , asALineSegment
 
   , StartEnd(..)
+
+  , inPerpendicularSlab
   ) where
 
 
@@ -292,9 +294,21 @@ instance {-# OVERLAPPING #-}
 onSegment2                          :: ( Point_ point 2 r, Point_ point' 2 r, Ord r, Num r
                                        , LineSegment_ lineSegment point')
                                     => point -> lineSegment -> Bool
-onSegment2 q seg@(LineSegment_ s t) =
-    onLine q supLine && shouldBe (seg^.startPoint.to endPointType) (onSide q l) LeftSide
-                     && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) RightSide
+onSegment2 q seg@(LineSegment_ s t) = inPerpendicularSlab q seg && onLine q supLine
+  where
+    supLine = LinePV (s^.asPoint) (t .-. s)
+  -- note: we test whether we are in the slab first; since that involves less precision
+  -- and thus tends to be faster (in case there is no intersection)
+
+-- | Test if the given query point q lies in the slab perpendicular to
+-- the given line segment
+inPerpendicularSlab                          :: ( Point_ point 2 r, Point_ point' 2 r, Ord r, Num r
+                                                , LineSegment_ lineSegment point'
+                                                )
+                                             => point -> lineSegment -> Bool
+inPerpendicularSlab q seg@(LineSegment_ s t) =
+       shouldBe (seg^.startPoint.to endPointType) (onSide q l) LeftSide
+    && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) RightSide
   where
     supLine = LinePV (s^.asPoint) (t .-. s)
     l = perpendicularTo supLine
@@ -305,6 +319,8 @@ onSegment2 q seg@(LineSegment_ s t) =
     shouldBe et a side = case et of
       Open   -> a == side
       Closed -> a == side || a == OnLine
+
+
 
 instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
          ) => HasOnSegment (ClosedLineSegment point) 2 where
