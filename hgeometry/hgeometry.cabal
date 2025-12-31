@@ -752,7 +752,7 @@ library ply-writer
 -- * NumType Implementations:
 
 library numtypes
-  import: setup
+  import: all-setup
   visibility: private
   hs-source-dirs: numtypes
   exposed-modules:
@@ -854,8 +854,9 @@ test-suite hspec
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
+  mixins:
+      hgeometry:numtypes (Rational as R)
   other-modules:
-      R
       Spec
       ConvexHull.ConvexHullSpec
       ConvexHull.MelkmanSpec
@@ -883,6 +884,7 @@ test-suite hspec
   hs-source-dirs: test, polygon/test
   build-depends:
       hgeometry:quickcheck
+    , hgeometry:numtypes
 
 test-suite doctest
     import:           all-setup, all-quickcheck-setup, quickcheck-setup, doctest
@@ -896,8 +898,9 @@ test-suite with-ipe-hspec
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
+  mixins:
+      hgeometry:numtypes (Rational as R)
   other-modules:
-      R
       Spec
       Paths_hgeometry
       Golden
@@ -951,6 +954,7 @@ test-suite with-ipe-hspec
         hspec-with-tempfile    >= 0.1
       , hgeometry:ipe
       , hgeometry:quickcheck
+      , hgeometry:numtypes
       , wavefront              >= 0.7.1.5 && < 0.8
       , exceptions             >= 0.10.9  && < 0.11
 
