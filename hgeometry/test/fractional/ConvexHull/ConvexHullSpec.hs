@@ -87,6 +87,16 @@ spec = do
             in hull === NonEmpty.sort hull
 
 
+        prop "GrahamScan and JarvisMarch lower hulls are the same" $
+          \(PS pts) ->
+            (GrahamScan.lowerHull pts) === (JarvisMarch.lowerHull pts)
+
+        it "steepestccwfrom correct" $
+          JarvisMarch.steepestCcwFrom origin
+                                      (NonEmpty.fromList [Point2 1 0, Point2 2 0, Point2 1 1])
+          `shouldBe` (Point2 2 0 :: Point 2 R)
+
+
 newtype PG = PG (ConvexPolygon (Point 2 R)) deriving (Show)
 
 instance Eq PG where
