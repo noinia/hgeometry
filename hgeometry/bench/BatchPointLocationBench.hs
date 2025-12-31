@@ -22,16 +22,13 @@ import Data.Time
 import Prelude hiding (lines)
 -- import Data.Fixed
 
-import Interval
 import HGeometry.Plane
 import HGeometry.Combinatorial.Util
 import Ipe
 import System.OsPath
-
+import R
 --------------------------------------------------------------------------------
 
-type R = IntervalReal (RealNumber 5)
--- type R = Pico
 
 --------------------------------------------------------------------------------
 

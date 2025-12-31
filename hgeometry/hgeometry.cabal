@@ -762,6 +762,7 @@ library numtypes
     Float
     Rational
     RawRational
+    IntervalReal
 
 --------------------------------------------------------------------------------
 -- * Test Suites
@@ -884,13 +885,21 @@ test-suite hspec-rational
   mixins:
       hgeometry:numtypes (Rational as R)
 
-test-suite hspec-double
+test-suite hspec-intervalreal
   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
                     quickcheck-setup, test-fractional
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   mixins:
-      hgeometry:numtypes (Double as R)
+      hgeometry:numtypes (IntervalReal as R)
+
+-- test-suite hspec-double
+--   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+--                     quickcheck-setup, test-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   mixins:
+--       hgeometry:numtypes (Double as R)
 
 test-suite hspec-integral
   import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
@@ -1033,14 +1042,13 @@ common bench-setup
     , hgeometry
     , deepseq-generics      >= 0.2  && < 1
     , hashable              >= 1.4  && < 2
+    , hgeometry:numtypes
 
 benchmark benchmarks
   import: all-setup, hgeometry-setup, bench-setup
   hs-source-dirs: bench
-  main-is:
-    Benchmarks.hs
+  main-is:        Benchmarks.hs
   type: exitcode-stdio-1.0
-
   other-modules:
     ConvexHull.Bench
     ConvexHull.GrahamBench
@@ -1051,11 +1059,10 @@ benchmark benchmarks
     Util
 
 benchmark lowerEnv
-  import: all-setup, hgeometry-setup, bench-setup
+  import:         all-setup, hgeometry-setup, bench-setup
   hs-source-dirs: bench
-  main-is:
-    LowerEnvBench.hs
-  type: exitcode-stdio-1.0
+  main-is:        LowerEnvBench.hs
+  type:           exitcode-stdio-1.0
   -- ghc-options:
   --   -prof
   --   -fprof-late-inline
@@ -1064,18 +1071,15 @@ benchmark lowerEnv
   other-modules:
 
 benchmark batchPointLocation
-  import: all-setup, hgeometry-setup, bench-setup
+  import:         all-setup, hgeometry-setup, bench-setup
   hs-source-dirs: bench
-  main-is:
-    BatchPointLocationBench.hs
-  type: exitcode-stdio-1.0
-  other-modules:
-    Interval
+  main-is:        BatchPointLocationBench.hs
+  type:           exitcode-stdio-1.0
+  mixins:
+      hgeometry:numtypes (IntervalReal as R)
   build-depends:
          hgeometry:ipe
        , time                    >= 1.14 && < 1.16
-       , rounded-hw              >= 0.4  && < 0.5
-
 
 benchmark vector-bench
     import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
