@@ -854,6 +854,10 @@ test-suite hspec
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
+  hs-source-dirs: test/fractional, polygon/test
+  build-depends:
+      hgeometry:quickcheck
+    , hgeometry:numtypes
   mixins:
       hgeometry:numtypes (Rational as R)
   other-modules:
@@ -862,7 +866,6 @@ test-suite hspec
       ConvexHull.MelkmanSpec
       ConvexHull.R3Spec
       ClosestPair.ClosestPairSpec
-      IntervalTreeSpec
       LowerEnvelope.RegionsSpec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.UnboundedSpec
@@ -873,18 +876,29 @@ test-suite hspec
       Polygon.PickPointSpec
       PolyLine.Simplification.ImaiIriSpec
       PolyLine.Frechet.DiscreteSpec
-      SegmentTreeSpec
-      SegmentTree.R2Spec
-      RangeTreeSpec
       VerticalRayShootingSpec
       LineSegment.BentheyOttmanNeighbourSpec
       Graphics.CameraSpec
       Plane.LowerEnvSpec
 
-  hs-source-dirs: test, polygon/test
+test-suite hspec-integral
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs: test/integral
   build-depends:
       hgeometry:quickcheck
     , hgeometry:numtypes
+  mixins:
+      hgeometry:numtypes (Int as R)
+  other-modules:
+      Spec
+      SegmentTreeSpec
+      SegmentTree.R2Spec
+      RangeTreeSpec
+      IntervalTreeSpec
+
 
 test-suite doctest
     import:           all-setup, all-quickcheck-setup, quickcheck-setup, doctest
