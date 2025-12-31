@@ -4,7 +4,6 @@ import Data.Ord
 import Data.Maybe
 import Control.Lens
 import Data.Foldable
-import Data.Foldable1
 import HGeometry.VerticalRayShooting.PersistentSweep
 import HGeometry.Ext
 import HGeometry.Vector
@@ -12,14 +11,11 @@ import HGeometry.Intersection
 import HGeometry.HalfLine
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.List.NonEmpty (NonEmpty(..))
-import HGeometry.Number.Real.Rational
 import HGeometry.LineSegment
 import HGeometry.Point
 import Test.Hspec
-
+import R
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = describe "VerticalRayShooting Tests" $ do

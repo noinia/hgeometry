@@ -49,6 +49,7 @@ import           HGeometry.Interval.EndPoint
 import           HGeometry.LineSegment
 import qualified HGeometry.Matrix as Matrix
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Number.Real.Interval
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Class
@@ -186,6 +187,9 @@ instance IpeWriteText Integer where
 
 instance IpeWriteText (RealNumber p) where
   ipeWriteText = ipeWriteText . realToFrac @(RealNumber p) @Rational
+
+instance Real r => IpeWriteText (IntervalReal r) where
+  ipeWriteText = ipeWriteText . realToFrac @(IntervalReal r) @Rational
 
 instance HasResolution p => IpeWriteText (Fixed p) where
   ipeWriteText = writeByShow

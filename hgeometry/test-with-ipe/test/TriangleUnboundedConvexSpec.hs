@@ -30,7 +30,7 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
---------------------------------------------------------------------------------
+--------------------------------------------------------------------------------x
 
 dataPath :: OsPath
 dataPath = [osp|data/test-with-ipe/Triangle/|]

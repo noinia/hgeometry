@@ -5,7 +5,7 @@ module ConvexHull.R3Spec (spec) where
 -- import qualified Data.List.NonEmpty as NonEmpty
 -- import qualified HGeometry.ConvexHull.R3.Naive.Dual as Dual
 import           HGeometry.Instances ()
-import           R
+-- import           R
 -- import           HGeometry.Point
 -- import           HGeometry.Triangle
 import           Test.Hspec

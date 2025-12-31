@@ -21,6 +21,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (maybeToList)
 import           HGeometry
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Number.Real.Interval
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Monotone
 import           HGeometry.Polygon.Simple
@@ -117,11 +118,19 @@ instance Arbitrary (SimplePolygon (Point 2 Double)) where
   --   | otherwise = cutEars p ++ simplifyP p
 
 
+instance Arbitrary (SimplePolygon (Point 2 (IntervalReal (RealNumber (p::Nat))))) where
+  arbitrary = over (vertices.coordinates) realToFrac
+           <$> (arbitrary :: Gen (SimplePolygon (Point 2 (RealNumber p))))
+  shrink = map (over (vertices.coordinates) realToFrac) . shrink . trunc
+    where
+      trunc :: SimplePolygon (Point 2 (IntervalReal (RealNumber p)))
+            -> SimplePolygon (Point 2               (RealNumber p))
+      trunc = over (vertices.coordinates) realToFrac
+
 instance Arbitrary (SimplePolygon (Point 2 (RealNumber (p::Nat)))) where
   arbitrary = over (vertices.coordinates) realToFrac
            <$> (arbitrary :: Gen (SimplePolygon (Point 2 Rational)))
-  shrink = map (over (vertices.coordinates) realToFrac)
-         . shrink . trunc
+  shrink = map (over (vertices.coordinates) realToFrac) . shrink . trunc
     where
       trunc :: SimplePolygon (Point 2 (RealNumber (p::Nat))) -> SimplePolygon (Point 2 Rational)
       trunc = over (vertices.coordinates) realToFrac

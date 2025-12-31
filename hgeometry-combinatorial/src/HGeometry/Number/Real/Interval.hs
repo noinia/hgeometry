@@ -10,6 +10,7 @@
 
 module HGeometry.Number.Real.Interval
   ( IntervalReal
+  , exactValue
   ) where
 
 -- import Numeric.Rounded.Hardware
@@ -18,6 +19,7 @@ import Numeric.Rounded.Hardware.Interval.Class
 import Numeric.Rounded.Hardware.Interval.NonEmpty
 import GHC.Generics(Generic)
 import Control.DeepSeq
+import Data.Bifunctor
 
 --------------------------------------------------------------------------------
 
@@ -25,12 +27,17 @@ import Control.DeepSeq
 data IntervalReal r = IR {-# UNPACK#-}!(Interval Double) r
   deriving (Generic)
 
+-- | Get the exact vavlue of the interval-real.
+exactValue          :: IntervalReal r -> r
+exactValue (IR _ x) = x
+
 instance NFData r => NFData (IntervalReal r)
 
 instance Show r => Show (IntervalReal r) where
   showsPrec d (IR _ r) = showsPrec d r
 
-
+instance (Read r, Real r, Fractional r) => Read (IntervalReal r) where
+  readsPrec i = fmap (first realToFrac) . readsPrec i
 
 instance Eq r => Eq (IntervalReal r)  where
   (IR ix x) == (IR iy y) = not (disjoint ix iy) && x == y

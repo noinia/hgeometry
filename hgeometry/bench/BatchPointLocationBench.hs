@@ -120,9 +120,6 @@ timed x = do
     after <- getCurrentTime
     pure $ diffUTCTime after before
 
-instance Real r => IpeWriteText (IntervalReal r) where
-  ipeWriteText = ipeWriteText . realToFrac @(IntervalReal r) @Rational
-
 
 main :: IO ()
 main = do
