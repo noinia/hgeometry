@@ -26,6 +26,7 @@ import HGeometry.Combinatorial.Util
 import Ipe
 import System.OsPath
 import R
+
 --------------------------------------------------------------------------------
 
 
@@ -123,6 +124,7 @@ timed x = do
 
 main :: IO ()
 main = do
+  setStdGen $ mkStdGen 12453
   traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
 
 
