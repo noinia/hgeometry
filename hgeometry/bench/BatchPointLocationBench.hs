@@ -112,7 +112,13 @@ runExperiment r n = do
     tNaive   <- timed $ naivePlanesAbove     queries planes
     putStrLn $ "batched point loc: " <> show tBatched
     putStrLn $ "naive: " <> show tNaive
-    putStrLn "========="
+    -- putStrLn "========="
+    -- defaultMain
+    --   [ bgroup "Batched point location/computing conflict lists Benchmarks"
+    --       [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
+    --       , bench "Brute Force"          $ nf (uncurry naivePlanesAbove)     (queries, planes)
+    --       ]
+    --   ]
 
 timed    :: NFData a => a -> IO NominalDiffTime
 timed x = do
