@@ -849,17 +849,12 @@ test-suite kernel-doctest
 --------------------------------------------------------------------------------
 -- ** HGeometry
 
-test-suite hspec
-  import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
+common test-fractional
   build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  hs-source-dirs: test/fractional, polygon/test
   build-depends:
       hgeometry:quickcheck
     , hgeometry:numtypes
-  mixins:
-      hgeometry:numtypes (Rational as R)
+  hs-source-dirs: test/fractional, polygon/test
   other-modules:
       Spec
       ConvexHull.ConvexHullSpec
@@ -880,6 +875,22 @@ test-suite hspec
       LineSegment.BentheyOttmanNeighbourSpec
       Graphics.CameraSpec
       Plane.LowerEnvSpec
+
+test-suite hspec-rational
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+                    quickcheck-setup, test-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  mixins:
+      hgeometry:numtypes (Rational as R)
+
+test-suite hspec-double
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+                    quickcheck-setup, test-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  mixins:
+      hgeometry:numtypes (Double as R)
 
 test-suite hspec-integral
   import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
