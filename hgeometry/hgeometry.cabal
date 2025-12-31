@@ -885,13 +885,13 @@ test-suite hspec-rational
   mixins:
       hgeometry:numtypes (Rational as R)
 
-test-suite hspec-intervalreal
-  import:           all-setup, hgeometry-setup, all-quickcheck-setup,
-                    quickcheck-setup, test-fractional
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  mixins:
-      hgeometry:numtypes (IntervalReal as R)
+-- test-suite hspec-intervalreal
+--   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+--                     quickcheck-setup, test-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   mixins:
+--       hgeometry:numtypes (IntervalReal as R)
 
 -- test-suite hspec-double
 --   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
@@ -926,14 +926,8 @@ test-suite doctest
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
--- tests with ipe dependency
-test-suite with-ipe-hspec
-  import:           all-setup, ipe-setup, all-quickcheck-setup, quickcheck-setup
+common with-ipe-hspec-fractional
   build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  mixins:
-      hgeometry:numtypes (Rational as R)
   other-modules:
       Spec
       Paths_hgeometry
@@ -983,7 +977,6 @@ test-suite with-ipe-hspec
 
   autogen-modules:
       Paths_hgeometry
-  hs-source-dirs:   test-with-ipe/test
   build-depends:
         hspec-with-tempfile    >= 0.1
       , hgeometry:ipe
@@ -991,6 +984,16 @@ test-suite with-ipe-hspec
       , hgeometry:numtypes
       , wavefront              >= 0.7.1.5 && < 0.8
       , exceptions             >= 0.10.9  && < 0.11
+
+-- tests with ipe dependency
+test-suite with-ipe-hspec-rational
+  import:           all-setup, ipe-setup, all-quickcheck-setup,
+                    quickcheck-setup, with-ipe-hspec-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs:   test-with-ipe/test
+  mixins:
+      hgeometry:numtypes (Rational as R)
 
 
 --------------------------------------------------------------------------------

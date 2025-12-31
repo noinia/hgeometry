@@ -16,7 +16,6 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Line.General
 import           HGeometry.LineSegment
 import           R
 import           HGeometry.Point
