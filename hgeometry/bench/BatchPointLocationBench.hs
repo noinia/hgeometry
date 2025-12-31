@@ -5,7 +5,6 @@ import Data.Maybe
 import Data.Foldable
 import Control.DeepSeq
 import Data.Word
-import HGeometry.Number.Real.Rational
 import HGeometry.Kernel
 import Control.Lens
 import System.Random
@@ -91,6 +90,7 @@ naivePlanesAbove queries planes =
 
 --------------------------------------------------------------------------------
 
+runExperiment     :: Int -> Int -> IO ()
 runExperiment r n = do
     putStrLn $ "r = " <> show r <> ", n = " <> show n
     planes  <- force                      <$> randomPlanes r
@@ -124,29 +124,6 @@ timed x = do
 main :: IO ()
 main = do
   traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
-
-  -- planes  <- force                      <$> randomPlanes 20
-  -- queries <- force . fmap fromPoint     <$> randomPoints 10_000
-  -- let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
-
-  -- let content :: [IpeObject R]
-  --     content = concat [ (iO . defIO . projectPoint @2) <$> toList queries
-  --                      , (iO . defIO)                   <$> toList lines
-  --                      ]
-  -- writeIpeFile [osp|bench_points.ipe|] $ singlePageFromContent content
-
-  -- defaultMain
-  --   [ bgroup "Batched point location/computing conflict lists Benchmarks"
-  --       [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
-  --       , bench "Brute Force"          $ nf (uncurry naivePlanesAbove)     (queries, planes)
-  --       ]
-  --   ]
-
-
-{-
--}
--- -}
---   print $ batchedPointLocation queries planes
 
 
 {-

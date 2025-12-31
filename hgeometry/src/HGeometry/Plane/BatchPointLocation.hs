@@ -67,7 +67,7 @@ answerBatch                :: forall set set' plane queryPoint r.
                            -> NEMap.NEMap queryPoint (Vector.Vector plane)
 answerBatch planes queries = foldMap1 query queries
   where
-    query q = NEMap.singleton q $ case binarySearchFirstIdxIn (q `liesBelow'`) sortedPlanes of
+    query q = NEMap.singleton q $ case binarySearchFirstIdxIn (q `liesBelow`) sortedPlanes of
                                     Nothing -> Vector.empty
                                     Just i  -> Vector.drop i sortedPlanes
                                                -- Vector.slice i 1 sortedPlanes
@@ -81,8 +81,8 @@ answerBatch planes queries = foldMap1 query queries
     sortedPlanes  :: Vector.Vector plane
     sortedPlanes  = sortOn (evalAt q0 :: plane -> r) planes
 
-    liesBelow'       :: queryPoint -> plane -> Bool
-    q `liesBelow'` h = verticalSideTest q h /= GT
+    liesBelow       :: queryPoint -> plane -> Bool
+    q `liesBelow` h = verticalSideTest q h /= GT
 
 --------------------------------------------------------------------------------
 
