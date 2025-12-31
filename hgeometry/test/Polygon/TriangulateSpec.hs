@@ -5,7 +5,7 @@ import           Control.Lens
 import           Data.Maybe (fromJust)
 import           HGeometry
 import           HGeometry.Ext
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
@@ -20,9 +20,6 @@ import           Test.QuickCheck.Instances ()
 
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 
 spec :: Spec

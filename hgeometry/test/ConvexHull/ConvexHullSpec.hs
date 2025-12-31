@@ -8,7 +8,7 @@ import qualified HGeometry.ConvexHull.JarvisMarch as JarvisMarch
 import qualified HGeometry.ConvexHull.QuickHull as QuickHull
 import           HGeometry.Cyclic
 import           HGeometry.Instances ()
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
@@ -18,8 +18,6 @@ import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 newtype PointSet = PS (NonEmpty (Point 2 R))
   deriving newtype (Show,Eq)

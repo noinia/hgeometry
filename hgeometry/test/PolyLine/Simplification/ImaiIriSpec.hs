@@ -3,7 +3,7 @@ module PolyLine.Simplification.ImaiIriSpec
 
 import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Ext
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.PolyLine.Simplification.ImaiIri
@@ -11,9 +11,6 @@ import           Test.Hspec
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 mkPoly :: [Point 2 R :+ Int] -> PolyLine (Point 2 R :+ Int)
 mkPoly = polyLineFromPoints . NonEmpty.fromList
