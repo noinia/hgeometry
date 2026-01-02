@@ -33,7 +33,7 @@ import PlaneGraph.RenderSpec
 import Data.Map.NonEmpty qualified as NEMap
 import Prelude hiding (lines)
 
-import Debug.Trace
+-- import Debug.Trace
 --------------------------------------------------------------------------------
 
 spec :: Spec
@@ -85,13 +85,12 @@ debug name (Input theQueryPoints thePlanes) = describe "debug" $ do
          goldenWith [osp|data/test-with-ipe/golden/Plane/|]
            (ipeFileGolden { name      = name }
            )
-           ( let lines = traceShowWith ("lines",) $
-                         mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2)
+           ( let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2)
                        $ uniquePairs thePlanes
                  theQueryPoints2D = (\q -> projectPoint (q^.asPoint)) <$> theQueryPoints
                  myLines'     = (iO . defIO) <$> lines
                  queryPoints' = (iO . defIO) <$> theQueryPoints2D
-                 answers      = traceShowWith ("ansers",) $ Line.groupQueries theQueryPoints2D lines
+                 answers      = Line.groupQueries theQueryPoints2D lines
                  lr pts       = (iO . defIO) <$> pts
                  answers'     = [ iO $ ipeGroup (lr group) ! attr SLayer (LayerName (Text.show i))
                                 | (i, group) <- zip [0..] (toList answers)
