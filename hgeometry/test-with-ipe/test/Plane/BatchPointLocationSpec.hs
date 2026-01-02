@@ -17,7 +17,7 @@ import Ipe
 import System.OsPath
 import Control.Lens
 import HGeometry.Ext
-import HGeometry.Number.Real.Rational
+import R
 import HGeometry.PlaneGraph.Connected
 import Test.Hspec.WithTempFile
 import Test.Hspec.QuickCheck
@@ -33,11 +33,8 @@ import PlaneGraph.RenderSpec
 import Data.Map.NonEmpty qualified as NEMap
 import Prelude hiding (lines)
 
-
+-- import Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec :: Spec
 spec = describe "Plane.BatchedPointlocation" $ do
@@ -79,23 +76,26 @@ spec = describe "Plane.BatchedPointlocation" $ do
              in (toSet <$> batchedPointLocation queries planes)
                 ===
                 naivePlanesAbove queries planes
+         debug [osp|batchpointlocate2|] myBug
 
-debug :: Spec
-debug = describe "debug" $ do
+         -- debug [osp|batchpointlocate_debug|] myBug
+
+debug                                       :: OsPath -> Input -> Spec
+debug name (Input theQueryPoints thePlanes) = describe "debug" $ do
          goldenWith [osp|data/test-with-ipe/golden/Plane/|]
-           (ipeFileGolden { name      = [osp|batchpointlocate_debug|] }
+           (ipeFileGolden { name      = name }
            )
            ( let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2)
-                       $ uniquePairs myPlanes
-                 theQueryPoints = (\q -> projectPoint (q^.asPoint)) <$> myQueryPoints
+                       $ uniquePairs thePlanes
+                 theQueryPoints2D = (\q -> projectPoint (q^.asPoint)) <$> theQueryPoints
                  myLines'     = (iO . defIO) <$> lines
-                 queryPoints' = (iO . defIO) <$> theQueryPoints
-                 answers      = Line.groupQueries theQueryPoints lines
+                 queryPoints' = (iO . defIO) <$> theQueryPoints2D
+                 answers      = Line.groupQueries theQueryPoints2D lines
                  lr pts       = (iO . defIO) <$> pts
                  answers'     = [ iO $ ipeGroup (lr group) ! attr SLayer (LayerName (Text.show i))
                                 | (i, group) <- zip [0..] (toList answers)
                                 ]
-                 subdiv = Line.buildPointLocationStructure theQueryPoints lines
+                 subdiv = Line.buildPointLocationStructure theQueryPoints2D lines
 
                  gr :: CPlaneGraph () (Point 2 R) (ClosedLineSegment (Point 2 R) :+ Maybe (VerticalOrLineEQ R)) String
                  gr = (subdiv^.Line.subdivision) & faces %@~ \i _ -> show i
@@ -320,3 +320,68 @@ instance Arbitrary MyPlane where
 
 -- instance Arbitrary r => Arbitrary (Plane' r) where
 --   arbitrary = Plane' <$> arbitrary <*> arbitrary <*> arbitrary
+
+
+-- bug = describe "bug" $ do
+--         it "verify below" $
+--           verticalSideTest (Point3 20 1 7) (Plane 0 6 0) `shouldBe` GT
+
+--       Point3 20 1 7 `liesBelow`
+
+-- =  q h /= GT
+
+
+-- est-with-ipe/test/Plane/BatchPointLocationSpec.hs:73:37:
+--   1) Plane.BatchPointLocation.Plane.BatchedPointlocation same as naive
+--        Falsified (after 49 tests and 184 shrinks):
+
+-- Input (Query (Point3 37 22 0) :| [Query (Point3 20 1 7)]) (MyPlane (Plane 3 0 22) :| [MyPlane (Plane 0 6 0),MyPlane (Plane 0 1 79)])
+
+
+-- fromList ((Query (Point3 20 1 7)
+
+--           ,fromList [MyPlane (Plane 0 1 79),MyPlane (Plane 0 6 0),MyPlane (Plane 3 0 22)])
+--           [
+
+
+--         (Query (Point3 37 22 0)
+--         ,fromList [MyPlane (Plane 0 1 79),MyPlane (Plane 0 6 0),MyPlane (Plane 3 0 22)])])
+
+
+--   /=
+
+
+-- fromList (
+
+--   (Query (Point3 20 1 7),fromList [MyPlane (Plane 0 1 79)
+--                                   ,MyPlane (Plane 3 0 22)]
+--   )
+
+
+
+--   (Query (Point3 37 22 0),fromList [MyPlane (Plane 0 1 79)
+--                                    ,MyPlane (Plane 0 6 0) --
+--                                    ,MyPlane (Plane 3 0 22)])])
+
+--   To rerun use: --match "/Plane.BatchPointLocation/Plane.BatchedPointlocation/same as naive/" --seed 1533380504
+
+-- -- ok: so suposedly (20,1,7) lies above the plane (0,6,0)
+
+
+myBug = Input (Query (Point3 37 22 0) :| [Query (Point3 20 1 7)]) (MyPlane (Plane 3 0 22) :| [MyPlane (Plane 0 6 0),MyPlane (Plane 0 1 79)])
+
+-- myPlanes :: [MyPlane]
+-- myPlanes = MyPlane <$>
+--            [ Plane 1 0 5
+--            , Plane 0 1 20
+--            , Plane 2 2 3
+--            ]
+
+-- myQueryPoints :: NonEmpty (Point 3 R)
+-- myQueryPoints = NonEmpty.fromList
+--               [
+--               --   origin
+--               -- , Point3 1 8 5
+--                Point3 45 0 10
+--               , Point3 10 4 20
+--               ]

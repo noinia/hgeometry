@@ -8,7 +8,7 @@ import           Data.Maybe
 import           Golden
 import           HGeometry
 import           HGeometry.Ext
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
@@ -21,9 +21,6 @@ import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM
 
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec :: Spec
 spec = do it "triangulate triangle"   $ do

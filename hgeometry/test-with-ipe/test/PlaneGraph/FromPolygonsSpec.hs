@@ -23,7 +23,7 @@ import           HGeometry.LineSegment
 import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon hiding (holes)
@@ -48,10 +48,6 @@ import Data.Functor.Bind.Class
 
 
 import           Debug.Trace
---------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 --------------------------------------------------------------------------------
 
 -- TODO:: this should probably go into Semigroups?

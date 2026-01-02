@@ -30,7 +30,7 @@ import           HGeometry.LineSegment
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
 import           HGeometry.Polygon.Convex.Instances ()
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Plane.LowerEnvelope.Clipped (foldMapVertices, ClippedMDCell, ClippedMDCell''(..))
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
@@ -60,9 +60,6 @@ import           HGeometry.Combinatorial.Util
 
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 rVoronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
                    , Ord r, Fractional r, Foldable1 f

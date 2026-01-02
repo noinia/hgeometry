@@ -17,6 +17,7 @@ import           HGeometry.Ext
 import           HGeometry.Cyclic
 import           HGeometry.Number.Ratio.Generalized
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Number.Real.Interval
 import qualified HGeometry.Sign as Sign
 -- import HGeometry.Number.Real.Symbolic
 import           Test.QuickCheck
@@ -58,6 +59,11 @@ instance KnownNat p => Arbitrary (RealNumber p) where
 
 instance Arbitrary Sign.Sign where
   arbitrary = (\b -> if b then Sign.Positive else Sign.Negative) <$> arbitrary
+
+
+instance (Arbitrary r, Real r, Fractional r) => Arbitrary (IntervalReal r) where
+  arbitrary = realToFrac <$> arbitrary
+  shrink x  = realToFrac <$> shrink (exactValue x)
 
 --------------------------------------------------------------------------------
 -- * Symbolic instances

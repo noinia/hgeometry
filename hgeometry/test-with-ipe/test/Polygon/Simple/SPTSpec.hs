@@ -12,7 +12,7 @@ import           Golden
 import           HGeometry.Ext
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon
@@ -35,8 +35,6 @@ import           Test.QuickCheck
 
 import           System.IO.Unsafe (unsafePerformIO)
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 data PointInPoly = PointInPoly (SimplePolygon (Point 2 R)) (Point 2 R)
   deriving (Show,Eq)

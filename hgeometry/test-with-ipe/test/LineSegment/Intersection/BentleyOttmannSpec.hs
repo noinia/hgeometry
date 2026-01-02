@@ -15,16 +15,13 @@ import           HGeometry.LineSegment
 import           HGeometry.Point
 import           LineSegmentSpec (arrowAsOpen)
 import qualified Data.Map as Map
-import           HGeometry.Number.Real.Rational
+import           R
 import           Ipe
 import           System.OsPath
 import           Golden
 import           Test.Hspec
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec :: Spec
 spec = do

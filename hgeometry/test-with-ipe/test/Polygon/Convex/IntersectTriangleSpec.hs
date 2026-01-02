@@ -13,7 +13,7 @@ import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -28,9 +28,6 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec :: Spec
 spec = describe "Convex polygon x Triangle intersection" $ do

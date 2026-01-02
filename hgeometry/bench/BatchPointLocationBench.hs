@@ -5,7 +5,6 @@ import Data.Maybe
 import Data.Foldable
 import Control.DeepSeq
 import Data.Word
-import HGeometry.Number.Real.Rational
 import HGeometry.Kernel
 import Control.Lens
 import System.Random
@@ -19,15 +18,17 @@ import Data.Map.NonEmpty qualified as NEMap
 import Data.Set qualified as Set
 import HGeometry.Line.BatchPointLocation qualified as Line
 import Data.Time
+import Prelude hiding (lines)
+-- import Data.Fixed
 
 import HGeometry.Plane
 import HGeometry.Combinatorial.Util
 import Ipe
 import System.OsPath
+import R
 
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 
@@ -59,9 +60,11 @@ fromPoints = asNonVerticalHyperPlane @(HyperPlane 3 r) . hyperPlaneThrough
 --------------------------------------------------------------------------------
 
 -- | Helper function to generate uniformly random points at integer
--- coordinates in an [0,127]^3 grid.
-fromPoint   :: Point 3 Word8 -> Point 3 R
-fromPoint p = p&coordinates %~ fromIntegral
+-- coordinates in an [0,100]^3 grid.
+fromPoint   :: Point 3 Word -> Point 3 R
+fromPoint p = p&coordinates %~ \x -> fromIntegral x / rescale
+  where
+    rescale = fromIntegral $ ((maxBound :: Word) `div` 100)
 
 
 --------------------------------------------------------------------------------
@@ -88,6 +91,7 @@ naivePlanesAbove queries planes =
 
 --------------------------------------------------------------------------------
 
+runExperiment     :: Int -> Int -> IO ()
 runExperiment r n = do
     putStrLn $ "r = " <> show r <> ", n = " <> show n
     planes  <- force                      <$> randomPlanes r
@@ -104,30 +108,30 @@ runExperiment r n = do
     -- print grs
     -- print "==== results ======"
     -- traverse_ (print . answerBatch planes) grs
+    tBatched <- timed $ batchedPointLocation queries planes
+    tNaive   <- timed $ naivePlanesAbove     queries planes
+    putStrLn $ "batched point loc: " <> show tBatched
+    putStrLn $ "naive: " <> show tNaive
+    -- putStrLn "========="
+    -- defaultMain
+    --   [ bgroup "Batched point location/computing conflict lists Benchmarks"
+    --       [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
+    --       , bench "Brute Force"          $ nf (uncurry naivePlanesAbove)     (queries, planes)
+    --       ]
+    --   ]
+
+timed    :: NFData a => a -> IO NominalDiffTime
+timed x = do
     before <- getCurrentTime
-    batchedPointLocation queries planes `deepseq` (pure ())
+    x `deepseq` (pure ())
     after <- getCurrentTime
-    putStrLn $ "running time: " <> show (diffUTCTime after before)
-    putStrLn "========="
+    pure $ diffUTCTime after before
+
 
 main :: IO ()
-main = traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
-  -- defaultMain
-  --   [ bgroup "Batched point location/computing conflict lists Benchmarks"
-  --       [ bench "Via Batched PointLoc" $ nf (uncurry batchedPointLocation) (queries, planes)
-  --       , bench "Brute Force"          $ nf (uncurry naivePlanesAbove)     (queries, planes)
-  --       ]
-  --   ]
-
-
-{-
-  let content = concat [ (iO . defIO . projectPoint @2) <$> toList queries
-                       , (iO . defIO)                   <$> toList lines
-                       ]
-  writeIpeFile [osp|bench_points.ipe|] $ singlePageFromContent content
--}
--- -}
---   print $ batchedPointLocation queries planes
+main = do
+  setStdGen $ mkStdGen 12453
+  traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
 
 
 {-

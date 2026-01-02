@@ -10,7 +10,6 @@ import HGeometry.Ext
 import HGeometry.Intersection
 import HGeometry.Line
 import HGeometry.LineSegment
-import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.HyperPlane.Class
 import Ipe
@@ -18,11 +17,13 @@ import Ipe.Color
 import Paths_hgeometry
 import System.OsPath
 import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.QuickCheck
 import Test.QuickCheck.Instances ()
+import System.Random
+import R
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 getDataFileName' :: OsPath -> IO OsPath
 getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS
@@ -60,6 +61,28 @@ spec =
 
     fp <- runIO $ getDataFileName' [osp|test-with-ipe/LineSegment/linesegmentBoxIntersections.ipe|]
     ipeIntersectionTests fp
+
+    modifyMaxSuccess (const 10_000) $ prop "faster intersect same as slow one" $
+      \(line :: LinePV 2 R) (segB :: ClosedLineSegment (Point 2 R)) ->
+        line `intersect` segB === line `slowIntersectImpl` segB
+
+
+-- instance (Arbitrary r, Num r) =>
+instance (Num r, Random r, Eq r) => Arbitrary (LinePV 2 r) where
+  arbitrary = supportingLine <$> arbitrary @(ClosedLineSegment (Point 2 r))
+
+    -- do p <- arbitraryPoint
+    --              q <- arbitraryPoint `suchThat` (/= p)
+    --              pure $ lineThrough p q
+    -- where
+    --   arbitraryPoint = Point2 <$> choose (0,100) <*> choose (0,100)
+
+instance (Num r, Random r, Eq r) => Arbitrary (ClosedLineSegment (Point 2 r)) where
+  arbitrary = do p <- arbitraryPoint
+                 q <- arbitraryPoint `suchThat` (/= p)
+                 pure $ ClosedLineSegment p q
+    where
+      arbitraryPoint = Point2 <$> choose (0,100) <*> choose (0,100)
 
 
 ipeIntersectionTests    :: OsPath -> Spec
@@ -122,3 +145,27 @@ leftSide' = ClosedLineSegment (Point2 320 560) (Point2 320 624)
 -- seg3= read "LineSegment (AnEndPoint Closed (Point2 256 572)) (AnEndPoint Open (Point2 320 584))"
 
 -- X Box (Point2 320 560) (Point2 448 624),
+
+
+
+
+-- | Implementation for intersects between lines and line segments.
+--
+-- the type is is sufficiently general that for various line or closed line segment types
+-- we can appeal to it.
+slowIntersectImpl       :: ( HyperPlane_ line 2 r
+                           , Point_ point 2 r
+                           , Fractional r, Ord r
+                           , LineSegment_ lineSegment point
+                           , HasSupportingLine lineSegment
+                           , HasOnSegment lineSegment 2
+                           , line `IsIntersectableWith` LinePV 2 r
+                           , line `HasIntersectionWith` lineSegment
+                           , Intersection line (LinePV 2 r) ~ Maybe (LineLineIntersection line)
+                           ) => line -> lineSegment
+                        -> Maybe (LineLineSegmentIntersection lineSegment)
+l `slowIntersectImpl` s = l `intersect` supportingLine s >>= \case
+    Line_x_Line_Point p
+      | p `onSegment` s -> Just $ Line_x_LineSegment_Point p
+      | otherwise       -> Nothing
+    Line_x_Line_Line _  -> Just $ Line_x_LineSegment_LineSegment s

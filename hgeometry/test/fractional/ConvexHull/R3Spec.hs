@@ -5,7 +5,7 @@ module ConvexHull.R3Spec (spec) where
 -- import qualified Data.List.NonEmpty as NonEmpty
 -- import qualified HGeometry.ConvexHull.R3.Naive.Dual as Dual
 import           HGeometry.Instances ()
-import           HGeometry.Number.Real.Rational
+-- import           R
 -- import           HGeometry.Point
 -- import           HGeometry.Triangle
 import           Test.Hspec
@@ -16,9 +16,6 @@ import           Test.Hspec
 
 import Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec = describe "3D convex hull through duality tests " $ do
          pure ()

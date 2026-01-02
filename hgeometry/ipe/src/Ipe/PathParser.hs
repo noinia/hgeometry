@@ -31,6 +31,7 @@ import qualified Data.Text as T
 import           HGeometry.Box
 import           HGeometry.Matrix
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Number.Real.Interval
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Ipe.ParserPrimitives
@@ -63,6 +64,7 @@ instance Coordinate Double
 instance Coordinate Float
 instance Coordinate (Ratio Integer)
 instance Coordinate (RealNumber p)
+instance (Coordinate r, Ord r) => Coordinate (IntervalReal r)
 
 instance ( Coordinate r, Ord r
          , AbsoluteTolerance tol

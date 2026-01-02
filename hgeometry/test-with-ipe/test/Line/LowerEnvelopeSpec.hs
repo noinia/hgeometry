@@ -7,7 +7,7 @@ import qualified Data.Vector as Vector
 import           HGeometry.Kernel.Instances ()
 import           HGeometry.Line
 import           HGeometry.Line.LowerEnvelope
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Sequence.Alternating
 -- import           Paths_hgeometry
@@ -18,8 +18,6 @@ import           Test.QuickCheck ((===))
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = describe "lower envelope of lines tests" $ do

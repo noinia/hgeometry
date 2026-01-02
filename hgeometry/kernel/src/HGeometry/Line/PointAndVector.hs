@@ -33,8 +33,6 @@ module HGeometry.Line.PointAndVector
 
 import           Control.DeepSeq
 import           Control.Lens
-import qualified Data.Foldable as F
-import           Data.Ord (comparing)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.Ext
@@ -297,9 +295,9 @@ instance OnSideUpDownTest (LinePV 2 r) where
   -- >>> Point2 5 5 `onSideUpDown` (lineThrough origin $ Point2 (-3) (-3))
   -- On
   q `onSideUpDown` (LinePV p v) = let r    =  p .+^ v
-                                      f z         = (z^.xCoord, -z^.yCoord)
-                                      minBy g a b = F.minimumBy (comparing g) [a,b]
-                                      maxBy g a b = F.maximumBy (comparing g) [a,b]
+                                      f z         = Vector2 (z^.xCoord) (-z^.yCoord)
+                                      minBy g a b = if g a <= g b then a else b
+                                      maxBy g a b = if g a >= g b then a else b
                                   in case ccw (minBy f p r) (maxBy f p r) (q^.asPoint) of
                                        CCW      -> Above
                                        CW       -> Below

@@ -12,10 +12,9 @@ module SegmentTree.R2Spec where
 -- import           HGeometry.Measured.Size
 -- import           HGeometry.SegmentTree
 import           Test.Hspec
+-- import           R
 -- import           Test.Hspec.QuickCheck
 --------------------------------------------------------------------------------
-
-type R = Int
 
 spec :: Spec
 spec = describe "segmentTree2 tests" $ do

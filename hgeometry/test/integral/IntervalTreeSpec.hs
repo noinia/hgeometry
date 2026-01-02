@@ -7,10 +7,8 @@ import           HGeometry.IntervalTree
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck.Instances ()
-
+import           R
 --------------------------------------------------------------------------------
-
-type R = Int
 
 spec :: Spec
 spec = describe "intervaltree tests" $ do

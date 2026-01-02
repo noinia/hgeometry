@@ -8,7 +8,7 @@ import qualified HGeometry.ConvexHull.JarvisMarch as JarvisMarch
 import qualified HGeometry.ConvexHull.QuickHull as QuickHull
 import           HGeometry.Cyclic
 import           HGeometry.Instances ()
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
@@ -19,8 +19,6 @@ import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
-
 newtype PointSet = PS (NonEmpty (Point 2 R))
   deriving newtype (Show,Eq)
 
@@ -30,23 +28,27 @@ instance Arbitrary PointSet where
                  r <- arbitrary `suchThat` (\r' -> r' /= p && r' /= q && ccw p q r' /= CoLinear
                                            )
                  (\pts' -> PS $ NonEmpty.fromList $ [p,q,r] <> pts') <$> arbitrary
+  shrink (PS xs) = [ PS ps
+                   | ps@(p :| (q:r:_)) <- shrink xs
+                   , q /= p, r /= p, r /= q, ccw p q r /= CoLinear
+                   ]
 
 spec :: Spec
 spec = do
     describe "ConvexHull Algorithms" $ do
       modifyMaxSize (const 1000) $ do
         describe "GrahamScan and DivideAnd Conquer are the same" $ do
-          it "quickcheck convex hull " $
-            property $ \(PS pts) ->
-              (PG $ GrahamScan.convexHull pts) == (PG $ DivideAndConquer.convexHull pts)
-          it "quickcheck upper hull " $
-            property $ \(pts :: NonEmpty (Point 2 Int)) ->
-              GrahamScan.upperHull pts == DivideAndConquer.upperHull pts
-          it "quickcheck lower hull " $
-            property $ \(pts :: NonEmpty (Point 2 Int)) ->
-              GrahamScan.lowerHull pts == DivideAndConquer.lowerHull pts
-          it "manual" $
-            (PG $ GrahamScan.convexHull myPoints) == (PG $ DivideAndConquer.convexHull myPoints)
+          prop "quickcheck convex hull " $
+            \(PS pts) ->
+              (PG $ GrahamScan.convexHull pts) === (PG $ DivideAndConquer.convexHull pts)
+          prop "quickcheck upper hull " $
+            \(pts :: NonEmpty (Point 2 Int)) ->
+              GrahamScan.upperHull pts === DivideAndConquer.upperHull pts
+          prop "quickcheck lower hull " $
+            \(pts :: NonEmpty (Point 2 Int)) ->
+              GrahamScan.lowerHull pts === DivideAndConquer.lowerHull pts
+          prop "manual" $
+            (PG $ GrahamScan.convexHull myPoints) === (PG $ DivideAndConquer.convexHull myPoints)
 
         -- describe "GrahamScan and Old DivideAnd Conquer are the same" $ do
         --   -- it "quickcheck " $
@@ -75,14 +77,24 @@ spec = do
                                  , mPoint2 [6,20], mPoint2 [8,11]
                                  , mPoint2 [7,4],  mPoint2 [5,3] , mPoint2 [1,4] ]))
 
-        it "GrahamScan and JarvisMarch are the same" $
-          property $ \(PS pts) ->
-            (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
+        prop "GrahamScan and JarvisMarch are the same" $
+          \(PS pts) ->
+            (PG $ GrahamScan.convexHull pts) === (PG $ JarvisMarch.convexHull pts)
 
         prop "upper hull left to right (so in general, sorted)" $
           \(pts :: NonEmpty (Point 2 R)) ->
             let hull = GrahamScan.upperHull' pts
-            in hull == NonEmpty.sort hull
+            in hull === NonEmpty.sort hull
+
+
+        prop "GrahamScan and JarvisMarch lower hulls are the same" $
+          \(PS pts) ->
+            (GrahamScan.lowerHull pts) === (JarvisMarch.lowerHull pts)
+
+        it "steepestccwfrom correct" $
+          JarvisMarch.steepestCcwFrom origin
+                                      (NonEmpty.fromList [Point2 1 0, Point2 2 0, Point2 1 1])
+          `shouldBe` (Point2 2 0 :: Point 2 R)
 
 
 newtype PG = PG (ConvexPolygon (Point 2 R)) deriving (Show)

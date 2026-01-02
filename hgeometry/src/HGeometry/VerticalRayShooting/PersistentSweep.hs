@@ -38,6 +38,7 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import qualified HGeometry.Set.Util as SS
 
+
 --------------------------------------------------------------------------------
 
 -- | The vertical ray shooting data structure
@@ -86,7 +87,8 @@ sweepStruct f (VerticalRayShootingStructure _ ss) = phantom (f ss)
 -- space: \(O(n\log n)\).
 verticalRayShootingStructure    :: ( LineSegment_ lineSegment point
                                    , Point_ point 2 r
-                                   , Ord r, Fractional r, Foldable1 nonEmpty)
+                                   , Ord r, Fractional r, Foldable1 nonEmpty
+                                   )
                                 => nonEmpty lineSegment
                                 -> VerticalRayShootingStructure lineSegment
 verticalRayShootingStructure ss =
@@ -114,7 +116,8 @@ verticalRayShootingStructure ss =
 -- space: \(O(n\log n)\).
 verticalRayShootingStructure' :: ( LineSegment_ lineSegment point
                                 , Point_ point 2 r
-                                , Ord r, Fractional r, Foldable1 nonEmpty)
+                                , Ord r, Fractional r, Foldable1 nonEmpty
+                                )
                               => nonEmpty lineSegment
                               -> Maybe (VerticalRayShootingStructure lineSegment)
 verticalRayShootingStructure' =
@@ -154,38 +157,40 @@ eventActions = view extra
 ----------------------------------------
 
 -- | Runs the sweep building the data structure from left to right.
-sweep    :: ( LineSegment_ lineSegment point, Point_ point 2 r
+sweep    :: forall lineSegment point r.
+            ( LineSegment_ lineSegment point, Point_ point 2 r
             , Ord r, Fractional r
             )
          => NonEmpty (Event r lineSegment) -> NonEmpty (r :+ StatusStructure lineSegment)
 sweep es = NonEmpty.fromList
-         . snd . List.mapAccumL h SS.empty
+         . snd
+         . List.mapAccumL handle (initialX, SS.empty)
          $ zip (toList es) (NonEmpty.tail es)
   where
-    h ss evts = let x :+ ss' = handle ss evts in (ss',x :+ ss')
+    initialX = eventX (NonEmpty.head es) - 1
+      -- this value should not b e used, as there are no deletions before the first event anyway
 
--- | Given the current status structure (for left of the next event
--- 'l'), and the next two events (l,r); essentially defining the slab
--- between l and r, we construct the status structure for in the slab (l,r).
--- returns the right boundary and this status structure.
-handle                :: (Ord r, Fractional r, LineSegment_ lineSegment point, Point_ point 2 r)
-                      => StatusStructure lineSegment
-                      -> (Event r lineSegment, Event r lineSegment)
-                      -> r :+ StatusStructure lineSegment
-handle ss ( l :+ acts
-          , r :+ _)   = let mid               = (l+r)/2
-                            runActionAt x act = interpret act (ordAtX x)
-                        in r :+ foldr (runActionAt mid) ss (orderActs acts)
-                           -- run deletions first
-
--- | orders the actions to put insertions first and then all deletions
-orderActs      :: NonEmpty (Action a) -> NonEmpty (Action a)
-orderActs acts = let (dels,ins) = NonEmpty.partition (\case
-                                                         Delete _ -> True
-                                                         Insert _ -> False
-                                                     ) acts
-                 in NonEmpty.fromList $ ins <> dels
-
+    -- | Given the current status structure (for left of the next event
+    -- 'l'), and the next two events (l,r); essentially defining the slab
+    -- between l and r, we construct the status structure for in the slab (l,r).
+    -- returns the right boundary and this status structure.
+    handle       :: (r, StatusStructure lineSegment)
+                 -> (Event r lineSegment, Event r lineSegment)
+                 -> ((r, StatusStructure lineSegment), r :+ StatusStructure lineSegment)
+    handle (prevX,ss) (l :+ acts, r :+ _) = ( (mid, ss'), r :+ ss' )
+      where
+        mid = (l + r) / 2
+        -- run the deletions first; and use the ordering at prevX ;
+        -- i.e. before l to perform them then run the insertions
+        -- (based on the new order).
+        -- we use the prevX order, since if we perform deletions at l, then
+        -- the order after l may be invalid.
+        ss' = foldr (runActionAt mid) (foldr (runActionAt prevX) ss deletions) insertions
+        (deletions,insertions) = NonEmpty.partition (\case
+                                                        Delete _ -> True
+                                                        Insert _ -> False
+                                                    ) acts
+        runActionAt x act m = interpret act (ordAtX x) m
 
 --------------------------------------------------------------------------------
 -- * Querying the DS

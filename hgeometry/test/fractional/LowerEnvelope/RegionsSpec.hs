@@ -11,7 +11,7 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex.Unbounded
@@ -21,9 +21,6 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 -- see also the test-with-ipe/test/VoronoiDiagram/VornoiSpec tests
 --
 

@@ -19,7 +19,7 @@ import           HGeometry.HyperPlane
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Matrix
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Plane.LowerEnvelope.Connected (VertexForm
                                                            , intersectionPoint
                                                            , definers
@@ -36,9 +36,6 @@ import           Test.QuickCheck.Instances ()
 import           HGeometry.Combinatorial.Util
 import           Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 newtype NonDegenerate plane = NonDegenerate (NonEmpty plane)
   deriving newtype (Show,Eq,Foldable,Functor,Foldable1)

@@ -747,6 +747,23 @@ library ply-writer
        , hgeometry:kernel
        , colour                  >= 2.3.6         && < 3
 
+
+--------------------------------------------------------------------------------
+-- * NumType Implementations:
+
+library numtypes
+  import: all-setup
+  visibility: private
+  hs-source-dirs: numtypes
+  exposed-modules:
+    Int
+    Int32
+    Double
+    Float
+    Rational
+    RawRational
+    IntervalReal
+
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
@@ -833,18 +850,18 @@ test-suite kernel-doctest
 --------------------------------------------------------------------------------
 -- ** HGeometry
 
-test-suite hspec
-  import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
+common test-fractional
   build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
+  build-depends:
+      hgeometry:quickcheck
+    , hgeometry:numtypes
+  hs-source-dirs: test/fractional, polygon/test
   other-modules:
       Spec
       ConvexHull.ConvexHullSpec
       ConvexHull.MelkmanSpec
       ConvexHull.R3Spec
       ClosestPair.ClosestPairSpec
-      IntervalTreeSpec
       LowerEnvelope.RegionsSpec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.UnboundedSpec
@@ -855,17 +872,53 @@ test-suite hspec
       Polygon.PickPointSpec
       PolyLine.Simplification.ImaiIriSpec
       PolyLine.Frechet.DiscreteSpec
-      SegmentTreeSpec
-      SegmentTree.R2Spec
-      RangeTreeSpec
       VerticalRayShootingSpec
       LineSegment.BentheyOttmanNeighbourSpec
       Graphics.CameraSpec
       Plane.LowerEnvSpec
 
-  hs-source-dirs: test, polygon/test
+test-suite hspec-rational
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+                    quickcheck-setup, test-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  mixins:
+      hgeometry:numtypes (Rational as R)
+
+test-suite hspec-intervalreal
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+                    quickcheck-setup, test-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  mixins:
+      hgeometry:numtypes (IntervalReal as R)
+
+-- test-suite hspec-double
+--   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
+--                     quickcheck-setup, test-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   mixins:
+--       hgeometry:numtypes (Double as R)
+
+test-suite hspec-integral
+  import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs: test/integral
   build-depends:
       hgeometry:quickcheck
+    , hgeometry:numtypes
+  mixins:
+      hgeometry:numtypes (Int as R)
+  other-modules:
+      Spec
+      SegmentTreeSpec
+      SegmentTree.R2Spec
+      RangeTreeSpec
+      IntervalTreeSpec
+
 
 test-suite doctest
     import:           all-setup, all-quickcheck-setup, quickcheck-setup, doctest
@@ -873,12 +926,8 @@ test-suite doctest
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
--- tests with ipe dependency
-test-suite with-ipe-hspec
-  import:           all-setup, ipe-setup, all-quickcheck-setup, quickcheck-setup
+common with-ipe-hspec-fractional
   build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
   other-modules:
       Spec
       Paths_hgeometry
@@ -928,14 +977,32 @@ test-suite with-ipe-hspec
 
   autogen-modules:
       Paths_hgeometry
-  hs-source-dirs:   test-with-ipe/test
   build-depends:
         hspec-with-tempfile    >= 0.1
       , hgeometry:ipe
       , hgeometry:quickcheck
+      , hgeometry:numtypes
       , wavefront              >= 0.7.1.5 && < 0.8
       , exceptions             >= 0.10.9  && < 0.11
 
+
+test-suite with-ipe-hspec-rational
+  import:           all-setup, ipe-setup, all-quickcheck-setup,
+                    quickcheck-setup, with-ipe-hspec-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs:   test-with-ipe/test
+  mixins:
+      hgeometry:numtypes (Rational as R)
+
+-- test-suite with-ipe-hspec-intervalreal
+--   import:           all-setup, ipe-setup, all-quickcheck-setup,
+--                     quickcheck-setup, with-ipe-hspec-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   hs-source-dirs:   test-with-ipe/test
+--   mixins:
+--       hgeometry:numtypes (IntervalReal as R)
 
 --------------------------------------------------------------------------------
 -- ** Ipe Tests
@@ -986,14 +1053,13 @@ common bench-setup
     , hgeometry
     , deepseq-generics      >= 0.2  && < 1
     , hashable              >= 1.4  && < 2
+    , hgeometry:numtypes
 
 benchmark benchmarks
   import: all-setup, hgeometry-setup, bench-setup
   hs-source-dirs: bench
-  main-is:
-    Benchmarks.hs
+  main-is:        Benchmarks.hs
   type: exitcode-stdio-1.0
-
   other-modules:
     ConvexHull.Bench
     ConvexHull.GrahamBench
@@ -1004,11 +1070,10 @@ benchmark benchmarks
     Util
 
 benchmark lowerEnv
-  import: all-setup, hgeometry-setup, bench-setup
+  import:         all-setup, hgeometry-setup, bench-setup
   hs-source-dirs: bench
-  main-is:
-    LowerEnvBench.hs
-  type: exitcode-stdio-1.0
+  main-is:        LowerEnvBench.hs
+  type:           exitcode-stdio-1.0
   -- ghc-options:
   --   -prof
   --   -fprof-late-inline
@@ -1017,11 +1082,12 @@ benchmark lowerEnv
   other-modules:
 
 benchmark batchPointLocation
-  import: all-setup, hgeometry-setup, bench-setup
+  import:         all-setup, hgeometry-setup, bench-setup
   hs-source-dirs: bench
-  main-is:
-    BatchPointLocationBench.hs
-  type: exitcode-stdio-1.0
+  main-is:        BatchPointLocationBench.hs
+  type:           exitcode-stdio-1.0
+  mixins:
+      hgeometry:numtypes (IntervalReal as R)
   build-depends:
          hgeometry:ipe
        , time                    >= 1.14 && < 1.16
