@@ -38,7 +38,8 @@ import Data.List.NonEmpty (NonEmpty(..))
 import Prelude hiding (lines)
 import HGeometry.PointLocation.Type
 import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap, singleton)
-
+import HGeometry.Indexed
+import HGeometry.Sequence.NonEmpty (ViewL1(..))
 --------------------------------------------------------------------------------
 
 -- | Given a set of \(n\) query points, and a set of \(r\) lines H computes for each
@@ -49,7 +50,6 @@ groupQueries               :: ( Point_ queryPoint 2 r
                               , Line_ line 2 r
                               , Foldable set
                               , Ord r, Fractional r
-                              , Eq line
                               , IsBoxable queryPoint
                               , IsIntersectableWith line (Rectangle (Point 2 r))
                               , Intersection line (Rectangle (Point 2 r)) ~
@@ -79,7 +79,7 @@ buildPointLocationStructure   :: ( IsBoxable geom
 
 
                                  , Line_ line 2 r
-                                 , Foldable set, Eq line
+                                 , Foldable set
                                  , IsIntersectableWith line (Rectangle (Point 2 r))
                                  , Intersection line (Rectangle (Point 2 r)) ~
                                    Maybe (LineBoxIntersection 2 r)
@@ -172,6 +172,10 @@ pointLocationStructure lines = undefined -- pointLocationStructureFrom inters li
 
 -}
 
+
+
+
+
 -- | Construct a point location data structure on the given set of n
 -- lines in a given bounding rectangle.
 --
@@ -181,8 +185,6 @@ pointLocationStructure lines = undefined -- pointLocationStructureFrom inters li
 -- O(n^2 \log n)
 pointLocationStructureIn            :: forall set line r.
                                        (Foldable set , Line_ line 2 r, Fractional r, Ord r
-                                       , Eq line
-
                                        , IsIntersectableWith line (Rectangle (Point 2 r))
                                        , Intersection line (Rectangle (Point 2 r)) ~
                                          Maybe (LineBoxIntersection 2 r)
@@ -203,18 +205,18 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
     -- | Construct a plane graph
     gr' :: CPlaneGraph () (Point 2 r :+ Seq.Seq (Point 2 r))
                           (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
-    gr' =  gr'' & edges %~ view head1
+    gr' =  gr'' & edges %~ \(e :<< _) -> (e&extra._Just %~ view _1)
 
     gr'' :: CPlaneGraph () _ _ _
     gr'' = fromIntersectingSegments segs
 
 
-    segs :: NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe line)
+    segs :: NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe (WithIndex line))
     segs =
       (toNonEmpty $ (:+ Nothing) <$> sides rect)
-         <<> mapMaybe clip (toList lines)
+         <<> mapMaybe clip (labelWithIndex $ toList lines)
 
-    clip l = l `intersect` rect >>= \case
+    clip l = (l^._1) `intersect` rect >>= \case
       Line_x_Box_LineSegment seg -> Just $ seg :+ Just l
       Line_x_Box_Point _         -> Nothing
     -- if the line intersects the box in a point; we just ignore the line
