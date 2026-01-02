@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Number.Real.Interval</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Interval Arithmetic. We use doubles as initial approximation of the interval.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Number.Real.Interval.html"><span class="hs-identifier">HGeometry.Number.Real.Interval</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier">IntervalReal</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#exactValue"><span class="hs-identifier">exactValue</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#fromExact"><span class="hs-identifier">fromExact</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.html"><span class="hs-identifier">Numeric.Rounded.Hardware</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Interval.Class.html"><span class="hs-identifier">Numeric.Rounded.Hardware.Interval.Class</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Interval.NonEmpty.html"><span class="hs-identifier">Numeric.Rounded.Hardware.Interval.NonEmpty</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/MonadRandom-0.6.2-4eb141b60dea40d3c37f7717851ef4178d32e1e9f68f5b74475e00574256871d/share/doc/html/src/Control.Monad.Random.html"><span class="hs-identifier">Control.Monad.Random</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-25"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">data</span><span> </span><span id="IntervalReal"><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-var">IntervalReal</span></a></span></span><span> </span><span id="local-6989586621679239273"><span class="annot"><a href="#local-6989586621679239273"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IR"><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span></span><span> </span><span class="hs-pragma">{-# UNPACK</span><span class="hs-pragma">#-}</span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Interval.NonEmpty.html#Interval"><span class="hs-identifier hs-type">Interval</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679239273"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679239357"><span id="local-6989586621679239359"><span class="annot"><span class="annottext">(forall x. IntervalReal r -&gt; Rep (IntervalReal r) x)
+-&gt; (forall x. Rep (IntervalReal r) x -&gt; IntervalReal r)
+-&gt; Generic (IntervalReal r)
+forall x. Rep (IntervalReal r) x -&gt; IntervalReal r
+forall x. IntervalReal r -&gt; Rep (IntervalReal r) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall r x. Rep (IntervalReal r) x -&gt; IntervalReal r
+forall r x. IntervalReal r -&gt; Rep (IntervalReal r) x
+$cfrom :: forall r x. IntervalReal r -&gt; Rep (IntervalReal r) x
+from :: forall x. IntervalReal r -&gt; Rep (IntervalReal r) x
+$cto :: forall r x. Rep (IntervalReal r) x -&gt; IntervalReal r
+to :: forall x. Rep (IntervalReal r) x -&gt; IntervalReal r
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | Get the exact vavlue of the interval-real.</span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679239266"><span class="annot"><a href="HGeometry.Number.Real.Interval.html#exactValue"><span class="hs-identifier hs-type">exactValue</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239266"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679239266"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-33"></span><span id="exactValue"><span class="annot"><span class="annottext">exactValue :: forall r. IntervalReal r -&gt; r
+</span><a href="HGeometry.Number.Real.Interval.html#exactValue"><span class="hs-identifier hs-var hs-var">exactValue</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679239364"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239364"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239364"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- | Construct an intervalReal from a given r value.</span></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679239269"><span class="annot"><a href="HGeometry.Number.Real.Interval.html#fromExact"><span class="hs-identifier hs-type">fromExact</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679239269"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679239269"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239269"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-37"></span><span id="fromExact"><span class="annot"><span class="annottext">fromExact :: forall r. Real r =&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#fromExact"><span class="hs-identifier hs-var hs-var">fromExact</span></a></span></span><span> </span><span id="local-6989586621679239373"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239373"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Interval Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239373"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239373"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239293"><span id="local-6989586621679239376"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679239293"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239293"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239297"><span id="local-6989586621679239399"><span id="local-6989586621679239403"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679239297"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239297"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679239407"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; IntervalReal r -&gt; ShowS
+</span><a href="#local-6989586621679239407"><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621679239409"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679239409"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679239410"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239410"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; r -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679239409"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239410"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239302"><span id="local-6989586621679239414"><span id="local-6989586621679239418"><span id="local-6989586621679239422"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679239302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679239302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239302"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679239429"><span class="annot"><span class="annottext">readPrec :: ReadPrec (IntervalReal r)
+</span><a href="#local-6989586621679239429"><span class="hs-identifier hs-var hs-var hs-var">readPrec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; IntervalReal r
+forall r. Real r =&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#fromExact"><span class="hs-identifier hs-var">fromExact</span></a></span><span> </span><span class="annot"><span class="annottext">(r -&gt; IntervalReal r) -&gt; ReadPrec r -&gt; ReadPrec (IntervalReal r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ReadPrec r
+forall a. Read a =&gt; ReadPrec a
+</span><span class="hs-identifier hs-var">readPrec</span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239308"><span id="local-6989586621679239435"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679239308"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239308"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239446"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239446"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239447"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239447"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679239448"><span class="annot"><span class="annottext">== :: IntervalReal r -&gt; IntervalReal r -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239449"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239449"><span class="hs-identifier hs-var">iy</span></a></span></span><span> </span><span id="local-6989586621679239450"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239450"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double -&gt; Bool
+forall i. IsInterval i =&gt; i -&gt; i -&gt; Bool
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Interval.Class.html#disjoint"><span class="hs-identifier hs-var">disjoint</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239446"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239449"><span class="hs-identifier hs-var">iy</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239447"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239450"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-50"></span><span>         </span><span class="hs-comment">-- the disjoint test is important; only if the intervals are not disjoint check</span><span>
+</span><span id="line-51"></span><span>         </span><span class="hs-comment">-- for actual equality</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239315"><span id="local-6989586621679239460"><span id="local-6989586621679239464"><span id="local-6989586621679239467"><span id="local-6989586621679239470"><span id="local-6989586621679239473"><span id="local-6989586621679239476"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679239315"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239315"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239485"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239485"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239486"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239486"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679239487"><span class="annot"><span class="annottext">compare :: IntervalReal r -&gt; IntervalReal r -&gt; Ordering
+</span><a href="#local-6989586621679239487"><span class="hs-operator hs-var hs-var hs-var">`compare`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239489"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239489"><span class="hs-identifier hs-var">iy</span></a></span></span><span> </span><span id="local-6989586621679239490"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239490"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239485"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double -&gt; Bool
+forall i. IsInterval i =&gt; i -&gt; i -&gt; Bool
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Interval.Class.html#strictPrecedes"><span class="hs-operator hs-var">`strictPrecedes`</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239489"><span class="hs-identifier hs-var">iy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239489"><span class="hs-identifier hs-var">iy</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double -&gt; Bool
+forall i. IsInterval i =&gt; i -&gt; i -&gt; Bool
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Interval.Class.html#strictPrecedes"><span class="hs-operator hs-var">`strictPrecedes`</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239485"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239486"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239490"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-comment">-- we could maybe do something more interesting here</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239318"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679239318"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679239318"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239318"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239508"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239508"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239509"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239509"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679239510"><span class="annot"><span class="annottext">+ :: IntervalReal r -&gt; IntervalReal r -&gt; IntervalReal r
+</span><a href="#local-6989586621679239510"><span class="hs-operator hs-var hs-var hs-var">+</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239512"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239512"><span class="hs-identifier hs-var">iy</span></a></span></span><span> </span><span id="local-6989586621679239513"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239513"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239508"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double -&gt; Interval Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239512"><span class="hs-identifier hs-var">iy</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239509"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239513"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239518"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239518"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239519"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239519"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679239520"><span class="annot"><span class="annottext">- :: IntervalReal r -&gt; IntervalReal r -&gt; IntervalReal r
+</span><span class="hs-glyph hs-var hs-var hs-var">-</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239521"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239521"><span class="hs-identifier hs-var">iy</span></a></span></span><span> </span><span id="local-6989586621679239522"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239522"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239518"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double -&gt; Interval Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239521"><span class="hs-identifier hs-var">iy</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239519"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239522"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239527"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239527"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239528"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239528"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679239529"><span class="annot"><span class="annottext">* :: IntervalReal r -&gt; IntervalReal r -&gt; IntervalReal r
+</span><a href="#local-6989586621679239529"><span class="hs-operator hs-var hs-var hs-var">*</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239531"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239531"><span class="hs-identifier hs-var">iy</span></a></span></span><span> </span><span id="local-6989586621679239532"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239532"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239527"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double -&gt; Interval Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239531"><span class="hs-identifier hs-var">iy</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239528"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239532"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679239537"><span class="annot"><span class="annottext">abs :: IntervalReal r -&gt; IntervalReal r
+</span><a href="#local-6989586621679239537"><span class="hs-identifier hs-var hs-var hs-var">abs</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239539"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239539"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239540"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239540"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239539"><span class="hs-identifier hs-var">ix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239540"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679239555"><span class="annot"><span class="annottext">signum :: IntervalReal r -&gt; IntervalReal r
+</span><a href="#local-6989586621679239555"><span class="hs-identifier hs-var hs-var hs-var">signum</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Interval.NonEmpty.html#I"><span class="hs-identifier hs-type">I</span></a></span><span> </span><span id="local-6989586621679239558"><span class="annot"><span class="annottext">Rounded 'TowardNegInf Double
+</span><a href="#local-6989586621679239558"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679239559"><span class="annot"><span class="annottext">Rounded 'TowardInf Double
+</span><a href="#local-6989586621679239559"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679239560"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239560"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Rounded 'TowardNegInf Double -&gt; Double
+forall (r :: RoundingMode) a. Rounded r a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Internal.Rounding.html#getRounded"><span class="hs-identifier hs-var">getRounded</span></a></span><span> </span><span class="annot"><span class="annottext">Rounded 'TowardNegInf Double
+</span><a href="#local-6989586621679239558"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IntervalReal r
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Rounded 'TowardInf Double -&gt; Double
+forall (r :: RoundingMode) a. Rounded r a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/rounded-hw-0.4.0.2-dd39354be97710b0d9e655419445db3db9a9ba6737b9b3a1c5175259dbd4ccc1/share/doc/html/src/Numeric.Rounded.Hardware.Internal.Rounding.html#getRounded"><span class="hs-identifier hs-var">getRounded</span></a></span><span> </span><span class="annot"><span class="annottext">Rounded 'TowardInf Double
+</span><a href="#local-6989586621679239559"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">IntervalReal r
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239560"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-69"></span><span>                           </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IntervalReal r
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-70"></span><span>                           </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IntervalReal r
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-71"></span><span>                           </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">IntervalReal r
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679239568"><span class="annot"><span class="annottext">fromInteger :: Integer -&gt; IntervalReal r
+</span><span class="hs-identifier hs-var hs-var hs-var">fromInteger</span></span></span><span> </span><span id="local-6989586621679239569"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679239569"><span class="hs-identifier hs-var">i</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Interval Double
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679239569"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; r
+forall a. Num a =&gt; Integer -&gt; a
+</span><span class="hs-identifier hs-var">fromInteger</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679239569"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679239574"><span class="annot"><span class="annottext">negate :: IntervalReal r -&gt; IntervalReal r
+</span><span class="hs-identifier hs-var hs-var hs-var">negate</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239575"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239575"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239576"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239576"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239575"><span class="hs-identifier hs-var">ix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239576"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239328"><span id="local-6989586621679239584"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679239328"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679239328"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239328"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>  </span><span id="local-6989586621679239594"><span class="annot"><span class="annottext">fromRational :: Rational -&gt; IntervalReal r
+</span><span class="hs-identifier hs-var hs-var hs-var">fromRational</span></span></span><span> </span><span id="local-6989586621679239595"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679239595"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Interval Double
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679239595"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; r
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679239595"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239600"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239600"><span class="hs-identifier hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679239601"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239601"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679239602"><span class="annot"><span class="annottext">/ :: IntervalReal r -&gt; IntervalReal r -&gt; IntervalReal r
+</span><a href="#local-6989586621679239602"><span class="hs-operator hs-var hs-var hs-var">/</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span id="local-6989586621679239604"><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239604"><span class="hs-identifier hs-var">iy</span></a></span></span><span> </span><span id="local-6989586621679239605"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239605"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; r -&gt; IntervalReal r
+forall r. Interval Double -&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-var">IR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239600"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double -&gt; Interval Double -&gt; Interval Double
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><a href="#local-6989586621679239604"><span class="hs-identifier hs-var">iy</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239601"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239605"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- FIXME: we are potentially dividing by 0 apparently</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239331"><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679239331"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239331"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621679239619"><span class="annot"><span class="annottext">toRational :: IntervalReal r -&gt; Rational
+</span><span class="hs-identifier hs-var hs-var hs-var">toRational</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IR"><span class="hs-identifier hs-type">IR</span></a></span><span> </span><span class="annot"><span class="annottext">Interval Double
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679239620"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239620"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; Rational
+forall a. Real a =&gt; a -&gt; Rational
+</span><span class="hs-identifier hs-var">toRational</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679239620"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- instance Uniform r =&gt; Uniform (IntervalReal r) where</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679239342"><span id="local-6989586621679239626"><span id="local-6989586621679239632"><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#Random"><span class="hs-identifier hs-type">Random</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239342"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="annot"><a href="#local-6989586621679239342"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#Random"><span class="hs-identifier hs-type">Random</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Number.Real.Interval.html#IntervalReal"><span class="hs-identifier hs-type">IntervalReal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679239342"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>  </span><span id="local-6989586621679239643"><span class="annot"><span class="annottext">randomR :: forall g.
+RandomGen g =&gt;
+(IntervalReal r, IntervalReal r) -&gt; g -&gt; (IntervalReal r, g)
+</span><a href="#local-6989586621679239643"><span class="hs-identifier hs-var hs-var hs-var">randomR</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679239645"><span class="annot"><span class="annottext">IntervalReal r
+</span><a href="#local-6989586621679239645"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679239646"><span class="annot"><span class="annottext">IntervalReal r
+</span><a href="#local-6989586621679239646"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(r -&gt; IntervalReal r) -&gt; (r, g) -&gt; (IntervalReal r, g)
+forall a b c. (a -&gt; b) -&gt; (a, c) -&gt; (b, c)
+forall (p :: * -&gt; * -&gt; *) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; IntervalReal r
+forall r. Real r =&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#fromExact"><span class="hs-identifier hs-var">fromExact</span></a></span><span> </span><span class="annot"><span class="annottext">((r, g) -&gt; (IntervalReal r, g))
+-&gt; (g -&gt; (r, g)) -&gt; g -&gt; (IntervalReal r, g)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(r, r) -&gt; g -&gt; (r, g)
+forall g. RandomGen g =&gt; (r, r) -&gt; g -&gt; (r, g)
+forall a g. (Random a, RandomGen g) =&gt; (a, a) -&gt; g -&gt; (a, g)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#randomR"><span class="hs-identifier hs-var">randomR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntervalReal r -&gt; r
+forall r. IntervalReal r -&gt; r
+</span><a href="HGeometry.Number.Real.Interval.html#exactValue"><span class="hs-identifier hs-var">exactValue</span></a></span><span> </span><span class="annot"><span class="annottext">IntervalReal r
+</span><a href="#local-6989586621679239645"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">IntervalReal r -&gt; r
+forall r. IntervalReal r -&gt; r
+</span><a href="HGeometry.Number.Real.Interval.html#exactValue"><span class="hs-identifier hs-var">exactValue</span></a></span><span> </span><span class="annot"><span class="annottext">IntervalReal r
+</span><a href="#local-6989586621679239646"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621679239654"><span class="annot"><span class="annottext">random :: forall g. RandomGen g =&gt; g -&gt; (IntervalReal r, g)
+</span><a href="#local-6989586621679239654"><span class="hs-identifier hs-var hs-var hs-var">random</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(r -&gt; IntervalReal r) -&gt; (r, g) -&gt; (IntervalReal r, g)
+forall a b c. (a -&gt; b) -&gt; (a, c) -&gt; (b, c)
+forall (p :: * -&gt; * -&gt; *) a b c.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; p a c -&gt; p b c
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; IntervalReal r
+forall r. Real r =&gt; r -&gt; IntervalReal r
+</span><a href="HGeometry.Number.Real.Interval.html#fromExact"><span class="hs-identifier hs-var">fromExact</span></a></span><span> </span><span class="annot"><span class="annottext">((r, g) -&gt; (IntervalReal r, g))
+-&gt; (g -&gt; (r, g)) -&gt; g -&gt; (IntervalReal r, g)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">g -&gt; (r, g)
+forall g. RandomGen g =&gt; g -&gt; (r, g)
+forall a g. (Random a, RandomGen g) =&gt; g -&gt; (a, g)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/random-1.3.1-aa31a645096a77e6d2f6dd013b77a36d1e42e9ac116fef024d69eea907cb01f3/share/doc/html/src/System.Random.html#random"><span class="hs-identifier hs-var">random</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-comment">--   runRand $ do</span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-comment">--   v &lt;- getRandom</span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-comment">--   pure $ (b-a)*abs v + a</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-comment">-- -- Generate a random number between -1 and +1 with 'maxBound::Int' discrete increments.</span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-comment">-- random = runRand $ do</span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-comment">--   v &lt;- getRandom</span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-comment">--   let fromInt :: Int -&gt; Integer; fromInt = fromIntegral</span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-comment">--   pure $ RealNumber $ fromInt v % fromInt maxBound</span><span>
+</span><span id="line-100"></span></pre></body></html>
