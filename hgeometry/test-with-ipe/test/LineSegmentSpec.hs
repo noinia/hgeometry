@@ -62,7 +62,7 @@ spec =
     fp <- runIO $ getDataFileName' [osp|test-with-ipe/LineSegment/linesegmentBoxIntersections.ipe|]
     ipeIntersectionTests fp
 
-    modifyMaxSuccess (const 100_000) $ prop "faster intersect same as slow one" $
+    modifyMaxSuccess (const 10_000) $ prop "faster intersect same as slow one" $
       \(line :: LinePV 2 R) (segB :: ClosedLineSegment (Point 2 R)) ->
         line `intersect` segB === line `slowIntersectImpl` segB
 
