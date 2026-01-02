@@ -24,7 +24,7 @@ import           Data.Maybe (isJust)
 import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import           Data.Tree
+import           Data.Tree (Tree(..),levels)
 import           HGeometry.Foldable.Util ()
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Vector
