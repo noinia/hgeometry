@@ -100,7 +100,7 @@ runExperiment r n = do
     let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
         ds    = Line.pointLocationStructureIn (Rect (-1) (-1) 128 128) lines
         -- res = Line.groupQueries (projectPoint @2 <$> queries) lines
-    ds `seq` (pure ())
+    ds `deepseq` (pure ())
     -- print ds
     -- print res
     -- print "========="
@@ -131,7 +131,7 @@ timed x = do
 main :: IO ()
 main = do
   setStdGen $ mkStdGen 12453
-  traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
+  traverse_ (\r -> runExperiment r (r^5)) [5,10,15,20] -- [10, 15, 20]
 
 
 {-
