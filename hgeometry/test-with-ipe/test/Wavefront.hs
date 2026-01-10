@@ -88,3 +88,14 @@ allTriangles objFile = foldMap (traverse toTriangle) $ objFaces objFile
     --
     -- TODO: not sure why, but at least for the Cornel box we seem to
     -- need to flip the y and z coordinates.
+
+
+type instance Dimension Location = 4
+type instance NumType   Location = Float
+
+instance HasVector Location Location where
+  vector = iso (\(Location x y z w) -> Vector4 x y z w)
+               (\(Vector x y z w)   -> Location x y z w)
+
+instance Affine Location 4 Float where
+instance AsPoint Location where
