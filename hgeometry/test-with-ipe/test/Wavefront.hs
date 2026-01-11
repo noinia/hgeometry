@@ -32,6 +32,7 @@ import System.OsPath
 import HGeometry.Point
 import Data.Vector qualified as Vector
 import HGeometry.Properties
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -95,7 +96,7 @@ type instance NumType   Location = Float
 
 instance HasVector Location Location where
   vector = iso (\(Location x y z w) -> Vector4 x y z w)
-               (\(Vector x y z w)   -> Location x y z w)
-
-instance Affine Location 4 Float where
-instance AsPoint Location where
+               (\(Vector4 x y z w)  -> Location x y z w)
+instance HasCoordinates Location Location where
+instance Affine_ Location 4 Float where
+instance Point_  Location 4 Float where
