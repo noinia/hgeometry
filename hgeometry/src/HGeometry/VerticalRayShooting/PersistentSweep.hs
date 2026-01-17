@@ -243,7 +243,7 @@ lookupAboveOrOn   :: ( LineSegment_ lineSegment point, Point_ point 2 r
                      , Ord r, Num r
                      )
                   => queryPoint -> StatusStructure lineSegment -> Maybe lineSegment
-lookupAboveOrOn q = binarySearchFirstIn ((q `liesOnOrBelow`) . orientLR)
+lookupAboveOrOn q = binarySearchFirstIn (q `liesOnOrBelow`)
   where
     liesOnOrBelow q' (LineSegment_ s t) = ccw s t q' /= CCW
 
@@ -255,7 +255,7 @@ lookupAbove   :: ( LineSegment_ lineSegment point, Point_ point 2 r
                  , Ord r, Num r
                  )
               => queryPoint -> StatusStructure lineSegment -> Maybe lineSegment
-lookupAbove q = binarySearchFirstIn ((q `liesBelow`) . orientLR)
+lookupAbove q = binarySearchFirstIn (q `liesBelow`)
   where
     liesBelow q' (LineSegment_ s t) = ccw s t q' == CW
 
