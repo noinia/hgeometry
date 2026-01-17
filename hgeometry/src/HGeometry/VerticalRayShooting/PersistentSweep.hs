@@ -16,7 +16,7 @@ module HGeometry.VerticalRayShooting.PersistentSweep
   -- * Querying the Data Structure
   , segmentAbove, segmentAboveOrOn
   , findSlab
-  , lookupAbove, lookupAboveOrOn, searchInSlab
+  , lookupAbove, lookupAboveOrOn
   ) where
 
 import           Control.DeepSeq
@@ -32,7 +32,6 @@ import qualified Data.Set as SS -- status struct
 import qualified Data.Vector as V
 import           HGeometry.Algorithms.BinarySearch (binarySearchFirstIn)
 import           HGeometry.Ext
-import           HGeometry.Line.PointAndVector
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Properties
@@ -201,7 +200,7 @@ sweep es = NonEmpty.fromList
 -- \(O(\log n)\)
 segmentAbove      :: ( LineSegment_ lineSegment point, Point_ point 2 r
                      , Point_ queryPoint 2 r
-                     , Ord r, Num r, HasSupportingLine lineSegment
+                     , Ord r, Num r
                      ) => queryPoint -> VerticalRayShootingStructure lineSegment
                   -> Maybe lineSegment
 segmentAbove q ds = findSlab q ds >>= lookupAbove q
@@ -211,7 +210,7 @@ segmentAbove q ds = findSlab q ds >>= lookupAbove q
 -- \(O(\log n)\)
 segmentAboveOrOn       :: ( LineSegment_ lineSegment point, Point_ point 2 r
                           , Point_ queryPoint 2 r
-                          , Ord r, Num r, HasSupportingLine lineSegment
+                          , Ord r, Num r
                           ) => queryPoint -> VerticalRayShootingStructure lineSegment
                        -> Maybe lineSegment
 segmentAboveOrOn q ds = findSlab q ds >>= lookupAboveOrOn q
@@ -223,7 +222,7 @@ segmentAboveOrOn q ds = findSlab q ds >>= lookupAboveOrOn q
 -- \(O(\log n)\)
 findSlab  :: ( LineSegment_ lineSegment point, Point_ point 2 r
              , Point_ queryPoint 2 r
-             , Ord r, Num r, HasSupportingLine lineSegment
+             , Ord r, Num r
              )
           => queryPoint -> VerticalRayShootingStructure lineSegment
           -> Maybe (StatusStructure lineSegment)
@@ -241,27 +240,25 @@ findSlab q ds | q^.xCoord < ds^.leftMost = Nothing
 -- \(O(\log n)\)
 lookupAboveOrOn   :: ( LineSegment_ lineSegment point, Point_ point 2 r
                      , Point_ queryPoint 2 r
-                     , Ord r, Num r, HasSupportingLine lineSegment
+                     , Ord r, Num r
                      )
                   => queryPoint -> StatusStructure lineSegment -> Maybe lineSegment
-lookupAboveOrOn q = searchInSlab (not . (q `liesAbove`))
+lookupAboveOrOn q = binarySearchFirstIn (q `liesOnOrBelow`)
+  where
+    liesOnOrBelow q' (LineSegment_ s t) = ccw s t q' /= CCW
 
 -- | Finds the first segment strictly above q
 --
 -- \(O(\log n)\)
 lookupAbove   :: ( LineSegment_ lineSegment point, Point_ point 2 r
                  , Point_ queryPoint 2 r
-                 , Ord r, Num r, HasSupportingLine lineSegment
+                 , Ord r, Num r
                  )
               => queryPoint -> StatusStructure lineSegment -> Maybe lineSegment
-lookupAbove q = searchInSlab (q `liesBelow`)
+lookupAbove q = binarySearchFirstIn (q `liesBelow`)
+  where
+    liesBelow q' (LineSegment_ s t) = ccw s t q' == CW
 
--- | generic searching function
-searchInSlab   :: (LineSegment_ lineSegment point, Point_ point 2 r
-                  , HasSupportingLine lineSegment, Num r)
-               => (LinePV 2 r -> Bool)
-               -> StatusStructure lineSegment -> Maybe lineSegment
-searchInSlab p = binarySearchFirstIn (p . supportingLine)
 
 
 ----------------------------------------------------------------------------------

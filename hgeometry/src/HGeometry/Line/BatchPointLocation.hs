@@ -270,7 +270,6 @@ pointLocationStructureFrom gr = PointLocationDS gr vrDS (gr^.outerFace.asIndex)
 -- \(O(\log n)\)
 pointLocate      :: ( Point_ queryPoint 2 r, Num r, Ord r
                     , LineSegment_ edge vertex, Point_ vertex 2 r
-                    , HasSupportingLine edge
                     )
                  => queryPoint -> PointLocationDS vertex edge f
                  -> FaceIx (PointLocationDS vertex edge f)
