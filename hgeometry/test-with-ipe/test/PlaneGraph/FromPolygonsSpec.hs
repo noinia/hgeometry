@@ -50,17 +50,6 @@ import Data.Functor.Bind.Class
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
--- TODO:: this should probably go into Semigroups?
-
-instance Apply (ST s) where
-  (<.>) = (<*>)
-  (<.) = (<*)
-  (.>) = (*>)
-
---------------------------------------------------------------------------------
-
-
-
 -- | Given a set of line segments that may intersect only in endpoints, construct
 -- the planeGraph these segments represent.
 fromDisjointSegments      :: ( Foldable1 nonEmpty, Ord r, Num r
