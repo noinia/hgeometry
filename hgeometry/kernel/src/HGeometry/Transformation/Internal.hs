@@ -276,6 +276,7 @@ rotateTo (Vector3 u v w) = Transformation . Matrix $ Vector4 (snoc u        0)
 -- | Euler angle rotation; in order XYZ (from bottom to top in the gimbal hierarchy)
 --
 -- the angles CCW and given in radians.
+rotateXYZ                 :: Floating r => Vector 3 r -> Transformation 3 r
 rotateXYZ (Vector3 a b g) = rotateZ g |.| rotateY b |.| rotateX a
 
 -- rotateXYZ     :: Floating r => Vector 3 r -> Transformation 3 r
