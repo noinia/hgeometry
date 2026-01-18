@@ -58,7 +58,9 @@ import           HGeometry.Point
 -- for the long one it's an "on" segment, but they do not intersect
 
 
--- | Assumes that two segments have the same start point
+-- | A newtype helping us order segments CCW around their common start
+-- point. I.e. this assumes that two segments have the same start
+-- point.
 newtype AroundStart a = AroundStart a
   deriving (Show,Read,NFData,Functor,Generic)
 
@@ -81,7 +83,8 @@ instance ( LineSegment_ lineSegment point
 
 ----------------------------------------
 
--- | Assumes that two segments have the same end point
+-- | Assumes that two segments have the same end point (ordering is CCW around common endpoint)
+-- (note that we specifically mean end point; not startpoint. See AroundStart)
 newtype AroundEnd a = AroundEnd a deriving (Show,Read,NFData,Functor,Generic)
 
 instance Wrapped (AroundEnd a) where
@@ -159,7 +162,8 @@ cmpAroundP p s s' = ccwCmpAround (p^.asPoint) (s^.start.asPoint)  (s'^.start.asP
 data Associated lineSegment =
   Associated { _startPointOf :: Set.Set (AroundStart lineSegment)
              -- ^ segments for which the intersection point is the
-             -- start point (i.e. s^.start == p)
+             -- start point (i.e. s^.start == p). These segments are
+             -- stored in CCW order around their common starting point.
              , _endPointOf   :: Set.Set (AroundEnd lineSegment)
              -- ^ segments for which the intersection point is the end
              -- point (i.e. s^.end == p)
@@ -316,13 +320,6 @@ deriving stock instance ( Read lineSegment, Read point
 instance (NFData point, NFData lineSegment) => NFData (IntersectionPoint point lineSegment)
 
 
--- sameOrder           :: (Ord r, Num r, Eq p) => Point 2 r
---                     -> [LineSegment 2 p r] -> [LineSegment 2 p r] -> Bool
--- sameOrder c ss ss' = f ss == f ss'
---   where
---     f = map (^.extra) . sortAround' (ext c) . map (\s -> s^.end.core :+ s)
-
-
 
 
 -- | Given a point p, and a bunch of segments that suposedly intersect
@@ -337,15 +334,6 @@ mkIntersectionPoint         :: ( LineSegment_ lineSegment endPoint
                             -> [lineSegment] -- ^ segments we know contain p,
                             -> IntersectionPoint point lineSegment
 mkIntersectionPoint p as cs = IntersectionPoint p $ foldMap (mkAssociated p) $ as <> cs
-
-  -- IntersectionPoint p
-  --                           $ Associated mempty mempty (Set.fromAscList cs')
-  --                           <> foldMap (mkAssociated p) as
-  -- where
-  --   cs' = map AroundIntersection . List.sortBy (cmpAroundP p) $ cs
-  -- -- TODO: In the bentley ottman algo we already know the sorted order of the segments
-  -- -- so we can likely save the additional sort
-
 
 -- | An ordering that is decreasing on y, increasing on x
 ordPoints     :: (Point_ point 2 r, Ord r) => point -> point -> Ordering
