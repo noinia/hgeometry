@@ -15,7 +15,9 @@ module HGeometry.LineSegment.Intersection.Types
 
   , Associated(Associated)
   , startPointOf, endPointOf, interiorTo
-  , empty, mkAssociated, mkAroundStart, mkAroundEnd
+  , empty
+  , mkAssociated
+  , mkAroundStart, mkAroundEnd
   , associatedSegments
 
   , AroundEnd(..), AroundStart(..), AroundIntersection(..)
@@ -33,20 +35,28 @@ module HGeometry.LineSegment.Intersection.Types
   , OrdArounds
 
   , ordPoints
+
+
+  , fromInteriors
+  , mergeInteriorsWith
   ) where
 
-import           Control.DeepSeq
-import           Control.Lens
-import qualified Data.List as List
-import qualified Data.Map as Map
-import           Data.Ord (comparing, Down(..))
-import qualified Data.Set as Set
-import           GHC.Generics
-import           HGeometry.Intersection
-import           HGeometry.Properties
-import           HGeometry.Interval
-import           HGeometry.LineSegment
-import           HGeometry.Point
+import Control.Applicative((<|>))
+import Control.DeepSeq
+import Control.Lens
+import Data.List qualified as List
+import Data.Map qualified as Map
+import Data.Ord (comparing, Down(..))
+import Data.Set qualified as Set
+import GHC.Generics
+import HGeometry.Intersection
+import HGeometry.Line
+import HGeometry.Properties
+import HGeometry.Interval ()
+import HGeometry.LineSegment
+import HGeometry.Point
+import HGeometry.Algorithms.DivideAndConquer (mergeSortedListsBy)
+import Data.Coerce
 
 ----------------------------------------------------------------------------------
 
@@ -62,7 +72,7 @@ import           HGeometry.Point
 -- point. I.e. this assumes that two segments have the same start
 -- point.
 newtype AroundStart a = AroundStart a
-  deriving (Show,Read,NFData,Functor,Generic)
+  deriving (Show,NFData,Functor,Generic)
 
 instance Wrapped (AroundStart a) where
   type Unwrapped (AroundStart a) = a
@@ -85,7 +95,7 @@ instance ( LineSegment_ lineSegment point
 
 -- | Assumes that two segments have the same end point (ordering is CCW around common endpoint)
 -- (note that we specifically mean end point; not startpoint. See AroundStart)
-newtype AroundEnd a = AroundEnd a deriving (Show,Read,NFData,Functor,Generic)
+newtype AroundEnd a = AroundEnd a deriving (Show,NFData,Functor,Generic)
 
 instance Wrapped (AroundEnd a) where
   type Unwrapped (AroundEnd a) = a
@@ -106,38 +116,48 @@ instance ( LineSegment_ lineSegment point
 
 --------------------------------------------------------------------------------
 
--- | Assumes that two segments intersect in a single point.
+-- | This type represents a line segment seg, that contains some
+-- globally known point "p" in its interior. The Ord instance of
+-- 'AroundIntersection' orders segments of this type "around" p. In
+-- particular, it orders the segments in CCW order by their starting
+-- point (starting from the positive x-axis).
 newtype AroundIntersection a = AroundIntersection a
-  deriving (Eq,Show,Read,NFData,Functor,Generic)
+  deriving (Eq,Show,NFData,Functor,Generic)
 
 instance Wrapped (AroundIntersection a) where
     type Unwrapped (AroundIntersection a) = a
 
 instance (AroundIntersection a ~ t) => Rewrapped (AroundIntersection a) t
 
-instance ( LineSegment_ lineSegment point
-         , Point_ point 2 r
-         , Ord r, Fractional r
-         , Eq lineSegment
-         , IsIntersectableWith lineSegment lineSegment
-         , Intersection lineSegment lineSegment ~
-           Maybe (LineSegmentLineSegmentIntersection lineSegment')
-         , NumType lineSegment' ~ r
-         ) => Ord (AroundIntersection lineSegment) where
-  -- | ccw ordered around their common intersection point.
-  (AroundIntersection s) `compare` (AroundIntersection s') = case s `intersect` s' of
-    Nothing                                  ->
-      error "AroundIntersection: segments do not intersect!"
-    Just (LineSegment_x_LineSegment_Point p)       -> cmpAroundP p s s'
-    Just (LineSegment_x_LineSegment_LineSegment _) -> squaredLength s `compare` (squaredLength s')
-        -- if s and s' just happen to be the same length but
-        -- intersect in different behaviour from using (==).
-        -- but that situation doese not satisfy the precondition
-        -- of aroundIntersection anyway.
-    where
-      squaredLength ss = squaredEuclideanDist (ss^.start) (ss^.end)
+-- instance ( LineSegment_ lineSegment point
+--          , Point_ point 2 r
+--          , Ord r, Fractional r
+--          , Eq lineSegment
+--          , IsIntersectableWith lineSegment lineSegment
+--          , Intersection lineSegment lineSegment ~
+--            Maybe (LineSegmentLineSegmentIntersection lineSegment')
+--          , NumType lineSegment' ~ r
+--          ) => Ord (AroundIntersection lineSegment) where
+--   -- | ccw ordered around their common intersection point.
+--   (AroundIntersection s) `compare` (AroundIntersection s') = case s `intersect` s' of
+--     Nothing                                  ->
+--       error "AroundIntersection: segments do not intersect!"
+--     Just (LineSegment_x_LineSegment_Point p)       -> cmpAroundP p s s'
+--     Just (LineSegment_x_LineSegment_LineSegment _) ->
+--       error "BOOM!"
+--       -- squaredLength s `compare` (squaredLength s')
 
--- | compare around p
+--         -- if s and s' just happen to be the same length but
+--         -- intersect in different behaviour from using (==).
+--         -- but that situation doese not satisfy the precondition
+--         -- of aroundIntersection anyway.
+--     where
+--       squaredLength ss = squaredEuclideanDist (ss^.start) (ss^.end)
+-- -- FIXME: should this instance really exist?
+
+
+-- | We compare the segments by their startPoints, ordered CCCW around
+-- p, starting from the positive x-axis.
 cmpAroundP        :: ( LineSegment_ lineSegment point
                      , Point_ point 2 r
                      , Point_ point' 2 r
@@ -145,6 +165,9 @@ cmpAroundP        :: ( LineSegment_ lineSegment point
                      )
                   => point' -> lineSegment -> lineSegment -> Ordering
 cmpAroundP p s s' = ccwCmpAround (p^.asPoint) (s^.start.asPoint)  (s'^.start.asPoint)
+
+
+
 
 
 -- seg1 = ClosedLineSegment (ext $ Point2 0 0) (ext $ Point2 0 10)
@@ -170,14 +193,15 @@ data Associated lineSegment =
              , _interiorTo   :: Set.Set (AroundIntersection lineSegment)
              } deriving stock (Show, Generic)
 
+
 deriving stock instance ( Eq (AroundStart lineSegment)
                         , Eq (AroundIntersection lineSegment)
                         , Eq (AroundEnd lineSegment)
                         ) => Eq (Associated lineSegment)
 
-deriving stock instance ( Read lineSegment
-                        , OrdArounds lineSegment
-                        ) => Read (Associated lineSegment)
+-- deriving stock instance ( Read lineSegment
+--                         , OrdArounds lineSegment
+--                         ) => Read (Associated lineSegment)
 
 -- | Constructs an empty associated
 empty :: Associated lineSegment
@@ -186,7 +210,7 @@ empty = Associated Set.empty Set.empty Set.empty
 
 -- | Shorthand for the required Ord instances
 type OrdArounds lineSegment = ( Ord (AroundStart lineSegment)
-                              , Ord (AroundIntersection lineSegment)
+                              -- , Ord (AroundIntersection lineSegment)
                               , Ord (AroundEnd lineSegment)
                               )
 
@@ -254,6 +278,9 @@ mkAssociated p s
   | otherwise                      = empty&interiorTo   .~  Set.singleton (AroundIntersection s)
 
 
+
+
+
 ---- | test if the given segment has p as its endpoint, an construct the
 ---- appropriate associated representing that.
 ----
@@ -268,11 +295,76 @@ mkAssociated p s
 --mkAssociated' p s = (mkAssociated p s)&interiorTo .~ mempty
 
 
-instance OrdArounds lineSegment => Semigroup (Associated lineSegment) where
+instance ( OrdArounds lineSegment
+         , LineSegment_ lineSegment point, Point_ point 2 r, Ord r, Fractional r
+         , HasSupportingLine lineSegment
+         ) => Semigroup (Associated lineSegment) where
   (Associated ss es is) <> (Associated ss' es' is') =
-    Associated (ss <> ss') (es <> es') (is <> is')
+    Associated starts ends (mergeInteriors is is' mp)
+    where
+      starts = ss <> ss'
+      ends   = es <> es'
+      -- try to find the intersection point p that this Associated represents
+      mp     = firstOf (folded._Wrapped.start.asPoint) starts
+               <|> firstOf (folded._Wrapped.end.asPoint) ends
 
-instance OrdArounds lineSegment => Monoid (Associated lineSegment) where
+-- | Merge the interiors of the Associated. The Maybe (Point 2 r) is
+-- the intersection point in which all the segments intersect in their
+-- interior (if we already know it; e.g. because it was the start or
+-- endpoint of one of the other segments that also intersect here).
+--
+-- If this value is Nothing, then it must mean that all given segments
+-- actually are interior intersections.
+--
+-- pre: if Nothing, then not all segments are colinear. This should be the
+-- case (at least assuming we don't have )
+mergeInteriors        :: forall lineSegment endPoint r.
+                         ( LineSegment_ lineSegment endPoint
+                         , Point_ endPoint 2 r, Ord r, Fractional r
+                         , HasSupportingLine lineSegment
+                         )
+                      => Set.Set (AroundIntersection lineSegment)
+                      -> Set.Set (AroundIntersection lineSegment)
+                      -> Maybe (Point 2 r)
+                      -> Set.Set (AroundIntersection lineSegment)
+mergeInteriors is is' = \case
+    Just p  -> mergeInteriorsWith p is is'
+    Nothing -> case Set.minView is of
+      Nothing    -> is' -- nothing to mrege anyway
+      Just (s,rest) -> case Set.minView is' of
+        Nothing -> is -- nothing to merge anyway
+        Just _  -> mergeInteriorsWith (findInteriorIntersection s rest) is is'
+                   -- in this case, we claim there must be some segment that is not
+                   -- colinear with s.
+  where
+    findInteriorIntersection (AroundIntersection s@(LineSegment_ a b)) rest =
+      case filter nonColinear $
+             coerce @_ @[lineSegment] (Set.toAscList rest <> Set.toAscList is') of
+        (s':_) -> case supportingLine s `intersect` supportingLine s' of
+          Just (Line_x_Line_Point p) -> p
+          _                          -> error "mergeInteriors. absurd. non-colinear intersect in point"
+        _      -> error "mergeInteriors. no non-colinear segments !?"
+      where
+        nonColinear s' = ccw a b (s'^.start) /= CoLinear || ccw a b (s'^.end) /= CoLinear
+
+-- | Merge the two 'AroundIntersection' sets; given that they all have
+-- point p in their interior.
+mergeInteriorsWith ::       forall lineSegment endPoint r.
+                            ( LineSegment_ lineSegment endPoint
+                            , Point_ endPoint 2 r, Ord r, Num r
+                            ) => Point 2 r
+                            -> Set.Set (AroundIntersection lineSegment)
+                            -> Set.Set (AroundIntersection lineSegment)
+                            -> Set.Set (AroundIntersection lineSegment)
+mergeInteriorsWith p is is' = Set.fromDistinctAscList . coerce
+                            $ mergeSortedListsBy (cmpInteriors p)
+                                                 (coerce @_ @[lineSegment] $ Set.toAscList is)
+                                                 (coerce $ Set.toAscList is')
+
+instance ( OrdArounds lineSegment
+         , LineSegment_ lineSegment point, Point_ point 2 r, Ord r, Fractional r
+         , HasSupportingLine lineSegment
+         ) => Monoid (Associated lineSegment) where
   mempty = empty
 
 instance (NFData lineSegment) => NFData (Associated lineSegment)
@@ -312,9 +404,9 @@ deriving stock instance ( Eq (AroundStart lineSegment)
                         , Eq point
                         ) => Eq (IntersectionPoint point lineSegment)
 
-deriving stock instance ( Read lineSegment, Read point
-                        , OrdArounds lineSegment
-                        ) => Read (IntersectionPoint point lineSegment)
+-- deriving stock instance ( Read lineSegment, Read point
+--                         , OrdArounds lineSegment
+--                         ) => Read (IntersectionPoint point lineSegment)
 
 
 instance (NFData point, NFData lineSegment) => NFData (IntersectionPoint point lineSegment)
@@ -326,14 +418,43 @@ instance (NFData point, NFData lineSegment) => NFData (IntersectionPoint point l
 -- at p, correctly categorize them.
 mkIntersectionPoint         :: ( LineSegment_ lineSegment endPoint
                                , Point_ endPoint 2 r
-                               , Point_ point 2 r, Eq r
+                               , Point_ point 2 r, Ord r, Num r
                                , OrdArounds lineSegment
                                )
                             => point
                             -> [lineSegment] -- ^ uncategorized
                             -> [lineSegment] -- ^ segments we know contain p,
                             -> IntersectionPoint point lineSegment
-mkIntersectionPoint p as cs = IntersectionPoint p $ foldMap (mkAssociated p) $ as <> cs
+mkIntersectionPoint p as cs = IntersectionPoint p $ Associated starts ends interiors
+  where
+    p' = p^.asPoint
+    (starts',ends') = List.partition (\seg -> seg^.start.asPoint == p') as
+    starts    = foldMap (Set.singleton . AroundStart) starts'
+    ends      = foldMap (Set.singleton . AroundEnd)   ends'
+    interiors = fromInteriors p' cs
+
+
+-- | Helper to produce the "AroundIntersection" part of the associate segments
+fromInteriors      :: ( LineSegment_ lineSegment endPoint
+                      , Point_ endPoint 2 r, Ord r, Num r
+                      ) => Point 2 r -> [lineSegment] -> Set.Set (AroundIntersection lineSegment)
+fromInteriors p cs =
+  Set.fromDistinctAscList . map AroundIntersection . List.sortBy (cmpInteriors p) $ cs
+
+-- | we first compare by the CCW orrientation of the startin point; on
+-- equal starting angles, we prefer segments closer to p. If those are
+-- equal as well, order by distance to the endpoint. (If those are
+-- equal, the segments would really have the same endpoints; so
+-- consider them equal
+cmpInteriors        :: ( LineSegment_ lineSegment endPoint
+                       , Point_ endPoint 2 r, Ord r, Num r
+                       )
+                    => Point 2 r -> lineSegment -> lineSegment -> Ordering
+cmpInteriors p s s' = cmpAroundP p s s' <> cmpDist (s^.start.asPoint) (s'^.start.asPoint)
+                                   <> cmpDist (s^.end.asPoint)   (s'^.end.asPoint)
+  where
+    -- compare by increasing distance to p.
+    cmpDist = comparing (squaredEuclideanDist p)
 
 -- | An ordering that is decreasing on y, increasing on x
 ordPoints     :: (Point_ point 2 r, Ord r) => point -> point -> Ordering
@@ -353,8 +474,26 @@ intersectionPointOf s s' = s `intersect` s' <&> \case
      LineSegment_x_LineSegment_Point p         -> intersectionPoint' p
      LineSegment_x_LineSegment_LineSegment seg -> intersectionPoint' (topEndPoint seg)
   where
-    intersectionPoint' p = IntersectionPoint p (mkAssociated p s <> mkAssociated p s')
+    intersectionPoint' p = IntersectionPoint p associated
+      where
+        associated = case categorize p s of
+          Start    -> mkAssociated p s' & startPointOf %~ Set.insert (AroundStart s)
+          End      -> mkAssociated p s' & endPointOf   %~ Set.insert (AroundEnd s)
+          Interior -> case categorize p s' of
+             Interior -> empty             & interiorTo .~ fromInteriors p [s,s']
+             _        -> mkAssociated p s' & interiorTo .~ Set.singleton (AroundIntersection s)
     topEndPoint seg = List.minimumBy ordPoints [seg^.start.asPoint, seg^.end.asPoint]
+
+data IntersectionType = Start | End | Interior deriving (Show,Eq)
+
+-- | Try to find the apprpriate intersection type
+categorize    :: (Eq r, LineSegment_ lineSegment point, Point_ point 2 r)
+              => Point 2 r -> lineSegment -> IntersectionType
+categorize p s
+  | p == s^.start.asPoint = Start
+  | p == s^.end.asPoint   = End
+  | otherwise             = Interior
+
 
 -- | Shorthand for the more-or-less standard constraints that we need on LineSegments
 type IntersectConstraints seg lineSegment =
