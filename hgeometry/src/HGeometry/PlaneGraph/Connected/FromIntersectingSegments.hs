@@ -21,6 +21,7 @@ import Data.Semialign
 import Data.Sequence qualified as Seq
 import Control.Lens
 import HGeometry.Intersection
+import HGeometry.Line
 import HGeometry.LineSegment
 import HGeometry.LineSegment.Intersection.BentleyOttmann
 import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
@@ -55,6 +56,7 @@ fromIntersectingSegments      :: forall s nonEmpty ix lineSegment segment r poin
                                  , Ord ix
                                  , HasOnSegment lineSegment 2
                                  , StartPointOf lineSegment ~ EndPointOf lineSegment
+                                 , HasSupportingLine lineSegment
 
 
                                  , Eq lineSegment -- FIXME
@@ -81,8 +83,9 @@ fromIntersectingSegments segs = fromIntersections segs (intersections segs)
 fromIntersections             :: forall s nonEmpty lineSegment r point planeGraph.
                                    ( Foldable1 nonEmpty
                                    , LineSegment_ lineSegment point
-                                   , Point_ point 2 r, Ord r, Num r
+                                   , Point_ point 2 r, Ord r, Fractional r
                                    , IsIntersectableWith lineSegment lineSegment
+                                   , HasSupportingLine lineSegment
                                    , OrdArounds lineSegment
                                    -- , Ord lineSegment
 

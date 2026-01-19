@@ -302,6 +302,7 @@ instance OnSideUpDownTest (LinePV 2 r) where
                                        CCW      -> Above
                                        CW       -> Below
                                        CoLinear -> On
+  {-# INLINABLE onSideUpDown #-}
 
 -- | Result of a side test
 data SideTest = LeftSide | OnLine | RightSide deriving (Show,Read,Eq,Ord)

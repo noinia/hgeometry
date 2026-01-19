@@ -77,7 +77,7 @@ intersections :: forall bag lineSegment seg point r.
                  , StartPointOf lineSegment ~ EndPointOf lineSegment
                  )
               => bag lineSegment -> Intersections r lineSegment
-intersections = fmap unflipSegs . intersections' . fmap tagFlipped
+intersections = Map.mapWithKey unflipSegs . intersections' . fmap tagFlipped
 
 
 -- intersections segs = fmap unflipSegs . merge $ sweep pts SS.empty
@@ -486,11 +486,12 @@ unflipSegs                       :: ( LineSegment_ lineSegment point
                                     , IntersectConstraints seg lineSegment
                                     , StartPointOf lineSegment ~ EndPointOf lineSegment
                                     )
-                                 => Associated (Flipped lineSegment)
+                                 => Point 2 r
+                                 -> Associated (Flipped lineSegment)
                                  -> Associated lineSegment
-unflipSegs assocs = Associated (dropFlipped ss1 <> unflipSegs' es)
-                               (dropFlipped es1 <> unflipSegs' ss)
-                               (dropFlipped is1 <> unflipSegs' is)
+unflipSegs p assocs = Associated (dropFlipped ss1 <> unflipSegs' es)
+                                 (dropFlipped es1 <> unflipSegs' ss)
+                                 (mergeInteriorsWith p (dropFlipped is1) (unflipSegs' is))
   where
     (ss,ss1) = Set.partition isFlipped $ assocs^.startPointOf
     (es,es1) = Set.partition isFlipped $ assocs^.endPointOf
