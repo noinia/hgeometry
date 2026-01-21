@@ -1,23 +1,29 @@
+{-# LANGUAGE  UndecidableInstances  #-}
 module Main(main) where
 
 import Control.DeepSeq
 import Data.Word
 import HGeometry.Plane.LowerEnvelope.Connected.Randomized qualified as Randomized
-import HGeometry.Number.Real.Rational
 import HGeometry.VoronoiDiagram (VoronoiDiagram, voronoiDiagramWith')
 import HGeometry.VoronoiDiagram qualified as BruteForce
 import HGeometry.Kernel
+import HGeometry.Duality
 import Control.Lens
 import System.Random
 import Data.Foldable1
+import Data.Foldable
 import Data.List qualified as List
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Test.Tasty.Bench
+import Plane.BruteForce
+import Plane.Sample
+import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as Original
+import HGeometry.ByIndex
+import R
 
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
 
 
 voronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
@@ -37,15 +43,28 @@ randomPoints n = NonEmpty.fromList . take n . points <$> getStdGen
 fromPoint   :: Point 2 Word8 -> Point 2 R
 fromPoint p = p&coordinates %~ fromIntegral
 
+
+
+
+
+
+
+
 main :: IO ()
 main = do
   let n = 50
   pts <- force . fmap fromPoint <$> randomPoints n
+  let planes = force $ labelWithIndex $ fmap liftPointToPlane $ pts
   -- let vd = voronoiDiagram pts
   -- print vd
   defaultMain
     [ bgroup "Lower Envelope/Voronoi Diagram Benchmarks"
         [ bench "Randomized"    $ nf voronoiDiagram pts
         , bench "Brute Force"   $ nf BruteForce.voronoiDiagram pts
+
+        ]
+    , bgroup "Computin vertices bench"
+        [ bench "old brute force" $ nf Original.computeVertexForm planes
+        , bench "new bruteForce"  $ nf bruteForceVertices (Sample (toList planes) n [] n)
         ]
     ]

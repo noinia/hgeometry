@@ -24,6 +24,8 @@ import HGeometry.List.Util
 import Data.Map (Map)
 import Data.Map qualified as Map
 import HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import Control.DeepSeq
+import GHC.Generics(Generic)
 
 --------------------------------------------------------------------------------
 
@@ -129,7 +131,9 @@ data Boundary plane = Unbounded (NonEmpty plane)
 
 -- | a vertex is defined by at least three planes.
 data Vertex plane = Vertex plane plane plane [plane]
-                  deriving (Show,Eq,Ord,Foldable,Functor)
+                  deriving (Show,Eq,Ord,Foldable,Functor,Generic)
+
+instance NFData plane => NFData (Vertex plane)
 
 -- | Report all planes passing through a vertex (even possibly redundant ones)
 planesOf :: Vertex plane -> [plane]

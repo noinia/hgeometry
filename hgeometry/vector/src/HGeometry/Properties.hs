@@ -22,6 +22,7 @@ import Data.List.NonEmpty (NonEmpty)
 import GHC.TypeNats
 import HGeometry.Ext
 import HGeometry.ByIndex
+import HGeometry.Indexed
 
 -------------------------------------------------------------------------------
 
@@ -52,3 +53,6 @@ type instance NumType   (Either l r) = NumType r
 
 type instance NumType   (ByIndex ix a) = NumType a
 type instance Dimension (ByIndex ix a) = Dimension a
+
+type instance Dimension (WithIndex g) = Dimension g
+type instance NumType   (WithIndex g) = NumType g

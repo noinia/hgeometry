@@ -1079,7 +1079,7 @@ benchmark benchmarks
 
 benchmark lowerEnv
   import:         all-setup, hgeometry-setup, bench-setup
-  hs-source-dirs: bench
+  hs-source-dirs: bench test-with-ipe/test
   main-is:        LowerEnvBench.hs
   type:           exitcode-stdio-1.0
   -- ghc-options:
@@ -1087,7 +1087,12 @@ benchmark lowerEnv
   --   -fprof-late-inline
   --   -fprof-auto
   --   -rtsopts "-with-rtsopts=-p"
+  mixins:
+      hgeometry:numtypes (IntervalReal as R)
   other-modules:
+    Plane.BruteForce
+    Plane.Sample
+
 
 benchmark batchPointLocation
   import:         all-setup, hgeometry-setup, bench-setup
