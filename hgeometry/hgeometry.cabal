@@ -554,6 +554,10 @@ library
         HGeometry.VerticalRayShooting
         HGeometry.VerticalRayShooting.PersistentSweep
 
+
+        HGeometry.Plane.LowerEnvelope.Connected.Primitives
+        -- FIXME
+
     reexported-modules:
         HGeometry.LineSegment.Intersection.Naive
       , HGeometry.LineSegment.Intersection.BentleyOttmann
@@ -579,7 +583,6 @@ library
         HGeometry.Plane.LowerEnvelope.Clipped.Type
 
         HGeometry.Plane.LowerEnvelope.Connected.Type
-        HGeometry.Plane.LowerEnvelope.Connected.Primitives
         HGeometry.Plane.LowerEnvelope.Connected.VertexForm
         HGeometry.Plane.LowerEnvelope.Connected.Region
         HGeometry.Plane.LowerEnvelope.Connected.Regions
@@ -948,9 +951,10 @@ common with-ipe-hspec-fractional
       Plane.RenderProps
           -- TODO: move these ones
 
-      Plane.Randomized2
+      -- Plane.Randomized2
       Plane.RandomizedEnvSpec
-
+      Plane.Sample
+      Plane.BruteForce
 
       Plane.BatchPointLocationSpec
 

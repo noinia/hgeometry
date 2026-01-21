@@ -15,6 +15,7 @@ import System.Random
 import Control.Lens hiding (Prism)
 import Data.Foldable1
 import Data.List.NonEmpty (NonEmpty(..))
+import Data.List qualified as List
 import Data.List.NonEmpty qualified as NonEmpty
 import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
 import HGeometry.Plane.LowerEnvelope.Connected( mapVertices
@@ -27,74 +28,125 @@ import Data.Map.NonEmpty qualified as NEMap
 import Data.Map (Map)
 import Data.Map qualified as Map
 import Prelude hiding (filter)
+import Plane.Sample
+
 --------------------------------------------------------------------------------
 
 
 
+-- | For every plane, the list of prisms, each together with their conflict list
 type TriangulatedEnvelope r plane = MonoidalNEMap plane (NonEmpty (Prism r plane :+ [plane]))
 
 
 
--- root i = iterate (i `div`) sqrt . fromIntegral
---   where
+data Prism r plane
+
 
 type Probability = Double
 
--- | Given a parameter r, the main idea is to take a (r/n)-sample of
--- the given set; we return both the sampled set, as well as the
--- remainder (non-sampled elements).
---
--- pre: r >= 3
---
--- more specifically, we return the first three elements, so that the
--- ouput set has size at least 3, and a p-sample of the rest.
-sample          :: (RandomGen gen, Foldable1 set)
-                => gen -> Int -> set a -> (NonEmpty a, [a], gen)
-sample gen r xs = let (sample',rest) = splitAt r (toList xs)
-                  in (NonEmpty.fromList sample',rest,gen)
-  -- FIXME: do the actual sampling rather than just returning the first r elents
 
--- type TriangulatedEnvelope r plane = MonoidalNEMap plane (NonEmpty (Prism r plane :+ [plane]))
+
+
+-- | minimum value below which we just use the bruteForce method anyway
+n0 :: Int
+n0 = 5
+
+
+
 
 
 -- | Given a set H, a subset S (which is a (s/n)-sample) compute the
 -- lower envelope of the planes in S, and their conflict lists w.r.t
 -- the planes in H.
-lowerEnvelope' :: forall plane r set subset gen. ( Plane_ plane r
+lowerEnvelope' :: forall plane r subset gen. ( Plane_ plane r
                         , Ord r, Fractional r
-                        , Foldable1 set, Foldable1 subset
+                        , Foldable1 subset
                         , RandomGen gen
-                        , Witherable subset
-
                         , Show r, Show plane
                         , Ord plane
-                        ) => gen -> set plane -> subset plane ->
+                        ) => gen -> Sample subset plane ->
                            ( TriangulatedEnvelope r plane
                            , Box (Point 2 r)
                            , gen
                            )
-lowerEnvelope' gen0 allPlanes ss = if (s <= nDelta) then undefined else (env, bbox, gen')
+lowerEnvelope' gen0 input = lowerEnv gen0 input
   where
-    n  = length allPlanes
-    nDelta = ceiling . sqrt . sqrt $ fromIntegral n
-    s  = length ss
-    r  = min s nDelta
+    nDelta = ceiling . sqrt . sqrt $ fromIntegral (totalSize input)
+    r      = min (sampleSize input) nDelta
 
-    menv'           :: Maybe (TriangulatedEnvelope r plane)
-    triangulatedEnv = triangulate <$> menv
+    lowerEnv                           :: gen
+                                       -> Sample subset plane
+                                       -> ( TriangulatedEnvelope r plane
+                                          , Box (Point 2 r)
+                                          , gen
+                                          )
+    lowerEnv gen sample@(Sample ss s rest n)
+      | n <= n0 || s <= nDelta = let (env, bBox) = bruteForceEnvelope sample
+                                 in (env, bBox, gen)
+      | otherwise              = let (sample', gen') = sampleSubset gen r s ss
+                                 in lowerEnv1 gen' sample' rest n
+
+    lowerEnv1 :: gen -> Sample NonEmpty plane -> [plane] -> Int ->
+                 ( TriangulatedEnvelope r plane
+                 , Box (Point 2 r)
+                 , gen
+                 )
+    lowerEnv1 gen (Sample rs r restSs s) restHs n = undefined
+      where
+        (env, bBox) = bruteForceEnvelope (Sample rs r (restSs <> restHs) n)
+        env'        = ifoldMap (\h -> foldMap (go h)) env
+          -- this should either become a traverse; or we should split gen' all the time
+
+        go h nabla@(prism :+ conflictList) = case NonEmpty.nonEmpty conflictList of
+          Nothing            -> singleton h (NonEmpty.singleton nabla)
+            -- we found an actual prism in the final solution
+          Just conflictList' -> _
+            where
+              --
+              extended    = definingPlanes h prism <> conflictList'
+              (rs',rest') = undefined
+              m           = length extended
+
+              env         = lowerEnv _ (Sample rs' r' rest' m)
 
 
-    menv :: Maybe (MinimizationDiagram r (MDVertex r plane [plane]) plane)
-    menv = bruteForceEnvelope allPlanes rs
-    (rs,rest,gen1) = sample gen0 r ss
+definingPlanes h prism = h :| undefined
+-- this may now introduce some duplicatesI guess
+
+
+
+
+type Definers plane = [plane]
+
+
+
+    -- lowerEnv0 :: gen -> Sample subset plane -> ( TriangulatedEnvelope r plane
+    --                                            , Box (Point 2 r)
+    --                                            , gen
+    --                                            )
+    -- lowerEnv0 gen
+    --   where
+    --     verticesEnv     = bruteForceLowerEnvelope rs rest
+    --     bBox            = boundingBox . fmap projectPoint $ verticesEnv
+
+
+
+    -- menv'           :: Maybe (TriangulatedEnvelope r plane)
+    -- triangulatedEnv = triangulate <$> menv
+
+
+    -- menv :: Maybe (MinimizationDiagram r (MDVertex r plane [plane]) plane)
+    -- menv = bruteForceEnvelope allPlanes rs
+    -- (rs,rest,gen1) = sample gen0 r ss
 
     -- lowerEnv =
 
 
-    env = undefined
-    bbox = undefined
-    gen' = undefined
+    -- env = undefined
+    -- bbox = undefined
+    -- gen' = undefined
 
+{-
 
 -- | Given two sets H and R of planes; compute the lower envelope of R using a brute force
 -- method, and compute the conflict lists of every vertex w.r.t the first set H.
@@ -118,12 +170,10 @@ bruteForceEnvelope allPlanes = NEMap.withNonEmpty Nothing (Just . toDiagram)
               . fromVertexForm
               . NEMap.mapWithKey (\v defs -> vertexConflictList allPlanes v :+ defs)
 
--- data Prism r plane = Prism (Triangle (MDVertex r plane [plane]))
+
+
+data Prism r plane = Prism (Triangle (MDVertex r plane [plane]))
   -- prism may be unbounded as well
-
-
-
-
 
 
 -- | Compute the conflict list of a vertex.
@@ -133,6 +183,7 @@ vertexConflictList          :: ( Point_ vertex 3 r, Ord r, Num r
 vertexConflictList planes v = filter (v `liesAbove`) (toList planes)
   where
     v `liesAbove` h = verticalSideTest v h /= GT
+
 
 
 -- | The unbounded edges of a prism
@@ -146,7 +197,7 @@ unboundedEdges = \case
 edgeConflictLists              :: ( Plane_ plane r, Ord r, Num r, Foldable set
                                   ) => set plane -> HalfLine (Point 3 r) -> [plane]
 edgeConflictLists planes prism = let Vector2 hl hl' = unboundedEdges prism
-                                 in filter (\h -> h `intersects` hl || h `intersects hl'`)
+                                 in filter (\h -> h `intersects` hl || h `intersects` hl')
                                            (toList planes)
 
 -- | Triangulate the regions
@@ -157,7 +208,4 @@ triangulate = MonoidalNEMap . fmap triangulate' . asMap
     triangulate'        :: Region r (MDVertex r plane [plane]) -> NonEmpty (Prism r plane)
     triangulate' region = undefined
 
-
-
-
--- bruteForceEnvelope :: set plane ->
+-}
