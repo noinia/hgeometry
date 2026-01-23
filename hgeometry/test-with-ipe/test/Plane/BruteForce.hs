@@ -16,6 +16,7 @@ import HGeometry.HyperPlane.Class
 import HGeometry.Ext
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
+import Data.List qualified as List
 import Data.Map.Monoidal (MonoidalMap)
 import Data.Map.Monoidal qualified as MonoidalMap
 import HGeometry.Combinatorial.Util
@@ -25,7 +26,7 @@ import Data.Map (Map)
 import Data.Map qualified as Map
 import HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import Control.DeepSeq
-import GHC.Generics(Generic)
+import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -51,9 +52,9 @@ bruteForceEnvelope (Sample rs _ rest _) = (env, bBox)
 -- type TriangulatedLowerEnvelope plane = Map plane
 
 
-data Prism plane = Triangular (Vertex plane) (Vertex plane) (Vertex plane)
-                 | Cone (Vertex plane)
-                 | ClippedCone (Vertex plane) (Vertex plane)
+data Prism r plane = Triangular (Vertex r plane) (Vertex r plane) (Vertex r plane)
+                   | Cone (Vertex r plane)
+                   | ClippedCone (Vertex r plane) (Vertex r plane)
 
 
 
@@ -65,7 +66,7 @@ data Prism plane = Triangular (Vertex plane) (Vertex plane) (Vertex plane)
 -- the vertices bounding a plane are given in arbitrary order.
 --
 -- (this assumes there is at least one vertex) in the lower envelope.
-type LowerEnvelope plane = MonoidalMap plane (NonEmpty (Vertex plane :+ [plane]))
+type LowerEnvelope r plane = MonoidalMap plane (NonEmpty (Vertex r plane :+ [plane]))
 
 
 -- |
@@ -74,7 +75,7 @@ type LowerEnvelope plane = MonoidalMap plane (NonEmpty (Vertex plane :+ [plane])
 --
 --
 -- O(h\log h), where \(h\) is the complexity of the envelope.
-fromVertices :: Ord plane => MonoidalMap (Vertex plane) [plane] -> LowerEnvelope plane
+fromVertices :: Ord plane => MonoidalMap (Vertex r plane) [plane] -> LowerEnvelope r plane
 fromVertices = ifoldMap $ \v cl -> let v' = NonEmpty.singleton $ v :+ cl
                                    in MonoidalMap.fromList [ (h,v') | h <- planesOf v ]
   -- TODO: what do we do with empty maps
@@ -88,7 +89,7 @@ fromVertices = ifoldMap $ \v cl -> let v' = NonEmpty.singleton $ v :+ cl
 --
 -- O(r^4 + rn)
 bruteForceEnvelope :: (Plane_ plane r, Ord r, Fractional r, Ord plane, Foldable subset)
-                   => Sample subset plane -> LowerEnvelope plane
+                   => Sample subset plane -> LowerEnvelope r plane
 bruteForceEnvelope = fromVertices . bruteForceVertices
 
 {-
@@ -113,7 +114,7 @@ bruteForceTriangulatedLowerEnvelope = imap triangulate . bruteForceEnvelope
 -- on the lower envelope in a point or line segment.
 --
 -- O(k\log k)
-triangulate       :: plane -> NonEmpty (Vertex plane :+ [plane]) -> [Prism plane :+ [plane]]
+triangulate       :: plane -> NonEmpty (Vertex r plane :+ [plane]) -> [Prism r plane :+ [plane]]
 triangulate = undefined
 -- triangulate h vs' = case vs' of
 --   v1 :| []          -> _ -- cone or nothing
@@ -130,26 +131,46 @@ data Boundary plane = Unbounded (NonEmpty plane)
 --------------------------------------------------------------------------------
 
 -- | a vertex is defined by at least three planes.
-data Vertex plane = Vertex plane plane plane [plane]
-                  deriving (Show,Eq,Ord,Foldable,Functor,Generic)
+--
+-- The Eq and Ord instances only consider these three defining planes,
+-- and assume that they are ordered in increasing order (in some
+-- global order defined on the planes).
+data Vertex r plane = Vertex !plane !plane !plane
+                             [plane] -- ^ remaining defining planes ; purposly lazy
+                             (Point 3 r) -- ^ this field is purposly lazy
+                    deriving (Show,Foldable,Functor,Generic)
 
-instance NFData plane => NFData (Vertex plane)
+-- | Smart constructor for constructing a Vertex.
+--
+-- pre: the three defining planes are given in increasing order
+mkVertex             :: (Plane_ plane r, Ord r, Fractional r)
+                     => plane -> plane -> plane -> [plane] -> Maybe (Vertex r plane)
+mkVertex h1 h2 h3 hs = Vertex h1 h2 h3 hs <$> vertexLocation3 h1 h2 h3
+
+instance Eq plane => Eq (Vertex r plane) where
+  (Vertex u v w _ _) == (Vertex u' v' w' _ _) = u == u' && v == v' && w == w'
+
+instance Ord plane => Ord (Vertex r plane) where
+  (Vertex u v w _ _) `compare` (Vertex u' v' w' _ _) =
+    u `compare` u' <> v `compare` v' <> w `compare` w'
+
+instance (NFData r, NFData plane) => NFData (Vertex r plane)
 
 -- | Report all planes passing through a vertex (even possibly redundant ones)
-planesOf :: Vertex plane -> [plane]
+planesOf :: Vertex r plane -> [plane]
 planesOf = toList
 
 -- | Compute the exact location of a vertex
 location                     :: (Plane_ plane r, Ord r, Fractional r)
-                             => Vertex plane -> Point 3 r
-location (Vertex h1 h2 h3 _) = fromMaybe (error "location: absurd, no intersection?")
-                                         (vertexLocation3 h1 h2 h3)
+                             => Vertex r plane -> Point 3 r
+location (Vertex _ _ _ _ v) = v
 
 -- | Compute the projection of of a vertex
-location2                     :: (Plane_ plane r, Ord r, Fractional r)
-                              => Vertex plane -> Point 2 r
-location2 (Vertex h1 h2 h3 _) = fromMaybe (error "location2: absurd, no intersection?")
-                                          (vertexLocation2 h1 h2 h3)
+location2 :: (Plane_ plane r, Ord r, Fractional r) => Vertex r plane -> Point 2 r
+location2 = projectPoint . location
+
+-- (Vertex h1 h2 h3 _) = fromMaybe (error "location2: absurd, no intersection?")
+--                                           (vertexLocation2 h1 h2 h3)
 
 -- | Compute the point in which the three planes intersect
 vertexLocation3          :: (Plane_ plane r, Ord r, Fractional r)
@@ -170,29 +191,33 @@ vertexLocation2 h1 h2 h3 = do l12 <- intersectionLine h1 h2
 -- compute the vertices of the lower envelope of R as well as their
 -- conflict lists (w.r.t \(H\)) using a brute force method.
 --
+-- pre: the planes are given in increasing order
+--
 -- running time: \(O(r^4 + rn)\)
 bruteForceVertices                      :: ( Plane_ plane r, Ord r, Fractional r
                                            , Foldable subset, Ord plane
                                            )
-                                        => Sample subset plane -> MonoidalMap (Vertex plane) [plane]
-bruteForceVertices (Sample rs _ rest _) = withUniques mkVertex rs
+                                        => Sample subset plane
+                                        -> MonoidalMap (Vertex r plane) [plane]
+bruteForceVertices (Sample rs _ rest _) = withUniques mkVertex' rs
   where
-    mkVertex h1 h2 h3 hs = case partition3 (belowVertex' h1 h2 h3) hs of
-                             (_,eqs,[]) -> MonoidalMap.singleton (Vertex h1 h2 h3 eqs)
-                                                                 (filter (\h -> belowVertex h1 h2 h3 h
-                                                                        == Just GT
-                                                                 ) rest)
-                                           -- the fact that the map is monoidal is somewhat
-                                           -- meaningless here; as vertices are generated uniquely
-                             _          -> mempty
-      where
-        mv                  = vertexLocation3 h1 h2 h3
-        -- returns whether the given forth plane h passes below (GT),
-        -- through (EQ), or above (LT) the common vertex defined by
-        -- the three given planes. Returns GT if the first three
-        -- planes don't define a common vertex.
-        belowVertex' ha hb hc h = fromMaybe GT $ belowVertex ha hb hc h
-        belowVertex  _  _  _  h = (\v -> verticalSideTest v h ) <$> mv
+    mkVertex' h1 h2 h3 hs = case vertexLocation3 h1 h2 h3 of
+      Just v -> case List.partition (\h -> verticalSideTest v h == GT) hs of
+                  ([],nonGTs) -> let eqs = filter (\h -> verticalSideTest v h == EQ) nonGTs in
+                                 MonoidalMap.singleton (Vertex h1 h2 h3 eqs v)
+                                                       [ h | h <- rest, verticalSideTest v h == GT ]
+                  _           -> mempty
+      _      -> mempty
+    -- the fact that the map is monoidal is somewhat meaningless here;
+    -- as vertices are generated uniquely
+
+    -- NOTE: It seems somewhat silly that we are evaluating
+    -- verticalSideTest twice per plane here. However, testing if v
+    -- lies above the plane requires much less precision, and GHC
+    -- manages to optimize this.  In particular, this version is
+    -- something like 15x faster than evaluating verticalSideTest v h
+    -- exactly and using partition3 instead (as this forces the exact
+    -- evaluation for many more) planes.
 
   -- TODO: If the input set is actually given in sorted order, the
   -- vertices are also generated in sorted order. So then the unioning
