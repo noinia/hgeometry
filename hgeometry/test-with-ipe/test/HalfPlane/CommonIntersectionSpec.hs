@@ -131,7 +131,7 @@ onlyNegatives :: IO (NonEmpty (HalfPlane R))
 onlyNegatives = generateInput <&> fmap (\h -> h&halfSpaceSign .~ Negative)
 
 myIpeTest       :: NonEmpty (HalfPlane R) -> [IpeObject R]
-myIpeTest input = [ iO $ draw $ commonIntersection input
+myIpeTest input = [ iO $ maybe (ipeGroup []) draw $ commonIntersection input
                   ] <>
                   [ iO $ asConstraint h
                   | h <- F.toList input
