@@ -10,11 +10,13 @@ module HGeometry.HalfPlane.CommonIntersection.Chain
   , glueChains
   ) where
 
+import           Data.Coerce (coerce)
 import           Control.Lens hiding (Empty)
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
 import           HGeometry.Ext
 import           HGeometry.Line
+import           HGeometry.Intersection
 import           HGeometry.Point
 import           HGeometry.Sequence.Alternating
 
@@ -108,14 +110,16 @@ clipLeftWhen p = over _ChainAlternating $
 
 --------------------------------------------------------------------------------
 -- | Given two chains; glue them together by introducing the new
--- appropriate intersection point
+-- appropriate intersection point.
 --
--- pre: such an intersection point exists.
-glueChains          :: Chain f (LineEQ r :+ halfPlane) r
-                    -> Chain f (LineEQ r :+ halfPlane) r
-                    -> Chain f (LineEQ r :+ halfPlane) r
-glueChains pref suf = coerce $ concatAlternatingsWith f (coerce pref) (coerce suf)
+-- pre: such an intersection point exists (i.e. the rightmost bounding line of the prefix)
+-- and the leftmost bounding line of the suffix intersect in a point.
+glueChains          :: (Ord r, Fractional r)
+                    => Chain Seq (LineEQ r :+ halfPlane) r
+                    -> Chain Seq (LineEQ r :+ halfPlane) r
+                    -> Chain Seq (LineEQ r :+ halfPlane) r
+glueChains pref suf = Chain $ concatAlternatingsWith f (coerce pref) (coerce suf)
   where
-    f r l = case r `intersect` l of
-      Nothing -> error "glueChains: precondition failed!"
-      Just p  -> Chain $ Alternating a $ pref <> (p,l)
+    f (r :+ _) (l :+ _) = case r `intersect` l of
+      Just (Line_x_Line_Point p)  -> p
+      _                           -> error "glueChains: precondition failed!"

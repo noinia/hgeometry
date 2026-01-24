@@ -36,10 +36,10 @@ import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
--- | Common intersection of a bunch of halfplanes
+-- | A type represetning the Common intersection of a bunch of halfplanes; assuming
+-- this intersection is non-empty.
 data CommonIntersection halfPlane r =
-    EmptyIntersection
-  | SingletonPoint    (Point 2 r)                     (Vector 3 halfPlane)
+    SingletonPoint    (Point 2 r)                     (Vector 3 halfPlane)
   -- ^ Common intersection is a singleton point, defined by the three given halfplanes
   | InSubLine (VerticalOrLineEQ r) (Vector 2 halfPlane) (SubLine halfPlane r)
   -- ^ The two halfPlanes that define the line, and the other halfplanes furthe
@@ -71,16 +71,18 @@ commonIntersection     :: forall f halfPlane r.
 
                           , Show halfPlane, Show r
                           )
-                       => f halfPlane -> CommonIntersection halfPlane r
+                       => f halfPlane -> Maybe (CommonIntersection halfPlane r)
 commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs0 of
     -- we only have vertical halfpalnes planes
     This verticals               -> case verticals of
-            Negatives (_ :+ l)            -> UnboundedRegion $ Chain (Alternating l mempty)
-            Positives (_ :+ u)            -> UnboundedRegion $ Chain (Alternating u mempty)
+            Negatives (_ :+ l)            -> Just . UnboundedRegion $
+                                             Chain (Alternating l mempty)
+            Positives (_ :+ u)            -> Just . UnboundedRegion $
+                                             Chain (Alternating u mempty)
             BothSigns (x :+ l) (x' :+ u)  -> case x `compare` x' of
-              LT -> EmptyIntersection
-              EQ -> InSubLine (VerticalLineThrough x) (Vector2 l u) EntireLine
-              GT -> Slab l u
+              LT -> Nothing
+              EQ -> Just $ InSubLine (VerticalLineThrough x) (Vector2 l u) EntireLine
+              GT -> Just $ Slab l u
 
     -- we only have non-vertical halfpalnes planes
     That nonVerticals            -> withNonVerticals nonVerticals
@@ -101,12 +103,12 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
          -- withNonVerticals nonVerticals `clipBy` verticals
   where
     withNonVerticals              :: These2 (Chain Seq (LineEQ r :+ halfPlane) r)
-                                  -> CommonIntersection halfPlane r
+                                  -> Maybe (CommonIntersection halfPlane r)
     withNonVerticals nonVerticals = case nonVerticals of
       -- we only have halfplanes with negative signs
-       Negatives upperBoundary               -> unboundedRegion upperBoundary
+       Negatives upperBoundary               -> Just $ unboundedRegion upperBoundary
       -- we only have halfplanes with positives signs
-       Positives lowerBoundary               -> unboundedRegion lowerBoundary
+       Positives lowerBoundary               -> Just $ unboundedRegion lowerBoundary
        -- we have both positive and negative halfplanes
        BothSigns _upperBoundary _lowerBoundary -> undefined -- TODO: somehow combine them.
 
@@ -119,6 +121,10 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
     --     | otherwise              -> undefined
 
 
+
+
+
+
 -- | Helper function to construct an unbounded region
 unboundedRegion :: Chain Seq (core :+ halfPlane) r -> CommonIntersection halfPlane r
 unboundedRegion = UnboundedRegion . first (view extra)
@@ -128,12 +134,12 @@ unboundedRegion = UnboundedRegion . first (view extra)
 clipAndPushBy        :: (Ord r, Num r, HalfPlane_ halfPlane r)
                      => Chain Seq (LineEQ r :+ halfPlane) r
                      -> These2 (r :+ halfPlane)
-                     -> CommonIntersection halfPlane r
+                     -> Maybe (CommonIntersection halfPlane r)
 clipAndPushBy inters = \case
-    Negatives hl    -> unboundedRegion . clipRight' hl $ inters
-    Positives hu    -> unboundedRegion . clipLeft'  hu $ inters
+    Negatives hl    -> Just . unboundedRegion . clipRight' hl $ inters
+    Positives hu    -> Just . unboundedRegion . clipLeft'  hu $ inters
     BothSigns hl hu -> case (hl^.core) `compare` (hu^.core) of
-      LT -> EmptyIntersection
+      LT -> Nothing
       EQ -> let x           = hl^.core
                 verticals   = Vector2 (hl^.extra) (hu^.extra)
                   -- the two vertical halfplanes defining x
@@ -143,8 +149,8 @@ clipAndPushBy inters = \case
                 vy          = case h^.halfSpaceSign of
                                 Positive -> 1
                                 Negative -> -1
-            in InSubLine (VerticalLineThrough x) verticals (InHalfLine theHalfLine h)
-      GT -> unboundedRegion . clipLeft' hl . clipRight' hu $ inters
+            in Just $ InSubLine (VerticalLineThrough x) verticals (InHalfLine theHalfLine h)
+      GT -> Just . unboundedRegion . clipLeft' hl . clipRight' hu $ inters
   where
 
     dummy = LineEQ 0 0
@@ -465,6 +471,12 @@ asGeneralLine :: (HyperPlane_ hyperPlane 2 r, Fractional r, Eq r)
 asGeneralLine = hyperPlaneFromEquation . hyperPlaneEquation
 
 --------------------------------------------------------------------------------
+
+-- | Given a chain, close it (if possible)
+closeIntersection :: Chain Seq (line :+ halfPlane) r
+                  -> Either (Chain Seq halfPlane r)
+                            (ConvexPolygon (Point 3 r :+ halfPlane))
+closeIntersection chain = undefined
 
 
 --clipLower

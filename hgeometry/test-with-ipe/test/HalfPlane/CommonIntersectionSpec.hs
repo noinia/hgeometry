@@ -37,9 +37,9 @@ type HalfPlane r = HalfSpaceF (VerticalOrLineEQ r)
 spec :: Spec
 spec = describe "common halfplane intersection tests" $ do
          it "myHalfplanes test" $
-           commonIntersection myHalfPlanes `shouldBe` theAnswer
+           commonIntersection myHalfPlanes `shouldBe` Just theAnswer
          it "myHalfplanes2 test" $
-           commonIntersection myHalfPlanes2 `shouldBe` theAnswer2
+           commonIntersection myHalfPlanes2 `shouldBe` Just theAnswer2
          -- generateGoldenSpec [osp|commonIntersectionAllNegatives1|]
          -- generateGoldenSpec [osp|commonIntersectionAllNegatives|]
 
@@ -163,9 +163,8 @@ asConstraint h = ipeGroup [ iO $ defIO seg
 
 draw :: IpeOut (CommonIntersection (HalfPlane r) r) Group r
 draw = \case
-  EmptyIntersection     -> ipeGroup []
-  SingletonPoint _p _hs   -> ipeGroup []
-  InSubLine _l _hs _sl     -> ipeGroup []
-  Slab _hl _hr            -> ipeGroup []
+  SingletonPoint _p _hs  -> ipeGroup []
+  InSubLine _l _hs _sl   -> ipeGroup []
+  Slab _hl _hr           -> ipeGroup []
   BoundedRegion _pg      -> ipeGroup []
   UnboundedRegion _chain -> ipeGroup []
