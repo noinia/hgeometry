@@ -6,7 +6,7 @@ module Util
 
 -- import           Control.DeepSeq
 import           Data.Hashable
-import qualified Data.List as List
+-- import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 -- import           Data.RealNumber.Rational

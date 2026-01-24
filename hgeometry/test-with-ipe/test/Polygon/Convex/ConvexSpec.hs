@@ -12,14 +12,10 @@ import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           R
-import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
+import           HGeometry
+import           HGeometry.Polygon
 import qualified HGeometry.Polygon.Convex.Merge as Merge
 import           HGeometry.Polygon.Convex.MinkowskiSum
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Transformation
-import           HGeometry.Vector
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
