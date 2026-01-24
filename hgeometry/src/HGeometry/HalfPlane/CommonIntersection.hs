@@ -11,8 +11,8 @@ module HGeometry.HalfPlane.CommonIntersection
 
 
 import           Control.Lens hiding (Empty)
-import           Data.Bifunctor (first)
 import           Data.Foldable1
+import           Data.Foldable(toList)
 import           Data.List.NonEmpty (NonEmpty(..))
 -- import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
@@ -24,6 +24,7 @@ import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.HalfPlane.CommonIntersection.Chain
 import           HGeometry.HalfSpace
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
@@ -47,7 +48,8 @@ data CommonIntersection halfPlane r =
   | Slab halfPlane halfPlane
     -- ^ two parallel halfPlanes l and u that form a slab;
   | BoundedRegion (ConvexPolygon (Point 2 r :+ halfPlane))
-  | UnboundedRegion (Chain Seq halfPlane r)
+    -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
+  | UnboundedRegion (Chain Seq r halfPlane)
     -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
   deriving (Show,Eq)
 
@@ -102,7 +104,7 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
          undefined -- TODO: somehow combine them, and clip
          -- withNonVerticals nonVerticals `clipBy` verticals
   where
-    withNonVerticals              :: These2 (Chain Seq (LineEQ r :+ halfPlane) r)
+    withNonVerticals              :: These2 (Chain Seq r (LineEQ r :+ halfPlane))
                                   -> Maybe (CommonIntersection halfPlane r)
     withNonVerticals nonVerticals = case nonVerticals of
       -- we only have halfplanes with negative signs
@@ -126,13 +128,13 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
 
 
 -- | Helper function to construct an unbounded region
-unboundedRegion :: Chain Seq (core :+ halfPlane) r -> CommonIntersection halfPlane r
-unboundedRegion = UnboundedRegion . first (view extra)
+unboundedRegion :: Chain Seq r (core :+ halfPlane) -> CommonIntersection halfPlane r
+unboundedRegion = UnboundedRegion . fmap (view extra)
 
 -- | clip the chain by the given vertical halfplanes, and add the clipping halfPlanes to
 -- the chains.
 clipAndPushBy        :: (Ord r, Num r, HalfPlane_ halfPlane r)
-                     => Chain Seq (LineEQ r :+ halfPlane) r
+                     => Chain Seq r (LineEQ r :+ halfPlane)
                      -> These2 (r :+ halfPlane)
                      -> Maybe (CommonIntersection halfPlane r)
 clipAndPushBy inters = \case
@@ -168,16 +170,16 @@ clipAndPushBy inters = \case
 
 data LeftIntersection halfPlane r =
     LowerAboveUpper
-  | Intersection (Point 2 r) (Chain Seq (LineEQ r :+ halfPlane) r)
-                             (Chain Seq (LineEQ r :+ halfPlane) r)
-  | NoIntersection (Chain Seq (LineEQ r :+ halfPlane) r)
-                                       (Chain Seq (LineEQ r :+ halfPlane) r)
+  | Intersection (Point 2 r) (Chain Seq r (LineEQ r :+ halfPlane))
+                             (Chain Seq r (LineEQ r :+ halfPlane))
+  | NoIntersection (Chain Seq r (LineEQ r :+ halfPlane))
+                   (Chain Seq r (LineEQ r :+ halfPlane))
 
 -- | Given the lower  chain and the upper chain, computes the first intersection as seen from the left; i.e. the first point where the remainder of the lower chain indeed lies below the remainder of the upper chain
 leftIntersection               :: (Ord  r, Fractional r
                                   )
-                               => Chain Seq (LineEQ r :+ halfPlane) r
-                               -> Chain Seq (LineEQ r :+ halfPlane) r
+                               => Chain Seq r (LineEQ r :+ halfPlane)
+                               -> Chain Seq r (LineEQ r :+ halfPlane)
                                -> LeftIntersection halfPlane r
 leftIntersection lower0 upper0 = case dropWhile lowerAboveUpper $ zipLR lower0 upper0 of
     []                     -> LowerAboveUpper
@@ -195,8 +197,8 @@ leftIntersection lower0 upper0 = case dropWhile lowerAboveUpper $ zipLR lower0 u
 -- triples (x_i,lower_i,upper_i), so that on (x_{i-1},x_i] lower_i and upper_i are the
 -- remaining alternating chains. (x_{-1} = -\infty).
 zipLR             :: Ord r
-                  => Chain Seq halfPlane r -> Chain Seq halfPlane r
-                  -> [(r, Chain Seq halfPlane r, Chain Seq halfPlane r )]
+                  => Chain Seq r halfPlane -> Chain Seq r halfPlane
+                  -> [(r, Chain Seq r halfPlane, Chain Seq r halfPlane )]
 zipLR lower upper = case firstIntersection lower upper of
     None                           -> []
     Upper p upper'                 -> (p^.xCoord, lower, upper) : zipLR lower  upper'
@@ -204,17 +206,17 @@ zipLR lower upper = case firstIntersection lower upper of
     Simultaneous p _ lower' upper' -> (p^.xCoord, lower, upper) : zipLR lower' upper'
 
 data FirstVertex halfPlane r = None
-                 | Upper (Point 2 r) (Chain Seq  halfPlane r)
+                 | Upper (Point 2 r) (Chain Seq r halfPlane)
                  -- ^ first vertex in the upper chain, and the rest of the upper chain
-                 | Lower (Point 2 r) (Chain Seq  halfPlane r)
+                 | Lower (Point 2 r) (Chain Seq r halfPlane)
                  | Simultaneous (Point 2 r)  -- ^ point in the lower chian
                                 (Point 2 r) -- ^ point in the upper chain
-                                (Chain Seq  halfPlane r) -- ^ remainder of the lower chain
-                                (Chain Seq  halfPlane r) -- ^ remainder of the upper chain
+                                (Chain Seq r halfPlane) -- ^ remainder of the lower chain
+                                (Chain Seq r halfPlane) -- ^ remainder of the upper chain
                  deriving (Show,Eq)
 
 firstIntersection             :: Ord r
-                              => Chain Seq halfPlane r -> Chain Seq halfPlane r
+                              => Chain Seq r halfPlane -> Chain Seq r halfPlane
                               -> FirstVertex halfPlane r
 firstIntersection (Chain lower) (Chain upper) = case unconsAlt lower of
   Left _               -> case unconsAlt upper of
@@ -282,7 +284,7 @@ boundaries :: ( HalfPlane_ halfPlane r
 
 
               , Show r, Show halfPlane
-              ) => NonVerticals halfPlane r -> These2 (Chain Seq (LineEQ r :+ halfPlane) r)
+              ) => NonVerticals halfPlane r -> These2 (Chain Seq r (LineEQ r :+ halfPlane))
 boundaries = bimap upperBoundary lowerBoundary
   where
     upperBoundary hs = let LowerEnvelope alt = lowerEnvelope hs in Chain alt
@@ -294,7 +296,7 @@ boundaries = bimap upperBoundary lowerBoundary
 
 
 -- clipLowerLeft :: VerticalOrLineEQ r
---               -> Chain Seq halfPlane r -- ^ lower boundary of the (non-vertical) positive halfplanes
+--               -> Chain Seq r halfPlane -- ^ lower boundary of the (non-vertical) positive halfplanes
 --               ->
 
 -- (Chain lower) (Chain upper) =  case (unconsAlt lowerB, unconsAlt upperB) of
@@ -317,9 +319,9 @@ boundaries = bimap upperBoundary lowerBoundary
 
 -- -- |
 -- combineNonV :: ( Fractional r, Ord r
---                ) => Chain Seq (LineEQ r :+ halfPlane) r
+--                ) => Chain Seq r (LineEQ r :+ halfPlane)
 --                -- ^ lower boundary of the (non-vertical) positive halfplanes
---             -> Chain Seq (LineEQ r :+ halfPlane) r
+--             -> Chain Seq r (LineEQ r :+ halfPlane)
 --             -- ^ upper boundary of the (non-vertical) negative halfplanes
 --             -> CommonIntersection halfPlane r
 -- combineNonV (Chain lower0) (Chain upper0) = go0 lower0 upper0
@@ -383,7 +385,7 @@ boundaries = bimap upperBoundary lowerBoundary
 -- data ConvergingOrDiversing = Converging | Diverging
 --                            deriving (Show,Eq)
 
--- combine                               :: Chain Seq halfPlane r -> Chain Seq halfPlane r
+-- combine                               :: Chain Seq r halfPlane -> Chain Seq r halfPlane
 --                                       -> CommonIntersection halfPlane r
 -- combine (Chain lowerB0) (Chain upperB0) = go lowerB0 upperB0
 --   where
@@ -473,10 +475,15 @@ asGeneralLine = hyperPlaneFromEquation . hyperPlaneEquation
 --------------------------------------------------------------------------------
 
 -- | Given a chain, close it (if possible)
-closeIntersection :: Chain Seq (line :+ halfPlane) r
-                  -> Either (Chain Seq halfPlane r)
-                            (ConvexPolygon (Point 3 r :+ halfPlane))
-closeIntersection chain = undefined
-
+closeIntersection       :: Chain Seq r (line :+ halfPlane)
+                        -> Either (Chain Seq r halfPlane)
+                                  (ConvexPolygon (Point 2 r :+ halfPlane))
+closeIntersection chain@(Chain (Alternating _ rest))
+  = case leftMost chain `converge` rightMost chain of
+    Just p -> Right . uncheckedFromCCWPoints . fmap (\(v,h) -> v :+ h^.extra) $
+              (p,chain^.head1) :| toList rest
+    _      -> Left $ fmap (^.extra) chain
+  where
+    converge _ _ = undefined
 
 --clipLower
