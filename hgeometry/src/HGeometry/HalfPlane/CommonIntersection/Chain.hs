@@ -7,16 +7,13 @@ module HGeometry.HalfPlane.CommonIntersection.Chain
   , leftMost
   , clipLeft
   , clipRight
+  , glueChains
   ) where
 
 import           Control.Lens hiding (Empty)
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
 import           HGeometry.Ext
--- import           HGeometry.Foldable.Util()
--- import           HGeometry.HalfSpace
--- import           HGeometry.HyperPlane.Class
--- import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Point
 import           HGeometry.Sequence.Alternating
@@ -110,3 +107,15 @@ clipLeftWhen p = over _ChainAlternating $
                    (_ :|> (_,h0'), kept) -> Alternating h0' kept
 
 --------------------------------------------------------------------------------
+-- | Given two chains; glue them together by introducing the new
+-- appropriate intersection point
+--
+-- pre: such an intersection point exists.
+glueChains          :: Chain f (LineEQ r :+ halfPlane) r
+                    -> Chain f (LineEQ r :+ halfPlane) r
+                    -> Chain f (LineEQ r :+ halfPlane) r
+glueChains pref suf = coerce $ concatAlternatingsWith f (coerce pref) (coerce suf)
+  where
+    f r l = case r `intersect` l of
+      Nothing -> error "glueChains: precondition failed!"
+      Just p  -> Chain $ Alternating a $ pref <> (p,l)
