@@ -22,23 +22,25 @@ module HGeometry.Sequence.Alternating
   , consElemWith
   , unconsAlt
   , snocElemWith
+  , concatAlternatingsWith
   , separators
   ) where
 
-import           Control.DeepSeq
-import           Control.Lens
-import           Data.Bifoldable
-import           Data.Bitraversable
-import qualified Data.Foldable as F
-import           Data.Foldable1
-import           Data.Functor.Apply ((<.*>))
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Traversable
-import           GHC.Generics (Generic)
-import           HGeometry.Foldable.Util
-import           Prelude hiding (reverse)
+import Data.Maybe (fromMaybe)
+import Control.DeepSeq
+import Control.Lens
+import Data.Bifoldable
+import Data.Bitraversable
+import Data.Foldable qualified as F
+import Data.Foldable1 hiding (last)
+import Data.Functor.Apply ((<.*>))
+import Data.List qualified as List
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Semigroup.Traversable
+import GHC.Generics (Generic)
+import HGeometry.Foldable.Util
+import Prelude hiding (reverse)
 
 --------------------------------------------------------------------------------
 
@@ -212,3 +214,26 @@ firstWithNeighbors f (Alternating x0 xs) = Alternating x0 xs'
 -- | Get the separators out of the alternating
 separators                    :: Functor f => Alternating f sep a -> f sep
 separators (Alternating _ xs) = fmap fst xs
+
+
+--------------------------------------------------------------------------------0
+
+-- | Given a function that computes the new separator, combinges the
+-- two alternatings.
+--
+-- >>> let alt1 = fromNonEmptyWith "," (NonEmpty.fromList [1..2]) :: Alternating [] String Int
+-- >>> let alt2 = fromNonEmptyWith "," (NonEmpty.fromList [3..4])
+-- >>> concatAlternatingsWith (\x y -> "new sep " <> show x <> show y) alt1 alt2
+-- Alternating 1 [(",",2),("new sep 23",3),(",",4)]
+concatAlternatingsWith :: ( Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                          , Snoc (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                          , Semigroup (f (sep,a))
+                          ) => (a -> a -> sep)
+                          -- ^ Function that combines the last element from
+                          -- the first alternating with the first of the
+                          -- second to compute the new separator.
+                          -> Alternating f sep a -> Alternating f sep a -> Alternating f sep a
+concatAlternatingsWith f (Alternating x pref) (Alternating y suf) = Alternating x $ pref <> suf'
+  where
+    sep  = f (fromMaybe x $ pref^?_last._2) y
+    suf' = (sep,y) <| suf
