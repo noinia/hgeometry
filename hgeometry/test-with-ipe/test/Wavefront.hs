@@ -23,11 +23,10 @@ import Codec.Wavefront.IO qualified
 import Codec.Wavefront.Face qualified as Face
 import Codec.Wavefront.Object (WavefrontOBJ, objFaces, objLocations
                               )
-import Codec.Wavefront.Element (Element, ElementF(Element))
+import Codec.Wavefront.Element (Element, ElementF())
 import Codec.Wavefront.Element qualified as Element
 import Codec.Wavefront.Location
 import HGeometry.Triangle
-import Hiraffe.Graph.Class (HasVertices(..), HasVertices'(..))
 import System.OsPath
 import HGeometry.Point
 import Data.Vector qualified as Vector

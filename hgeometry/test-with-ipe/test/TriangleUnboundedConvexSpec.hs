@@ -4,25 +4,14 @@
 module TriangleUnboundedConvexSpec where
 
 import           Control.Lens as Lens
-import qualified Data.Foldable as F
-import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing)
 import           Golden
 import           HGeometry.Ext
-import           HGeometry.HalfSpace
-import           HGeometry.Intersection
-import           HGeometry.Line
+import           HGeometry.Kernel
 import           R
-import           HGeometry.Point
-import           HGeometry.PolyLine
-import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
-import           HGeometry.Properties
-import           HGeometry.Triangle
-import           HGeometry.Vector
 import           Ipe
 import           Ipe.Color
 import           System.OsPath

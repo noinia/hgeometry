@@ -12,7 +12,6 @@ import           HGeometry.Polygon
 import           HGeometry.Polygon.Triangulation
 import qualified HGeometry.Polygon.Triangulation.MakeMonotone as MM
 import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM
-import           HGeometry.Transformation
 import           Ipe
 import           PlaneGraph.RenderSpec (drawVertex, drawDart, drawEdge, drawFace)
 -- import           System.OsPath
