@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module Polygon.Simple.SPTSpec(spec) where
 
 import           Control.Lens
@@ -129,10 +130,10 @@ manualTest = it "manual test" $
         diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
                 | (e, Diagonal) <- triang^..edges.withIndex
                 ]
-        wrong = [ iO $ defIO wr ! attr SStroke red
-                                ! attr SPen (IpePen (Named "fat"))
-                | wr <- res'
-                ]
+        -- wrong = [ iO $ defIO wr ! attr SStroke red
+        --                         ! attr SPen (IpePen (Named "fat"))
+        --         | wr <- res'
+        --         ]
 
         out = [ iO' myBuggySource
               , iO' myBuggyPoly
@@ -156,14 +157,13 @@ testIpe inFp outFp = describe (show inFp) $ do
     (sources, poly) <-  runIO $ do
         inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/ShortestPath/|] <> inFp)
         Right page <- readSinglePageFile inFp'
-        let (pts :: NonEmpty (Point 2 R :+ _))            = NonEmpty.fromList $ readAll page
-            ((pg :: SimplePolygon (Point 2 R) :+ _) : _)  = readAll page
+        let (pts :: NonEmpty (Point 2 R :+ _))             = NonEmpty.fromList $ readAll page
+            ((pg :: SimplePolygon (Point 2 R) :+ _) :| _)  = NonEmpty.fromList $ readAll page
         pure (pts,pg)
 
     let triang    = triangulate (poly^.core)
         (mySource :+ _)  = NonEmpty.head sources
-
-        Just tree  = dualTreeFrom mySource triang
+        tree  = fromJust $ dualTreeFrom mySource triang
         tree' = bimap (\d -> let ((ri,li),(r,l)) = triang^.endPointsOf d.withIndex
                              in Vector2 (l :+ li) (r :+ ri))
                       (\(_,(i,v)) -> v :+ i) tree

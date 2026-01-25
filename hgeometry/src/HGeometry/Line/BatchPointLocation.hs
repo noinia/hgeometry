@@ -19,14 +19,8 @@ module HGeometry.Line.BatchPointLocation
 import Data.Foldable
 import Data.Foldable1
 import Control.Lens
-import HGeometry.Sequence.Alternating
-import Data.Vector qualified as Vector
-import Data.Set qualified as Set
 import HGeometry.VerticalRayShooting.PersistentSweep
 import Data.Maybe
-import Data.Map qualified as Map
-import Data.Set qualified as Set
-import Data.IntMap.Monoidal qualified as IntMap
 import HGeometry.PlaneGraph.Connected
 import HGeometry.Sequence.NonEmpty
 import HGeometry.Ext
@@ -39,7 +33,6 @@ import Prelude hiding (lines)
 import HGeometry.PointLocation.Type
 import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap, singleton)
 import HGeometry.Indexed
-import HGeometry.Sequence.NonEmpty (ViewL1(..))
 --------------------------------------------------------------------------------
 
 -- | Given a set of \(n\) query points, and a set of \(r\) lines H computes for each
@@ -205,7 +198,7 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
     -- | Construct a plane graph
     gr' :: CPlaneGraph () (Point 2 r :+ Seq.Seq (Point 2 r))
                           (ClosedLineSegment (Point 2 r) :+ Maybe line) ()
-    gr' =  gr'' & edges %~ \(e :<< _) -> (e&extra._Just %~ view _1)
+    gr' =  gr'' & edges %~ \(e :<< _) -> e&extra._Just %~ view _1
 
     gr'' :: CPlaneGraph () _ _ _
     gr'' = fromIntersectingSegments segs
@@ -213,7 +206,7 @@ pointLocationStructureIn rect lines = pointLocationStructureFrom gr
 
     segs :: NonEmpty (ClosedLineSegment (Point 2 r) :+ Maybe (WithIndex line))
     segs =
-      (toNonEmpty $ (:+ Nothing) <$> sides rect)
+      toNonEmpty ((:+ Nothing) <$> sides rect)
          <<> mapMaybe clip (labelWithIndex $ toList lines)
 
     clip l = (l^._1) `intersect` rect >>= \case
@@ -275,7 +268,7 @@ pointLocate      :: ( Point_ queryPoint 2 r, Num r, Ord r
                  -> FaceIx (PointLocationDS vertex edge f)
 pointLocate q ds = case segmentAbove q (ds^.vrStructure) of
   Nothing       -> ds^.outerFaceIx
-  Just (e :+ d) -> ds^.subdivision.incidentFaceOf d.asIndex
+  Just (_ :+ d) -> ds^.subdivision.incidentFaceOf d.asIndex
 
 
 

@@ -12,7 +12,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Class
-  ( PlaneGraph_(..)
+  ( PlaneGraph_
   , ConstructablePlaneGraph_(..)
   -- , HasLocation(..)
   , defaultOuterFaceDart

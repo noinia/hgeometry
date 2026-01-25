@@ -1,13 +1,14 @@
-write-ghc-environment-files: always
-tests: true
-benchmarks: true
-multi-repl: true
+Write-ghc-environment-files: always
+tests: True
+benchmarks: True
+-- multi-repl: True
 packages:
   hgeometry-combinatorial
   hgeometry
   hgeometry-examples
   -- ../hiraffe
   -- ../miso-bulma
+  -- ../approximate-equality
 
 -- ghc-options: -Werror
 
@@ -45,6 +46,7 @@ source-repository-package
 source-repository-package
     type: git
     location: https://github.com/noinia/approximate-equality
+    tag: 02fc43ca97dd66940dc3d4ac61ecda7888ec252e
 
 -- source-repository-package
 --     type: git
