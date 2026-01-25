@@ -55,12 +55,12 @@ onClickWithButton toAction = on "click" (Decoder dec dt) (\res _ -> toAction res
     dt  = DecodeTarget mempty
     dec :: Value -> Parser Button
     dec = withObject "event" $ \o -> case Map.lookup "button" o of
-            Nothing -> pfail "button not found?"
+            Nothing -> fail "button not found?"
             Just v  -> flip (withNumber "Button") v $ \case
               0 -> pure LeftButton
               1 -> pure MiddleButton
               2 -> pure RightButton
-              _ -> pfail "unknown button"
+              _ -> fail "unknown button"
 
 -- | Get right clicks
 onRightClick :: action -> Attribute action
@@ -69,7 +69,3 @@ onRightClick = onContextMenuWithOptions disabled
     disabled = Event.defaultOptions { _preventDefault  = True
                                     , _stopPropagation = False
                                     }
-
-
-pfail   :: a -> b
-pfail _ = error "miso does not yet expose this :S" -- FIXME: for now

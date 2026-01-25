@@ -26,11 +26,15 @@ import           HGeometry.Viewport
 import           Miso ( Attribute, View, Effect
                       , put
                       )
-import           Miso.String (MisoString, ms)
+import           Miso.String (ms)
 import           Miso.Svg (svg_, g_, rect_)
 import           Miso.Svg.Property (transform_, fill_, pointerEvents_)
 import           Miso.Html.Property (width_,height_) -- not sure if this is correct (namespace)!
-import           Miso.Event.Types ( PointerEvent(..))
+import           Miso.Event.Types ( PointerEvent(..), Events
+                                  , pointerEvents
+                                  , touchEvents
+                                  , Phase(..)
+                                  )
 import           Miso.Html.Event ( onPointerLeave
                                  , onPointerMove
                                  , onPointerEnter
@@ -180,15 +184,12 @@ svgCanvas_ canvas ats vs =
 -- * Canvas events that we should isten to
 
 -- | Events a canvas wants to listen to
-withCanvasEvents :: Map.Map MisoString Bool -> Map.Map MisoString Bool
-withCanvasEvents = Map.union $ Map.fromList
-                   [ ("touchstart"  , False)
-                   , ("touchmove"   , False)
-                   , ("touchend"    , False)
-                   , ("pointerleave"  , True)
-                   , ("pointermove"   , False)
-                   , ("contextmenu" , False)
-                   ]
+withCanvasEvents :: Events -> Events
+withCanvasEvents = ((touchEvents <> pointerEvents <> custom) <>)
+  where
+    custom = Map.fromList
+             [ ("contextmenu" , CAPTURE)
+             ]
 
 -- -- | Subscription needed for the iCanvas. In particular, captures the
 -- -- mouse position

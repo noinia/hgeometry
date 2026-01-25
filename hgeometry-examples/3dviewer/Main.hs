@@ -10,6 +10,7 @@ import HGeometry.Number.Real.Rational
 import HGeometry
 import HGeometry.Ext
 import Language.Javascript.JSaddle.Warp qualified as JSaddle
+import Miso.Html
 
 --------------------------------------------------------------------------------
 
@@ -33,13 +34,12 @@ data Action = Action ()
 
 main :: IO ()
 main = JSaddle.run 8080 $
-         startComponent $
+         startComponent defaultEvents $
             Component
                 { model         = initialModel
                 , update        = updateModel
                 , view          = viewModel
                 , subs          = mempty
-                , events        = defaultEvents
                 , styles        = []
                 , initialAction = Nothing
                 , mountPoint    = Nothing
@@ -53,5 +53,5 @@ updateModel _ = pure ()
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Action
+viewModel       :: Model -> View Model Action
 viewModel m = div_ [ ] [ ]

@@ -21,10 +21,12 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
-import           Miso hiding (style_)
-import           Miso.Style (style_,(=:))
-import           Miso.String (MisoString,ToMisoString(..), ms)
-import           Miso.Svg hiding (height_, id_, style_, width_)
+import           Miso
+import           Miso.String (ToMisoString(..))
+import           Miso.CSS (style_, border)
+import           Miso.Svg hiding (style_)
+import           Miso.Html (div_)
+import           Miso.Svg.Property
 import           Prelude hiding (lines)
 
 --------------------------------------------------------------------------------
@@ -75,7 +77,7 @@ data Action = PrimalCanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect Model Action
+updateModel   :: Model -> Action -> Effect parent Model Action
 updateModel m = \case
     PrimalCanvasAction ca -> zoom primalCanvas $ wrap Canvas.handleInternalCanvasAction ca
     DualCanvasAction ca   -> zoom dualCanvas   $ wrap Canvas.handleInternalCanvasAction ca
@@ -99,18 +101,18 @@ insert p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Action
+viewModel       :: Model -> View Model Action
 viewModel m = div_ [ ]
                    [ either PrimalCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.primalCanvas)
                                        [ onClick PrimalClick
-                                       , style_ ["border" =: "1px solid black"]
+                                       , style_ [border "1px solid black"]
                                        ]
                                        primalBody
                    , either DualCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.dualCanvas)
                                        [ onClick DualClick
-                                       , style_ ["border" =: "1px solid black"]
+                                       , style_ [border "1px solid black"]
                                        ]
                                        dualBody
                    , div_ []
@@ -154,18 +156,18 @@ large = 100000
 
 main :: IO ()
 main = JSaddle.run 8080 $
-         startComponent $
+         startComponent (Canvas.withCanvasEvents defaultEvents) $
             Component
                 { model         = initialModel
                 , update        = wrap updateModel
                 , view          = viewModel
                 , subs          = mempty
-                , events        = Canvas.withCanvasEvents defaultEvents
                 , styles        = []
                 , initialAction = Nothing
                 , mountPoint    = Nothing
                 , logLevel      = Off
                 }
 
-wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
+wrap       :: (model -> action -> Effect parent model action') -> action
+           -> Effect parent model action'
 wrap f act = get >>= flip f act

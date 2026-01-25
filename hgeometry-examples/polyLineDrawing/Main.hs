@@ -15,7 +15,6 @@ module Main (main) where
 
 -- import           Control.Monad.IO.Class
 import           Control.Lens hiding (view, element)
-import           Data.Colour.SRGB
 import           Data.Default
 import qualified Data.IntMap as IntMap
 import qualified Data.List as List
@@ -38,12 +37,18 @@ import           HGeometry.PolyLine
 import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
-import           Miso hiding (onMouseUp, onMouseDown, style_)
+import           Miso
 import           HGeometry.Miso.Event.Extra
-import qualified Miso as Html
-import           Miso.String (MisoString,ToMisoString(..), ms)
-import           Miso.Svg hiding (height_, style_, id_, width_)
-import           Miso.Style ((=:),style_)
+import           Miso.String (ToMisoString(..))
+import           Miso.Svg hiding (style_)
+import           Miso.Svg.Property
+import           Miso.CSS (style_)
+import           Miso.CSS qualified as CSS
+import           Miso.CSS.Color
+import           Miso.Html.Event (onTouchMove, onTouchEnd, onTouchStart)
+import           Miso.Html.Element hiding (style_)
+import           Miso.Html.Property as Prop
+import           Miso.Html qualified as Html
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -70,8 +75,6 @@ switchMode = \case
   PenMode      -> PolyLineMode
 
 
-type Color = RGB Word8
-
 {-
 -- | default color presets in goodnotes
 colorPresets :: NonEmpty Color
@@ -97,13 +100,11 @@ colorPresets = NonEmpty.fromList
 -}
 
 defaultQuickColors :: Vector 4 Color
-defaultQuickColors = Vector4 black' red blue green
+defaultQuickColors = Vector4 black red' blue' green'
   where
-    black' = RGB 0 0 0
-    red = RGB 192 40  27
-    blue = RGB 53  121 246
-    green = RGB 49  113 86
-
+    red'    = RGB 192 40  27
+    blue'   = RGB 53  121 246
+    green'  = RGB 49  113 86
 
 selectedColor :: Color
 selectedColor = RGB 205 205 205
@@ -182,11 +183,11 @@ windowDeltas :: Vector 2 Int
 windowDeltas = Vector2 50 200
 
 
-wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
+wrap       :: (model -> action -> Effect p model action') -> action -> Effect p model action'
 wrap f act = get >>= flip f act
 
 
-updateModel   :: Model -> Action -> Effect Model Action
+updateModel   :: Model -> Action -> Effect parent Model Action
 updateModel m = \case
     CanvasAction ca    -> traceShow ("canvas act: ",ca) $
       zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
@@ -262,10 +263,10 @@ insertPoly p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel  :: Model -> View Action
+viewModel  :: Model -> View Model Action
 viewModel m =
-    div_ [ style_ [ "display" =: "flex"
-                  , "flex-direction" =: "column"
+    div_ [ style_ [ CSS.display       "flex"
+                  , CSS.flexDirection "column"
                   ]
          ]
          [ theToolbar m
@@ -277,22 +278,22 @@ singleton :: a -> [a]
 singleton = (:[])
 
 buttonGroup         :: Foldable f
-                    => f (MisoString, MisoString) -> View action
+                    => f (MisoString, MisoString) -> View model action
 buttonGroup buttons =
     div_ [ ]
          (foldMap (singleton .  button) buttons)
   where
     button (t,icon') =
-      button_ [ class_      "button"
-              , Miso.title_ t
+      button_ [ class_       "button"
+              , Prop.title_  t
               ]
               [ icon icon' ]
 
-theToolbar   :: Model -> View Action
+theToolbar   :: Model -> View Model Action
 theToolbar m =
       div_ [ id_    "toolBar"
-           , style_ [ "border"  =: "1px solid black"
-                    , "display" =: "flex"
+           , style_ [ CSS.border  "1px solid black"
+                    , CSS.display "flex"
                     ]
            ]
            [ tools
@@ -301,8 +302,8 @@ theToolbar m =
            ]
   where
     tools =
-      div_ [ style_ [ "width" =: "30%"
-                    , "margin" =: "auto"
+      div_ [ style_ [ CSS.width "30%"
+                    , CSS.margin "auto"
                     ]
            ]
            [ buttonGroup [ ("pen", "fas fa-pencil-alt")
@@ -311,16 +312,16 @@ theToolbar m =
                          ]
            ]
     penProperties =
-      div_ [ style_ [ "width" =: "30%"
-                    , "margin" =: "auto"
+      div_ [ style_ [ CSS.width "30%"
+                    , CSS.margin "auto"
                     ]
            ]
            [ toolGroup [ tool "pen-width"
                        ]
            ]
     colorSelectors =
-      div_ [ style_ [ "width" =: "30%"
-                    , "margin" =: "auto"
+      div_ [ style_ [ CSS.width "30%"
+                    , CSS.margin "auto"
                     ]
            ]
            [ toolGroup $ colorPickers (m^.currentAttrs.color)
@@ -330,25 +331,26 @@ theToolbar m =
     toolGroup = div_ [ ]
 
     tool t = button_ [ class_ "button" ]
-                     [ text t]
+                     [ text t ]
 
 --------------------------------------------------------------------------------
 
-colorPickers            :: FoldableWithIndex Int f => Color -> Int -> f Color -> [View Action]
+colorPickers            :: FoldableWithIndex Int f => Color -> Int -> f Color
+                        -> [View Model Action]
 colorPickers selected i = ifoldMap (\j c -> [colorPickerButton (i == j && selected == c) j c])
 
-colorPickerButton              :: Bool -> Int -> Color -> View Action
+colorPickerButton              :: Bool -> Int -> Color -> View Model Action
 colorPickerButton selected i c =
-  button_ [ style_ [ "background-color" =: ms c
-                   , "width"            =: (ms size <> "px")
-                   , "height"           =: (ms size <> "px")
-                   , "display"          =: "display"
-                   , "margin"           =: "3px"
-                   , "cursor"           =: "pointer"
-                   , "border"           =: "none"
-                   , "border-radius"    =: (ms (size `div` 2) <> "px")
-                   , "outline"          =: if selected then "3px solid " <> ms selectedColor
-                                           else "none"
+  button_ [ style_ [ CSS.backgroundColor c
+                   , CSS.width           (ms size <> "px")
+                   , CSS.height          (ms size <> "px")
+                   , CSS.display         "display"
+                   , CSS.margin          "3px"
+                   , CSS.cursor          "pointer"
+                   , CSS.border          "none"
+                   , CSS.borderRadius    (ms (size `div` 2) <> "px")
+                   , "outline" =:        (if selected then "3px solid " <> ms selectedColor
+                                                      else "none")
                    ]
           , onClick $ SelectColor i c
           ] []
@@ -359,7 +361,7 @@ colorPickerButton selected i c =
 --------------------------------------------------------------------------------
 
 
-theCanvas   :: Model -> View Action
+theCanvas   :: Model -> View Model Action
 theCanvas m =
       div_ [ id_ "canvas"
            , style_ [ "margin-left"  =: "auto"
@@ -376,8 +378,8 @@ theCanvas m =
                                , onTouchMove  TouchMove
                                , onTouchEnd   EndTouch
                                , onMouseMove  MouseMove
-                               , style_ [ "border"           =: "1px solid black"
-                                        , "background-color" =: "white"
+                               , style_ [ CSS.border          "1px solid black"
+                                        , CSS.backgroundColor white
                                         ]
 
                                ]
@@ -432,13 +434,12 @@ instance ToMisoString Word8 where
 
 main :: IO ()
 main = JSaddle.run 8080 $
-         startComponent $ Component
+         startComponent (Canvas.withCanvasEvents defaultEvents) $ Component
                 { model         = initialModel
                 , update        = wrap updateModel
                 , view          = viewModel
                 , subs          = [ windowDimensionsSub WindowResize
                                   ]
-                , events        = Canvas.withCanvasEvents defaultEvents
                 , styles        = mempty
                 , initialAction = Nothing
                 , mountPoint    = Nothing
@@ -447,7 +448,7 @@ main = JSaddle.run 8080 $
 
 -- textAt                    :: ToMisoString r
 --                           => Point 2 r
---                           -> [Attribute action] -> MisoString -> View action
+--                           -> [Attribute action] -> MisoString -> View model action
 -- textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
 --                                   , y_ $ ms y
 --                                   ] <> ats
@@ -456,18 +457,18 @@ main = JSaddle.run 8080 $
 
 -- | Subscription that gets the window dimensions.
 windowDimensionsSub   :: (Vector 2 Int -> action) -> Sub action
-windowDimensionsSub f = windowCoordsSub (\(h,w) -> f $ Vector2 w h)
+windowDimensionsSub f = windowCoordsSub (\(h,w) -> f $ Vector2 (truncate w) (truncate h))
 
 
 
 --------------------------------------------------------------------------------
 
 -- | Produce an icon
-icon    :: MisoString -> View action
+icon    :: MisoString -> View model action
 icon cs = i_ [ class_ cs, textProp "aria-hidden" "true"] []
 
 -- | Produce a linked icon
-iconLink :: View action
-iconLink = Miso.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/all.js"
+iconLink :: View model action
+iconLink = Html.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/all.js"
                         , defer_ "true"
                         ] mempty
