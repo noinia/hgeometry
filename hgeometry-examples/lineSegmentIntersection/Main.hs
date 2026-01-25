@@ -55,7 +55,7 @@ data Action = CanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect Model Action
+updateModel   :: Model -> Action -> Effect parent Model Action
 updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
@@ -90,7 +90,7 @@ viewModel m = div_ [ ]
                                        ]
                                        canvasBody
                    , div_ [ onClick AddPoint ]
-                          [text $ "add point" ]
+                          [text "add point" ]
                    , div_ []
                           [text . ms . show $ m^.canvas.mouseCoordinates ]
                    , div_ []
@@ -118,7 +118,7 @@ viewModel m = div_ [ ]
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = JSaddle.run 8080 $ mainJSM
+main = JSaddle.run 8080 mainJSM
 
 
 mainJSM :: JSM ()

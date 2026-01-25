@@ -19,11 +19,11 @@ import           HGeometry.Point
 import           HGeometry.VoronoiDiagram
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
-import           Miso.String (MisoString,ToMisoString(..), ms)
+import           Miso.String (ToMisoString(..))
 import           Miso.CSS (style_, border)
 import           Miso.Svg hiding (style_, text_)
-import           Miso.Html
-import           Miso.Html.Element
+import           Miso.Svg.Property
+import           Miso.Html hiding (style_)
 
 --------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ data Action = CanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect Model Action
+updateModel   :: Model -> Action -> Effect parent Model Action
 updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
@@ -80,7 +80,7 @@ insertPoint p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Action
+viewModel       :: Model -> View Model Action
 viewModel m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)

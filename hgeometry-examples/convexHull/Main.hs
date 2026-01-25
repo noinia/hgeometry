@@ -89,7 +89,7 @@ viewModel m = div_ [ ]
                                        ]
                                        canvasBody
                    , div_ [ onClick AddPoint ]
-                          [text $ "add point" ]
+                          [text "add point" ]
                    , div_ []
                           [text . ms . show $ m^.canvas.mouseCoordinates ]
                    , div_ []

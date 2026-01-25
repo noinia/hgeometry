@@ -433,18 +433,12 @@ instance ToMisoString Word8 where
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = JSaddle.run 8080 $
-         startComponent (Canvas.withCanvasEvents defaultEvents) $ Component
-                { model         = initialModel
-                , update        = wrap updateModel
-                , view          = viewModel
-                , subs          = [ windowDimensionsSub WindowResize
-                                  ]
-                , styles        = mempty
-                , initialAction = Nothing
-                , mountPoint    = Nothing
-                , logLevel      = Off
-                }
+main = JSaddle.run 8080 $ startApp (Canvas.withCanvasEvents defaultEvents) app
+  where
+    app = (Miso.component initialModel (wrap updateModel) viewModel)
+          { subs          = [ windowDimensionsSub WindowResize
+                            ]
+          }
 
 -- textAt                    :: ToMisoString r
 --                           => Point 2 r
