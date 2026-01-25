@@ -20,10 +20,10 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           Language.Javascript.JSaddle (JSM)
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
-import           Miso hiding (style_)
-import           Miso.Style(style_,(=:))
+import           Miso hiding (text_)
 import           Miso.String (MisoString, ToMisoString(..), ms)
-import           Miso.Svg hiding (height_, id_, style_, width_)
+import           Miso.Svg hiding (style_)
+import           Miso.CSS (style_, border)
 
 --------------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ data Action = CanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect Model Action
+updateModel   :: Model -> Action -> Effect parent Model Action
 updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
@@ -86,11 +86,11 @@ viewModel m = div_ [ ]
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick AddPoint
                                        , id_ "mySvg"
-                                       , style_ ["border" =: "1px solid black"]
+                                       , style_ [border "1px solid black"]
                                        ]
                                        canvasBody
                    , div_ [ onClick AddPoint ]
-                          [text $ "add point" ]
+                          [text "add point" ]
                    , div_ []
                           [text . ms . show $ m^.canvas.mouseCoordinates ]
                    , div_ []
@@ -118,7 +118,7 @@ viewModel m = div_ [ ]
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = JSaddle.run 8080 $ mainJSM
+main = JSaddle.run 8080 mainJSM
 
 
 mainJSM :: JSM ()
@@ -128,21 +128,21 @@ mainJSM = do
                     , update        = wrap updateModel
                     , view          = viewModel
                     , subs          = mempty
-                    , events        = Canvas.withCanvasEvents defaultEvents
                     , styles        = mempty
                     , initialAction = Nothing
                     , mountPoint    = Nothing
                     , logLevel      = Off
                     }
-    startComponent myApp
+    startComponent (Canvas.withCanvasEvents defaultEvents) myApp
 
 
-wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
+wrap       :: (model -> action -> Effect parent model action') -> action
+           -> Effect parent model action'
 wrap f act = get >>= flip f act
 
 textAt                    :: ToMisoString r
                           => Point 2 r
-                          -> [Attribute action] -> MisoString -> View action
+                          -> [Attribute action] -> MisoString -> View model action
 textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                    , y_ $ ms y
                                    ] <> ats
