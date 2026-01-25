@@ -9,6 +9,7 @@ import HGeometry.Miso.Svg.StaticCanvas
 import HGeometry.Point
 import Ipe
 import System.OsPath
+import Miso.Svg.Property
 
 --------------------------------------------------------------------------------
 
