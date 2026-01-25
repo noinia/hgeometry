@@ -23,15 +23,18 @@ import           HGeometry.Point
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.Viewport
-import           Miso ( Attribute, View, Effect, height_, width_
-                      , onPointerLeave
-                      , onPointerMove
-                      , onPointerEnter
-                      , PointerEvent(..), put
+import           Miso ( Attribute, View, Effect
+                      , put
                       )
 import           Miso.String (MisoString, ms)
-import           Miso.Svg (svg_, g_, rect_, transform_, pointerEvents_, fill_)
-
+import           Miso.Svg (svg_, g_, rect_)
+import           Miso.Svg.Property (transform_, fill_, pointerEvents_)
+import           Miso.Html.Property (width_,height_) -- not sure if this is correct (namespace)!
+import           Miso.Event.Types ( PointerEvent(..))
+import           Miso.Html.Event ( onPointerLeave
+                                 , onPointerMove
+                                 , onPointerEnter
+                                 )
 --------------------------------------------------------------------------------
 -- *A Canvas
 
@@ -96,18 +99,21 @@ data InternalCanvasAction = PointerEnter PointerEvent
                           -- | TouchEnd
                           deriving (Show,Eq)
 
-offset :: PointerEvent -> (Int,Int)
-offset = bimap floor floor . client -- FIXME!!!
+offset' :: PointerEvent -> (Int,Int)
+offset' = bimap floor floor . offset -- changed this from client;
 
 -- | Handles InternalCanvas Actions
-handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect (Canvas r) action
+handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction
+                                  -> Effect parent (Canvas r) action
 handleInternalCanvasAction canvas = put . \case
-  PointerEnter pe  -> canvas&mousePosition ?~ uncurry Point2 (offset pe)
-  PointerMove  pe  -> canvas&mousePosition ?~ uncurry Point2 (offset pe)
+  PointerEnter pe  -> canvas&mousePosition ?~ uncurry Point2 (offset' pe)
+  PointerMove  pe  -> canvas&mousePosition ?~ uncurry Point2 (offset' pe)
   PointerLeave _   -> canvas&mousePosition .~ Nothing
   -- TouchStart p     -> canvas&mousePosition ?~ p
   -- TouchMove p     -> canvas&mousePosition ?~ p
   -- TouchEnd        -> canvas&mousePosition .~ Nothing
+
+
 
 --------------------------------------------------------------------------------
 -- * The View
@@ -115,8 +121,8 @@ handleInternalCanvasAction canvas = put . \case
 -- | Draws the actual canvas using an svg tag
 svgCanvas_               :: (RealFrac r, ToSvgCoordinate r)
                          => Canvas r
-                         -> [Attribute action] -> [View action]
-                         -> View (Either InternalCanvasAction action)
+                         -> [Attribute action] -> [View model action]
+                         -> View model (Either InternalCanvasAction action)
 svgCanvas_ canvas ats vs =
   svg_ ([ width_    . ms $ w
         , height_   . ms $ h
@@ -130,7 +136,7 @@ svgCanvas_ canvas ats vs =
               -- , onTouchMoveAt  $ Left . TouchMove
               -- , onTouchEnd     $ Left TouchEnd
               ]
-              [ rect_ [width_ "100%", height_ "100%", fill_ "none"] []
+              [ rect_ [width_ "100%", height_ "100%", fill_ "none"]
               , g_ [transform_ ts] (fmap Right <$> vs)
               ]
        ]
@@ -147,7 +153,7 @@ svgCanvas_ canvas ats vs =
 -- textAt                     :: ToSvgCoordinate r
 --                            => Point 2 r -- ^ position where to draw (in world coordinates)
 --                            -> [Attribute action]
---                            -> MisoString -> View action
+--                            -> MisoString -> View model action
 -- textAt (Point2 x y) ats t = g_ [ transform_ $ mconcat [ "translate("
 --                                                        , ms x
 --                                                        , ", "
@@ -159,9 +165,9 @@ svgCanvas_ canvas ats vs =
 
 
 -- class RenderWebSvg t where
---   renderWith :: t -> [Attribute action] -> [View action] -> View action
+--   renderWith :: t -> [Attribute action] -> [View model action] -> View model action
 
--- render       :: RenderWebSvg t => t -> [Attribute action] -> View action
+-- render       :: RenderWebSvg t => t -> [Attribute action] -> View model action
 -- render x ats = renderWith x ats []
 
 -- instance ToSvgCoordinate r => RenderWebSvg (Point 2 r) where

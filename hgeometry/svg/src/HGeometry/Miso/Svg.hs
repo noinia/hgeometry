@@ -13,7 +13,7 @@ module HGeometry.Miso.Svg
   ( renderSvgToFile
   , renderAsSvgText, renderAsSvgByteString
 
-  , withAts, withAts'
+  , withAts
   , Drawable(..)
 
   , dPoint
@@ -25,20 +25,21 @@ module HGeometry.Miso.Svg
   , dSimplePolygon
   ) where
 
-import qualified Data.ByteString.Lazy as ByteString
-import qualified Data.Text.Encoding.Error as Text
-import qualified Data.Text.Lazy as Text
-import qualified Data.Text.Lazy.Encoding as Text
-import           HGeometry.Miso.Svg.Writer
-import qualified Miso
-import qualified System.File.OsPath as File
-import           System.OsPath
+import Data.ByteString.Lazy qualified as ByteString
+import Data.Text.Encoding.Error qualified as Text
+import Data.Text.Lazy qualified as Text
+import Data.Text.Lazy.Encoding qualified as Text
+import HGeometry.Miso.Svg.Writer
+import Miso qualified
+import Miso.Html.Render qualified as Miso
+import System.File.OsPath qualified as File
+import System.OsPath
 
 --------------------------------------------------------------------------------
 
 -- | Given an file path, and a view whose root is an svg element,
 -- render the output to the given file.
-renderSvgToFile    :: OsPath -> Miso.View action -> IO ()
+renderSvgToFile    :: OsPath -> Miso.View model action -> IO ()
 renderSvgToFile fp = File.writeFile fp . renderAsSvgByteString
 
 -- | Add the doctype
@@ -65,11 +66,11 @@ withDocType content = mconcat
 -- | Given an View whose root is an svg element, renders the view to a
 -- lazy Text
 --
-renderAsSvgText :: Miso.View action -> Text.Text
+renderAsSvgText :: Miso.View model action -> Text.Text
 renderAsSvgText = Text.decodeUtf8With Text.strictDecode . renderAsSvgByteString
 
 -- | Given an View whose root is an svg element, renders the view to a
 -- lazy ByteString.
 --
-renderAsSvgByteString :: Miso.View action -> ByteString.ByteString
+renderAsSvgByteString :: Miso.View model action -> ByteString.ByteString
 renderAsSvgByteString = withDocType . Miso.toHtml

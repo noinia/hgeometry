@@ -15,20 +15,18 @@ module HGeometry.Miso.Event.Extra
   , Button(..)
   , onClickWithButton
   , onRightClick
-
-  , onContextMenu
-
   -- , Touch(..), TouchEvent(..)
-  , onTouchStart
-  , onTouchMove
-  , onTouchEnd
+  -- , onTouchStart
+  -- , onTouchMove
+  -- , onTouchEnd
   ) where
 
-import qualified Data.Aeson.KeyMap as Aeson
-import           Data.Aeson.Types
--- import           HGeometry.Point
-import           Miso
-import qualified Miso as Event
+import Data.Map qualified as Map
+import Miso.JSON
+import Miso
+import Miso.Html.Event
+import Miso.Event.Types as Event
+import Miso.Util.Parser ()
 
 --------------------------------------------------------------------------------
 
@@ -46,7 +44,7 @@ onWheel          :: (WheelDirection -> action) -> Attribute action
 onWheel toAction = on "wheel" (Decoder dec dt) (\res _ -> toAction res)
   where
     dt = DecodeTarget mempty
-    dec = withObject "event" $ \o -> (f <$> (o .: "deltaY"))
+    dec = withObject "event" $ \o -> f <$> (o .: "deltaY")
     f   :: Double -> WheelDirection
     f x = if x < 0 then Up else Down
 
@@ -56,81 +54,22 @@ onClickWithButton toAction = on "click" (Decoder dec dt) (\res _ -> toAction res
   where
     dt  = DecodeTarget mempty
     dec :: Value -> Parser Button
-    dec = withObject "event" $ \o -> case Aeson.lookup "button" o of
-            Nothing -> fail "button not found?"
-            Just v  -> flip (withScientific "Button") v $ \case
+    dec = withObject "event" $ \o -> case Map.lookup "button" o of
+            Nothing -> pfail "button not found?"
+            Just v  -> flip (withNumber "Button") v $ \case
               0 -> pure LeftButton
               1 -> pure MiddleButton
               2 -> pure RightButton
-              _ -> fail "unknown button"
+              _ -> pfail "unknown button"
 
 -- | Get right clicks
 onRightClick :: action -> Attribute action
-onRightClick = onContextMenu
-
-
--- | prevent onContextMenu events
-onContextMenu     :: action -> Attribute action
-onContextMenu act = onWithOptions disabled "contextmenu" emptyDecoder (\_ _ -> act)
+onRightClick = onContextMenuWithOptions disabled
   where
-    disabled = Event.defaultOptions { preventDefault  = True
-                                    , stopPropagation = False
+    disabled = Event.defaultOptions { _preventDefault  = True
+                                    , _stopPropagation = False
                                     }
 
 
---------------------------------------------------------------------------------
--- * Decoding Touch Events
-
--- -- taken/adapted from the Miso svg example
-
--- data Touch = Touch
---   { identifier :: {-# UNPACK #-}!Int
---   , screen     :: Point 2 Int
---   , client     :: Point 2 Int
---   , page       :: Point 2 Int
---   } deriving (Eq, Show)
-
--- instance FromJSON Touch where
---   parseJSON =
---     withObject "touch" $ \o -> do
---       identifier <- o .: "identifier"
---       screen     <- Point2 <$> o .: "screenX" <*> o .: "screenY"
---       client     <- Point2 <$> o .: "clientX" <*> o .: "clientY"
---       page       <- Point2 <$> o .: "pageX"   <*> o .: "pageY"
---       pure $ Touch identifier screen client page
-
--- newtype TouchEvent = TouchEvent Touch
---   deriving (Eq, Show)
-
--- instance FromJSON TouchEvent where
---   parseJSON obj = do
---     ((x:_):_) <- parseJSON obj
---     pure $ TouchEvent x
-
--- touchDecoder :: Decoder TouchEvent
--- touchDecoder = Decoder dec dt
---   where
---     dt = DecodeTargets [["changedTouches"], ["targetTouches"], ["touches"]]
---     dec = parseJSON
-
--- -- | touchmove event
--- onTouchMove :: (TouchEvent -> action) -> Attribute action
--- onTouchMove = on "touchmove" touchDecoder
-
--- -- | touchstart  event
--- onTouchStart     :: (TouchEvent -> action) -> Attribute action
--- onTouchStart = on "touchstart" touchDecoder
-
--- -- | touchend event
--- onTouchEnd :: (TouchEvent -> action) -> Attribute action
--- onTouchEnd = on "touchend" touchDecoder
-
-
-onTouchEnd     :: action -> Attribute action
-onTouchEnd act = on "touchend" emptyDecoder (\_ _ -> act)
-
-onTouchStart     :: action -> Attribute action
-onTouchStart act = on "touchstart" emptyDecoder (\_ _ -> act)
-
-onTouchMove     :: action -> Attribute action
-onTouchMove act = on "touchmove" emptyDecoder (\_ _ -> act)
+pfail   :: a -> b
+pfail _ = error "miso does not yet expose this :S" -- FIXME: for now
