@@ -16,16 +16,14 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Line.General
 import           HGeometry.LineSegment
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
 import           HGeometry.Sequence.Alternating
 import           HGeometry.Transformation
 import           Ipe
 import           Ipe.Color
--- import           Paths_hgeometry
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
@@ -33,8 +31,6 @@ import           Test.QuickCheck (arbitrary, generate)
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 type HalfPlane r = HalfSpaceF (VerticalOrLineEQ r)
 

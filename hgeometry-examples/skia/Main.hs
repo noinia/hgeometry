@@ -16,7 +16,7 @@ import           Control.Monad.IO.Class
 import           Control.Monad.Reader
 import qualified Data.ByteString.Lazy as BS
 import           Data.Coerce
-import           Data.Default.Class
+import           Data.Default
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
@@ -477,7 +477,7 @@ menuBar_ _ = navBar_
   --   canvasBody = [ g_ [] [ draw v [ fill_ "red"
   --                                 ]
   --                        ]
-  --                | v <- m^..diagram.traverse.traverse ]
+  --                | v <- m^..diagram.folded.traverse ]
   --             <> [ g_ [] [ draw p [ fill_ "black"
   --                                 ]
   --                        , textAt p [] (ms i)

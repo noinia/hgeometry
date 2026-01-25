@@ -15,16 +15,13 @@ import           HGeometry.LineSegment
 import           HGeometry.Point
 import           LineSegmentSpec (arrowAsOpen)
 import qualified Data.Map as Map
-import           HGeometry.Number.Real.Rational
+import           R
 import           Ipe
 import           System.OsPath
 import           Golden
 import           Test.Hspec
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec :: Spec
 spec = do
@@ -90,7 +87,7 @@ samePointsAsNaive      :: ( LineSegment_ lineSegment point
                           , Eq lineSegment
                           , Ord r, Fractional r
                           , HasOnSegment lineSegment 2
-                          , IntersectConstraints lineSegment
+                          , IntersectConstraints lineSegment lineSegment
                           , StartPointOf lineSegment ~ EndPointOf lineSegment
                           , Show lineSegment, Show r
                           , Show point
@@ -105,7 +102,7 @@ sameAsNaive      :: ( LineSegment_ lineSegment point
                     , Eq lineSegment
                     , Ord r, Fractional r
                     , HasOnSegment lineSegment 2
-                    , IntersectConstraints lineSegment
+                    , IntersectConstraints lineSegment lineSegment
                     , StartPointOf lineSegment ~ EndPointOf lineSegment
                     , Show lineSegment, Show r
                     , Show point

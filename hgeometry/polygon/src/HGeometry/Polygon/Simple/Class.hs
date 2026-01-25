@@ -15,7 +15,7 @@ module HGeometry.Polygon.Simple.Class
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
+import           Data.Default
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Kind (Constraint)

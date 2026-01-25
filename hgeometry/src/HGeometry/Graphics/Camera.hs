@@ -14,7 +14,7 @@ module HGeometry.Graphics.Camera
 
   , cameraNormal, viewUp
 
-  , blenderCamera
+  , blenderCamera, blenderCameraAt
 
   , cameraTransform, worldToView
 
@@ -24,13 +24,14 @@ module HGeometry.Graphics.Camera
   ) where
 
 import Control.Lens
-import Data.Default.Class
+import Data.Default
 import HGeometry.Box
 import HGeometry.Matrix
 import HGeometry.Number.Radical
 import HGeometry.Point
 import HGeometry.Transformation
 import HGeometry.Vector
+import Data.Traversable
 
 --------------------------------------------------------------------------------
 
@@ -51,7 +52,7 @@ data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
                        , _rawViewUp          :: !(Vector 3 r)
                        -- ^ viewUp; assumed to be unit vector
                        , _focalDepth         :: !r
-                       -- ^ Distnace from the camera position to the viewport/viewplane
+                       -- ^ Distance from the camera position to the viewport/viewplane
                        , _nearDist           :: !r
                        -- ^ Near distance; everything closer than this distance is ignored
                        , _farDist            :: !r
@@ -62,50 +63,8 @@ data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
                        -- coordinates)
                        } deriving (Show,Eq,Ord)
 
---------------------------------------------------------------------------------
-
-instance Fractional r => Default (Camera r) where
-  -- ^ A default camera, placed at the origin, looking along the y-axis. The view-up
-  -- vector is the z-axis. The focalDepth is 1.
-  def = Camera { _cameraPosition     = origin
-               , _rawCameraNormal    = Vector3 0 1 0 -- We are looking itnto the y-direction
-               , _rawViewUp          = Vector3 0 0 1 -- up in the z-direction
-               , _focalDepth         = 1
-               , _nearDist           = 0.1
-               , _farDist            = 100
-               , _viewportDimensions = Vector2 4 3
-               }
-
--- | This is the default camera position used in Blender
-blenderCamera :: forall r. (Floating r, Radical r) => Camera r
-blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7.35 (-34) (4.95)
-                   &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
-                   &viewUp             .~ fromRotate (Vector3 0 1 0)
-                   &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
-                   &nearDist           .~ 0.1
-                   &focalDepth         .~ 0.05
-  where
-    -- in degrees with respect to?
-    -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
-    -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
-
-    rotationAngles = Vector3 (-63.559) 0 46.692
-
-    fromRotate :: Vector 3 r -> Vector 3 r
-    fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
-
-    -- camera width in real world space is 36mm
-    lensWidth                     = 0.036
-    fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
-
-    toRadians deg = pi * (deg / 180.0)
-
-
 ----------------------------------------
 -- * Field Accessor Lenses
-
--- Lemmih: Writing out the lenses by hand so they can be documented.
--- makeLenses ''Camera
 
 -- | Camera position.
 cameraPosition :: Lens' (Camera r) (Point 3 r)
@@ -132,9 +91,81 @@ nearDist = lens _nearDist (\cam n -> cam {_nearDist=n})
 farDist :: Lens' (Camera r) r
 farDist = lens _farDist (\cam f -> cam {_farDist=f})
 
--- | The viewport dimensions.
+-- | The viewport dimensions. (i.e. the size of the screen on which we
+-- draw, in terms of world coordinates)
 viewportDimensions :: Lens' (Camera r) (Vector 2 r)
 viewportDimensions = lens _viewportDimensions (\cam d -> cam {_viewportDimensions=d})
+
+--------------------------------------------------------------------------------
+
+instance Functor Camera where
+  fmap = fmapDefault
+instance Foldable Camera where
+  foldMap = foldMapDefault
+
+-- over coordinates f pos
+-- over coordinates f pos
+
+instance Traversable Camera where
+  -- ^ be aware that this invalidate some of the invariants that vectors are unit vectors.
+  traverse f (Camera pos n up focalD nearD farD dims) =
+    Camera <$> (Point <$> traverse f (pos^.vector))
+           <*> traverse f         n
+           <*> traverse f         up
+           <*> f                  focalD
+           <*> f                  nearD
+           <*> f                  farD
+           <*> traverse f         dims
+
+--------------------------------------------------------------------------------
+
+instance Fractional r => Default (Camera r) where
+  -- ^ A default camera, placed at the origin, looking along the y-axis. The view-up
+  -- vector is the z-axis. The focalDepth is 1.
+  def = Camera { _cameraPosition     = origin
+               , _rawCameraNormal    = Vector3 0 1 0 -- We are looking into the y-direction
+               , _rawViewUp          = Vector3 0 0 1 -- up in the z-direction
+               , _focalDepth         = 1
+               , _nearDist           = 0.1
+               , _farDist            = 100
+               , _viewportDimensions = Vector2 4 3
+               }
+
+-- | This is the default camera position used in Blender
+blenderCamera :: (Floating r, Radical r) => Camera r
+blenderCamera = blenderCameraAt (Point3 7.35 (-6.92) (4.95))
+                                (Vector3 (-63.559) 0 46.692)
+
+-- | Construct a "default" blender camera at the given position and rotation angles
+--
+-- The rotation angles are given in degrees with respect to:
+--
+-- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
+-- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
+blenderCameraAt                    :: forall r. (Floating r, Radical r)
+                                   => Point 3 r -- ^ Initial position
+                                   -> Vector 3 r -- ^ Rotation angles in degrees
+                                   -> Camera r
+blenderCameraAt pos rotationAngles =
+    def&cameraPosition     .~ pos
+       &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
+       &viewUp             .~ fromRotate (Vector3 0 1 0)
+       &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
+       &nearDist           .~ 0.1
+       &focalDepth         .~ 0.05
+  where
+    -- in degrees with respect to?
+    -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
+    -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
+
+    fromRotate :: Vector 3 r -> Vector 3 r
+    fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
+
+    -- camera width in real world space is 36mm
+    lensWidth                     = 0.036
+    fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
+
+    toRadians deg = pi * (deg / 180.0)
 
 --------------------------------------------------------------------------------
 -- * Accessor Lenses

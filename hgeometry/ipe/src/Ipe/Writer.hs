@@ -25,6 +25,7 @@ import           Control.Lens (view, review, (^.), (^..), toNonEmptyOf, IxValue)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as C
 import           Data.Colour.SRGB (RGB (..))
+import           Data.Eq.Approximate
 import           Data.Fixed
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty (..))
@@ -48,6 +49,7 @@ import           HGeometry.Interval.EndPoint
 import           HGeometry.LineSegment
 import qualified HGeometry.Matrix as Matrix
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Number.Real.Interval
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Class
@@ -129,6 +131,9 @@ instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
 instance (IpeWriteText l, IpeWriteText r) => IpeWriteText (Either l r) where
   ipeWriteText = either ipeWriteText ipeWriteText
 
+instance IpeWriteText r => IpeWriteText (AbsolutelyApproximateValue tol r) where
+  ipeWriteText = ipeWriteText . unwrapAbsolutelyApproximateValue
+
 
 -- | Functon to write all attributes in a Rec
 ipeWriteAttrs           :: ( RecordToList rs, RMap rs
@@ -182,6 +187,9 @@ instance IpeWriteText Integer where
 
 instance IpeWriteText (RealNumber p) where
   ipeWriteText = ipeWriteText . realToFrac @(RealNumber p) @Rational
+
+instance Real r => IpeWriteText (IntervalReal r) where
+  ipeWriteText = ipeWriteText . realToFrac @(IntervalReal r) @Rational
 
 instance HasResolution p => IpeWriteText (Fixed p) where
   ipeWriteText = writeByShow

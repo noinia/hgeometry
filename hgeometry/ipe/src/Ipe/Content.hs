@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Ipe.Content(
-    Image(Image), imageData, rect
+    Image(Image), imageData, imageRect
   , TextLabel(..)
   , MiniPage(..), width
 
@@ -19,7 +19,7 @@ module Ipe.Content(
 
   , IpeAttributes
   , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, traverseIpeAttrs
+  , attributes, mapIpeAttrs, traverseIpeAttrs
   , commonAttributes
 
   , flattenGroups
@@ -52,7 +52,7 @@ import           Ipe.Path
 
 -- | bitmap image objects in Ipe
 data Image r = Image { _imageData :: ()
-                     , _rect      :: Rectangle (Point 2 r)
+                     , _imageRect      :: Rectangle (Point 2 r)
                      } deriving (Show,Eq,Ord,Generic)
 
 -- | Lens to access the image data
@@ -61,15 +61,15 @@ imageData f (Image i r) = fmap (\i' -> Image i' r) (f i)
 {-# INLINE imageData #-}
 
 -- | Lens to access the rectangle of the image
-rect :: Lens (Image r) (Image r') (Rectangle (Point 2 r)) (Rectangle (Point 2 r'))
-rect f (Image i r) = fmap (\r' -> Image i r') (f r)
-{-# INLINE rect #-}
+imageRect :: Lens (Image r) (Image r') (Rectangle (Point 2 r)) (Rectangle (Point 2 r'))
+imageRect f (Image i r) = fmap (\r' -> Image i r') (f r)
+{-# INLINE imageRect #-}
 
 type instance NumType   (Image r) = r
 type instance Dimension (Image r) = 2
 
 instance Fractional r => IsTransformable (Image r) where
-  transformBy t = over rect (transformBy t)
+  transformBy t = over imageRect (transformBy t)
 
 instance Functor Image where
   fmap = fmapDefault
@@ -304,7 +304,12 @@ type IpeObject' g r = g r :+ IpeAttributes g r
 attributes :: Lens' (IpeObject' g r) (IpeAttributes g r)
 attributes = extra
 
--- | traverse for ipe attributes
+-- | Map some function over the coordinates of the ipe Attributes
+mapIpeAttrs      :: AllConstrained TraverseIpeAttr (AttributesOf g)
+                 => proxy g -> (r -> s) -> IpeAttributes g r -> IpeAttributes g s
+mapIpeAttrs px f = runIdentity . traverseIpeAttrs px (Identity . f)
+
+-- | Traverse for ipe attributes
 traverseIpeAttrs               :: ( Applicative f
                                   , AllConstrained TraverseIpeAttr (AttributesOf g)
                                   ) => proxy g -> (r -> f s) -> IpeAttributes g r -> f (IpeAttributes g s)

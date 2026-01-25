@@ -51,8 +51,18 @@ import           System.Random
 
 --------------------------------------------------------------------------------
 
--- n_0 :: Int
--- n_0 = 2
+-- | the minimum size for which we recurse. Below this size we switch to the naive algorithm.
+--
+-- this value should be at least 5.
+n_0 :: Int
+n_0 = 12
+-- the max 5 is due to the following: consider some triangle defined by the plane
+-- h_0, and let h_1, h_2, h_3, be the planes that intersect h_0 on the edges of the
+-- triangle. If this triangle has a conflict list, i.e. there is a plane h that
+-- intersects below a vertex, then we need to include at least h_0,..,h_3,h. Hence,
+-- we need at least 5 planes.
+
+-- this may have to be at least 11 actually
 
 --------------------------------------------------------------------------------
 
@@ -65,12 +75,151 @@ computeVertexForm gen = computeVertexFormIn tri . V.unsafeFromVector . shuffle g
     -- since the set is non-empty, the V.unsafeFromVector is actually also safe
   where
     tri = Triangle (Point2 (-100_000) (-100_000))
-                   (Point2 (-100_000) (200_000))
-                   (Point2 (200_000)  (-100_000))
+                   (Point2 (-100_000) (300_000))
+                   (Point2 (300_000)  (-100_000))
     -- TODO: compute abounding box/triangle instead
 
 toSet :: (Foldable1 f, Ord a) => f a -> NESet a
 toSet = NESet.fromList . toNonEmpty
+
+
+--------------------------------------------------------------------------------
+
+-- data Prism r plane = TriangularPrism (Triangle (MDVertex r plane (Set plane)))
+--                    | UnboundedPrism  (UnboundedConvexRegionF r AtMostTwo (MDVertex r plane (Set plane)))
+
+
+-- toPrisms :: MinimizationDiagram r (MDVertex r plane (Definers plane, Set plane)) plane
+--          -> NonEmpty (Prism r plane, Set plane)
+-- toPrisms = undefined
+
+
+
+-- -- | pre:
+-- --
+-- -- - input is already a random permutation
+-- computeVertex'    :: forall plane point r.
+--                      ( Plane_ plane r, Ord plane, Ord r, Fractional r
+--                      , Show plane, Show r
+--                      , Point_ point 2 r
+--                      )
+--                   => V.NonEmptyVector plane
+--                   -> VertexForm Map r plane
+-- computeVertex' hs = lowerEnvelope (toSet hs)
+--   where
+--     n  = length hs
+--     r' = max 5 $ sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
+--     r  = round $ r' * logBase 2 r'
+--       -- take a sample of size r*log r
+--       --
+--       -- the max 5 is due to the following: consider some triangle defined by the plane
+--       -- h_0, and let h_1, h_2, h_3, be the planes that intersect h_0 on the edges of the
+--       -- triangle. If this triangle has a conflict list, i.e. there is a plane h that
+--       -- intersects below a vertex, then we need to include at least h_0,..,h_3,h. Hence,
+--       -- we need at least 5 planes.
+
+--       -- TODO: make sure that if the lower envelope has a vertex, we select planes
+--       -- that generate a plane.
+
+--     lowerEnvelope        :: NESet plane -> Map (Point 3 r) (Definers plane)
+--     lowerEnvelope planes =  let (rNet,remaining) = takeSample r planes in
+--       case withConflictLists remaining (BruteForce.computeVertexForm rNet) of
+--         IsEmpty               -> mempty
+--         IsNonEmpty vertexFrom -> go $ fromVertexForm vertexForm
+
+
+--     -- go :: NEMap (Point 3 r) (Definers plane, Set plane) -> Map (Point 3 r) (Definers plane)
+--     -- go verticesRNet =
+--     go :: MinimizationDiagram r (MDVertex r plane (Definers plane, Set plane)) plane
+--        -> Map (Point 3 r) (Definers plane)
+--     go = foldMap lowerEnvelopeIn . toPrisms
+
+--     lowerEnvelopeIn                        :: (Prism r plane, Set plane)
+--                                            -> Map (Point 3 r) (Definers plane)
+--     lowerEnvelopeIn (prism, conflictList) =
+
+
+
+
+--         (verticesRNet :: ) ->
+--           NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
+--             `merge` foldMap lowerEnvelopeIn' triangulatedEnv
+--           where
+--             -- Construct the lower envelope inside the triangle.
+--             -- also compute the conflicts of the corners
+--             env :: NEMap plane (ClippedMDCell'' r (MDVertex r plane (_, Set plane))
+--                                                   (Point 2 r :+ (ExtraDefiners plane, Set plane))
+--                                )
+--             env = withExtraConflictLists (NESet.toSet planes)
+--                 . fromVertexFormIn tri rNet $ verticesRNet
+
+--             -- | Triangulate the lower envelope, and collect the conflict list of each
+--             -- prism. We will already throw away any prisms with an
+--             triangulatedEnv :: [Triangle (Point 2 r) :+ NESet plane]
+--             triangulatedEnv = NEMap.foldMapWithKey triangulate env
+--               -- traceShow ("n'",length planes
+--               --           ,"total size: ", sum (map (\(_ :+ cl) -> length cl) res)
+--               --           ," sizes: ",map (\(_ :+ cl) -> length cl) res
+--               --           ) res
+--               -- where
+--               --   res =
+
+--             -- merge the resulting Maps; making sure to actually combine the definers
+--             merge = Map.unionWithKey mergeDefiners
+
+
+
+
+
+
+--     lowerEnvelopeIn :: Triangle (Point 2 r) -> NESet plane -> Map (Point 3 r) (Definers plane)
+--     -- lowerEnvelopeIn tri planes | traceShow ("LE",tri,length planes) False = undefined
+--     lowerEnvelopeIn tri planes = let (rNet,remaining) = takeSample r planes in
+--       case withConflictLists remaining (BruteForce.computeVertexForm rNet) of
+--         IsEmpty                                                                    -> mempty
+--         IsNonEmpty (verticesRNet :: NEMap (Point 3 r) (Definers plane, Set plane)) ->
+--           NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
+--             `merge` foldMap lowerEnvelopeIn' triangulatedEnv
+--           where
+--             -- Construct the lower envelope inside the triangle.
+--             -- also compute the conflicts of the corners
+--             env :: NEMap plane (ClippedMDCell'' r (MDVertex r plane (_, Set plane))
+--                                                   (Point 2 r :+ (ExtraDefiners plane, Set plane))
+--                                )
+--             env = withExtraConflictLists (NESet.toSet planes)
+--                 . fromVertexFormIn tri rNet $ verticesRNet
+
+--             -- | Triangulate the lower envelope, and collect the conflict list of each
+--             -- prism. We will already throw away any prisms with an
+--             triangulatedEnv :: [Triangle (Point 2 r) :+ NESet plane]
+--             triangulatedEnv = NEMap.foldMapWithKey triangulate env
+--               -- traceShow ("n'",length planes
+--               --           ,"total size: ", sum (map (\(_ :+ cl) -> length cl) res)
+--               --           ," sizes: ",map (\(_ :+ cl) -> length cl) res
+--               --           ) res
+--               -- where
+--               --   res =
+
+--             -- merge the resulting Maps; making sure to actually combine the definers
+--             merge = Map.unionWithKey mergeDefiners
+
+
+--     lowerEnvelopeIn'     :: Triangle (Point 2 r) :+ NESet plane
+--                          -> Map (Point 3 r) (Definers plane)
+--     lowerEnvelopeIn' (tri :+ conflictList) = lowerEnvelopeIn tri conflictList
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
 
 -- | pre:
 --
@@ -86,16 +235,10 @@ computeVertexFormIn         :: forall plane point r.
 computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
   where
     n  = length hs
-    r' = max 5 $ sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
-    r  = round $ r' * logBase 2 r'
+    r' = sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
+    r  = max n_0 $ round $ r' * logBase 2 r'
       -- take a sample of size r*log r
       --
-      -- the max 5 is due to the following: consider some triangle defined by the plane
-      -- h_0, and let h_1, h_2, h_3, be the planes that intersect h_0 on the edges of the
-      -- triangle. If this triangle has a conflict list, i.e. there is a plane h that
-      -- intersects below a vertex, then we need to include at least h_0,..,h_3,h. Hence,
-      -- we need at least 5 planes.
-
       -- TODO: make sure that if the lower envelope has a vertex, we select planes
       -- that generate a plane.
 
@@ -106,7 +249,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
         IsEmpty                                                                    -> mempty
         IsNonEmpty (verticesRNet :: NEMap (Point 3 r) (Definers plane, Set plane)) ->
           NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
-            `merge` foldMap lowerEnvelopeIn' triangulatedEnv
+            `merge` foldMap (lowerEnvelopeIn' tri) triangulatedEnv
           where
             -- Construct the lower envelope inside the triangle.
             -- also compute the conflicts of the corners
@@ -131,10 +274,16 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
             merge = Map.unionWithKey mergeDefiners
 
 
-    lowerEnvelopeIn'     :: Triangle (Point 2 r) :+ NESet plane
+    lowerEnvelopeIn'     :: Triangle (Point 2 r)
+                         -> Triangle (Point 2 r) :+ NESet plane
                          -> Map (Point 3 r) (Definers plane)
-    lowerEnvelopeIn' (tri :+ conflictList) = lowerEnvelopeIn tri conflictList
+    lowerEnvelopeIn' parent (tri :+ conflictList) -- = lowerEnvelopeIn tri conflictList
+      | tri `intersects` parent = lowerEnvelopeIn tri conflictList
+      | otherwise               = mempty
 
+    -- hmm, explicitly testing this made things even slower somehow.
+      -- if the triangle we are interested in does not even intersect
+      -- the parent triangle, there is no need to recurse.
 
 -- verify tri0 planes tr@(tri :+ cl)
 --   | length cl < length planes = tr

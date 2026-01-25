@@ -20,7 +20,7 @@ import           HGeometry.DelaunayTriangulation
 import qualified HGeometry.DelaunayTriangulation.DivideAndConquer as DC
 import qualified HGeometry.DelaunayTriangulation.Naive as Naive
 import           HGeometry.Ext
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           Hiraffe.PlanarGraph.Connected (VertexIdIn(..))
 import           Ipe
@@ -30,9 +30,6 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 dtEdges :: (Point_ point 2 r, Ord point, Num r, Ord r, Show point
            )
@@ -88,7 +85,7 @@ readInput fp = fmap f <$> readSinglePageFile fp
              | pSet <- byStrokeColour' syms
              ]
       where
-        syms = page^..content.traverse._IpeUse
+        syms = page^..content.folded._IpeUse
         byStrokeColour' = mapMaybe NonEmpty.nonEmpty . byStrokeColour
 
 

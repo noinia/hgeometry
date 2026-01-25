@@ -17,7 +17,7 @@ import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Point
 import           HGeometry.Sequence.Alternating (Alternating(..))
@@ -29,11 +29,8 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
--- import Test.Util
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = describe "Voronoi diagram tests" $ do

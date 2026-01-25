@@ -92,16 +92,22 @@ lowerHull' pts = pruneVertical $ repeatedly cmp steepestCcwFrom s rest
 
 
 -- | Find the next point in counter clockwise order, i.e. the point
--- with minimum slope w.r.t. the given point.
+-- with minimum slope w.r.t. the given point. For points on the same distance we report
+-- the furthest point.
 steepestCcwFrom   :: (Ord r, Num r, Point_ point 2 r)
                   => point  -> NonEmpty point  -> point
-steepestCcwFrom p = List.minimumBy (ccwCmpAroundWith (Vector2 0 (-1)) p)
+steepestCcwFrom p = List.minimumBy (ccwCmpAroundWith (Vector2 0 (-1)) p
+                                    <> flip (cmpByDistanceTo p)
+                                   )
+
 
 -- | Find the next point in clockwise order, i.e. the point
 -- with maximum slope w.r.t. the given point.
 steepestCwFrom   :: (Ord r, Num r, Point_ point 2 r)
                  => point -> NonEmpty point -> point
-steepestCwFrom p = List.minimumBy (cwCmpAroundWith (Vector2 0 1) p)
+steepestCwFrom p = List.minimumBy (cwCmpAroundWith (Vector2 0 1) p
+                                    <> flip (cmpByDistanceTo p)
+                                  )
 
 repeatedly       :: (a -> a -> Ordering) -> (a -> NonEmpty a -> a) -> a -> [a] -> NonEmpty a
 repeatedly cmp f = go

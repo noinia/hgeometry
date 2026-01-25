@@ -11,8 +11,6 @@ import           Control.Lens
 import qualified Data.CircularList as C
 import           Data.Foldable
 import           Data.Foldable1
-import qualified Data.List as List
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified Data.Vector as V

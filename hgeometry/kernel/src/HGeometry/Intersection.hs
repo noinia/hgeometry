@@ -22,6 +22,7 @@ import Control.Lens ((^.))
 import Data.Kind (Type)
 import Data.Maybe (isJust)
 import HGeometry.Ext
+import HGeometry.ByIndex
 import HGeometry.Point
 
 -------------------------------------------------------------------------------
@@ -79,3 +80,17 @@ instance (geom `HasIntersectionWith` left
 -- instance IsIntersectableWith geomA geomB
 --          => IsIntersectableWith (geomA :+ extra) (geomB :+ extra) where
 --   ga `intersect` gb = (ga^.core) `intersect` (gb^.core)
+
+
+--------------------------------------------------------------------------------
+-- * Instances for ByIndex
+
+instance (geomA `HasIntersectionWith` geomB
+         ) => ByIndex ix geomA `HasIntersectionWith` ByIndex ix geomB where
+  a `intersects` b = (a^.theValue) `intersects` (b^.theValue)
+
+type instance Intersection (ByIndex ix a) (ByIndex ix b) = Intersection a b
+
+instance (geomA `IsIntersectableWith` geomB
+         ) => ByIndex ix geomA `IsIntersectableWith` ByIndex ix geomB where
+  a `intersect` b = (a^.theValue) `intersect` (b^.theValue)

@@ -12,12 +12,15 @@ module HGeometry.VerticalRayShooting.PersistentSweep
 
   -- * Building the Data Structure
   , verticalRayShootingStructure
+  , verticalRayShootingStructure'
   -- * Querying the Data Structure
   , segmentAbove, segmentAboveOrOn
   , findSlab
-  , lookupAbove, lookupAboveOrOn, searchInSlab
+  , lookupAbove, lookupAboveOrOn
   ) where
 
+import           Control.DeepSeq
+import           GHC.Generics (Generic)
 import           Control.Lens hiding (contains, below)
 import           Data.Foldable (toList)
 import           Data.Functor.Contravariant (phantom)
@@ -29,11 +32,11 @@ import qualified Data.Set as SS -- status struct
 import qualified Data.Vector as V
 import           HGeometry.Algorithms.BinarySearch (binarySearchFirstIn)
 import           HGeometry.Ext
-import           HGeometry.Line.PointAndVector
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Properties
 import qualified HGeometry.Set.Util as SS
+
 
 --------------------------------------------------------------------------------
 
@@ -48,10 +51,11 @@ data VerticalRayShootingStructure' r lineSegment =
                                  , _sweepStruct :: V.Vector (r :+ StatusStructure lineSegment)
                                    -- ^ entry (r :+ s) means that "just" left of "r" the
                                    -- status structure is 's', i.e up to 'r'
-                                 } deriving (Show,Eq)
+                                 } deriving (Show,Eq,Generic)
 
 -- TODO this is very similar to the 'Alternating' sequence structure; so see if we can reuse code
 
+instance (NFData r, NFData lineSegment) => NFData (VerticalRayShootingStructure' r lineSegment)
 
 -- | The status structure
 type StatusStructure lineSegment = SS.Set lineSegment
@@ -80,12 +84,14 @@ sweepStruct f (VerticalRayShootingStructure _ ss) = phantom (f ss)
 --
 -- running time: \(O(n\log n)\).
 -- space: \(O(n\log n)\).
-verticalRayShootingStructure   :: ( LineSegment_ lineSegment point
-                                  , Point_ point 2 r
-                                  , Ord r, Fractional r, Foldable1 f)
-                               => f lineSegment
-                               -> VerticalRayShootingStructure lineSegment
-verticalRayShootingStructure ss = VerticalRayShootingStructure (eventX e) (sweep' events)
+verticalRayShootingStructure    :: ( LineSegment_ lineSegment point
+                                   , Point_ point 2 r
+                                   , Ord r, Fractional r, Foldable1 nonEmpty
+                                   )
+                                => nonEmpty lineSegment
+                                -> VerticalRayShootingStructure lineSegment
+verticalRayShootingStructure ss =
+    VerticalRayShootingStructure (eventX e) (sweep' events)
   where
     events@(e :| _) = fmap combine
                     . NonEmpty.groupAllWith1 eventX
@@ -96,6 +102,28 @@ verticalRayShootingStructure ss = VerticalRayShootingStructure (eventX e) (sweep
     toEvents seg = NonEmpty.fromList [ (seg^.start.xCoord) :+ Insert seg :| []
                                      , (seg^.end.xCoord)   :+ Delete seg :| []
                                      ]
+
+
+-- | Given a set of \(n\) interiorly pairwise disjoint *closed*
+-- segments, try to construct a vertical ray shooting data
+-- structure. This function will remove all vertical line segments. If
+-- there are no non-vertical segments, we return a Nothing.
+--
+-- The endpoints of the segments are allowed to coincide.
+--
+-- running time: \(O(n\log n)\).
+-- space: \(O(n\log n)\).
+verticalRayShootingStructure' :: ( LineSegment_ lineSegment point
+                                , Point_ point 2 r
+                                , Ord r, Fractional r, Foldable1 nonEmpty
+                                )
+                              => nonEmpty lineSegment
+                              -> Maybe (VerticalRayShootingStructure lineSegment)
+verticalRayShootingStructure' =
+    fmap verticalRayShootingStructure . witherNE isNonVertical . toNonEmpty
+  where
+    witherNE p = NonEmpty.nonEmpty . NonEmpty.filter p
+    isNonVertical seg = seg^.start.xCoord /= seg^.end.xCoord
 
 
 -- | Given a bunch of events happening at the same time, merge them into a single event
@@ -128,38 +156,40 @@ eventActions = view extra
 ----------------------------------------
 
 -- | Runs the sweep building the data structure from left to right.
-sweep    :: ( LineSegment_ lineSegment point, Point_ point 2 r
+sweep    :: forall lineSegment point r.
+            ( LineSegment_ lineSegment point, Point_ point 2 r
             , Ord r, Fractional r
             )
          => NonEmpty (Event r lineSegment) -> NonEmpty (r :+ StatusStructure lineSegment)
 sweep es = NonEmpty.fromList
-         . snd . List.mapAccumL h SS.empty
+         . snd
+         . List.mapAccumL handle (initialX, SS.empty)
          $ zip (toList es) (NonEmpty.tail es)
   where
-    h ss evts = let x :+ ss' = handle ss evts in (ss',x :+ ss')
+    initialX = eventX (NonEmpty.head es) - 1
+      -- this value should not b e used, as there are no deletions before the first event anyway
 
--- | Given the current status structure (for left of the next event
--- 'l'), and the next two events (l,r); essentially defining the slab
--- between l and r, we construct the status structure for in the slab (l,r).
--- returns the right boundary and this status structure.
-handle                :: (Ord r, Fractional r, LineSegment_ lineSegment point, Point_ point 2 r)
-                      => StatusStructure lineSegment
-                      -> (Event r lineSegment, Event r lineSegment)
-                      -> r :+ StatusStructure lineSegment
-handle ss ( l :+ acts
-          , r :+ _)   = let mid               = (l+r)/2
-                            runActionAt x act = interpret act (ordAtX x)
-                        in r :+ foldr (runActionAt mid) ss (orderActs acts)
-                           -- run deletions first
-
--- | orders the actions to put insertions first and then all deletions
-orderActs      :: NonEmpty (Action a) -> NonEmpty (Action a)
-orderActs acts = let (dels,ins) = NonEmpty.partition (\case
-                                                         Delete _ -> True
-                                                         Insert _ -> False
-                                                     ) acts
-                 in NonEmpty.fromList $ ins <> dels
-
+    -- | Given the current status structure (for left of the next event
+    -- 'l'), and the next two events (l,r); essentially defining the slab
+    -- between l and r, we construct the status structure for in the slab (l,r).
+    -- returns the right boundary and this status structure.
+    handle       :: (r, StatusStructure lineSegment)
+                 -> (Event r lineSegment, Event r lineSegment)
+                 -> ((r, StatusStructure lineSegment), r :+ StatusStructure lineSegment)
+    handle (prevX,ss) (l :+ acts, r :+ _) = ( (mid, ss'), r :+ ss' )
+      where
+        mid = (l + r) / 2
+        -- run the deletions first; and use the ordering at prevX ;
+        -- i.e. before l to perform them then run the insertions
+        -- (based on the new order).
+        -- we use the prevX order, since if we perform deletions at l, then
+        -- the order after l may be invalid.
+        ss' = foldr (runActionAt mid) (foldr (runActionAt prevX) ss deletions) insertions
+        (deletions,insertions) = NonEmpty.partition (\case
+                                                        Delete _ -> True
+                                                        Insert _ -> False
+                                                    ) acts
+        runActionAt x act m = interpret act (ordAtX x) m
 
 --------------------------------------------------------------------------------
 -- * Querying the DS
@@ -170,7 +200,7 @@ orderActs acts = let (dels,ins) = NonEmpty.partition (\case
 -- \(O(\log n)\)
 segmentAbove      :: ( LineSegment_ lineSegment point, Point_ point 2 r
                      , Point_ queryPoint 2 r
-                     , Ord r, Num r, HasSupportingLine lineSegment
+                     , Ord r, Num r
                      ) => queryPoint -> VerticalRayShootingStructure lineSegment
                   -> Maybe lineSegment
 segmentAbove q ds = findSlab q ds >>= lookupAbove q
@@ -180,7 +210,7 @@ segmentAbove q ds = findSlab q ds >>= lookupAbove q
 -- \(O(\log n)\)
 segmentAboveOrOn       :: ( LineSegment_ lineSegment point, Point_ point 2 r
                           , Point_ queryPoint 2 r
-                          , Ord r, Num r, HasSupportingLine lineSegment
+                          , Ord r, Num r
                           ) => queryPoint -> VerticalRayShootingStructure lineSegment
                        -> Maybe lineSegment
 segmentAboveOrOn q ds = findSlab q ds >>= lookupAboveOrOn q
@@ -192,7 +222,7 @@ segmentAboveOrOn q ds = findSlab q ds >>= lookupAboveOrOn q
 -- \(O(\log n)\)
 findSlab  :: ( LineSegment_ lineSegment point, Point_ point 2 r
              , Point_ queryPoint 2 r
-             , Ord r, Num r, HasSupportingLine lineSegment
+             , Ord r, Num r
              )
           => queryPoint -> VerticalRayShootingStructure lineSegment
           -> Maybe (StatusStructure lineSegment)
@@ -210,27 +240,25 @@ findSlab q ds | q^.xCoord < ds^.leftMost = Nothing
 -- \(O(\log n)\)
 lookupAboveOrOn   :: ( LineSegment_ lineSegment point, Point_ point 2 r
                      , Point_ queryPoint 2 r
-                     , Ord r, Num r, HasSupportingLine lineSegment
+                     , Ord r, Num r
                      )
                   => queryPoint -> StatusStructure lineSegment -> Maybe lineSegment
-lookupAboveOrOn q = searchInSlab (not . (q `liesAbove`))
+lookupAboveOrOn q = binarySearchFirstIn (q `liesOnOrBelow`)
+  where
+    liesOnOrBelow q' (LineSegment_ s t) = ccw s t q' /= CCW
 
 -- | Finds the first segment strictly above q
 --
 -- \(O(\log n)\)
 lookupAbove   :: ( LineSegment_ lineSegment point, Point_ point 2 r
                  , Point_ queryPoint 2 r
-                 , Ord r, Num r, HasSupportingLine lineSegment
+                 , Ord r, Num r
                  )
               => queryPoint -> StatusStructure lineSegment -> Maybe lineSegment
-lookupAbove q = searchInSlab (q `liesBelow`)
+lookupAbove q = binarySearchFirstIn (q `liesBelow`)
+  where
+    liesBelow q' (LineSegment_ s t) = ccw s t q' == CW
 
--- | generic searching function
-searchInSlab   :: (LineSegment_ lineSegment point, Point_ point 2 r
-                  , HasSupportingLine lineSegment, Num r)
-               => (LinePV 2 r -> Bool)
-               -> StatusStructure lineSegment -> Maybe lineSegment
-searchInSlab p = binarySearchFirstIn (p . supportingLine)
 
 
 ----------------------------------------------------------------------------------

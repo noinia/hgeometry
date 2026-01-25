@@ -2,9 +2,9 @@ module Settings where
 
 import Control.Lens
 import Data.Colour
-import Data.Colour.Names
+-- import Data.Colour.Names
 import Data.Colour.SRGB (sRGB)
-import Data.Default.Class
+import Data.Default
 import HGeometry.Graphics.Camera
 import HGeometry.Vector
 import Types

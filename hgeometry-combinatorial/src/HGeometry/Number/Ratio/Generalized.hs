@@ -70,3 +70,14 @@ instance (Num a, Eq a) => Fractional (GRatio a) where
     -- dividing by zero.  however, if c is zero then (c % d) would be
     -- zero, so there is no need to explicitly handle that; i.e. that
     -- is a something the user must do
+
+-- instance (Num a, Ord a) => Real (GRatio a) where
+--   toRational (a :% b) =
+
+-- instance (Num a, Ord a) => RealFrac (GRatio a) where
+--   properFraction
+
+-- The function properFraction takes a real fractional number x and returns a pair (n,f) such that x = n+f, and:
+
+--     n is an integral number with the same sign as x; and
+--     f is a fraction with the same type and sign as x, and with absolute value less than 1.

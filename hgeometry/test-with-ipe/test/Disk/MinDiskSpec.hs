@@ -16,7 +16,7 @@ import           HGeometry.Disk.Smallest
 import qualified HGeometry.Disk.Smallest.Naive as Naive
 import           HGeometry.Ext
 import           HGeometry.Instances ()
-import           HGeometry.Number.Real.Rational
+import           R
 import           Ipe
 import           System.OsPath
 import           System.Random (mkStdGen)
@@ -25,9 +25,6 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 spec :: Spec
 spec = describe "Disk.MinDisk" $ do

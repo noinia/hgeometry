@@ -146,9 +146,12 @@ intersectImpl       :: ( HyperPlane_ line 2 r
                        ) => line -> lineSegment
                     -> Maybe (LineLineSegmentIntersection lineSegment)
 l `intersectImpl` s = l `intersect` supportingLine s >>= \case
-    Line_x_Line_Point p | p `onSegment` s -> Just $ Line_x_LineSegment_Point p
-                        | otherwise       -> Nothing
-    Line_x_Line_Line _  -> Just $ Line_x_LineSegment_LineSegment s
+    Line_x_Line_Point p
+      | p `inPerpendicularSlab` s -> Just $ Line_x_LineSegment_Point p
+      | otherwise                 -> Nothing
+    Line_x_Line_Line _            -> Just $ Line_x_LineSegment_LineSegment s
+    -- Note that a point p that lies (i) on the supporting line of s,
+    -- and (ii) in the slab perpendicular to s must lie *on* s itself.
 {-# INLINE intersectImpl #-}
 
 
@@ -293,7 +296,7 @@ instance ( Point_ point 2 r, Num r,  Ord r
          ) => LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint point where
   s `intersect` s' = supportingLine s `intersect` s' >>= \case
       Line_x_LineSegment_Point p
-        | p `onSegment` s              -> Just $ LineSegment_x_LineSegment_Point p
+        | p `inPerpendicularSlab` s    -> Just $ LineSegment_x_LineSegment_Point p
         | otherwise                    -> Nothing
       Line_x_LineSegment_LineSegment _ -> spanIn' s `intersect` spanIn' s' <&> \case
         Interval_x_Interval_Point xy   -> LineSegment_x_LineSegment_Point $
@@ -303,6 +306,7 @@ instance ( Point_ point 2 r, Num r,  Ord r
     where
       mkIntersect i =
         LineSegment_x_LineSegment_LineSegment $ LineSegment (i^.start.extra) (i^.end.extra)
+
 
 -- | Given a line segment, compute the span of the line segment. In principle we compute
 -- the span in terms of the x-coordinate. Except wehn the segment is vertical, then we return
@@ -369,7 +373,7 @@ instance ( LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint
               (LineSegment endPoint point :+ extra) where
   (s :+ _) `intersect` (s' :+ _) = fmap' (:+ undef') <$> s `intersect` s'
     where
-      undef' = error "intersect semgnets: not possible"
+      undef' = error "intersect segments: not possible"
 
 
 

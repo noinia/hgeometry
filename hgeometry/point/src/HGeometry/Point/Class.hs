@@ -30,7 +30,7 @@ module HGeometry.Point.Class
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
+import           Data.Default
 import           Data.Function (on)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy (Proxy(..))

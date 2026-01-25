@@ -7,7 +7,7 @@ import           Golden
 import           HGeometry
 import           HGeometry.Ext
 import           HGeometry.Instances ()
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances (shrinkPolygon)
@@ -21,8 +21,6 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 worldPath :: OsPath
 worldPath = [osp|test-with-ipe/Polygon/Triangulation/world.ipe|]

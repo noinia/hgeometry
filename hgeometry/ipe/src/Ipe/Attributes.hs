@@ -20,7 +20,7 @@ module Ipe.Attributes
   where
 
 import Control.Lens hiding (rmap, Const)
-import Data.Default.Class
+import Data.Default
 import Data.Kind (Type)
 import Data.Singletons
 import Data.Singletons.TH

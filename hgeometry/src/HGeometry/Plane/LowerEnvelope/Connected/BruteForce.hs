@@ -57,9 +57,9 @@ connectedLowerEnvelopeWith :: (Plane_ plane r, Ord r, Fractional r, Foldable set
                            -> set plane
                            -> Maybe (MinimizationDiagram r (MDVertex r plane ()) plane)
 connectedLowerEnvelopeWith computeVertexForm' planes = case computeVertexForm' planes of
-  IsNonEmpty vertices -> Just . mapVertices void $ fromVertexForm vertices
-                         -- the mapVertices replaces the data value in the MDVertex data by ()
-  IsEmpty             -> Nothing
+  IsNonEmpty vertices' -> Just . mapVertices void $ fromVertexForm vertices'
+                          -- the mapVertices replaces the data value in the MDVertex data by ()
+  IsEmpty              -> Nothing
 
 
 --------------------------------------------------------------------------------

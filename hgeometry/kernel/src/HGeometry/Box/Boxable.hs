@@ -13,6 +13,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Box.Boxable
   ( IsBoxable(..)
+  , Union(..)
   ) where
 
 import Control.Lens

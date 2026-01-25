@@ -12,7 +12,7 @@ module HGeometry.Small.AtMostTwo
   ( AtMostTwo(..)
   ) where
 
-import           Data.Functor.Classes
+import Data.Functor.Classes
 
 --------------------------------------------------------------------------------
 
@@ -45,3 +45,6 @@ instance Ord1  AtMostTwo where
 
   liftCompare f (Two x y) (Two x' y') = f x x' <> f y y'
   liftCompare _ _         _           = GT
+
+
+--------------------------------------------------------------------------------

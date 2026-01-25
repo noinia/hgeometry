@@ -11,7 +11,7 @@ import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.Line
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Ipe
@@ -23,9 +23,6 @@ import           Test.QuickCheck.Instances ()
 
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 10
-
 
 -- getDataFileName' :: OsPath -> IO OsPath
 -- getDataFileName' = decodeFS >=> getDataFileName >=> encodeFS

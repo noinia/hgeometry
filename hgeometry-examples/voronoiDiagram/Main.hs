@@ -97,7 +97,7 @@ viewModel m = div_ [ ]
     canvasBody = [ g_ [] [ draw v [ fill_ "red"
                                   ]
                          ]
-                 | v <- m^..diagram.traverse.to toList.traverse ]
+                 | v <- m^..diagram.folded.to toList.traverse ]
               <> [ g_ [] [ draw p [ fill_ "black"
                                   ]
                          , textAt p [] (ms i)

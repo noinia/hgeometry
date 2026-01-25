@@ -27,7 +27,6 @@ import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Line.General
 import           HGeometry.Line.LowerEnvelope
 import           HGeometry.LineSegment
 import           HGeometry.Point

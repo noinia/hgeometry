@@ -19,6 +19,10 @@ module HGeometry.LineSegment.Internal
   , spanIn
   , EndPoint_(..)
   , asALineSegment
+
+  , StartEnd(..)
+
+  , inPerpendicularSlab
   ) where
 
 
@@ -39,6 +43,7 @@ import Text.Read
 import Data.Foldable1
 import GHC.Generics (Generic)
 import Control.DeepSeq
+import Hiraffe.Graph.Class(HasVertices'(..), HasVertices(..))
 
 -- import HGeometry.Number.Real.Rational
 -- import Debug.Trace
@@ -289,9 +294,21 @@ instance {-# OVERLAPPING #-}
 onSegment2                          :: ( Point_ point 2 r, Point_ point' 2 r, Ord r, Num r
                                        , LineSegment_ lineSegment point')
                                     => point -> lineSegment -> Bool
-onSegment2 q seg@(LineSegment_ s t) =
-    onLine q supLine && shouldBe (seg^.startPoint.to endPointType) (onSide q l) LeftSide
-                     && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) RightSide
+onSegment2 q seg@(LineSegment_ s t) = inPerpendicularSlab q seg && onLine q supLine
+  where
+    supLine = LinePV (s^.asPoint) (t .-. s)
+  -- note: we test whether we are in the slab first; since that involves less precision
+  -- and thus tends to be faster (in case there is no intersection)
+
+-- | Test if the given query point q lies in the slab perpendicular to
+-- the given line segment
+inPerpendicularSlab                          :: ( Point_ point 2 r, Point_ point' 2 r, Ord r, Num r
+                                                , LineSegment_ lineSegment point'
+                                                )
+                                             => point -> lineSegment -> Bool
+inPerpendicularSlab q seg@(LineSegment_ s t) =
+       shouldBe (seg^.startPoint.to endPointType) (onSide q l) LeftSide
+    && shouldBe (seg^.endPoint.to endPointType)   (onSide q r) RightSide
   where
     supLine = LinePV (s^.asPoint) (t .-. s)
     l = perpendicularTo supLine
@@ -302,6 +319,8 @@ onSegment2 q seg@(LineSegment_ s t) =
     shouldBe et a side = case et of
       Open   -> a == side
       Closed -> a == side || a == OnLine
+
+
 
 instance {-# OVERLAPPING #-} ( Point_ point 2 r, Num r
          ) => HasOnSegment (ClosedLineSegment point) 2 where
@@ -362,6 +381,34 @@ instance ( Point_ point d r
          ) => IsTransformable (LineSegment endPoint point) where
   transformBy t s = s&start %~ transformBy t
                      &end   %~ transformBy t
+
+
+
+-- | Data type modelling the index type for Line Segments
+data StartEnd = Start | End
+  deriving (Show,Eq,Ord)
+
+instance ( IxValue (endPoint vertex) ~ vertex, EndPoint_ (endPoint vertex)
+         ) => HasVertices' (LineSegment endPoint vertex) where
+  type Vertex   (LineSegment endPoint vertex) = vertex
+  type VertexIx (LineSegment endPoint vertex) = StartEnd
+  vertexAt = \case
+    Start -> \paFa -> start (indexed paFa Start)
+    End   -> \paFa -> end   (indexed paFa End)
+  {-# INLINE vertexAt #-}
+  numVertices = const 2
+
+instance ( Traversable1 endPoint, EndPoint_ (endPoint v)
+         , IxValue (endPoint v) ~ v
+         )
+           => HasVertices (LineSegment endPoint v) (LineSegment endPoint v') where
+  vertices = conjoined traverse1 (itrav.indexed)
+    where
+      itrav f (LineSegment s t) =
+        LineSegment <$> traverse1 (f Start) s Apply.<.> traverse1 (f End) t
+  {-# INLINE vertices #-}
+
+
 
 
   -- traverse1' f xs =

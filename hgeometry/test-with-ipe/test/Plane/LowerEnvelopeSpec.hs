@@ -26,14 +26,12 @@ import           Golden
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Ext
-import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
 import           HGeometry.Polygon.Convex.Instances ()
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Plane.LowerEnvelope
-import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Plane.LowerEnvelope.Clipped (foldMapVertices, ClippedMDCell, ClippedMDCell''(..))
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
@@ -48,7 +46,7 @@ import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
-import           Hiraffe.Graph.Class
+-- import           Hiraffe.Graph.Class
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
@@ -62,9 +60,6 @@ import           HGeometry.Combinatorial.Util
 
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
-
 
 rVoronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
                    , Ord r, Fractional r, Foldable1 f
@@ -689,32 +684,43 @@ verifyStartWithUp env =  let startWithUp        :: Point 3 R -> Definers MyPlane
 
 renderToIpe             :: (Plane_ plane R, Ord plane, Show plane
                            ) => OsPath -> _ -> NonEmpty plane -> IO _
-renderToIpe fp mkEnv hs =
-   do writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
-      pure env
-  where
-    Just env = connectedLowerEnvelopeWith mkEnv hs
+renderToIpe fp mkEnv hs = case connectedLowerEnvelopeWith mkEnv hs of
+  Nothing  -> error "renderToIpe: absurd"
+  Just env -> do writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
+                 pure env
+    where
+      out :: [IpeObject R]
+      out = zipWith render (cycle $ drop 3 basicNamedColors)
+          . toList . NEMap.assocs . HGeometry.Plane.LowerEnvelope.asMap $ env
 
-    out :: [IpeObject R]
-    out = zipWith render (cycle $ drop 3 basicNamedColors)
-        . toList . NEMap.assocs . HGeometry.Plane.LowerEnvelope.asMap $ env
+      -- render :: IpeColor R -> (Point 3 R, Definers plane) -> IpeObject R
+      -- render color (p, _defs) = iO $ defIO (projectPoint @2 p) ! attr SStroke color
 
-    -- render :: IpeColor R -> (Point 3 R, Definers plane) -> IpeObject R
-    -- render color (p, _defs) = iO $ defIO (projectPoint @2 p) ! attr SStroke color
+      render color (h, region) = iO' $ ipeGroup
+                                 [ iO $ labelled centroid' defIO' (region :+ h)
+                                 -- , iO $ ipeLabel (c :+ h)
+                                 -- , iO $ defIO (site^.asPoint) ! attr SStroke  color
+                                 -- ,
+                                 ]
+        where
+          defIO' reg = defIO reg ! attr SFill    color
+                                 ! attr SOpacity (Text.pack "10%")
+          centroid' reg = centerPoint (boundingBox $ toPoly reg)
+          toPoly reg = case toConvexPolygonIn rect' reg of
+              Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))
+              Right pg -> pg&vertices %~ view asPoint
 
-    render color (h, region) = iO' $ ipeGroup
-                               [ iO $ labelled centroid' defIO' (region :+ h)
-                               -- , iO $ ipeLabel (c :+ h)
-                               -- , iO $ defIO (site^.asPoint) ! attr SStroke  color
-                               -- ,
-                               ]
-      where
-        defIO' reg = defIO reg ! attr SFill    color
-                               ! attr SOpacity (Text.pack "10%")
-        centroid' reg = centerPoint (boundingBox $ toPoly reg)
-        toPoly reg = case toConvexPolygonIn rect' region of
-            Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))
-            Right pg -> pg&vertices %~ view asPoint
+            where
+              rect' = grow 1000 $ boundingBox region
 
-          where
-            rect' = grow 1000 $ boundingBox region
+
+
+
+
+
+--------------------------------------------------------------------------------
+-- FIXME: Discovered some bug it seems
+
+    -- fromList (NonVerticalHyperPlane [-21.28572,-18,-13.5] :| [NonVerticalHyperPlane [-20.4,10.66666,6.47058],NonVerticalHyperPlane [-18.6,-16.52381,11.5],NonVerticalHyperPlane [-5.41667,-21.5625,-17.33334],NonVerticalHyperPlane [-2,-14.5,5.66666],NonVerticalHyperPlane [0.75,-3.2,-13.72728],NonVerticalHyperPlane [1.33333,-18.25,-11.81819],NonVerticalHyperPlane [7.57894,20.15384,7.5],NonVerticalHyperPlane [10,17.66666,23.9],NonVerticalHyperPlane [10.66666,-15.5,5.4],NonVerticalHyperPlane [14.5,13.04347,7.5],NonVerticalHyperPlane [15.77777,-15.72223,-3.76924],NonVerticalHyperPlane [18.68181,8.11111,13.375],NonVerticalHyperPlane [21,5.72222,-23.46154],NonVerticalHyperPlane [21.5,-7.33334,-5.875]])
+    --    expected: fromList [(Point3 (-164151.35307~) (-159780.90643~) (-4464284.57894~),Definers (NonVerticalHyperPlane [14.5,13.04347,7.5] :| [NonVerticalHyperPlane [10,17.66666,23.9],NonVerticalHyperPlane [7.57894,20.15384,7.5]])),(Point3 (-49.43364~) (-48.11749~) (-1336.90663~),Definers (NonVerticalHyperPlane [21,5.72222,-23.46154] :| [NonVerticalHyperPlane [14.5,13.04347,7.5],NonVerticalHyperPlane [7.57894,20.15384,7.5]])),(Point3 (-1.52139~) 1.28878~ (-48.03599~),Definers (NonVerticalHyperPlane [15.77777,-15.72223,-3.76924] :| [NonVerticalHyperPlane [21.5,-7.33334,-5.875],NonVerticalHyperPlane [21,5.72222,-23.46154]])),(Point3 (-0.95727~) 1.15140~ (-36.97544~),Definers (NonVerticalHyperPlane [-5.41667,-21.5625,-17.33334] :| [NonVerticalHyperPlane [15.77777,-15.72223,-3.76924],NonVerticalHyperPlane [21,5.72222,-23.46154]])),(Point3 0.23985~ (-0.00762~) (-18.46827~),Definers (NonVerticalHyperPlane [-5.41667,-21.5625,-17.33334] :| [NonVerticalHyperPlane [21,5.72222,-23.46154],NonVerticalHyperPlane [-21.28572,-18,-13.5]])),(Point3 0.52509~ (-1.65708~) (-21.91674~),Definers (NonVerticalHyperPlane [21,5.72222,-23.46154] :| [NonVerticalHyperPlane [7.57894,20.15384,7.5],NonVerticalHyperPlane [-20.4,10.66666,6.47058]])),(Point3 0.63744~ (-0.71635~) (-14.17429~),Definers (NonVerticalHyperPlane [-21.28572,-18,-13.5] :| [NonVerticalHyperPlane [21,5.72222,-23.46154],NonVerticalHyperPlane [-20.4,10.66666,6.47058]]))]
+    --     but got: fromList [(Point3 (-49.43364~) (-48.11749~) (-1336.90663~),Definers (NonVerticalHyperPlane [21,5.72222,-23.46154] :| [NonVerticalHyperPlane [14.5,13.04347,7.5],NonVerticalHyperPlane [7.57894,20.15384,7.5]])),(Point3 (-1.52139~) 1.28878~ (-48.03599~),Definers (NonVerticalHyperPlane [15.77777,-15.72223,-3.76924] :| [NonVerticalHyperPlane [21.5,-7.33334,-5.875],NonVerticalHyperPlane [21,5.72222,-23.46154]])),(Point3 (-0.95727~) 1.15140~ (-36.97544~),Definers (NonVerticalHyperPlane [-5.41667,-21.5625,-17.33334] :| [NonVerticalHyperPlane [15.77777,-15.72223,-3.76924],NonVerticalHyperPlane [21,5.72222,-23.46154]])),(Point3 0.23985~ (-0.00762~) (-18.46827~),Definers (NonVerticalHyperPlane [-5.41667,-21.5625,-17.33334] :| [NonVerticalHyperPlane [21,5.72222,-23.46154],NonVerticalHyperPlane [-21.28572,-18,-13.5]])),(Point3 0.52509~ (-1.65708~) (-21.91674~),Definers (NonVerticalHyperPlane [21,5.72222,-23.46154] :| [NonVerticalHyperPlane [7.57894,20.15384,7.5],NonVerticalHyperPlane [-20.4,10.66666,6.47058]])),(Point3 0.63744~ (-0.71635~) (-14.17429~),Definers (NonVerticalHyperPlane [-21.28572,-18,-13.5] :| [NonVerticalHyperPlane [21,5.72222,-23.46154],NonVerticalHyperPlane [-20.4,10.66666,6.47058]]))]

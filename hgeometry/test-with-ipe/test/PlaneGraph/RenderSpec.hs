@@ -3,6 +3,7 @@
 module PlaneGraph.RenderSpec
   ( spec
   , drawGraph
+  , drawGraphWithDarts
   , drawVertex
   , drawDart
   , drawFace
@@ -80,7 +81,7 @@ spec :: Spec
 spec = describe "render planegraph tests" $ do
          goldenWith [osp|data/test-with-ipe/golden/PlaneGraph|]
                     (ipeContentGolden { name = [osp|smallPlaneGraph|]})
-                    (drawGraph smallGraph)
+                    (drawGraphWithDarts smallGraph)
          -- eg <- runIO $ decodeYAMLFile [osp|myPlaneGraph.json|]
          -- let myPlaneGraph = case eg of
          --       Left err -> error (show err)
@@ -91,15 +92,33 @@ spec = describe "render planegraph tests" $ do
 
 --------------------------------------------------------------------------------
 
+
 drawGraph    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                 , HasInnerComponents planeGraph
                 , IsTransformable vertex
                 , ConstructablePoint_ vertex 2 r, Ord r, Real r
                 , Fractional r, Show r, Eq (FaceIx planeGraph)
-                , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
-                , Show (EdgeIx planeGraph)
+                , Show (Vertex planeGraph), Show (Face planeGraph)
+                , Show (EdgeIx planeGraph), Show (Edge planeGraph)
                 ) => planeGraph -> [IpeObject r]
 drawGraph gr = theVertices <> theEdges <> theFaces
+  where
+    theVertices = ifoldMapOf vertices             drawVertex    gr
+    theEdges    = ifoldMapOf edgeSegments         (drawEdge gr) gr
+    theFaces    = ifoldMapOf interiorFacePolygons (drawFace gr) gr
+
+
+-- | Draws the graph, including all darts
+drawGraphWithDarts    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
+                         , HasInnerComponents planeGraph
+                         , IsTransformable vertex
+                         , ConstructablePoint_ vertex 2 r, Ord r, Real r
+                         , Fractional r, Show r, Eq (FaceIx planeGraph)
+                         , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
+                         , Show (EdgeIx planeGraph), Show (Edge planeGraph)
+
+                         ) => planeGraph -> [IpeObject r]
+drawGraphWithDarts gr = theVertices <> theEdges <> theFaces
   where
     theVertices = ifoldMapOf vertices             drawVertex    gr
     theEdges    = ifoldMapOf dartSegments         (drawDart gr) gr
@@ -113,11 +132,13 @@ drawVertex _ v = [ iO $ ipeDiskMark (v^.asPoint) ! attr SLayer "vertex"
                                                          -- ! attr SStroke Ipe.red
                  ]
 
-drawEdge        :: ( PlaneGraph_ planeGraph vertex, ConstructablePoint_ vertex 2 r, IsTransformable vertex
-                   , Show (EdgeIx planeGraph), Fractional r, Real r)
-                => planeGraph -> EdgeIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
-drawEdge _g d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
+drawEdge       :: ( PlaneGraph_ planeGraph vertex, ConstructablePoint_ vertex 2 r, IsTransformable vertex
+                  , Show (EdgeIx planeGraph), Show (Edge planeGraph)
+                  , Fractional r, Real r)
+               => planeGraph -> EdgeIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
+drawEdge g d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
                   , iO $ ipeLabel (tshow d :+ c) ! attr SLayer "edgeLabel"
+                  , iO $ ipeLabel (tshow (g^?!edgeAt d) :+ c) ! attr SLayer "edgeData"
                   ]
   where
     c = interpolate 0.5 s ^. asPoint

@@ -22,7 +22,7 @@ module HGeometry.Algorithms.BinarySearch
   ) where
 
 import           Data.Kind
-import           Data.Sequence (Seq, ViewL(..),ViewR(..))
+import           Data.Sequence (Seq, ViewL(..))
 import qualified Data.Sequence as Seq
 import           Data.Set (Set)
 import qualified Data.Set.Internal as Set
@@ -231,32 +231,26 @@ instance BinarySearch (Seq a) where
   {-# INLINABLE binarySearchIn #-}
 
   -- ^ runs in \(O(T*\log^2 n)\) time.
-  binarySearchIdxIn p s = case Seq.viewr s of
-                            EmptyR                 -> AllFalse Nothing
-                            (_ :> x)   | p x       -> case Seq.viewl s of
-                              (y :< _) | p y          -> AllTrue 0
-                              _                       -> binarySearch p' 0 u
-                                       | otherwise -> AllFalse $ Just (length s - 1)
+  binarySearchIdxIn p s = case Seq.viewl s of
+                            (y :< _) | p y -> binarySearch p' 0 (Seq.length s)
+                            _              -> AllFalse Nothing
     where
       p' = p . Seq.index s
-      u  = Seq.length s - 1
   {-# INLINABLE binarySearchIdxIn #-}
 
-
+-- | Helper to implement binary search on vectors and sequences
 binarySearch       :: (Int -> Bool) -> Int -> Int -> BinarySearchResult Int
 binarySearch p l u = let h' = binarySearchFirst p l u
-                     in FlipsAt (h'-1) h'
-
+                     in if h' == u then AllFalse (Just (u-1))
+                                   else FlipsAt (h'-1) h'
 
 instance {-# OVERLAPPABLE #-} V.Vector v a => BinarySearch (v a) where
   type Index (v a) = Int
   type Elem  (v a) = a
 
   binarySearchIdxIn p' v | V.null v   = AllFalse Nothing
-                         | not $ p n' = AllFalse (Just n')
-                         | otherwise  = if p 0 then AllTrue 0 else binarySearch p 0 n'
+                         | otherwise  = if p 0 then AllTrue 0 else binarySearch p 0 (V.length v)
     where
-      n' = V.length v - 1
       p = p' . (v V.!)
   {-# INLINABLE binarySearchIn #-}
 

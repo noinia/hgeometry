@@ -10,7 +10,7 @@ module SelectMode
 
 import           Base
 import           Control.Lens hiding (view, element)
-import           Data.Default.Class
+import           Data.Default
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (maybeToList)

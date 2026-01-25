@@ -18,7 +18,7 @@ module StrokeAndFill
 import Color
 import Control.Lens hiding (view, element)
 import Data.Colour (black)
-import Data.Default.Class
+import Data.Default
 import Miso.Bulma.Modal (Status(..), HasStatus(..), _InActive,_Active)
 
 --------------------------------------------------------------------------------

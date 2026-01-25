@@ -24,7 +24,7 @@ module PLY.Writer
 import           Control.Lens
 import qualified Data.ByteString.Lazy.Char8 as Char8
 import           Data.Colour.SRGB (Colour, RGB(..), toSRGB24)
-import           Data.Default.Class
+import           Data.Default
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Kind (Type)

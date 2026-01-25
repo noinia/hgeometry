@@ -16,7 +16,7 @@ import           Control.Monad.Except
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Data.Colour.SRGB
-import           Data.Default.Class
+import           Data.Default
 import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty

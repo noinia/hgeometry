@@ -27,7 +27,7 @@ import           HGeometry.Intersection
 import           HGeometry.LPType
 import           HGeometry.LPType.LinearProgramming
 import           HGeometry.Line
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Unbounded
@@ -46,8 +46,6 @@ import           Test.QuickCheck ( (===), property,Discard(..), counterexample
 import           Test.QuickCheck.Instances ()
 import           Witherable
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 lpRecomputeBasis :: forall r. (Ord r, Fractional r)
                  => HalfPlane r -> Basis2D r (HalfPlane r) -> Maybe ( Basis2D r (HalfPlane r) )

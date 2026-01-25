@@ -14,7 +14,7 @@ import           Control.Lens
 import           Control.Monad (void)
 import qualified Data.ByteString.Lazy as Lazy
 import           Data.Coerce
-import           Data.Default.Class
+import           Data.Default
 import           Data.Functor.Apply (Apply(..))
 import           Data.Word (Word8)
 import           GHCJS.Marshal (ToJSVal(..))

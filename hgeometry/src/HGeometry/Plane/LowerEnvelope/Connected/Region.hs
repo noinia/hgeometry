@@ -1,12 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances  #-}
 module HGeometry.Plane.LowerEnvelope.Connected.Region
-  ( Region(..)
+  ( RegionF(..), Region, Prism
   , MDVertex(MDVertex), location, vertexData
   , ClippedBoundedRegion
   ) where
 
-import Control.Lens
+import HGeometry.Small.OneOrTwo
+import Control.Lens hiding (Prism)
 import Data.Bifoldable
 import Data.List.NonEmpty (NonEmpty(..))
 import HGeometry.Box
@@ -18,8 +19,11 @@ import HGeometry.Polygon.Convex.Unbounded
 import HGeometry.Properties
 import HGeometry.Vector
 import HGeometry.Cyclic
+import HGeometry.Triangle
 import GHC.Generics (Generic)
 import Control.DeepSeq
+import Data.Functor.Classes
+
 
 --------------------------------------------------------------------------------
 
@@ -70,19 +74,31 @@ type ClippedBoundedRegion r vertex corner =
 
 --------------------------------------------------------------------------------
 
+type Prism r vertex = RegionF Triangle OneOrTwo
+
+
+-- | Unbounded regions
+type Region r vertex = RegionF (ConvexPolygonF (Cyclic NonEmpty)) NonEmpty r vertex
+
 -- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
 -- region is to the left of the boundary.
-data Region r vertex = BoundedRegion   (ConvexPolygonF (Cyclic NonEmpty) vertex)
-                     | UnboundedRegion (UnboundedConvexRegionF r NonEmpty vertex)
-                     deriving stock (Functor,Foldable,Traversable,Generic)
+data RegionF bounded unbounded r vertex =
+    BoundedRegion   (bounded vertex)
+  | UnboundedRegion (UnboundedConvexRegionF r unbounded vertex)
+   deriving stock (Functor,Foldable,Traversable,Generic)
 
-type instance NumType   (Region r point) = r
-type instance Dimension (Region r point) = Dimension point
+type instance NumType   (RegionF bounded unbounded r point) = r
+type instance Dimension (RegionF bounded unbounded r point) = Dimension point
 
-instance (NFData r, NFData vertex) => NFData (Region r vertex)
+instance (NFData r, NFData (unbounded vertex), NFData (bounded vertex)
+         ) => NFData (RegionF bounded unbounded r vertex)
 
-deriving instance (Show r, Show vertex, Point_ vertex 2 r) => Show (Region r vertex)
-deriving instance (Eq r, Eq vertex) => Eq (Region r vertex)
+deriving instance ( Show r, Show vertex, Point_ vertex 2 r
+                  , Show (bounded vertex), Show1 unbounded
+                  ) => Show (RegionF bounded unbounded r vertex)
+
+deriving instance (Eq r, Eq vertex, Eq (bounded vertex), Eq1 unbounded
+                  ) => Eq (RegionF bounded unbounded r vertex)
 
 
 --------------------------------------------------------------------------------

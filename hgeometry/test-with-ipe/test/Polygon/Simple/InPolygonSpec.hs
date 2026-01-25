@@ -12,7 +12,7 @@ import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.LineSegment
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
 import           Ipe
@@ -25,8 +25,6 @@ import           Test.QuickCheck.Instances ()
 -- import           HGeometry.Interval
 -- import           HGeometry.Polygon.Simple.InPolygon
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = do
@@ -83,8 +81,8 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
              | (poly :+ ats) <- polies
              ]
       where
-        polies = page^..content.traverse._withAttrs _IpePath _asSimplePolygon
-        syms   = page^..content.traverse._IpeUse
+        polies = page^..content.folded._withAttrs _IpePath _asSimplePolygon
+        syms   = page^..content.folded._IpeUse
 
 
         myPoints polyAts = [s | (s :+ ats) <- syms, belongsToPoly ats polyAts ]

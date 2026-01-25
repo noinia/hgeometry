@@ -21,6 +21,8 @@ import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty)
 import GHC.TypeNats
 import HGeometry.Ext
+import HGeometry.ByIndex
+
 -------------------------------------------------------------------------------
 
 -- | A type family for types that are associated with a dimension. The
@@ -47,3 +49,6 @@ type instance NumType   (Maybe a) = NumType a
 type instance Dimension (Maybe a) = Dimension a
 
 type instance NumType   (Either l r) = NumType r
+
+type instance NumType   (ByIndex ix a) = NumType a
+type instance Dimension (ByIndex ix a) = Dimension a

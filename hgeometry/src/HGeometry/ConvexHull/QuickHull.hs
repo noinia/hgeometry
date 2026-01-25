@@ -15,6 +15,7 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           HGeometry.Line
+import           HGeometry.Line.PointAndVector(liesAbove)
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple

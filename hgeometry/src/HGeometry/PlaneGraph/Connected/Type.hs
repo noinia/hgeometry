@@ -34,6 +34,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
+import           Control.DeepSeq
 import           GHC.Generics (Generic)
 import           HGeometry.Boundary
 import           HGeometry.Box
@@ -78,6 +79,10 @@ _CPlanarGraph :: Iso (CPlaneGraph s v e f)         (CPlaneGraph s v' e' f')
 _CPlanarGraph = coerced
 {-# INLINE _CPlanarGraph #-}
 
+--------------------------------------------------------------------------------
+
+instance (NFData v, NFData e, NFData f) => NFData (CPlaneGraph s v e f)
+
 ----------------------------------------
 
 instance HasVertices' (CPlaneGraph s v e f) where
@@ -105,7 +110,7 @@ instance HasEdges' (CPlaneGraph s v e f) where
   type EdgeIx (CPlaneGraph s v e f) = DartId s
   edgeAt d = _CPlanarGraph.edgeAt d
 
-instance HasEdges (CPlaneGraph s v e f) (CPlaneGraph s v e f) where
+instance HasEdges (CPlaneGraph s v e f) (CPlaneGraph s v e' f) where
   edges = _CPlanarGraph.edges
 
 ----------------------------------------

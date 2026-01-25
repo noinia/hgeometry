@@ -6,7 +6,7 @@ import           Control.Lens
 -- import           Debug.Trace
 import           HGeometry
 import           HGeometry.Ext
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Triangulation
@@ -21,8 +21,6 @@ import           Test.Hspec
 -- import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 spec :: Spec
 spec = describe "triangulateSpec" $ do
@@ -60,7 +58,7 @@ _drawGraph    :: ( PlaneGraph_ planeGraph vertex
                  , HasOuterBoundaryOf planeGraph, HasInnerComponents planeGraph
                  , ConstructablePoint_ vertex 2 r, Ord r, Real r, Fractional r, Show r, Eq (FaceIx planeGraph)
                  , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
-                 , Show (EdgeIx planeGraph)
+                 , Show (EdgeIx planeGraph), Show (Edge planeGraph)
                  ) => planeGraph -> [IpeObject r]
 _drawGraph gr = theVertices <> theEdges <> theFaces
   where

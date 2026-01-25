@@ -15,7 +15,7 @@ module Color
 import Control.Lens(Lens', lens)
 import Data.Colour (black)
 import Data.Colour.SRGB
-import Data.Default.Class
+import Data.Default
 import Data.Word (Word8)
 import Miso.String (MisoString, ToMisoString(..), ms)
 

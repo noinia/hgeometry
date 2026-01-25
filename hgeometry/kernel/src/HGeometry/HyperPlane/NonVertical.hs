@@ -29,7 +29,11 @@ import           HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
 import           HGeometry.Properties
 import           HGeometry.Vector
 import           Prelude hiding (last)
-import           Text.Read (Read (..), readListPrecDefault)
+import           Text.Read ( Read (..), Lexeme(Ident), parens, prec, step
+                           , readListPrecDefault,  readListDefault
+                           )
+import           GHC.Show (showSpace)
+import           GHC.Read (expectP)
 
 --------------------------------------------------------------------------------
 
@@ -63,6 +67,8 @@ deriving stock instance Foldable    (Vector d) => Foldable    (NonVerticalHyperP
 deriving stock instance Traversable (Vector d) => Traversable (NonVerticalHyperPlane d)
 
 
+--------------------------------------------------------------------------------
+
 
 instance (Show r, Foldable (Vector d)) => Show (NonVerticalHyperPlane d r) where
   showsPrec k (NonVerticalHyperPlane v) = showParen (k > app_prec) $
@@ -81,6 +87,26 @@ instance ( Read r, Has_ Vector_ d r) => Read (NonVerticalHyperPlane d r) where
   -- TODO, should we verify the hyperplane is non-vertical?
   readListPrec = readListPrecDefault
 
+----------------------------------------
+-- Use a more compact representation for Planes in R^3
+
+instance {-# OVERLAPPING #-} Show r => Show (NonVerticalHyperPlane 3 r) where
+  showsPrec d (Plane a b c) = showParen (d >= 11) $
+    showString "Plane " . showsPrec 11 a . showSpace . showsPrec 11 b . showSpace . showsPrec 11 c
+
+instance {-# OVERLAPPING #-} Read r => Read (NonVerticalHyperPlane 3 r) where
+  readPrec = parens $ prec 10 (do expectP (Ident "Plane")
+                                  a <- step readPrec
+                                  b <- step readPrec
+                                  c <- step readPrec
+                                  pure (Plane a b c)
+                              )
+  readList = readListDefault
+  readListPrec = readListPrecDefault
+
+
+--------------------------------------------------------------------------------
+
 
 -- | Try to construct a Non-vertical hyperplane out of some generic hyperplane.
 --
@@ -91,7 +117,7 @@ instance ( Read r, Has_ Vector_ d r) => Read (NonVerticalHyperPlane d r) where
 -- >>> asNonVerticalHyperPlane myOtherLine
 -- Just (NonVerticalHyperPlane [-1.5,-2.0])
 -- >>> asNonVerticalHyperPlane myPlane
--- Just (NonVerticalHyperPlane [2.0,3.0,10.0])
+-- Just (Plane 2.0 3.0 10.0)
 asNonVerticalHyperPlane :: ( HyperPlane_ hyperPlane d r
                            , Fractional r, Eq r, 1 <= d
                            )

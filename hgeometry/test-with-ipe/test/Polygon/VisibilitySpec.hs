@@ -13,7 +13,7 @@ import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Graphics.Camera
 import           HGeometry.LineSegment
-import           HGeometry.Number.Real.Rational
+import           R
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
@@ -30,8 +30,6 @@ import           Test.QuickCheck hiding (vector)
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
-
-type R = RealNumber 5
 
 inputPolygonPath :: OsPath
 inputPolygonPath = [osp|data/test-with-ipe/golden/Polygon/visibilityInputPolygons.ipe|]
