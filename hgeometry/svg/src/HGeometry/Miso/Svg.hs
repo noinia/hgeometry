@@ -23,6 +23,9 @@ module HGeometry.Miso.Svg
   , dDisk
   , dPolyLine
   , dSimplePolygon
+
+  , module Miso.Svg
+  , module Miso.Svg.Property
   ) where
 
 import Data.ByteString.Lazy qualified as ByteString
@@ -34,6 +37,9 @@ import Miso qualified
 import Miso.Html.Render qualified as Miso
 import System.File.OsPath qualified as File
 import System.OsPath
+
+import Miso.Svg
+import Miso.Property
 
 --------------------------------------------------------------------------------
 

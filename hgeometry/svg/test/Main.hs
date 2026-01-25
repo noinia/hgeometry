@@ -3,14 +3,13 @@
 module Main (main) where
 
 -- import qualified Data.Text.Lazy.IO as Text
-import           HGeometry.Box
-import           HGeometry.Miso.Svg
-import           HGeometry.Miso.Svg.StaticCanvas
-import           HGeometry.Point
-import           Ipe
--- import qualified Miso
-import           Miso.Svg
-import           System.OsPath
+import HGeometry.Box
+import HGeometry.Miso.Svg
+import HGeometry.Miso.Svg.StaticCanvas
+import HGeometry.Point
+import Ipe
+import System.OsPath
+
 --------------------------------------------------------------------------------
 
 main :: IO ()
