@@ -33,6 +33,7 @@ import Data.ByteString.Builder (floatDec, charUtf8, intDec, Builder, hPutBuilder
 import Prelude hiding (unwords, unlines, writeFile)
 import System.File.OsPath (withBinaryFile)
 import System.IO (IOMode(..))
+import HGeometry.Foldable.Util (fromFoldable)
 --------------------------------------------------------------------------------
 
 
@@ -51,9 +52,17 @@ main' :: IO ()
 main' = run [osp|data/test-with-ipe/golden/Render/cube/cube.obj|]
             [osp|data/test-with-ipe/ConvexHull/cube.out.obj|]
 
+
+-- | Create a default element
+mkElement' :: a -> Element a
+mkElement' = Element mempty mempty Nothing 0
+
 run inFP outFp = Wavefront.fromFile inFP >>= \case
     Left err  -> error err
-    Right obj -> toFile outFp $ extendObj (allLocations obj) [] obj
+    Right obj -> toFile outFp $ extendObj mkElement'
+                                          (allLocations obj)
+                                          (elValue <$> Vector.take 3 (objFaces obj))
+                                          (obj { objFaces = mempty } )
 
 allLocations :: WavefrontOBJ -> Vector.Vector (Point 3 R)
 allLocations = fmap toPoint3 . objLocations
@@ -102,18 +111,19 @@ toFile fp obj = writeFile fp $ unlines [ locs
 -- toOBJOut :: Foldable f => Vector.Vector (Point 3 R) -> f Face -> WavefrontOBJ
 -- toOBJOut = extendObj emptyObj
 
-extendObj            :: Foldable f
-                     => Vector.Vector (Point 3 R) -- additional points
+extendObj            :: (Foldable f)
+                     => (forall a. a -> Element a)
+                     -> Vector.Vector (Point 3 R) -- additional points
                      -> f Face -- ^ additional faces
                      -> WavefrontOBJ -- ^ file we are extending
                      -> WavefrontOBJ
-extendObj pts fs obj = obj { objLocations = objLocations obj <> locs
-                           , objFaces     = objFaces obj     <> fs'
-                           , objPoints    = objPoints obj    <> imap asPoint' pts
-                           }
+extendObj mkElement pts fs obj = obj { objLocations = objLocations obj <> locs
+                                     , objFaces     = objFaces obj     <> fs'
+                                     , objPoints    = objPoints obj    <> imap asPoint' pts
+                                     }
   where
     n    = length (objLocations obj)
-    fs'  = Vector.empty
+    fs'  = mkElement <$> fromFoldable fs
     locs = fmap (\p -> let Point3 x y z = p&coordinates %~ realToFrac
                        in Location x y z 1
                 ) pts
@@ -139,7 +149,7 @@ emptyObj = WavefrontOBJ { objLocations = Vector.empty
 
 
 --------------------------------------------------------------------------------
--- * These should move to Bytestring I guess
+-- * TODO: These should move to Bytestring I guess
 
 
 modifyFile :: IOMode -> OsPath -> Builder -> IO ()
