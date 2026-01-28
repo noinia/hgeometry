@@ -9,7 +9,6 @@ import Data.Foldable
 import Data.Maybe
 import Golden
 import HGeometry.Intersection
-import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Kernel
 import HGeometry.HalfLine
@@ -23,12 +22,9 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 import Test.Hspec.WithTempFile
+import R
 
-import Debug.Trace
 --------------------------------------------------------------------------------
-
-type R = RealNumber 10
-
 
 -- data OneOrTwo a =
 
@@ -95,24 +91,26 @@ spec = describe "Polygon.Convex.Unbounded" $ do
              Just (Line_x_UnboundedConvexRegion_HalfLine _) -> True
              _ -> False
 
-         let [a,b,c] = tri2^..outerBoundaryEdgeSegments
-         it ("a intersects reg " <> show a) $
-            (a `intersects` ub4) `shouldBe` False
-         it "b intersects reg" $
-            (b `intersects` ub4) `shouldBe` False
-         it "c intersects reg" $
-            (c `intersects` ub4) `shouldBe` False
+         case tri2^..outerBoundaryEdgeSegments of
+           [a,b,c] -> do
+               it ("a intersects reg " <> show a) $
+                  (a `intersects` ub4) `shouldBe` False
+               it "b intersects reg" $
+                  (b `intersects` ub4) `shouldBe` False
+               it "c intersects reg" $
+                  (c `intersects` ub4) `shouldBe` False
 
-         prop "the halfline that is the intersection should not intersect a" $
-           case supportingLine a `intersect` ub4 of
-             Just (Line_x_UnboundedConvexRegion_HalfLine hl) ->
-               counterexample (show a) .
-                 counterexample (show $ supportingLine a) .
-                   counterexample (show hl) $
-                    counterexample (show $ hl `intersect` a) $
-                     not (hl `intersects` a)
-             --   HalfLine (Point2 (-13.5037) (-9.47631)) (Vector2 (-5) (-1.75))
-             _ -> property False
+               prop "the halfline that is the intersection should not intersect a" $
+                 case supportingLine a `intersect` ub4 of
+                   Just (Line_x_UnboundedConvexRegion_HalfLine hl) ->
+                     counterexample (show a) .
+                       counterexample (show $ supportingLine a) .
+                         counterexample (show hl) $
+                          counterexample (show $ hl `intersect` a) $
+                           not (hl `intersects` a)
+                   --   HalfLine (Point2 (-13.5037) (-9.47631)) (Vector2 (-5) (-1.75))
+                   _ -> property False
+           _        -> error "tri2 not a triangle!?"
 
          it "bug edges x ub4 should be " $
            (linex `intersect` ub4) `shouldSatisfy` \case
@@ -130,15 +128,17 @@ spec = describe "Polygon.Convex.Unbounded" $ do
             counterexample (show $ tri `intersect` convex) $
               tri `intersects` convex === isJust (tri `intersect` convex)
 
-         let [a',b',c'] = tri3^..outerBoundaryEdgeSegments
-         it ("a' intersects reg " <> show a) $
-            (a' `intersects` ub5) `shouldBe` False
-         it "b' intersects reg" $
-            (b' `intersects` ub5) `shouldBe` False
-         it "c' intersects reg" $
-           counterexample (show c') $ counterexample (show $ supportingLine c') $
-            counterexample (show $ (supportingLine c') `intersect` ub5) $
-             (c' `intersects` ub5) `shouldBe` False
+         case tri3^..outerBoundaryEdgeSegments of
+           [a',b',c'] -> do
+               it ("a' intersects reg " <> show a') $
+                  (a' `intersects` ub5) `shouldBe` False
+               it "b' intersects reg" $
+                  (b' `intersects` ub5) `shouldBe` False
+               it "c' intersects reg" $
+                 counterexample (show c') $ counterexample (show $ supportingLine c') $
+                  counterexample (show $ (supportingLine c') `intersect` ub5) $
+                   (c' `intersects` ub5) `shouldBe` False
+           _         -> error "tri3 not a triangle !?"
 
          modifyMaxDiscardRatio (*4) $
            prop "line x unbounded region intersects in the correct halfline" $
