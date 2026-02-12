@@ -19,9 +19,8 @@ module HGeometry.Sequence.Alternating
   , insertBreakPoints
   , reverse
 
-  , consElemWith
-  , unconsAlt
-  , snocElemWith
+  , consElemWith, unconsAlt
+  , snocElemWith, unsnocAlt
   , concatAlternatingsWith
   , separators
   ) where
@@ -177,6 +176,16 @@ unconsAlt                     :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
 unconsAlt (Alternating x0 xs) = case xs^?_Cons of
   Nothing           -> Left x0
   Just ((s,x1),xs') -> Right ((x0,s), Alternating x1 xs')
+
+
+-- | Unsnoc the alternating, getting either just the last element (if there was only one),
+-- or the "init" of the alternating, the last separator, and the last element
+-- the init would be the alternating without its last element.
+unsnocAlt                     :: Snoc (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                              => Alternating f sep a -> Either a (Alternating f sep a, (sep,a))
+unsnocAlt (Alternating x0 xs) = case xs^?_Snoc of
+  Nothing           -> Left x0
+  Just (xs', last') -> Right (Alternating x0 xs', last')
 
 --------------------------------------------------------------------------------
 
