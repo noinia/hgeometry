@@ -76,7 +76,7 @@ import           Witherable
 -- import Ipe.Color(IpeColor(..))
 --------------------------------------------------------------------------------
 -- $setup
--- >>> :set -XOverloadedStrings
+-- >>> :seti -XOverloadedStrings
 -- >>> import Ipe.Attributes
 -- >>> import Ipe.Color(IpeColor(..))
 -- >>> import qualified Data.List.NonEmpty as NonEmpty
