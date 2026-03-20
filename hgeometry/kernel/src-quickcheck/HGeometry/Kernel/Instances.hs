@@ -1,6 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Kernel.Instances
@@ -200,7 +199,7 @@ instance ( Has_ Additive_ m r
   arbitrary = (matrixFromRows :: Vector n (Vector m r) -> Matrix n m r)
            <$> arbitrary
 
-instance ( Arbitrary r, Has_ Vector_ (d+1) r, Has_ Additive_ d r
+instance ( Arbitrary r, Has_ Vector_ (d+1) r, Has_ Additive_ d r, d <= d+1
          , Num r, Eq (Vector d r)) => Arbitrary (HyperPlane d r) where
   arbitrary = do a0                <- arbitrary
                  (a :: Vector d r) <- arbitrary `suchThat` (/= zero)

@@ -1,9 +1,6 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
-{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------------------
 -- |
@@ -203,7 +200,7 @@ component = singular $ component' (fromIntegral . natVal $ Proxy @i)
 -- 1
 -- >>> Vector2 1 2 & xComponent .~ 10
 -- Vector2 10 2
-xComponent :: (Vector_ vector d r, 1 <= d)
+xComponent :: (Vector_ vector d r, 0 <= d - 1)
            => IndexedLens' Int vector r
 xComponent = component @0
 {-# INLINE xComponent #-}
@@ -214,7 +211,7 @@ xComponent = component @0
 -- 2
 -- >>> Vector2 1 2 & yComponent .~ 10
 -- Vector2 1 10
-yComponent :: (Vector_ vector d r, 2 <= d)
+yComponent :: (Vector_ vector d r, 1 <= d - 1)
            => IndexedLens' Int vector r
 yComponent = component @1
 {-# INLINE yComponent #-}
@@ -225,7 +222,7 @@ yComponent = component @1
 -- 3
 -- >>> Vector3 1 2 3 & zComponent .~ 10
 -- Vector3 1 2 10
-zComponent :: (Vector_ vector d r, 3 <= d)
+zComponent :: (Vector_ vector d r, 2 <= d - 1)
            => IndexedLens' Int vector r
 zComponent = component @2
 {-# INLINE zComponent #-}
@@ -236,7 +233,7 @@ zComponent = component @2
 -- 4
 -- >>> Vector4 1 2 3 4 & wComponent .~ 10
 -- Vector4 1 2 3 10
-wComponent :: (Vector_ vector d r, 4 <= d)
+wComponent :: (Vector_ vector d r, 3 <= d - 1)
            => IndexedLens' Int vector r
 wComponent = component @3
 {-# INLINE wComponent #-}

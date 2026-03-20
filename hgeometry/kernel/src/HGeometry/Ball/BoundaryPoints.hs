@@ -64,7 +64,7 @@ diskFromPoints a b c = case ccw a b c of
 type instance Dimension (BallByPoints' k point) = Dimension point
 type instance NumType   (BallByPoints' k point) = NumType   point
 
-instance ( Point_ point d r, Fractional r, 1 <= k, Has_ Vector_ k point, Has_ Metric_ d r
+instance ( Point_ point d r, Fractional r, 0 <= k-1, Has_ Vector_ k point, Has_ Metric_ d r
          , HasCenter (BallByPoints' k point) (Point d r)
          ) => Ball_ (BallByPoints' k point) (Point d r) where
   squaredRadius = to $ \ball@(BoundaryPoints v) ->
