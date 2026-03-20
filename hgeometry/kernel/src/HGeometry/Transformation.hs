@@ -38,6 +38,7 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Transformation.Internal
 import           HGeometry.Vector
+import           GHC.TypeNats
 
 --------------------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ fitToBox     :: forall box d g point r.
                 , Ord r, Fractional r
                 , TransformationConstraints d r
                 , Functor (Vector d), Zip (Vector d)
+                , d <= (d + 1) - 1
                 ) => box -> g -> g
 fitToBox r g = transformBy (fitToBoxTransform r g) g
 {-# INLINE fitToBox #-}
@@ -67,6 +69,7 @@ fitToBoxTransform     :: forall box d g point r.
                          , Ord r, Fractional r
                          , TransformationConstraints d r
                          , Functor (Vector d), Zip (Vector d)
+                         , d <= (d + 1) - 1
                          ) => box -> g -> Transformation d r
 fitToBoxTransform r g = translation v2 |.| uniformScaling lam |.| translation v1
   where

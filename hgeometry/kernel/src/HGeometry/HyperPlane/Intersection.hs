@@ -1,8 +1,6 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 {-# LANGUAGE UndecidableInstances #-}
+{- HLINT ignore "Use camelCase" -}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.HyperPlane.Intersection
@@ -60,12 +58,15 @@ instance Bitraversable PlanePlaneIntersection where
     Plane_x_Plane_Plane h -> Plane_x_Plane_Plane <$> f h
 
 instance ( Has_ Metric_ d r, Num r, Eq r, 2 <= d, d < d + 1 -- this constraint is rather silly
-         , Has_ Metric_ (1+d) r, Eq (Vector (1 + d) r)
+         , Has_ Metric_ (1+d) r
+         , 1 <= d, Has_ Metric_ (d + 1) r, Eq (Vector (d + 1) r), d <= d + 1
          ) => HasIntersectionWith (HyperPlane d r) (HyperPlane d r) where
   h `intersects` h' = h == h' || not (h `isParallelTo` h')
 
 instance ( Has_ Metric_ d r, Num r, Eq r, 2 <= d, d < d + 1
          , Has_ Metric_ (1+d) r, Has_ Additive_ (d-1) r, Eq (Vector d r)
+         , 1 <= d, Has_ Metric_ (d + 1) r, (1 + (d - 1) ~ d), d <= d + 1
+         , d -1 <= d, ((d - 1) + 1) ~ d
          ) => HasIntersectionWith (NonVerticalHyperPlane d r) (NonVerticalHyperPlane d r) where
   h `intersects` h' = h == h' ||  not (h `isParallelTo` h')
 
