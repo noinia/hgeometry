@@ -14,7 +14,6 @@ import HGeometry.Point
 import HGeometry.Triangle
 import HGeometry.Vector
 import HGeometry.Kernel.Instances()
-import Hiraffe.Graph
 import Test.Hspec
 import Test.Hspec.QuickCheck
 -- import Test.QuickCheck
@@ -64,10 +63,10 @@ spec = describe "intersection tests" $ do
           it "intersecting halfspaces" $
             let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
             in (show <$> intersectingHalfPlanes t) `shouldBe`
-               (Vector3 "HalfSpace Positive (LinePV (Point2 0 0) (Vector2 (-1) 0))"
-                        "HalfSpace Positive (LinePV (Point2 (-1) 0) (Vector2 1 (-1)))"
-                        "HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))"
-               )
+               Vector3 "HalfSpace Positive (LinePV (Point2 0 0) (Vector2 (-1) 0))"
+                       "HalfSpace Positive (LinePV (Point2 (-1) 0) (Vector2 1 (-1)))"
+                       "HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))"
+
 
 --------------------------------------------------------------------------------
 

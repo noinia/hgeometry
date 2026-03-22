@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.HyperPlaneSpec where
 
 import Control.Lens hiding (unsnoc)
@@ -48,7 +45,10 @@ asHyp :: ( NonVerticalHyperPlane_ hyperPlane d r
 asHyp = hyperPlaneFromEquation . hyperPlaneEquation
 
 -- | Test if the hyperplane is non-vertical
-isNonVertical :: ( HyperPlane_ hyperPlane d r, Fractional r, Eq r, 1 <= d)
+isNonVertical :: ( HyperPlane_ hyperPlane d r, Fractional r, Eq r, 1 <= d
+                 , d <= (d + 1) - 1
+                 , d <= d + 1, 0 <= (d+1)-1, Has_ Vector_ (d+1) r, KnownNat (d-1)
+                 )
               => hyperPlane -> Bool
 isNonVertical = isJust . asNonVerticalHyperPlane
 
@@ -59,6 +59,7 @@ onSideTestNonVertical     :: forall point nonVerticalHyperPlane d r.
                              , Ord r, Fractional r
                              , Has_ Additive_ (d-1) r
                              , d-1 <= d, 1 <= d
+                             , (d-1)+1 ~ d
                              ) => point -> nonVerticalHyperPlane -> Ordering
 onSideTestNonVertical p h = let (v, pd) = unsnoc (p^.vector) :: (Vector (d-1) r, r)
                             in pd `compare` evalAt (Point v) h
@@ -137,13 +138,13 @@ spec = describe "HyperPlane Tests" $ do
              q `verticalSideTest` h === onSideTestNonVertical q h
 
          it "onside test NonVertical Hyperplanes i.e. lines) manual " $ do
-           (Point2 3 10) `onSideTestNonVertical` (LineEQ 1 1) `shouldBe` GT
-           (Point2 3 10) `onSideTestNonVertical` (LineEQ 2 1) `shouldBe` GT
-           (Point2 3 3) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` LT
-           (Point2 3 7) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` EQ
-           (Point2 0 1) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` EQ
-           (Point2 0 0) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` LT
-           (Point2 0 4) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` GT
+           Point2 3 10 `onSideTestNonVertical` LineEQ 1 1 `shouldBe` GT
+           Point2 3 10 `onSideTestNonVertical` LineEQ 2 1 `shouldBe` GT
+           Point2 3 3 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` LT
+           Point2 3 7 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` EQ
+           Point2 0 1 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` EQ
+           Point2 0 0 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` LT
+           Point2 0 4 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` GT
 
          it "on side of vertical line / hyperplane" $
            (Point2 0 1 `onSideTest` HyperPlane2 3 (-1) 0)

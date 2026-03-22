@@ -1,6 +1,4 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
@@ -26,7 +24,6 @@ import HGeometry.HyperPlane.Class
 import HGeometry.HyperPlane.Internal
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
-import HGeometry.Intersection()
 import HGeometry.Line.Class
 import HGeometry.Line.Intersection
 import HGeometry.Line.NonVertical.Class

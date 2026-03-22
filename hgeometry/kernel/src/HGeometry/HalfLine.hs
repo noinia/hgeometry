@@ -89,7 +89,7 @@ instance ( Point_ point d r, Ord r, Num r
          , HasOnLine (LinePV d r) d
          , Has_ Metric_ d r
          , Has_ Metric_ (d+1) r, Has_ Vector_ (1+d) r
-         , d < d+1 -- TODO: this constraint is silly
+         , d < d+1, d <= d + 1 -- TODO: these constraints are silly
          ) => Point d r `HasIntersectionWith` HalfLine point where
   q `intersects` hl = q `onLine` l && q `intersects` HalfSpace Positive h
     where

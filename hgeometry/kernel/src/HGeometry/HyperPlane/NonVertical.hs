@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -120,6 +118,7 @@ instance {-# OVERLAPPING #-} Read r => Read (NonVerticalHyperPlane 3 r) where
 -- Just (Plane 2.0 3.0 10.0)
 asNonVerticalHyperPlane :: ( HyperPlane_ hyperPlane d r
                            , Fractional r, Eq r, 1 <= d
+                           , Has_ Vector_ (d+1) r, d <= d + 1, KnownNat (d-1), 0 <= (d+1) - 1
                            )
                         => hyperPlane -> Maybe (NonVerticalHyperPlane d r)
 asNonVerticalHyperPlane = asNonVerticalHyperPlane' . hyperPlaneEquation
@@ -127,11 +126,12 @@ asNonVerticalHyperPlane = asNonVerticalHyperPlane' . hyperPlaneEquation
 
 -- | Constructs a non-vertical hyperplane from a vector
 asNonVerticalHyperPlane'   :: forall d r. ( Has_ Vector_ d r, Has_ Vector_ (d+1) r, 1 <= d
-                                          , Fractional r, Eq r)
+                                          , Fractional r, Eq r
+                                          , d <= d + 1, 0 <= (d+1) - 1, KnownNat (d-1))
                            => Vector (d+1) r -> Maybe (NonVerticalHyperPlane d r)
 asNonVerticalHyperPlane' e
     | ad == 0   = Nothing
-    | otherwise = Just $ NonVerticalHyperPlane $ a ^/ (negate ad)
+    | otherwise = Just $ NonVerticalHyperPlane $ a ^/ negate ad
   where
     (a0 :: r, as :: Vector d r) = uncons e
     ad = as^.last
@@ -142,6 +142,8 @@ asNonVerticalHyperPlane' e
 
 instance ( MkHyperPlaneConstraints d r, Has_ Additive_ (d-1) r
          , 2 <= d
+         , d - 1 <= d, 1 <= d, (1 + (d - 1) ~ d) -- these are rather silly :(
+         , ((d - 1) + 1) ~ d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
   -- normalVector h = let a = suffix $ hyperPlaneEquation h
@@ -150,6 +152,9 @@ instance ( MkHyperPlaneConstraints d r, Has_ Additive_ (d-1) r
 instance ( MkHyperPlaneConstraints d r, Has_ Additive_ (d-1) r
          , Fractional r, Eq r
          , 2 <= d
+         , d - 1 <= d, 1 <= d, (1 + (d - 1) ~ d), 0 <= (d+1) - 1, KnownNat (d-1)
+         , ((d - 1) + 1) ~ d
+           -- these are rather silly :(
          ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
 
   -- | pre: the last component is not zero
@@ -166,6 +171,8 @@ instance ( MkHyperPlaneConstraints d r, Has_ Additive_ (d-1) r
 instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d, Has_ Additive_ (d-1) r
          , Num r
          , 2 <= d
+         , d - 1 <= d, 1 <= d, (1 + (d - 1) ~ d) -- these are rather silly :(
+         , ((d - 1) + 1) ~ d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where
   -- >>> myLineAsNV^.hyperPlaneCoefficients
   -- Vector2 1 2
@@ -198,5 +205,6 @@ pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)
 --------------------------------------------------------------------------------
 
 -- | Access the last element of a vector
-last :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
+last :: forall vector d r. (Vector_ vector d r, 1 <= d, KnownNat (d-1)
+                           ) => IndexedLens' Int vector r
 last = component @(d-1)
