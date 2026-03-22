@@ -37,7 +37,7 @@ import           Data.Sequence (Seq)
 import           HGeometry.Ext
 import           Data.These
 
-import Debug.Trace
+-- import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -139,7 +139,6 @@ asLineEQ = \case
 
 
 boundaries' = let f = fmap (\h -> asLineEQ (h^.boundingHyperPlane) :+ h)
-                    . traceShowId
               in boundaries . bimap f f
 
 testClip :: ( NonEmpty _, NonEmpty _
