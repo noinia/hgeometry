@@ -1,8 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DefaultSignatures #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.HyperPlane.Class
@@ -112,6 +109,7 @@ class ( NumType hyperPlane ~ r
   default hyperPlaneEquation :: ( NonVerticalHyperPlane_ hyperPlane d r
                                 , Num r
                                 , 1 <= d
+                                , Has_ Vector_ (d+1) r, KnownNat (d-1)
                                 )
                              => hyperPlane -> Vector (d+1) r
   hyperPlaneEquation h = cons a0 a
@@ -129,7 +127,7 @@ class ( NumType hyperPlane ~ r
   -- >>> normalVector myLine
   -- Vector2 (-1.0) 1.0
   normalVector :: (Num r, Eq r, 1 <= d) => hyperPlane -> Vector d r
-  default normalVector :: (KnownNat d, Num r, Eq r, 1 <= d)
+  default normalVector :: (KnownNat d, Num r, Eq r, 1 <= d, Has_ Vector_ (d+1) r, d <= d+1)
                        => hyperPlane -> Vector d r
   normalVector h = negated . suffix $ hyperPlaneEquation h
   {-# INLINE normalVector #-}
@@ -200,6 +198,7 @@ class ( NumType hyperPlane ~ r
 pointOn   :: forall hyperPlane d r.
              ( HyperPlane_ hyperPlane d r, Eq r, Fractional r, Has_ Additive_ d r
              , FoldableWithIndex Int (Vector d)
+             , Has_ Vector_ (d+1) r, d <= d +1, 0 <= (d+1)-1 -- these are silly :(
              )
           => hyperPlane -> Point d r
 pointOn h = case uncons $ hyperPlaneEquation h of
@@ -207,7 +206,7 @@ pointOn h = case uncons $ hyperPlaneEquation h of
               (a0, a) -> case ifind (const (/= 0)) (a :: Vector d r) of
                            Nothing     -> error "pointOn: Invalid hyperplane"
                            Just (i,ai) ->
-                             (origin :: Point d r)&vector.component' i .~ ((negate a0) / ai)
+                             (origin :: Point d r)&vector.component' i .~ (negate a0 / ai)
   -- We are trying to find a point p so that a0 + sum_{i=1}^d ai*pi = 0,
   -- in other words, so that
   --
@@ -258,6 +257,7 @@ class HyperPlane_ hyperPlane d r
                                 , ConstructableHyperPlane_ hyperPlane d r
                                 , HyperPlaneFromEquationConstraint hyperPlane d r
                                 , Has_ Metric_ d r
+                                , Has_ Vector_ (d+1) r -- this is implied but whatever
                                 )
                              => point -> Vector d r -> hyperPlane
   fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 (negated n)
@@ -291,8 +291,8 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   default evalAt :: ( Num r
                     , 1 <= d
                     , Point_ point (d-1) r
-                    , 1 + (d-1) ~ d -- silly silly agian :(
                     , Has_ Metric_ d r
+                    , d - 1 <= d, KnownNat (d-1), (d-1) + 1 ~ d
                     ) => point -> hyperPlane -> r
   evalAt p h = (h^.hyperPlaneCoefficients) `dot` snoc (p^.vector) 1
   {-# INLINE evalAt #-}
@@ -339,7 +339,7 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   default verticalSideTest :: ( Point_ point d r
                               , Num r, Ord r
                               , 1 <= d
-                              , 1 + (d-1) ~ d -- silly silly agian :(
+                              , (d-1) + 1 ~ d, d - 1 <= d, KnownNat (d-1) -- silly silly agian :(
                               , Has_ Metric_ d r
                               , Has_ Additive_ (d-1) r
                               ) => point -> hyperPlane -> Ordering
@@ -424,5 +424,6 @@ instance (NonVerticalHyperPlane_  hyperPlane d r)
 
 
 -- | Access the last element of a vector
-last :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
+last :: forall vector d r. (Vector_ vector d r, 1 <= d, KnownNat (d-1)
+                           ) => IndexedLens' Int vector r
 last = component @(d-1)

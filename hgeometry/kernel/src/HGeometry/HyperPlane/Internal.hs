@@ -1,6 +1,4 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.HyperPlane.Internal
@@ -87,6 +85,8 @@ type MkHyperPlaneConstraints d r =
   ( d < d+1, KnownNat d
   , Has_ Metric_ d r, Has_ Metric_ (d+1) r
   , Has_ Vector_ d r, Has_ Vector_ (d+1) r
+  , Has_ Vector_ (1+d) r
+  , d <= d+1
   )
 
 instance ( MkHyperPlaneConstraints d r
@@ -143,6 +143,7 @@ cmpInDirection       :: forall point d r.
                         , Has_ Metric_ d r
                         , Point_ point d r
                         , d < d+1--, 0 < d
+                        , Has_ Vector_ (1+d) r, d <= d+1
                         )
                      => Vector d r -> point -> point -> Ordering
 cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n

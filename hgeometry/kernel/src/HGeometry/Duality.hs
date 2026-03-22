@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
-{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Duality
@@ -33,7 +30,9 @@ import HGeometry.Vector
 --
 -- >>> dualPoint (LineEQ 10 20)
 -- Point2 10 (-20)
-dualPoint :: forall hyperPlane d r. (NonVerticalHyperPlane_ hyperPlane d r, Num r, 1 <= d)
+dualPoint :: forall hyperPlane d r. (NonVerticalHyperPlane_ hyperPlane d r, Num r, 1 <= d
+                                    , KnownNat (d-1)
+                                    )
           => hyperPlane -> Point d r
 dualPoint = Point . over (component @(d-1)) negate . view hyperPlaneCoefficients
 
@@ -41,7 +40,7 @@ dualPoint = Point . over (component @(d-1)) negate . view hyperPlaneCoefficients
 --
 -- >>> dualHyperPlane (Point2 10 (-20))
 -- NonVerticalHyperPlane [10,20]
-dualHyperPlane :: forall point d r. (Point_ point d r, Num r, 1 <= d)
+dualHyperPlane :: forall point d r. (Point_ point d r, Num r, 1 <= d, KnownNat (d-1))
                => point -> NonVerticalHyperPlane d r
 dualHyperPlane = NonVerticalHyperPlane . over (component @(d-1)) negate . view vector
 

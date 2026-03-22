@@ -1,7 +1,5 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 -- --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Transformation.Internal
@@ -70,8 +68,8 @@ instance (Num r, OptMatrix_ (d+1) r) => Monoid (Transformation d r) where
 --
 -- >>> inverseOf $ translation (Vector2 (10.0) (5.0))
 -- Transformation {_transformationMatrix = Matrix (Vector3 (Vector3 1.0 0.0 (-10.0)) (Vector3 0.0 1.0 (-5.0)) (Vector3 0.0 0.0 1.0))}
-inverseOf :: (Fractional r, OptMatrix_ (d+1) r, Invertible (d + 1))
-          => Transformation d r -> Transformation d r
+inverseOf :: (  Fractional r, OptMatrix_ (d+1) r, Invertible (d + 1)
+             ) => Transformation d r -> Transformation d r
 inverseOf = Transformation . inverseMatrix . _transformationMatrix
 {-# INLINE inverseOf #-}
 
@@ -97,7 +95,8 @@ type DefaultTransformByConstraints g d r =
   , OptMatrix_ (d+1) r
   , Fractional r
   , Has_ Additive_ d r
-  , HasComponents (Vector (1 + d) (Vector (1 + d) r)) (Vector (1 + d) r)
+  , HasComponents (Vector (d+1) (Vector (d+1) r)) (Vector (d+1) r)
+  , d <= d+1, d <= (d+1) - 1
   )
 
 -- | A class representing types that can be transformed using a transformation
@@ -113,7 +112,8 @@ class IsTransformable g where
   {-# INLINE transformBy #-}
 
 instance (Fractional r, Has_ Vector_ d r, OptMatrix_ (d+1) r
-         , HasComponents (Vector (1 + d) (Vector (1 + d) r)) (Vector (1 + d) r)
+         , HasComponents (Vector (d+1) (Vector (d+1) r)) (Vector (d+1) r)
+         , d <= (d + 1) - 1, d <= d + 1
          ) => IsTransformable (Point d r) where
   transformBy t = Point . transformBy t . toVec
   {-# INLINE transformBy #-}
@@ -121,8 +121,8 @@ instance (Fractional r, Has_ Vector_ d r, OptMatrix_ (d+1) r
 instance ( Fractional r
          , Has_ Vector_ d r
          , OptMatrix_ (d+1) r
-         , HasComponents (Vector (1 + d) (Vector (1 + d) r)) (Vector (1 + d) r)
-         -- , d < d+1
+         , HasComponents (Vector (d+1) (Vector (d+1) r)) (Vector (d+1) r)
+         , d <= (d + 1) - 1, d <= d + 1
          ) => IsTransformable (Vector d r) where
   transformBy (Transformation m) v = f $ m !* (snoc v 1 :: Vector (d+1) r)
     where
@@ -151,6 +151,7 @@ instance IsTransformable geom => IsTransformable (NonEmpty geom) where
 translation   :: forall d r vector. ( Num r
                                     , Vector_ vector d r
                                     , TransformationConstraints d r
+                                    , d <= (d + 1) - 1
                                     )
               => vector -> Transformation d r
 translation v = Transformation . Matrix
@@ -217,8 +218,10 @@ uniformScaling x = scaling $ generate @(Vector d r) (const x)
 -- Point2 3.0 5.0
 translateBy :: ( IsTransformable g
                , Num (NumType g)
-               , Vector_ vector (Dimension g) (NumType g)
-               , TransformationConstraints (Dimension g) (NumType g)
+               , Vector_ vector d (NumType g)
+               , TransformationConstraints d (NumType g)
+               , Dimension g ~ d
+               , d <= (d + 1) - 1
                ) => vector -> g -> g
 translateBy = transformBy . translation
 {-# INLINE translateBy #-}
@@ -228,8 +231,10 @@ translateBy = transformBy . translation
 -- >>> scaleBy (Vector2 2 (-1)) $ Point2 2 3
 -- Point2 4.0 (-3.0)
 scaleBy :: ( IsTransformable g, Num (NumType g)
-           , Vector_ vector (Dimension g) (NumType g)
-           , TransformationConstraints (Dimension g) (NumType g)
+           , Vector_ vector d (NumType g)
+           , TransformationConstraints d (NumType g)
+           , Dimension g ~ d
+           , d <= (d + 1) - 1
            ) => vector -> g -> g
 scaleBy = transformBy . scaling
 {-# INLINE scaleBy #-}
@@ -240,7 +245,9 @@ scaleBy = transformBy . scaling
 -- >>> scaleUniformlyBy 5 $ Point2 2 3
 -- Point2 10.0 15.0
 scaleUniformlyBy :: ( IsTransformable g, Num (NumType g)
-                    , TransformationConstraints (Dimension g) (NumType g)
+                    , TransformationConstraints d (NumType g)
+                    , Dimension g ~ d
+                    , d <= (d + 1) - 1
                     ) => NumType g -> g -> g
 scaleUniformlyBy = transformBy  . uniformScaling
 {-# INLINE scaleUniformlyBy #-}
@@ -249,6 +256,7 @@ scaleUniformlyBy = transformBy  . uniformScaling
 -- | Row in a translation matrix
 transRow     :: forall n r . ( Num r
                              , Has_ Additive_ (n+1) r
+                             , n <= (n + 1) - 1, KnownNat n
                              )
              => Int -> r -> Vector (n + 1) r
 transRow i x = set (component @n) x $ mkRow i 1

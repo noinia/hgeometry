@@ -1,7 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Box.Class
@@ -100,7 +98,7 @@ widthIn = view (component @i) . size
 
 -- | Get the width of a rectangle.
 width :: ( Box_ box point, Point_ point d r
-         , 1 <= d
+         , 0 <= d - 1
          , Functor (Vector d)
          , Num r
          ) => box -> r
@@ -108,7 +106,7 @@ width  = widthIn @0
 
 -- | get the height of a rectangle
 height :: ( Box_ box point, Point_ point d r
-         , 2 <= d
+         , 1 <= d - 1
          , Functor (Vector d)
          , Num r
          ) => box -> r
