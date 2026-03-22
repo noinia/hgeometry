@@ -138,13 +138,13 @@ spec = describe "HyperPlane Tests" $ do
              q `verticalSideTest` h === onSideTestNonVertical q h
 
          it "onside test NonVertical Hyperplanes i.e. lines) manual " $ do
-           (Point2 3 10) `onSideTestNonVertical` (LineEQ 1 1) `shouldBe` GT
-           (Point2 3 10) `onSideTestNonVertical` (LineEQ 2 1) `shouldBe` GT
-           (Point2 3 3) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` LT
-           (Point2 3 7) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` EQ
-           (Point2 0 1) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` EQ
-           (Point2 0 0) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` LT
-           (Point2 0 4) `onSideTestNonVertical` (LineEQ 2 1)  `shouldBe` GT
+           Point2 3 10 `onSideTestNonVertical` LineEQ 1 1 `shouldBe` GT
+           Point2 3 10 `onSideTestNonVertical` LineEQ 2 1 `shouldBe` GT
+           Point2 3 3 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` LT
+           Point2 3 7 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` EQ
+           Point2 0 1 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` EQ
+           Point2 0 0 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` LT
+           Point2 0 4 `onSideTestNonVertical` LineEQ 2 1  `shouldBe` GT
 
          it "on side of vertical line / hyperplane" $
            (Point2 0 1 `onSideTest` HyperPlane2 3 (-1) 0)

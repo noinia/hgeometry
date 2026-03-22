@@ -273,7 +273,7 @@ suffix   :: forall i d vector vector' r. ( i <= d
          => vector -> vector'
 suffix v = let d = fromIntegral . natVal $ Proxy @d
                s = d - (fromIntegral . natVal $ Proxy @i)
-           in generate $ (\j -> v^?!component' (s+j))
+           in generate (\j -> v^?!component' (s+j))
 {-# INLINE suffix #-}
 
 --------------------------------------------------------------------------------
@@ -366,8 +366,8 @@ basis = basisFor zero
 
 -- | Produce a default basis for a vector space from which the
 -- argument is drawn.
-basisFor :: (Additive_ vector d r, Num r) => vector -> [vector]
-basisFor = \t ->
+basisFor   :: (Additive_ vector d r, Num r) => vector -> [vector]
+basisFor t =
    ifoldMapOf components ?? t $ \i _ ->
      return                  $
        iover  components ?? t $ \j _ ->

@@ -206,7 +206,7 @@ pointOn h = case uncons $ hyperPlaneEquation h of
               (a0, a) -> case ifind (const (/= 0)) (a :: Vector d r) of
                            Nothing     -> error "pointOn: Invalid hyperplane"
                            Just (i,ai) ->
-                             (origin :: Point d r)&vector.component' i .~ ((negate a0) / ai)
+                             (origin :: Point d r)&vector.component' i .~ (negate a0 / ai)
   -- We are trying to find a point p so that a0 + sum_{i=1}^d ai*pi = 0,
   -- in other words, so that
   --
