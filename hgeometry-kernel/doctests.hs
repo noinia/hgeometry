@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -F -pgmF doctest-driver-gen
-                -optF kernel/src
+                -optF src
 
                 -optF -XTypeFamilies
                 -optF -XGADTs

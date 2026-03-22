@@ -113,19 +113,15 @@ common all-setup
       , FunctionalDependencies
       , PartialTypeSignatures
 
-common kernel-setup
-    build-depends:
-        hgeometry-vector
-
 common polygon-setup
     build-depends:
         hgeometry-vector
-      , hgeometry:kernel
+      , hgeometry-kernel
       , hgeometry:lineSegmentIntersection
 
 common hgeometry-setup
     build-depends:
-        hgeometry:kernel
+        hgeometry-kernel
       , hgeometry:polyLine
       , hgeometry:lineSegmentIntersection
       , hgeometry:polygon
@@ -150,24 +146,14 @@ common all-quickcheck-setup
 
 common quickcheck-setup
     build-depends:
-        hgeometry:kernel-quickcheck
+        hgeometry-kernel:quickcheck
       , hgeometry-vector:quickcheck
       , hgeometry-point:quickcheck
       , hgeometry
 
-common kernel-quickcheck-setup
-    build-depends:
-      , hgeometry-point
-      , hgeometry:kernel
-      , hgeometry:polyLine
-      , hgeometry:polygon
-      , hgeometry-combinatorial:quickcheck
-      , hgeometry-vector:quickcheck
-      , hgeometry-point:quickcheck
-
 common ipe-setup
     build-depends:
-        hgeometry:kernel
+        hgeometry-kernel
       , hgeometry:polyLine
       , hgeometry:polygon
       , hgeometry:spline
@@ -188,7 +174,7 @@ common svg-setup
     build-depends:
         hgeometry-vector
       , hgeometry-point
-      , hgeometry:kernel
+      , hgeometry-kernel
       , hgeometry:polyLine
       , hgeometry:spline
       , hgeometry:polygon
@@ -220,102 +206,6 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
---------------------------------------------------------------------------------
--- * HGeometry Kernel
-
-library kernel
-    import: all-setup, kernel-setup
-    visibility: public
-    hs-source-dirs: kernel/src
-    exposed-modules:
-        HGeometry.Kernel
-
-        HGeometry.Matrix
-        HGeometry.Matrix.Class
-
-        HGeometry.Line
-        HGeometry.Line.Class
-        HGeometry.Line.PointAndVector
-
-        HGeometry.Line.General
-        HGeometry.Line.LineEQ
-        HGeometry.Line.NonVertical.Class
-
-        HGeometry.HyperPlane
-        HGeometry.HyperPlane.Class
-        HGeometry.HyperPlane.NonVertical
-        HGeometry.HyperPlane.Intersection
-
-        HGeometry.Duality
-
-        HGeometry.HalfSpace
-        HGeometry.HalfSpace.Class
-        HGeometry.HalfLine
-
-        -- HGeometry.HalfPlane
-
-        HGeometry.Box
-        HGeometry.Box.Class
-        HGeometry.Box.Boxable
-
-    -- --
-    -- --    HGeometry.SoS.Point
-    -- --    HGeometry.SoS.Orientation
-    -- --    HGeometry.SoS.Determinant
-    -- --
-        HGeometry.Interval
-        HGeometry.Interval.Class
-        HGeometry.Interval.EndPoint
-
-        HGeometry.Boundary
-
-        HGeometry.LineSegment
-        HGeometry.LineSegment.Class
-        HGeometry.LineSegment.PossiblyDegenerate
-
-        HGeometry.Intersection
-
-        HGeometry.Plane
-
-        HGeometry.Triangle
-        HGeometry.Triangle.Class
-
-        HGeometry.Ball
-        HGeometry.Ball.Class
-        HGeometry.Ball.CenterAndRadius
-        HGeometry.Ball.Diametral
-        HGeometry.Ball.BoundaryPoints
-
-        HGeometry.Transformation
-
-        HGeometry.Direction
-        HGeometry.Direction.Cardinal
-        HGeometry.Disk
-
-        HGeometry.Viewport
-
-        HGeometry.Ellipse
-
-
-    other-modules:
-        HGeometry.Line.Intersection
-        HGeometry.Box.Internal
-        HGeometry.Box.Corners
-        HGeometry.Box.Sides
-        HGeometry.Box.Intersection
-
-        HGeometry.HalfSpace.Type
-
-        HGeometry.HyperPlane.Internal
-        HGeometry.Matrix.Internal
-        HGeometry.Matrix.ByRows
-        HGeometry.Transformation.Internal
-
-        HGeometry.LineSegment.Internal
-        HGeometry.LineSegment.Intersection
-
-        HGeometry.Interval.HalfOpen
-        HGeometry.Interval.Internal
 
 --------------------------------------------------------------------------------
 -- * PolyLine Library
@@ -327,7 +217,7 @@ library polyLine
     build-depends:
         hgeometry-vector
       , hgeometry-point
-      , hgeometry:kernel
+      , hgeometry-kernel
     exposed-modules:
         HGeometry.PolyLine
         HGeometry.PolyLine.Class
@@ -342,7 +232,7 @@ library spline
     build-depends:
         hgeometry-vector
       , hgeometry-point
-      , hgeometry:kernel
+      , hgeometry-kernel
     exposed-modules:
         HGeometry.BezierSpline
 
@@ -356,7 +246,7 @@ library lineSegmentIntersection
     build-depends:
         hgeometry-vector
       , hgeometry-point
-      , hgeometry:kernel
+      , hgeometry-kernel
     exposed-modules:
         HGeometry.LineSegment.Intersection.Naive
         HGeometry.LineSegment.Intersection.BentleyOttmann
@@ -618,7 +508,7 @@ library geojson
        -- , hgeometry-combinatorial
        , hgeometry-vector
        , hgeometry-point
-       , hgeometry:kernel
+       , hgeometry-kernel
        , hgeometry:polygon
        -- , hgeometry
     exposed-modules:
@@ -651,14 +541,6 @@ library quickcheck
          hgeometry
        , cereal   >= 0.5    && < 1
 
-library kernel-quickcheck
-    import: all-setup, all-quickcheck-setup, kernel-quickcheck-setup
-    visibility: public
-    hs-source-dirs: kernel/src-quickcheck
-    exposed-modules:
-      HGeometry.Kernel.Instances
-      HGeometry.Kernel.Test.Box
-
 library ply-writer
     import: all-setup
     visibility: public
@@ -667,7 +549,7 @@ library ply-writer
       PLY.Writer
     build-depends:
          hgeometry-point
-       , hgeometry:kernel
+       , hgeometry-kernel
        , colour                  >= 2.3.6         && < 3
 
 
@@ -690,39 +572,6 @@ library numtypes
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- ** HGeometry-Kernel
-
-test-suite kernel-hspec
-  import:           all-setup, kernel-setup, all-quickcheck-setup, kernel-quickcheck-setup
-  build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  other-modules:
-      Spec
-      Point2Spec
-      HGeometry.Line.PointAndVectorSpec
-      HGeometry.Line.GeneralSpec
-      HGeometry.LineSegmentSpec
-      HGeometry.BallSpec
-      HGeometry.BoxSpec
-      HGeometry.MatrixSpec
-      HGeometry.HalfSpaceSpec
-      HGeometry.HyperPlaneSpec
-      HGeometry.IntervalSpec
-      HGeometry.TriangleSpec
-
-  hs-source-dirs: kernel/test
-  build-depends:
-      hgeometry:kernel-quickcheck
-
-test-suite kernel-doctest
-    import:           all-setup, kernel-setup, kernel-quickcheck-setup, doctest
-    type:             exitcode-stdio-1.0
-    main-is:          kernel/doctests.hs
-    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
-
 --------------------------------------------------------------------------------
 -- ** HGeometry
 
