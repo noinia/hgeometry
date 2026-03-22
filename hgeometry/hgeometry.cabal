@@ -52,6 +52,7 @@ common all-setup
         base                      >= 4.16.1        && < 5
       , hgeometry-combinatorial   >= 1             && < 2
       , hgeometry-vector          >= 1             && < 2
+      , hgeometry-point           >= 1             && < 2
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
@@ -112,27 +113,19 @@ common all-setup
       , FunctionalDependencies
       , PartialTypeSignatures
 
-common point-setup
-    build-depends:
-        hgeometry-vector
-
 common kernel-setup
     build-depends:
         hgeometry-vector
-      , hgeometry:point
 
 common polygon-setup
     build-depends:
         hgeometry-vector
-      , hgeometry:point
       , hgeometry:kernel
       , hgeometry:lineSegmentIntersection
 
 common hgeometry-setup
     build-depends:
-        hgeometry-vector
-      , hgeometry:point
-      , hgeometry:kernel
+        hgeometry:kernel
       , hgeometry:polyLine
       , hgeometry:lineSegmentIntersection
       , hgeometry:polygon
@@ -155,33 +148,26 @@ common all-quickcheck-setup
       , quickcheck-instances            >= 0.3     && < 1
       , approximate-equality            >= 1.1.0.2 && < 1.2
 
-
-common point-quickcheck-setup
-   build-depends:
-        hgeometry:point
-      , hgeometry-vector:quickcheck
-
 common quickcheck-setup
     build-depends:
         hgeometry:kernel-quickcheck
       , hgeometry-vector:quickcheck
-      , hgeometry:point-quickcheck
+      , hgeometry-point:quickcheck
       , hgeometry
 
 common kernel-quickcheck-setup
     build-depends:
-      , hgeometry:point
+      , hgeometry-point
       , hgeometry:kernel
       , hgeometry:polyLine
       , hgeometry:polygon
       , hgeometry-combinatorial:quickcheck
       , hgeometry-vector:quickcheck
-      , hgeometry:point-quickcheck
+      , hgeometry-point:quickcheck
 
 common ipe-setup
     build-depends:
-        hgeometry:point
-      , hgeometry:kernel
+        hgeometry:kernel
       , hgeometry:polyLine
       , hgeometry:polygon
       , hgeometry:spline
@@ -201,7 +187,7 @@ common ipe-setup
 common svg-setup
     build-depends:
         hgeometry-vector
-      , hgeometry:point
+      , hgeometry-point
       , hgeometry:kernel
       , hgeometry:polyLine
       , hgeometry:spline
@@ -234,27 +220,6 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- * HGeometry Point
-
-library point
-    import: all-setup, point-setup
-    visibility: public
-    hs-source-dirs: point/src
-    exposed-modules:
-       HGeometry.Point
-       HGeometry.Point.Class
-       HGeometry.Point.PointF
-       HGeometry.Point.EuclideanDistance
-       HGeometry.Point.Orientation
-       HGeometry.Point.Either
-
-    other-modules:
-        HGeometry.Point.Type
-        HGeometry.Point.Orientation.Degenerate
-        HGeometry.Point.Quadrants
-
 --------------------------------------------------------------------------------
 -- * HGeometry Kernel
 
@@ -361,7 +326,7 @@ library polyLine
     hs-source-dirs:   polyLine/src
     build-depends:
         hgeometry-vector
-      , hgeometry:point
+      , hgeometry-point
       , hgeometry:kernel
     exposed-modules:
         HGeometry.PolyLine
@@ -376,7 +341,7 @@ library spline
     hs-source-dirs:   spline/src
     build-depends:
         hgeometry-vector
-      , hgeometry:point
+      , hgeometry-point
       , hgeometry:kernel
     exposed-modules:
         HGeometry.BezierSpline
@@ -390,7 +355,7 @@ library lineSegmentIntersection
     hs-source-dirs:   lineSegmentIntersection/src
     build-depends:
         hgeometry-vector
-      , hgeometry:point
+      , hgeometry-point
       , hgeometry:kernel
     exposed-modules:
         HGeometry.LineSegment.Intersection.Naive
@@ -652,7 +617,7 @@ library geojson
          geojson        >= 4.1.1  && < 5
        -- , hgeometry-combinatorial
        , hgeometry-vector
-       , hgeometry:point
+       , hgeometry-point
        , hgeometry:kernel
        , hgeometry:polygon
        -- , hgeometry
@@ -694,15 +659,6 @@ library kernel-quickcheck
       HGeometry.Kernel.Instances
       HGeometry.Kernel.Test.Box
 
-library point-quickcheck
-    import: all-setup, point-setup, all-quickcheck-setup, point-quickcheck-setup
-    visibility: public
-    hs-source-dirs: point/src-quickcheck
-    exposed-modules:
-      HGeometry.Point.Instances
-    build-depends:
-         hgeometry:point
-
 library ply-writer
     import: all-setup
     visibility: public
@@ -710,7 +666,7 @@ library ply-writer
     exposed-modules:
       PLY.Writer
     build-depends:
-         hgeometry:point
+         hgeometry-point
        , hgeometry:kernel
        , colour                  >= 2.3.6         && < 3
 
@@ -734,32 +690,6 @@ library numtypes
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- ** HGeometry-Point
-
-
-test-suite point-hspec
-  import:           all-setup, point-setup, all-quickcheck-setup, point-quickcheck-setup
-  build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  hs-source-dirs: point/test
-  other-modules:
-      Spec
-      Point2Spec
-      PointSpec
-      PointSpec
-      Point.CmpAround
-  build-depends:
-      hgeometry:point-quickcheck
-
-test-suite point-doctest
-    import:           all-setup, point-setup, all-quickcheck-setup, doctest
-    type:             exitcode-stdio-1.0
-    main-is:          point/doctests.hs
-    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
-
 
 --------------------------------------------------------------------------------
 -- ** HGeometry-Kernel
