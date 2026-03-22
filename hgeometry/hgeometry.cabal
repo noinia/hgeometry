@@ -51,6 +51,7 @@ common all-setup
     build-depends:
         base                      >= 4.16.1        && < 5
       , hgeometry-combinatorial   >= 1             && < 2
+      , hgeometry-vector          >= 1             && < 2
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
@@ -113,27 +114,23 @@ common all-setup
 
 common point-setup
     build-depends:
-        hgeometry:vector
-
-common vector-setup
-    build-depends:
-        these                      >= 1.1        && < 2
+        hgeometry-vector
 
 common kernel-setup
     build-depends:
-        hgeometry:vector
+        hgeometry-vector
       , hgeometry:point
 
 common polygon-setup
     build-depends:
-        hgeometry:vector
+        hgeometry-vector
       , hgeometry:point
       , hgeometry:kernel
       , hgeometry:lineSegmentIntersection
 
 common hgeometry-setup
     build-depends:
-        hgeometry:vector
+        hgeometry-vector
       , hgeometry:point
       , hgeometry:kernel
       , hgeometry:polyLine
@@ -159,37 +156,31 @@ common all-quickcheck-setup
       , approximate-equality            >= 1.1.0.2 && < 1.2
 
 
-common vector-quickcheck-setup
-   build-depends:
-        hgeometry:vector
-
 common point-quickcheck-setup
    build-depends:
         hgeometry:point
-      , hgeometry:vector-quickcheck
+      , hgeometry-vector:quickcheck
 
 common quickcheck-setup
     build-depends:
         hgeometry:kernel-quickcheck
-      , hgeometry:vector-quickcheck
+      , hgeometry-vector:quickcheck
       , hgeometry:point-quickcheck
       , hgeometry
 
 common kernel-quickcheck-setup
     build-depends:
-      , hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
       , hgeometry:polyLine
       , hgeometry:polygon
       , hgeometry-combinatorial:quickcheck
-      , hgeometry:vector-quickcheck
+      , hgeometry-vector:quickcheck
       , hgeometry:point-quickcheck
 
 common ipe-setup
     build-depends:
-        hgeometry:vector
-      , hgeometry:point
+        hgeometry:point
       , hgeometry:kernel
       , hgeometry:polyLine
       , hgeometry:polygon
@@ -209,7 +200,7 @@ common ipe-setup
 
 common svg-setup
     build-depends:
-        hgeometry:vector
+        hgeometry-vector
       , hgeometry:point
       , hgeometry:kernel
       , hgeometry:polyLine
@@ -243,21 +234,6 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- * HGeometry Vector
-
-library vector
-    import: all-setup, vector-setup
-    visibility: public
-    hs-source-dirs: vector/src
-    exposed-modules:
-        HGeometry.Vector
-      , HGeometry.Properties
-      , HGeometry.Vector.Class
-
-    other-modules:
-        HGeometry.Vector.Type
 
 --------------------------------------------------------------------------------
 -- * HGeometry Point
@@ -384,7 +360,7 @@ library polyLine
     visibility:       public
     hs-source-dirs:   polyLine/src
     build-depends:
-        hgeometry:vector
+        hgeometry-vector
       , hgeometry:point
       , hgeometry:kernel
     exposed-modules:
@@ -399,7 +375,7 @@ library spline
     visibility:       public
     hs-source-dirs:   spline/src
     build-depends:
-        hgeometry:vector
+        hgeometry-vector
       , hgeometry:point
       , hgeometry:kernel
     exposed-modules:
@@ -413,7 +389,7 @@ library lineSegmentIntersection
     visibility:       private
     hs-source-dirs:   lineSegmentIntersection/src
     build-depends:
-        hgeometry:vector
+        hgeometry-vector
       , hgeometry:point
       , hgeometry:kernel
     exposed-modules:
@@ -675,7 +651,7 @@ library geojson
     build-depends:
          geojson        >= 4.1.1  && < 5
        -- , hgeometry-combinatorial
-       , hgeometry:vector
+       , hgeometry-vector
        , hgeometry:point
        , hgeometry:kernel
        , hgeometry:polygon
@@ -727,15 +703,6 @@ library point-quickcheck
     build-depends:
          hgeometry:point
 
-library vector-quickcheck
-    import: all-setup, all-quickcheck-setup, vector-quickcheck-setup
-    visibility: public
-    hs-source-dirs: vector/src-quickcheck
-    exposed-modules:
-      HGeometry.Vector.Instances
-    build-depends:
-         hgeometry:vector
-
 library ply-writer
     import: all-setup
     visibility: public
@@ -767,27 +734,6 @@ library numtypes
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
-
-
-test-suite vector-hspec
-   import:           all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
-   build-tool-depends: hspec-discover:hspec-discover
-   type:             exitcode-stdio-1.0
-   main-is:          Main.hs
-   other-modules:
-       Spec
-       VectorSpec
-   hs-source-dirs: vector/test
-   build-depends:
-       hgeometry:vector-quickcheck
-
---------------------------------------------------------------------------------
-
-test-suite vector-doctest
-    import:           all-setup, all-quickcheck-setup, vector-quickcheck-setup, doctest
-    type:             exitcode-stdio-1.0
-    main-is:          vector/doctests.hs
-    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
 --------------------------------------------------------------------------------
 -- ** HGeometry-Point
@@ -1091,12 +1037,3 @@ benchmark batchPointLocation
   build-depends:
          hgeometry:ipe
        , time                    >= 1.14 && < 1.16
-
-benchmark vector-bench
-    import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
-    hs-source-dirs: vector/bench
-    main-is: Benchmarks.hs
-    type: exitcode-stdio-1.0
-    build-depends:
-         tasty-bench              >= 0.3   && < 1
-       , tasty                    >= 1.4   && < 2
