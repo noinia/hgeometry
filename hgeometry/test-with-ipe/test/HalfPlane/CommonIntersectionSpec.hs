@@ -69,18 +69,47 @@ generateClipGolden theName = do
     lowers <- runIO onlyPositives
     ipeClipResult theName uppers lowers
 
+
+
+--------------------------------------------------------------------------------
+-- for now;
+-- type IpeAttr r = Attributes' r
+
+
+-- class IpeDraw geom where
+--   -- | Draws some geometry
+--   ipeDraw :: (NumType geom ~ r) => [IpeAttr r] -> geom -> [IpeObject r]
+--   -- ipedraw ats g = undefined
+
+
+-- drawHalfPlane       :: [IpeAttr r] -> halfPlane -> [IpeObject r]
+-- drawHalfPlane ats g = [ iO ipeHalfPlane
+
+--                       ]
+
+  -- ipeHalfPlane
+
+--   undefined
+
+-- drawUpper ::
+
+--------------------------------------------------------------------------------
+
+
+
+
 ipeClipResult theName uppers lowers = do
     let These myUpper myLower = boundaries' $ These uppers lowers
         result = clipUpperByLower myUpper myLower
     goldenWith [osp|data/test-with-ipe/golden/|]
                     (ipeContentGolden { name = theName  })
-                    [ iO $ defIO myUpper ! attr SStroke red
+                    [ iO $ defIO myUpper ! attr SStroke green
                     , iO $ defIO myLower ! attr SStroke blue
                     , iO $ defIO result  ! attr SStroke purple
-                    , iO $ ipeGroup [ iO $ asConstraint h
+                    , iO $ ipeGroup [ iO $ asConstraint lightgreen h
                                     | h <- F.toList uppers
                                     ]  ! attr SLayer "uppers"
-                    , iO $ ipeGroup [ iO $ asConstraint h
+                    , iO $ ipeGroup [ iO $ asConstraint lightblue h
                                     | h <- F.toList lowers
                                     ]  ! attr SLayer "lowers"
                     ]
@@ -132,8 +161,10 @@ testClip = (uppers, lowers, clipUpperByLower myUpper myLower, answer)
               , above $ LineEQ (-0.5) (-12)
               ]
     answer' = NonEmpty.fromList
-            . drop 1 . NonEmpty.take 2
-            $ uppers
+              [ below $ LineEQ (-5) 20
+              , below $ LineEQ (-1) 2
+              , below $ LineEQ 5 (-20)
+              ]
 
 myHalfPlanes :: NonEmpty (HalfPlane R)
 myHalfPlanes = NonEmpty.fromList
@@ -219,15 +250,15 @@ onlyPositives = generateInput <&> fmap (\h -> h&halfSpaceSign .~ Positive)
 myIpeTest       :: NonEmpty (HalfPlane R) -> [IpeObject R]
 myIpeTest input = [ iO $ maybe (ipeGroup []) draw $ commonIntersection input
                   ] <>
-                  [ iO $ asConstraint h
+                  [ iO $ asConstraint gray h
                   | h <- F.toList input
                   ]
 
-asConstraint    :: forall r. (Fractional r, Ord r)
-                => IpeOut (HalfPlane r) Group r
-asConstraint h = ipeGroup [ iO $ defIO seg
-                          , iO $ ipeSimplePolygon poly ! attr SFill gray
-                          ]
+asConstraint         :: forall r. (Fractional r, Ord r)
+                     => IpeColor r -> IpeOut (HalfPlane r) Group r
+asConstraint color h = ipeGroup [ iO $ defIO seg
+                                , iO $ ipeSimplePolygon poly ! attr SFill color
+                                ]
   where
     l = h^.boundingHyperPlane
     n = normalVector l
