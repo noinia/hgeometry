@@ -7,6 +7,9 @@ module HGeometry.HalfPlane.CommonIntersection
   , commonIntersection
   -- , lowerBoundary
   -- , LowerBoundary(..)
+
+  , boundaries
+  , clipUpperByLower
   ) where
 
 
@@ -170,27 +173,36 @@ clipAndPushBy inters = \case
 
 data LeftIntersection halfPlane r =
     LowerAboveUpper
-  | Intersection (Point 2 r) (Chain Seq r (LineEQ r :+ halfPlane))
-                             (Chain Seq r (LineEQ r :+ halfPlane))
-  | NoIntersection (Chain Seq r (LineEQ r :+ halfPlane))
-                   (Chain Seq r (LineEQ r :+ halfPlane))
+  | Intersection (Point 2 r) (Chain Seq r halfPlane)
+                             (Chain Seq r halfPlane)
+  | NoIntersection (Chain Seq r halfPlane)
+                   (Chain Seq r halfPlane)
 
 -- | Given the lower  chain and the upper chain, computes the first intersection as seen from the left; i.e. the first point where the remainder of the lower chain indeed lies below the remainder of the upper chain
 leftIntersection               :: (Ord  r, Fractional r
+                                  , HalfPlane_ halfPlane r
+                                  , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
+                                                        (BoundingHyperPlane halfPlane 2 r)
+                                  , NonVerticalHyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
+                                  , Intersection (BoundingHyperPlane halfPlane 2 r)
+                                                 (BoundingHyperPlane halfPlane 2 r)
+                                    ~ Maybe (LineLineIntersection (BoundingHyperPlane halfPlane 2 r))
                                   )
-                               => Chain Seq r (LineEQ r :+ halfPlane)
-                               -> Chain Seq r (LineEQ r :+ halfPlane)
+                               => Chain Seq r halfPlane
+                               -> Chain Seq r halfPlane
                                -> LeftIntersection halfPlane r
 leftIntersection lower0 upper0 = case dropWhile lowerAboveUpper $ zipLR lower0 upper0 of
     []                     -> LowerAboveUpper
-    (_, lower, upper) : _  -> case leftMost lower `intersect` leftMost upper of
+    (_, lower, upper) : _  -> case (lower^.leftMost.boundingHyperPlane)
+                                   `intersect`
+                                   (upper^.leftMost.boundingHyperPlane) of
       Nothing                    -> NoIntersection lower upper -- parallel
       Just (Line_x_Line_Point p) -> Intersection p lower upper
       Just (Line_x_Line_Line _)  -> undefined -- TODO: think about this....
        -- should be a degenerate slab, which is just a line (segment?) I guess
   where
-    lowerAboveUpper (x, lower, upper) = evalAt' x (leftMost lower) > evalAt' x (leftMost upper)
-
+    lowerAboveUpper (x, lower, upper) = eval' x lower > eval' x upper
+    eval' x chain = evalAt (Point1 x) (chain^.leftMost.boundingHyperPlane)
 
 
 -- | simultaneously scan the chains, zipping up their remainders. i.e.  returns a list of
@@ -479,11 +491,27 @@ closeIntersection       :: Chain Seq r (line :+ halfPlane)
                         -> Either (Chain Seq r halfPlane)
                                   (ConvexPolygon (Point 2 r :+ halfPlane))
 closeIntersection chain@(Chain (Alternating _ rest))
-  = case leftMost chain `converge` rightMost chain of
+  = case (chain^.leftMost) `converge` (chain^.rightMost) of
     Just p -> Right . uncheckedFromCCWPoints . fmap (\(v,h) -> v :+ h^.extra) $
               (p,chain^.head1) :| toList rest
     _      -> Left $ fmap (^.extra) chain
   where
     converge _ _ = undefined
 
---clipLower
+
+-- | given the upper and lower chain, clip the upper thain to retain
+-- only the vertices that are above the lower chain.
+clipUpperByLower         :: (Ord r, Num r, HasIntersectionWith (Point 2 r) halfPlane)
+                         => Chain Seq r (line :+ halfPlane)
+                         -> Chain Seq r (line :+ halfPlane)
+                         -> Chain Seq r (line :+ halfPlane)
+clipUpperByLower u lower = goLeft u (unconsAlt $ lower^._ChainAlternating)
+  where
+    goLeft upper = \case
+      Left  (_ :+ h)           -> goRight (clipLeftLine h upper) (unsnocAlt $ lower^._ChainAlternating)
+      Right ((_ :+ h,_),lower') -> goLeft  (clipLeftLine h upper) (unconsAlt lower')
+
+    goRight upper = \case
+      Left (_ :+ h)             -> clipRightLine h upper
+      Right (lower',(_,_ :+ h)) -> goRight (clipRightLine h upper) (unsnocAlt lower')
+    -- I think this is essentially just a foldr

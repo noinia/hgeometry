@@ -8,6 +8,7 @@ module HGeometry.HalfPlane.CommonIntersection.Chain
   , clipLeft
   , clipRight
   , glueChains
+  , clipLeftLine, clipRightLine
   ) where
 
 import Data.Foldable1
@@ -21,6 +22,10 @@ import HGeometry.Line
 import HGeometry.Intersection
 import HGeometry.Point
 import HGeometry.Sequence.Alternating
+import HGeometry.Properties
+import HGeometry.HalfSpace.Class
+import HGeometry.HalfLine
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -28,6 +33,8 @@ import HGeometry.Sequence.Alternating
 -- | A polygonal chain bounding an unbounded convex region, in CCW order.
 newtype Chain f r halfPlane = Chain (Alternating f (Point 2 r) halfPlane)
   deriving newtype (Functor,Foldable,Foldable1)
+
+type instance NumType (Chain f r halfPlane) = r
 
 -- | Iso to convert to just an Alternating
 _ChainAlternating :: Iso (Chain f  r  halfPlane)
@@ -77,12 +84,28 @@ evalChainAt x chain = let chain'   = clipLeft x chain
                       in evalAt' x l :+ h
 
 -- | Get the leftmost line in the chain (i.e. the line bounding the first halfplane)
-leftMost :: Chain Seq r (line :+ halfPlane) -> line
-leftMost = view (_ChainAlternating.head1.core)
+leftMost :: Lens' (Chain Seq r halfPlane) halfPlane
+leftMost = _ChainAlternating.head1
 
 -- | Get the rightmost line in the chain (i.e. the line bounding the last halfplane)
-rightMost :: Chain Seq r (line :+ halfPlane) -> line
-rightMost = view (_ChainAlternating.last1.core)
+rightMost :: Lens' (Chain Seq r halfPlane) halfPlane
+rightMost = _ChainAlternating.last1
+
+
+unboundedEdges   :: Chain f r halfPlane
+                 -> Either (BoundingHyperPlane halfPlane 2 r :+ halfPlane)
+                           (Vector 2 (HalfLine (Point 2 r) :+ halfPlane))
+unboundedEdges c = case unconsAlt $ c^._ChainAlternating of
+  Left h             -> Left $ (h^.boundingHyperPlane) :+ h
+  Right ((h,v),rest) -> Right $ case unsnocAlt rest of
+      Left h'          -> Vector2 (toHalfLine v h :+ h) (toHalfLine v h' :+ h')
+      Right (_,(w,h')) -> Vector2 (toHalfLine v h :+ h) (toHalfLine w h' :+ h')
+    where
+      toHalfLine p halfPlane = HalfLine p (halfPlane^.boundingLine.direction)
+      -- TODO: somehow report the right vector
+
+leftBoundingLine   :: halfPlane -> LinePV 2 r
+leftBoundingLine h = undefined -- h^.boundingLine
 
 --------------------------------------------------------------------------------
 
@@ -97,18 +120,14 @@ clipLeft      :: Ord r
 clipLeft minX = clipLeftWhen $ \(v, _) -> v^.xCoord <= minX
 
 -- | Clip on the right by a line
-_clipRightLine       :: (Ord r, Num r)
-                    => LineEQ r -> Chain Seq r halfPlane -> Chain Seq r halfPlane
-_clipRightLine right = clipRightWhen (_above right)
+clipRightLine   :: (Ord r, Num r, HasIntersectionWith (Point 2 r) halfPlane')
+                => halfPlane' -> Chain Seq r halfPlane -> Chain Seq r halfPlane
+clipRightLine h = clipRightWhen (\(v,_) -> not $ v `intersects` h)
 
--- | Clip the left by a line
-_clipLeftLine      :: (Ord r, Num r)
-                  => LineEQ r -> Chain Seq r halfPlane -> Chain Seq r halfPlane
-_clipLeftLine left = clipLeftWhen (_above left)
-
--- | Test if the given (Point 2 r) lies above the line
-_above            :: (Ord r, Num r) => LineEQ r -> (Point 2 r,a) -> Bool
-_above line (v,_) = (v^.yCoord) >= evalAt' (v^.xCoord) line
+-- | Clip the chain from the left; removing when a vertex is not in the halfplane
+clipLeftLine   :: (Ord r, Num r, HasIntersectionWith (Point 2 r) halfPlane')
+               => halfPlane' -> Chain Seq r halfPlane -> Chain Seq r halfPlane
+clipLeftLine h = clipLeftWhen (\(v,_) -> not $ v `intersects` h)
 
 -- | Clip the chain on the right
 clipRightWhen   :: ((Point 2 r, halfPlane) -> Bool)

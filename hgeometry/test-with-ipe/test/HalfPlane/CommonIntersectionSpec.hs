@@ -1,7 +1,10 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
 module HalfPlane.CommonIntersectionSpec(spec) where
 
+import           Data.Bifoldable
+import           Data.Foldable1
 import           Control.Lens hiding (below)
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -16,6 +19,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
+import           HGeometry.PolyLine
 import           HGeometry.LineSegment
 import           R
 import           HGeometry.Point
@@ -29,6 +33,11 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck (arbitrary, generate)
 import           Test.QuickCheck.Instances ()
+import           Data.Sequence (Seq)
+import           HGeometry.Ext
+import           Data.These
+
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -42,7 +51,11 @@ spec = describe "common halfplane intersection tests" $ do
            commonIntersection myHalfPlanes2 `shouldBe` Just theAnswer2
          -- generateGoldenSpec [osp|commonIntersectionAllNegatives1|]
          -- generateGoldenSpec [osp|commonIntersectionAllNegatives|]
-
+         describe "clipUpperByLower manual" $ do
+           let (uppers, lowers, res,answer) = testClip
+           it "verify" $ res `shouldBe` answer
+           ipeClipResult [osp|commonIntersectionClipManual|] uppers lowers
+         -- generateClipGolden [osp|commonIntersectionClip|]
 
 
 generateGoldenSpec theName = do
@@ -51,6 +64,76 @@ generateGoldenSpec theName = do
                     (ipeContentGolden { name = theName  })
                     ( myIpeTest halfPlanes)
 
+generateClipGolden theName = do
+    uppers <- runIO onlyNegatives
+    lowers <- runIO onlyPositives
+    ipeClipResult theName uppers lowers
+
+ipeClipResult theName uppers lowers = do
+    let These myUpper myLower = boundaries' $ These uppers lowers
+        result = clipUpperByLower myUpper myLower
+    goldenWith [osp|data/test-with-ipe/golden/|]
+                    (ipeContentGolden { name = theName  })
+                    [ iO $ defIO myUpper ! attr SStroke red
+                    , iO $ defIO myLower ! attr SStroke blue
+                    , iO $ defIO result  ! attr SStroke purple
+                    , iO $ ipeGroup [ iO $ asConstraint h
+                                    | h <- F.toList uppers
+                                    ]  ! attr SLayer "uppers"
+                    , iO $ ipeGroup [ iO $ asConstraint h
+                                    | h <- F.toList lowers
+                                    ]  ! attr SLayer "lowers"
+                    ]
+
+instance ( Foldable f
+         , Fractional r, Ord r
+         ) => HasDefaultIpeOut (Chain f r halfPlane) where
+  type DefaultIpeOut (Chain f r halfPlane) = Path
+  defIO  = defIO . toPolyLineIn defaultBox
+
+
+
+
+
+toPolyLineIn           :: Foldable f
+                       => Rectangle (Point 2 r)
+                       -> Chain f r halfPlane -> PolyLine (Point 2 r)
+toPolyLineIn box (Chain c) =
+  polyLineFromPoints . NonEmpty.fromList . bifoldMap (:[]) (const []) $ c
+  -- TODO: use the box somehow
+
+
+asLineEQ :: Show r => VerticalOrLineEQ r -> LineEQ r
+asLineEQ = \case
+  NonVertical              l -> l
+  VerticalLineThrough x    -> error $ "vertical line at " <> show x  <> " !?"
+
+
+boundaries' = let f = fmap (\h -> asLineEQ (h^.boundingHyperPlane) :+ h)
+                    . traceShowId
+              in boundaries . bimap f f
+
+testClip :: ( NonEmpty _, NonEmpty _
+            , Chain Seq R (LineEQ R :+ HalfPlane R)
+            , Chain Seq R (LineEQ R :+ HalfPlane R))
+testClip = (uppers, lowers, clipUpperByLower myUpper myLower, answer)
+  where
+    These myUpper myLower = boundaries' $ These uppers lowers
+    These answer _ = boundaries' $ These answer' lowers
+    uppers = NonEmpty.fromList
+              [ below $ LineEQ 5 (-20)
+              , below $ LineEQ 1    1
+              , below $ LineEQ (-1) 2
+              , below $ LineEQ (-5) 20
+              ]
+    lowers = NonEmpty.fromList
+              [ above $ LineEQ 1      (-50)
+              , above $ LineEQ 0      (-22)
+              , above $ LineEQ (-0.5) (-12)
+              ]
+    answer' = NonEmpty.fromList
+            . drop 1 . NonEmpty.take 2
+            $ uppers
 
 myHalfPlanes :: NonEmpty (HalfPlane R)
 myHalfPlanes = NonEmpty.fromList
@@ -129,6 +212,9 @@ generateInput = generate arbitrary
 
 onlyNegatives :: IO (NonEmpty (HalfPlane R))
 onlyNegatives = generateInput <&> fmap (\h -> h&halfSpaceSign .~ Negative)
+
+onlyPositives :: IO (NonEmpty (HalfPlane R))
+onlyPositives = generateInput <&> fmap (\h -> h&halfSpaceSign .~ Positive)
 
 myIpeTest       :: NonEmpty (HalfPlane R) -> [IpeObject R]
 myIpeTest input = [ iO $ maybe (ipeGroup []) draw $ commonIntersection input
