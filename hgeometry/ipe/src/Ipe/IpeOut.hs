@@ -58,7 +58,7 @@ import           Ipe.Types
 --------------------------------------------------------------------------------
 
 -- $setup
--- >>> :set -XOverloadedStrings
+-- >>> :seti -XOverloadedStrings
 -- >>> :{
 -- let Just (myPolygon :: SimplePolygon (Point 2 Int)) = fromPoints $ [origin, Point2 10 10, Point2 100 200]
 -- :}
