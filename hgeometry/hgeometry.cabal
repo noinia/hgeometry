@@ -118,13 +118,13 @@ common polygon-setup
     build-depends:
         hgeometry-vector
       , hgeometry-kernel
-      , hgeometry:lineSegmentIntersection
+      , hgeometry-lineSegmentIntersection
 
 common hgeometry-setup
     build-depends:
         hgeometry-kernel
       , hgeometry-polyline
-      , hgeometry:lineSegmentIntersection
+      , hgeometry-lineSegmentIntersection
       , hgeometry:polygon
 
 common doctest
@@ -208,22 +208,6 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- * Line Segment Intersection Library
-
-library lineSegmentIntersection
-    import:           all-setup
-    visibility:       private
-    hs-source-dirs:   lineSegmentIntersection/src
-    build-depends:
-        hgeometry-vector
-      , hgeometry-point
-      , hgeometry-kernel
-    exposed-modules:
-        HGeometry.LineSegment.Intersection.Naive
-        HGeometry.LineSegment.Intersection.BentleyOttmann
-        HGeometry.LineSegment.Intersection.Types
 
 --------------------------------------------------------------------------------
 -- * Polygon Library
