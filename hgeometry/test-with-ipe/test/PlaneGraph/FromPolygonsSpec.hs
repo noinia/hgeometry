@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -Wno-unused-binds #-}
 module PlaneGraph.FromPolygonsSpec where
 
 import           Control.Lens hiding (holes)
@@ -27,7 +28,6 @@ import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon hiding (holes)
-import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.PlanarGraph
 import           Hiraffe.PlanarGraph.Component
@@ -38,7 +38,6 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
-import           Test.QuickCheck
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import qualified Hiraffe.AdjacencyListRep.Map as MapRep
@@ -47,7 +46,6 @@ import           Control.Monad.ST
 import Data.Functor.Bind.Class
 
 
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Given a set of line segments that may intersect only in endpoints, construct

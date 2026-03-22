@@ -19,11 +19,9 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Line.General
 import           HGeometry.Point
 import           HGeometry.Plane(projectedIntersectionLine)
 import           HGeometry.Vector
-import           HGeometry.HyperPlane.Intersection
 
 --------------------------------------------------------------------------------
 -- * Geometric Primitives

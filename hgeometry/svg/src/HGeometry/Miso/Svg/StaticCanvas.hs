@@ -28,10 +28,12 @@ import           HGeometry.Matrix
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.Viewport
-import           Miso (Attribute, View, height_, width_)
+import           Miso (Attribute, View)
 import           Miso.String (MisoString, ToMisoString, ms)
 import qualified Miso.String.Util as MisoString
-import           Miso.Svg (svg_, g_, transform_)
+import           Miso.Svg (svg_, g_)
+import           Miso.Svg.Property (transform_)
+import           Miso.Html.Property (width_,height_) -- not sure if this is correct (namespace)!
 
 --------------------------------------------------------------------------------
 -- *A Canvas
@@ -96,7 +98,7 @@ type ToSvgCoordinate = ToMisoString
 -- | Draws the actual canvas
 staticCanvas_               :: (RealFrac r, ToSvgCoordinate r)
                             => StaticCanvas r
-                            -> [Attribute action] -> [View action] -> View action
+                            -> [Attribute action] -> [View model action] -> View model action
 staticCanvas_ canvas ats vs =
     svg_ ([ width_   . ms $ w
           , height_  . ms $ h
@@ -124,7 +126,7 @@ matrixToMisoString m = "matrix(" <> MisoString.unwords [a,b,c,e,d,f] <> ")"
 -- textAt                     :: ToSvgCoordinate r
 --                            => Point 2 r -- ^ position where to draw (in world coordinates)
 --                            -> [Attribute action]
---                            -> MisoString -> View action
+--                            -> MisoString -> View model action
 -- textAt (Point2 x y) ats t = g_ [ transform_ $ mconcat [ "translate("
 --                                                        , ms x
 --                                                        , ", "
@@ -136,9 +138,9 @@ matrixToMisoString m = "matrix(" <> MisoString.unwords [a,b,c,e,d,f] <> ")"
 
 
 -- class RenderWebSvg t where
---   renderWith :: t -> [Attribute action] -> [View action] -> View action
+--   renderWith :: t -> [Attribute action] -> [View model action] -> View model action
 
--- render       :: RenderWebSvg t => t -> [Attribute action] -> View action
+-- render       :: RenderWebSvg t => t -> [Attribute action] -> View model action
 -- render x ats = renderWith x ats []
 
 -- instance ToSvgCoordinate r => RenderWebSvg (Point 2 r) where

@@ -12,19 +12,15 @@ import Data.Foldable1
 import Data.List qualified as List
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
-import Test.Tasty.Bench
+-- import Test.Tasty.Bench
 import HGeometry.Plane.BatchPointLocation
 import Data.Map.NonEmpty qualified as NEMap
 import Data.Set qualified as Set
 import HGeometry.Line.BatchPointLocation qualified as Line
 import Data.Time
 import Prelude hiding (lines)
--- import Data.Fixed
-
 import HGeometry.Plane
 import HGeometry.Combinatorial.Util
-import Ipe
-import System.OsPath
 import R
 
 --------------------------------------------------------------------------------
