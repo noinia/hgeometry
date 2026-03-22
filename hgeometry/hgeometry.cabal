@@ -50,10 +50,10 @@ common all-setup
 
     build-depends:
         base                      >= 4.16.1        && < 5
-      , hgeometry-combinatorial   >= 1             && < 2
-      , hgeometry-vector          >= 1             && < 2
-      , hgeometry-point           >= 1             && < 2
-      , hgeometry-kernel          >= 1             && < 2
+      , hgeometry-combinatorial   >= 1             && < 1.1
+      , hgeometry-vector          >= 1             && < 1.1
+      , hgeometry-point           >= 1             && < 1.1
+      , hgeometry-kernel          >= 1             && < 1.1
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
@@ -155,10 +155,10 @@ common quickcheck-setup
 
 common ipe-setup
     build-depends:
-        hgeometry-kernel
-      , hgeometry-polyline
+        hgeometry-kernel        >= 1.0.0         && < 1.1
+      , hgeometry-polyline      >= 1.0.0         && < 1.1
       , hgeometry:polygon
-      , hgeometry:spline
+      , hgeometry-spline        >= 1.0.0         && < 1.1
 
       , hexpat                  >= 0.20.9        && < 1
       , parsec                  >= 3             && < 4
@@ -178,7 +178,7 @@ common svg-setup
       , hgeometry-point
       , hgeometry-kernel
       , hgeometry-polyline
-      , hgeometry:spline
+      , hgeometry-spline
       , hgeometry:polygon
       , hgeometry:ipe
 
@@ -208,20 +208,6 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- * Splines
-
-library spline
-    import:           all-setup
-    visibility:       public
-    hs-source-dirs:   spline/src
-    build-depends:
-        hgeometry-vector
-      , hgeometry-point
-      , hgeometry-kernel
-    exposed-modules:
-        HGeometry.BezierSpline
 
 --------------------------------------------------------------------------------
 -- * Line Segment Intersection Library
