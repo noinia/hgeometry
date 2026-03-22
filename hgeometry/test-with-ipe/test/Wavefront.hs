@@ -80,7 +80,8 @@ allTriangles objFile = foldMap (traverse toTriangle) $ objFaces objFile
                                  vis = map vtx is
                              in Triangle vi vj vk : map (Triangle vi vk) vis
 
-    vtx i = toPoint $ objLocations objFile Vector.! (Face.faceLocIndex i)
+    vtx i = toPoint $ objLocations objFile Vector.! (Face.faceLocIndex i - 1)
+    -- vertices are 1-indexed.
 
     toPoint (Location x y z _w) = Point3 x (negate z) y
     -- we ignore the _w value, if they exist
