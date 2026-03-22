@@ -54,6 +54,9 @@ common all-setup
       , hgeometry-vector          >= 1             && < 1.1
       , hgeometry-point           >= 1             && < 1.1
       , hgeometry-kernel          >= 1             && < 1.1
+      , hgeometry-lineSegmentIntersection           >= 1             && < 1.1
+      , hgeometry-polyLine        >= 1             && < 1.1
+      , hgeometry-spline          >= 1             && < 1.1
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
@@ -123,7 +126,7 @@ common polygon-setup
 common hgeometry-setup
     build-depends:
         hgeometry-kernel
-      , hgeometry-polyline
+      , hgeometry-polyLine
       , hgeometry-lineSegmentIntersection
       , hgeometry:polygon
 
@@ -150,13 +153,13 @@ common quickcheck-setup
         hgeometry-kernel:quickcheck
       , hgeometry-vector:quickcheck
       , hgeometry-point:quickcheck
-      , hgeometry-polyline:quickcheck
+      , hgeometry-polyLine:quickcheck
       , hgeometry
 
 common ipe-setup
     build-depends:
         hgeometry-kernel        >= 1.0.0         && < 1.1
-      , hgeometry-polyline      >= 1.0.0         && < 1.1
+      , hgeometry-polyLine      >= 1.0.0         && < 1.1
       , hgeometry:polygon
       , hgeometry-spline        >= 1.0.0         && < 1.1
 
@@ -177,7 +180,7 @@ common svg-setup
         hgeometry-vector
       , hgeometry-point
       , hgeometry-kernel
-      , hgeometry-polyline
+      , hgeometry-polyLine
       , hgeometry-spline
       , hgeometry:polygon
       , hgeometry:ipe
