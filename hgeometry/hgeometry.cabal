@@ -53,6 +53,7 @@ common all-setup
       , hgeometry-combinatorial   >= 1             && < 2
       , hgeometry-vector          >= 1             && < 2
       , hgeometry-point           >= 1             && < 2
+      , hgeometry-kernel          >= 1             && < 2
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
@@ -122,7 +123,7 @@ common polygon-setup
 common hgeometry-setup
     build-depends:
         hgeometry-kernel
-      , hgeometry:polyLine
+      , hgeometry-polyline
       , hgeometry:lineSegmentIntersection
       , hgeometry:polygon
 
@@ -149,12 +150,13 @@ common quickcheck-setup
         hgeometry-kernel:quickcheck
       , hgeometry-vector:quickcheck
       , hgeometry-point:quickcheck
+      , hgeometry-polyline:quickcheck
       , hgeometry
 
 common ipe-setup
     build-depends:
         hgeometry-kernel
-      , hgeometry:polyLine
+      , hgeometry-polyline
       , hgeometry:polygon
       , hgeometry:spline
 
@@ -175,7 +177,7 @@ common svg-setup
         hgeometry-vector
       , hgeometry-point
       , hgeometry-kernel
-      , hgeometry:polyLine
+      , hgeometry-polyline
       , hgeometry:spline
       , hgeometry:polygon
       , hgeometry:ipe
@@ -206,21 +208,6 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- * PolyLine Library
-
-library polyLine
-    import:           all-setup
-    visibility:       public
-    hs-source-dirs:   polyLine/src
-    build-depends:
-        hgeometry-vector
-      , hgeometry-point
-      , hgeometry-kernel
-    exposed-modules:
-        HGeometry.PolyLine
-        HGeometry.PolyLine.Class
 
 --------------------------------------------------------------------------------
 -- * Splines
