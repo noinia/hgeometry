@@ -92,7 +92,14 @@ rightMost :: Lens' (Chain Seq r halfPlane) halfPlane
 rightMost = _ChainAlternating.last1
 
 
-unboundedEdges   :: Chain f r halfPlane
+unboundedEdges   :: ( HalfPlane_ halfPlane r
+                    , Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                           (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
+                    , Snoc (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                           (Point 2 r, halfPlane) (Point 2 r, halfPlane)
+                    , HasDirection (BoundingHyperPlane halfPlane 2 r)
+                    )
+                 => Chain f r halfPlane
                  -> Either (BoundingHyperPlane halfPlane 2 r :+ halfPlane)
                            (Vector 2 (HalfLine (Point 2 r) :+ halfPlane))
 unboundedEdges c = case unconsAlt $ c^._ChainAlternating of
@@ -101,7 +108,7 @@ unboundedEdges c = case unconsAlt $ c^._ChainAlternating of
       Left h'          -> Vector2 (toHalfLine v h :+ h) (toHalfLine v h' :+ h')
       Right (_,(w,h')) -> Vector2 (toHalfLine v h :+ h) (toHalfLine w h' :+ h')
     where
-      toHalfLine p halfPlane = HalfLine p (halfPlane^.boundingLine.direction)
+      toHalfLine p halfPlane = HalfLine p (halfPlane^.boundingHyperPlane.direction)
       -- TODO: somehow report the right vector
 
 leftBoundingLine   :: halfPlane -> LinePV 2 r
