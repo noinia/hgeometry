@@ -58,6 +58,12 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/hgeometry-combinatorial
           cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-vector
+          cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-point
+          cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-kernel
+          cabal -vnormal check
           cd $GITHUB_WORKSPACE/hgeometry
           cabal -vnormal check
       - name: haddock
