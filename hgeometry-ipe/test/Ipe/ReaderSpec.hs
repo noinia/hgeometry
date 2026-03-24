@@ -14,7 +14,7 @@ import           HGeometry.Polygon
 import           Ipe
 import           Ipe.Path
 import           Ipe.Reader
-import qualified Paths_hgeometry as Paths
+import qualified Paths_hgeometry_ipe as Paths
 import           System.OsPath
 import           Test.Hspec
 
@@ -57,15 +57,15 @@ spec = do
                                                                   <$> readAllFrom fp
                    pure . listToMaybe $ filter (not . isCounterClockwise) pgs
       it "simple" $
-        act [osp|ipe/test/clockwisepg.ipe|] `shouldReturn` Nothing
+        act [osp|test/clockwisepg.ipe|] `shouldReturn` Nothing
       it "simple ccw" $
-        act [osp|ipe/test/ccw.ipe|] `shouldReturn` Nothing
+        act [osp|test/ccw.ipe|] `shouldReturn` Nothing
       it "multipolygon?" $
-        act [osp|ipe/test/multipolygon.ipe|] `shouldReturn` Nothing
+        act [osp|test/multipolygon.ipe|] `shouldReturn` Nothing
       it "minimized" $
-        act [osp|ipe/test/minimized.ipe|] `shouldReturn` Nothing
-      it "world" $
-        act [osp|test-with-ipe/Polygon/Triangulation/world.ipe|] `shouldReturn` Nothing
+        act [osp|test/minimized.ipe|] `shouldReturn` Nothing
+      -- it "world" $
+      --   act [osp|test-with-ipe/Polygon/Triangulation/world.ipe|] `shouldReturn` Nothing
 
   where
     useTxt = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"

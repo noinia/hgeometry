@@ -61,7 +61,6 @@ common all-setup
       , semigroupoids             >= 6.0.0.2       && < 7
       -- , foldable1-classes-compat  >= 0.1           && < 1
       -- , semigroups                >= 0.18          && < 1
-      -- , random                    >= 1.3           && < 2
       -- , witherable                >= 0.4           && < 1
       -- , linear                    >= 1.21          && < 2
       -- , data-clist                >= 0.2           && < 1
@@ -119,11 +118,12 @@ common all-quickcheck-setup
          -fno-warn-type-defaults
          -fno-warn-orphans
     build-depends:
-        hspec                           >= 2.9     && < 3
-      , QuickCheck                      >= 2.10    && < 3
-      , quickcheck-instances            >= 0.3     && < 1
-      , approximate-equality            >= 1.1.0.2 && < 1.2
-      , mtl                             >= 2.2     && < 3
+        hspec                           >= 2.9           && < 3
+      , QuickCheck                      >= 2.10          && < 3
+      , quickcheck-instances            >= 0.3           && < 1
+      , approximate-equality            >= 1.1.0.2       && < 1.2
+      -- , mtl                             >= 2.2           && < 3
+      -- , random                          >= 1.3           && < 2
 
 common quickcheck-setup
     build-depends:
@@ -166,20 +166,20 @@ library
 --------------------------------------------------------------------------------
 -- * HGeometry-quickcheck
 
--- library quickcheck
---     import: all-setup, all-quickcheck-setup, quickcheck-setup
---     visibility: public
---     hs-source-dirs: src-quickcheck
---     exposed-modules:
---       HGeometry.Polygon.Instances
---       -- HGeometry.Polygon.Convex.Instances
---     other-modules:
---       Paths_hgeometry_polygon
---     autogen-modules:
---       Paths_hgeometry_polygon
---     build-depends:
---          hgeometry-polygon
---        , cereal   >= 0.5    && < 1
+library quickcheck
+    import: all-setup, all-quickcheck-setup, quickcheck-setup
+    visibility: public
+    hs-source-dirs: src-quickcheck
+    exposed-modules:
+      HGeometry.Polygon.Instances
+      -- HGeometry.Polygon.Convex.Instances
+    other-modules:
+      Paths_hgeometry_polygon
+    autogen-modules:
+      Paths_hgeometry_polygon
+    build-depends:
+         hgeometry-polygon
+--       , cereal   >= 0.5    && < 1
 
 --------------------------------------------------------------------------------
 -- * Test Suites
@@ -187,32 +187,23 @@ library
 --------------------------------------------------------------------------------
 -- ** HGeometry
 
--- common test-fractional
---   build-tool-depends: hspec-discover:hspec-discover
---   build-depends:
---       hgeometry:quickcheck
---     , hgeometry-vector:numtypes
---   hs-source-dirs: test/fractional, test
---   other-modules:
---       Spec
---       -- ConvexHull.ConvexHullSpec
---       -- ConvexHull.MelkmanSpec
---       -- ConvexHull.R3Spec
---       -- ClosestPair.ClosestPairSpec
---       -- LowerEnvelope.RegionsSpec
---       Polygon.Convex.ConvexSpec
---       Polygon.Convex.UnboundedSpec
---       Polygon.TriangulateSpec
---       Polygon.SeqSpec
---       Polygon.Triangulation.MakeMonotoneSpec
---       Polygon.VerticesSpec
---       Polygon.PickPointSpec
---       -- PolyLine.Simplification.ImaiIriSpec
---       -- PolyLine.Frechet.DiscreteSpec
---       -- VerticalRayShootingSpec
---       -- LineSegment.BentheyOttmanNeighbourSpec
---       -- Graphics.CameraSpec
---       -- Plane.LowerEnvSpec
+common test-fractional
+  build-tool-depends: hspec-discover:hspec-discover
+  build-depends:
+      hgeometry-vector:numtypes
+    , hgeometry-polygon:quickcheck
+  hs-source-dirs: test/fractional
+  other-modules:
+      Spec
+      -- Polygon.Convex.ConvexSpec
+      -- Polygon.Convex.UnboundedSpec
+      -- Polygon.TriangulateSpec
+
+      Polygon.NoDupsSpec
+
+      -- Polygon.Triangulation.MakeMonotoneSpec
+      Polygon.PickPointSpec
+
 
 -- test-suite hspec-rational
 --   import:           all-setup, all-quickcheck-setup,
@@ -222,13 +213,13 @@ library
 --   mixins:
 --       hgeometry-vector:numtypes (Rational as R)
 
--- test-suite hspec-intervalreal
---   import:           all-setup, all-quickcheck-setup,
---                     quickcheck-setup, test-fractional
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   mixins:
---       hgeometry-vector:numtypes (IntervalReal as R)
+test-suite hspec-fractional
+  import:           all-setup, all-quickcheck-setup,
+                    quickcheck-setup, test-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  mixins:
+      hgeometry-vector:numtypes (IntervalReal as R)
 
 -- -- test-suite hspec-double
 -- --   import:           all-setup, all-quickcheck-setup,
@@ -238,23 +229,20 @@ library
 -- --   mixins:
 -- --       hgeometry-vector:numtypes (Double as R)
 
--- test-suite hspec-integral
---   import:           all-setup, all-quickcheck-setup, quickcheck-setup
---   build-tool-depends: hspec-discover:hspec-discover
---   type:             exitcode-stdio-1.0
---   main-is:          Main.hs
---   hs-source-dirs: test/integral
---   build-depends:
---       hgeometry:quickcheck
---     , hgeometry-vector:numtypes
---   mixins:
---       hgeometry-vector:numtypes (Int as R)
---   other-modules:
---       Spec
---       SegmentTreeSpec
---       SegmentTree.R2Spec
---       RangeTreeSpec
---       IntervalTreeSpec
+test-suite hspec-integral
+  import:           all-setup, all-quickcheck-setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs: test/integral
+  build-depends:
+      hgeometry-vector:numtypes
+  mixins:
+      hgeometry-vector:numtypes (Int as R)
+  other-modules:
+      Spec
+      Polygon.VerticesSpec
+      Polygon.SeqSpec
 
 test-suite doctest
     import:           all-setup, all-quickcheck-setup, quickcheck-setup, doctest

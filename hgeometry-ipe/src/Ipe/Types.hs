@@ -106,12 +106,12 @@ styleData f (IpeStyle n sd) = fmap (\sd' -> IpeStyle n sd') (f sd)
 
 -- | The "basic" ipe stylesheet
 basicIpeStyle :: IpeStyle
-basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|data/ipe/basic.isy|])
+basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|data/basic.isy|])
 
 -- | A stylesheet with some convenient predefined opacities. In particular
 -- the opacities "10%","20%",..,"90%".
 opacitiesStyle :: IpeStyle
-opacitiesStyle = IpeStyle (Just "opacities") (xmlLiteral [litFile|data/ipe/opacities.isy|])
+opacitiesStyle = IpeStyle (Just "opacities") (xmlLiteral [litFile|data/opacities.isy|])
 
 -- | The maybe string is the encoding
 data IpePreamble  = IpePreamble { _encoding     :: Maybe Text

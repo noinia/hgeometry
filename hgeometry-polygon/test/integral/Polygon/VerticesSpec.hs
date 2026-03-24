@@ -10,10 +10,9 @@ import HGeometry.Point
 import HGeometry.Polygon.Class
 import HGeometry.Polygon.Simple
 import Test.Hspec
+import R
 
 --------------------------------------------------------------------------------
-
-type R = Int
 
 spec :: Spec
 spec = describe "testing vertices" $

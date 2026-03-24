@@ -15,19 +15,19 @@ module HGeometry.Polygon.Instances
   ) where
 
 import           Control.Lens hiding (elements)
-import           Control.Monad.State
+-- import           Control.Monad.State
 import           Data.Aeson (eitherDecodeFileStrict)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (maybeToList)
-import           HGeometry
+import           HGeometry.Kernel
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Number.Real.Interval
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Monotone
+-- import           HGeometry.Polygon.Monotone
 import           HGeometry.Polygon.Simple
-import           Paths_hgeometry
+import           Paths_hgeometry_polygon
 import           System.IO.Unsafe
-import           System.Random.Stateful
+-- import           System.Random.Stateful
 import           Test.QuickCheck hiding (vector)
 import           Test.QuickCheck.Instances ()
 
@@ -138,12 +138,15 @@ instance Arbitrary (SimplePolygon (Point 2 (RealNumber (p::Nat)))) where
 -- instance Arbitrary (MultiPolygon () Rational) where
 --   arbitrary = elements allMultiPolygons'
 
-instance (Uniform r, Ord r, Num r) => Arbitrary (MonotonePolygon (Point 2 r)) where
-  arbitrary = do
-                n <- max 3    <$> getSize
-                g <- mkStdGen <$> arbitrary
-                let (v, g') = runState randomNonZeroVector g
-                pure $ evalState (randomMonotoneDirected n v) g'
+
+
+
+-- instance (Uniform r, Ord r, Num r) => Arbitrary (MonotonePolygon (Point 2 r)) where
+--   arbitrary = do
+--                 n <- max 3    <$> getSize
+--                 g <- mkStdGen <$> arbitrary
+--                 let (v, g') = runState randomNonZeroVector g
+--                 pure $ evalState (randomMonotoneDirected n v) g'
 
 
 --------------------------------------------------------------------------------

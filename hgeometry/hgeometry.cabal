@@ -57,6 +57,7 @@ common all-setup
       , hgeometry-lineSegmentIntersection           >= 1             && < 1.1
       , hgeometry-polyLine        >= 1             && < 1.1
       , hgeometry-spline          >= 1             && < 1.1
+      , hgeometry-polygon         >= 1             && < 1.1
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
@@ -117,18 +118,12 @@ common all-setup
       , FunctionalDependencies
       , PartialTypeSignatures
 
-common polygon-setup
-    build-depends:
-        hgeometry-vector
-      , hgeometry-kernel
-      , hgeometry-lineSegmentIntersection
-
 common hgeometry-setup
     build-depends:
         hgeometry-kernel
       , hgeometry-polyLine
       , hgeometry-lineSegmentIntersection
-      , hgeometry:polygon
+      , hgeometry-polygon
 
 common doctest
     build-depends:
@@ -154,13 +149,14 @@ common quickcheck-setup
       , hgeometry-vector:quickcheck
       , hgeometry-point:quickcheck
       , hgeometry-polyLine:quickcheck
+      , hgeometry-polygon:quickcheck
       , hgeometry
 
 common ipe-setup
     build-depends:
         hgeometry-kernel        >= 1.0.0         && < 1.1
       , hgeometry-polyLine      >= 1.0.0         && < 1.1
-      , hgeometry:polygon
+      , hgeometry-polygon       >= 1.0.0         && < 1.1
       , hgeometry-spline        >= 1.0.0         && < 1.1
 
       , hexpat                  >= 0.20.9        && < 1
@@ -182,7 +178,7 @@ common svg-setup
       , hgeometry-kernel
       , hgeometry-polyLine
       , hgeometry-spline
-      , hgeometry:polygon
+      , hgeometry-polygon
       , hgeometry:ipe
 
       , miso                      >= 1.9           && < 2
@@ -211,35 +207,6 @@ common ipe-test-setup
 --------------------------------------------------------------------------------
 -- * Libraries
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- * Polygon Library
-
-library polygon
-    import:           all-setup,polygon-setup
-    visibility:       public
-    hs-source-dirs:   polygon/src
-    exposed-modules:
-        HGeometry.Polygon
-        HGeometry.Polygon.Class
-
-        HGeometry.Polygon.Convex
-        HGeometry.Polygon.Convex.Class
-        HGeometry.Polygon.Convex.Internal
-        HGeometry.Polygon.Convex.Unbounded
-
-        HGeometry.Polygon.Simple
-        HGeometry.Polygon.Simple.Class
-        HGeometry.Polygon.Simple.PossiblyDegenerate
-
-        HGeometry.Polygon.WithHoles
-
-    other-modules:
-
-        HGeometry.Polygon.Simple.Type
-        HGeometry.Polygon.Simple.Implementation
-        HGeometry.Polygon.Simple.InPolygon
-
 
 --------------------------------------------------------------------------------
 -- * HGeometry Library (main library)
@@ -469,7 +436,7 @@ library geojson
        , hgeometry-vector
        , hgeometry-point
        , hgeometry-kernel
-       , hgeometry:polygon
+       , hgeometry-polygon
        -- , hgeometry
     exposed-modules:
        HGeometry.GeoJSON
@@ -490,7 +457,7 @@ library quickcheck
     hs-source-dirs: src-quickcheck
     exposed-modules:
       HGeometry.Instances
-      HGeometry.Polygon.Instances
+      HGeometry.Polygon.Monotone.Instances
       HGeometry.Polygon.Convex.Instances
       HGeometry.PlaneGraph.Instances
     other-modules:
@@ -499,7 +466,7 @@ library quickcheck
       Paths_hgeometry
     build-depends:
          hgeometry
-       , cereal   >= 0.5    && < 1
+       -- , cereal   >= 0.5    && < 1
 
 library ply-writer
     import: all-setup
@@ -523,8 +490,9 @@ common test-fractional
   build-tool-depends: hspec-discover:hspec-discover
   build-depends:
       hgeometry:quickcheck
+    , hgeometry-polygon:quickcheck
     , hgeometry-vector:numtypes
-  hs-source-dirs: test/fractional, polygon/test
+  hs-source-dirs: test/fractional
   other-modules:
       Spec
       ConvexHull.ConvexHullSpec
@@ -535,10 +503,7 @@ common test-fractional
       Polygon.Convex.ConvexSpec
       Polygon.Convex.UnboundedSpec
       Polygon.TriangulateSpec
-      Polygon.SeqSpec
       Polygon.Triangulation.MakeMonotoneSpec
-      Polygon.VerticesSpec
-      Polygon.PickPointSpec
       PolyLine.Simplification.ImaiIriSpec
       PolyLine.Frechet.DiscreteSpec
       VerticalRayShootingSpec

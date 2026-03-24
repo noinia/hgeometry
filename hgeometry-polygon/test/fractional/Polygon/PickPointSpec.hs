@@ -6,6 +6,7 @@ import           HGeometry.Boundary
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
 import           Test.Hspec
+import           R
 
 --------------------------------------------------------------------------------
 
@@ -18,15 +19,15 @@ spec = do it "Pick point in polygon test"  $
 data TestCase r = TestCase { _polygon :: SimplePolygon (Point 2 r) }
                   deriving (Show)
 
-toSpec                  :: TestCase Rational -> Expectation
-toSpec (TestCase  poly) = ((centroid poly :: Point 2 Rational)
+toSpec                  :: TestCase R -> Expectation
+toSpec (TestCase  poly) = ((centroid poly :: Point 2 R)
                            `inPolygon` poly) `shouldBe` StrictlyInside
 
-testPoly :: TestCase Rational
+testPoly :: TestCase R
 testPoly = TestCase . fromJust . fromPoints . NonEmpty.fromList
          $ [origin, Point2 10 10, Point2 20 5, Point2 30 2, Point2 3 1, Point2 31 0]
 
-testPoly2 :: TestCase Rational
+testPoly2 :: TestCase R
 testPoly2 = TestCase . fromJust . fromPoints  . NonEmpty.fromList
           $ [ Point2 208 752
             , Point2 304 688
