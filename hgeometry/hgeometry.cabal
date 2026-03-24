@@ -514,22 +514,6 @@ library ply-writer
 
 
 --------------------------------------------------------------------------------
--- * NumType Implementations:
-
-library numtypes
-  import: all-setup
-  visibility: private
-  hs-source-dirs: numtypes
-  exposed-modules:
-    Int
-    Int32
-    Double
-    Float
-    Rational
-    RawRational
-    IntervalReal
-
---------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -539,7 +523,7 @@ common test-fractional
   build-tool-depends: hspec-discover:hspec-discover
   build-depends:
       hgeometry:quickcheck
-    , hgeometry:numtypes
+    , hgeometry-vector:numtypes
   hs-source-dirs: test/fractional, polygon/test
   other-modules:
       Spec
@@ -568,7 +552,7 @@ test-suite hspec-rational
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   mixins:
-      hgeometry:numtypes (Rational as R)
+      hgeometry-vector:numtypes (Rational as R)
 
 test-suite hspec-intervalreal
   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
@@ -576,7 +560,7 @@ test-suite hspec-intervalreal
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   mixins:
-      hgeometry:numtypes (IntervalReal as R)
+      hgeometry-vector:numtypes (IntervalReal as R)
 
 -- test-suite hspec-double
 --   import:           all-setup, hgeometry-setup, all-quickcheck-setup,
@@ -584,7 +568,7 @@ test-suite hspec-intervalreal
 --   type:             exitcode-stdio-1.0
 --   main-is:          Main.hs
 --   mixins:
---       hgeometry:numtypes (Double as R)
+--       hgeometry-vector:numtypes (Double as R)
 
 test-suite hspec-integral
   import:           all-setup, hgeometry-setup, all-quickcheck-setup, quickcheck-setup
@@ -594,9 +578,9 @@ test-suite hspec-integral
   hs-source-dirs: test/integral
   build-depends:
       hgeometry:quickcheck
-    , hgeometry:numtypes
+    , hgeometry-vector:numtypes
   mixins:
-      hgeometry:numtypes (Int as R)
+      hgeometry-vector:numtypes (Int as R)
   other-modules:
       Spec
       SegmentTreeSpec
@@ -666,7 +650,7 @@ common with-ipe-hspec-fractional
         hspec-with-tempfile    >= 0.1
       , hgeometry:ipe
       , hgeometry:quickcheck
-      , hgeometry:numtypes
+      , hgeometry-vector:numtypes
       , wavefront              >= 0.7.1.5 && < 0.8
       , exceptions             >= 0.10.9  && < 0.11
 
@@ -678,7 +662,7 @@ test-suite with-ipe-hspec-rational
   main-is:          Main.hs
   hs-source-dirs:   test-with-ipe/test
   mixins:
-      hgeometry:numtypes (Rational as R)
+      hgeometry-vector:numtypes (Rational as R)
 
 -- test-suite with-ipe-hspec-intervalreal
 --   import:           all-setup, ipe-setup, all-quickcheck-setup,
@@ -687,7 +671,7 @@ test-suite with-ipe-hspec-rational
 --   main-is:          Main.hs
 --   hs-source-dirs:   test-with-ipe/test
 --   mixins:
---       hgeometry:numtypes (IntervalReal as R)
+--       hgeometry-vector:numtypes (IntervalReal as R)
 
 --------------------------------------------------------------------------------
 -- ** Ipe Tests
@@ -738,7 +722,7 @@ common bench-setup
     , hgeometry
     , deepseq-generics      >= 0.2  && < 1
     , hashable              >= 1.4  && < 2
-    , hgeometry:numtypes
+    , hgeometry-vector:numtypes
 
 benchmark benchmarks
   import: all-setup, hgeometry-setup, bench-setup
@@ -772,7 +756,7 @@ benchmark batchPointLocation
   main-is:        BatchPointLocationBench.hs
   type:           exitcode-stdio-1.0
   mixins:
-      hgeometry:numtypes (IntervalReal as R)
+      hgeometry-vector:numtypes (IntervalReal as R)
   build-depends:
          hgeometry:ipe
        , time                    >= 1.14 && < 1.16
