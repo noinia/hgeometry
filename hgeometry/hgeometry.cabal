@@ -24,9 +24,9 @@ data-dir: data
 data-files:
     polygons.simple.json
     -- polygons.multi
-    ipe/basic.isy
-    ipe/opacities.isy
-    ipe/test/*.ipe
+    -- ipe/basic.isy
+    -- ipe/opacities.isy
+    -- ipe/test/*.ipe
     test-with-ipe/**/*.ipe
 
 tested-with:
@@ -179,7 +179,7 @@ common svg-setup
       , hgeometry-polyLine
       , hgeometry-spline
       , hgeometry-polygon
-      , hgeometry:ipe
+      , hgeometry-ipe
 
       , miso                      >= 1.9           && < 2
       , lucid                     >= 2             && < 3
@@ -202,7 +202,7 @@ common ipe-test-setup
         hspec                   >= 2.9
       -- , QuickCheck              >= 2.10
       -- , quickcheck-instances
-      , hgeometry:ipe
+      , hgeometry-ipe
 
 --------------------------------------------------------------------------------
 -- * Libraries
@@ -352,39 +352,6 @@ library
     -- other-extensions:
 
 --------------------------------------------------------------------------------
--- * HGeometry-Ipe Library
-
-library ipe
-    import:           all-setup, ipe-setup
-    visibility:       public
-    hs-source-dirs:   ipe/src
-    exposed-modules:
-          Ipe
-          Ipe.Literal
-          Ipe.Value
-          Ipe.Color
-          Ipe.Attributes
-          Ipe.Types
-          Ipe.Writer
-          Ipe.Reader
-          Ipe.PathParser
-          Ipe.IpeOut
-          Ipe.FromIpe
-          Ipe.Path
-          Ipe.Matrix
-          Ipe.Layer
-          Ipe.Content
-
-          Ipe.IpeRender
-          Ipe.IpeToIpe
-          -- HGeometry.PlaneGraph.Draw
-
-
-    other-modules:
-          Ipe.ParserPrimitives
-          Ipe.FromIpe.UnboundedConvexChain
-
-----------g----------------------------------------------------------------------
 -- * svg
 
 library svg
@@ -613,7 +580,7 @@ common with-ipe-hspec-fractional
       Paths_hgeometry
   build-depends:
         hspec-with-tempfile    >= 0.1
-      , hgeometry:ipe
+      , hgeometry-ipe
       , hgeometry:quickcheck
       , hgeometry-vector:numtypes
       , wavefront              >= 0.7.1.5 && < 0.8
@@ -637,28 +604,6 @@ test-suite with-ipe-hspec-rational
 --   hs-source-dirs:   test-with-ipe/test
 --   mixins:
 --       hgeometry-vector:numtypes (IntervalReal as R)
-
---------------------------------------------------------------------------------
--- ** Ipe Tests
-
-test-suite ipe-hspec
-  import:           all-setup, ipe-setup, ipe-test-setup
-  build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  other-modules:
-      Spec
-      Ipe.ReaderSpec
-      Paths_hgeometry
-  autogen-modules:
-      Paths_hgeometry
-  hs-source-dirs:   ipe/test
-
-test-suite ipe-doctest
-    import:           all-setup, ipe-test-setup, doctest
-    type:             exitcode-stdio-1.0
-    main-is:          ipe/doctests.hs
-    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
 
 --------------------------------------------------------------------------------
 -- ** Svg Tests
@@ -723,5 +668,5 @@ benchmark batchPointLocation
   mixins:
       hgeometry-vector:numtypes (IntervalReal as R)
   build-depends:
-         hgeometry:ipe
+         hgeometry-ipe
        , time                    >= 1.14 && < 1.16
