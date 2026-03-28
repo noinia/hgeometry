@@ -75,8 +75,8 @@ computeVertexForm gen = computeVertexFormIn tri . V.unsafeFromVector . shuffle g
     -- since the set is non-empty, the V.unsafeFromVector is actually also safe
   where
     tri = Triangle (Point2 (-100_000) (-100_000))
-                   (Point2 (-100_000) (300_000))
-                   (Point2 (300_000)  (-100_000))
+                   (Point2 (-100_000) 300_000)
+                   (Point2 300_000  (-100_000))
     -- TODO: compute abounding box/triangle instead
 
 toSet :: (Foldable1 f, Ord a) => f a -> NESet a
