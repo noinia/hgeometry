@@ -39,19 +39,19 @@ common setup
                 -fspecialise-aggressively -fexpose-all-unfoldings
 
     build-depends:
-        base                      >= 4.16.1.0  &&  < 5
-      , hgeometry-combinatorial   >= 1.0.0.0
-      , hgeometry                 >= 1.0.0.0
-      , hgeometry:vector
-      , hgeometry:point
-      , hgeometry:kernel
-      , hgeometry:polyLine
-      , hgeometry:spline
-      , hgeometry:polygon
-      , hgeometry:ipe
-      , hgeometry:svg
-      , hgeometry:miso
-      , hgeometry:geojson
+        base                      >= 4.16.1.0  && < 5
+      , hgeometry-combinatorial   >= 1.0.0.0   && < 1.1
+      , hgeometry                 >= 1.0.0.0   && < 1.1
+      , hgeometry-vector          >= 1.0.0.0   && < 1.1
+      , hgeometry-point           >= 1.0.0.0   && < 1.1
+      , hgeometry-kernel          >= 1.0.0.0   && < 1.1
+      , hgeometry-polyLine        >= 1.0.0.0   && < 1.1
+      , hgeometry-spline          >= 1.0.0.0   && < 1.1
+      , hgeometry-polygon         >= 1.0.0.0   && < 1.1
+      , hgeometry-ipe             >= 1.0.0.0   && < 1.1
+      , hgeometry-svg             >= 1.0.0.0   && < 1.1
+      , hgeometry-svg:miso        >= 1.0.0.0   && < 1.1
+      , hgeometry-geojson         >= 1.0.0.0   && < 1.1
       , hgeometry:quickcheck
       , hiraffe                   >= 0.1
       , containers                >= 0.6
@@ -89,8 +89,8 @@ common setup
       -- , some                      >= 1.0.1
       -- , constraints-extras        >= 0.4
 
-      , ghc-typelits-natnormalise >= 0.7.7
-      , ghc-typelits-knownnat     >= 0.7.6
+      -- , ghc-typelits-natnormalise >= 0.7.7
+      -- , ghc-typelits-knownnat     >= 0.7.6
 
 
     default-language: GHC2021
