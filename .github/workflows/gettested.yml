@@ -56,16 +56,18 @@ jobs:
 
       - name: cabal check
         run: |
-          cd $GITHUB_WORKSPACE/hgeometry-combinatorial
-          cabal -vnormal check
-          cd $GITHUB_WORKSPACE/hgeometry-vector
-          cabal -vnormal check
-          cd $GITHUB_WORKSPACE/hgeometry-point
-          cabal -vnormal check
-          cd $GITHUB_WORKSPACE/hgeometry-kernel
-          cabal -vnormal check
-          cd $GITHUB_WORKSPACE/hgeometry
-          cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry                         ; echo hgeometry- ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-combinatorial           ; echo hgeometry-combinatorial ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-geojson                 ; echo hgeometry-geojson ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-ipe                     ; echo hgeometry-ipe ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-kernel                  ; echo hgeometry-kernel ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-lineSegmentIntersection ; echo hgeometry-lineSegmentIntersection ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-point                   ; echo hgeometry-point ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-polygon                 ; echo hgeometry-polygon ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-polyLine                ; echo hgeometry-polyLine ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-spline                  ; echo hgeometry-spline ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-svg                     ; echo hgeometry-svg ; cabal -vnormal check
+          cd $GITHUB_WORKSPACE/hgeometry-vector                  ; echo hgeometry-vector ; cabal -vnormal check
       - name: haddock
         run: |
           cabal haddock all

@@ -1,5 +1,4 @@
-hgeometry-point
+hgeometry-spline
 ===============
 
-The Point data type and typeclass used in
-[HGeometry](https://hackage.haskell.org/package/hgeometry).
+A Spline data type used in [HGeometry](https://hackage.haskell.org/package/hgeometry).
