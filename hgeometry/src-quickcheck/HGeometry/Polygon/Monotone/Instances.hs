@@ -12,23 +12,12 @@ module HGeometry.Polygon.Monotone.Instances
   (
   ) where
 
-import Control.Lens hiding (elements)
 import Control.Monad.State
-import Data.Aeson (eitherDecodeFileStrict)
-import Data.List.NonEmpty (NonEmpty(..))
-import Data.Maybe (maybeToList)
 import HGeometry
-import HGeometry.Number.Real.Rational
-import HGeometry.Number.Real.Interval
-import HGeometry.Polygon.Class
 import HGeometry.Polygon.Monotone
-import HGeometry.Polygon.Simple
-import Paths_hgeometry
-import System.IO.Unsafe
 import System.Random.Stateful
 import Test.QuickCheck hiding (vector)
 import Test.QuickCheck.Instances ()
-import HGeometry.Polygon.Instances
 
 --------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
+{- HLINT ignore "Use ++" -}
 module Plane.LowerEnvelopeSpec
   -- ( spec
   -- ) where

@@ -59,7 +59,7 @@ instance Traversable f => Traversable1 (Chain f r) where
   traverse1 f (Chain alt) = Chain <$> traverse1 f alt
 
 instance Functor f => Bifunctor (Chain f) where
-  bimap f g = bimap' (over coordinates f) g
+  bimap f = bimap' (over coordinates f)
 
 instance Foldable f => Bifoldable (Chain f) where
   bifoldMap f g (Chain alt) = bifoldMap (foldMapOf coordinates f) g alt

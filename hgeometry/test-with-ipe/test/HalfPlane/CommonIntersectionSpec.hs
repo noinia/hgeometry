@@ -4,7 +4,6 @@
 module HalfPlane.CommonIntersectionSpec(spec) where
 
 import           Data.Bifoldable
-import           Data.Foldable1
 import           Control.Lens hiding (below)
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -59,7 +58,7 @@ spec = describe "common halfplane intersection tests" $ do
 
 
 generateGoldenSpec theName = do
-    halfPlanes <- runIO $ onlyNegatives
+    halfPlanes <- runIO onlyNegatives
     goldenWith [osp|data/test-with-ipe/golden/|]
                     (ipeContentGolden { name = theName  })
                     ( myIpeTest halfPlanes)
@@ -98,9 +97,9 @@ generateClipGolden theName = do
 
 
 
-ipeClipResult theName uppers lowers = do
-    let These myUpper myLower = boundaries' $ These uppers lowers
-        result = clipUpperByLower myUpper myLower
+ipeClipResult theName uppers lowers = case boundaries' $ These uppers lowers of
+  These myUpper myLower -> do
+    let result = clipUpperByLower myUpper myLower
     goldenWith [osp|data/test-with-ipe/golden/|]
                     (ipeContentGolden { name = theName  })
                     [ iO $ defIO myUpper ! attr SStroke green
@@ -113,6 +112,7 @@ ipeClipResult theName uppers lowers = do
                                     | h <- F.toList lowers
                                     ]  ! attr SLayer "lowers"
                     ]
+  _ -> error "ipeClipresult: absurd?"
 
 instance ( Foldable f
          , Fractional r, Ord r
@@ -127,7 +127,7 @@ instance ( Foldable f
 toPolyLineIn           :: Foldable f
                        => Rectangle (Point 2 r)
                        -> Chain f r halfPlane -> PolyLine (Point 2 r)
-toPolyLineIn box (Chain c) =
+toPolyLineIn _box (Chain c) =
   polyLineFromPoints . NonEmpty.fromList . bifoldMap (:[]) (const []) $ c
   -- TODO: use the box somehow
 
@@ -169,15 +169,15 @@ myHalfPlanes :: NonEmpty (HalfPlane R)
 myHalfPlanes = NonEmpty.fromList
                [ below $ LineEQ 1    1
                , below $ LineEQ (-1) 2
-               , leftOf $ 10
+               , leftOf 10
                ]
 
 theAnswer :: CommonIntersection (HalfPlane R) R
 theAnswer = UnboundedRegion . Chain
-          $ Alternating (myHalfPlanes NonEmpty.!! 0)
-                        (Seq.fromList $ [ (Point2 (1/2) (3/2), myHalfPlanes NonEmpty.!! 1)
-                                        , (Point2 10    (-8),  myHalfPlanes NonEmpty.!! 2)
-                                        ]
+          $ Alternating (NonEmpty.head myHalfPlanes)
+                        (Seq.fromList [ (Point2 (1/2) (3/2), myHalfPlanes NonEmpty.!! 1)
+                                      , (Point2 10    (-8),  myHalfPlanes NonEmpty.!! 2)
+                                      ]
                         )
 
 
@@ -186,15 +186,15 @@ myHalfPlanes2 :: NonEmpty (HalfPlane R)
 myHalfPlanes2 = NonEmpty.fromList
                 [ above $ LineEQ 1    1
                 , above $ LineEQ (-1) 2
-                , rightOf $ (-2)
+                , rightOf (-2)
                 ]
 
 theAnswer2 :: CommonIntersection (HalfPlane R) R
 theAnswer2 = UnboundedRegion . Chain
           $ Alternating (myHalfPlanes2 NonEmpty.!! 2)
-                        (Seq.fromList $ [ (Point2 (-2) 4,      myHalfPlanes2 NonEmpty.!! 1)
-                                        , (Point2 (1/2) (3/2), myHalfPlanes2 NonEmpty.!! 0)
-                                        ]
+                        (Seq.fromList [ (Point2 (-2) 4,      myHalfPlanes2 NonEmpty.!! 1)
+                                      , (Point2 (1/2) (3/2), NonEmpty.head myHalfPlanes2)
+                                      ]
                         )
 
 
