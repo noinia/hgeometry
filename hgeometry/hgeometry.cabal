@@ -171,25 +171,6 @@ common ipe-setup
       , directory               >= 1.3.8         && < 2
       , approximate-equality    >= 1.1.0.2       && < 1.2
 
-common svg-setup
-    build-depends:
-        hgeometry-vector
-      , hgeometry-point
-      , hgeometry-kernel
-      , hgeometry-polyLine
-      , hgeometry-spline
-      , hgeometry-polygon
-      , hgeometry-ipe
-
-      , miso                      >= 1.9           && < 2
-      , lucid                     >= 2             && < 3
-      , lucid-svg                 >= 0.7           && < 1
-      , jsaddle                   >= 0.9.9         && < 0.10
-      , vinyl
-      , colour
-      , singletons
-      , text
-
 common ipe-test-setup
     ghc-options:
          -Wall
@@ -350,70 +331,6 @@ library
 
 
     -- other-extensions:
-
---------------------------------------------------------------------------------
--- * svg
-
-library svg
-    import: all-setup, svg-setup
-    build-depends:
-      hgeometry:miso
-    visibility: public
-    hs-source-dirs: svg/src
-    exposed-modules:
-        HGeometry.Miso.Svg
-        HGeometry.Miso.OrphanInstances
-        HGeometry.Miso.Svg.StaticCanvas
-        HGeometry.Miso.Svg.Canvas
-        HGeometry.Svg
-
-        HGeometry.Miso.Canvas.Zoom
-
-    other-modules:
-        HGeometry.Miso.Svg.Writer
-        Miso.String.Util
-
---------------------------------------------------------------------------------
--- * miso
-
-library miso
-    import: all-setup, svg-setup
-    visibility: public
-    hs-source-dirs: miso/src
-    exposed-modules:
-        HGeometry.Miso.Event.Extra
-        HGeometry.Miso.FFI.Extra
-        -- HGeometry.Miso.Subscription.MouseExtra
-
-    -- other-modules:
-    --     Miso.String.Util
-
-
-
---------------------------------------------------------------------------------
--- * HGeometry GeoJSON
-
-library geojson
-    import: all-setup
-    visibility: public
-    hs-source-dirs: geojson/src
-    build-depends:
-         geojson        >= 4.1.1  && < 5
-       -- , hgeometry-combinatorial
-       , hgeometry-vector
-       , hgeometry-point
-       , hgeometry-kernel
-       , hgeometry-polygon
-       -- , hgeometry
-    exposed-modules:
-       HGeometry.GeoJSON
-
-    -- other-modules:
-    --     HGeometry.Point.Type
-    --     HGeometry.Point.Orientation.Degenerate
-    --     HGeometry.Point.Quadrants
-
-
 
 --------------------------------------------------------------------------------
 -- * HGeometry-quickcheck
@@ -604,20 +521,6 @@ test-suite with-ipe-hspec-rational
 --   hs-source-dirs:   test-with-ipe/test
 --   mixins:
 --       hgeometry-vector:numtypes (IntervalReal as R)
-
---------------------------------------------------------------------------------
--- ** Svg Tests
-
-test-suite svg-hspec
-  import:           all-setup, all-quickcheck-setup, quickcheck-setup, svg-setup
-  build-tool-depends: hspec-discover:hspec-discover
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  other-modules:
-      Spec
-  hs-source-dirs:   svg/test
-  build-depends:
-      hgeometry:svg
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
