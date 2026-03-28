@@ -29,9 +29,4 @@
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
 
-                -optF -package=hgeometry-combinatorial
-                -optF -package=hiraffe
-                -optF -package=hgeometry-spline
-                -optF -package=hgeometry
-
 #-}

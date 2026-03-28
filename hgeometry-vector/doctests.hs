@@ -30,8 +30,7 @@
                 -optF -XDerivingVia
 
                 -optF -package=hgeometry-combinatorial
-                -optF -package=hiraffe
-                -optF -package=hgeometry-spline
-                -optF -package=hgeometry
+
 
 #-}
+                -- -optF -package=hgeometry:vector

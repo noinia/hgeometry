@@ -1,0 +1,154 @@
+cabal-version:      3.4
+name:               hgeometry-svg
+version:            1.0.0.0
+synopsis:           Writing HGeometry data types to svg files
+description:
+  Writing HGeometry data types to svg files.
+
+homepage:           https://fstaals.net/software/hgeometry
+license:            MIT
+license-file:       LICENSE
+author:             Frank Staals
+maintainer:         frank@fstaals.net
+-- copyright:
+category:           Geometry
+build-type:         Simple
+extra-doc-files:
+    README.md
+    changelog.txt
+-- extra-source-files:
+data-dir: data
+data-files:
+tested-with:
+    GHC == 9.12.2
+  -- , GHC == 9.10.1
+  -- , GHC == 9.8.2
+
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
+--------------------------------------------------------------------------------
+
+common all-setup
+    ghc-options: -O2 -fspecialise-aggressively -fexpose-all-unfoldings
+                 -Wall
+                 -fno-warn-unticked-promoted-constructors
+                 -fno-warn-type-defaults
+                 -fno-warn-partial-type-signatures
+                 -Werror=missing-methods
+
+    build-depends:
+        base                      >= 4.16.1        && < 5
+      , hgeometry-combinatorial   >= 1             && < 1.1
+      , hgeometry-vector          >= 1             && < 1.1
+      , hgeometry-point           >= 1             && < 1.1
+      , hgeometry-kernel          >= 1             && < 1.1
+      , hgeometry-polyLine        >= 1             && < 1.1
+      , hgeometry-polygon         >= 1             && < 1.1
+      , hgeometry-ipe             >= 1             && < 1.1
+      , containers                >= 0.6           && < 1
+      , bytestring                >= 0.11          && < 1
+      , lens                      >= 5.2           && < 6
+      , mtl                       >= 2.2           && < 3
+      , filepath                  >= 1.4.100       && < 2
+      , file-io                   >= 0.1           && < 1
+      , text                    >= 2.1.2         && < 3
+      , colour                  >= 2.3.6         && < 3
+      , vinyl                   >= 0.14          && < 1
+      , singletons              >= 3             && < 4
+      , miso                      >= 1.9           && < 2
+      , lucid                     >= 2             && < 3
+      , lucid-svg                 >= 0.7           && < 1
+      , jsaddle                   >= 0.9.9         && < 0.10
+
+
+    default-language: GHC2024
+
+    default-extensions:
+        DataKinds
+      , TypeFamilies
+      , GADTs
+      , KindSignatures
+      , ScopedTypeVariables
+      , DerivingStrategies
+      , DerivingVia
+      , GeneralizedNewtypeDeriving
+      , DeriveGeneric
+      , DeriveFunctor
+      , PatternSynonyms
+      , TupleSections
+      , LambdaCase
+      , ViewPatterns
+      , FunctionalDependencies
+      , PartialTypeSignatures
+
+common doctest
+    build-depends:
+      , doctest                    >= 0.8      && < 1
+
+common all-quickcheck-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
+    build-depends:
+        hspec                           >= 2.9     && < 3
+      , QuickCheck                      >= 2.10    && < 3
+      , quickcheck-instances            >= 0.3     && < 1
+      , approximate-equality            >= 1.1.0.2 && < 1.2
+
+--------------------------------------------------------------------------------
+-- * Libraries
+--------------------------------------------------------------------------------
+
+library
+    import: all-setup
+    build-depends:
+      hgeometry-svg:miso
+    hs-source-dirs: src
+    exposed-modules:
+        HGeometry.Miso.Svg
+        HGeometry.Miso.OrphanInstances
+        HGeometry.Miso.Svg.StaticCanvas
+        HGeometry.Miso.Svg.Canvas
+        HGeometry.Svg
+
+        HGeometry.Miso.Canvas.Zoom
+
+    other-modules:
+        HGeometry.Miso.Svg.Writer
+        Miso.String.Util
+
+--------------------------------------------------------------------------------
+-- * miso
+
+library miso
+    import: all-setup
+    visibility: public
+    hs-source-dirs: miso/src
+    exposed-modules:
+        HGeometry.Miso.Event.Extra
+        HGeometry.Miso.FFI.Extra
+        -- HGeometry.Miso.Subscription.MouseExtra
+
+--------------------------------------------------------------------------------
+-- Test Suites
+
+test-suite svg-hspec
+  import:           all-setup, all-quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  other-modules:
+      Spec
+  hs-source-dirs:   test
+  build-depends:
+      hgeometry-svg
+
+--------------------------------------------------------------------------------
+-- * Benchmarks
+--------------------------------------------------------------------------------

@@ -1,0 +1,107 @@
+cabal-version:      3.4
+name:               hgeometry-spline
+version:            1.0.0.0
+synopsis:           Data type and some convenience functions for representing splines in HGeometry
+description:
+  Data type and some convenience functions for representing splines in HGeometry.
+
+homepage:           https://fstaals.net/software/hgeometry
+license:            MIT
+license-file:       LICENSE
+author:             Frank Staals
+maintainer:         frank@fstaals.net
+-- copyright:
+category:           Geometry
+build-type:         Simple
+extra-doc-files:
+    README.md
+    changelog.txt
+-- extra-source-files:
+data-dir: data
+data-files:
+tested-with:
+    GHC == 9.12.2
+  -- , GHC == 9.10.1
+  -- , GHC == 9.8.2
+
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
+--------------------------------------------------------------------------------
+
+common all-setup
+    ghc-options: -O2 -fspecialise-aggressively -fexpose-all-unfoldings
+                 -Wall
+                 -fno-warn-unticked-promoted-constructors
+                 -fno-warn-type-defaults
+                 -fno-warn-partial-type-signatures
+                 -Werror=missing-methods
+
+    build-depends:
+        base                      >= 4.16.1        && < 5
+      , hgeometry-combinatorial   >= 1             && < 2
+      , hgeometry-vector          >= 1             && < 2
+      , hgeometry-point           >= 1             && < 2
+      , hgeometry-kernel          >= 1             && < 2
+      , hiraffe                   >= 0.1           && < 1
+      , containers                >= 0.6           && < 1
+      , lens                      >= 5.2           && < 6
+      , deepseq                   >= 1.1           && < 2
+      , semigroupoids             >= 6.0.0.2       && < 7
+      , nonempty-vector           >= 0.2           && < 1
+
+    default-language: GHC2024
+
+    default-extensions:
+        DataKinds
+      , TypeFamilies
+      , GADTs
+      , KindSignatures
+      , ScopedTypeVariables
+      , DerivingStrategies
+      , DerivingVia
+      , GeneralizedNewtypeDeriving
+      , DeriveGeneric
+      , DeriveFunctor
+      , PatternSynonyms
+      , TupleSections
+      , LambdaCase
+      , ViewPatterns
+      , FunctionalDependencies
+      , PartialTypeSignatures
+
+common doctest
+    build-depends:
+      , doctest                    >= 0.8      && < 1
+
+common all-quickcheck-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
+    build-depends:
+        hspec                           >= 2.9     && < 3
+      , QuickCheck                      >= 2.10    && < 3
+      , quickcheck-instances            >= 0.3     && < 1
+      , approximate-equality            >= 1.1.0.2 && < 1.2
+
+--------------------------------------------------------------------------------
+-- * Libraries
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- * Splines
+
+library
+    import:           all-setup
+    hs-source-dirs:   src
+    build-depends:
+        hgeometry-vector
+      , hgeometry-point
+      , hgeometry-kernel
+    exposed-modules:
+        HGeometry.BezierSpline
