@@ -1,0 +1,751 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.PolyLine</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- A Polyline and some basic functions to interact with them.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.html"><span class="hs-identifier">HGeometry.PolyLine</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier">PolyLineF</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier">PolyLine</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.html#_PolyLineF"><span class="hs-identifier">_PolyLineF</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.Class.html"><span class="hs-identifier">HGeometry.PolyLine.Class</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#HasVertices"><span class="hs-identifier">HasVertices</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#HasEdges"><span class="hs-identifier">HasEdges</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/deepseq-1.5.1.0-6837/src/Control.DeepSeq.html"><span class="hs-identifier">Control.DeepSeq</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier">NFData</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Coerce.html"><span class="hs-identifier">Data.Coerce</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Prim.html#coerce"><span class="hs-identifier">coerce</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Functor.Classes.html"><span class="hs-identifier">Data.Functor.Classes</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Foldable.html"><span class="hs-identifier">Data.Semigroup.Foldable</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.Internal.html"><span class="hs-identifier">Data.Vector.NonEmpty.Internal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier">NonEmptyVector</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/GHC.Generics.html"><span class="hs-identifier">GHC.Generics</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.html"><span class="hs-identifier">HGeometry.Box</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Util.html"><span class="hs-identifier">HGeometry.Foldable.Util</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Interval.Class.html"><span class="hs-identifier">HGeometry.Interval.Class</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.Class.html"><span class="hs-identifier">HGeometry.PolyLine.Class</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html"><span class="hs-identifier">HGeometry.Properties</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Transformation.html"><span class="hs-identifier">HGeometry.Transformation</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Vector.NonEmpty.Util.html"><span class="hs-identifier">HGeometry.Vector.NonEmpty.Util</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.html"><span class="hs-identifier">Hiraffe.Graph</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="annot"><span class="hs-comment">-- | Simple polygons just store their vertices in CCCW order</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">newtype</span><span> </span><span id="PolyLineF"><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-var">PolyLineF</span></a></span></span><span> </span><span id="local-6989586621679160627"><span class="annot"><a href="#local-6989586621679160627"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679160628"><span class="annot"><a href="#local-6989586621679160628"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PolyLine"><span class="annot"><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160627"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160628"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679160845"><span id="local-6989586621679160847"><span class="annot"><span class="annottext">(forall x. PolyLineF f point -&gt; Rep (PolyLineF f point) x)
+-&gt; (forall x. Rep (PolyLineF f point) x -&gt; PolyLineF f point)
+-&gt; Generic (PolyLineF f point)
+forall x. Rep (PolyLineF f point) x -&gt; PolyLineF f point
+forall x. PolyLineF f point -&gt; Rep (PolyLineF f point) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (f :: k -&gt; *) (point :: k) x.
+Rep (PolyLineF f point) x -&gt; PolyLineF f point
+forall k (f :: k -&gt; *) (point :: k) x.
+PolyLineF f point -&gt; Rep (PolyLineF f point) x
+$cfrom :: forall k (f :: k -&gt; *) (point :: k) x.
+PolyLineF f point -&gt; Rep (PolyLineF f point) x
+from :: forall x. PolyLineF f point -&gt; Rep (PolyLineF f point) x
+$cto :: forall k (f :: k -&gt; *) (point :: k) x.
+Rep (PolyLineF f point) x -&gt; PolyLineF f point
+to :: forall x. Rep (PolyLineF f point) x -&gt; PolyLineF f point
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679160854"><span id="local-6989586621679160859"><span id="local-6989586621679160863"><span class="annot"><span class="annottext">Int -&gt; PolyLineF f point -&gt; ShowS
+[PolyLineF f point] -&gt; ShowS
+PolyLineF f point -&gt; String
+(Int -&gt; PolyLineF f point -&gt; ShowS)
+-&gt; (PolyLineF f point -&gt; String)
+-&gt; ([PolyLineF f point] -&gt; ShowS)
+-&gt; Show (PolyLineF f point)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k (f :: k -&gt; *) (point :: k).
+Show (f point) =&gt;
+Int -&gt; PolyLineF f point -&gt; ShowS
+forall k (f :: k -&gt; *) (point :: k).
+Show (f point) =&gt;
+[PolyLineF f point] -&gt; ShowS
+forall k (f :: k -&gt; *) (point :: k).
+Show (f point) =&gt;
+PolyLineF f point -&gt; String
+$cshowsPrec :: forall k (f :: k -&gt; *) (point :: k).
+Show (f point) =&gt;
+Int -&gt; PolyLineF f point -&gt; ShowS
+showsPrec :: Int -&gt; PolyLineF f point -&gt; ShowS
+$cshow :: forall k (f :: k -&gt; *) (point :: k).
+Show (f point) =&gt;
+PolyLineF f point -&gt; String
+show :: PolyLineF f point -&gt; String
+$cshowList :: forall k (f :: k -&gt; *) (point :: k).
+Show (f point) =&gt;
+[PolyLineF f point] -&gt; ShowS
+showList :: [PolyLineF f point] -&gt; ShowS
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679160869"><span id="local-6989586621679160873"><span id="local-6989586621679160876"><span id="local-6989586621679160883"><span class="annot"><span class="annottext">ReadPrec [PolyLineF f point]
+ReadPrec (PolyLineF f point)
+Int -&gt; ReadS (PolyLineF f point)
+ReadS [PolyLineF f point]
+(Int -&gt; ReadS (PolyLineF f point))
+-&gt; ReadS [PolyLineF f point]
+-&gt; ReadPrec (PolyLineF f point)
+-&gt; ReadPrec [PolyLineF f point]
+-&gt; Read (PolyLineF f point)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+ReadPrec [PolyLineF f point]
+forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+ReadPrec (PolyLineF f point)
+forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+Int -&gt; ReadS (PolyLineF f point)
+forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+ReadS [PolyLineF f point]
+$creadsPrec :: forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+Int -&gt; ReadS (PolyLineF f point)
+readsPrec :: Int -&gt; ReadS (PolyLineF f point)
+$creadList :: forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+ReadS [PolyLineF f point]
+readList :: ReadS [PolyLineF f point]
+$creadPrec :: forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+ReadPrec (PolyLineF f point)
+readPrec :: ReadPrec (PolyLineF f point)
+$creadListPrec :: forall k (f :: k -&gt; *) (point :: k).
+Read (f point) =&gt;
+ReadPrec [PolyLineF f point]
+readListPrec :: ReadPrec [PolyLineF f point]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679160891"><span class="annot"><span class="annottext">PolyLineF f point -&gt; ()
+(PolyLineF f point -&gt; ()) -&gt; NFData (PolyLineF f point)
+forall a. (a -&gt; ()) -&gt; NFData a
+forall k (f :: k -&gt; *) (point :: k).
+NFData (f point) =&gt;
+PolyLineF f point -&gt; ()
+$crnf :: forall k (f :: k -&gt; *) (point :: k).
+NFData (f point) =&gt;
+PolyLineF f point -&gt; ()
+rnf :: PolyLineF f point -&gt; ()
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/deepseq-1.5.1.0-6837/src/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679160899"><span id="local-6989586621679160903"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; PolyLineF f a -&gt; PolyLineF f b)
+-&gt; (forall a b. a -&gt; PolyLineF f b -&gt; PolyLineF f a)
+-&gt; Functor (PolyLineF f)
+forall a b. a -&gt; PolyLineF f b -&gt; PolyLineF f a
+forall a b. (a -&gt; b) -&gt; PolyLineF f a -&gt; PolyLineF f b
+forall (f :: * -&gt; *) a b.
+Functor f =&gt;
+a -&gt; PolyLineF f b -&gt; PolyLineF f a
+forall (f :: * -&gt; *) a b.
+Functor f =&gt;
+(a -&gt; b) -&gt; PolyLineF f a -&gt; PolyLineF f b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall (f :: * -&gt; *) a b.
+Functor f =&gt;
+(a -&gt; b) -&gt; PolyLineF f a -&gt; PolyLineF f b
+fmap :: forall a b. (a -&gt; b) -&gt; PolyLineF f a -&gt; PolyLineF f b
+$c&lt;$ :: forall (f :: * -&gt; *) a b.
+Functor f =&gt;
+a -&gt; PolyLineF f b -&gt; PolyLineF f a
+&lt;$ :: forall a b. a -&gt; PolyLineF f b -&gt; PolyLineF f a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#Functor"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679160911"><span id="local-6989586621679160917"><span id="local-6989586621679160923"><span id="local-6989586621679160929"><span id="local-6989586621679160933"><span id="local-6989586621679160937"><span id="local-6989586621679160941"><span id="local-6989586621679160945"><span id="local-6989586621679160949"><span id="local-6989586621679160953"><span id="local-6989586621679160957"><span id="local-6989586621679160961"><span id="local-6989586621679160965"><span id="local-6989586621679160971"><span id="local-6989586621679160977"><span id="local-6989586621679160983"><span id="local-6989586621679160989"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; PolyLineF f m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a)
+-&gt; (forall a. PolyLineF f a -&gt; [a])
+-&gt; (forall a. PolyLineF f a -&gt; Bool)
+-&gt; (forall a. PolyLineF f a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; PolyLineF f a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; PolyLineF f a -&gt; a)
+-&gt; (forall a. Ord a =&gt; PolyLineF f a -&gt; a)
+-&gt; (forall a. Num a =&gt; PolyLineF f a -&gt; a)
+-&gt; (forall a. Num a =&gt; PolyLineF f a -&gt; a)
+-&gt; Foldable (PolyLineF f)
+forall a. Eq a =&gt; a -&gt; PolyLineF f a -&gt; Bool
+forall a. Num a =&gt; PolyLineF f a -&gt; a
+forall a. Ord a =&gt; PolyLineF f a -&gt; a
+forall m. Monoid m =&gt; PolyLineF f m -&gt; m
+forall a. PolyLineF f a -&gt; Bool
+forall a. PolyLineF f a -&gt; Int
+forall a. PolyLineF f a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+forall (f :: * -&gt; *) a.
+(Foldable f, Eq a) =&gt;
+a -&gt; PolyLineF f a -&gt; Bool
+forall (f :: * -&gt; *) a. (Foldable f, Num a) =&gt; PolyLineF f a -&gt; a
+forall (f :: * -&gt; *) a. (Foldable f, Ord a) =&gt; PolyLineF f a -&gt; a
+forall (f :: * -&gt; *) m.
+(Foldable f, Monoid m) =&gt;
+PolyLineF f m -&gt; m
+forall (f :: * -&gt; *) a. Foldable f =&gt; PolyLineF f a -&gt; Bool
+forall (f :: * -&gt; *) a. Foldable f =&gt; PolyLineF f a -&gt; Int
+forall (f :: * -&gt; *) a. Foldable f =&gt; PolyLineF f a -&gt; [a]
+forall (f :: * -&gt; *) a.
+Foldable f =&gt;
+(a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a
+forall (f :: * -&gt; *) m a.
+(Foldable f, Monoid m) =&gt;
+(a -&gt; m) -&gt; PolyLineF f a -&gt; m
+forall (f :: * -&gt; *) b a.
+Foldable f =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+forall (f :: * -&gt; *) a b.
+Foldable f =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall (f :: * -&gt; *) m.
+(Foldable f, Monoid m) =&gt;
+PolyLineF f m -&gt; m
+fold :: forall m. Monoid m =&gt; PolyLineF f m -&gt; m
+$cfoldMap :: forall (f :: * -&gt; *) m a.
+(Foldable f, Monoid m) =&gt;
+(a -&gt; m) -&gt; PolyLineF f a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m
+$cfoldMap' :: forall (f :: * -&gt; *) m a.
+(Foldable f, Monoid m) =&gt;
+(a -&gt; m) -&gt; PolyLineF f a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m
+$cfoldr :: forall (f :: * -&gt; *) a b.
+Foldable f =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+$cfoldr' :: forall (f :: * -&gt; *) a b.
+Foldable f =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+$cfoldl :: forall (f :: * -&gt; *) b a.
+Foldable f =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+$cfoldl' :: forall (f :: * -&gt; *) b a.
+Foldable f =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; PolyLineF f a -&gt; b
+$cfoldr1 :: forall (f :: * -&gt; *) a.
+Foldable f =&gt;
+(a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a
+$cfoldl1 :: forall (f :: * -&gt; *) a.
+Foldable f =&gt;
+(a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; PolyLineF f a -&gt; a
+$ctoList :: forall (f :: * -&gt; *) a. Foldable f =&gt; PolyLineF f a -&gt; [a]
+toList :: forall a. PolyLineF f a -&gt; [a]
+$cnull :: forall (f :: * -&gt; *) a. Foldable f =&gt; PolyLineF f a -&gt; Bool
+null :: forall a. PolyLineF f a -&gt; Bool
+$clength :: forall (f :: * -&gt; *) a. Foldable f =&gt; PolyLineF f a -&gt; Int
+length :: forall a. PolyLineF f a -&gt; Int
+$celem :: forall (f :: * -&gt; *) a.
+(Foldable f, Eq a) =&gt;
+a -&gt; PolyLineF f a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; PolyLineF f a -&gt; Bool
+$cmaximum :: forall (f :: * -&gt; *) a. (Foldable f, Ord a) =&gt; PolyLineF f a -&gt; a
+maximum :: forall a. Ord a =&gt; PolyLineF f a -&gt; a
+$cminimum :: forall (f :: * -&gt; *) a. (Foldable f, Ord a) =&gt; PolyLineF f a -&gt; a
+minimum :: forall a. Ord a =&gt; PolyLineF f a -&gt; a
+$csum :: forall (f :: * -&gt; *) a. (Foldable f, Num a) =&gt; PolyLineF f a -&gt; a
+sum :: forall a. Num a =&gt; PolyLineF f a -&gt; a
+$cproduct :: forall (f :: * -&gt; *) a. (Foldable f, Num a) =&gt; PolyLineF f a -&gt; a
+product :: forall a. Num a =&gt; PolyLineF f a -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Foldable.html#Foldable"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679161018"><span id="local-6989586621679161024"><span id="local-6989586621679161030"><span id="local-6989586621679161036"><span id="local-6989586621679161040"><span id="local-6989586621679161046"><span id="local-6989586621679161052"><span id="local-6989586621679161056"><span id="local-6989586621679161060"><span id="local-6989586621679161064"><span id="local-6989586621679161068"><span id="local-6989586621679161072"><span class="annot"><span class="annottext">Foldable (PolyLineF f)
+Foldable (PolyLineF f) =&gt;
+(forall m. Semigroup m =&gt; PolyLineF f m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m)
+-&gt; (forall a. PolyLineF f a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; PolyLineF f a -&gt; a)
+-&gt; (forall a. Ord a =&gt; PolyLineF f a -&gt; a)
+-&gt; (forall a. PolyLineF f a -&gt; a)
+-&gt; (forall a. PolyLineF f a -&gt; a)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b)
+-&gt; Foldable1 (PolyLineF f)
+forall a. Ord a =&gt; PolyLineF f a -&gt; a
+forall m. Semigroup m =&gt; PolyLineF f m -&gt; m
+forall a. PolyLineF f a -&gt; a
+forall a. PolyLineF f a -&gt; NonEmpty a
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m
+forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b
+forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b
+forall (t :: * -&gt; *).
+Foldable t =&gt;
+(forall m. Semigroup m =&gt; t m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a. t a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; Foldable1 t
+forall (f :: * -&gt; *). Foldable1 f =&gt; Foldable (PolyLineF f)
+forall (f :: * -&gt; *) a. (Foldable1 f, Ord a) =&gt; PolyLineF f a -&gt; a
+forall (f :: * -&gt; *) m.
+(Foldable1 f, Semigroup m) =&gt;
+PolyLineF f m -&gt; m
+forall (f :: * -&gt; *) a. Foldable1 f =&gt; PolyLineF f a -&gt; a
+forall (f :: * -&gt; *) a. Foldable1 f =&gt; PolyLineF f a -&gt; NonEmpty a
+forall (f :: * -&gt; *) m a.
+(Foldable1 f, Semigroup m) =&gt;
+(a -&gt; m) -&gt; PolyLineF f a -&gt; m
+forall (f :: * -&gt; *) a b.
+Foldable1 f =&gt;
+(a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b
+forall (f :: * -&gt; *) a b.
+Foldable1 f =&gt;
+(a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b
+$cfold1 :: forall (f :: * -&gt; *) m.
+(Foldable1 f, Semigroup m) =&gt;
+PolyLineF f m -&gt; m
+fold1 :: forall m. Semigroup m =&gt; PolyLineF f m -&gt; m
+$cfoldMap1 :: forall (f :: * -&gt; *) m a.
+(Foldable1 f, Semigroup m) =&gt;
+(a -&gt; m) -&gt; PolyLineF f a -&gt; m
+foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m
+$cfoldMap1' :: forall (f :: * -&gt; *) m a.
+(Foldable1 f, Semigroup m) =&gt;
+(a -&gt; m) -&gt; PolyLineF f a -&gt; m
+foldMap1' :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; PolyLineF f a -&gt; m
+$ctoNonEmpty :: forall (f :: * -&gt; *) a. Foldable1 f =&gt; PolyLineF f a -&gt; NonEmpty a
+toNonEmpty :: forall a. PolyLineF f a -&gt; NonEmpty a
+$cmaximum :: forall (f :: * -&gt; *) a. (Foldable1 f, Ord a) =&gt; PolyLineF f a -&gt; a
+maximum :: forall a. Ord a =&gt; PolyLineF f a -&gt; a
+$cminimum :: forall (f :: * -&gt; *) a. (Foldable1 f, Ord a) =&gt; PolyLineF f a -&gt; a
+minimum :: forall a. Ord a =&gt; PolyLineF f a -&gt; a
+$chead :: forall (f :: * -&gt; *) a. Foldable1 f =&gt; PolyLineF f a -&gt; a
+head :: forall a. PolyLineF f a -&gt; a
+$clast :: forall (f :: * -&gt; *) a. Foldable1 f =&gt; PolyLineF f a -&gt; a
+last :: forall a. PolyLineF f a -&gt; a
+$cfoldrMap1 :: forall (f :: * -&gt; *) a b.
+Foldable1 f =&gt;
+(a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b
+foldrMap1 :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b
+$cfoldlMap1' :: forall (f :: * -&gt; *) a b.
+Foldable1 f =&gt;
+(a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b
+foldlMap1' :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b
+$cfoldlMap1 :: forall (f :: * -&gt; *) a b.
+Foldable1 f =&gt;
+(a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b
+foldlMap1 :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; PolyLineF f a -&gt; b
+$cfoldrMap1' :: forall (f :: * -&gt; *) a b.
+Foldable1 f =&gt;
+(a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b
+foldrMap1' :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; PolyLineF f a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Foldable1.html#Foldable1"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable1</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679161092"><span id="local-6989586621679161096"><span class="annot"><span class="annottext">PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+(PolyLineF f point -&gt; PolyLineF f point -&gt; Bool)
+-&gt; (PolyLineF f point -&gt; PolyLineF f point -&gt; Bool)
+-&gt; Eq (PolyLineF f point)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (f :: k -&gt; *) (point :: k).
+Eq (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+$c== :: forall k (f :: k -&gt; *) (point :: k).
+Eq (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+== :: PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+$c/= :: forall k (f :: k -&gt; *) (point :: k).
+Eq (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+/= :: PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679161107"><span id="local-6989586621679161111"><span id="local-6989586621679161115"><span id="local-6989586621679161119"><span id="local-6989586621679161123"><span id="local-6989586621679161127"><span id="local-6989586621679161131"><span class="annot"><span class="annottext">Eq (PolyLineF f point)
+Eq (PolyLineF f point) =&gt;
+(PolyLineF f point -&gt; PolyLineF f point -&gt; Ordering)
+-&gt; (PolyLineF f point -&gt; PolyLineF f point -&gt; Bool)
+-&gt; (PolyLineF f point -&gt; PolyLineF f point -&gt; Bool)
+-&gt; (PolyLineF f point -&gt; PolyLineF f point -&gt; Bool)
+-&gt; (PolyLineF f point -&gt; PolyLineF f point -&gt; Bool)
+-&gt; (PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point)
+-&gt; (PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point)
+-&gt; Ord (PolyLineF f point)
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+PolyLineF f point -&gt; PolyLineF f point -&gt; Ordering
+PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+Eq (PolyLineF f point)
+forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Ordering
+forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point
+$ccompare :: forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Ordering
+compare :: PolyLineF f point -&gt; PolyLineF f point -&gt; Ordering
+$c&lt; :: forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+&lt; :: PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+$c&lt;= :: forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+&lt;= :: PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+$c&gt; :: forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+&gt; :: PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+$c&gt;= :: forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+&gt;= :: PolyLineF f point -&gt; PolyLineF f point -&gt; Bool
+$cmax :: forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point
+max :: PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point
+$cmin :: forall k (f :: k -&gt; *) (point :: k).
+Ord (f point) =&gt;
+PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point
+min :: PolyLineF f point -&gt; PolyLineF f point -&gt; PolyLineF f point
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679161147"><span class="annot"><span class="annottext">(forall a. Eq a =&gt; Eq (PolyLineF f a)) =&gt;
+(forall a b.
+ (a -&gt; b -&gt; Bool) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Bool)
+-&gt; Eq1 (PolyLineF f)
+forall a. Eq a =&gt; Eq (PolyLineF f a)
+forall a b.
+(a -&gt; b -&gt; Bool) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Bool
+forall (f :: * -&gt; *) a. (Eq1 f, Eq a) =&gt; Eq (PolyLineF f a)
+forall (f :: * -&gt; *) a b.
+Eq1 f =&gt;
+(a -&gt; b -&gt; Bool) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Bool
+forall (f :: * -&gt; *).
+(forall a. Eq a =&gt; Eq (f a)) =&gt;
+(forall a b. (a -&gt; b -&gt; Bool) -&gt; f a -&gt; f b -&gt; Bool) -&gt; Eq1 f
+$cliftEq :: forall (f :: * -&gt; *) a b.
+Eq1 f =&gt;
+(a -&gt; b -&gt; Bool) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Bool
+liftEq :: forall a b.
+(a -&gt; b -&gt; Bool) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Functor.Classes.html#Eq1"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var">Eq1</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679161162"><span class="annot"><span class="annottext">Eq1 (PolyLineF f)
+(Eq1 (PolyLineF f), forall a. Ord a =&gt; Ord (PolyLineF f a)) =&gt;
+(forall a b.
+ (a -&gt; b -&gt; Ordering) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Ordering)
+-&gt; Ord1 (PolyLineF f)
+forall a. Ord a =&gt; Ord (PolyLineF f a)
+forall a b.
+(a -&gt; b -&gt; Ordering) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Ordering
+forall (f :: * -&gt; *). Ord1 f =&gt; Eq1 (PolyLineF f)
+forall (f :: * -&gt; *) a. (Ord1 f, Ord a) =&gt; Ord (PolyLineF f a)
+forall (f :: * -&gt; *) a b.
+Ord1 f =&gt;
+(a -&gt; b -&gt; Ordering) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Ordering
+forall (f :: * -&gt; *).
+(Eq1 f, forall a. Ord a =&gt; Ord (f a)) =&gt;
+(forall a b. (a -&gt; b -&gt; Ordering) -&gt; f a -&gt; f b -&gt; Ordering)
+-&gt; Ord1 f
+$cliftCompare :: forall (f :: * -&gt; *) a b.
+Ord1 f =&gt;
+(a -&gt; b -&gt; Ordering) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Ordering
+liftCompare :: forall a b.
+(a -&gt; b -&gt; Ordering) -&gt; PolyLineF f a -&gt; PolyLineF f b -&gt; Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Functor.Classes.html#Ord1"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Ord1</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | By default we store simple poylline as non-empty vectors.</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">type</span><span> </span><span id="PolyLine"><span class="annot"><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/nonempty-vector-0.2.4-45186915c5024bfe5503e8ec6efd55f9c89f0b91a0e98f6f86b52a522e0428fb/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span id="local-6989586621679161171"><span id="local-6989586621679161172"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679161171"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679161172"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679161172"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span>   </span><span id="local-6989586621679161173"><span id="local-6989586621679161174"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679161173"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679161174"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679161174"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="annot"><span class="hs-comment">-- | Access the container</span></span><span>
+</span><span id="line-53"></span><span id="local-6989586621679160609"><span id="local-6989586621679160610"><span id="local-6989586621679160611"><span id="local-6989586621679160612"><span class="annot"><a href="HGeometry.PolyLine.html#_PolyLineF"><span class="hs-identifier hs-type">_PolyLineF</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Type.html#Iso"><span class="hs-identifier hs-type">Iso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160609"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160610"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160611"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160612"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160609"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160610"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>                </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160611"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160612"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-55"></span><span id="_PolyLineF"><span class="annot"><span class="annottext">_PolyLineF :: forall {k} {k} (f :: k -&gt; *) (point :: k) (f' :: k -&gt; *)
+       (point' :: k) (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
+(Profunctor p, Functor f) =&gt;
+p (f point) (f (f' point'))
+-&gt; p (PolyLineF f point) (f (PolyLineF f' point'))
+</span><a href="HGeometry.PolyLine.html#_PolyLineF"><span class="hs-identifier hs-var hs-var">_PolyLineF</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PolyLineF f point -&gt; f point)
+-&gt; (f' point' -&gt; PolyLineF f' point')
+-&gt; Iso
+     (PolyLineF f point) (PolyLineF f' point') (f point) (f' point')
+forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Iso.html#iso"><span class="hs-identifier hs-var">iso</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span id="local-6989586621679161180"><span class="annot"><span class="annottext">f point
+</span><a href="#local-6989586621679161180"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">f point
+</span><a href="#local-6989586621679161180"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f' point' -&gt; PolyLineF f' point'
+forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
+</span><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160644"><span id="local-6989586621679161190"><span id="local-6989586621679161196"><span id="local-6989586621679161201"><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Traversable.html#Traversable"><span class="hs-identifier hs-type">Traversable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160644"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Traversable.html#Traversable"><span class="hs-identifier hs-type">Traversable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160644"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621679161214"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; PolyLineF f a -&gt; f (PolyLineF f b)
+</span><a href="#local-6989586621679161214"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679161216"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679161216"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span id="local-6989586621679161217"><span class="annot"><span class="annottext">f a
+</span><a href="#local-6989586621679161217"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f b -&gt; PolyLineF f b
+forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
+</span><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">(f b -&gt; PolyLineF f b) -&gt; f (f b) -&gt; f (PolyLineF f b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; f a -&gt; f (f b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; f a -&gt; f (f b)
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Traversable.html#traverse"><span class="hs-identifier hs-var">traverse</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679161216"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">f a
+</span><a href="#local-6989586621679161217"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160662"><span id="local-6989586621679161228"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160662"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160662"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679161242"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; PolyLineF f a -&gt; f (PolyLineF f b)
+</span><a href="#local-6989586621679161242"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679161244"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679161244"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-type">PolyLine</span></a></span><span> </span><span id="local-6989586621679161245"><span class="annot"><span class="annottext">f a
+</span><a href="#local-6989586621679161245"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f b -&gt; PolyLineF f b
+forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
+</span><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">(f b -&gt; PolyLineF f b) -&gt; f (f b) -&gt; f (PolyLineF f b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; f a -&gt; f (f b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b. Apply f =&gt; (a -&gt; f b) -&gt; f a -&gt; f (f b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679161244"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">f a
+</span><a href="#local-6989586621679161245"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160683"><span id="local-6989586621679160684"><span id="local-6989586621679160685"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/indexed-traversable-0.1.4-abf18009c8aa238896def64882e8e8d1f618d0164d9214ba36444910f4d62193/share/doc/html/src/WithIndex.html#TraversableWithIndex"><span class="hs-identifier hs-type">TraversableWithIndex</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160683"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-63"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160683"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-64"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160683"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160684"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160684"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-65"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160683"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160684"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-66"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160683"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160684"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#HasVertices"><span class="hs-identifier hs-type">HasVertices</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160683"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160684"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160683"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160685"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679161273"><span class="annot"><span class="annottext">vertices :: IndexedTraversal1
+  (VertexIx (PolyLineF f point))
+  (PolyLineF f point)
+  (PolyLineF f point')
+  (Vertex (PolyLineF f point))
+  (Vertex (PolyLineF f point'))
+</span><a href="#local-6989586621679161273"><span class="hs-identifier hs-var hs-var hs-var">vertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(f point -&gt; f (f point'))
+-&gt; PolyLineF f point -&gt; f (PolyLineF f point')
+forall {k} {k} (f :: k -&gt; *) (point :: k) (f' :: k -&gt; *)
+       (point' :: k) (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
+(Profunctor p, Functor f) =&gt;
+p (f point) (f (f' point'))
+-&gt; p (PolyLineF f point) (f (PolyLineF f' point'))
+</span><a href="HGeometry.PolyLine.html#_PolyLineF"><span class="hs-identifier hs-var">_PolyLineF</span></a></span><span> </span><span class="annot"><span class="annottext">((f point -&gt; f (f point'))
+ -&gt; PolyLineF f point -&gt; f (PolyLineF f point'))
+-&gt; (p point (f point') -&gt; f point -&gt; f (f point'))
+-&gt; p point (f point')
+-&gt; PolyLineF f point
+-&gt; f (PolyLineF f point')
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">p point (f point') -&gt; f point -&gt; f (f point')
+forall (f :: * -&gt; *) a b.
+Traversable1 f =&gt;
+IndexedTraversal1 Int (f a) (f b) a b
+IndexedTraversal1 Int (f point) (f point') point point'
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Traversal.html#traversed1"><span class="hs-identifier hs-var">traversed1</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160711"><span id="local-6989586621679160712"><span id="local-6989586621679160713"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160711"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-71"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160711"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160712"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160712"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-72"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160711"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160712"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-73"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160711"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160712"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#HasPoints"><span class="hs-identifier hs-type">HasPoints</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160711"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160712"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160711"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160713"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679160712"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160713"><span class="hs-identifier hs-type">point'</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679161298"><span class="annot"><span class="annottext">allPoints :: forall (d :: Nat) r r'.
+(Point_ point d r, Point_ point' d r',
+ NumType (PolyLineF f point) ~ r, NumType (PolyLineF f point') ~ r',
+ Dimension (PolyLineF f point) ~ d,
+ Dimension (PolyLineF f point') ~ d) =&gt;
+Traversal1 (PolyLineF f point) (PolyLineF f point') point point'
+</span><a href="#local-6989586621679161298"><span class="hs-identifier hs-var hs-var hs-var">allPoints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(f point -&gt; f (f point'))
+-&gt; PolyLineF f point -&gt; f (PolyLineF f point')
+forall {k} {k} (f :: k -&gt; *) (point :: k) (f' :: k -&gt; *)
+       (point' :: k) (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
+(Profunctor p, Functor f) =&gt;
+p (f point) (f (f' point'))
+-&gt; p (PolyLineF f point) (f (PolyLineF f' point'))
+</span><a href="HGeometry.PolyLine.html#_PolyLineF"><span class="hs-identifier hs-var">_PolyLineF</span></a></span><span> </span><span class="annot"><span class="annottext">((f point -&gt; f (f point'))
+ -&gt; PolyLineF f point -&gt; f (PolyLineF f point'))
+-&gt; ((point -&gt; f point') -&gt; f point -&gt; f (f point'))
+-&gt; (point -&gt; f point')
+-&gt; PolyLineF f point
+-&gt; f (PolyLineF f point')
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">(point -&gt; f point') -&gt; f point -&gt; f (f point')
+forall (f :: * -&gt; *) a b.
+Traversable1 f =&gt;
+IndexedTraversal1 Int (f a) (f b) a b
+IndexedTraversal1 Int (f point) (f point') point point'
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Traversal.html#traversed1"><span class="hs-identifier hs-var">traversed1</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160739"><span id="local-6989586621679160740"><span id="local-6989586621679160741"><span id="local-6989586621679161307"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160739"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-78"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160739"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160740"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160740"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-79"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160739"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160740"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-80"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160739"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160740"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Transformation.Internal.html#DefaultTransformByConstraints"><span class="hs-identifier hs-type">DefaultTransformByConstraints</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160739"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160740"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679160741"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-82"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160740"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679160741"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-83"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Transformation.Internal.html#IsTransformable"><span class="hs-identifier hs-type">IsTransformable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160739"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160740"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160774"><span id="local-6989586621679160775"><span id="local-6989586621679160776"><span id="local-6989586621679161360"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160774"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-86"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160774"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160775"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160775"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-87"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160774"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160775"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-88"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160774"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160775"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160775"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679160776"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-90"></span><span>         </span><span class="hs-comment">-- , OptVector_ 2 r, OptMetric_ 2 r</span><span>
+</span><span id="line-91"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Boxable.html#IsBoxable"><span class="hs-identifier hs-type">IsBoxable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160774"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160775"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160681"><span id="local-6989586621679160682"><span id="local-6989586621679161473"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/indexed-traversable-0.1.4-abf18009c8aa238896def64882e8e8d1f618d0164d9214ba36444910f4d62193/share/doc/html/src/WithIndex.html#TraversableWithIndex"><span class="hs-identifier hs-type">TraversableWithIndex</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-94"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-95"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-97"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-98"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#HasVertices%27"><span class="hs-identifier hs-type">HasVertices'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Vertex"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#Vertex"><span class="hs-identifier hs-var">Vertex</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="VertexIx"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-var">VertexIx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160681"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160682"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-101"></span><span>  </span><span id="local-6989586621679161496"><span class="annot"><span class="annottext">vertexAt :: VertexIx (PolyLineF f point)
+-&gt; IndexedTraversal'
+     (VertexIx (PolyLineF f point))
+     (PolyLineF f point)
+     (Vertex (PolyLineF f point))
+</span><a href="#local-6989586621679161496"><span class="hs-identifier hs-var hs-var hs-var">vertexAt</span></a></span></span><span> </span><span id="local-6989586621679161498"><span class="annot"><span class="annottext">VertexIx (PolyLineF f point)
+</span><a href="#local-6989586621679161498"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(f point -&gt; f (f point))
+-&gt; PolyLineF f point -&gt; f (PolyLineF f point)
+forall {k} {k} (f :: k -&gt; *) (point :: k) (f' :: k -&gt; *)
+       (point' :: k) (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
+(Profunctor p, Functor f) =&gt;
+p (f point) (f (f' point'))
+-&gt; p (PolyLineF f point) (f (PolyLineF f' point'))
+</span><a href="HGeometry.PolyLine.html#_PolyLineF"><span class="hs-identifier hs-var">_PolyLineF</span></a></span><span> </span><span class="annot"><span class="annottext">((f point -&gt; f (f point))
+ -&gt; PolyLineF f point -&gt; f (PolyLineF f point))
+-&gt; (p point (f point) -&gt; f point -&gt; f (f point))
+-&gt; p point (f point)
+-&gt; PolyLineF f point
+-&gt; f (PolyLineF f point)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Index (f point)
+-&gt; IndexedTraversal'
+     (Index (f point)) (f point) (IxValue (f point))
+forall m.
+Ixed m =&gt;
+Index m -&gt; IndexedTraversal' (Index m) m (IxValue m)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#iix"><span class="hs-identifier hs-var">iix</span></a></span><span> </span><span class="annot"><span class="annottext">VertexIx (PolyLineF f point)
+Index (f point)
+</span><a href="#local-6989586621679161498"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160790"><span id="local-6989586621679160791"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160790"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-104"></span><span>         </span><span class="hs-comment">-- , Ixed (f point)</span><span>
+</span><span id="line-105"></span><span>         </span><span class="hs-comment">-- , IxValue (f point) ~ point</span><span>
+</span><span id="line-106"></span><span>         </span><span class="hs-comment">-- , Index (f point) ~ Int</span><span>
+</span><span id="line-107"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Interval.Class.html#HasStart"><span class="hs-identifier hs-type">HasStart</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160790"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160791"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679160791"><span class="hs-identifier hs-type">point</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621679161507"><span class="annot"><span class="annottext">start :: Lens' (PolyLineF f point) point
+</span><a href="#local-6989586621679161507"><span class="hs-identifier hs-var hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; f point) -&gt; PolyLineF f point -&gt; f (PolyLineF f point)
+Lens' (PolyLineF f point) point
+forall (t :: * -&gt; *) a. Traversable1 t =&gt; Lens' (t a) a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Lens.html#head1"><span class="hs-identifier hs-var">head1</span></a></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160800"><span id="local-6989586621679160801"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160800"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-111"></span><span>         </span><span class="hs-comment">-- , Ixed (f point)</span><span>
+</span><span id="line-112"></span><span>         </span><span class="hs-comment">-- , IxValue (f point) ~ point</span><span>
+</span><span id="line-113"></span><span>         </span><span class="hs-comment">-- , Index (f point) ~ Int</span><span>
+</span><span id="line-114"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Interval.Class.html#HasEnd"><span class="hs-identifier hs-type">HasEnd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160800"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160801"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679160801"><span class="hs-identifier hs-type">point</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-115"></span><span>  </span><span id="local-6989586621679161517"><span class="annot"><span class="annottext">end :: Lens' (PolyLineF f point) point
+</span><a href="#local-6989586621679161517"><span class="hs-identifier hs-var hs-var hs-var">end</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; f point) -&gt; PolyLineF f point -&gt; f (PolyLineF f point)
+Lens' (PolyLineF f point) point
+forall (t :: * -&gt; *) a. Traversable1 t =&gt; Lens' (t a) a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Lens.html#last1"><span class="hs-identifier hs-var">last1</span></a></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160811"><span id="local-6989586621679160812"><span id="local-6989586621679160813"><span id="local-6989586621679160814"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160811"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-118"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160811"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160812"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160812"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160811"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160812"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-119"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160811"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160812"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Util.html#HasFromFoldable1"><span class="hs-identifier hs-type">HasFromFoldable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160811"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-121"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160812"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160813"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160814"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-122"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/indexed-traversable-0.1.4-abf18009c8aa238896def64882e8e8d1f618d0164d9214ba36444910f4d62193/share/doc/html/src/WithIndex.html#TraversableWithIndex"><span class="hs-identifier hs-type">TraversableWithIndex</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160811"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-123"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.Class.html#PolyLine_"><span class="hs-identifier hs-type">PolyLine_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160811"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160812"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679160812"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160823"><span id="local-6989586621679160824"><span id="local-6989586621679160825"><span id="local-6989586621679160826"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-4f02d4525881a843957dd389fad628ddb080cdcbf0ace7494169fdf0d0f44b6c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160823"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-126"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160823"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160824"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160824"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160823"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160824"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span>
+</span><span id="line-127"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160823"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160824"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Util.html#HasFromFoldable1"><span class="hs-identifier hs-type">HasFromFoldable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160823"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-129"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160824"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160825"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160826"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-130"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/indexed-traversable-0.1.4-abf18009c8aa238896def64882e8e8d1f618d0164d9214ba36444910f4d62193/share/doc/html/src/WithIndex.html#TraversableWithIndex"><span class="hs-identifier hs-type">TraversableWithIndex</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Int"><span class="hs-identifier hs-type">Int</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160823"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-131"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.PolyLine.Class.html#ConstructablePolyLine_"><span class="hs-identifier hs-type">ConstructablePolyLine_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160823"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160824"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679160824"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-132"></span><span>  </span><span id="local-6989586621679161650"><span class="annot"><span class="annottext">polyLineFromPoints :: forall (f :: * -&gt; *). Foldable1 f =&gt; f point -&gt; PolyLineF f point
+</span><a href="#local-6989586621679161650"><span class="hs-identifier hs-var hs-var hs-var">polyLineFromPoints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f point -&gt; PolyLineF f point
+forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
+</span><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">(f point -&gt; PolyLineF f point)
+-&gt; (f point -&gt; f point) -&gt; f point -&gt; PolyLineF f point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">f point -&gt; f point
+forall (f :: * -&gt; *) (g :: * -&gt; *) a.
+(HasFromFoldable1 f, Foldable1 g) =&gt;
+g a -&gt; f a
+forall (g :: * -&gt; *) a. Foldable1 g =&gt; g a -&gt; f a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Util.html#fromFoldable1"><span class="hs-identifier hs-var">fromFoldable1</span></a></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679160837"><span id="local-6989586621679160838"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Internal.Iso.html#Reversing"><span class="hs-identifier hs-type">Reversing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679160837"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160838"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Internal.Iso.html#Reversing"><span class="hs-identifier hs-type">Reversing</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PolyLine.html#PolyLineF"><span class="hs-identifier hs-type">PolyLineF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160837"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679160838"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-135"></span><span>  </span><span id="local-6989586621679161659"><span class="annot"><span class="annottext">reversing :: PolyLineF f point -&gt; PolyLineF f point
+</span><a href="#local-6989586621679161659"><span class="hs-identifier hs-var hs-var hs-var">reversing</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f point -&gt; PolyLineF f point
+forall {k} (f :: k -&gt; *) (point :: k). f point -&gt; PolyLineF f point
+</span><a href="HGeometry.PolyLine.html#PolyLine"><span class="hs-identifier hs-var">PolyLine</span></a></span><span> </span><span class="annot"><span class="annottext">(f point -&gt; PolyLineF f point)
+-&gt; (PolyLineF f point -&gt; f point)
+-&gt; PolyLineF f point
+-&gt; PolyLineF f point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">f point -&gt; f point
+forall t. Reversing t =&gt; t -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-3ac4d5fba4e02bd93f1b9a40c88fed633232291cd9e797811242bb59874aa874/share/doc/html/src/Control.Lens.Internal.Iso.html#reversing"><span class="hs-identifier hs-var">reversing</span></a></span><span> </span><span class="annot"><span class="annottext">(f point -&gt; f point)
+-&gt; (PolyLineF f point -&gt; f point) -&gt; PolyLineF f point -&gt; f point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLineF f point -&gt; f point
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Prim.html#coerce"><span class="hs-identifier hs-var">coerce</span></a></span><span>
+</span><span id="line-136"></span></pre></body></html>

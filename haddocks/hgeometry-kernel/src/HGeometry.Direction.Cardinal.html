@@ -1,0 +1,543 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679365861"><span id="local-6989586621679365862"><span id="local-6989586621679365863"><span id="local-6989586621679365864"></span></span></span></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Direction.Cardinal</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Cardinal and Intercardinal directions.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html"><span class="hs-identifier">HGeometry.Direction.Cardinal</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier">CardinalDirection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>    </span><span class="hs-comment">-- , _North, _East, _South, _West</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#oppositeDirection"><span class="hs-identifier">oppositeDirection</span></a></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#InterCardinalDirection"><span class="hs-identifier">InterCardinalDirection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>    </span><span class="hs-comment">-- , _NorthWest, _NorthEast, _SouthEast, _SouthWest</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#interCardinalsOf"><span class="hs-identifier">interCardinalsOf</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#classifyDirection"><span class="hs-identifier">classifyDirection</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#classifyDirection%27"><span class="hs-identifier">classifyDirection'</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Maybe.html"><span class="hs-identifier">Data.Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Maybe.html#fromMaybe"><span class="hs-identifier">fromMaybe</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/GHC.Generics.html"><span class="hs-identifier">GHC.Generics</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Generics.html#Generic"><span class="hs-identifier">Generic</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | The four cardinal directions.</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">data</span><span> </span><span id="CardinalDirection"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-var">CardinalDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="North"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#North"><span class="hs-identifier hs-var">North</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="East"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#East"><span class="hs-identifier hs-var">East</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="South"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#South"><span class="hs-identifier hs-var">South</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="West"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#West"><span class="hs-identifier hs-var">West</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679365875"><span id="local-6989586621679365877"><span id="local-6989586621679365881"><span class="annot"><span class="annottext">Int -&gt; CardinalDirection -&gt; ShowS
+[CardinalDirection] -&gt; ShowS
+CardinalDirection -&gt; String
+(Int -&gt; CardinalDirection -&gt; ShowS)
+-&gt; (CardinalDirection -&gt; String)
+-&gt; ([CardinalDirection] -&gt; ShowS)
+-&gt; Show CardinalDirection
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; CardinalDirection -&gt; ShowS
+showsPrec :: Int -&gt; CardinalDirection -&gt; ShowS
+$cshow :: CardinalDirection -&gt; String
+show :: CardinalDirection -&gt; String
+$cshowList :: [CardinalDirection] -&gt; ShowS
+showList :: [CardinalDirection] -&gt; ShowS
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679365886"><span id="local-6989586621679365890"><span id="local-6989586621679365893"><span id="local-6989586621679365900"><span class="annot"><span class="annottext">ReadPrec [CardinalDirection]
+ReadPrec CardinalDirection
+Int -&gt; ReadS CardinalDirection
+ReadS [CardinalDirection]
+(Int -&gt; ReadS CardinalDirection)
+-&gt; ReadS [CardinalDirection]
+-&gt; ReadPrec CardinalDirection
+-&gt; ReadPrec [CardinalDirection]
+-&gt; Read CardinalDirection
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS CardinalDirection
+readsPrec :: Int -&gt; ReadS CardinalDirection
+$creadList :: ReadS [CardinalDirection]
+readList :: ReadS [CardinalDirection]
+$creadPrec :: ReadPrec CardinalDirection
+readPrec :: ReadPrec CardinalDirection
+$creadListPrec :: ReadPrec [CardinalDirection]
+readListPrec :: ReadPrec [CardinalDirection]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679365907"><span id="local-6989586621679365912"><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; Bool
+(CardinalDirection -&gt; CardinalDirection -&gt; Bool)
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
+-&gt; Eq CardinalDirection
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+== :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+$c/= :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+/= :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679365919"><span id="local-6989586621679365923"><span id="local-6989586621679365927"><span id="local-6989586621679365931"><span id="local-6989586621679365934"><span id="local-6989586621679365937"><span id="local-6989586621679365940"><span class="annot"><span class="annottext">Eq CardinalDirection
+Eq CardinalDirection =&gt;
+(CardinalDirection -&gt; CardinalDirection -&gt; Ordering)
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; Bool)
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; CardinalDirection)
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; CardinalDirection)
+-&gt; Ord CardinalDirection
+CardinalDirection -&gt; CardinalDirection -&gt; Bool
+CardinalDirection -&gt; CardinalDirection -&gt; Ordering
+CardinalDirection -&gt; CardinalDirection -&gt; CardinalDirection
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: CardinalDirection -&gt; CardinalDirection -&gt; Ordering
+compare :: CardinalDirection -&gt; CardinalDirection -&gt; Ordering
+$c&lt; :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+&lt; :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+$c&lt;= :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+&lt;= :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+$c&gt; :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+&gt; :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+$c&gt;= :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+&gt;= :: CardinalDirection -&gt; CardinalDirection -&gt; Bool
+$cmax :: CardinalDirection -&gt; CardinalDirection -&gt; CardinalDirection
+max :: CardinalDirection -&gt; CardinalDirection -&gt; CardinalDirection
+$cmin :: CardinalDirection -&gt; CardinalDirection -&gt; CardinalDirection
+min :: CardinalDirection -&gt; CardinalDirection -&gt; CardinalDirection
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679365948"><span id="local-6989586621679365955"><span id="local-6989586621679365960"><span id="local-6989586621679365966"><span id="local-6989586621679365969"><span id="local-6989586621679365974"><span id="local-6989586621679365981"><span id="local-6989586621679365985"><span class="annot"><span class="annottext">Int -&gt; CardinalDirection
+CardinalDirection -&gt; Int
+CardinalDirection -&gt; [CardinalDirection]
+CardinalDirection -&gt; CardinalDirection
+CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+CardinalDirection
+-&gt; CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+(CardinalDirection -&gt; CardinalDirection)
+-&gt; (CardinalDirection -&gt; CardinalDirection)
+-&gt; (Int -&gt; CardinalDirection)
+-&gt; (CardinalDirection -&gt; Int)
+-&gt; (CardinalDirection -&gt; [CardinalDirection])
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection])
+-&gt; (CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection])
+-&gt; (CardinalDirection
+    -&gt; CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection])
+-&gt; Enum CardinalDirection
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+$csucc :: CardinalDirection -&gt; CardinalDirection
+succ :: CardinalDirection -&gt; CardinalDirection
+$cpred :: CardinalDirection -&gt; CardinalDirection
+pred :: CardinalDirection -&gt; CardinalDirection
+$ctoEnum :: Int -&gt; CardinalDirection
+toEnum :: Int -&gt; CardinalDirection
+$cfromEnum :: CardinalDirection -&gt; Int
+fromEnum :: CardinalDirection -&gt; Int
+$cenumFrom :: CardinalDirection -&gt; [CardinalDirection]
+enumFrom :: CardinalDirection -&gt; [CardinalDirection]
+$cenumFromThen :: CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+enumFromThen :: CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+$cenumFromTo :: CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+enumFromTo :: CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+$cenumFromThenTo :: CardinalDirection
+-&gt; CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+enumFromThenTo :: CardinalDirection
+-&gt; CardinalDirection -&gt; CardinalDirection -&gt; [CardinalDirection]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Enum.html#Enum"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></a></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679365993"><span id="local-6989586621679365995"><span class="annot"><span class="annottext">CardinalDirection
+CardinalDirection -&gt; CardinalDirection -&gt; Bounded CardinalDirection
+forall a. a -&gt; a -&gt; Bounded a
+$cminBound :: CardinalDirection
+minBound :: CardinalDirection
+$cmaxBound :: CardinalDirection
+maxBound :: CardinalDirection
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Enum.html#Bounded"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></a></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- makePrisms ''CardinalDirection</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- * Functions on Cardinal Directions</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- | Computes the direction opposite to the given one.</span></span><span>
+</span><span id="line-39"></span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#oppositeDirection"><span class="hs-identifier hs-type">oppositeDirection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span>
+</span><span id="line-40"></span><span id="oppositeDirection"><span class="annot"><span class="annottext">oppositeDirection :: CardinalDirection -&gt; CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#oppositeDirection"><span class="hs-identifier hs-var hs-var">oppositeDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#North"><span class="hs-identifier hs-var">North</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#South"><span class="hs-identifier hs-var">South</span></a></span><span>
+</span><span id="line-42"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#East"><span class="hs-identifier hs-var">East</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#West"><span class="hs-identifier hs-var">West</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#South"><span class="hs-identifier hs-var">South</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#North"><span class="hs-identifier hs-var">North</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#West"><span class="hs-identifier hs-var">West</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#East"><span class="hs-identifier hs-var">East</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | Intercardinal directions</span></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">data</span><span> </span><span id="InterCardinalDirection"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#InterCardinalDirection"><span class="hs-identifier hs-var">InterCardinalDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NorthWest"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#NorthWest"><span class="hs-identifier hs-var">NorthWest</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="NorthEast"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#NorthEast"><span class="hs-identifier hs-var">NorthEast</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SouthEast"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#SouthEast"><span class="hs-identifier hs-var">SouthEast</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SouthWest"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#SouthWest"><span class="hs-identifier hs-var">SouthWest</span></a></span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679366005"><span id="local-6989586621679366007"><span id="local-6989586621679366011"><span class="annot"><span class="annottext">Int -&gt; InterCardinalDirection -&gt; ShowS
+[InterCardinalDirection] -&gt; ShowS
+InterCardinalDirection -&gt; String
+(Int -&gt; InterCardinalDirection -&gt; ShowS)
+-&gt; (InterCardinalDirection -&gt; String)
+-&gt; ([InterCardinalDirection] -&gt; ShowS)
+-&gt; Show InterCardinalDirection
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; InterCardinalDirection -&gt; ShowS
+showsPrec :: Int -&gt; InterCardinalDirection -&gt; ShowS
+$cshow :: InterCardinalDirection -&gt; String
+show :: InterCardinalDirection -&gt; String
+$cshowList :: [InterCardinalDirection] -&gt; ShowS
+showList :: [InterCardinalDirection] -&gt; ShowS
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679366014"><span id="local-6989586621679366018"><span id="local-6989586621679366021"><span id="local-6989586621679366027"><span class="annot"><span class="annottext">ReadPrec [InterCardinalDirection]
+ReadPrec InterCardinalDirection
+Int -&gt; ReadS InterCardinalDirection
+ReadS [InterCardinalDirection]
+(Int -&gt; ReadS InterCardinalDirection)
+-&gt; ReadS [InterCardinalDirection]
+-&gt; ReadPrec InterCardinalDirection
+-&gt; ReadPrec [InterCardinalDirection]
+-&gt; Read InterCardinalDirection
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS InterCardinalDirection
+readsPrec :: Int -&gt; ReadS InterCardinalDirection
+$creadList :: ReadS [InterCardinalDirection]
+readList :: ReadS [InterCardinalDirection]
+$creadPrec :: ReadPrec InterCardinalDirection
+readPrec :: ReadPrec InterCardinalDirection
+$creadListPrec :: ReadPrec [InterCardinalDirection]
+readListPrec :: ReadPrec [InterCardinalDirection]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679366030"><span id="local-6989586621679366034"><span class="annot"><span class="annottext">InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+(InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
+-&gt; (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
+-&gt; Eq InterCardinalDirection
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+== :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+$c/= :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+/= :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679366040"><span id="local-6989586621679366044"><span id="local-6989586621679366048"><span id="local-6989586621679366052"><span id="local-6989586621679366055"><span id="local-6989586621679366058"><span id="local-6989586621679366061"><span class="annot"><span class="annottext">Eq InterCardinalDirection
+Eq InterCardinalDirection =&gt;
+(InterCardinalDirection -&gt; InterCardinalDirection -&gt; Ordering)
+-&gt; (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
+-&gt; (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
+-&gt; (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
+-&gt; (InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool)
+-&gt; (InterCardinalDirection
+    -&gt; InterCardinalDirection -&gt; InterCardinalDirection)
+-&gt; (InterCardinalDirection
+    -&gt; InterCardinalDirection -&gt; InterCardinalDirection)
+-&gt; Ord InterCardinalDirection
+InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+InterCardinalDirection -&gt; InterCardinalDirection -&gt; Ordering
+InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; InterCardinalDirection
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+$ccompare :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Ordering
+compare :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Ordering
+$c&lt; :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+&lt; :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+$c&lt;= :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+&lt;= :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+$c&gt; :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+&gt; :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+$c&gt;= :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+&gt;= :: InterCardinalDirection -&gt; InterCardinalDirection -&gt; Bool
+$cmax :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; InterCardinalDirection
+max :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; InterCardinalDirection
+$cmin :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; InterCardinalDirection
+min :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; InterCardinalDirection
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679366064"><span id="local-6989586621679366069"><span id="local-6989586621679366074"><span id="local-6989586621679366078"><span id="local-6989586621679366081"><span id="local-6989586621679366085"><span id="local-6989586621679366091"><span id="local-6989586621679366095"><span class="annot"><span class="annottext">Int -&gt; InterCardinalDirection
+InterCardinalDirection -&gt; Int
+InterCardinalDirection -&gt; [InterCardinalDirection]
+InterCardinalDirection -&gt; InterCardinalDirection
+InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; [InterCardinalDirection]
+InterCardinalDirection
+-&gt; InterCardinalDirection
+-&gt; InterCardinalDirection
+-&gt; [InterCardinalDirection]
+(InterCardinalDirection -&gt; InterCardinalDirection)
+-&gt; (InterCardinalDirection -&gt; InterCardinalDirection)
+-&gt; (Int -&gt; InterCardinalDirection)
+-&gt; (InterCardinalDirection -&gt; Int)
+-&gt; (InterCardinalDirection -&gt; [InterCardinalDirection])
+-&gt; (InterCardinalDirection
+    -&gt; InterCardinalDirection -&gt; [InterCardinalDirection])
+-&gt; (InterCardinalDirection
+    -&gt; InterCardinalDirection -&gt; [InterCardinalDirection])
+-&gt; (InterCardinalDirection
+    -&gt; InterCardinalDirection
+    -&gt; InterCardinalDirection
+    -&gt; [InterCardinalDirection])
+-&gt; Enum InterCardinalDirection
+forall a.
+(a -&gt; a)
+-&gt; (a -&gt; a)
+-&gt; (Int -&gt; a)
+-&gt; (a -&gt; Int)
+-&gt; (a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; [a])
+-&gt; (a -&gt; a -&gt; a -&gt; [a])
+-&gt; Enum a
+$csucc :: InterCardinalDirection -&gt; InterCardinalDirection
+succ :: InterCardinalDirection -&gt; InterCardinalDirection
+$cpred :: InterCardinalDirection -&gt; InterCardinalDirection
+pred :: InterCardinalDirection -&gt; InterCardinalDirection
+$ctoEnum :: Int -&gt; InterCardinalDirection
+toEnum :: Int -&gt; InterCardinalDirection
+$cfromEnum :: InterCardinalDirection -&gt; Int
+fromEnum :: InterCardinalDirection -&gt; Int
+$cenumFrom :: InterCardinalDirection -&gt; [InterCardinalDirection]
+enumFrom :: InterCardinalDirection -&gt; [InterCardinalDirection]
+$cenumFromThen :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; [InterCardinalDirection]
+enumFromThen :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; [InterCardinalDirection]
+$cenumFromTo :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; [InterCardinalDirection]
+enumFromTo :: InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; [InterCardinalDirection]
+$cenumFromThenTo :: InterCardinalDirection
+-&gt; InterCardinalDirection
+-&gt; InterCardinalDirection
+-&gt; [InterCardinalDirection]
+enumFromThenTo :: InterCardinalDirection
+-&gt; InterCardinalDirection
+-&gt; InterCardinalDirection
+-&gt; [InterCardinalDirection]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Enum.html#Enum"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></a></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679366098"><span id="local-6989586621679366100"><span class="annot"><span class="annottext">(forall x. InterCardinalDirection -&gt; Rep InterCardinalDirection x)
+-&gt; (forall x.
+    Rep InterCardinalDirection x -&gt; InterCardinalDirection)
+-&gt; Generic InterCardinalDirection
+forall x. Rep InterCardinalDirection x -&gt; InterCardinalDirection
+forall x. InterCardinalDirection -&gt; Rep InterCardinalDirection x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. InterCardinalDirection -&gt; Rep InterCardinalDirection x
+from :: forall x. InterCardinalDirection -&gt; Rep InterCardinalDirection x
+$cto :: forall x. Rep InterCardinalDirection x -&gt; InterCardinalDirection
+to :: forall x. Rep InterCardinalDirection x -&gt; InterCardinalDirection
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- makePrisms ''InterCardinalDirection</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-54"></span><span class="annot"><span class="hs-comment">-- * Functions on InterCardinal Directions</span></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- | Get the two intercardinal directions, in increasing order,</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- corresponding to the cardinal direction.</span><span>
+</span><span id="line-58"></span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#interCardinalsOf"><span class="hs-identifier hs-type">interCardinalsOf</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#InterCardinalDirection"><span class="hs-identifier hs-type">InterCardinalDirection</span></a></span><span>
+</span><span id="line-59"></span><span id="interCardinalsOf"><span class="annot"><span class="annottext">interCardinalsOf :: CardinalDirection -&gt; Vector 2 InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#interCardinalsOf"><span class="hs-identifier hs-var hs-var">interCardinalsOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#North"><span class="hs-identifier hs-var">North</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; Vector 2 InterCardinalDirection
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#NorthWest"><span class="hs-identifier hs-var">NorthWest</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#NorthEast"><span class="hs-identifier hs-var">NorthEast</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#East"><span class="hs-identifier hs-var">East</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; Vector 2 InterCardinalDirection
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#NorthEast"><span class="hs-identifier hs-var">NorthEast</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#SouthEast"><span class="hs-identifier hs-var">SouthEast</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#South"><span class="hs-identifier hs-var">South</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; Vector 2 InterCardinalDirection
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#SouthEast"><span class="hs-identifier hs-var">SouthEast</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#SouthWest"><span class="hs-identifier hs-var">SouthWest</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#West"><span class="hs-identifier hs-var">West</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; InterCardinalDirection -&gt; Vector 2 InterCardinalDirection
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#SouthWest"><span class="hs-identifier hs-var">SouthWest</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#NorthWest"><span class="hs-identifier hs-var">NorthWest</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | Classfiy the direction of the given vector</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- pre: the vector is non-zero</span><span>
+</span><span id="line-72"></span><span id="local-6989586621679365842"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#classifyDirection"><span class="hs-identifier hs-type">classifyDirection</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679365842"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#Num"><span class="hs-identifier hs-type">Num</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679365842"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679365842"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-73"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Either"><span class="hs-identifier hs-type">Either</span></a></span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#InterCardinalDirection"><span class="hs-identifier hs-type">InterCardinalDirection</span></a></span></span><span>
+</span><span id="line-74"></span><span id="classifyDirection"><span class="annot"><span class="annottext">classifyDirection :: forall r.
+(Ord r, Num r) =&gt;
+Vector 2 r -&gt; Either CardinalDirection InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#classifyDirection"><span class="hs-identifier hs-var hs-var">classifyDirection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a. a -&gt; Maybe a -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Maybe.html#fromMaybe"><span class="hs-identifier hs-var">fromMaybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; Either CardinalDirection InterCardinalDirection
+forall a. HasCallStack =&gt; String -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Err.html#error"><span class="hs-identifier hs-var">error</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;classifyDirection: Direction vector is zero!&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>                  </span><span class="annot"><span class="annottext">(Maybe (Either CardinalDirection InterCardinalDirection)
+ -&gt; Either CardinalDirection InterCardinalDirection)
+-&gt; (Vector 2 r
+    -&gt; Maybe (Either CardinalDirection InterCardinalDirection))
+-&gt; Vector 2 r
+-&gt; Either CardinalDirection InterCardinalDirection
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall r.
+(Ord r, Num r) =&gt;
+Vector 2 r
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+</span><a href="HGeometry.Direction.Cardinal.html#classifyDirection%27"><span class="hs-identifier hs-var">classifyDirection'</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="annot"><span class="hs-comment">-- | Classfiy the direction of the given vector. Returns nothing if the vector is zero</span></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679365851"><span class="annot"><a href="HGeometry.Direction.Cardinal.html#classifyDirection%27"><span class="hs-identifier hs-type">classifyDirection'</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679365851"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#Num"><span class="hs-identifier hs-type">Num</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679365851"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679365851"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-79"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Either"><span class="hs-identifier hs-type">Either</span></a></span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="annot"><a href="HGeometry.Direction.Cardinal.html#InterCardinalDirection"><span class="hs-identifier hs-type">InterCardinalDirection</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-80"></span><span id="classifyDirection%27"><span class="annot"><span class="annottext">classifyDirection' :: forall r.
+(Ord r, Num r) =&gt;
+Vector 2 r
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+</span><a href="HGeometry.Direction.Cardinal.html#classifyDirection%27"><span class="hs-identifier hs-var hs-var">classifyDirection'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679366124"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679366124"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679366125"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679366125"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679366124"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#compare"><span class="hs-operator hs-var">`compare`</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-81"></span><span>  </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#LT"><span class="hs-identifier hs-var">LT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a. a -&gt; Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">(Either CardinalDirection InterCardinalDirection
+ -&gt; Maybe (Either CardinalDirection InterCardinalDirection))
+-&gt; Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679366125"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#compare"><span class="hs-operator hs-var">`compare`</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-82"></span><span>                 </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#LT"><span class="hs-identifier hs-var">LT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. b -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Right"><span class="hs-identifier hs-var">Right</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#SouthWest"><span class="hs-identifier hs-var">SouthWest</span></a></span><span>
+</span><span id="line-83"></span><span>                 </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#EQ"><span class="hs-identifier hs-var">EQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. a -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Left"><span class="hs-identifier hs-var">Left</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#West"><span class="hs-identifier hs-var">West</span></a></span><span>
+</span><span id="line-84"></span><span>                 </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#GT"><span class="hs-identifier hs-var">GT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. b -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Right"><span class="hs-identifier hs-var">Right</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#NorthWest"><span class="hs-identifier hs-var">NorthWest</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#EQ"><span class="hs-identifier hs-var">EQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679366125"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#compare"><span class="hs-operator hs-var">`compare`</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-86"></span><span>          </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#LT"><span class="hs-identifier hs-var">LT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a. a -&gt; Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">(Either CardinalDirection InterCardinalDirection
+ -&gt; Maybe (Either CardinalDirection InterCardinalDirection))
+-&gt; Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. a -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Left"><span class="hs-identifier hs-var">Left</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#South"><span class="hs-identifier hs-var">South</span></a></span><span>
+</span><span id="line-87"></span><span>          </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#EQ"><span class="hs-identifier hs-var">EQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Either CardinalDirection InterCardinalDirection)
+forall a. Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span>
+</span><span id="line-88"></span><span>          </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#GT"><span class="hs-identifier hs-var">GT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a. a -&gt; Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">(Either CardinalDirection InterCardinalDirection
+ -&gt; Maybe (Either CardinalDirection InterCardinalDirection))
+-&gt; Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. a -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Left"><span class="hs-identifier hs-var">Left</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#North"><span class="hs-identifier hs-var">North</span></a></span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#GT"><span class="hs-identifier hs-var">GT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a. a -&gt; Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">(Either CardinalDirection InterCardinalDirection
+ -&gt; Maybe (Either CardinalDirection InterCardinalDirection))
+-&gt; Either CardinalDirection InterCardinalDirection
+-&gt; Maybe (Either CardinalDirection InterCardinalDirection)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679366125"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#compare"><span class="hs-operator hs-var">`compare`</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-90"></span><span>                 </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#LT"><span class="hs-identifier hs-var">LT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. b -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Right"><span class="hs-identifier hs-var">Right</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#SouthEast"><span class="hs-identifier hs-var">SouthEast</span></a></span><span>
+</span><span id="line-91"></span><span>                 </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#EQ"><span class="hs-identifier hs-var">EQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. a -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Left"><span class="hs-identifier hs-var">Left</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#East"><span class="hs-identifier hs-var">East</span></a></span><span>
+</span><span id="line-92"></span><span>                 </span><span class="annot"><span class="annottext">Ordering
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#GT"><span class="hs-identifier hs-var">GT</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+-&gt; Either CardinalDirection InterCardinalDirection
+forall a b. b -&gt; Either a b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Either.html#Right"><span class="hs-identifier hs-var">Right</span></a></span><span> </span><span class="annot"><span class="annottext">InterCardinalDirection
+</span><a href="HGeometry.Direction.Cardinal.html#NorthEast"><span class="hs-identifier hs-var">NorthEast</span></a></span><span>
+</span><span id="line-93"></span></pre></body></html>
