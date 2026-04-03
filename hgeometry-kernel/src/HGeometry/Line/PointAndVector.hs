@@ -87,8 +87,8 @@ instance ( Eq r, Num r
   -- equation: line equation is: c + ax + by = 0
   -- pre: not all of a b and c are zero
   hyperPlaneFromEquation (Vector3 c a b)
-    | b == 0    = LinePV (Point2 (-c/a) 0)      (Vector2 0 1) -- if b=0 we are vertical
-    | otherwise = LinePV (Point2 0      (-c/b)) (Vector2 c (-a))
+    | b == 0    = LinePV (Point2 (- (c / a)) 0)      (Vector2 0 1) -- if b=0 we are vertical
+    | otherwise = LinePV (Point2 0      (- (c / b))) (Vector2 c (-a))
 
   fromPointAndNormal p (Vector2 vx vy) = LinePV (p^.asPoint) (Vector2 (-vy) vx)
 
@@ -296,7 +296,7 @@ instance OnSideUpDownTest (LinePV 2 r) where
   -- >>> Point2 5 5 `onSideUpDown` (lineThrough origin $ Point2 (-3) (-3))
   -- On
   q `onSideUpDown` (LinePV p v) = let r    =  p .+^ v
-                                      f z         = Vector2 (z^.xCoord) (-z^.yCoord)
+                                      f z         = Vector2 (z^.xCoord) (- (z^.yCoord))
                                       minBy g a b = if g a <= g b then a else b
                                       maxBy g a b = if g a >= g b then a else b
                                   in case ccw (minBy f p r) (maxBy f p r) (q^.asPoint) of
