@@ -10,6 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.General
   ( VerticalOrLineEQ(..)
+  , AsLine(..)
   ) where
 
 import Control.DeepSeq
@@ -123,3 +124,16 @@ instance (Eq r, Fractional r)
          => IsIntersectableWith (VerticalOrLineEQ r :+ extra) (VerticalOrLineEQ r :+ extra') where
   m `intersect` l = let ix = (m^.core) `intersect` (l^.core)
                     in fmap (const m) <$> ix -- if it is a line, just replace it by m
+
+--------------------------------------------------------------------------------
+
+-- | Types that can be converted into a general 2 dimensional line
+class AsLine line where
+  -- | Convert a given line into a general Line
+  asLine :: NumType line ~ r => line -> VerticalOrLineEQ r
+
+instance AsLine (VerticalOrLineEQ r) where
+  asLine = id
+
+instance AsLine (LineEQ r) where
+  asLine = NonVertical

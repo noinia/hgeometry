@@ -46,10 +46,9 @@ instance (Eq r, Num r) => HasIntersectionWith (LineEQ r) (LinePV 2 r) where
 instance (Ord r, Fractional r)
          => IsIntersectableWith (LineEQ r) (LinePV 2 r) where
   l `intersect` m = case toLinearFunction m of
-    Nothing    -> let x = m^.anchorPoint.xCoord
-                  in Just . Line_x_Line_Point $ Point2 x (evalAt' x l)
-                  -- m is vertical, l is not, so they intersect in a point
-    Just m'    -> l `intersect` m'
+    VerticalLineThrough x -> Just . Line_x_Line_Point $ Point2 x (evalAt' x l)
+                             -- m is vertical, l is not, so they intersect in a point
+    NonVertical m'        -> l `intersect` m'
 
 -- | Convert from a LineEQ to a Point and Line
 fromLineEQ              :: Num r => LineEQ r -> LinePV 2 r

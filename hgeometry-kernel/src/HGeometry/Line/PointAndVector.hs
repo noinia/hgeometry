@@ -31,24 +31,23 @@ module HGeometry.Line.PointAndVector
   , cmpSlope
   ) where
 
-import           Control.DeepSeq
-import           Control.Lens
-import           GHC.Generics (Generic)
-import           GHC.TypeLits
-import           HGeometry.Ext
-import           HGeometry.Sign
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
-import           HGeometry.Line.Class
-import           HGeometry.Line.Intersection
-import           HGeometry.Line.LineEQ
-import           HGeometry.Point
-import           HGeometry.HalfSpace
--- import           HGeometry.Point.EuclideanDistance
--- import           HGeometry.Point.Orientation.Degenerate
-import           HGeometry.Properties (NumType, Dimension)
-import           HGeometry.Vector
-import           Text.Read
+import Control.DeepSeq
+import Control.Lens
+import GHC.Generics (Generic)
+import GHC.TypeLits
+import HGeometry.Ext
+import HGeometry.Sign
+import HGeometry.HyperPlane.Class
+import HGeometry.Intersection
+import HGeometry.Line.Class
+import HGeometry.Line.Intersection
+import HGeometry.Line.LineEQ
+import HGeometry.Line.General
+import HGeometry.Point
+import HGeometry.HalfSpace
+import HGeometry.Properties (NumType, Dimension)
+import HGeometry.Vector
+import Text.Read
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -114,13 +113,15 @@ instance ( Eq r, Num r
 toLinearFunction                               :: forall r.
                                                   ( Fractional r, Ord r
                                                   )
-                                               => LinePV 2 r -> Maybe (LineEQ r)
-toLinearFunction l@(LinePV _ ~(Vector2 vx vy)) =
+                                               => LinePV 2 r -> VerticalOrLineEQ r
+toLinearFunction l@(LinePV p ~(Vector2 vx vy)) =
   case l `intersect` verticalLine @r @(LinePV 2 r) 0 of
-    Nothing                               -> Nothing -- l is vertical
-    Just (Line_x_Line_Point (Point2 _ b)) -> Just $ LineEQ (vy / vx) b
-    Just (Line_x_Line_Line _)             -> Nothing -- l is a vertical line (through x=0)
+    Nothing                               -> VerticalLineThrough (p^.xCoord)
+    Just (Line_x_Line_Point (Point2 _ b)) -> NonVertical $ LineEQ (vy / vx) b
+    Just (Line_x_Line_Line _)             -> VerticalLineThrough 0
 
+instance (Fractional r, Ord r) => AsLine (LinePV 2 r) where
+  asLine = toLinearFunction
 
 instance ( Show r, KnownNat d
          , Has_ Additive_ d r

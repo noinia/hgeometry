@@ -16,6 +16,7 @@
 --------------------------------------------------------------------------------
 module Ipe.IpeOut where
 
+import           Prelude hiding (sqrt)
 import           Control.Lens hiding (Simple, holes)
 import           Data.Foldable (toList)
 import           Data.Foldable1 (Foldable1)
@@ -32,17 +33,21 @@ import           HGeometry.Box
 import           HGeometry.Disk
 import           HGeometry.Ellipse (Ellipse, circleToEllipse)
 import           HGeometry.Ext
+import           HGeometry.Vector.Class
 import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.LineSegment
+import           Data.Maybe (fromMaybe)
+import           HGeometry.Transformation
 import           HGeometry.Number.Radical
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
+import           HGeometry.HyperPlane.Class
 import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Polygon.WithHoles
@@ -445,6 +450,60 @@ ipeHalfPlaneIn rect' c hl = case hl `intersect` rect' of
   where
     boundary = iO $ ipeLineIn rect' (hl^.boundingHyperPlane)
 
+
+-- | Renders a halfplane as a "constraint"; i.e. draw the bounding line and some "thickened"
+-- part of the bounding line (that is drawn outside) the halfplane. This thickened part
+-- is drawn using the given color.
+drawAsConstraint         :: forall line r.
+                            ( Fractional r, Real r, Ord r
+                            , HyperPlane_ line 2 r
+                            , IsIntersectableWith line (Rectangle (Point 2 r))
+                            , Intersection line (Rectangle (Point 2 r))
+                              ~ Maybe (LineBoxIntersection 2 r)
+                            )
+                         => IpeColor r
+                         -> IpeOut (HalfPlaneF line) Group r
+drawAsConstraint color h = ipeGroup [ iO $ defIO seg
+                                    , iO $ ipeSimplePolygon poly ! attr SFill color
+                                    ]
+  where
+    l = h^.boundingHyperPlane
+    f = case h^.halfSpaceSign of
+          Positive -> negated
+          Negative -> id
+    n = f $ normalVector l
+
+    width' = let q :: Double
+                 q = realToFrac $ quadrance n
+             in constraintDrawingWidth / realToFrac (sqrt q)
+
+    poly = fromMaybe (error "drawAsConstraint: absurd")
+         . fromPoints @(SimplePolygon (Point 2 r))
+         . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
+
+    seg' = translateBy (width' *^ n) seg
+
+    box :: Rectangle (Point 2 r)
+    box = Box (Point2 (-1000) (-1000)) (Point2 1000 1000)
+    -- the line segment we will d raw to represent the bounding line
+    seg = case l `intersect` box of
+            Nothing                             -> undefined
+            Just (Line_x_Box_Point _)           -> undefined
+            Just (Line_x_Box_LineSegment seg'') -> seg''
+
+    -- -- make sure the oreintation of the segment seg' and the orientation of the line l
+    -- -- are conisstent.
+    -- orientCorrectly seg''@(ClosedLineSegment s t)
+    --     | consistent = seg''
+    --     | otherwise  = ClosedLineSegment t s
+    --   where
+    --     n' = normalVector $ supportingLine seg''
+    --     consistent = ccw s (s .+^ n) t == ccw s (s .+^ n') t
+
+-- | The Width of a constraint in the halfplane constraint drawing
+-- (note; the acutal drawing may be subject to rounding)
+constraintDrawingWidth :: Num r => r
+constraintDrawingWidth = 100
 
 --------------------------------------------------------------------------------
 -- * Group Converters

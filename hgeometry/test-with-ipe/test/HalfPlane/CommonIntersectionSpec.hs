@@ -1,5 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
 module HalfPlane.CommonIntersectionSpec(spec) where
 
@@ -18,6 +19,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
+import           HGeometry.Vector (Vector(..))
 import           HGeometry.PolyLine
 import           HGeometry.LineSegment
 import           R
@@ -35,7 +37,8 @@ import           Test.QuickCheck.Instances ()
 import           Data.Sequence (Seq)
 import           HGeometry.Ext
 import           Data.These
-
+import           HGeometry.HalfPlane.CommonIntersection.Chain (unboundedEdges, _ChainAlternating)
+import           HGeometry.Sequence.NonEmpty (ViewL1(..))
 -- import Debug.Trace
 
 --------------------------------------------------------------------------------
@@ -54,8 +57,7 @@ spec = describe "common halfplane intersection tests" $ do
            let (uppers, lowers, res,answer) = testClip
            it "verify" $ res `shouldBe` answer
            ipeClipResult [osp|commonIntersectionClipManual|] uppers lowers
-         -- generateClipGolden [osp|commonIntersectionClip|]
-
+         generateClipGolden [osp|commonIntersectionClip|]
 
 generateGoldenSpec theName = do
     halfPlanes <- runIO onlyNegatives
@@ -67,8 +69,6 @@ generateClipGolden theName = do
     uppers <- runIO onlyNegatives
     lowers <- runIO onlyPositives
     ipeClipResult theName uppers lowers
-
-
 
 --------------------------------------------------------------------------------
 -- for now;
@@ -94,42 +94,28 @@ generateClipGolden theName = do
 
 --------------------------------------------------------------------------------
 
-
-
-
-ipeClipResult theName uppers lowers = case boundaries' $ These uppers lowers of
-  These myUpper myLower -> do
-    let result = clipUpperByLower myUpper myLower
-    goldenWith [osp|data/test-with-ipe/golden/|]
-                    (ipeContentGolden { name = theName  })
-                    [ iO $ defIO myUpper ! attr SStroke green
-                    , iO $ defIO myLower ! attr SStroke blue
-                    , iO $ defIO result  ! attr SStroke purple
-                    , iO $ ipeGroup [ iO $ asConstraint lightgreen h
-                                    | h <- F.toList uppers
-                                    ]  ! attr SLayer "uppers"
-                    , iO $ ipeGroup [ iO $ asConstraint lightblue h
-                                    | h <- F.toList lowers
-                                    ]  ! attr SLayer "lowers"
-                    ]
-  _ -> error "ipeClipresult: absurd?"
-
-instance ( Foldable f
-         , Fractional r, Ord r
-         ) => HasDefaultIpeOut (Chain f r halfPlane) where
-  type DefaultIpeOut (Chain f r halfPlane) = Path
-  defIO  = defIO . toPolyLineIn defaultBox
-
-
-
-
-
-toPolyLineIn           :: Foldable f
-                       => Rectangle (Point 2 r)
-                       -> Chain f r halfPlane -> PolyLine (Point 2 r)
-toPolyLineIn _box (Chain c) =
-  polyLineFromPoints . NonEmpty.fromList . bifoldMap (:[]) (const []) $ c
-  -- TODO: use the box somehow
+ipeClipResult                       :: _
+                                    -> NonEmpty (HalfPlane R)
+                                    -> NonEmpty (HalfPlane R)
+                                    -> Spec
+ipeClipResult theName uppers lowers =
+  case boundaries' $ These uppers lowers of
+    These myUpper myLower -> do
+      let result  = clipUpperByLower myUpper myLower
+      goldenWith [osp|data/test-with-ipe/golden/|]
+                      (ipeContentGolden { name = theName  })
+                      [
+                      --    iO $ defIO myUpper ! attr SStroke green
+                      -- , iO $ defIO myLower ! attr SStroke blue
+                      -- , iO $ defIO result  ! attr SStroke purple
+                       iO $ ipeGroup [ iO $ drawAsConstraint lightgreen h
+                                      | h <- F.toList uppers
+                                      ]  ! attr SLayer "uppers"
+                      , iO $ ipeGroup [ iO $ drawAsConstraint lightblue h
+                                      | h <- F.toList lowers
+                                      ]  ! attr SLayer "lowers"
+                      ]
+    _ -> error "ipeClipresult: absurd?"
 
 
 asLineEQ :: Show r => VerticalOrLineEQ r -> LineEQ r
@@ -137,11 +123,15 @@ asLineEQ = \case
   NonVertical              l -> l
   VerticalLineThrough x    -> error $ "vertical line at " <> show x  <> " !?"
 
+type These2 a = These a a
 
+boundaries' :: These2 (NonEmpty (HalfPlane R))
+            -> These2 (Chain Seq R (LineEQ R :+ (HalfPlane R)))
 boundaries' = let f = fmap (\h -> asLineEQ (h^.boundingHyperPlane) :+ h)
               in boundaries . bimap f f
 
-testClip :: ( NonEmpty _, NonEmpty _
+testClip :: ( NonEmpty (HalfPlane R)
+            , NonEmpty (HalfPlane R)
             , Chain Seq R (LineEQ R :+ HalfPlane R)
             , Chain Seq R (LineEQ R :+ HalfPlane R))
 testClip = (uppers, lowers, clipUpperByLower myUpper myLower, answer)
@@ -249,32 +239,9 @@ onlyPositives = generateInput <&> fmap (\h -> h&halfSpaceSign .~ Positive)
 myIpeTest       :: NonEmpty (HalfPlane R) -> [IpeObject R]
 myIpeTest input = [ iO $ maybe (ipeGroup []) draw $ commonIntersection input
                   ] <>
-                  [ iO $ asConstraint gray h
+                  [ iO $ drawAsConstraint gray h
                   | h <- F.toList input
                   ]
-
-asConstraint         :: forall r. (Fractional r, Ord r)
-                     => IpeColor r -> IpeOut (HalfPlane r) Group r
-asConstraint color h = ipeGroup [ iO $ defIO seg
-                                , iO $ ipeSimplePolygon poly ! attr SFill color
-                                ]
-  where
-    l = h^.boundingHyperPlane
-    n = normalVector l
-    poly = fromMaybe (error "asConstraint: absurd")
-         . fromPoints @(SimplePolygon (Point 2 r))
-         . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
-
-    seg' = translateBy n seg
-
-    box :: Rectangle (Point 2 r)
-    box = Box (Point2 (-1000) (-1000)) (Point2 1000 1000)
-    -- the line segment we will d raw to represent the bounding line
-    seg = case l `intersect` box of
-            Nothing                             -> undefined
-            Just (Line_x_Box_Point _)           -> undefined
-            Just (Line_x_Box_LineSegment seg'') -> seg''
-
 
 
 draw :: IpeOut (CommonIntersection (HalfPlane r) r) Group r
@@ -284,3 +251,56 @@ draw = \case
   Slab _hl _hr           -> ipeGroup []
   BoundedRegion _pg      -> ipeGroup []
   UnboundedRegion _chain -> ipeGroup []
+
+
+--------------------------------------------------------------------------------
+
+instance ( Foldable f
+         , Fractional r, Ord r
+         , HalfPlane_ halfPlane r
+         , Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
+         , Snoc (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                (Point 2 r, halfPlane) (Point 2 r, halfPlane)
+         , HasDirection (BoundingHyperPlane halfPlane 2 r)
+         , Intersection (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
+           ~ Maybe (LineBoxIntersection 2 r)
+         , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
+         ) => HasDefaultIpeOut (Chain f r halfPlane) where
+  type DefaultIpeOut (Chain f r halfPlane) = Path
+  defIO  = defIO . toPolyLineIn defaultBox
+
+-- | Render the chain as a polyline; slipping the first and last
+-- halfplanes at the boundary of the box.
+--
+-- pre: the first and last vertex of the chain lie inside the box.
+toPolyLineIn       :: ( HalfPlane_ halfPlane r
+                      , Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                             (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
+                      , Snoc (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                             (Point 2 r, halfPlane) (Point 2 r, halfPlane)
+                      , HasDirection (BoundingHyperPlane halfPlane 2 r)
+                      , Foldable f, Ord r, Fractional r
+                      , Intersection (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
+                        ~ Maybe (LineBoxIntersection 2 r)
+                      , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
+                      )
+                   => Rectangle (Point 2 r)
+                   -> Chain f r halfPlane -> PolyLine (Point 2 r)
+toPolyLineIn box c = case bimap (^.core) (fmap (^.core)) $ unboundedEdges c of
+    Left l             -> case l `intersect` box of
+                             Just (Line_x_Box_LineSegment seg) -> polyLineFromPoints seg
+                             Just (Line_x_Box_Point _p)        ->
+                               error "toPolyLineIn precondition failed; point touches"
+                             Nothing ->
+                               error "toPolyLineIn precondition failed; no intersection"
+    Right (Vector2 s t) -> let u = computeVertex s
+                               v = computeVertex t
+                               vs = bifoldMap (Seq.singleton) (const mempty)
+                                  $ c^._ChainAlternating
+                           in polyLineFromPoints $ u :<< (vs Seq.|> v)
+  where
+    computeVertex ray = case ray `intersect` box of
+      Just (HalfLine_x_Box_LineSegment seg) -> seg^.end
+      Just (HalfLine_x_Box_Point p)         -> p
+      Nothing                               -> error "toPolyLineIn precondition failed"

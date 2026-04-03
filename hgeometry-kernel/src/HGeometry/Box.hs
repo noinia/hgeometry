@@ -197,13 +197,13 @@ instance ( Num r, Ord r
 instance ( Fractional r, Ord r
          , Point_ point 2 r
          ) =>  IsIntersectableWith (LinePV 2 r) (Rectangle point) where
-  l@(LinePV p _) `intersect` r = case toLinearFunction l of
-      Nothing
-        | (p^.xCoord) `stabsInterval` xRange -> Just . Line_x_Box_LineSegment
-                                              $ ClosedLineSegment (Point2 (p^.xCoord) minY)
-                                                                  (Point2 (p^.xCoord) maxY)
-        | otherwise                          -> Nothing
-      Just l'                                -> l' `intersect` r
+  l `intersect` r = case toLinearFunction l of
+      VerticalLineThrough x
+        | x `stabsInterval` xRange -> Just . Line_x_Box_LineSegment
+                                              $ ClosedLineSegment (Point2 x minY)
+                                                                  (Point2 x maxY)
+        | otherwise                -> Nothing
+      NonVertical l'               -> l' `intersect` r
     where
       Vector2 xRange (ClosedInterval minY maxY) = extent r
   {-# INLINE intersect #-}

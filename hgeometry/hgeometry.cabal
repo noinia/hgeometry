@@ -58,6 +58,7 @@ common all-setup
       , hgeometry-polyLine        >= 1             && < 1.1
       , hgeometry-spline          >= 1             && < 1.1
       , hgeometry-polygon         >= 1             && < 1.1
+      -- , hgeometry-ipe             >= 1             && < 1.1
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
@@ -256,6 +257,7 @@ library
         HGeometry.IntervalTree
 
         HGeometry.HalfPlane.CommonIntersection
+        HGeometry.HalfPlane.CommonIntersection.Chain
 
         HGeometry.Polygon.Triangulation
         HGeometry.Polygon.Triangulation.TriangulateMonotone
@@ -298,7 +300,6 @@ library
       , HGeometry.LineSegment.Intersection.BentleyOttmann
 
     other-modules:
-        HGeometry.HalfPlane.CommonIntersection.Chain
 
         HGeometry.DelaunayTriangulation.Types
 
@@ -465,6 +466,8 @@ common with-ipe-hspec-fractional
       Plane.RenderEnvelopeSpec
       Plane.RenderProps
           -- TODO: move these ones
+
+      HalfPlane.Intersect
 
       Plane.BatchPointLocationSpec
 
