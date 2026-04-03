@@ -318,15 +318,17 @@ ipeLineIn bBox l = case l `intersect` bBox of
 -- | Renders an Halfine.
 --
 -- pre: the intersection of the box with the line is non-empty
-ipeHalfLine :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point) => IpeOut (HalfLine point) Path r
-ipeHalfLine = \(HalfLine p v) -> ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
+ipeHalfLine                :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point)
+                           => IpeOut (HalfLine point) Path r
+ipeHalfLine (HalfLine p v) = ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
 
 -- | Renders a ray, i.e. a half line drawing an arrow in the direction
 -- of the ray.
 --
 -- pre: the intersection of the box with the line is non-empty
-ipeRay :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point) => IpeOut (HalfLine point) Path r
-ipeRay = \hl -> ipeHalfLine hl ! attr SArrow normalArrow
+ipeRay    :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point)
+          => IpeOut (HalfLine point) Path r
+ipeRay hl = ipeHalfLine hl ! attr SArrow normalArrow
 
 -- | Renders the HalfLine in the given box.
 --
@@ -351,8 +353,8 @@ ipePolyLine p = (path . PolyLineSegment $ p) :+ mempty
 
 
 -- | Renders an Ellipse to a Path
-ipeEllipse :: IpeOut (Ellipse r) Path r
-ipeEllipse = \e -> path (EllipseSegment e) :+ mempty
+ipeEllipse   :: IpeOut (Ellipse r) Path r
+ipeEllipse e = path (EllipseSegment e) :+ mempty
 
 -- | Renders a circle to a Path
 ipeCircle :: Radical r => IpeOut (Circle (Point 2 r)) Path r
@@ -363,8 +365,8 @@ ipeDisk   :: Radical r => IpeOut (Disk (Point 2 r)) Path r
 ipeDisk d = ipeCircle (MkSphere d) ! attr SFill (IpeColor "0.722 0.145 0.137")
 
 -- | Renders a Bezier curve to a Path
-ipeBezier :: IpeOut (CubicBezier (Point 2 r)) Path r
-ipeBezier b = (path $ CubicBezierSegment b) :+ mempty
+ipeBezier   :: IpeOut (CubicBezier (Point 2 r)) Path r
+ipeBezier b = path (CubicBezierSegment b) :+ mempty
 
 -- | Helper to construct a path from a singleton item
 path :: PathSegment r -> Path r
@@ -537,10 +539,10 @@ labelledWith                      :: (Show lbl, NumType g ~ r, ToObject i)
                                   -> IpeOut g i r     -- ^ how to draw the geometric object
                                   -> IpeOut (g :+ lbl) Group r
 labelledWith ats pos f (g :+ lbl) = ipeGroup [ iO $ f g
-                                     , iO $ ipeLabel ((toInlineLatex $ Text.show lbl) :+ pos g) ! ats
+                                     , iO $ ipeLabel (toInlineLatex (Text.show lbl) :+ pos g) ! ats
                                      ]
 
 -- | Convert a text into a valid piece of inline latex
 toInlineLatex :: Text -> InlineLaTeX
-toInlineLatex = Text.replace "_" ("\\_")
+toInlineLatex = Text.replace "_" "\\_"
 -- for the moment we just make sure that our underscores get properly escaped

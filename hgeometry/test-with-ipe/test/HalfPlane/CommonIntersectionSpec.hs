@@ -126,7 +126,7 @@ asLineEQ = \case
 type These2 a = These a a
 
 boundaries' :: These2 (NonEmpty (HalfPlane R))
-            -> These2 (Chain Seq R (LineEQ R :+ (HalfPlane R)))
+            -> These2 (Chain Seq R (LineEQ R :+ HalfPlane R))
 boundaries' = let f = fmap (\h -> asLineEQ (h^.boundingHyperPlane) :+ h)
               in boundaries . bimap f f
 
@@ -296,7 +296,7 @@ toPolyLineIn box c = case bimap (^.core) (fmap (^.core)) $ unboundedEdges c of
                                error "toPolyLineIn precondition failed; no intersection"
     Right (Vector2 s t) -> let u = computeVertex s
                                v = computeVertex t
-                               vs = bifoldMap (Seq.singleton) (const mempty)
+                               vs = bifoldMap Seq.singleton (const mempty)
                                   $ c^._ChainAlternating
                            in polyLineFromPoints $ u :<< (vs Seq.|> v)
   where

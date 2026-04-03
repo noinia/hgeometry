@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{- HLINT ignore "Use camelCase" -}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Box
