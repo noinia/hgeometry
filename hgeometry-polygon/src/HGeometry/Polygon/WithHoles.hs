@@ -240,7 +240,7 @@ instance Semigroup Monoid where
 instance ( HoleContainer h nonEmpty vertex
          , VertexContainer nonEmpty vertex, HasFromFoldable1 nonEmpty, Point_ vertex 2 r
          , Fractional r, Ord r
-         ) => HasPickPoint (PolygonalDomainF h nonEmpty vertex) r where
+         ) => HasPickInteriorPoint (PolygonalDomainF h nonEmpty vertex) 2 r where
   pointInteriorTo pg = case foldMapOf vertices farthest pg of
       Nothing              -> pointInteriorTo tri
       Just (Max (Arg _ p)) -> Point $ lerp (1/2) (v^.vector) (p^.vector)

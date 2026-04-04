@@ -297,8 +297,12 @@ instance (Point_ vertex 2 r, Fractional r, Eq r) => HasPickInteriorPoint (Triang
       -- TODO: this is just the definition of centroid, copied over from
       -- the simple polygon class. Avoid the code duplication, by splititng the SimplePolygon_
       -- class
-      centroid' poly = fromVector $ sum' xs ^/ (3 * signedArea2X poly)
+      centroid' (Triangle a b c) = fromVector $ sum' xs ^/ (3 * signedArea2X)
         where
-           xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
-                | (p,q) <- poly ^..outerBoundaryEdges   ]
-           sum' = foldl' (^+^) zero
+          edges' = [(a,b),(b,c),(c,a)]
+          xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
+               | (p,q) <- edges'   ]
+          sum' = foldl' (^+^) zero
+          signedArea2X = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
+                             | (p,q) <- edges'
+                             ]

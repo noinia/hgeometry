@@ -16,7 +16,6 @@ module HGeometry.HyperPlane.Class
   , NonVerticalHyperPlane_(..)
   , Plane_, pattern Plane_
   , isParallelTo
-  , pointOn
 
   , HyperPlaneFromPoints(..)
   , showPlaneEquation
@@ -190,33 +189,6 @@ class ( NumType hyperPlane ~ r
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
   onSideTest q h = 0 `compare` evalHyperPlaneEquation h q
   {-# INLINE onSideTest #-}
-
--- | Produce a point that lies on the hyperplane. No gurantees are given about which point
---
--- >>> pointOn myLine
--- Point2 (-2.0) 0.0
-pointOn   :: forall hyperPlane d r.
-             ( HyperPlane_ hyperPlane d r, Eq r, Fractional r, Has_ Additive_ d r
-             , FoldableWithIndex Int (Vector d)
-             , Has_ Vector_ (d+1) r, d <= d +1, 0 <= (d+1)-1 -- these are silly :(
-             )
-          => hyperPlane -> Point d r
-pointOn h = case uncons $ hyperPlaneEquation h of
-              (0, _)  -> origin
-              (a0, a) -> case ifind (const (/= 0)) (a :: Vector d r) of
-                           Nothing     -> error "pointOn: Invalid hyperplane"
-                           Just (i,ai) ->
-                             (origin :: Point d r)&vector.component' i .~ (negate a0 / ai)
-  -- We are trying to find a point p so that a0 + sum_{i=1}^d ai*pi = 0,
-  -- in other words, so that
-  --
-  --    sum_{i=1}^d ai*pi = -a0                          (1)
-  --
-  -- so if a0 is actually zero, we can simply choose all the pi's in Eq 1 to be zero anyway.
-  -- if a0 is not zero, then there must be at least one ai that is non-zero; otherwise
-  -- we would have the equation 0 = <notzero>. Hence, we find this ai. We then rewrite Eq (1)
-  -- to: ai*pi + sum_{j /= i} aj*pj = -a0. Hence, we pick all the pj's to be zero, and
-  -- set pi to -a0/ai.
 
 
 -- | Class representing hyperplanes with methods to construct the

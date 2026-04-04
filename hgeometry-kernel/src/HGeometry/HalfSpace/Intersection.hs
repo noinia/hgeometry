@@ -38,7 +38,7 @@ instance ( Ord r, Fractional r
          )
        => IsIntersectableWith (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) where
   h@(HalfSpace sign l) `intersect` h'@(HalfSpace sign' l') = case l `intersect` l' of
-      Nothing -> case (pointOn l `intersects` h', pointOn l' `intersects` h) of
+      Nothing -> case (pointInteriorTo l `intersects` h', pointInteriorTo l' `intersects` h) of
         (False,False) -> Nothing
         (True,False)  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h
         (False,True)  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h'
@@ -62,8 +62,8 @@ instance ( Ord r, Fractional r
       -- contain this point they are oriented the same way. Otherwise, they are oriented
       -- in opposite directions, and thus the halfplanes intersect in a line.
       sameSide = q `intersects` h == q `intersects` h'
-      q = pointOn l .+^ Vector2 0 1 -- take some offset; this uses that l is not vertial.
+      q = pointInteriorTo l .+^ Vector2 0 1 -- take some offset; this uses that l is not vertial.
 
 
-      slab = let w = squaredEuclideanDistTo (pointOn l') l
+      slab = let w = squaredEuclideanDistTo (pointInteriorTo l') l
              in Slab (fromLineEQ l) (if l^.intercept  > l'^.intercept then w else negate w)

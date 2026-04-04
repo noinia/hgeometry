@@ -66,7 +66,7 @@ instance HyperPlane_ (VerticalOrLineEQ r) 2 r where
 instance Num r => HasPickInteriorPoint (VerticalOrLineEQ r) 2 r where
   pointInteriorTo = \case
     VerticalLineThrough x -> Point2 x 0
-    NonVertical l         -> pointOn l
+    NonVertical l         -> pointInteriorTo l
 
 instance (Fractional r, Eq r) => ConstructableHyperPlane_ (VerticalOrLineEQ r) 2 r where
   type HyperPlaneFromEquationConstraint (VerticalOrLineEQ r) 2 r = ()

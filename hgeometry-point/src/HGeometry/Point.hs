@@ -56,6 +56,7 @@ module HGeometry.Point
 
   , HasPoints(..), HasPoints'
   , CanonicalPoint
+  , HasPickInteriorPoint(..)
   ) where
 
 import Control.Lens (Lens', Iso', coerced, (^.))
@@ -64,6 +65,7 @@ import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
 import HGeometry.Point.Orientation
 import HGeometry.Point.PointF
+import HGeometry.Point.Type
 import HGeometry.Point.Quadrants
 import HGeometry.Properties
 import HGeometry.Vector
@@ -75,9 +77,6 @@ import HGeometry.Vector
 -- >>> import Control.Lens(Lens', Iso', (^.), coerced)
 
 --------------------------------------------------------------------------------
-
--- | d-dimensional points
-type Point d r = PointF (Vector d r)
 
 -- | Convert a generic point into a Point d r, dropping any additional
 -- information we may now about it.

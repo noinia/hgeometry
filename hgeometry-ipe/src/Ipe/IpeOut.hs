@@ -462,6 +462,8 @@ drawAsConstraint         :: forall line r.
                             , IsIntersectableWith line (Rectangle (Point 2 r))
                             , Intersection line (Rectangle (Point 2 r))
                               ~ Maybe (LineBoxIntersection 2 r)
+
+                            , Show r -- FIXME: drop this one
                             )
                          => IpeColor r
                          -> IpeOut (HalfPlaneF line) Group r
@@ -479,7 +481,7 @@ drawAsConstraint color h = ipeGroup [ iO $ defIO seg
                  q = realToFrac $ quadrance n
              in constraintDrawingWidth / realToFrac (sqrt q)
 
-    poly = fromMaybe (error "drawAsConstraint: absurd")
+    poly = fromMaybe (error "drawAsConstraint: absurd" $ show (seg,seg'))
          . fromPoints @(SimplePolygon (Point 2 r))
          . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
 

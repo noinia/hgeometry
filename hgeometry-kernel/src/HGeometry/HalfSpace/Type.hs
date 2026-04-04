@@ -139,10 +139,11 @@ instance ( HasSquaredEuclideanDistance boundingHyperPlane
 --------------------------------------------------------------------------------
 
 
-instance (HasIntersectionWith line line'
+instance ( HasIntersectionWith line line'
          , HyperPlane_ line 2 r, HyperPlane_ line' 2 r
          , Ord r, Fractional r
+         , HasPickInteriorPoint line 2 r, HasPickInteriorPoint line' 2 r
          )
        => HasIntersectionWith (HalfSpaceF line) (HalfSpaceF line') where
   h@(HalfSpace _ l) `intersects` h'@(HalfSpace _ l') =
-    l `intersects` l' || pointOn l `intersects`  h' || pointOn l' `intersects`  h
+    l `intersects` l' || pointInteriorTo l `intersects`  h' || pointInteriorTo l' `intersects`  h

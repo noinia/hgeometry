@@ -41,17 +41,17 @@ spec = describe "halfspace Tests" $ do
          prop "normal vector points into positive halfspace" $
            \(h :: HyperPlane 2 Rational) ->
              let n = normalVector h
-                 p = pointOn h
+                 p = pointInteriorTo h
              in (p .+^ n) `intersects` HalfSpace Positive h
          prop "normal vector points into positive halfspace (NonVertical HyperPlane)" $
            \(h :: NonVerticalHyperPlane 3 Rational) ->
              let n = normalVector h
-                 p = pointOn h
+                 p = pointInteriorTo h
              in (p .+^ n) `intersects` HalfSpace Positive h
          prop "normal vector points into positive halfspace (LineEQ)" $
            \(h :: LineEQ Rational) ->
              let n = normalVector h
-                 p = pointOn h
+                 p = pointInteriorTo h
              in (p .+^ n) `intersects` HalfSpace Positive h
          -- it "intersect tests" $ do
          --   let h = HalfSpace Positive $ horizontalLine (4 % 1 :: Rational)
