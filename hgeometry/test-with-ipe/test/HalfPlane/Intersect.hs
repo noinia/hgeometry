@@ -36,6 +36,7 @@ import           R
 import           Golden (getDataFileName)
 import           HalfPlane.CommonIntersectionSpec ()
 import           HGeometry.Polygon
+import           HalfPlane.Cone
 import           Test.Hspec
 
 import           Debug.Trace
@@ -79,7 +80,7 @@ outPath = getDataFileName [osp|test-with-ipe/golden/Halfplane/intersection.out.i
 
 testMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
               case halfPlanes' of
-                (h1:h2:_) -> do let res = (h1^.boundingHyperPlane) `intersect` h2
+                (h1:h2:_) -> do let res = h1 `intersect` h2
                                 print res
                                 outPath' <- outPath
                                 writeIpeFile outPath' . singlePageFromContent . concat $
@@ -165,20 +166,59 @@ joinChains pref suf = pref -- FIXME!!!
 --          ) =>
 
 
+--------------------------------------------------------------------------------
 
-data Cone r edge = Cone { _apex                :: Point 2 r
-                        , _leftBoundaryVector  :: Vector 2 r :+ edge
-                        -- ^ the interior of the cone is to the right
-                        , _rightBoundaryVector :: Vector 2 r :+ edge
-                        }
-                 deriving (Show,Eq,Ord)
+
+
+--------------------------------------------------------------------------------
+
+data Slab' halfPlane = Slab' halfPlane halfPlane
+  deriving (Show,Eq)
+
+type instance NumType   (Slab' halfPlane) = NumType halfPlane
+type instance Dimension (Slab' halfPlane) = 2
+
+
+--------------------------------------------------------------------------------
+
+instance (HalfPlane_ halfPlane r
+         ) => HasDefaultIpeOut (Slab' halfPlane) where
+  type DefaultIpeOut (Slab' halfPlane) = Group
+  defIO (Slab' h1 h2) = ipeGroup []
+
+    -- ipeGroup [ iO $ defIO (h1^.boundingHyperPlane)
+    --                              , iO $ defIO (h2^.boundingHyperPlane)
+    --                              ]
+    -- -- TODO: do this property; i.e. compute the intersection with the bounding box
+
+
+instance HasDefaultIpeOut (Cone r edge) where
+  type DefaultIpeOut (Cone r edge) = Group
+  defIO c = undefined
+
+    -- (Slab' h1 h2) =
+
+
+    -- ipeGroup [ iO $ defIO (h1^.boundingHyperPlane)
+    --                              , iO $ defIO (h2^.boundingHyperPlane)
+    --                              ]
+    -- -- TODO: do this property; i.e. compute the intersection with the bounding box
+
+
+--------------------------------------------------------------------------------
+
 
 -- | The non-empty intersection of two halfPlanes
 data HalfPlaneIntersection r halfPlane =
     HalfPlane_x_HalfPlane_Line (BoundingHyperPlane halfPlane 2 r)
-  | HalfPlane_x_HalfPlane_Slab halfPlane halfPlane -- this may be too general
+  | HalfPlane_x_HalfPlane_Slab (Slab' halfPlane)
   | HalfPlane_x_HalfPlane_Cone (Cone r halfPlane)
   | HalfPlane_x_HalfPlane_HalfPlane halfPlane
+
+deriving instance (Show r, Show halfPlane, Show (BoundingHyperPlane halfPlane 2 r)
+                  ) => Show (HalfPlaneIntersection r halfPlane)
+deriving instance (Eq r, Eq halfPlane, Eq (BoundingHyperPlane halfPlane 2 r)
+                  ) => Eq (HalfPlaneIntersection r halfPlane)
 
 type instance NumType   (HalfPlaneIntersection r halfPlane) = r
 type instance Dimension (HalfPlaneIntersection r halfPlane) = 2
@@ -207,6 +247,25 @@ instance ( HasDefaultIpeOut line, Fractional r, Ord r, Show r
   defIO = \case
     Line_x_HalfPlane_Line line   -> defIO line
     Line_x_HalfPlane_HalfLine hl -> defIO hl
+
+
+instance ( HasDefaultIpeOut halfPlane
+         , HasDefaultIpeOut (BoundingHyperPlane halfPlane 2 r)
+         , HalfPlane_ halfPlane r
+         , Fractional r, Ord r
+         , Show r
+         -- , DefaultIpeOut halfPlane ~ Path
+         , NumType halfPlane ~ r
+         , Dimension halfPlane ~ 2
+         , Dimension (BoundingHyperPlane halfPlane 2 r) ~ 2
+         , NumType (BoundingHyperPlane halfPlane 2 r) ~ r
+         ) => HasDefaultIpeOut (HalfPlaneIntersection r halfPlane) where
+  type DefaultIpeOut (HalfPlaneIntersection r halfPlane) = Group
+  defIO = \case
+    HalfPlane_x_HalfPlane_Line line           -> ipeGroup [iO $ defIO line]
+    HalfPlane_x_HalfPlane_Slab slab           -> ipeGroup [iO $ defIO slab]
+    HalfPlane_x_HalfPlane_Cone cone           -> ipeGroup [iO $ defIO cone]
+    HalfPlane_x_HalfPlane_HalfPlane halfPlane -> ipeGroup [iO $ defIO halfPlane ]
 
 --------------------------------------------------------------------------------
 class GetDirection line where
@@ -279,9 +338,9 @@ intersectLineHalfplane l h = case l `intersect` (h^.boundingHyperPlane) of
 type instance Intersection (HalfPlane r) (HalfPlane r) =
   Maybe (HalfPlaneIntersection r (HalfPlane r))
 
--- instance ( Fractional r, Ord r
---          ) => IsIntersectableWith (HalfPlane r) (HalfPlane r) where
---   intersect = intersectsTwo
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (HalfPlane r) (HalfPlane r) where
+  intersect = intersectTwo
 
 --------------------------------------------------------------------------------
 
@@ -289,23 +348,33 @@ type instance Intersection (HalfPlane r) (HalfPlane r) =
 intersectTwo :: ( HalfPlane_ halfPlane r
                 , Fractional r, Ord r
                 , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
-                , Show halfPlane, Show r
                 , HasIntersectionWith (Point 2 r) halfPlane
-                , AsLine (BoundingHyperPlane halfPlane 2 r)
+                , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
+                , GetDirection (BoundingHyperPlane halfPlane 2 r)
                 , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r) (BoundingHyperPlane halfPlane 2 r)
                 , Intersection (BoundingHyperPlane halfPlane 2 r)
                   (BoundingHyperPlane halfPlane 2 r)
                   ~ Maybe (LineLineIntersection (BoundingHyperPlane halfPlane 2 r))
                 ) => halfPlane -> halfPlane -> Maybe (HalfPlaneIntersection r halfPlane)
-intersectTwo h1 h2 = case (h1^.boundingHyperPlane) `intersect` (h2^.boundingHyperPlane) of
-    Nothing -> undefined
+intersectTwo h1 h2 = case l1 `intersect` l2 of
+    Nothing -> case (pointInteriorTo l1 `intersects` h2, pointInteriorTo l2 `intersects` h1) of
+      (False,False) -> Nothing
+      (True, False) -> Just $ HalfPlane_x_HalfPlane_HalfPlane h1
+      (False, True) -> Just $ HalfPlane_x_HalfPlane_HalfPlane h2
+      (True,True)   -> Just $ HalfPlane_x_HalfPlane_Slab (Slab' h1 h2)
+        -- todo; make slab into a better type
+    Just i  -> case i of
+      Line_x_Line_Line l  -> Just $ HalfPlane_x_HalfPlane_Line l
+      Line_x_Line_Point a -> Just $ HalfPlane_x_HalfPlane_Cone
+                                  $ Cone a (v Positive h1 l1)
+                                           (v Negative h2 l2)
+  where
+    l1 = h1^.boundingHyperPlane
+    l2 = h2^.boundingHyperPlane
 
-
-      -- | (h2^.boundingHyperPlane) `intersects` h1 -> Just $ HalfPlane_x_HalfPlane_HalfPlane h2
-
-
-      -- ->
-    Just i  -> undefined
+    f s s' | s' == s   = id
+           | otherwise = negated
+    v s h l = f s (h^.halfSpaceSign) (inLineVector l) :+ h
 
   -- case (h1^.boundingHyperPlane) `intersect` h2 of
   --   Nothing
@@ -318,9 +387,6 @@ intersectTwo h1 h2 = case (h1^.boundingHyperPlane) `intersect` (h2^.boundingHype
 
 
 
---       Line_x_Line_Line l  -> undefined -- subLine -- orPoint? or duplicate constraint
---       Line_x_Line_Point v -> OneChain $ consChain (h,v) chain
---                 -- TODO: extract this into the intersection type of two halfpsaces
 
 
 
