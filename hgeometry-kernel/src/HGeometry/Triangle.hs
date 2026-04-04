@@ -290,3 +290,15 @@ instance ( Point_ corner 2 r, Point_ vertex 2 r, Num r, Ord r
                                                     , ClosedLineSegment c a
                                                     ]
                               )
+
+instance (Point_ vertex 2 r, Fractional r, Eq r) => HasPickInteriorPoint (Triangle vertex) 2 r where
+  pointInteriorTo = centroid'
+    where
+      -- TODO: this is just the definition of centroid, copied over from
+      -- the simple polygon class. Avoid the code duplication, by splititng the SimplePolygon_
+      -- class
+      centroid' poly = fromVector $ sum' xs ^/ (3 * signedArea2X poly)
+        where
+           xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
+                | (p,q) <- poly ^..outerBoundaryEdges   ]
+           sum' = foldl' (^+^) zero

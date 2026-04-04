@@ -107,6 +107,9 @@ instance ( Eq r, Num r
     -- our slope a1 = vy/vx, and our intercept a0 = py-(vy/vx)px, and a2 = (-1)
     -- multiplying everything by vx gets rid of the fraction, and yields the above equation.
 
+instance HasPickInteriorPoint (LinePV d r) d r where
+  pointInteriorTo (LinePV p _) = p
+
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.
 -- returns Nothing if the line is vertical

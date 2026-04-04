@@ -85,6 +85,9 @@ instance ( MkHyperPlaneConstraints 2 r
          ) => HyperPlane_ (LineEQ r) 2 r where
   onHyperPlane = onLine
 
+instance Num r => HasPickInteriorPoint (LineEQ r) 2 r where
+  pointInteriorTo (LineEQ _ b) = Point2 0 b
+
 instance ( MkHyperPlaneConstraints 2 r
          , Fractional r, Eq r
          ) => ConstructableHyperPlane_ (LineEQ r) 2 r where
