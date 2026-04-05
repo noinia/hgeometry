@@ -10,6 +10,7 @@ module HalfPlane.Intersect
 import           HGeometry.HalfPlane.CommonIntersection.Chain
 import           HGeometry.HalfPlane.CommonIntersection (CommonIntersection(..))
 import           HGeometry.HalfSpace
+import           HGeometry.Cyclic
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Unbounded
 import qualified Data.Sequence as Seq
@@ -23,6 +24,7 @@ import           Data.Coerce
 import           Data.Foldable1
 import           Data.Ord (Down (..))
 import           HGeometry.Foldable.Sort (sortOnCheap)
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Vector.NonEmpty as NonEmptyVector
 import qualified Data.Vector as Vector
 import           Ipe
@@ -36,8 +38,9 @@ import           R
 import           Golden (getDataFileName)
 import           HalfPlane.CommonIntersectionSpec ()
 import           HGeometry.Polygon
-import           HalfPlane.Cone
+import           HGeometry.Cone
 import           Test.Hspec
+import           HalfPlane.Cone.IntersectRect
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -192,18 +195,19 @@ instance (HalfPlane_ halfPlane r
     -- -- TODO: do this property; i.e. compute the intersection with the bounding box
 
 
-instance HasDefaultIpeOut (Cone r point edge) where
+instance (Point_ point 2 r, Fractional r, Ord r
+         ) => HasDefaultIpeOut (Cone r point edge) where
   type DefaultIpeOut (Cone r point edge) = Group
-  defIO c = undefined
-
-    -- (Slab' h1 h2) =
-
-
-    -- ipeGroup [ iO $ defIO (h1^.boundingHyperPlane)
-    --                              , iO $ defIO (h2^.boundingHyperPlane)
-    --                              ]
-    -- -- TODO: do this property; i.e. compute the intersection with the bounding box
-
+  defIO c = ipeGroup [ iO $ defIO poly ]
+    where
+      poly :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
+      poly = toConvexPolygonIn rect c'&vertices %~ (^.asPoint)
+      c' :: Cone r (Point 2 r) edge
+      c' = c&apex %~ (^.asPoint)
+      rect :: Rectangle (Point 2 r)
+      rect = boundingBox $ defaultBox :| [boundingBox (c'^.apex) ]
+      -- we have to include the bounding box of the apex since toConvexPolygonIn
+      -- requires the apex to be in the box.
 
 --------------------------------------------------------------------------------
 

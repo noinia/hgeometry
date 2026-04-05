@@ -12,7 +12,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.HalfLine
-  ( HalfLine(..)
+  ( HalfLine(..), halfLineStart
   , asOrientedLine
   , halfLineThrough
   , LineHalfLineIntersection(..)
@@ -72,8 +72,13 @@ instance ( Read r, Read point, Has_ Additive_ d r, KnownNat d
                         pure (HalfLine p v))
 
 instance HasStart (HalfLine point) point where
-  start = lens (\(HalfLine p _) -> p) (\(HalfLine _ v) p -> HalfLine p v)
+  start = halfLineStart
   {-# INLINE start #-}
+
+-- | Lens to access the starting point of a HalfLine (that supports type changing updates).
+halfLineStart :: (NumType point ~ NumType point', Dimension point ~ Dimension point')
+              => Lens (HalfLine point) (HalfLine point') point point'
+halfLineStart = lens (\(HalfLine p _) -> p) (\(HalfLine _ v) p -> HalfLine p v)
 
 instance HasDirection (HalfLine point) where
   direction = lens (\(HalfLine _ v) -> v) (\(HalfLine p _) v -> HalfLine p v)

@@ -1,11 +1,19 @@
 {-# LANGUAGE TemplateHaskell #-}
-module HalfPlane.Cone
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Cone
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A Data type to represent Cones
+--
+--------------------------------------------------------------------------------
+module HGeometry.Cone
   ( Cone(Cone), apex, leftBoundaryVector, rightBoundaryVector
   , leftBoundary, rightBoundary
   ) where
 
-import HGeometry.Point
-import HGeometry.Line
 import HGeometry.Vector
 import HGeometry.Ext
 import HGeometry.HalfLine
@@ -37,15 +45,3 @@ leftBoundary c = (c^.leftBoundaryVector)&core %~ (HalfLine (c^.apex))
 rightBoundary   :: ( Dimension point ~ 2, NumType point ~ r)
                 => Cone r point edge -> HalfLine point :+ edge
 rightBoundary c = (c^.leftBoundaryVector)&core %~ (HalfLine (c^.apex))
-
-
-
-
--- toConvexPolygonIn      :: ( Rectangle_ rectangle corner
---                           , Point_ corner 2 r
---                           , Point_ point 2 r, Ord r, Fractional r
---                           )
---                        => rectangle -> Cone r point edge
---                        -> Either (ConvexPolygonF (Cyclic NonEmpty) point)
---                                  (ConvexPolygonF (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r)))
--- toConvexPolygonIn rect = \case
