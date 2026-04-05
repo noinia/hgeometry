@@ -192,8 +192,8 @@ instance (HalfPlane_ halfPlane r
     -- -- TODO: do this property; i.e. compute the intersection with the bounding box
 
 
-instance HasDefaultIpeOut (Cone r edge) where
-  type DefaultIpeOut (Cone r edge) = Group
+instance HasDefaultIpeOut (Cone r point edge) where
+  type DefaultIpeOut (Cone r point edge) = Group
   defIO c = undefined
 
     -- (Slab' h1 h2) =
@@ -212,7 +212,7 @@ instance HasDefaultIpeOut (Cone r edge) where
 data HalfPlaneIntersection r halfPlane =
     HalfPlane_x_HalfPlane_Line (BoundingHyperPlane halfPlane 2 r)
   | HalfPlane_x_HalfPlane_Slab (Slab' halfPlane)
-  | HalfPlane_x_HalfPlane_Cone (Cone r halfPlane)
+  | HalfPlane_x_HalfPlane_Cone (Cone r (Point 2 r) halfPlane)
   | HalfPlane_x_HalfPlane_HalfPlane halfPlane
 
 deriving instance (Show r, Show halfPlane, Show (BoundingHyperPlane halfPlane 2 r)

@@ -15,23 +15,37 @@ import Control.Lens
 --------------------------------------------------------------------------------
 
 -- | A Cone
-data Cone r edge = Cone { _apex                :: Point 2 r
-                        , _leftBoundaryVector  :: Vector 2 r :+ edge
-                        -- ^ the interior of the cone is to the right
-                        , _rightBoundaryVector :: Vector 2 r :+ edge
-                        -- ^ the interior of the cone is to the left
-                        }
-                 deriving (Show,Eq,Ord)
+data Cone r point edge = Cone { _apex                :: point
+                              , _leftBoundaryVector  :: Vector 2 r :+ edge
+                              -- ^ the interior of the cone is to the right
+                              , _rightBoundaryVector :: Vector 2 r :+ edge
+                              -- ^ the interior of the cone is to the left
+                              }
+                       deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
 makeLenses ''Cone
 
-type instance NumType   (Cone r edge) = r
-type instance Dimension (Cone r edge) = 2
+type instance NumType   (Cone r point edge) = r
+type instance Dimension (Cone r point edge) = 2
 
 -- | Get the left boundary as a HalfLine starting at the apex.
-leftBoundary   :: Cone r edge -> HalfLine (Point 2 r) :+ edge
+leftBoundary   :: ( Dimension point ~ 2, NumType point ~ r)
+               => Cone r point edge -> HalfLine point :+ edge
 leftBoundary c = (c^.leftBoundaryVector)&core %~ (HalfLine (c^.apex))
 
 -- | Get the left boundary as a HalfLine starting at the apex.
-rightBoundary   :: Cone r edge -> HalfLine (Point 2 r) :+ edge
+rightBoundary   :: ( Dimension point ~ 2, NumType point ~ r)
+                => Cone r point edge -> HalfLine point :+ edge
 rightBoundary c = (c^.leftBoundaryVector)&core %~ (HalfLine (c^.apex))
+
+
+
+
+-- toConvexPolygonIn      :: ( Rectangle_ rectangle corner
+--                           , Point_ corner 2 r
+--                           , Point_ point 2 r, Ord r, Fractional r
+--                           )
+--                        => rectangle -> Cone r point edge
+--                        -> Either (ConvexPolygonF (Cyclic NonEmpty) point)
+--                                  (ConvexPolygonF (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r)))
+-- toConvexPolygonIn rect = \case
