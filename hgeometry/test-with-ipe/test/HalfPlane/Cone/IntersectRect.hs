@@ -23,6 +23,7 @@ import HGeometry.Cyclic
 import HGeometry.Point
 import HGeometry.Point.Either
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 

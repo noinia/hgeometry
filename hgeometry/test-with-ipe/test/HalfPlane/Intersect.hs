@@ -4,6 +4,7 @@
 module HalfPlane.Intersect
   ( commonIntersection
   , myMain, testMain
+  , myCone
   , spec
   ) where
 
@@ -74,21 +75,27 @@ toHalfPlane = traceShowId . rightHalfPlane . traceShowId
               . asOrientedLine . view core
 
 inFile :: IO OsPath
-inFile  = getDataFileName [osp|test-with-ipe/golden/Halfplane/intersection.ipe|]
+inFile  = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.ipe|]
 
 --- >>> show outPath
 outPath :: IO OsPath
-outPath = getDataFileName [osp|test-with-ipe/golden/Halfplane/intersection.out.ipe|]
+outPath = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.out.ipe|]
+
+
+
+myCone = Cone (Point2 100 100) (Vector2 1 1 :+ ()) (Vector2 1 0 :+ ())
 
 
 testMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
               case halfPlanes' of
                 (h1:h2:_) -> do let res = h1 `intersect` h2
+                                    -- FIXME: this does not really work yet it seems
                                 print res
                                 outPath' <- outPath
                                 writeIpeFile outPath' . singlePageFromContent . concat $
                                   [ [iO $ defIO res ]
                                   , iO . drawAsConstraint gray <$> [h1,h2]
+                                  , [iO $ defIO  myCone]
                                   ]
 
               -- case NonEmpty.nonEmpty halfPlanes' of
@@ -195,11 +202,17 @@ instance (HalfPlane_ halfPlane r
     -- -- TODO: do this property; i.e. compute the intersection with the bounding box
 
 
-instance (Point_ point 2 r, Fractional r, Ord r
+instance (Point_ point 2 r, Fractional r, Ord r, Show r
          ) => HasDefaultIpeOut (Cone r point edge) where
   type DefaultIpeOut (Cone r point edge) = Group
-  defIO c = ipeGroup [ iO $ defIO poly ]
+  defIO c = ipeGroup [ iO $ defIO poly ! attr SFill blue
+                     , iO $ ipeRay hl
+                     , iO $ ipeRay hr
+                     ]
     where
+      hl = leftBoundary c'  ^.core
+      hr = rightBoundary c' ^.core
+
       poly :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
       poly = toConvexPolygonIn rect c'&vertices %~ (^.asPoint)
       c' :: Cone r (Point 2 r) edge

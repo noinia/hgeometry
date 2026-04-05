@@ -19,6 +19,8 @@ import HGeometry.Ext
 import HGeometry.HalfLine
 import HGeometry.Properties
 import Control.Lens
+import Data.Bitraversable
+import Data.Bifoldable
 
 --------------------------------------------------------------------------------
 
@@ -36,12 +38,23 @@ makeLenses ''Cone
 type instance NumType   (Cone r point edge) = r
 type instance Dimension (Cone r point edge) = 2
 
+
+instance Bifunctor (Cone r) where
+  bimap f g (Cone a l r) = Cone (f a) (l&extra %~ g) (r&extra %~ g)
+
+instance Bifoldable (Cone r) where
+  bifoldMap f g (Cone a l r) = f a <> g (l^.extra) <> g (r^.extra)
+
+instance Bitraversable (Cone r) where
+  bitraverse f g (Cone a l r) = Cone <$> f a <*> (l&extra %%~ g) <*> (r&extra %%~ g)
+
+
 -- | Get the left boundary as a HalfLine starting at the apex.
 leftBoundary   :: ( Dimension point ~ 2, NumType point ~ r)
                => Cone r point edge -> HalfLine point :+ edge
-leftBoundary c = (c^.leftBoundaryVector)&core %~ (HalfLine (c^.apex))
+leftBoundary c = (c^.leftBoundaryVector)&core %~ HalfLine (c^.apex)
 
 -- | Get the left boundary as a HalfLine starting at the apex.
 rightBoundary   :: ( Dimension point ~ 2, NumType point ~ r)
                 => Cone r point edge -> HalfLine point :+ edge
-rightBoundary c = (c^.leftBoundaryVector)&core %~ (HalfLine (c^.apex))
+rightBoundary c = (c^.rightBoundaryVector)&core %~ HalfLine (c^.apex)
