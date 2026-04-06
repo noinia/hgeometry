@@ -1,13 +1,15 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {- HLINT ignore "Use ++" -}
 module HalfPlane.Intersect
   ( commonIntersection
   , myMain, testMain
-  , myCone
+  , myCone, myCone2, debug
   , spec
   ) where
 
+import qualified Data.Text as Text
 import           HGeometry.HalfPlane.CommonIntersection.Chain
 import           HGeometry.HalfPlane.CommonIntersection (CommonIntersection(..))
 import           HGeometry.HalfSpace
@@ -19,7 +21,7 @@ import           Data.Sequence (Seq)
 import           HGeometry.Point
 import           HGeometry.Line
 import           HGeometry.Kernel
-import           Control.Lens
+import           Control.Lens hiding (below)
 import           HGeometry.Sequence.Alternating
 import           Data.Coerce
 import           Data.Foldable1
@@ -49,6 +51,74 @@ import           Debug.Trace
 type HalfPlane r = HalfSpaceF (LinePV 2 r)
 
 
+
+--------------------------------------------------------------------------------
+
+type instance Intersection (LinePV 2 r) (LineEQ r) =
+  Maybe (LineLineIntersection (LinePV 2 r))
+
+instance (Eq r, Num r) => HasIntersectionWith (LinePV 2 r) (LineEQ r) where
+  linePV `intersects` lineEQ = lineEQ `intersects` linePV
+  {-# INLINE intersects #-}
+
+instance (Ord r, Fractional r)
+         => IsIntersectableWith (LinePV 2 r) (LineEQ r) where
+  linePV `intersect` lineEQ = (linePV <$) <$> lineEQ `intersect` linePV
+   -- we use the LineEQ x LinePV instance to compute the intersection. If
+   -- the lines are the same; then we just replace the line in the LineLineIntersection
+   -- by the linePV
+
+--------------------------------------------------------------------------------
+
+type instance Intersection (VerticalOrLineEQ r) (LinePV 2 r) =
+  Maybe (LineLineIntersection (VerticalOrLineEQ r))
+
+instance (Eq r, Num r) => HasIntersectionWith (VerticalOrLineEQ r) (LinePV 2 r) where
+  line `intersects` linePV = case line of
+    VerticalLineThrough x -> linePV^.direction.xComponent /= 0 ||
+                             linePV^.anchorPoint.xCoord == x
+    NonVertical lineEQ    -> lineEQ `intersects` linePV
+  {-# INLINE intersects #-}
+
+instance (Ord r, Fractional r)
+         => IsIntersectableWith (VerticalOrLineEQ r) (LinePV 2 r) where
+  line `intersect` linePV = line `intersect` toLinearFunction linePV
+  {-# INLINE intersect #-}
+
+----------------------------------------
+-- * the symmetric instances
+
+type instance Intersection (LinePV 2 r) (VerticalOrLineEQ r) =
+  Maybe (LineLineIntersection (LinePV 2 r))
+
+instance (Eq r, Num r) => HasIntersectionWith (LinePV 2 r) (VerticalOrLineEQ r) where
+  linePV `intersects` lineEQ = lineEQ `intersects` linePV
+  {-# INLINE intersects #-}
+
+instance (Ord r, Fractional r)
+         => IsIntersectableWith (LinePV 2 r) (VerticalOrLineEQ r) where
+  linePV `intersect` lineEQ = (linePV <$) <$> lineEQ `intersect` linePV
+   -- we use the LineEQ x LinePV instance to compute the intersection. If
+   -- the lines are the same; then we just replace the line in the LineLineIntersection
+   -- by the linePV
+
+
+----------------------------------------
+-- * the symmetric instances
+
+type instance Intersection (VerticalOrLineEQ r) (LineEQ r) =
+  Maybe (LineLineIntersection (VerticalOrLineEQ r))
+
+instance (Eq r, Num r) => HasIntersectionWith (VerticalOrLineEQ r) (LineEQ r) where
+  line `intersects` lineEQ = lineEQ `intersects` line
+  {-# INLINE intersects #-}
+
+instance (Ord r, Fractional r)
+         => IsIntersectableWith (VerticalOrLineEQ r) (LineEQ r) where
+  line `intersect` lineEQ = (line <$) <$> lineEQ `intersect` line
+
+--------------------------------------------------------------------------------
+
 -- class AsOrientedLine line where
 --   -- | Convert the given line into an canonical oriented line
 --   asOrientedLine :: (d ~ Dimension line, r ~ NumType line) => line -> LinePV d r
@@ -71,7 +141,7 @@ spec = describe "rightHalfPlane correct" $ do
 
 
 toHalfPlane :: HalfLine (Point 2 R) :+ attrs -> HalfPlane R
-toHalfPlane = traceShowId . rightHalfPlane . traceShowId
+toHalfPlane = rightHalfPlane
               . asOrientedLine . view core
 
 inFile :: IO OsPath
@@ -82,21 +152,34 @@ outPath :: IO OsPath
 outPath = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.out.ipe|]
 
 
+debug = let h1 = HalfSpace Negative (LinePV (Point2 64 240) (Vector2 160 (-16)))
+            h2 = HalfSpace Negative (LinePV (Point2 192 272) (Vector2 48 (-128)))
+        in h1 `intersect` h2
+
+
+myCone2 :: Intersection (HalfSpaceF (LineEQ R)) (HalfSpaceF (LineEQ R))
+myCone2 = let hRight = above (LineEQ 0 100) :: HalfSpaceF (LineEQ R)
+              hLeft  = below (LineEQ 1 0)   :: HalfSpaceF (LineEQ R)
+          in hLeft `intersect` hRight
 
 myCone = Cone (Point2 100 100) (Vector2 1 1 :+ ()) (Vector2 1 0 :+ ())
 
 
 testMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
-              case halfPlanes' of
-                (h1:h2:_) -> do let res = h1 `intersect` h2
-                                    -- FIXME: this does not really work yet it seems
-                                print res
-                                outPath' <- outPath
-                                writeIpeFile outPath' . singlePageFromContent . concat $
-                                  [ [iO $ defIO res ]
-                                  , iO . drawAsConstraint gray <$> [h1,h2]
-                                  , [iO $ defIO  myCone]
+              traverse print halfPlanes'
+              let pages' = [ let res = h1 `intersect` h2
+                             in fromContent . concat $
+                                  [ [ iO $ defIO res ! attr SLayer "intersection"]
+                                  , [ iO $ defIO h   ! attr SLayer "input"
+                                    | h <- [h1,h2]
+                                    ]
                                   ]
+                           | h1 <- halfPlanes', h2 <- halfPlanes'
+                           ]
+              case ipeFile <$> NonEmpty.nonEmpty pages' of
+                Nothing    -> print "error no halfplanes"
+                Just file -> do outPath' <- outPath
+                                writeIpeFile outPath' $ file&styles %~ (opacitiesStyle:)
 
               -- case NonEmpty.nonEmpty halfPlanes' of
               --   Nothing         -> print "error; no halfplanes"
@@ -121,8 +204,11 @@ myMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
                 Just res -> do print res
                                outPath' <- outPath
                                writeIpeFile outPath' . singlePageFromContent . concat $
-                                 [ [iO $ defIO res ]
-                                 , iO . drawAsConstraint gray <$> halfPlanes'
+                                 [ [iO $ defIO res ! attr SLayer "output"
+                                   ]
+                                 , [ iO $ drawAsConstraint gray h ! attr SLayer "constraint"
+                                   | h <- halfPlanes'
+                                   ]
                                  ]
 
 instance (Ord r, Fractional r)
@@ -140,7 +226,8 @@ drawIntersection = \case
   Slab _hl _hr          -> ipeGroup [] -- TODO
   BoundedRegion pg      -> ipeGroup [iO $ defIO (pg&vertices %~ view core
                                                   :: ConvexPolygon (Point 2 r)
-                                                )
+                                                ) ! attr SFill blue
+                                                  ! attr SOpacity "10%"
                                     ]
   UnboundedRegion chain -> ipeGroup [iO $ defIO chain]
 
@@ -302,8 +389,35 @@ instance Num r => GetDirection (VerticalOrLineEQ r) where
 --------------------------------------------------------------------------------
 
 instance ( Num r, Ord r
-         ) => HasIntersectionWith (LinePV 2 r) (HalfPlane r) where
+         ) => HasIntersectionWith (LinePV 2 r) (HalfSpaceF (LinePV 2 r)) where
   intersects = intersectsLineHalfplane
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (LinePV 2 r) (HalfSpaceF (LineEQ r)) where
+  intersects = intersectsLineHalfplane
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (LinePV 2 r) (HalfSpaceF (VerticalOrLineEQ r)) where
+  intersects = intersectsLineHalfplane
+
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (LineEQ r) (HalfSpaceF (LinePV 2 r)) where
+  intersects = intersectsLineHalfplane
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (LineEQ r) (HalfSpaceF (LineEQ r)) where
+  intersects = intersectsLineHalfplane
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (LineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) where
+  intersects = intersectsLineHalfplane
+
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (VerticalOrLineEQ r) (HalfSpaceF (LinePV 2 r)) where
+  intersects = intersectsLineHalfplane
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (VerticalOrLineEQ r) (HalfSpaceF (LineEQ r)) where
+  intersects = intersectsLineHalfplane
+instance ( Num r, Ord r
+         ) => HasIntersectionWith (VerticalOrLineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) where
+  intersects = intersectsLineHalfplane
+
 
 -- | test if a line and a halfplane intersect
 intersectsLineHalfplane     :: ( HalfPlane_ halfPlane r
@@ -318,12 +432,42 @@ intersectsLineHalfplane l h = (l `intersects` (h^.boundingHyperPlane)) ||
 
 --------------------------------------------------------------------------------
 
-type instance Intersection (LinePV 2 r) (HalfPlane r) =
+type instance Intersection (LinePV 2 r) (HalfSpaceF (LinePV 2 r)) =
+  Maybe (LineHalfPlaneIntersection r (LinePV 2 r))
+type instance Intersection (LinePV 2 r) (HalfSpaceF (LineEQ r)) =
+  Maybe (LineHalfPlaneIntersection r (LinePV 2 r))
+type instance Intersection (LinePV 2 r) (HalfSpaceF (VerticalOrLineEQ r)) =
   Maybe (LineHalfPlaneIntersection r (LinePV 2 r))
 
 instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (LinePV 2 r) (HalfPlane r) where
+         ) => IsIntersectableWith (LinePV 2 r) (HalfSpaceF (LinePV 2 r)) where
   intersect = intersectLineHalfplane
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (LinePV 2 r) (HalfSpaceF (LineEQ r)) where
+  intersect = intersectLineHalfplane
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (LinePV 2 r) (HalfSpaceF (VerticalOrLineEQ r)) where
+  intersect = intersectLineHalfplane
+
+
+type instance Intersection (LineEQ r) (HalfSpaceF (LinePV 2 r)) =
+  Maybe (LineHalfPlaneIntersection r (LineEQ r))
+type instance Intersection (LineEQ r) (HalfSpaceF (LineEQ r)) =
+  Maybe (LineHalfPlaneIntersection r (LineEQ r))
+type instance Intersection (LineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) =
+  Maybe (LineHalfPlaneIntersection r (LineEQ r))
+
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (LineEQ r) (HalfSpaceF (LinePV 2 r)) where
+  intersect = intersectLineHalfplane
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (LineEQ r) (HalfSpaceF (LineEQ r)) where
+  intersect = intersectLineHalfplane
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (LineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) where
+  intersect = intersectLineHalfplane
+
+
 
 --------------------------------------------------------------------------------
 
@@ -352,11 +496,18 @@ intersectLineHalfplane l h = case l `intersect` (h^.boundingHyperPlane) of
 
 --------------------------------------------------------------------------------
 
-type instance Intersection (HalfPlane r) (HalfPlane r) =
-  Maybe (HalfPlaneIntersection r (HalfPlane r))
+type instance Intersection (HalfSpaceF (LinePV 2 r)) (HalfSpaceF (LinePV 2 r)) =
+  Maybe (HalfPlaneIntersection r (HalfSpaceF (LinePV 2 r)))
 
 instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (HalfPlane r) (HalfPlane r) where
+         ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (HalfSpaceF (LinePV 2 r)) where
+  intersect = intersectTwo
+
+type instance Intersection (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) =
+  Maybe (HalfPlaneIntersection r (HalfSpaceF (LineEQ r)))
+
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) where
   intersect = intersectTwo
 
 --------------------------------------------------------------------------------
@@ -380,18 +531,40 @@ intersectTwo h1 h2 = case l1 `intersect` l2 of
       (False, True) -> Just $ HalfPlane_x_HalfPlane_HalfPlane h2
       (True,True)   -> Just $ HalfPlane_x_HalfPlane_Slab (Slab' h1 h2)
         -- todo; make slab into a better type
-    Just i  -> case i of
-      Line_x_Line_Line l  -> Just $ HalfPlane_x_HalfPlane_Line l
-      Line_x_Line_Point a -> Just $ HalfPlane_x_HalfPlane_Cone
-                                  $ Cone a (v Positive h1 l1)
-                                           (v Negative h2 l2)
+    Just i  -> Just $ case i of
+      Line_x_Line_Line l  -> let n = normalVector l
+                                 q = pointInteriorTo l .+^ n
+                             in if q `intersects` h1 == q `intersects` h2
+                                then HalfPlane_x_HalfPlane_HalfPlane h1 -- same halfplane
+                                else HalfPlane_x_HalfPlane_Line l -- oppositive halfplanes
+      Line_x_Line_Point a -> HalfPlane_x_HalfPlane_Cone $ Cone a left right
   where
     l1 = h1^.boundingHyperPlane
     l2 = h2^.boundingHyperPlane
+    v1 = inLineVector l1
+    v2 = inLineVector l2
 
-    f s s' | s' == s   = id
-           | otherwise = negated
-    v s h l = f s (h^.halfSpaceSign) (inLineVector l) :+ h
+    -- FIXME: this is still broken
+
+    -- makeRightwards v | v >= zero = v
+    --                  | otherwise = negated v
+
+    (left,right) = case (h1^.halfSpaceSign, h2^.halfSpaceSign) of
+      (Negative,Negative) -> (v1 :+ h1, negated v2 :+ h2)
+      (Negative,Positive) -> (v1 :+ h1, v2 :+ h2)
+      (Positive,Negative) -> (v2 :+ h2, v1 :+ h1)
+      (Positive,Positive) -> (negated v1 :+ h1, v2 :+ h2)
+
+
+
+        -- so far this assumes v1 and v2 are pointing "towards the right"
+
+
+
+
+    -- f s s' | s' == s   = negated
+    --        | otherwise = id
+    -- v s h l = f s (h^.halfSpaceSign) (inLineVector l) :+ h
 
   -- case (h1^.boundingHyperPlane) `intersect` h2 of
   --   Nothing
@@ -659,3 +832,9 @@ halfPlaneType h = case h^.boundingHyperPlane.to asLine of
 --   mkIpeObject $ () :+ moncat ats
 
 --                 ]
+
+below :: LineEQ r -> HalfSpaceF (LineEQ r)
+below = HalfSpace Negative
+
+above :: LineEQ r -> HalfSpaceF (LineEQ r)
+above = HalfSpace Positive

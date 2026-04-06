@@ -5,25 +5,20 @@ module HalfPlane.Cone.IntersectRect
 
 import HGeometry.Cone
 import HGeometry.Point
-import HGeometry.Line
-import HGeometry.Vector
 import HGeometry.Ext
 import HGeometry.Box
 import HGeometry.HalfLine
 import HGeometry.Polygon
 import HGeometry.Direction
 import HGeometry.Intersection
-import HGeometry.Properties
 import HGeometry.LineSegment
 import Data.Monoid
 import Control.Lens
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import HGeometry.Cyclic
-import HGeometry.Point
 import HGeometry.Point.Either
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 
