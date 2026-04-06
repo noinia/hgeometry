@@ -50,6 +50,8 @@ extraPoints            :: ( Rectangle_ rectangle corner, Point_ corner 2 r
                           , Intersection (HalfLine point) (ClosedLineSegment corner)
                             ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
                                                                      (ClosedLineSegment corner))
+
+
                           )
                        => HalfLine point -> HalfLine point -> rectangle
                        -> NonEmpty (Point 2 r)
