@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell  #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.Slab</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- A data type to represent slabs; i.e. regions bounded by two parallel lines.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Slab.html"><span class="hs-identifier">HGeometry.Slab</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier">Slab</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier">Slab</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Slab.html#definingLine"><span class="hs-identifier">definingLine</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Slab.html#squaredWidth"><span class="hs-identifier">squaredWidth</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Slab.html#leftData"><span class="hs-identifier">leftData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Slab.html#rightData"><span class="hs-identifier">rightData</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Slab.html#fromParalelHalfplanes"><span class="hs-identifier">fromParalelHalfplanes</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html"><span class="hs-identifier">HGeometry.Properties</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier">NumType</span></a></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier">Dimension</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html"><span class="hs-identifier">HGeometry.Line.PointAndVector</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html"><span class="hs-identifier">HGeometry.HalfSpace.Class</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="annot"><span class="hs-comment">-- | A data type representing a slab.</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">data</span><span> </span><span id="Slab"><span class="annot"><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier hs-var">Slab</span></a></span></span><span> </span><span id="local-6989586621679498037"><span class="annot"><a href="#local-6989586621679498037"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679498038"><span class="annot"><a href="#local-6989586621679498038"><span class="hs-identifier hs-type">side</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Slab"><span class="annot"><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier hs-var">Slab</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_definingLine"><span class="annot"><span class="annottext">forall r side. Slab r side -&gt; LinePV 2 r
+</span><a href="HGeometry.Slab.html#_definingLine"><span class="hs-identifier hs-var hs-var">_definingLine</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498037"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>                        </span><span class="hs-comment">-- ^ The oriented line that defines the slab. This</span><span>
+</span><span id="line-30"></span><span>                        </span><span class="hs-comment">-- is the left bounding line of the slab; i.e.</span><span>
+</span><span id="line-31"></span><span>                        </span><span class="hs-comment">-- the interior of the slab is to its right</span><span>
+</span><span id="line-32"></span><span>                        </span><span class="hs-special">,</span><span> </span><span id="_squaredWidth"><span class="annot"><span class="annottext">forall r side. Slab r side -&gt; r
+</span><a href="HGeometry.Slab.html#_squaredWidth"><span class="hs-identifier hs-var hs-var">_squaredWidth</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679498037"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-33"></span><span>                        </span><span class="annot"><span class="hs-comment">-- ^ the squared width of the slab</span></span><span>
+</span><span id="line-34"></span><span>                        </span><span class="hs-special">,</span><span> </span><span id="_leftData"><span class="annot"><span class="annottext">forall r side. Slab r side -&gt; side
+</span><a href="HGeometry.Slab.html#_leftData"><span class="hs-identifier hs-var hs-var">_leftData</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679498038"><span class="hs-identifier hs-type">side</span></a></span><span>
+</span><span id="line-35"></span><span>                        </span><span class="annot"><span class="hs-comment">-- ^ data associated with the left bounding line</span></span><span>
+</span><span id="line-36"></span><span>                        </span><span class="hs-special">,</span><span> </span><span id="_rightData"><span class="annot"><span class="annottext">forall r side. Slab r side -&gt; side
+</span><a href="HGeometry.Slab.html#_rightData"><span class="hs-identifier hs-var hs-var">_rightData</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679498038"><span class="hs-identifier hs-type">side</span></a></span><span>
+</span><span id="line-37"></span><span>                        </span><span class="annot"><span class="hs-comment">-- ^ data associated with the right bounding line</span></span><span>
+</span><span id="line-38"></span><span>                        </span><span class="hs-special">}</span><span>
+</span><span id="line-39"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679498187"><span id="local-6989586621679498198"><span id="local-6989586621679498202"><span class="annot"><span class="annottext">Int -&gt; Slab r side -&gt; ShowS
+[Slab r side] -&gt; ShowS
+Slab r side -&gt; String
+(Int -&gt; Slab r side -&gt; ShowS)
+-&gt; (Slab r side -&gt; String)
+-&gt; ([Slab r side] -&gt; ShowS)
+-&gt; Show (Slab r side)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall r side. (Show r, Show side) =&gt; Int -&gt; Slab r side -&gt; ShowS
+forall r side. (Show r, Show side) =&gt; [Slab r side] -&gt; ShowS
+forall r side. (Show r, Show side) =&gt; Slab r side -&gt; String
+$cshowsPrec :: forall r side. (Show r, Show side) =&gt; Int -&gt; Slab r side -&gt; ShowS
+showsPrec :: Int -&gt; Slab r side -&gt; ShowS
+$cshow :: forall r side. (Show r, Show side) =&gt; Slab r side -&gt; String
+show :: Slab r side -&gt; String
+$cshowList :: forall r side. (Show r, Show side) =&gt; [Slab r side] -&gt; ShowS
+showList :: [Slab r side] -&gt; ShowS
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679498211"><span id="local-6989586621679498219"><span class="annot"><span class="annottext">Slab r side -&gt; Slab r side -&gt; Bool
+(Slab r side -&gt; Slab r side -&gt; Bool)
+-&gt; (Slab r side -&gt; Slab r side -&gt; Bool) -&gt; Eq (Slab r side)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall r side.
+(Ord r, Num r, Eq side) =&gt;
+Slab r side -&gt; Slab r side -&gt; Bool
+$c== :: forall r side.
+(Ord r, Num r, Eq side) =&gt;
+Slab r side -&gt; Slab r side -&gt; Bool
+== :: Slab r side -&gt; Slab r side -&gt; Bool
+$c/= :: forall r side.
+(Ord r, Num r, Eq side) =&gt;
+Slab r side -&gt; Slab r side -&gt; Bool
+/= :: Slab r side -&gt; Slab r side -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679498225"><span id="local-6989586621679498227"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Slab r a -&gt; Slab r b)
+-&gt; (forall a b. a -&gt; Slab r b -&gt; Slab r a) -&gt; Functor (Slab r)
+forall a b. a -&gt; Slab r b -&gt; Slab r a
+forall a b. (a -&gt; b) -&gt; Slab r a -&gt; Slab r b
+forall r a b. a -&gt; Slab r b -&gt; Slab r a
+forall r a b. (a -&gt; b) -&gt; Slab r a -&gt; Slab r b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall r a b. (a -&gt; b) -&gt; Slab r a -&gt; Slab r b
+fmap :: forall a b. (a -&gt; b) -&gt; Slab r a -&gt; Slab r b
+$c&lt;$ :: forall r a b. a -&gt; Slab r b -&gt; Slab r a
+&lt;$ :: forall a b. a -&gt; Slab r b -&gt; Slab r a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#Functor"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679498232"><span id="local-6989586621679498238"><span id="local-6989586621679498242"><span id="local-6989586621679498247"><span id="local-6989586621679498249"><span id="local-6989586621679498252"><span id="local-6989586621679498255"><span id="local-6989586621679498258"><span id="local-6989586621679498261"><span id="local-6989586621679498264"><span id="local-6989586621679498267"><span id="local-6989586621679498269"><span id="local-6989586621679498272"><span id="local-6989586621679498277"><span id="local-6989586621679498282"><span id="local-6989586621679498287"><span id="local-6989586621679498292"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Slab r m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a)
+-&gt; (forall a. Slab r a -&gt; [a])
+-&gt; (forall a. Slab r a -&gt; Bool)
+-&gt; (forall a. Slab r a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Slab r a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Slab r a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Slab r a -&gt; a)
+-&gt; (forall a. Num a =&gt; Slab r a -&gt; a)
+-&gt; (forall a. Num a =&gt; Slab r a -&gt; a)
+-&gt; Foldable (Slab r)
+forall a. Eq a =&gt; a -&gt; Slab r a -&gt; Bool
+forall a. Num a =&gt; Slab r a -&gt; a
+forall a. Ord a =&gt; Slab r a -&gt; a
+forall m. Monoid m =&gt; Slab r m -&gt; m
+forall a. Slab r a -&gt; Bool
+forall a. Slab r a -&gt; Int
+forall a. Slab r a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a
+forall r a. Eq a =&gt; a -&gt; Slab r a -&gt; Bool
+forall r a. Num a =&gt; Slab r a -&gt; a
+forall r a. Ord a =&gt; Slab r a -&gt; a
+forall r m. Monoid m =&gt; Slab r m -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m
+forall r a. Slab r a -&gt; Bool
+forall r a. Slab r a -&gt; Int
+forall r a. Slab r a -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+forall r a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a
+forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m
+forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall r m. Monoid m =&gt; Slab r m -&gt; m
+fold :: forall m. Monoid m =&gt; Slab r m -&gt; m
+$cfoldMap :: forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m
+$cfoldMap' :: forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Slab r a -&gt; m
+$cfoldr :: forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+$cfoldr' :: forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+$cfoldl :: forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+$cfoldl' :: forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Slab r a -&gt; b
+$cfoldr1 :: forall r a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a
+$cfoldl1 :: forall r a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Slab r a -&gt; a
+$ctoList :: forall r a. Slab r a -&gt; [a]
+toList :: forall a. Slab r a -&gt; [a]
+$cnull :: forall r a. Slab r a -&gt; Bool
+null :: forall a. Slab r a -&gt; Bool
+$clength :: forall r a. Slab r a -&gt; Int
+length :: forall a. Slab r a -&gt; Int
+$celem :: forall r a. Eq a =&gt; a -&gt; Slab r a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Slab r a -&gt; Bool
+$cmaximum :: forall r a. Ord a =&gt; Slab r a -&gt; a
+maximum :: forall a. Ord a =&gt; Slab r a -&gt; a
+$cminimum :: forall r a. Ord a =&gt; Slab r a -&gt; a
+minimum :: forall a. Ord a =&gt; Slab r a -&gt; a
+$csum :: forall r a. Num a =&gt; Slab r a -&gt; a
+sum :: forall a. Num a =&gt; Slab r a -&gt; a
+$cproduct :: forall r a. Num a =&gt; Slab r a -&gt; a
+product :: forall a. Num a =&gt; Slab r a -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Foldable.html#Foldable"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679498037"><span id="local-6989586621679498038"><span id="definingLine"><span id="squaredWidth"><span id="leftData"><span id="rightData"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">Slab</span></span></span></span></span></span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span>   </span><span id="local-6989586621679498332"><span id="local-6989586621679498333"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier hs-type">Slab</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498332"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498333"><span class="hs-identifier hs-type">side</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679498332"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span id="local-6989586621679498334"><span id="local-6989586621679498335"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier hs-type">Slab</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498334"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498335"><span class="hs-identifier hs-type">side</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- | Create a slab out of two halfplanes whose bounding lines are parallel.</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--</span><span>
+</span><span id="line-51"></span><span id="local-6989586621679498114"><span id="local-6989586621679498115"><span class="annot"><a href="HGeometry.Slab.html#fromParalelHalfplanes"><span class="hs-identifier hs-type">fromParalelHalfplanes</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#HalfPlane_"><span class="hs-identifier hs-type">HalfPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498114"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498115"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#Num"><span class="hs-identifier hs-type">Num</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498115"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Fractional"><span class="hs-identifier hs-type">Fractional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498115"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>                               </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498115"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679498114"><span class="hs-identifier hs-type">halfPlane</span></a></span><span>
+</span><span id="line-53"></span><span>                               </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#HasSupportingLine"><span class="hs-identifier hs-type">HasSupportingLine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-type">BoundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498114"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498115"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                               </span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679498114"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679498114"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier hs-type">Slab</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498115"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498114"><span class="hs-identifier hs-type">halfPlane</span></a></span></span></span><span>
+</span><span id="line-56"></span><span id="fromParalelHalfplanes"><span class="annot"><span class="annottext">fromParalelHalfplanes :: forall halfPlane r.
+(HalfPlane_ halfPlane r, Num r, Fractional r,
+ HasIntersectionWith (Point 2 r) halfPlane,
+ HasSupportingLine (BoundingHyperPlane halfPlane 2 r)) =&gt;
+halfPlane -&gt; halfPlane -&gt; Slab r halfPlane
+</span><a href="HGeometry.Slab.html#fromParalelHalfplanes"><span class="hs-identifier hs-var hs-var">fromParalelHalfplanes</span></a></span></span><span> </span><span id="local-6989586621679498378"><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498378"><span class="hs-identifier hs-var">h1</span></a></span></span><span> </span><span id="local-6989586621679498379"><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498379"><span class="hs-identifier hs-var">h2</span></a></span></span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679498380"><span class="hs-identifier hs-var">h1IsLeftHalfPlane</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LinePV 2 r -&gt; r -&gt; halfPlane -&gt; halfPlane -&gt; Slab r halfPlane
+forall r side. LinePV 2 r -&gt; r -&gt; side -&gt; side -&gt; Slab r side
+</span><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier hs-var">Slab</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679498381"><span class="hs-identifier hs-var">l1</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679498382"><span class="hs-identifier hs-var">dist</span></a></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498378"><span class="hs-identifier hs-var">h1</span></a></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498379"><span class="hs-identifier hs-var">h2</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LinePV 2 r -&gt; r -&gt; halfPlane -&gt; halfPlane -&gt; Slab r halfPlane
+forall r side. LinePV 2 r -&gt; r -&gt; side -&gt; side -&gt; Slab r side
+</span><a href="HGeometry.Slab.html#Slab"><span class="hs-identifier hs-var">Slab</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679498383"><span class="hs-identifier hs-var">l2</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679498382"><span class="hs-identifier hs-var">dist</span></a></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498379"><span class="hs-identifier hs-var">h2</span></a></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498378"><span class="hs-identifier hs-var">h1</span></a></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>    </span><span id="local-6989586621679498381"><span class="annot"><span class="annottext">l1 :: LinePV 2 r
+</span><a href="#local-6989586621679498381"><span class="hs-identifier hs-var">l1</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span id="local-6989586621679498385"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679498385"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679498387"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679498387"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679498388"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679498388"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498378"><span class="hs-identifier hs-var">h1</span></a></span><span class="annot"><span class="annottext">halfPlane
+-&gt; Getting (LinePV 2 r) halfPlane (LinePV 2 r) -&gt; LinePV 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane halfPlane 2 r
+ -&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r))
+-&gt; halfPlane -&gt; Const (LinePV 2 r) halfPlane
+forall halfSpace (d :: Nat) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' halfPlane (BoundingHyperPlane halfPlane 2 r)
+</span><a href="HGeometry.HalfSpace.Class.html#boundingHyperPlane"><span class="hs-identifier hs-var">boundingHyperPlane</span></a></span><span class="annot"><span class="annottext">((BoundingHyperPlane halfPlane 2 r
+  -&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r))
+ -&gt; halfPlane -&gt; Const (LinePV 2 r) halfPlane)
+-&gt; ((LinePV 2 r -&gt; Const (LinePV 2 r) (LinePV 2 r))
+    -&gt; BoundingHyperPlane halfPlane 2 r
+    -&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r))
+-&gt; Getting (LinePV 2 r) halfPlane (LinePV 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane halfPlane 2 r -&gt; LinePV 2 r)
+-&gt; (LinePV 2 r -&gt; Const (LinePV 2 r) (LinePV 2 r))
+-&gt; BoundingHyperPlane halfPlane 2 r
+-&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">BoundingHyperPlane halfPlane 2 r -&gt; LinePV 2 r
+BoundingHyperPlane halfPlane 2 r
+-&gt; LinePV
+     (Dimension (BoundingHyperPlane halfPlane 2 r))
+     (NumType (BoundingHyperPlane halfPlane 2 r))
+forall t.
+HasSupportingLine t =&gt;
+t -&gt; LinePV (Dimension t) (NumType t)
+</span><a href="HGeometry.Line.PointAndVector.html#supportingLine"><span class="hs-identifier hs-var">supportingLine</span></a></span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679498383"><span class="annot"><span class="annottext">l2 :: LinePV 2 r
+</span><a href="#local-6989586621679498383"><span class="hs-identifier hs-var hs-var">l2</span></a></span></span><span>                          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498379"><span class="hs-identifier hs-var">h2</span></a></span><span class="annot"><span class="annottext">halfPlane
+-&gt; Getting (LinePV 2 r) halfPlane (LinePV 2 r) -&gt; LinePV 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane halfPlane 2 r
+ -&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r))
+-&gt; halfPlane -&gt; Const (LinePV 2 r) halfPlane
+forall halfSpace (d :: Nat) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' halfPlane (BoundingHyperPlane halfPlane 2 r)
+</span><a href="HGeometry.HalfSpace.Class.html#boundingHyperPlane"><span class="hs-identifier hs-var">boundingHyperPlane</span></a></span><span class="annot"><span class="annottext">((BoundingHyperPlane halfPlane 2 r
+  -&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r))
+ -&gt; halfPlane -&gt; Const (LinePV 2 r) halfPlane)
+-&gt; ((LinePV 2 r -&gt; Const (LinePV 2 r) (LinePV 2 r))
+    -&gt; BoundingHyperPlane halfPlane 2 r
+    -&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r))
+-&gt; Getting (LinePV 2 r) halfPlane (LinePV 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane halfPlane 2 r -&gt; LinePV 2 r)
+-&gt; (LinePV 2 r -&gt; Const (LinePV 2 r) (LinePV 2 r))
+-&gt; BoundingHyperPlane halfPlane 2 r
+-&gt; Const (LinePV 2 r) (BoundingHyperPlane halfPlane 2 r)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">BoundingHyperPlane halfPlane 2 r -&gt; LinePV 2 r
+BoundingHyperPlane halfPlane 2 r
+-&gt; LinePV
+     (Dimension (BoundingHyperPlane halfPlane 2 r))
+     (NumType (BoundingHyperPlane halfPlane 2 r))
+forall t.
+HasSupportingLine t =&gt;
+t -&gt; LinePV (Dimension t) (NumType t)
+</span><a href="HGeometry.Line.PointAndVector.html#supportingLine"><span class="hs-identifier hs-var">supportingLine</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679498380"><span class="annot"><span class="annottext">h1IsLeftHalfPlane :: Bool
+</span><a href="#local-6989586621679498380"><span class="hs-identifier hs-var hs-var">h1IsLeftHalfPlane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span>  </span><span id="local-6989586621679498394"><span class="annot"><span class="annottext">w :: Vector 2 r
+</span><a href="#local-6989586621679498394"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679498388"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679498387"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679498385"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; Point 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#.%2B%5E"><span class="hs-operator hs-var">.+^</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679498394"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; halfPlane -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var">`intersects`</span></a></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679498378"><span class="hs-identifier hs-var">h1</span></a></span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679498382"><span class="annot"><span class="annottext">dist :: r
+</span><a href="#local-6989586621679498382"><span class="hs-identifier hs-var hs-var">dist</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LinePV 2 r -&gt; r
+forall g r (d :: Nat) point.
+(HasSquaredEuclideanDistance g, r ~ NumType g, d ~ Dimension g,
+ Num r, Point_ point d r) =&gt;
+point -&gt; g -&gt; r
+forall r (d :: Nat) point.
+(r ~ NumType (LinePV 2 r), d ~ Dimension (LinePV 2 r), Num r,
+ Point_ point d r) =&gt;
+point -&gt; LinePV 2 r -&gt; r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.EuclideanDistance.html#squaredEuclideanDistTo"><span class="hs-identifier hs-var">squaredEuclideanDistTo</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679498385"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679498383"><span class="hs-identifier hs-var">l2</span></a></span><span>
+</span><span id="line-65"></span></pre></body></html>

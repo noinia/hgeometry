@@ -1,0 +1,483 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Cone.Intersection.html"><span class="hs-identifier">HGeometry.Cone.Intersection</span></a></span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Cone.Intersection.html#toConvexPolygonIn"><span class="hs-identifier">toConvexPolygonIn</span></a></span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Cone.Intersection.html#extraPoints"><span class="hs-identifier">extraPoints</span></a></span><span>
+</span><span id="line-4"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html"><span class="hs-identifier">HGeometry.Cone</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.html"><span class="hs-identifier">HGeometry.Box</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfLine.html"><span class="hs-identifier">HGeometry.HalfLine</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-polygon-1.0.0.0/doc/html/hgeometry-polygon/src/HGeometry.Polygon.html"><span class="hs-identifier">HGeometry.Polygon</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Direction.html"><span class="hs-identifier">HGeometry.Direction</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.LineSegment.html"><span class="hs-identifier">HGeometry.LineSegment</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Monoid.html"><span class="hs-identifier">Data.Monoid</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#NonEmpty"><span class="hs-identifier">NonEmpty</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html"><span class="hs-identifier">HGeometry.Cyclic</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Either.html"><span class="hs-identifier">HGeometry.Point.Either</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | turn the cone into a convex polygon by clipping it in the given rectangle.</span><span>
+</span><span id="line-26"></span><span class="hs-comment">--</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- pre:  the apex lies inside the given rectangle</span><span>
+</span><span id="line-28"></span><span id="local-6989586621679454517"><span id="local-6989586621679454518"><span id="local-6989586621679454520"><span id="local-6989586621679454522"><span class="annot"><a href="HGeometry.Cone.Intersection.html#toConvexPolygonIn"><span class="hs-identifier hs-type">toConvexPolygonIn</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454517"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454518"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-29"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454518"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454520"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454520"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Fractional"><span class="hs-identifier hs-type">Fractional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454520"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-30"></span><span>                            </span><span class="hs-comment">-- , IsIntersectableWith (HalfLine point) (ClosedLineSegment point)</span><span>
+</span><span id="line-31"></span><span>                            </span><span class="hs-comment">-- , Intersection (HalfLine point) (ClosedLineSegment point)</span><span>
+</span><span id="line-32"></span><span>                            </span><span class="hs-comment">--   ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)</span><span>
+</span><span id="line-33"></span><span>                            </span><span class="hs-comment">--                                          (ClosedLineSegment point))</span><span>
+</span><span id="line-34"></span><span>                            </span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679454517"><span class="hs-identifier hs-type">rectangle</span></a></span><span>
+</span><span id="line-36"></span><span>                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#Cone"><span class="hs-identifier hs-type">Cone</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454520"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454518"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454522"><span class="hs-identifier hs-type">edge</span></a></span><span>
+</span><span id="line-37"></span><span>                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-polygon-1.0.0.0/doc/html/hgeometry-polygon/src/HGeometry.Polygon.Convex.Internal.html#ConvexPolygonF"><span class="hs-identifier hs-type">ConvexPolygonF</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#NonEmpty"><span class="hs-identifier hs-type">NonEmpty</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454518"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454520"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-38"></span><span id="toConvexPolygonIn"><span class="annot"><span class="annottext">toConvexPolygonIn :: forall rectangle point r edge.
+(Rectangle_ rectangle point, Point_ point 2 r, Ord r,
+ Fractional r) =&gt;
+rectangle
+-&gt; Cone r point edge
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r))
+</span><a href="HGeometry.Cone.Intersection.html#toConvexPolygonIn"><span class="hs-identifier hs-var hs-var">toConvexPolygonIn</span></a></span></span><span> </span><span id="local-6989586621679455347"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455347"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span id="local-6989586621679455348"><span class="annot"><span class="annottext">Cone r point edge
+</span><a href="#local-6989586621679455348"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679455349"><span class="annot"><span class="annottext">hp :: HalfLine (Point 2 r)
+</span><a href="#local-6989586621679455349"><span class="hs-identifier hs-var hs-var">hp</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cone r point edge -&gt; HalfLine point :+ edge
+forall point r edge.
+(Dimension point ~ 2, NumType point ~ r) =&gt;
+Cone r point edge -&gt; HalfLine point :+ edge
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#leftBoundary"><span class="hs-identifier hs-var">leftBoundary</span></a></span><span>  </span><span class="annot"><span class="annottext">Cone r point edge
+</span><a href="#local-6989586621679455348"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">(HalfLine point :+ edge)
+-&gt; Getting
+     (HalfLine point) (HalfLine point :+ edge) (HalfLine point)
+-&gt; HalfLine point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (HalfLine point) (HalfLine point :+ edge) (HalfLine point)
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">HalfLine point
+-&gt; (HalfLine point -&gt; HalfLine (Point 2 r)) -&gt; HalfLine (Point 2 r)
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Function.html#%26"><span class="hs-operator hs-var">&amp;</span></a></span><span class="annot"><span class="annottext">(point -&gt; Identity (Point 2 r))
+-&gt; HalfLine point -&gt; Identity (HalfLine (Point 2 r))
+forall point point'.
+(NumType point ~ NumType point',
+ Dimension point ~ Dimension point') =&gt;
+Lens (HalfLine point) (HalfLine point') point point'
+Lens (HalfLine point) (HalfLine (Point 2 r)) point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfLine.html#halfLineStart"><span class="hs-identifier hs-var">halfLineStart</span></a></span><span> </span><span class="annot"><span class="annottext">((point -&gt; Identity (Point 2 r))
+ -&gt; HalfLine point -&gt; Identity (HalfLine (Point 2 r)))
+-&gt; (point -&gt; Point 2 r) -&gt; HalfLine point -&gt; HalfLine (Point 2 r)
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>                               </span><span id="local-6989586621679455357"><span class="annot"><span class="annottext">hq :: HalfLine (Point 2 r)
+</span><a href="#local-6989586621679455357"><span class="hs-identifier hs-var hs-var">hq</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cone r point edge -&gt; HalfLine point :+ edge
+forall point r edge.
+(Dimension point ~ 2, NumType point ~ r) =&gt;
+Cone r point edge -&gt; HalfLine point :+ edge
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#rightBoundary"><span class="hs-identifier hs-var">rightBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">Cone r point edge
+</span><a href="#local-6989586621679455348"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">(HalfLine point :+ edge)
+-&gt; Getting
+     (HalfLine point) (HalfLine point :+ edge) (HalfLine point)
+-&gt; HalfLine point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (HalfLine point) (HalfLine point :+ edge) (HalfLine point)
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">HalfLine point
+-&gt; (HalfLine point -&gt; HalfLine (Point 2 r)) -&gt; HalfLine (Point 2 r)
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Function.html#%26"><span class="hs-operator hs-var">&amp;</span></a></span><span class="annot"><span class="annottext">(point -&gt; Identity (Point 2 r))
+-&gt; HalfLine point -&gt; Identity (HalfLine (Point 2 r))
+forall point point'.
+(NumType point ~ NumType point',
+ Dimension point ~ Dimension point') =&gt;
+Lens (HalfLine point) (HalfLine point') point point'
+Lens (HalfLine point) (HalfLine (Point 2 r)) point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfLine.html#halfLineStart"><span class="hs-identifier hs-var">halfLineStart</span></a></span><span> </span><span class="annot"><span class="annottext">((point -&gt; Identity (Point 2 r))
+ -&gt; HalfLine point -&gt; Identity (HalfLine (Point 2 r)))
+-&gt; (point -&gt; Point 2 r) -&gt; HalfLine point -&gt; HalfLine (Point 2 r)
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>                               </span><span id="local-6989586621679455359"><span class="annot"><span class="annottext">extras :: NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679455359"><span class="hs-identifier hs-var hs-var">extras</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+-&gt; HalfLine (Point 2 r) -&gt; Box (Point 2 r) -&gt; NonEmpty (Point 2 r)
+forall rectangle corner r point.
+(Rectangle_ rectangle corner, Point_ corner 2 r, Point_ point 2 r,
+ Fractional r, Ord r,
+ IsIntersectableWith (HalfLine point) (ClosedLineSegment corner),
+ Intersection (HalfLine point) (ClosedLineSegment corner)
+ ~ Maybe
+     (HalfLineLineSegmentIntersection
+        (Point 2 r) (ClosedLineSegment corner))) =&gt;
+HalfLine point
+-&gt; HalfLine point -&gt; rectangle -&gt; NonEmpty (Point 2 r)
+</span><a href="HGeometry.Cone.Intersection.html#extraPoints"><span class="hs-identifier hs-var">extraPoints</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679455349"><span class="hs-identifier hs-var">hp</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679455357"><span class="hs-identifier hs-var">hq</span></a></span><span> </span><span class="annot"><span class="annottext">(Box (Point 2 r) -&gt; NonEmpty (Point 2 r))
+-&gt; Box (Point 2 r) -&gt; NonEmpty (Point 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Box (Point 2 r)
+forall point. point -&gt; point -&gt; Box point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Internal.html#Box"><span class="hs-identifier hs-var">Box</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455347"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting (Point 2 r) rectangle (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
+-&gt; rectangle -&gt; Const (Point 2 r) rectangle
+forall box point. HasMinPoint box point =&gt; Lens' box point
+Lens' rectangle point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Class.html#minPoint"><span class="hs-identifier hs-var">minPoint</span></a></span><span class="annot"><span class="annottext">((point -&gt; Const (Point 2 r) point)
+ -&gt; rectangle -&gt; Const (Point 2 r) rectangle)
+-&gt; Getting (Point 2 r) point (Point 2 r)
+-&gt; Getting (Point 2 r) rectangle (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>                                                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455347"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting (Point 2 r) rectangle (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
+-&gt; rectangle -&gt; Const (Point 2 r) rectangle
+forall box point. HasMaxPoint box point =&gt; Lens' box point
+Lens' rectangle point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Class.html#maxPoint"><span class="hs-identifier hs-var">maxPoint</span></a></span><span class="annot"><span class="annottext">((point -&gt; Const (Point 2 r) point)
+ -&gt; rectangle -&gt; Const (Point 2 r) rectangle)
+-&gt; Getting (Point 2 r) point (Point 2 r)
+-&gt; Getting (Point 2 r) rectangle (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">NonEmpty (OriginalOrExtra point (Point 2 r))
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r))
+forall simplePolygon point r (f :: * -&gt; *).
+(SimplePolygon_ simplePolygon point r, Foldable1 f) =&gt;
+f point -&gt; simplePolygon
+forall (f :: * -&gt; *).
+Foldable1 f =&gt;
+f (OriginalOrExtra point (Point 2 r))
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-polygon-1.0.0.0/doc/html/hgeometry-polygon/src/HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (OriginalOrExtra point (Point 2 r))
+ -&gt; ConvexPolygonF
+      (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r)))
+-&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span id="line-43"></span><span>                                </span><span class="annot"><span class="annottext">point -&gt; OriginalOrExtra point (Point 2 r)
+forall orig extra. orig -&gt; OriginalOrExtra orig extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Either.html#Original"><span class="hs-identifier hs-var">Original</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cone r point edge
+</span><a href="#local-6989586621679455348"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Cone r point edge
+-&gt; Getting point (Cone r point edge) point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (Cone r point edge) point
+forall r point1 edge point2 (f :: * -&gt; *).
+Functor f =&gt;
+(point1 -&gt; f point2)
+-&gt; Cone r point1 edge -&gt; f (Cone r point2 edge)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#apex"><span class="hs-identifier hs-var">apex</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">OriginalOrExtra point (Point 2 r)
+-&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
+-&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
+forall a. a -&gt; NonEmpty a -&gt; NonEmpty a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.List.NonEmpty.html#%3C%7C"><span class="hs-operator hs-var">NonEmpty.&lt;|</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; OriginalOrExtra point (Point 2 r)
+forall orig extra. extra -&gt; OriginalOrExtra orig extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Either.html#Extra"><span class="hs-identifier hs-var">Extra</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; OriginalOrExtra point (Point 2 r))
+-&gt; NonEmpty (Point 2 r)
+-&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679455359"><span class="hs-identifier hs-var">extras</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- | computes the extra vertices (i.e. corners of the box) in between</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- the two given halflines (in CCW order) that we have to insert to</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- make an unbounded region bounded.</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- pre: the starting points of the halflines lie inside the rectangle</span><span>
+</span><span id="line-51"></span><span id="local-6989586621679454730"><span id="local-6989586621679454731"><span id="local-6989586621679454732"><span id="local-6989586621679454733"><span class="annot"><a href="HGeometry.Cone.Intersection.html#extraPoints"><span class="hs-identifier hs-type">extraPoints</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454730"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454731"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454731"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454732"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454733"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454732"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Fractional"><span class="hs-identifier hs-type">Fractional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454732"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454732"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-53"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454733"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454731"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-type">Intersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454733"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454731"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                            </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.LineSegment.Intersection.html#HalfLineLineSegmentIntersection"><span class="hs-identifier hs-type">HalfLineLineSegmentIntersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454732"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>                                                                     </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454731"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span>                          </span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454733"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454733"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679454730"><span class="hs-identifier hs-type">rectangle</span></a></span><span>
+</span><span id="line-61"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#NonEmpty"><span class="hs-identifier hs-type">NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454732"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-62"></span><span id="extraPoints"><span class="annot"><span class="annottext">extraPoints :: forall rectangle corner r point.
+(Rectangle_ rectangle corner, Point_ corner 2 r, Point_ point 2 r,
+ Fractional r, Ord r,
+ IsIntersectableWith (HalfLine point) (ClosedLineSegment corner),
+ Intersection (HalfLine point) (ClosedLineSegment corner)
+ ~ Maybe
+     (HalfLineLineSegmentIntersection
+        (Point 2 r) (ClosedLineSegment corner))) =&gt;
+HalfLine point
+-&gt; HalfLine point -&gt; rectangle -&gt; NonEmpty (Point 2 r)
+</span><a href="HGeometry.Cone.Intersection.html#extraPoints"><span class="hs-identifier hs-var hs-var">extraPoints</span></a></span></span><span> </span><span id="local-6989586621679455469"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455469"><span class="hs-identifier hs-var">hp</span></a></span></span><span> </span><span id="local-6989586621679455470"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455470"><span class="hs-identifier hs-var">hq</span></a></span></span><span> </span><span id="local-6989586621679455471"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455471"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679455472"><span class="hs-identifier hs-var">noDuplicates</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r))
+-&gt; NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455473"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; [Point 2 r] -&gt; NonEmpty (Point 2 r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3A%7C"><span class="hs-operator hs-var">:|</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; rectangle -&gt; [Point 2 r]
+forall rectangle point r.
+(Rectangle_ rectangle point, Point_ point 2 r, Num r) =&gt;
+CardinalDirection -&gt; CardinalDirection -&gt; rectangle -&gt; [Point 2 r]
+</span><a href="HGeometry.Cone.Intersection.html#cornersInBetween"><span class="hs-identifier hs-var">cornersInBetween</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455476"><span class="hs-identifier hs-var">qSide</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455477"><span class="hs-identifier hs-var">pSide</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455471"><span class="hs-identifier hs-var">rect</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; [Point 2 r] -&gt; [Point 2 r]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455478"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-comment">-- if the intersection point coincides with a corner then the current code includes</span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-comment">-- the corner. We use the noDuplicates to get rid of those.</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679455473"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455473"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679455476"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455476"><span class="hs-identifier hs-var">qSide</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679455479"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455470"><span class="hs-identifier hs-var">hq</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679455478"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455478"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679455477"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455477"><span class="hs-identifier hs-var">pSide</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679455479"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455469"><span class="hs-identifier hs-var">hp</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>    </span><span id="local-6989586621679455479"><span class="annot"><span class="annottext">intersectionPoint :: HalfLine point -&gt; (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679455479"><span class="hs-identifier hs-var hs-var">intersectionPoint</span></a></span></span><span>  </span><span id="local-6989586621679455480"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455480"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">First (Point 2 r, CardinalDirection)
+-&gt; Maybe (Point 2 r, CardinalDirection)
+forall a. First a -&gt; Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Monoid.html#getFirst"><span class="hs-identifier hs-var">getFirst</span></a></span><span> </span><span class="annot"><span class="annottext">(First (Point 2 r, CardinalDirection)
+ -&gt; Maybe (Point 2 r, CardinalDirection))
+-&gt; First (Point 2 r, CardinalDirection)
+-&gt; Maybe (Point 2 r, CardinalDirection)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; First (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679455482"><span class="hs-identifier hs-var">intersectionPoint'</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455480"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-70"></span><span>                             </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; (Point 2 r, CardinalDirection)
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Err.html#error"><span class="hs-identifier hs-var">error</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;extraPoints: precondititon failed &quot;</span></span><span>
+</span><span id="line-71"></span><span>                             </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621679455484"><span class="annot"><span class="annottext">(Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679455484"><span class="hs-identifier hs-var">x</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679455484"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679455482"><span class="annot"><span class="annottext">intersectionPoint' :: HalfLine point -&gt; First (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679455482"><span class="hs-identifier hs-var hs-var">intersectionPoint'</span></a></span></span><span> </span><span id="local-6989586621679455485"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455485"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection
+  -&gt; ClosedLineSegment corner
+  -&gt; First (Point 2 r, CardinalDirection))
+ -&gt; Sides (ClosedLineSegment corner)
+ -&gt; First (Point 2 r, CardinalDirection))
+-&gt; Sides (ClosedLineSegment corner)
+-&gt; (CardinalDirection
+    -&gt; ClosedLineSegment corner
+    -&gt; First (Point 2 r, CardinalDirection))
+-&gt; First (Point 2 r, CardinalDirection)
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#flip"><span class="hs-identifier hs-var">flip</span></a></span><span> </span><span class="annot"><span class="annottext">(CardinalDirection
+ -&gt; ClosedLineSegment corner
+ -&gt; First (Point 2 r, CardinalDirection))
+-&gt; Sides (ClosedLineSegment corner)
+-&gt; First (Point 2 r, CardinalDirection)
+forall m a.
+Monoid m =&gt;
+(CardinalDirection -&gt; a -&gt; m) -&gt; Sides a -&gt; m
+forall i (f :: * -&gt; *) m a.
+(FoldableWithIndex i f, Monoid m) =&gt;
+(i -&gt; a -&gt; m) -&gt; f a -&gt; m
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/indexed-traversable-0.1.4-abf18009c8aa238896def64882e8e8d1f618d0164d9214ba36444910f4d62193/share/doc/html/src/WithIndex.html#ifoldMap"><span class="hs-identifier hs-var">ifoldMap</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle -&gt; Sides (ClosedLineSegment corner)
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Sides (ClosedLineSegment point)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Sides.html#sides"><span class="hs-identifier hs-var">sides</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455471"><span class="hs-identifier hs-var">rect</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection
+  -&gt; ClosedLineSegment corner
+  -&gt; First (Point 2 r, CardinalDirection))
+ -&gt; First (Point 2 r, CardinalDirection))
+-&gt; (CardinalDirection
+    -&gt; ClosedLineSegment corner
+    -&gt; First (Point 2 r, CardinalDirection))
+-&gt; First (Point 2 r, CardinalDirection)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679455489"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455489"><span class="hs-identifier hs-var">side</span></a></span></span><span> </span><span id="local-6989586621679455490"><span class="annot"><span class="annottext">ClosedLineSegment corner
+</span><a href="#local-6989586621679455490"><span class="hs-identifier hs-var">seg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-73"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679455485"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+-&gt; ClosedLineSegment corner
+-&gt; Intersection (HalfLine point) (ClosedLineSegment corner)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Intersection.html#intersect"><span class="hs-operator hs-var">`intersect`</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment corner
+</span><a href="#local-6989586621679455490"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-74"></span><span>        </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.LineSegment.Intersection.html#HalfLine_x_LineSegment_Point"><span class="hs-identifier hs-type">HalfLine_x_LineSegment_Point</span></a></span><span> </span><span id="local-6989586621679455493"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455493"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
+-&gt; First (Point 2 r, CardinalDirection)
+forall a. Maybe a -&gt; First a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Monoid.html#First"><span class="hs-identifier hs-var">First</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Point 2 r, CardinalDirection)
+ -&gt; First (Point 2 r, CardinalDirection))
+-&gt; Maybe (Point 2 r, CardinalDirection)
+-&gt; First (Point 2 r, CardinalDirection)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r, CardinalDirection)
+-&gt; Maybe (Point 2 r, CardinalDirection)
+forall a. a -&gt; Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455493"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455489"><span class="hs-identifier hs-var">side</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>        </span><span class="annot"><span class="annottext">Intersection (HalfLine point) (ClosedLineSegment corner)
+</span><span class="hs-identifier">_</span></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
+-&gt; First (Point 2 r, CardinalDirection)
+forall a. Maybe a -&gt; First a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Monoid.html#First"><span class="hs-identifier hs-var">First</span></a></span><span>   </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
+forall a. Maybe a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679455472"><span class="annot"><span class="annottext">noDuplicates :: NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679455472"><span class="hs-identifier hs-var hs-var">noDuplicates</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r) -&gt; Point 2 r)
+-&gt; NonEmpty (NonEmpty (Point 2 r)) -&gt; NonEmpty (Point 2 r)
+forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#fmap"><span class="hs-identifier hs-var">fmap</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; Point 2 r
+forall a. NonEmpty a -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.List.NonEmpty.html#head"><span class="hs-identifier hs-var">NonEmpty.head</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty (Point 2 r)) -&gt; NonEmpty (Point 2 r))
+-&gt; (NonEmpty (Point 2 r) -&gt; NonEmpty (NonEmpty (Point 2 r)))
+-&gt; NonEmpty (Point 2 r)
+-&gt; NonEmpty (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; NonEmpty (NonEmpty (Point 2 r))
+forall a. Eq a =&gt; NonEmpty a -&gt; NonEmpty (NonEmpty a)
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.List.NonEmpty.html#group1"><span class="hs-identifier hs-var">NonEmpty.group1</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="annot"><span class="hs-comment">-- | Computes the corners in between the two given sides (in CCW order)</span></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679454772"><span id="local-6989586621679454773"><span id="local-6989586621679454774"><span class="annot"><a href="HGeometry.Cone.Intersection.html#cornersInBetween"><span class="hs-identifier hs-type">cornersInBetween</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454772"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454773"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454773"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454774"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#Num"><span class="hs-identifier hs-type">Num</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454774"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Direction.Cardinal.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679454772"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679454774"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-83"></span><span id="cornersInBetween"><span class="annot"><span class="annottext">cornersInBetween :: forall rectangle point r.
+(Rectangle_ rectangle point, Point_ point 2 r, Num r) =&gt;
+CardinalDirection -&gt; CardinalDirection -&gt; rectangle -&gt; [Point 2 r]
+</span><a href="HGeometry.Cone.Intersection.html#cornersInBetween"><span class="hs-identifier hs-var hs-var">cornersInBetween</span></a></span></span><span> </span><span id="local-6989586621679455590"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455590"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679455591"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455591"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679455592"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455592"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection, Point 2 r) -&gt; Point 2 r)
+-&gt; [(CardinalDirection, Point 2 r)] -&gt; [Point 2 r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#map"><span class="hs-identifier hs-var">map</span></a></span><span> </span><span class="annot"><span class="annottext">(CardinalDirection, Point 2 r) -&gt; Point 2 r
+forall a b. (a, b) -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Tuple.html#snd"><span class="hs-identifier hs-var">snd</span></a></span><span>
+</span><span id="line-84"></span><span>                          </span><span class="annot"><span class="annottext">([(CardinalDirection, Point 2 r)] -&gt; [Point 2 r])
+-&gt; ([(CardinalDirection, Point 2 r)]
+    -&gt; [(CardinalDirection, Point 2 r)])
+-&gt; [(CardinalDirection, Point 2 r)]
+-&gt; [Point 2 r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">((CardinalDirection, Point 2 r) -&gt; Bool)
+-&gt; [(CardinalDirection, Point 2 r)]
+-&gt; [(CardinalDirection, Point 2 r)]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.List.html#takeWhile"><span class="hs-identifier hs-var">takeWhile</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#%2F%3D"><span class="hs-operator hs-var">/=</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455591"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CardinalDirection -&gt; Bool)
+-&gt; ((CardinalDirection, Point 2 r) -&gt; CardinalDirection)
+-&gt; (CardinalDirection, Point 2 r)
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">(CardinalDirection, Point 2 r) -&gt; CardinalDirection
+forall a b. (a, b) -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Tuple.html#fst"><span class="hs-identifier hs-var">fst</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(CardinalDirection, Point 2 r)]
+ -&gt; [(CardinalDirection, Point 2 r)])
+-&gt; ([(CardinalDirection, Point 2 r)]
+    -&gt; [(CardinalDirection, Point 2 r)])
+-&gt; [(CardinalDirection, Point 2 r)]
+-&gt; [(CardinalDirection, Point 2 r)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">((CardinalDirection, Point 2 r) -&gt; Bool)
+-&gt; [(CardinalDirection, Point 2 r)]
+-&gt; [(CardinalDirection, Point 2 r)]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.List.html#dropWhile"><span class="hs-identifier hs-var">dropWhile</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#%2F%3D"><span class="hs-operator hs-var">/=</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679455590"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CardinalDirection -&gt; Bool)
+-&gt; ((CardinalDirection, Point 2 r) -&gt; CardinalDirection)
+-&gt; (CardinalDirection, Point 2 r)
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">(CardinalDirection, Point 2 r) -&gt; CardinalDirection
+forall a b. (a, b) -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Tuple.html#fst"><span class="hs-identifier hs-var">fst</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>                          </span><span class="annot"><span class="annottext">([(CardinalDirection, Point 2 r)] -&gt; [Point 2 r])
+-&gt; [(CardinalDirection, Point 2 r)] -&gt; [Point 2 r]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">[(CardinalDirection, Point 2 r)]
+-&gt; [(CardinalDirection, Point 2 r)]
+forall a. HasCallStack =&gt; [a] -&gt; [a]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.List.html#cycle"><span class="hs-identifier hs-var">cycle</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Direction.Cardinal.html#East"><span class="hs-identifier hs-var">East</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455600"><span class="hs-identifier hs-var">tr</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Direction.Cardinal.html#North"><span class="hs-identifier hs-var">North</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455602"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Direction.Cardinal.html#West"><span class="hs-identifier hs-var">West</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455604"><span class="hs-identifier hs-var">bl</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Direction.Cardinal.html#South"><span class="hs-identifier hs-var">South</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455606"><span class="hs-identifier hs-var">br</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-87"></span><span>    </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621679455602"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455602"><span class="hs-identifier hs-var">tl</span></a></span></span><span> </span><span id="local-6989586621679455600"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455600"><span class="hs-identifier hs-var">tr</span></a></span></span><span> </span><span id="local-6989586621679455606"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455606"><span class="hs-identifier hs-var">br</span></a></span></span><span> </span><span id="local-6989586621679455604"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679455604"><span class="hs-identifier hs-var">bl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r) -&gt; point -&gt; Point 2 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span> </span><span class="annot"><span class="annottext">(point -&gt; Point 2 r) -&gt; Corners point -&gt; Corners (Point 2 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle -&gt; Corners point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Corners point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679455592"><span class="hs-identifier hs-var">rect</span></a></span><span>
+</span><span id="line-88"></span></pre></body></html>
