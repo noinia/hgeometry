@@ -39,14 +39,15 @@ import           Witherable (mapMaybe)
 import           System.OsPath
 import qualified Data.List.NonEmpty as NonEmpty
 import           R
-import           Golden (getDataFileName)
+import           Test.Hspec.WithTempFile
+import           Golden
 import           HalfPlane.CommonIntersectionSpec ()
 import           HGeometry.Polygon
 import           HGeometry.Cone
 import           Test.Hspec
 import           HalfPlane.Cone.IntersectRect
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck(counterexample, (===), suchThat, discard, Arbitrary(..))
+import           Test.QuickCheck (counterexample, (===), suchThat, discard, Arbitrary(..))
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -202,9 +203,8 @@ spec' = describe "Cone properties" $ do
                     pts  = toConvexPolygonIn rect cone
                 in allOf vertices (`intersects` cone) pts
               _                                        -> discard
-
-
-
+          halfPlaneIntersectionTests inFile
+                                     [osp|halfPlaneIntersection|]
 
 
 toHalfPlane :: HalfLine (Point 2 R) :+ attrs -> HalfPlane R
@@ -232,6 +232,25 @@ myCone2 = let hRight = above (LineEQ 0 100) :: HalfSpaceF (LineEQ R)
           in hLeft `intersect` hRight
 
 myCone = Cone (Point2 100 100) (Vector2 1 1 :+ ()) (Vector2 1 0 :+ ())
+
+
+halfPlaneIntersectionTests :: IO OsPath -> OsPath -> Spec
+halfPlaneIntersectionTests inFile theName = describe "HalfPlane x HalfPlane tests"  $ do
+  halfPlanes' <- runIO (fmap toHalfPlane <$> (readAllFrom =<< inFile))
+  let pages' = [ let res = h1 `intersect` h2
+                 in fromContent . concat $
+                    [ [ iO $ defIO res ! attr SLayer "intersection"]
+                    , [ iO $ defIO h   ! attr SLayer "input"
+                      | h <- [h1,h2]
+                      ]
+                    ]
+               | h1 <- halfPlanes', h2 <- halfPlanes'
+               ]
+  case ipeFile <$> NonEmpty.nonEmpty pages' of
+    Nothing   -> error "error no halfplanes"
+    Just file -> goldenWith [osp|data/test-with-ipe/golden/HalfPlane/|]
+                   (ipeFileGolden { name = theName  })
+                   (file&styles %~ (opacitiesStyle:))
 
 
 testMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
