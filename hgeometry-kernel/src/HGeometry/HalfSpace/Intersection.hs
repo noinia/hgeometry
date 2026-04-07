@@ -25,7 +25,7 @@ import HGeometry.Ext
 -- | The non-empty intersection of two halfPlanes
 data HalfPlaneIntersection r halfPlane =
     HalfPlane_x_HalfPlane_Line (BoundingHyperPlane halfPlane 2 r)
-  | HalfPlane_x_HalfPlane_Slab (Slab r (LinePV 2 r :+ halfPlane))
+  | HalfPlane_x_HalfPlane_Slab (Slab r halfPlane)
   | HalfPlane_x_HalfPlane_Cone (Cone r (Point 2 r) halfPlane)
   | HalfPlane_x_HalfPlane_HalfPlane halfPlane
 

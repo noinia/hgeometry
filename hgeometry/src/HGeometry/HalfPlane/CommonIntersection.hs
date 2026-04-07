@@ -48,7 +48,7 @@ data CommonIntersection halfPlane r =
   | InSubLine (VerticalOrLineEQ r) (Vector 2 halfPlane) (SubLine halfPlane r)
   -- ^ The two halfPlanes that define the line, and the other halfplanes furthe
   -- restricitng the line.
-  | InSlab (Slab r (LinePV 2 r :+ halfPlane))
+  | InSlab (Slab r halfPlane)
     -- ^ two parallel halfPlanes l and u that form a slab;
   | BoundedRegion (ConvexPolygon (Point 2 r :+ halfPlane))
     -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.

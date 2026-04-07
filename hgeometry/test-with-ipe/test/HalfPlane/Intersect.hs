@@ -345,22 +345,28 @@ instance ( Fractional r, Ord r
          ) => IsIntersectableWith (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) where
   intersect = intersectTwo
 
+-- | move to LinePV or so
+instance (Num r) => HasSupportingLine (LineEQ r) where
+  supportingLine = fromLineEQ
+
 --------------------------------------------------------------------------------
 
--- | Create a slab out of two halfplanes
-fromParalelHalfplanes :: halfPlane -> halfPlane -> Slab r (LinePV 2 r :+ halfPlane)
-fromParalelHalfplanes = undefined
-  -- i.e. figure out which is the left bounding line one;
-  -- where
-  --   isLeftHalfPlane (Vector2 x y) h = let w = Vector2 (-y) x
-  --                                         a = undefined -- pickPoint ()
-  --                                             -- perpendicular to v; pointing left
-  --                                     in (a .+^ w) `intersects` h
+-- | Create a slab out of two halfplanes whose bounding lines are parallel.
+--
+fromParalelHalfplanes       :: ( HalfPlane_ halfPlane r, Num r, Fractional r
+                               , HasIntersectionWith (Point 2 r) halfPlane
+                               , HasSupportingLine (BoundingHyperPlane halfPlane 2 r)
+                               )
+                            => halfPlane -> halfPlane -> Slab r halfPlane
+fromParalelHalfplanes h1 h2
+    | h1IsLeftHalfPlane     = Slab l1 dist h1 h2
+    | otherwise             = Slab l2 dist h2 h1
+  where
+    l1@(LinePV a (Vector2 x y)) = h1^.boundingHyperPlane.to supportingLine
+    l2                          = h2^.boundingHyperPlane.to supportingLine
 
-
-
-        -- todo; make slab into a better type
-
+    h1IsLeftHalfPlane = let  w = Vector2 (-y) x in (a .+^ w) `intersects` h1
+    dist = squaredEuclideanDistTo a l2
 
 -- | Computes the intersection of two halfplanes
 intersectTwo :: forall halfPlane r.
@@ -371,6 +377,7 @@ intersectTwo :: forall halfPlane r.
                 , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
                 , GetDirection (BoundingHyperPlane halfPlane 2 r)
                 , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r) (BoundingHyperPlane halfPlane 2 r)
+                , HasSupportingLine (BoundingHyperPlane halfPlane 2 r)
                 , Intersection (BoundingHyperPlane halfPlane 2 r)
                   (BoundingHyperPlane halfPlane 2 r)
                   ~ Maybe (LineLineIntersection (BoundingHyperPlane halfPlane 2 r))
