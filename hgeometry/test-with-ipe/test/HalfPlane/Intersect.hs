@@ -44,7 +44,7 @@ import           HalfPlane.CommonIntersectionSpec ()
 import           HGeometry.Polygon
 import           HGeometry.Cone
 import           Test.Hspec
-import           HalfPlane.Cone.IntersectRect
+import           HGeometry.Cone.Intersection
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck (counterexample, (===), suchThat, discard, Arbitrary(..))
 import           HGeometry.Slab
@@ -91,8 +91,7 @@ spec = describe "Cone properties" $ do
 
 
 toHalfPlane :: HalfLine (Point 2 R) :+ attrs -> HalfPlane R
-toHalfPlane = rightHalfPlane
-              . asOrientedLine . view core
+toHalfPlane = rightHalfPlane . asOrientedLine . view core
 
 inFile :: IO OsPath
 inFile  = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.ipe|]

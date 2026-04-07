@@ -56,7 +56,7 @@ spec = describe "common halfplane intersection tests" $ do
          describe "clipUpperByLower manual" $ do
            let (uppers, lowers, res,answer) = testClip
            it "verify" $ res `shouldBe` answer
-           ipeClipResult [osp|commonIntersectionClipManual|] uppers lowers
+           -- ipeClipResult [osp|commonIntersectionClipManual|] uppers lowers
          -- generateClipGolden [osp|commonIntersectionClip|]
 
 generateGoldenSpec theName = do

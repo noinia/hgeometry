@@ -67,6 +67,7 @@ import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import GHC.Generics (Generic)
 import Control.DeepSeq
+import HGeometry.Cone.Intersection
 
 --------------------------------------------------------------------------------
 -- * The Minimization Diagram, i.e. the type that we use to represent our
@@ -133,44 +134,6 @@ toConvexPolygonIn rect = \case
                                                                 (rect^.maxPoint.asPoint)
                          in Right . uncheckedFromCCWPoints $
                                 (Extra <$> extras) <> (Original <$> pts)
-
--- | computes the extra vertices that we have to insert to make an unbounded region bounded
-extraPoints            :: ( Rectangle_ rectangle corner, Point_ corner 2 r
-                          , Point_ point 2 r, Fractional r, Ord r
-                          , IsIntersectableWith (HalfLine point) (ClosedLineSegment corner)
-                          , Intersection (HalfLine point) (ClosedLineSegment corner)
-                            ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
-                                                                     (ClosedLineSegment corner))
-                          )
-                       => HalfLine point -> HalfLine point -> rectangle
-                       -> NonEmpty (Point 2 r)
-extraPoints hp hq rect = noDuplicates $ q :| cornersInBetween qSide pSide rect <> [p]
-    -- if the intersection point coincides with a corner then the current code includes
-    -- the corner. We use the noDuplicates to get rid of those.
-  where
-    (q,qSide) = intersectionPoint hq
-    (p,pSide) = intersectionPoint hp
-
-    intersectionPoint  h = case getFirst $ intersectionPoint' h of
-                             Nothing -> error "extraPoints: precondititon failed "
-                             Just x  -> x
-    intersectionPoint' h = flip ifoldMap (sides rect) $ \side seg ->
-      case h `intersect` seg of
-        Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
-        _                                     -> First   Nothing
-
-    noDuplicates = fmap NonEmpty.head . NonEmpty.group1
-
-
--- | Computes the corners in between the two given sides (in CCW order)
-cornersInBetween          :: (Rectangle_ rectangle point, Point_ point 2 r, Num r)
-                          => CardinalDirection -> CardinalDirection -> rectangle -> [Point 2 r]
-cornersInBetween s e rect = map snd
-                          . takeWhile ((/= e) . fst) . dropWhile ((/= s) . fst)
-                          $ cycle [(East,tr),(North,tl),(West,bl),(South,br)]
-  where
-    Corners tl tr br bl = view asPoint <$> corners rect
-
 
 --------------------------------------------------------------------------------
 

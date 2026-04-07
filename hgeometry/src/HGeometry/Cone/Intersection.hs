@@ -1,4 +1,4 @@
-module HalfPlane.Cone.IntersectRect
+module HGeometry.Cone.Intersection
   ( toConvexPolygonIn
   , extraPoints
   ) where
@@ -43,7 +43,11 @@ toConvexPolygonIn rect c = let hp     = (leftBoundary  c ^.core)&halfLineStart %
                                 Original (c^.apex) NonEmpty.<| (Extra <$> extras)
 
 
--- | computes the extra vertices that we have to insert to make an unbounded region bounded
+-- | computes the extra vertices (i.e. corners of the box) in between
+-- the two given halflines (in CCW order) that we have to insert to
+-- make an unbounded region bounded.
+--
+-- pre: the starting points of the halflines lie inside the rectangle
 extraPoints            :: ( Rectangle_ rectangle corner, Point_ corner 2 r
                           , Point_ point 2 r, Fractional r, Ord r
                           , IsIntersectableWith (HalfLine point) (ClosedLineSegment corner)
