@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {- HLINT ignore "Use ++" -}
-module HalfPlane.Intersect
+module HalfPlane.IntersectSpec
   ( commonIntersection
   , myMain, testMain
   , spec
