@@ -145,6 +145,7 @@ instance (Ord r, Fractional r)
 -- move to Point.Either
 
 instance (HasIntersectionWith point geom, HasIntersectionWith extra geom
+
          ) => HasIntersectionWith (OriginalOrExtra point extra) geom where
   q `intersects` geom = case q of
     Original q' -> q' `intersects` geom
@@ -175,6 +176,7 @@ spec = describe "rightHalfPlane correct" $ do
            `shouldBe`
            Vector2 (-1) 0
          spec'
+
 
 spec' :: Spec
 spec' = describe "Cone properties" $ do
@@ -232,11 +234,11 @@ myCone2 = let hRight = above (LineEQ 0 100) :: HalfSpaceF (LineEQ R)
 myCone = Cone (Point2 100 100) (Vector2 1 1 :+ ()) (Vector2 1 0 :+ ())
 
 
-testMain = do -- halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
-              let halfPlanes' :: [HalfPlane R]
-                  halfPlanes' = [ HalfSpace Negative (LinePV (Point2 0 3) (Vector2 0 (-2.33334)))
-                                , HalfSpace Positive (LinePV (Point2 0 (-1.33334)) (Vector2 2.33333 0.33333))
-                                ]
+testMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
+              -- let halfPlanes' :: [HalfPlane R]
+              --     halfPlanes' = [ HalfSpace Negative (LinePV (Point2 0 3) (Vector2 0 (-2.33334)))
+              --                   , HalfSpace Positive (LinePV (Point2 0 (-1.33334)) (Vector2 2.33333 0.33333))
+              --                   ]
               traverse print halfPlanes'
               let pages' = [ let res = h1 `intersect` h2
                              in fromContent . concat $
@@ -620,8 +622,11 @@ intersectingHalfplanes c = Vector2 (rightHalfPlane $ LinePV a leftB)
 -- -- TODO: write a property check that extraPoints retursn only points inside the cone!
 
 
+
+
 -- | Computes the intersection of two halfplanes
-intersectTwo :: ( HalfPlane_ halfPlane r
+intersectTwo :: forall halfPlane r.
+                ( HalfPlane_ halfPlane r
                 , Fractional r, Ord r
                 , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
                 , HasIntersectionWith (Point 2 r) halfPlane
@@ -650,26 +655,71 @@ intersectTwo h1 h2 = case l1 `intersect` l2 of
                                 else HalfPlane_x_HalfPlane_Line l -- oppositive halfplanes
       Line_x_Line_Point a -> HalfPlane_x_HalfPlane_Cone $ Cone a left right
         where
-          (left,right) = case ((a .+^ v1) `intersects` h2, a .+^ v2 `intersects` h1) of
-            (False,False) -> (negated v2 :+ h2, negated v1 :+ h1)
-            (False,True)  -> traceShow (v1,v2) $
-              (negated v1 :+ h1,         v2 :+ h2)
-            (True,False)  -> (v1 :+ h1,         negated v2 :+ h2)
-            (True,True)   -> (v2         :+ h2,         v1 :+ h1)
+          v1 = inLineVector l1
+          v2 = inLineVector l2
 
-          v1 = leftVec h1
-          v2 = leftVec h2
+          (left,right)
+            | isLeftHalfPlane v1 h1 = case ccw (origin :: Point 2 r) (Point v1) (Point v2) of
+                CCW | isLeftHalfPlane v2 h2 -> (negated v1 :+ h1, v2 :+ h2)
+                    | otherwise             -> (v2 :+ h2,         v1 :+ h1)
+                CW  | isLeftHalfPlane v2 h2 -> (negated v2 :+ h2, v1 :+ h1)
+                    | otherwise             -> (negated v1 :+ h1, negated v2 :+ h2)
+                CoLinear -> error "absurd"
+            | otherwise            = case ccw (origin :: Point 2 r) (Point v1) (Point v2) of
+                CCW | isLeftHalfPlane v2 h2 -> (negated v2 :+ h2, negated v1 :+ h1)
+                    | otherwise             -> (v1 :+ h1,         negated v2 :+ h2)
+                CW  | isLeftHalfPlane v2 h2 -> (v1 :+ h1,         v2 :+ h2)
+                    | otherwise             -> (v2 :+ h2,         negated v1 :+ h1)
+                CoLinear -> error "absurd"
+
+          isLeftHalfPlane (Vector2 x y) h = let w = Vector2 (-y) x
+                                                -- perpendicular to v; pointing left
+                                            in (a .+^ w) `intersects` h
+          --   = case
+
+
+          --   (False,False) -> traceShow "woei" $ (negated v2 :+ h2, negated v1 :+ h1)
+          --   (False,True)  -> traceShow (v1,v2) $
+          --     (negated v1 :+ h1,         v2 :+ h2)
+          --   (True,False)  -> (v1 :+ h1,         negated v2 :+ h2)
+          --   (True,True)   -> (v2         :+ h2,         v1 :+ h1)
+
+
+          --   |
+          --   | otherwise = undefined
+
+
+          --   = case (h1^.halfSpaceSign)
+
+
+          -- cones = [ Cone a (negated v1 :+ h1) (negated v2 :+ h2)
+          --         , Cone a (negated v1 :+ h1) (v2 :+ h2)
+          --         , Cone a (v1 :+ h1)         (negated v2 :+ h2)
+          --         , Cone a (v1 :+ h1)         (v2 :+ h2)
+          --         ]
+
+
+
+          -- (left,right) = case ((a .+^ v1) `intersects` h2, a .+^ v2 `intersects` h1) of
+          --   (False,False) -> traceShow "woei" $ (negated v2 :+ h2, negated v1 :+ h1)
+          --   (False,True)  -> traceShow (v1,v2) $
+          --     (negated v1 :+ h1,         v2 :+ h2)
+          --   (True,False)  -> (v1 :+ h1,         negated v2 :+ h2)
+          --   (True,True)   -> (v2         :+ h2,         v1 :+ h1)
+
+          -- v1 = leftVec h1
+          -- v2 = leftVec h2
 
   where
     l1 = h1^.boundingHyperPlane
     l2 = h2^.boundingHyperPlane
 
-    -- | Given a halfplane; compute the vector v so that the halfplane is to the left
-    -- of the vector.
-    leftVec h = let v = inLineVector (h^.boundingHyperPlane)
-                in case h^.halfSpaceSign of
-                     Negative -> v
-                     Positive -> negated v
+    -- -- | Given a halfplane; compute the vector v so that the halfplane is to the left
+    -- -- of the vector.
+    -- leftVec h = let v = inLineVector (h^.boundingHyperPlane)
+    --             in case h^.halfSpaceSign of
+    --                  Negative -> v
+    --                  Positive -> negated v
 
 
 
