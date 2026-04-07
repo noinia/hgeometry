@@ -33,7 +33,9 @@ import           Text.Read (Read (..), readListPrecDefault)
 -- in other words, the line y = 1*x + 2
 
 -- $setup
+-- >>> import HGeometry.Line.LineEQ
 -- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1)
+-- >>> let myLine        = LineEQ 1 2                          :: LineEQ Double
 
 -- | A Hyperplane h in d-dimensions, described by a vector of
 -- coefficients (a_0,..,a_d).

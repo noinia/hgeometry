@@ -5,14 +5,15 @@ import HGeometry.HalfSpace
 import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Kernel.Instances ()
-import HGeometry.Line
-import HGeometry.Point
+import HGeometry.Kernel
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
 --------------------------------------------------------------------------------
 
 type R = Double
+type HalfPlane r = HalfSpaceF (LinePV 2 r)
+
 
 myHalfspace :: HalfSpaceF (LineEQ R)
 myHalfspace = HalfSpace Positive myLine

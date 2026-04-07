@@ -67,7 +67,7 @@ import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import GHC.Generics (Generic)
 import Control.DeepSeq
-import HGeometry.Cone.Intersection
+import HGeometry.Cone.Intersection (extraPoints)
 
 --------------------------------------------------------------------------------
 -- * The Minimization Diagram, i.e. the type that we use to represent our
