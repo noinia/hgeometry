@@ -47,6 +47,7 @@ import           Test.Hspec
 import           HalfPlane.Cone.IntersectRect
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck (counterexample, (===), suchThat, discard, Arbitrary(..))
+import           HGeometry.Slab
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -197,7 +198,7 @@ drawIntersection :: forall r.
 drawIntersection = \case
   SingletonPoint p _hs  -> ipeGroup [iO $ defIO p]
   InSubLine _l _hs _sl  -> ipeGroup [] -- TODO
-  Slab _hl _hr          -> ipeGroup [] -- TODO
+  InSlab _hl            -> ipeGroup [] -- TODO
   BoundedRegion pg      -> ipeGroup [iO $ defIO (pg&vertices %~ view core
                                                   :: ConvexPolygon (Point 2 r)
                                                 ) ! attr SFill blue
@@ -243,19 +244,19 @@ joinChains pref suf = pref -- FIXME!!!
 
 --------------------------------------------------------------------------------
 
-data Slab' halfPlane = Slab' halfPlane halfPlane
-  deriving (Show,Eq)
+-- data Slab' halfPlane = Slab' halfPlane halfPlane
+--   deriving (Show,Eq)
 
-type instance NumType   (Slab' halfPlane) = NumType halfPlane
-type instance Dimension (Slab' halfPlane) = 2
+-- type instance NumType   (Slab' halfPlane) = NumType halfPlane
+-- type instance Dimension (Slab' halfPlane) = 2
 
 
 --------------------------------------------------------------------------------
 
-instance (HalfPlane_ halfPlane r
-         ) => HasDefaultIpeOut (Slab' halfPlane) where
-  type DefaultIpeOut (Slab' halfPlane) = Group
-  defIO (Slab' h1 h2) = ipeGroup []
+instance (
+         ) => HasDefaultIpeOut (Slab r orientedLine) where
+  type DefaultIpeOut (Slab r orientedLine) = Group
+  defIO _s = ipeGroup []
 
     -- ipeGroup [ iO $ defIO (h1^.boundingHyperPlane)
     --                              , iO $ defIO (h2^.boundingHyperPlane)
@@ -286,28 +287,7 @@ instance (Point_ point 2 r, Fractional r, Ord r, Show r
 --------------------------------------------------------------------------------
 
 
--- | The non-empty intersection of two halfPlanes
-data HalfPlaneIntersection r halfPlane =
-    HalfPlane_x_HalfPlane_Line (BoundingHyperPlane halfPlane 2 r)
-  | HalfPlane_x_HalfPlane_Slab (Slab' halfPlane)
-  | HalfPlane_x_HalfPlane_Cone (Cone r (Point 2 r) halfPlane)
-  | HalfPlane_x_HalfPlane_HalfPlane halfPlane
 
-deriving instance (Show r, Show halfPlane, Show (BoundingHyperPlane halfPlane 2 r)
-                  ) => Show (HalfPlaneIntersection r halfPlane)
-deriving instance (Eq r, Eq halfPlane, Eq (BoundingHyperPlane halfPlane 2 r)
-                  ) => Eq (HalfPlaneIntersection r halfPlane)
-
-type instance NumType   (HalfPlaneIntersection r halfPlane) = r
-type instance Dimension (HalfPlaneIntersection r halfPlane) = 2
-
-data LineHalfPlaneIntersection r line = Line_x_HalfPlane_Line     line
-                                      | Line_x_HalfPlane_HalfLine (HalfLine (Point 2 r))
-  deriving (Show,Eq)
-
-
-type instance NumType   (LineHalfPlaneIntersection r line) = r
-type instance Dimension (LineHalfPlaneIntersection r line) = 2
 
 --------------------------------------------------------------------------------
 
@@ -346,127 +326,6 @@ instance ( HasDefaultIpeOut halfPlane
     HalfPlane_x_HalfPlane_HalfPlane halfPlane -> ipeGroup [iO $ defIO halfPlane ]
 
 --------------------------------------------------------------------------------
-class GetDirection line where
-  -- | Get a vector v that lies in the line; i.e. given a point
-  -- p that lies on the line; the point p .+^ v lies also in the line.
-  inLineVector :: (r ~ NumType line, d ~ Dimension line) => line -> Vector d r
-
-instance HasDirection line => GetDirection line where
-  inLineVector = view direction
-instance {-# OVERLAPPING #-} Num r => GetDirection (LineEQ r) where
-  inLineVector (LineEQ a _) = Vector2 1 a
-  -- not sure why it thinks this is overlapping, but whatever
-instance Num r => GetDirection (VerticalOrLineEQ r) where
-  inLineVector = \case
-    VerticalLineThrough _ -> Vector2 0 1
-    NonVertical l         -> inLineVector l
---------------------------------------------------------------------------------
-
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (LinePV 2 r) (HalfSpaceF (LinePV 2 r)) where
-  intersects = intersectsLineHalfplane
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (LinePV 2 r) (HalfSpaceF (LineEQ r)) where
-  intersects = intersectsLineHalfplane
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (LinePV 2 r) (HalfSpaceF (VerticalOrLineEQ r)) where
-  intersects = intersectsLineHalfplane
-
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (LineEQ r) (HalfSpaceF (LinePV 2 r)) where
-  intersects = intersectsLineHalfplane
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (LineEQ r) (HalfSpaceF (LineEQ r)) where
-  intersects = intersectsLineHalfplane
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (LineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) where
-  intersects = intersectsLineHalfplane
-
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (VerticalOrLineEQ r) (HalfSpaceF (LinePV 2 r)) where
-  intersects = intersectsLineHalfplane
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (VerticalOrLineEQ r) (HalfSpaceF (LineEQ r)) where
-  intersects = intersectsLineHalfplane
-instance ( Num r, Ord r
-         ) => HasIntersectionWith (VerticalOrLineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) where
-  intersects = intersectsLineHalfplane
-
-
--- | test if a line and a halfplane intersect
-intersectsLineHalfplane     :: ( HalfPlane_ halfPlane r
-                               , Num r, Ord r
-                               , HyperPlane_ line 2 r
-                               , HasPickInteriorPoint line 2 r
-                               , HasIntersectionWith line (BoundingHyperPlane halfPlane 2 r)
-                               , HasIntersectionWith (Point 2 r) halfPlane
-                               ) => line -> halfPlane -> Bool
-intersectsLineHalfplane l h = (l `intersects` (h^.boundingHyperPlane)) ||
-                              (pointInteriorTo l `intersects` h)
-
---------------------------------------------------------------------------------
-
-type instance Intersection (LinePV 2 r) (HalfSpaceF (LinePV 2 r)) =
-  Maybe (LineHalfPlaneIntersection r (LinePV 2 r))
-type instance Intersection (LinePV 2 r) (HalfSpaceF (LineEQ r)) =
-  Maybe (LineHalfPlaneIntersection r (LinePV 2 r))
-type instance Intersection (LinePV 2 r) (HalfSpaceF (VerticalOrLineEQ r)) =
-  Maybe (LineHalfPlaneIntersection r (LinePV 2 r))
-
-instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (LinePV 2 r) (HalfSpaceF (LinePV 2 r)) where
-  intersect = intersectLineHalfplane
-instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (LinePV 2 r) (HalfSpaceF (LineEQ r)) where
-  intersect = intersectLineHalfplane
-instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (LinePV 2 r) (HalfSpaceF (VerticalOrLineEQ r)) where
-  intersect = intersectLineHalfplane
-
-
-type instance Intersection (LineEQ r) (HalfSpaceF (LinePV 2 r)) =
-  Maybe (LineHalfPlaneIntersection r (LineEQ r))
-type instance Intersection (LineEQ r) (HalfSpaceF (LineEQ r)) =
-  Maybe (LineHalfPlaneIntersection r (LineEQ r))
-type instance Intersection (LineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) =
-  Maybe (LineHalfPlaneIntersection r (LineEQ r))
-
-instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (LineEQ r) (HalfSpaceF (LinePV 2 r)) where
-  intersect = intersectLineHalfplane
-instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (LineEQ r) (HalfSpaceF (LineEQ r)) where
-  intersect = intersectLineHalfplane
-instance ( Fractional r, Ord r
-         ) => IsIntersectableWith (LineEQ r) (HalfSpaceF (VerticalOrLineEQ r)) where
-  intersect = intersectLineHalfplane
-
-
-
---------------------------------------------------------------------------------
-
--- | Insertsect a line and a halfplane
-intersectLineHalfplane   :: ( HalfPlane_ halfPlane r
-                            , Fractional r, Ord r
-                            , HyperPlane_ line 2 r
-                            , HasPickInteriorPoint line 2 r
-                            , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
-                            , IsIntersectableWith line (BoundingHyperPlane halfPlane 2 r)
-                            , GetDirection line
-                            , HasIntersectionWith (Point 2 r) halfPlane
-                            , Intersection line (BoundingHyperPlane halfPlane 2 r)
-                              ~ Maybe (LineLineIntersection line)
-                            ) => line -> halfPlane -> Maybe (LineHalfPlaneIntersection r line)
-intersectLineHalfplane l h = case l `intersect` (h^.boundingHyperPlane) of
-    Nothing
-      | pointInteriorTo l `intersects` h -> Just $ Line_x_HalfPlane_Line l
-      | otherwise                        -> Nothing
-    Just i                               -> Just $ case i of
-      Line_x_Line_Line _  -> Line_x_HalfPlane_Line l
-      Line_x_Line_Point p -> Line_x_HalfPlane_HalfLine (HalfLine p v)
-        where
-          v' = inLineVector l
-          v = if p .+^ v' `intersects` h then v' else negated v'
 
 --------------------------------------------------------------------------------
 
@@ -488,41 +347,19 @@ instance ( Fractional r, Ord r
 
 --------------------------------------------------------------------------------
 
+-- | Create a slab out of two halfplanes
+fromParalelHalfplanes :: halfPlane -> halfPlane -> Slab r (LinePV 2 r :+ halfPlane)
+fromParalelHalfplanes = undefined
+  -- i.e. figure out which is the left bounding line one;
+  -- where
+  --   isLeftHalfPlane (Vector2 x y) h = let w = Vector2 (-y) x
+  --                                         a = undefined -- pickPoint ()
+  --                                             -- perpendicular to v; pointing left
+  --                                     in (a .+^ w) `intersects` h
 
 
--- | Get the bisector of the cone
-coneBisector   :: (Point_ point 2 r, Num r) => Cone r point edge -> HalfLine point
-coneBisector c = HalfLine (c^.apex)
-                         ((c^.leftBoundaryVector.core) ^+^ (c^.rightBoundaryVector.core))
 
-
-instance ( Point_ point 2 r, Num r, Ord r
-         ) => Point 2 r `HasIntersectionWith` Cone r point edge where
-  q `intersects` cone = all (q `intersects`) (intersectingHalfplanes cone)
-  {-# INLINE intersects #-}
-
-
--- | Get the two halfplanes so that the cone is the intersection of the two halfplanes.
--- the first halfplane is the plane right of the left boundary, whereas the
--- second halfplane is the plane left of the right boundary.
-intersectingHalfplanes   :: ( Point_ point 2 r, Num r, Ord r)
-                         => Cone r point edge -> Vector 2 (HalfSpaceF (LinePV 2 r))
-intersectingHalfplanes c = Vector2 (rightHalfPlane $ LinePV a leftB)
-                                   (leftHalfPlane  $ LinePV a rightB)
-  where
-    a      = c^.apex.asPoint
-    leftB  = c^.leftBoundaryVector.core
-    rightB = c^.rightBoundaryVector.core
-{-# INLINE intersectingHalfplanes #-}
-
---------------------------------------------------------------------------------
-
--- debug2 = let a = Point2 100 100
---              rect = defaultBox
---          in extraPoints (HalfLine a left) (HalfLine right)
--- -- TODO: write a property check that extraPoints retursn only points inside the cone!
-
-
+        -- todo; make slab into a better type
 
 
 -- | Computes the intersection of two halfplanes
@@ -546,8 +383,7 @@ intersectTwo h1 h2 = case l1 `intersect` l2 of
       (False,False) -> Nothing
       (True, False) -> Just $ HalfPlane_x_HalfPlane_HalfPlane h1
       (False, True) -> Just $ HalfPlane_x_HalfPlane_HalfPlane h2
-      (True,True)   -> Just $ HalfPlane_x_HalfPlane_Slab (Slab' h1 h2)
-        -- todo; make slab into a better type
+      (True,True)   -> Just $ HalfPlane_x_HalfPlane_Slab (fromParalelHalfplanes h1 h2)
     Just i  -> Just $ case i of
       Line_x_Line_Line l  -> let n = normalVector l
                                  q = pointInteriorTo l .+^ n
@@ -558,7 +394,6 @@ intersectTwo h1 h2 = case l1 `intersect` l2 of
         where
           v1 = inLineVector l1
           v2 = inLineVector l2
-
           (left,right)
             | isLeftHalfPlane v1 h1 = case ccw (origin :: Point 2 r) (Point v1) (Point v2) of
                 CCW | isLeftHalfPlane v2 h2 -> (negated v1 :+ h1, v2 :+ h2)
@@ -576,92 +411,9 @@ intersectTwo h1 h2 = case l1 `intersect` l2 of
           isLeftHalfPlane (Vector2 x y) h = let w = Vector2 (-y) x
                                                 -- perpendicular to v; pointing left
                                             in (a .+^ w) `intersects` h
-          --   = case
-
-
-          --   (False,False) -> traceShow "woei" $ (negated v2 :+ h2, negated v1 :+ h1)
-          --   (False,True)  -> traceShow (v1,v2) $
-          --     (negated v1 :+ h1,         v2 :+ h2)
-          --   (True,False)  -> (v1 :+ h1,         negated v2 :+ h2)
-          --   (True,True)   -> (v2         :+ h2,         v1 :+ h1)
-
-
-          --   |
-          --   | otherwise = undefined
-
-
-          --   = case (h1^.halfSpaceSign)
-
-
-          -- cones = [ Cone a (negated v1 :+ h1) (negated v2 :+ h2)
-          --         , Cone a (negated v1 :+ h1) (v2 :+ h2)
-          --         , Cone a (v1 :+ h1)         (negated v2 :+ h2)
-          --         , Cone a (v1 :+ h1)         (v2 :+ h2)
-          --         ]
-
-
-
-          -- (left,right) = case ((a .+^ v1) `intersects` h2, a .+^ v2 `intersects` h1) of
-          --   (False,False) -> traceShow "woei" $ (negated v2 :+ h2, negated v1 :+ h1)
-          --   (False,True)  -> traceShow (v1,v2) $
-          --     (negated v1 :+ h1,         v2 :+ h2)
-          --   (True,False)  -> (v1 :+ h1,         negated v2 :+ h2)
-          --   (True,True)   -> (v2         :+ h2,         v1 :+ h1)
-
-          -- v1 = leftVec h1
-          -- v2 = leftVec h2
-
   where
     l1 = h1^.boundingHyperPlane
     l2 = h2^.boundingHyperPlane
-
-    -- -- | Given a halfplane; compute the vector v so that the halfplane is to the left
-    -- -- of the vector.
-    -- leftVec h = let v = inLineVector (h^.boundingHyperPlane)
-    --             in case h^.halfSpaceSign of
-    --                  Negative -> v
-    --                  Positive -> negated v
-
-
-
-
-
-    -- regular  h = leftVec h           :+ h
-    -- negated' h = negated (leftVec h) :+ h
-
-
-
-
-    -- -- the following assignment assumes that the vectors v1 and v2 point rightward
-    -- (left,right) = case (h1^.halfSpaceSign, h2^.halfSpaceSign) of
-    --   (Negative,Negative) -> (regular  h1, negated' h2)
-    --   (Negative,Positive) -> (negated' h2, negated' h1)
-    --   (Positive,Negative) -> (negated' h2, regular  h1)
-    --   (Positive,Positive) -> (negated' h1, regular  h2)
-
-
-  -- FIXME: I guess I can compute whether a + v1 lies inside h2
-  -- to decide left right?
-
-
-
-    -- f s s' | s' == s   = negated
-    --        | otherwise = id
-
-  -- case (h1^.boundingHyperPlane) `intersect` h2 of
-  --   Nothing
-  --     | (h2^.boundingHyperPlane) `intersects` h1 -> Just $ HalfPlane_x_HalfPlane_HalfPlane h2
-  --     | otherwise                                -> Nothing
-  --   Just i  -> Just $ case i of
-  --     Line_x_HalfPlane_Line _
-  --       | (h2^.boundingHyperPlane) `intersects` h1 -> HalfPlane_x_HalfPlane_Slab h1 h2
-  --       | otherwise                               ->
-
-
-
-
-
-
 
 
 -- | Computes the common intersection of a \(n\) halfplanes.

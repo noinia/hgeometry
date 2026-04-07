@@ -1,10 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.HalfSpace.Intersection
-  (
-
-    -- HalfPlaneIntersection(..)
-   LineHalfPlaneIntersection(..)
+  ( HalfPlaneIntersection(..)
+  , LineHalfPlaneIntersection(..)
 
   , GetDirection(..)
   ) where
@@ -17,57 +15,27 @@ import HGeometry.Line
 import HGeometry.HalfLine
 import HGeometry.Point
 import HGeometry.Slab
+import HGeometry.Cone
 import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Vector
+import HGeometry.Ext
 
 --------------------------------------------------------------------------------
--- | Intersection between two halfplanes
-data HalfPlaneIntersection r orientedLine line =
-    HalfPlane_x_HalfPlane_Line      line
-  | HalfPlane_x_HalfPlane_Slab      (Slab r orientedLine)
-  | HalfPlane_x_HalfPlane_Wedge     (Vector 2 r) (Point 2 r) (Vector 2 r)
-    -- ^ The first vector points into p, the second one points away from p.
-    -- This way, we mean the wedge to the left of both vectors.
-  | HalfPlane_x_HalfPlane_HalfPlane (HalfSpaceF line)
-  deriving stock (Show,Eq)
 
-type instance Intersection (HalfSpaceF (LineEQ r)) (HalfSpaceF line') =
-  Maybe (HalfPlaneIntersection r (LinePV 2 r) (LineEQ r))
+-- | The non-empty intersection of two halfPlanes
+data HalfPlaneIntersection r halfPlane =
+    HalfPlane_x_HalfPlane_Line (BoundingHyperPlane halfPlane 2 r)
+  | HalfPlane_x_HalfPlane_Slab (Slab r (LinePV 2 r :+ halfPlane))
+  | HalfPlane_x_HalfPlane_Cone (Cone r (Point 2 r) halfPlane)
+  | HalfPlane_x_HalfPlane_HalfPlane halfPlane
 
+deriving instance (Show r, Show halfPlane, Show (BoundingHyperPlane halfPlane 2 r)
+                  ) => Show (HalfPlaneIntersection r halfPlane)
+deriving instance (Ord r, Num r, Eq halfPlane, Eq (BoundingHyperPlane halfPlane 2 r)
+                  ) => Eq (HalfPlaneIntersection r halfPlane)
 
-instance ( Ord r, Fractional r
-         )
-       => IsIntersectableWith (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) where
-  h@(HalfSpace sign l) `intersect` h'@(HalfSpace sign' l') = case l `intersect` l' of
-      Nothing -> case (pointInteriorTo l `intersects` h', pointInteriorTo l' `intersects` h) of
-        (False,False) -> Nothing
-        (True,False)  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h
-        (False,True)  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h'
-        (True,True)   -> Just $ HalfPlane_x_HalfPlane_Slab slab
-
-      Just (Line_x_Line_Point p) -> Just $ HalfPlane_x_HalfPlane_Wedge u p u'
-        where
-          LinePV _ v  = fromLineEQ l
-          LinePV _ v' = fromLineEQ l'
-
-          u  = error "not implemeted yet" -- if (p .+^ Vector2 0 1) `intersects` h  then negated v else v
-          u' = error "not implemeted yet" -- if (p .+^ Vector2 0 1) `intersects` h' then v'        else negated v'
-          -- FIXME: I don't think this is correct yet!!!
-
-
-      Just (Line_x_Line_Line _)
-          | sameSide  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h
-          | otherwise -> Just $ HalfPlane_x_HalfPlane_Line l
-    where
-      -- we take some point that is not on the bounding line; if the halfplanes both
-      -- contain this point they are oriented the same way. Otherwise, they are oriented
-      -- in opposite directions, and thus the halfplanes intersect in a line.
-      sameSide = q `intersects` h == q `intersects` h'
-      q = pointInteriorTo l .+^ Vector2 0 1 -- take some offset; this uses that l is not vertial.
-
-
-      slab = let w = squaredEuclideanDistTo (pointInteriorTo l') l
-             in Slab (fromLineEQ l) (if l^.intercept  > l'^.intercept then w else negate w)
+type instance NumType   (HalfPlaneIntersection r halfPlane) = r
+type instance Dimension (HalfPlaneIntersection r halfPlane) = 2
 
 
 

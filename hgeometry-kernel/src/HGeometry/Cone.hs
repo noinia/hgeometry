@@ -20,7 +20,7 @@ import HGeometry.Vector
 import HGeometry.Ext
 import HGeometry.HalfLine
 import HGeometry.Point
-import HGeometry.HalfSpace
+import HGeometry.HalfSpace.Type
 import HGeometry.Intersection
 import HGeometry.Line
 import HGeometry.Properties

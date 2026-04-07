@@ -248,7 +248,7 @@ draw :: IpeOut (CommonIntersection (HalfPlane r) r) Group r
 draw = \case
   SingletonPoint _p _hs  -> ipeGroup []
   InSubLine _l _hs _sl   -> ipeGroup []
-  Slab _hl _hr           -> ipeGroup []
+  InSlab _hl             -> ipeGroup []
   BoundedRegion _pg      -> ipeGroup []
   UnboundedRegion _chain -> ipeGroup []
 

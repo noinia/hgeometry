@@ -35,6 +35,7 @@ import HGeometry.Point
 import HGeometry.Polygon.Convex
 import HGeometry.Sequence.Alternating
 import HGeometry.Vector
+import HGeometry.Slab
 import HGeometry.Properties
 
 --------------------------------------------------------------------------------
@@ -47,7 +48,7 @@ data CommonIntersection halfPlane r =
   | InSubLine (VerticalOrLineEQ r) (Vector 2 halfPlane) (SubLine halfPlane r)
   -- ^ The two halfPlanes that define the line, and the other halfplanes furthe
   -- restricitng the line.
-  | Slab halfPlane halfPlane
+  | InSlab (Slab r (LinePV 2 r :+ halfPlane))
     -- ^ two parallel halfPlanes l and u that form a slab;
   | BoundedRegion (ConvexPolygon (Point 2 r :+ halfPlane))
     -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
@@ -92,7 +93,7 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
             BothSigns (x :+ l) (x' :+ u)  -> case x `compare` x' of
               LT -> Nothing
               EQ -> Just $ InSubLine (VerticalLineThrough x) (Vector2 l u) EntireLine
-              GT -> Just $ Slab l u
+              GT -> Just $ InSlab undefined -- FIXME!!!! (Slab l u)
 
     -- we only have non-vertical halfpalnes planes
     That nonVerticals            -> withNonVerticals nonVerticals
