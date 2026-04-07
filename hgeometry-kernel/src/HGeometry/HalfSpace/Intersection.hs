@@ -38,6 +38,77 @@ type instance NumType   (HalfPlaneIntersection r halfPlane) = r
 type instance Dimension (HalfPlaneIntersection r halfPlane) = 2
 
 
+type instance Intersection (HalfSpaceF (LinePV 2 r)) (HalfSpaceF (LinePV 2 r)) =
+  Maybe (HalfPlaneIntersection r (HalfSpaceF (LinePV 2 r)))
+
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (HalfSpaceF (LinePV 2 r)) where
+  intersect = intersectTwo
+
+type instance Intersection (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) =
+  Maybe (HalfPlaneIntersection r (HalfSpaceF (LineEQ r)))
+
+instance ( Fractional r, Ord r
+         ) => IsIntersectableWith (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) where
+  intersect = intersectTwo
+
+-- | move to LinePV or so
+instance (Num r) => HasSupportingLine (LineEQ r) where
+  supportingLine = fromLineEQ
+
+--------------------------------------------------------------------------------
+
+
+-- | Computes the intersection of two halfplanes
+intersectTwo :: forall halfPlane r.
+                ( HalfPlane_ halfPlane r
+                , Fractional r, Ord r
+                , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
+                , HasIntersectionWith (Point 2 r) halfPlane
+                , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
+                , GetDirection (BoundingHyperPlane halfPlane 2 r)
+                , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r) (BoundingHyperPlane halfPlane 2 r)
+                , HasSupportingLine (BoundingHyperPlane halfPlane 2 r)
+                , Intersection (BoundingHyperPlane halfPlane 2 r)
+                  (BoundingHyperPlane halfPlane 2 r)
+                  ~ Maybe (LineLineIntersection (BoundingHyperPlane halfPlane 2 r))
+                ) => halfPlane -> halfPlane -> Maybe (HalfPlaneIntersection r halfPlane)
+intersectTwo h1 h2 = case l1 `intersect` l2 of
+    Nothing -> case (pointInteriorTo l1 `intersects` h2, pointInteriorTo l2 `intersects` h1) of
+      (False,False) -> Nothing
+      (True, False) -> Just $ HalfPlane_x_HalfPlane_HalfPlane h1
+      (False, True) -> Just $ HalfPlane_x_HalfPlane_HalfPlane h2
+      (True,True)   -> Just $ HalfPlane_x_HalfPlane_Slab (fromParalelHalfplanes h1 h2)
+    Just i  -> Just $ case i of
+      Line_x_Line_Line l  -> let n = normalVector l
+                                 q = pointInteriorTo l .+^ n
+                             in if q `intersects` h1 == q `intersects` h2
+                                then HalfPlane_x_HalfPlane_HalfPlane h1 -- same halfplane
+                                else HalfPlane_x_HalfPlane_Line l -- oppositive halfplanes
+      Line_x_Line_Point a -> HalfPlane_x_HalfPlane_Cone $ Cone a left right
+        where
+          v1 = inLineVector l1
+          v2 = inLineVector l2
+          (left,right)
+            | isLeftHalfPlane v1 h1 = case ccw (origin :: Point 2 r) (Point v1) (Point v2) of
+                CCW | isLeftHalfPlane v2 h2 -> (negated v1 :+ h1, v2 :+ h2)
+                    | otherwise             -> (v2 :+ h2,         v1 :+ h1)
+                CW  | isLeftHalfPlane v2 h2 -> (negated v2 :+ h2, v1 :+ h1)
+                    | otherwise             -> (negated v1 :+ h1, negated v2 :+ h2)
+                CoLinear -> error "absurd"
+            | otherwise            = case ccw (origin :: Point 2 r) (Point v1) (Point v2) of
+                CCW | isLeftHalfPlane v2 h2 -> (negated v2 :+ h2, negated v1 :+ h1)
+                    | otherwise             -> (v1 :+ h1,         negated v2 :+ h2)
+                CW  | isLeftHalfPlane v2 h2 -> (v1 :+ h1,         v2 :+ h2)
+                    | otherwise             -> (v2 :+ h2,         negated v1 :+ h1)
+                CoLinear -> error "absurd"
+
+          isLeftHalfPlane (Vector2 x y) h = let w = Vector2 (-y) x
+                                                -- perpendicular to v; pointing left
+                                            in (a .+^ w) `intersects` h
+  where
+    l1 = h1^.boundingHyperPlane
+    l2 = h2^.boundingHyperPlane
 
 --------------------------------------------------------------------------------
 
