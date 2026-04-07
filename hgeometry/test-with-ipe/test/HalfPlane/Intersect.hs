@@ -5,7 +5,6 @@
 module HalfPlane.Intersect
   ( commonIntersection
   , myMain, testMain
-  , myCone, myCone2, debug
   , spec
   ) where
 
@@ -56,155 +55,38 @@ type HalfPlane r = HalfSpaceF (LinePV 2 r)
 
 
 --------------------------------------------------------------------------------
-
--- TODO move to kernel-quickcheck
-instance (Arbitrary r, Arbitrary point, Arbitrary edge, Num r, Ord r, Point_ point 2 r
-         ) => Arbitrary (Cone r point edge) where
-  arbitrary = do a <- arbitrary
-                 l <- arbitrary `suchThat` (/= zero)
-                 r <- arbitrary `suchThat`
-                        (\r' -> r' /= zero &&
-                                ccw (origin @(Point 2 r)) (Point l) (Point r') == CW)
-                 Vector2 x y <- arbitrary
-                 pure $ Cone a (l :+ x) (r :+ y)
-
---------------------------------------------------------------------------------
-
-type instance Intersection (LinePV 2 r) (LineEQ r) =
-  Maybe (LineLineIntersection (LinePV 2 r))
-
-instance (Eq r, Num r) => HasIntersectionWith (LinePV 2 r) (LineEQ r) where
-  linePV `intersects` lineEQ = lineEQ `intersects` linePV
-  {-# INLINE intersects #-}
-
-instance (Ord r, Fractional r)
-         => IsIntersectableWith (LinePV 2 r) (LineEQ r) where
-  linePV `intersect` lineEQ = (linePV <$) <$> lineEQ `intersect` linePV
-   -- we use the LineEQ x LinePV instance to compute the intersection. If
-   -- the lines are the same; then we just replace the line in the LineLineIntersection
-   -- by the linePV
-
---------------------------------------------------------------------------------
-
-type instance Intersection (VerticalOrLineEQ r) (LinePV 2 r) =
-  Maybe (LineLineIntersection (VerticalOrLineEQ r))
-
-instance (Eq r, Num r) => HasIntersectionWith (VerticalOrLineEQ r) (LinePV 2 r) where
-  line `intersects` linePV = case line of
-    VerticalLineThrough x -> linePV^.direction.xComponent /= 0 ||
-                             linePV^.anchorPoint.xCoord == x
-    NonVertical lineEQ    -> lineEQ `intersects` linePV
-  {-# INLINE intersects #-}
-
-instance (Ord r, Fractional r)
-         => IsIntersectableWith (VerticalOrLineEQ r) (LinePV 2 r) where
-  line `intersect` linePV = line `intersect` toLinearFunction linePV
-  {-# INLINE intersect #-}
-
-----------------------------------------
--- * the symmetric instances
-
-type instance Intersection (LinePV 2 r) (VerticalOrLineEQ r) =
-  Maybe (LineLineIntersection (LinePV 2 r))
-
-instance (Eq r, Num r) => HasIntersectionWith (LinePV 2 r) (VerticalOrLineEQ r) where
-  linePV `intersects` lineEQ = lineEQ `intersects` linePV
-  {-# INLINE intersects #-}
-
-instance (Ord r, Fractional r)
-         => IsIntersectableWith (LinePV 2 r) (VerticalOrLineEQ r) where
-  linePV `intersect` lineEQ = (linePV <$) <$> lineEQ `intersect` linePV
-   -- we use the LineEQ x LinePV instance to compute the intersection. If
-   -- the lines are the same; then we just replace the line in the LineLineIntersection
-   -- by the linePV
-
-
-----------------------------------------
--- * the symmetric instances
-
-type instance Intersection (VerticalOrLineEQ r) (LineEQ r) =
-  Maybe (LineLineIntersection (VerticalOrLineEQ r))
-
-instance (Eq r, Num r) => HasIntersectionWith (VerticalOrLineEQ r) (LineEQ r) where
-  line `intersects` lineEQ = lineEQ `intersects` line
-  {-# INLINE intersects #-}
-
-instance (Ord r, Fractional r)
-         => IsIntersectableWith (VerticalOrLineEQ r) (LineEQ r) where
-  line `intersect` lineEQ = (line <$) <$> lineEQ `intersect` line
-
---------------------------------------------------------------------------------
-
--- class AsOrientedLine line where
---   -- | Convert the given line into an canonical oriented line
---   asOrientedLine :: (d ~ Dimension line, r ~ NumType line) => line -> LinePV d r
-
--- instance AsOrientedLine (LinePV d r) where
---   asOrientedLine = id
-
---------------------------------------------------------------------------------
 -- move to Point.Either
 
-instance (HasIntersectionWith point geom, HasIntersectionWith extra geom
-
-         ) => HasIntersectionWith (OriginalOrExtra point extra) geom where
-  q `intersects` geom = case q of
-    Original q' -> q' `intersects` geom
-    Extra    q' -> q' `intersects` geom
-
-
-type instance Intersection (OriginalOrExtra point extra) geom =
-  Maybe (OriginalOrExtra point extra)
-
-instance (HasIntersectionWith point geom, HasIntersectionWith extra geom
-         ) => IsIntersectableWith (OriginalOrExtra point extra) geom where
-  q `intersect` geom
-    | q `intersects` geom = Just q
-    | otherwise           = Nothing
 
 --------------------------------------------------------------------------------
 
 
 spec :: Spec
-spec = describe "rightHalfPlane correct" $ do
-         it "vertical" $
-           (origin :: Point 2 R)
-           `intersects`
-           (rightHalfPlane (LinePV (Point2 1 10) (Vector2 0 (-10))) :: HalfPlane R)
-         -- it "testz"
-         it "normalVec" $
-           normalVector (LinePV (Point2 224 256) (Vector2 0 (-176)))
-           `shouldBe`
-           Vector2 (-1) 0
-         spec'
+spec = describe "Cone properties" $ do
+         prop "bisector in cone" $ \(cone :: Cone R (Point 2 R) ()) ->
+           let b@(HalfLine p v) = coneBisector cone
+           in counterexample (show b) $ ((p^.asPoint) .+^ v) `intersects` cone
+         prop "extraPoints correct" $ \(cone :: Cone R (Point 2 R) ()) ->
+           let rect = boundingBox $ defaultBox :| [boundingBox (cone^.apex) ]
+               pts  = extraPoints (leftBoundary  cone ^.core)
+                                  (rightBoundary cone ^.core)
+                                  rect
+           in all (`intersects` cone) pts
 
+         prop "toConvexIn correct" $ \(cone :: Cone R (Point 2 R) ()) ->
+           let rect = boundingBox $ defaultBox :| [boundingBox (cone^.apex) ]
+               pts  = toConvexPolygonIn rect cone
+           in allOf vertices (`intersects` cone) pts
 
-spec' :: Spec
-spec' = describe "Cone properties" $ do
-          prop "bisector in cone" $ \(cone :: Cone R (Point 2 R) ()) ->
-            let b@(HalfLine p v) = coneBisector cone
-            in counterexample (show b) $ ((p^.asPoint) .+^ v) `intersects` cone
-          prop "extraPoints correct" $ \(cone :: Cone R (Point 2 R) ()) ->
-            let rect = boundingBox $ defaultBox :| [boundingBox (cone^.apex) ]
-                pts  = extraPoints (leftBoundary  cone ^.core)
-                                   (rightBoundary cone ^.core)
-                                   rect
-            in all (`intersects` cone) pts
-
-          prop "toConvexIn correct" $ \(cone :: Cone R (Point 2 R) ()) ->
-            let rect = boundingBox $ defaultBox :| [boundingBox (cone^.apex) ]
-                pts  = toConvexPolygonIn rect cone
-            in allOf vertices (`intersects` cone) pts
-
-          prop "intersection correct" $ \(h1 :: HalfPlane R) (h2 :: HalfPlane R) ->
-            case h1 `intersect` h2 of
-              (Just (HalfPlane_x_HalfPlane_Cone cone)) ->
-                let rect = boundingBox $ defaultBox :| [boundingBox (cone^.apex) ]
-                    pts  = toConvexPolygonIn rect cone
-                in allOf vertices (`intersects` cone) pts
-              _                                        -> discard
-          halfPlaneIntersectionTests inFile
-                                     [osp|halfPlaneIntersection|]
+         prop "intersection correct" $ \(h1 :: HalfPlane R) (h2 :: HalfPlane R) ->
+           case h1 `intersect` h2 of
+             (Just (HalfPlane_x_HalfPlane_Cone cone)) ->
+               let rect = boundingBox $ defaultBox :| [boundingBox (cone^.apex) ]
+                   pts  = toConvexPolygonIn rect cone
+               in allOf vertices (`intersects` cone) pts
+             _                                        -> discard
+         halfPlaneIntersectionTests inFile
+                                    [osp|halfPlaneIntersection|]
 
 
 toHalfPlane :: HalfLine (Point 2 R) :+ attrs -> HalfPlane R

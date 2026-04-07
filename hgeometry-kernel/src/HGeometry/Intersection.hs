@@ -24,6 +24,7 @@ import Data.Maybe (isJust)
 import HGeometry.Ext
 import HGeometry.ByIndex
 import HGeometry.Point
+import HGeometry.Point.Either
 
 -------------------------------------------------------------------------------
 
@@ -94,3 +95,24 @@ type instance Intersection (ByIndex ix a) (ByIndex ix b) = Intersection a b
 instance (geomA `IsIntersectableWith` geomB
          ) => ByIndex ix geomA `IsIntersectableWith` ByIndex ix geomB where
   a `intersect` b = (a^.theValue) `intersect` (b^.theValue)
+
+
+
+--------------------------------------------------------------------------------
+-- * Intances for Point.Either
+instance (HasIntersectionWith point geom, HasIntersectionWith extra geom
+
+         ) => HasIntersectionWith (OriginalOrExtra point extra) geom where
+  q `intersects` geom = case q of
+    Original q' -> q' `intersects` geom
+    Extra    q' -> q' `intersects` geom
+
+
+type instance Intersection (OriginalOrExtra point extra) geom =
+  Maybe (OriginalOrExtra point extra)
+
+instance (HasIntersectionWith point geom, HasIntersectionWith extra geom
+         ) => IsIntersectableWith (OriginalOrExtra point extra) geom where
+  q `intersect` geom
+    | q `intersects` geom = Just q
+    | otherwise           = Nothing

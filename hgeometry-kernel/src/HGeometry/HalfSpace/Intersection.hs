@@ -8,22 +8,15 @@ import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Line
 import HGeometry.Point
+import HGeometry.Slab
 import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Vector
 
 --------------------------------------------------------------------------------
-
-data Slab' r orientedLine = Slab { _definingLine        :: orientedLine
-                                 , _signedSquaredWidth  :: !r
-                                 }
-                          deriving stock (Show,Eq,Ord,Functor,Foldable)
-
-type Slab orientedLine = Slab' (NumType orientedLine) orientedLine
-
 -- | Intersection between two halfplanes
 data HalfPlaneIntersection r orientedLine line =
     HalfPlane_x_HalfPlane_Line      line
-  | HalfPlane_x_HalfPlane_Slab      (Slab' r orientedLine)
+  | HalfPlane_x_HalfPlane_Slab      (Slab r orientedLine)
   | HalfPlane_x_HalfPlane_Wedge     (Vector 2 r) (Point 2 r) (Vector 2 r)
     -- ^ The first vector points into p, the second one points away from p.
     -- This way, we mean the wedge to the left of both vectors.

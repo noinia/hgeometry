@@ -32,11 +32,13 @@ import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
 import HGeometry.Matrix
 import HGeometry.Point
+import HGeometry.Cone
 import HGeometry.Point.Instances ()
 import HGeometry.Properties
 import HGeometry.Triangle
 import HGeometry.Vector
 import HGeometry.Vector.Instances ()
+import HGeometry.Ext
 import Test.QuickCheck
 
 --------------------------------------------------------------------------------
@@ -218,3 +220,14 @@ instance (Arbitrary r, Has_ Additive_ d r
 
 instance Arbitrary boundingHyperPlane => Arbitrary (HalfSpaceF boundingHyperPlane) where
   arbitrary = HalfSpace <$> arbitrary <*> arbitrary
+
+
+instance (Arbitrary r, Arbitrary point, Arbitrary edge, Num r, Ord r, Point_ point 2 r
+         ) => Arbitrary (Cone r point edge) where
+  arbitrary = do a <- arbitrary
+                 l <- arbitrary `suchThat` (/= zero)
+                 r <- arbitrary `suchThat`
+                        (\r' -> r' /= zero &&
+                                ccw (origin @(Point 2 r)) (Point l) (Point r') == CW)
+                 Vector2 x y <- arbitrary
+                 pure $ Cone a (l :+ x) (r :+ y)
