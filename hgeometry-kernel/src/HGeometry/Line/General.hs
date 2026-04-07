@@ -10,6 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.General
   ( VerticalOrLineEQ(..)
+  , AsLine(..)
   ) where
 
 import Control.DeepSeq
@@ -61,6 +62,11 @@ instance HyperPlane_ (VerticalOrLineEQ r) 2 r where
   onSideTest q = \case
     VerticalLineThrough x -> (q^.xCoord) `compare` x
     NonVertical l         -> onSideTest q l
+
+instance Num r => HasPickInteriorPoint (VerticalOrLineEQ r) 2 r where
+  pointInteriorTo = \case
+    VerticalLineThrough x -> Point2 x 0
+    NonVertical l         -> pointInteriorTo l
 
 instance (Fractional r, Eq r) => ConstructableHyperPlane_ (VerticalOrLineEQ r) 2 r where
   type HyperPlaneFromEquationConstraint (VerticalOrLineEQ r) 2 r = ()
@@ -123,3 +129,32 @@ instance (Eq r, Fractional r)
          => IsIntersectableWith (VerticalOrLineEQ r :+ extra) (VerticalOrLineEQ r :+ extra') where
   m `intersect` l = let ix = (m^.core) `intersect` (l^.core)
                     in fmap (const m) <$> ix -- if it is a line, just replace it by m
+
+
+----------------------------------------
+-- * the symmetric instances
+
+type instance Intersection (VerticalOrLineEQ r) (LineEQ r) =
+  Maybe (LineLineIntersection (VerticalOrLineEQ r))
+
+instance (Eq r, Num r) => HasIntersectionWith (VerticalOrLineEQ r) (LineEQ r) where
+  line `intersects` lineEQ = lineEQ `intersects` line
+  {-# INLINE intersects #-}
+
+instance (Ord r, Fractional r)
+         => IsIntersectableWith (VerticalOrLineEQ r) (LineEQ r) where
+  line `intersect` lineEQ = (line <$) <$> lineEQ `intersect` line
+
+
+--------------------------------------------------------------------------------
+
+-- | Types that can be converted into a general 2 dimensional line
+class AsLine line where
+  -- | Convert a given line into a general Line
+  asLine :: NumType line ~ r => line -> VerticalOrLineEQ r
+
+instance AsLine (VerticalOrLineEQ r) where
+  asLine = id
+
+instance AsLine (LineEQ r) where
+  asLine = NonVertical

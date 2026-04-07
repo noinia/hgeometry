@@ -165,10 +165,10 @@ spec = describe "HyperPlane Tests" $ do
            (Point2 0 0 `onSideTest` HyperPlane2 (-1) (-1) (-1))
            `shouldBe` GT
 
-         prop "pointOn produces a point on the hyperplane (2d)" $
-           \(h :: HyperPlane 2 R) -> onHyperPlane (pointOn h) h
-         prop "pointOn produces a point on the hyperplane (3d)" $
-           \(h :: HyperPlane 3 R) -> onHyperPlane (pointOn h) h
+         prop "pointInteriorTo produces a point on the hyperplane (2d)" $
+           \(h :: HyperPlane 2 R) -> onHyperPlane (pointInteriorTo h) h
+         prop "pointInteriorTo produces a point on the hyperplane (3d)" $
+           \(h :: HyperPlane 3 R) -> onHyperPlane (pointInteriorTo h) h
 
          prop "intersects nonvertical conistent" $
            \(l :: LineEQ R) (m :: LineEQ R) ->

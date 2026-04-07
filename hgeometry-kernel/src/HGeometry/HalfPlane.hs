@@ -7,7 +7,6 @@ import HGeometry.Line
 import HGeometry.Line.LineEQ
 import HGeometry.Properties
 
-
 --------------------------------------------------------------------------------
 
 -- | Two dimensional Halfplane bounded by a line.

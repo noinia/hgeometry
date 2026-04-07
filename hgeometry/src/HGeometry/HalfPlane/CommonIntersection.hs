@@ -13,34 +13,34 @@ module HGeometry.HalfPlane.CommonIntersection
   ) where
 
 
-import           Control.Lens hiding (Empty)
-import           Data.Foldable1
-import           Data.Foldable(toList)
-import           Data.List.NonEmpty (NonEmpty(..))
--- import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing)
-import           Data.Sequence (Seq(..))
--- import qualified Data.Sequence as Seq
-import           Data.These
-import           HGeometry.Ext
-import           HGeometry.Foldable.Util
-import           HGeometry.HalfLine
-import           HGeometry.HalfPlane.CommonIntersection.Chain
-import           HGeometry.HalfSpace
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
-import           HGeometry.Line
-import           HGeometry.Line.LowerEnvelope
-import           HGeometry.LineSegment
-import           HGeometry.Point
-import           HGeometry.Polygon.Convex
-import           HGeometry.Sequence.Alternating
-import           HGeometry.Vector
+import Control.Lens hiding (Empty)
+import Data.Foldable1
+import Data.Foldable (toList)
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Ord (comparing)
+import Data.Sequence (Seq(..))
+import Data.These
+import HGeometry.Ext
+import HGeometry.Foldable.Util
+import HGeometry.HalfLine
+import HGeometry.HalfPlane.CommonIntersection.Chain
+import HGeometry.HalfSpace
+import HGeometry.Polygon.Simple.Class
+import HGeometry.HyperPlane.Class
+import HGeometry.Intersection
+import HGeometry.Line
+import HGeometry.Line.LowerEnvelope
+import HGeometry.LineSegment
+import HGeometry.Point
+import HGeometry.Polygon.Convex
+import HGeometry.Sequence.Alternating
+import HGeometry.Vector
+import HGeometry.Slab
+import HGeometry.Properties
 
 --------------------------------------------------------------------------------
 
--- | A type represetning the Common intersection of a bunch of halfplanes; assuming
+-- | A type representing the Common intersection of a bunch of halfplanes; assuming
 -- this intersection is non-empty.
 data CommonIntersection halfPlane r =
     SingletonPoint    (Point 2 r)                     (Vector 3 halfPlane)
@@ -48,7 +48,7 @@ data CommonIntersection halfPlane r =
   | InSubLine (VerticalOrLineEQ r) (Vector 2 halfPlane) (SubLine halfPlane r)
   -- ^ The two halfPlanes that define the line, and the other halfplanes furthe
   -- restricitng the line.
-  | Slab halfPlane halfPlane
+  | InSlab (Slab r halfPlane)
     -- ^ two parallel halfPlanes l and u that form a slab;
   | BoundedRegion (ConvexPolygon (Point 2 r :+ halfPlane))
     -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
@@ -56,12 +56,18 @@ data CommonIntersection halfPlane r =
     -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
   deriving (Show,Eq)
 
+type instance NumType   (CommonIntersection halfPlane r) = r
+type instance Dimension (CommonIntersection halfPlane r) = 2
+
 -- | Part of the line
 data SubLine halfPlane r = EntireLine
                          | InHalfLine (HalfLine (Point 2 r)) halfPlane -- ^ the third halfPlane
                          | InSegment (ClosedLineSegment (Point 2 r)) halfPlane halfPlane
                            -- ^ the remaining two halfplanes
                          deriving (Show,Eq)
+
+type instance NumType   (SubLine halfPlane r) = r
+type instance Dimension (SubLine halfPlane r) = 2
 
 --------------------------------------------------------------------------------
 
@@ -87,7 +93,7 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
             BothSigns (x :+ l) (x' :+ u)  -> case x `compare` x' of
               LT -> Nothing
               EQ -> Just $ InSubLine (VerticalLineThrough x) (Vector2 l u) EntireLine
-              GT -> Just $ Slab l u
+              GT -> Just $ InSlab undefined -- FIXME!!!! (Slab l u)
 
     -- we only have non-vertical halfpalnes planes
     That nonVerticals            -> withNonVerticals nonVerticals

@@ -5,14 +5,15 @@ import HGeometry.HalfSpace
 import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Kernel.Instances ()
-import HGeometry.Line
-import HGeometry.Point
+import HGeometry.Kernel
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
 --------------------------------------------------------------------------------
 
 type R = Double
+type HalfPlane r = HalfSpaceF (LinePV 2 r)
+
 
 myHalfspace :: HalfSpaceF (LineEQ R)
 myHalfspace = HalfSpace Positive myLine
@@ -41,23 +42,33 @@ spec = describe "halfspace Tests" $ do
          prop "normal vector points into positive halfspace" $
            \(h :: HyperPlane 2 Rational) ->
              let n = normalVector h
-                 p = pointOn h
+                 p = pointInteriorTo h
              in (p .+^ n) `intersects` HalfSpace Positive h
          prop "normal vector points into positive halfspace (NonVertical HyperPlane)" $
            \(h :: NonVerticalHyperPlane 3 Rational) ->
              let n = normalVector h
-                 p = pointOn h
+                 p = pointInteriorTo h
              in (p .+^ n) `intersects` HalfSpace Positive h
          prop "normal vector points into positive halfspace (LineEQ)" $
            \(h :: LineEQ Rational) ->
              let n = normalVector h
-                 p = pointOn h
+                 p = pointInteriorTo h
              in (p .+^ n) `intersects` HalfSpace Positive h
          -- it "intersect tests" $ do
          --   let h = HalfSpace Positive $ horizontalLine (4 % 1 :: Rational)
          --       l = LinePV origin (Vector2 (1 % 1) (1 % 1 :: Rational))
          --   ((horizontalLine @Rational $ 5 % 1) `intersects` h) `shouldBe` True
          --   (l `intersects` h) `shouldBe` True
+         describe "rightHalfPlane correct" $ do
+           it "vertical" $
+             (origin :: Point 2 R)
+             `intersects`
+             (rightHalfPlane (LinePV (Point2 1 10) (Vector2 0 (-10))) :: HalfPlane R)
+           -- it "testz"
+           it "normalVec" $
+             normalVector (LinePV (Point2 224 256) (Vector2 0 (-176)))
+             `shouldBe`
+             Vector2 (-1) 0
 
 -- test :: Ordering
 -- test = (fst $ head myPoints) `onSideTest` (LineEQ 1 2)

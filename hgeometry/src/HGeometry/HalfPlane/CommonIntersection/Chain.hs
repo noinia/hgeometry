@@ -2,13 +2,15 @@
 module HGeometry.HalfPlane.CommonIntersection.Chain
   ( Chain(..)
   , _ChainAlternating
+  , unboundedEdges
+  , singleton
   , bimap'
   , evalChainAt
   , leftMost, rightMost
   , clipLeft
   , clipRight
   , glueChains
-  , clipLeftLine, clipRightLine
+  , clipLeftLine, clipRightLine, consChain
   ) where
 
 import Data.Foldable1
@@ -26,6 +28,7 @@ import HGeometry.Properties
 import HGeometry.HalfSpace.Class
 import HGeometry.HalfLine
 import HGeometry.Vector
+import Data.Default
 
 --------------------------------------------------------------------------------
 
@@ -64,6 +67,17 @@ instance Functor f => Bifunctor (Chain f) where
 instance Foldable f => Bifoldable (Chain f) where
   bifoldMap f g (Chain alt) = bifoldMap (foldMapOf coordinates f) g alt
 
+-- | Creates a singleton chain
+singleton   :: (Default (f (Point 2 r, halfPlane))) => halfPlane -> Chain f r halfPlane
+singleton x = Chain $ Alternating x def
+
+-- | Add a new halfplane and first vertex to the chain.
+consChain      :: (Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                        (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
+                  )
+               => (halfPlane,Point 2 r) -> Chain f r halfPlane -> Chain f r halfPlane
+consChain (h,v) = over _ChainAlternating $ consElemWith (\_ _ -> v) h
+
 -- instance Traversable f => Bitraversable (Chain f) where
 --   bitraverse f g (Chain alt) = Chain <$> bitraverse (over coordinates f) g alt
 
@@ -73,6 +87,8 @@ bimap'                 :: Functor f
                        -> (halfPlane -> halfPlane')
                        -> Chain f r halfPlane -> Chain f s halfPlane'
 bimap' f g (Chain alt) = Chain $ bimap f g alt
+
+
 
 
 -- | Evaluates the chain at the given x-coordinate. Returns the value (y-coordinate) y at
@@ -92,6 +108,7 @@ rightMost :: Lens' (Chain Seq r halfPlane) halfPlane
 rightMost = _ChainAlternating.last1
 
 
+-- | Get the unbounded edges of the chain
 unboundedEdges   :: ( HalfPlane_ halfPlane r
                     , Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
                            (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
@@ -165,3 +182,7 @@ glueChains pref suf = Chain $ concatAlternatingsWith f (coerce pref) (coerce suf
     f (r :+ _) (l :+ _) = case r `intersect` l of
       Just (Line_x_Line_Point p)  -> p
       _                           -> error "glueChains: precondition failed!"
+
+
+
+--------------------------------------------------------------------------------

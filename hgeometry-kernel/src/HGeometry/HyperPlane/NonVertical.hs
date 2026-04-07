@@ -23,8 +23,9 @@ import           Data.Functor.Classes
 import           Data.Type.Ord
 import           GHC.TypeLits
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints)
+import           HGeometry.HyperPlane.Internal (MkHyperPlaneConstraints, pointOn)
 import           HGeometry.Properties
+import           HGeometry.Point
 import           HGeometry.Vector
 import           Prelude hiding (last)
 import           Text.Read ( Read (..), Lexeme(Ident), parens, prec, step
@@ -179,7 +180,15 @@ instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d, Has_ Additive_ (d-1) r
   hyperPlaneCoefficients = coerced
 
 
-
+instance ( MkHyperPlaneConstraints d r, Has_ Additive_ (d-1) r
+         , 2 <= d
+         , d - 1 <= d, 1 <= d, (1 + (d - 1) ~ d) -- these are rather silly :(
+         , ((d - 1) + 1) ~ d
+         , Eq r, Fractional r
+         , FoldableWithIndex Int (Vector d)
+         , Has_ Vector_ (d+1) r, d <= d +1, 0 <= (d+1)-1 -- these are silly :(
+         ) => HasPickInteriorPoint (NonVerticalHyperPlane d r) d r where
+  pointInteriorTo = pointOn
 
 
 --------------------------------------------------------------------------------

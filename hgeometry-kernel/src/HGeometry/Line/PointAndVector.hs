@@ -31,24 +31,23 @@ module HGeometry.Line.PointAndVector
   , cmpSlope
   ) where
 
-import           Control.DeepSeq
-import           Control.Lens
-import           GHC.Generics (Generic)
-import           GHC.TypeLits
-import           HGeometry.Ext
-import           HGeometry.Sign
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
-import           HGeometry.Line.Class
-import           HGeometry.Line.Intersection
-import           HGeometry.Line.LineEQ
-import           HGeometry.Point
-import           HGeometry.HalfSpace
--- import           HGeometry.Point.EuclideanDistance
--- import           HGeometry.Point.Orientation.Degenerate
-import           HGeometry.Properties (NumType, Dimension)
-import           HGeometry.Vector
-import           Text.Read
+import Control.DeepSeq
+import Control.Lens
+import GHC.Generics (Generic)
+import GHC.TypeLits
+import HGeometry.Ext
+import HGeometry.Sign
+import HGeometry.HyperPlane.Class
+import HGeometry.Intersection
+import HGeometry.Line.Class
+import HGeometry.Line.Intersection
+import HGeometry.Line.LineEQ
+import HGeometry.Line.General
+import HGeometry.Point
+import HGeometry.HalfSpace.Type
+import HGeometry.Properties (NumType, Dimension)
+import HGeometry.Vector
+import Text.Read
 
 --------------------------------------------------------------------------------
 -- * d-dimensional Lines
@@ -88,8 +87,8 @@ instance ( Eq r, Num r
   -- equation: line equation is: c + ax + by = 0
   -- pre: not all of a b and c are zero
   hyperPlaneFromEquation (Vector3 c a b)
-    | b == 0    = LinePV (Point2 (-c/a) 0)      (Vector2 0 1) -- if b=0 we are vertical
-    | otherwise = LinePV (Point2 0      (-c/b)) (Vector2 c (-a))
+    | b == 0    = LinePV (Point2 (- (c / a)) 0)      (Vector2 0 1) -- if b=0 we are vertical
+    | otherwise = LinePV (Point2 0      (- (c / b))) (Vector2 c (-a))
 
   fromPointAndNormal p (Vector2 vx vy) = LinePV (p^.asPoint) (Vector2 (-vy) vx)
 
@@ -108,19 +107,24 @@ instance ( Eq r, Num r
     -- our slope a1 = vy/vx, and our intercept a0 = py-(vy/vx)px, and a2 = (-1)
     -- multiplying everything by vx gets rid of the fraction, and yields the above equation.
 
+instance HasPickInteriorPoint (LinePV d r) d r where
+  pointInteriorTo (LinePV p _) = p
+
 {- HLINT ignore toLinearFunction -}
 -- | get values a,b s.t. the input line is described by y = ax + b.
 -- returns Nothing if the line is vertical
 toLinearFunction                               :: forall r.
                                                   ( Fractional r, Ord r
                                                   )
-                                               => LinePV 2 r -> Maybe (LineEQ r)
-toLinearFunction l@(LinePV _ ~(Vector2 vx vy)) =
+                                               => LinePV 2 r -> VerticalOrLineEQ r
+toLinearFunction l@(LinePV p ~(Vector2 vx vy)) =
   case l `intersect` verticalLine @r @(LinePV 2 r) 0 of
-    Nothing                               -> Nothing -- l is vertical
-    Just (Line_x_Line_Point (Point2 _ b)) -> Just $ LineEQ (vy / vx) b
-    Just (Line_x_Line_Line _)             -> Nothing -- l is a vertical line (through x=0)
+    Nothing                               -> VerticalLineThrough (p^.xCoord)
+    Just (Line_x_Line_Point (Point2 _ b)) -> NonVertical $ LineEQ (vy / vx) b
+    Just (Line_x_Line_Line _)             -> VerticalLineThrough 0
 
+instance (Fractional r, Ord r) => AsLine (LinePV 2 r) where
+  asLine = toLinearFunction
 
 instance ( Show r, KnownNat d
          , Has_ Additive_ d r
@@ -295,7 +299,7 @@ instance OnSideUpDownTest (LinePV 2 r) where
   -- >>> Point2 5 5 `onSideUpDown` (lineThrough origin $ Point2 (-3) (-3))
   -- On
   q `onSideUpDown` (LinePV p v) = let r    =  p .+^ v
-                                      f z         = Vector2 (z^.xCoord) (-z^.yCoord)
+                                      f z         = Vector2 (z^.xCoord) (- (z^.yCoord))
                                       minBy g a b = if g a <= g b then a else b
                                       maxBy g a b = if g a >= g b then a else b
                                   in case ccw (minBy f p r) (maxBy f p r) (q^.asPoint) of

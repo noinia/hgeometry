@@ -12,9 +12,11 @@
 module HGeometry.HalfSpace
   ( module HGeometry.HalfSpace.Class
   , module HGeometry.HalfSpace.Type
+  , module HGeometry.HalfSpace.Intersection
   ) where
 
 import HGeometry.HalfSpace.Class
 import HGeometry.HalfSpace.Type
+import HGeometry.HalfSpace.Intersection
 
 --------------------------------------------------------------------------------

@@ -16,6 +16,7 @@
 --------------------------------------------------------------------------------
 module Ipe.IpeOut where
 
+import           Prelude hiding (sqrt)
 import           Control.Lens hiding (Simple, holes)
 import           Data.Foldable (toList)
 import           Data.Foldable1 (Foldable1)
@@ -32,17 +33,21 @@ import           HGeometry.Box
 import           HGeometry.Disk
 import           HGeometry.Ellipse (Ellipse, circleToEllipse)
 import           HGeometry.Ext
+import           HGeometry.Vector.Class
 import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.LineSegment
+import           Data.Maybe (fromMaybe)
+import           HGeometry.Transformation
 import           HGeometry.Number.Radical
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
+import           HGeometry.HyperPlane.Class
 import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Polygon.WithHoles
@@ -313,15 +318,17 @@ ipeLineIn bBox l = case l `intersect` bBox of
 -- | Renders an Halfine.
 --
 -- pre: the intersection of the box with the line is non-empty
-ipeHalfLine :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point) => IpeOut (HalfLine point) Path r
-ipeHalfLine = \(HalfLine p v) -> ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
+ipeHalfLine                :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point)
+                           => IpeOut (HalfLine point) Path r
+ipeHalfLine (HalfLine p v) = ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
 
 -- | Renders a ray, i.e. a half line drawing an arrow in the direction
 -- of the ray.
 --
 -- pre: the intersection of the box with the line is non-empty
-ipeRay :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point) => IpeOut (HalfLine point) Path r
-ipeRay = \hl -> ipeHalfLine hl ! attr SArrow normalArrow
+ipeRay    :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point)
+          => IpeOut (HalfLine point) Path r
+ipeRay hl = ipeHalfLine hl ! attr SArrow normalArrow
 
 -- | Renders the HalfLine in the given box.
 --
@@ -346,8 +353,8 @@ ipePolyLine p = (path . PolyLineSegment $ p) :+ mempty
 
 
 -- | Renders an Ellipse to a Path
-ipeEllipse :: IpeOut (Ellipse r) Path r
-ipeEllipse = \e -> path (EllipseSegment e) :+ mempty
+ipeEllipse   :: IpeOut (Ellipse r) Path r
+ipeEllipse e = path (EllipseSegment e) :+ mempty
 
 -- | Renders a circle to a Path
 ipeCircle :: Radical r => IpeOut (Circle (Point 2 r)) Path r
@@ -358,8 +365,8 @@ ipeDisk   :: Radical r => IpeOut (Disk (Point 2 r)) Path r
 ipeDisk d = ipeCircle (MkSphere d) ! attr SFill (IpeColor "0.722 0.145 0.137")
 
 -- | Renders a Bezier curve to a Path
-ipeBezier :: IpeOut (CubicBezier (Point 2 r)) Path r
-ipeBezier b = (path $ CubicBezierSegment b) :+ mempty
+ipeBezier   :: IpeOut (CubicBezier (Point 2 r)) Path r
+ipeBezier b = path (CubicBezierSegment b) :+ mempty
 
 -- | Helper to construct a path from a singleton item
 path :: PathSegment r -> Path r
@@ -446,6 +453,62 @@ ipeHalfPlaneIn rect' c hl = case hl `intersect` rect' of
     boundary = iO $ ipeLineIn rect' (hl^.boundingHyperPlane)
 
 
+-- | Renders a halfplane as a "constraint"; i.e. draw the bounding line and some "thickened"
+-- part of the bounding line (that is drawn outside) the halfplane. This thickened part
+-- is drawn using the given color.
+drawAsConstraint         :: forall line r.
+                            ( Fractional r, Real r, Ord r
+                            , HyperPlane_ line 2 r
+                            , IsIntersectableWith line (Rectangle (Point 2 r))
+                            , Intersection line (Rectangle (Point 2 r))
+                              ~ Maybe (LineBoxIntersection 2 r)
+
+                            , Show r -- FIXME: drop this one
+                            )
+                         => IpeColor r
+                         -> IpeOut (HalfPlaneF line) Group r
+drawAsConstraint color h = ipeGroup [ iO $ defIO seg
+                                    , iO $ ipeSimplePolygon poly ! attr SFill color
+                                    ]
+  where
+    l = h^.boundingHyperPlane
+    f = case h^.halfSpaceSign of
+          Positive -> negated
+          Negative -> id
+    n = f $ normalVector l
+
+    width' = let q :: Double
+                 q = realToFrac $ quadrance n
+             in constraintDrawingWidth / realToFrac (sqrt q)
+
+    poly = fromMaybe (error "drawAsConstraint: absurd" $ show (seg,seg'))
+         . fromPoints @(SimplePolygon (Point 2 r))
+         . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
+
+    seg' = translateBy (width' *^ n) seg
+
+    box :: Rectangle (Point 2 r)
+    box = Box (Point2 (-1000) (-1000)) (Point2 1000 1000)
+    -- the line segment we will d raw to represent the bounding line
+    seg = case l `intersect` box of
+            Nothing                             -> undefined
+            Just (Line_x_Box_Point _)           -> undefined
+            Just (Line_x_Box_LineSegment seg'') -> seg''
+
+    -- -- make sure the oreintation of the segment seg' and the orientation of the line l
+    -- -- are conisstent.
+    -- orientCorrectly seg''@(ClosedLineSegment s t)
+    --     | consistent = seg''
+    --     | otherwise  = ClosedLineSegment t s
+    --   where
+    --     n' = normalVector $ supportingLine seg''
+    --     consistent = ccw s (s .+^ n) t == ccw s (s .+^ n') t
+
+-- | The Width of a constraint in the halfplane constraint drawing
+-- (note; the acutal drawing may be subject to rounding)
+constraintDrawingWidth :: Num r => r
+constraintDrawingWidth = 100
+
 --------------------------------------------------------------------------------
 -- * Group Converters
 
@@ -478,10 +541,10 @@ labelledWith                      :: (Show lbl, NumType g ~ r, ToObject i)
                                   -> IpeOut g i r     -- ^ how to draw the geometric object
                                   -> IpeOut (g :+ lbl) Group r
 labelledWith ats pos f (g :+ lbl) = ipeGroup [ iO $ f g
-                                     , iO $ ipeLabel ((toInlineLatex $ Text.show lbl) :+ pos g) ! ats
+                                     , iO $ ipeLabel (toInlineLatex (Text.show lbl) :+ pos g) ! ats
                                      ]
 
 -- | Convert a text into a valid piece of inline latex
 toInlineLatex :: Text -> InlineLaTeX
-toInlineLatex = Text.replace "_" ("\\_")
+toInlineLatex = Text.replace "_" "\\_"
 -- for the moment we just make sure that our underscores get properly escaped
