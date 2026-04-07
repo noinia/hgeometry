@@ -22,7 +22,7 @@ module HGeometry.HalfLine
 import Control.Lens
 import GHC.Generics (Generic)
 import GHC.TypeLits
-import HGeometry.HalfSpace
+import HGeometry.HalfSpace.Type
 import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Interval.Class

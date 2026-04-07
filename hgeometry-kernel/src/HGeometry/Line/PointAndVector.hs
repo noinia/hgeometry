@@ -44,7 +44,7 @@ import HGeometry.Line.Intersection
 import HGeometry.Line.LineEQ
 import HGeometry.Line.General
 import HGeometry.Point
-import HGeometry.HalfSpace
+import HGeometry.HalfSpace.Type
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
 import Text.Read

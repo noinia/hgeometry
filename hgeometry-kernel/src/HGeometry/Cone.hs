@@ -12,11 +12,17 @@
 module HGeometry.Cone
   ( Cone(Cone), apex, leftBoundaryVector, rightBoundaryVector
   , leftBoundary, rightBoundary
+  , coneBisector
+  , intersectingHalfplanes
   ) where
 
 import HGeometry.Vector
 import HGeometry.Ext
 import HGeometry.HalfLine
+import HGeometry.Point
+import HGeometry.HalfSpace
+import HGeometry.Intersection
+import HGeometry.Line
 import HGeometry.Properties
 import Control.Lens
 import Data.Bitraversable
@@ -58,3 +64,29 @@ leftBoundary c = (c^.leftBoundaryVector)&core %~ HalfLine (c^.apex)
 rightBoundary   :: ( Dimension point ~ 2, NumType point ~ r)
                 => Cone r point edge -> HalfLine point :+ edge
 rightBoundary c = (c^.rightBoundaryVector)&core %~ HalfLine (c^.apex)
+
+
+-- | Get the bisector of the cone
+coneBisector   :: (Point_ point 2 r, Num r) => Cone r point edge -> HalfLine point
+coneBisector c = HalfLine (c^.apex)
+                         ((c^.leftBoundaryVector.core) ^+^ (c^.rightBoundaryVector.core))
+
+-- | Get the two halfplanes so that the cone is the intersection of the two halfplanes.
+-- the first halfplane is the plane right of the left boundary, whereas the
+-- second halfplane is the plane left of the right boundary.
+intersectingHalfplanes   :: ( Point_ point 2 r, Num r, Ord r)
+                         => Cone r point edge -> Vector 2 (HalfSpaceF (LinePV 2 r))
+intersectingHalfplanes c = Vector2 (rightHalfPlane $ LinePV a leftB)
+                                   (leftHalfPlane  $ LinePV a rightB)
+  where
+    a      = c^.apex.asPoint
+    leftB  = c^.leftBoundaryVector.core
+    rightB = c^.rightBoundaryVector.core
+{-# INLINE intersectingHalfplanes #-}
+
+--------------------------------------------------------------------------------
+
+instance ( Point_ point 2 r, Num r, Ord r
+         ) => Point 2 r `HasIntersectionWith` Cone r point edge where
+  q `intersects` cone = all (q `intersects`) (intersectingHalfplanes cone)
+  {-# INLINE intersects #-}
