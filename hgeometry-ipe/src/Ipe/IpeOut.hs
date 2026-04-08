@@ -149,6 +149,13 @@ instance HasDefaultIpeOut a => HasDefaultIpeOut (NonEmpty a) where
   type DefaultIpeOut (NonEmpty a) = Group
   defIO = ipeGroup . map (iO .  defIO) . toList
 
+instance HasDefaultIpeOut line => HasDefaultIpeOut (Maybe line)  where
+  type DefaultIpeOut (Maybe line) = Group
+  defIO = \case
+    Nothing -> ipeGroup []
+    Just g  -> ipeGroup [iO $ defIO g]
+
+
 instance (HasDefaultIpeOut a, HasDefaultIpeOut b
          , DefaultIpeOut a ~ DefaultIpeOut b, NumType a ~ NumType b
          ) => HasDefaultIpeOut (Either a b) where
@@ -460,28 +467,26 @@ drawAsConstraint         :: forall line r.
                             ( Fractional r, Real r, Ord r
                             , HyperPlane_ line 2 r
                             , IsIntersectableWith line (Rectangle (Point 2 r))
+                            , HasPickInteriorPoint line 2 r
                             , Intersection line (Rectangle (Point 2 r))
                               ~ Maybe (LineBoxIntersection 2 r)
-
-                            , Show r -- FIXME: drop this one
                             )
                          => IpeColor r
                          -> IpeOut (HalfPlaneF line) Group r
-drawAsConstraint color h = ipeGroup [ iO $ defIO seg
+drawAsConstraint color h = ipeGroup [ iO $ defIO seg ! attr SPen (IpePen "heavier")
                                     , iO $ ipeSimplePolygon poly ! attr SFill color
                                     ]
   where
     l = h^.boundingHyperPlane
-    f = case h^.halfSpaceSign of
-          Positive -> negated
-          Negative -> id
+    f n' | pointInteriorTo l .+^ n' `intersects` h = negated n'
+         | otherwise                               = n'
     n = f $ normalVector l
 
     width' = let q :: Double
                  q = realToFrac $ quadrance n
              in constraintDrawingWidth / realToFrac (sqrt q)
 
-    poly = fromMaybe (error "drawAsConstraint: absurd" $ show (seg,seg'))
+    poly = fromMaybe (error "drawAsConstraint: absurd")
          . fromPoints @(SimplePolygon (Point 2 r))
          . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
 

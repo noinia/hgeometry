@@ -147,3 +147,8 @@ instance ( HasIntersectionWith line line'
        => HasIntersectionWith (HalfSpaceF line) (HalfSpaceF line') where
   h@(HalfSpace _ l) `intersects` h'@(HalfSpace _ l') =
     l `intersects` l' || pointInteriorTo l `intersects`  h' || pointInteriorTo l' `intersects`  h
+
+
+
+
+--------------------------------------------------------------------------------

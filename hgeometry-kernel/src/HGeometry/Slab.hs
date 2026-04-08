@@ -12,6 +12,7 @@
 module HGeometry.Slab
   ( Slab(Slab), definingLine, squaredWidth, leftData, rightData
   , fromParalelHalfplanes
+  , leftBoundary, rightBoundary
   ) where
 
 import HGeometry.Properties (NumType,Dimension)
@@ -21,6 +22,9 @@ import HGeometry.Point
 import HGeometry.Vector
 import HGeometry.HalfSpace.Class
 import HGeometry.Intersection
+import HGeometry.Ext
+import HGeometry.Number.Radical
+import Prelude hiding (sqrt)
 
 --------------------------------------------------------------------------------
 
@@ -62,3 +66,17 @@ fromParalelHalfplanes h1 h2
 
     h1IsLeftHalfPlane = let  w = Vector2 (-y) x in (a .+^ w) `intersects` h1
     dist = squaredEuclideanDistTo a l2
+
+
+-- | Get the left boundary of the slab
+leftBoundary   :: Slab r side -> LinePV 2 r :+ side
+leftBoundary s = let l = s^.definingLine in l :+ s^.leftData
+
+-- | Get the right boundary of the slab
+rightBoundary   :: (Fractional r, Radical r) => Slab r side -> LinePV 2 r :+ side
+rightBoundary s = let (LinePV p v@(Vector2 x y)) = s^.definingLine
+                      n                          = signorm $ Vector2 y (-x)
+                      dist                       = sqrt $ s^.squaredWidth
+                      p'                         = p .+^ (dist *^ n)
+                        --
+                  in (LinePV p' v) :+ s^.rightData

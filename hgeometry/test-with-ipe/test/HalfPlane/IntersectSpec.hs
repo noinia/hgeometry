@@ -8,6 +8,8 @@ module HalfPlane.IntersectSpec
   , spec
   ) where
 
+import qualified VectorBuilder.Builder as Builder
+import qualified VectorBuilder.Vector as Builder
 import qualified Data.Text as Text
 import           HGeometry.HalfPlane.CommonIntersection.Chain
 import           HGeometry.HalfPlane.CommonIntersection (CommonIntersection(..))
@@ -29,6 +31,7 @@ import           Data.Ord (Down (..))
 import           HGeometry.Foldable.Sort (sortOnCheap)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Vector.NonEmpty as NonEmptyVector
+import           Data.Vector.NonEmpty (NonEmptyVector)
 import qualified Data.Vector as Vector
 import           Ipe
 import           Ipe.Color
@@ -44,23 +47,52 @@ import           HalfPlane.CommonIntersectionSpec ()
 import           HGeometry.Polygon
 import           HGeometry.Cone
 import           Test.Hspec
+import           Ipe.Color (gray)
 import           HGeometry.Cone.Intersection
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck (counterexample, (===), suchThat, discard, Arbitrary(..))
-import           HGeometry.Slab
-
+import           HGeometry.Slab (Slab(..))
+-- import HalfPlane.Intersection
+import           HGeometry.Ipe.Instances ()
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type HalfPlane r = HalfSpaceF (LinePV 2 r)
 
+allPoints' :: IpeObject r -> [Point 2 r]
+allPoints' = \case
+  IpeGroup gr    -> foldOf (core.groupItems.folded.to allPoints') gr
+  IpeImage _     -> []
+  IpeTextLabel _ -> []
+  IpeMiniPage _  -> []
+  IpeUse _       -> []
+  IpePath path   -> foldOf (core.to allPointsPath) path
 
---------------------------------------------------------------------------------
--- move to Point.Either
+allPointsPath :: Path r -> [Point 2 r]
+allPointsPath = foldOf (pathSegments.folded.to allPoints'')
+  where
+    allPoints'' = \case
+      PolyLineSegment poly        -> poly^..vertices
+      PolygonPath _ poly          -> poly^..vertices
+      CubicBezierSegment bez      -> bez^..vertices
+      QuadraticBezierSegment bez  -> bez^..vertices
+      EllipseSegment _            -> []
+      ArcSegment                  -> []
+      SplineSegment               -> []
+      ClosedSplineSegment         -> []
 
-
---------------------------------------------------------------------------------
-
+ipeSpec = describe "halfplane drawn correctly" $ do
+            prop "constraint drawing" $ \(h :: HalfPlane R) ->
+              let vs = drawAsConstraint gray h ^.core.groupItems.folded.to allPoints'
+                  flipSign = \case
+                    Positive -> Negative
+                    Negative -> Positive
+              in all (`intersects` (h&halfSpaceSign %~ flipSign)) vs
+              -- in the constraint drawing the vertices of the polygon should
+              -- either lie on the bounding line of h, or outside the halfplane.
+              -- so; they should lie in the flipped halfplane.
+            prop "toHalfPlane correct"   $ \(ray :: HalfLine (Point 2 r) :+ ()) ->
+              isRightHalfPlane (toHalfPlane ray)
 
 spec :: Spec
 spec = describe "Cone properties" $ do
@@ -89,32 +121,7 @@ spec = describe "Cone properties" $ do
          halfPlaneIntersectionTests inFile
                                     [osp|halfPlaneIntersection|]
 
-
-toHalfPlane :: HalfLine (Point 2 R) :+ attrs -> HalfPlane R
-toHalfPlane = rightHalfPlane . asOrientedLine . view core
-
-inFile :: IO OsPath
-inFile  = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.ipe|]
-
---- >>> show outPath
-outPath :: IO OsPath
-outPath = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.out.ipe|]
-
-
-debug = let h1 = HalfSpace Negative (LinePV (Point2 0 3) (Vector2 0 (-2.33334)))
-            h2 = HalfSpace Positive (LinePV (Point2 0 (-1.33334)) (Vector2 2.33333 0.33333))
-              -- HalfSpace Negative (LinePV (Point2 64 240) (Vector2 160 (-16)))
-            -- h2 = HalfSpace Negative (LinePV (Point2 192 272) (Vector2 48 (-128)))
-        in h1 `intersect` h2
-
-
-myCone2 :: Intersection (HalfSpaceF (LineEQ R)) (HalfSpaceF (LineEQ R))
-myCone2 = let hRight = above (LineEQ 0 100) :: HalfSpaceF (LineEQ R)
-              hLeft  = below (LineEQ 1 0)   :: HalfSpaceF (LineEQ R)
-          in hLeft `intersect` hRight
-
-myCone = Cone (Point2 100 100) (Vector2 1 1 :+ ()) (Vector2 1 0 :+ ())
-
+         ipeSpec
 
 halfPlaneIntersectionTests :: IO OsPath -> OsPath -> Spec
 halfPlaneIntersectionTests inFile theName = describe "HalfPlane x HalfPlane tests"  $ do
@@ -134,37 +141,79 @@ halfPlaneIntersectionTests inFile theName = describe "HalfPlane x HalfPlane test
                    (ipeFileGolden { name = theName  })
                    (file&styles %~ (opacitiesStyle:))
 
+toHalfPlane :: HalfLine (Point 2 R) :+ attrs -> HalfPlane R
+toHalfPlane = rightHalfPlane . asOrientedLine . view core
 
-testMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
+inFile :: IO OsPath
+inFile  = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.ipe|]
+
+--- >>> show outPath
+outPath :: IO OsPath
+outPath = getDataFileName [osp|test-with-ipe/golden/HalfPlane/intersection.out.ipe|]
+
+
+--------------------------------------------------------------------------------
+
+
+
+
+
+
+debug = let h1 = HalfSpace Negative (LinePV (Point2 0 3) (Vector2 0 (-2.33334)))
+            h2 = HalfSpace Positive (LinePV (Point2 0 (-1.33334)) (Vector2 2.33333 0.33333))
+              -- HalfSpace Negative (LinePV (Point2 64 240) (Vector2 160 (-16)))
+            -- h2 = HalfSpace Negative (LinePV (Point2 192 272) (Vector2 48 (-128)))
+        in h1 `intersect` h2
+
+
+myCone2 :: Intersection (HalfSpaceF (LineEQ R)) (HalfSpaceF (LineEQ R))
+myCone2 = let hRight = above (LineEQ 0 100) :: HalfSpaceF (LineEQ R)
+              hLeft  = below (LineEQ 1 0)   :: HalfSpaceF (LineEQ R)
+          in hLeft `intersect` hRight
+
+myCone = Cone (Point2 100 100) (Vector2 1 1 :+ ()) (Vector2 1 0 :+ ())
+
+
+
+
+testMain = do halfPlanes'' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
+              let halfPlanes' = take 4 halfPlanes''
               -- let halfPlanes' :: [HalfPlane R]
               --     halfPlanes' = [ HalfSpace Negative (LinePV (Point2 0 3) (Vector2 0 (-2.33334)))
               --                   , HalfSpace Positive (LinePV (Point2 0 (-1.33334)) (Vector2 2.33333 0.33333))
               --                   ]
               traverse print halfPlanes'
-              let pages' = [ let res = h1 `intersect` h2
-                             in fromContent . concat $
-                                  [ [ iO $ defIO res ! attr SLayer "intersection"]
-                                  , [ iO $ defIO h   ! attr SLayer "input"
-                                    | h <- [h1,h2]
-                                    ]
-                                  ]
-                           | h1 <- halfPlanes', h2 <- halfPlanes'
-                           ]
-              case ipeFile <$> NonEmpty.nonEmpty pages' of
-                Nothing    -> print "error no halfplanes"
-                Just file -> do outPath' <- outPath
-                                writeIpeFile outPath' $ file&styles %~ (opacitiesStyle:)
+              case NonEmpty.nonEmpty halfPlanes' of
+                Nothing         -> print "error; no halfplanes"
+                Just halfPlanes -> case commonIntersection halfPlanes of
+                  Nothing  -> putStrLn "no intersection?"
+                  Just res -> do print res
+                                 outPath' <- outPath
 
-              -- case NonEmpty.nonEmpty halfPlanes' of
-              --   Nothing         -> print "error; no halfplanes"
-              --   Just halfPlanes -> case commonIntersection halfPlanes of
-              --     Nothing  -> putStrLn "no intersection?"
-              --     Just res -> do print res
-              --                    outPath' <- outPath
-              --                    writeIpeFile outPath' . singlePageFromContent . concat $
-              --                      [ [iO $ defIO res ]
-              --                      , iO . drawAsConstraint gray <$> halfPlanes'
-              --                      ]
+                                 writeIpeFile outPath' . addStyleSheet opacitiesStyle
+                                                       . singlePageFromContent . concat $
+                                   [ [iO $ defIO res ! attr SLayer "intersection"
+                                     ]
+                                   , [ iO $ drawAsConstraint gray h ! attr SLayer "input"
+                                     | h <- halfPlanes'
+                                     ]
+                                   ]
+
+
+              -- let pages' = [ let res = h1 `intersect` h2
+              --                in fromContent . concat $
+              --                     [ [ iO $ defIO res ! attr SLayer "intersection"]
+              --                     , [ iO $ defIO h   ! attr SLayer "input"
+              --                       | h <- [h1,h2]
+              --                       ]
+              --                     ]
+              --              | h1 <- halfPlanes', h2 <- halfPlanes'
+              --              ]
+              -- case ipeFile <$> NonEmpty.nonEmpty pages' of
+              --   Nothing    -> print "error no halfplanes"
+              --   Just file -> do outPath' <- outPath
+              --                   writeIpeFile outPath' $ file&styles %~ (opacitiesStyle:)
+
 
 
 -- >>> myMain
@@ -185,33 +234,25 @@ myMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
                                    ]
                                  ]
 
-instance (Ord r, Fractional r)
-         => HasDefaultIpeOut (CommonIntersection (HalfPlane r) r) where
-  type DefaultIpeOut (CommonIntersection (HalfPlane r) r)  = Group
-  defIO = drawIntersection
-
---
-drawIntersection :: forall r.
-                    (Fractional r, Ord r)
-                 => IpeOut (CommonIntersection (HalfPlane r) r) Group r
-drawIntersection = \case
-  SingletonPoint p _hs  -> ipeGroup [iO $ defIO p]
-  InSubLine _l _hs _sl  -> ipeGroup [] -- TODO
-  InSlab _hl            -> ipeGroup [] -- TODO
-  BoundedRegion pg      -> ipeGroup [iO $ defIO (pg&vertices %~ view core
-                                                  :: ConvexPolygon (Point 2 r)
-                                                ) ! attr SFill blue
-                                                  ! attr SOpacity "10%"
-                                    ]
-  UnboundedRegion chain -> ipeGroup [iO $ defIO chain]
 
 --------------------------------------------------------------------------------
 
 
 data State r halfPlane = OneChain (Chain Seq r halfPlane)
                        | TwoChains (Chain Seq r halfPlane) (Chain Seq r halfPlane)
+                       deriving (Show)
 
-joinChains pref suf = pref -- FIXME!!!
+timChains pref suf = (pref,suf) -- FIXME!!
+
+-- | Given two chains;  try to join them in a combined convex chain
+--
+--
+joinChains          :: Chain Seq r halfPlane
+                    -- ^ The suffix of the chain; given from right to left
+                    -> Chain Seq r halfPlane
+                    -- ^ The prefix of the chain; given from left to right
+                    -> Maybe (CommonIntersection halfPlane r)
+joinChains suf pref = Just $ UnboundedRegion pref -- FIXME!!!
 
 -- data PossiblyDegenIntersection halfPlane = Subline halfPlane halfPlane
 --                                          | Slab' halfPlane halfPlane
@@ -241,21 +282,10 @@ joinChains pref suf = pref -- FIXME!!!
 
 
 
---------------------------------------------------------------------------------
-
--- data Slab' halfPlane = Slab' halfPlane halfPlane
---   deriving (Show,Eq)
-
--- type instance NumType   (Slab' halfPlane) = NumType halfPlane
--- type instance Dimension (Slab' halfPlane) = 2
 
 
 --------------------------------------------------------------------------------
 
-instance (
-         ) => HasDefaultIpeOut (Slab r orientedLine) where
-  type DefaultIpeOut (Slab r orientedLine) = Group
-  defIO _s = ipeGroup []
 
     -- ipeGroup [ iO $ defIO (h1^.boundingHyperPlane)
     --                              , iO $ defIO (h2^.boundingHyperPlane)
@@ -263,25 +293,6 @@ instance (
     -- -- TODO: do this property; i.e. compute the intersection with the bounding box
 
 
-instance (Point_ point 2 r, Fractional r, Ord r, Show r
-         ) => HasDefaultIpeOut (Cone r point edge) where
-  type DefaultIpeOut (Cone r point edge) = Group
-  defIO c = ipeGroup [ iO $ defIO poly ! attr SFill blue
-                     , iO $ ipeRay hl
-                     , iO $ ipeRay hr
-                     ]
-    where
-      hl = leftBoundary c'  ^.core
-      hr = rightBoundary c' ^.core
-
-      poly :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
-      poly = toConvexPolygonIn rect c'&vertices %~ (^.asPoint)
-      c' :: Cone r (Point 2 r) edge
-      c' = c&apex %~ (^.asPoint)
-      rect :: Rectangle (Point 2 r)
-      rect = boundingBox $ defaultBox :| [boundingBox (c'^.apex) ]
-      -- we have to include the bounding box of the apex since toConvexPolygonIn
-      -- requires the apex to be in the box.
 
 --------------------------------------------------------------------------------
 
@@ -290,39 +301,9 @@ instance (Point_ point 2 r, Fractional r, Ord r, Show r
 
 --------------------------------------------------------------------------------
 
-instance HasDefaultIpeOut line => HasDefaultIpeOut (Maybe line)  where
-  type DefaultIpeOut (Maybe line) = Group
-  defIO = \case
-    Nothing -> ipeGroup []
-    Just g  -> ipeGroup [iO $ defIO g]
-
-instance ( HasDefaultIpeOut line, Fractional r, Ord r, Show r
-         , DefaultIpeOut line ~ Path
-         , NumType line ~ r
-         ) => HasDefaultIpeOut (LineHalfPlaneIntersection r line) where
-  type DefaultIpeOut (LineHalfPlaneIntersection r line) = Path
-  defIO = \case
-    Line_x_HalfPlane_Line line   -> defIO line
-    Line_x_HalfPlane_HalfLine hl -> defIO hl
 
 
-instance ( HasDefaultIpeOut halfPlane
-         , HasDefaultIpeOut (BoundingHyperPlane halfPlane 2 r)
-         , HalfPlane_ halfPlane r
-         , Fractional r, Ord r
-         , Show r
-         -- , DefaultIpeOut halfPlane ~ Path
-         , NumType halfPlane ~ r
-         , Dimension halfPlane ~ 2
-         , Dimension (BoundingHyperPlane halfPlane 2 r) ~ 2
-         , NumType (BoundingHyperPlane halfPlane 2 r) ~ r
-         ) => HasDefaultIpeOut (HalfPlaneIntersection r halfPlane) where
-  type DefaultIpeOut (HalfPlaneIntersection r halfPlane) = Group
-  defIO = \case
-    HalfPlane_x_HalfPlane_Line line           -> ipeGroup [iO $ defIO line]
-    HalfPlane_x_HalfPlane_Slab slab           -> ipeGroup [iO $ defIO slab]
-    HalfPlane_x_HalfPlane_Cone cone           -> ipeGroup [iO $ defIO cone]
-    HalfPlane_x_HalfPlane_HalfPlane halfPlane -> ipeGroup [iO $ defIO halfPlane ]
+
 
 --------------------------------------------------------------------------------
 
@@ -345,19 +326,25 @@ commonIntersection     :: forall f halfPlane r.
                           , Intersection (BoundingHyperPlane halfPlane 2 r)
                                          (BoundingHyperPlane halfPlane 2 r)
                             ~ Maybe (LineLineIntersection (BoundingHyperPlane halfPlane 2 r))
+                          , IsIntersectableWith halfPlane halfPlane
+                          , GetDirection (BoundingHyperPlane halfPlane 2 r)
+                          , Intersection halfPlane halfPlane ~
+                              Maybe (HalfPlaneIntersection r halfPlane)
+                          , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
                           )
                        => f halfPlane -> Maybe (CommonIntersection halfPlane r)
-commonIntersection = fmap toCommonIntersection
+commonIntersection = (toCommonIntersection =<<)
                    . foldlMap1' (Just . OneChain . singleton . snd) extend
-                   . NonEmptyVector.unsafeFromVector
                    . dropRedundants
+                   . NonEmptyVector.unsafeFromVector
                    . sortOnCheap fst
                    . fmap (\h -> (halfPlaneType h, h))
   where
-    toCommonIntersection :: State r halfPlane -> CommonIntersection halfPlane r
+    toCommonIntersection :: State r halfPlane -> Maybe (CommonIntersection halfPlane r)
     toCommonIntersection = \case
-      OneChain chain     -> UnboundedRegion chain
-      TwoChains suf pref -> UnboundedRegion $ joinChains pref suf
+      OneChain chain     -> Just $ UnboundedRegion chain
+        -- FIXME: it is not clear that the chain does not just intersect itself!
+      TwoChains suf pref -> joinChains suf pref
       -- FIXME: this is incorrect, but for now it may be ok
       -- i.e. it may also be a polygon
 
@@ -369,16 +356,28 @@ commonIntersection = fmap toCommonIntersection
         TwoChains suff chain -> extendTwo suff (clipLeftLine h chain)
           -- TODO; combine with the existing chain
       where
-        extendTwo suff chain = undefined
+        extendTwo suff chain = case extendOne chain of
+          Nothing                -> Nothing
+          Just (OneChain chain') -> Just (TwoChains suff chain')
+          Just (TwoChains _ _)   -> Nothing
+                                    -- I think this would mean we have an empty intersection
+                                    -- TODO: verify this.
+
         extendOne chain = case unconsAlt $ chain^._ChainAlternating of
-            Left h'          -> case (h^.boundingHyperPlane)
-                                     `intersect`
-                                     (h'^.boundingHyperPlane) of
-              Nothing -> undefined
+            Left h'          -> case h `intersect` h' of
+              Nothing -> Nothing -- no intersection already
               Just i  -> Just $ case i of
-                Line_x_Line_Line l  -> undefined -- subLine -- orPoint? or duplicate constraint
-                Line_x_Line_Point v -> OneChain $ consChain (h,v) chain
-                -- TODO: extract this into the intersection type of two halfpsaces
+                HalfPlane_x_HalfPlane_Line line   -> error "line; not implemented yet"
+                HalfPlane_x_HalfPlane_Slab _      -> TwoChains (singleton h') (singleton h)
+                                                  -- h' forms the suffix
+                HalfPlane_x_HalfPlane_Cone cone
+                  | isCCWTurn h' a h -> OneChain $ consChain (h,a) chain
+                  | otherwise        -> TwoChains (singleton h') (singleton h)
+                  where
+                    a = cone^.apex
+                  -- if we actually turn CCW; then we have one chain; otherwise
+                  -- we found the opening
+                HalfPlane_x_HalfPlane_HalfPlane _ -> error "absurd; duplicate halfplane"
 
             Right ((h',u),_) -> case (h^.boundingHyperPlane)
                                      `intersect`
@@ -386,10 +385,13 @@ commonIntersection = fmap toCommonIntersection
               Nothing -> undefined -- TODO
                 -- slabOrNothing -- FIXME: whether its a slab or not depends on whether chain
                                        -- still has other items as well.
-              Just i  -> Just $ case i of
+              Just i  -> Just $ traceShowWith ("inters ",h',u,) $ case i of
                 Line_x_Line_Line l  -> subLine -- orPoint? or duplicate constraint
-                Line_x_Line_Point v -> OneChain $ consChain (h,v) chain
-                  -- something must bem missing;
+                Line_x_Line_Point v
+                  | orderedCorrectly u v h' -> OneChain $ consChain (h,v) chain
+                    -- should this be orderedCorrectly && isCCWTurn' u v h?
+                  | otherwise               -> traceShowWith ("twoChains",isCCWTurn' u v h,) $
+                    TwoChains chain (singleton h)
           where
             h' = chain^.leftMost
             p = pointInteriorTo t
@@ -399,10 +401,25 @@ commonIntersection = fmap toCommonIntersection
 
             subLine = undefined
 
+            -- test if we make a left turn at a when going from h' to h
+            isCCWTurn  h' a h = let u = a .+^ rightBoundingVector a h'
+                                      -- the vector should have the hyperplane to its left
+                                in isCCWTurn' u a h
 
+            -- | given the previous vertex u, and the current vertex a
+            -- (that both lie on the boundary of the halfplane h'),
+            -- and so that h' is to the right of the vector from u to
+            -- a., computes whether we make a counter-clockwise (i.e. left) turn
+            -- at a when going to (the bounding line of) h
+            isCCWTurn' u  a h = let v = a .+^ leftBoundingVector a h
+                                in ccw u a v == CCW
 
-          --                 case t of
-          --                    Leftward (Down x) -> evalAt
+            -- | Given the previous vertex u, and the current vertex
+            -- a, test if the vector going from u to a has h to its left
+            orderedCorrectly u a h = let Vector2 x y = a .-. u
+                                         w           = Vector2 (-y) x
+                                     in  a .+^ w `intersects` h
+
 
 
 
@@ -410,17 +427,28 @@ commonIntersection = fmap toCommonIntersection
 --   Rightward (Down x) ->
 --   Leftward x         ->
 
+-- | Helper data type
+data Helper a b = Helper { previous   :: !b
+                         , getBuilder :: (Builder.Builder a)
+                         }
 
-dropRedundants hs = Vector.catMaybes $ Vector.zipWith f hs (Vector.tail hs)
+-- | Drop redundant constraints.
+dropRedundants :: Eq r
+               => NonEmptyVector (HalfPlaneType r, halfPlane)
+               -> NonEmptyVector (HalfPlaneType r, halfPlane)
+dropRedundants = NonEmptyVector.unsafeFromVector
+               . Builder.build
+               . getBuilder
+               . foldrMap1 (\x -> Helper (fst x) (Builder.singleton x)) extend
   where
-    f z@(t,_) (t',_) = case (t,t') of
-      (Leftward _,   Leftward _)                -> Nothing
-      (Rightward _,  Rightward _)               -> Nothing
-      (Downward a _, Downward a' _) | a == a'   -> Nothing
-                                    | otherwise -> Just z
-      (Upward a _,   Upward a' _)   | a == a'   -> Nothing
-                                    | otherwise -> Just z
-      _                                         -> Just z
+    extend z@(t,_) (Helper t' res) = Helper t $ case (t,t') of
+      (Leftward _,   Leftward _)                -> res
+      (Rightward _,  Rightward _)               -> res
+      (Downward a _, Downward a' _) | a == a'   -> res
+                                    | otherwise -> Builder.singleton z <> res
+      (Upward a _,   Upward a' _)   | a == a'   -> res
+                                    | otherwise -> Builder.singleton z <> res
+      _                                         -> Builder.singleton z <> res
 
 -- | Helper type to compare halfplanes to produce an ordering that we
 -- can use to compute their common intersection. The order should
@@ -455,18 +483,43 @@ instance Num r => HasPickInteriorPoint (HalfPlaneType r) 2 r where
 --   asLine l = case toLinearFunction l of
 --                Just
 
+-- | Test whether the halfplane is a left or a right halfplane
+isLeftHalfPlane   :: ( HalfPlane_ halfPlane r, Ord r, Num r
+                     , HasIntersectionWith (Point 2 r) halfPlane
+                     , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
+                     , GetDirection (BoundingHyperPlane halfPlane 2 r)
+                     ) => halfPlane -> Bool
+isLeftHalfPlane h = let l             = h^.boundingHyperPlane
+                        a             = pointInteriorTo l
+                        (Vector2 x y) = inLineVector l
+                        w = Vector2 (-y) x -- perpendicular to v; pointing left
+                    in (a .+^ w) `intersects` h
+
+-- | Test hether the halfplane is a right halfplane
+isRightHalfPlane :: ( HalfPlane_ halfPlane r, Ord r, Num r
+                    , HasIntersectionWith (Point 2 r) halfPlane
+                    , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
+                    , GetDirection (BoundingHyperPlane halfPlane 2 r)
+                    ) => halfPlane -> Bool
+isRightHalfPlane = not . isLeftHalfPlane
 
 
 -- | Compute the halfplane type
-halfPlaneType   :: (HalfPlane_ halfPlane r, AsLine (BoundingHyperPlane halfPlane 2 r))
+halfPlaneType   :: (HalfPlane_ halfPlane r
+                   , Ord r, Num r
+                   , AsLine (BoundingHyperPlane halfPlane 2 r)
+                   , HasIntersectionWith (Point 2 r) halfPlane
+                   , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
+                   , GetDirection (BoundingHyperPlane halfPlane 2 r)
+                   )
                 => halfPlane -> HalfPlaneType r
 halfPlaneType h = case h^.boundingHyperPlane.to asLine of
-                    VerticalLineThrough x    -> case h^.halfSpaceSign of
-                                                  Negative -> Leftward (Down x)
-                                                  Positive -> Rightward x
-                    NonVertical (LineEQ a b) -> case h^.halfSpaceSign of
-                                                  Negative -> Downward a (Down b)
-                                                  Positive -> Upward a b
+    VerticalLineThrough x
+      | isLeftHalfPlane h -> Leftward (Down x)
+      | otherwise         -> Rightward x
+    NonVertical (LineEQ a b)
+      | isLeftHalfPlane h -> Downward a (Down b)
+      | otherwise         -> Upward a b
 
 
 
@@ -586,3 +639,32 @@ below = HalfSpace Negative
 
 above :: LineEQ r -> HalfSpaceF (LineEQ r)
 above = HalfSpace Positive
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+instance (Ord r, Fractional r)
+         => HasDefaultIpeOut (CommonIntersection (HalfPlane r) r) where
+  type DefaultIpeOut (CommonIntersection (HalfPlane r) r)  = Group
+  defIO = drawIntersection
+
+--
+drawIntersection :: forall r.
+                    (Fractional r, Ord r)
+                 => IpeOut (CommonIntersection (HalfPlane r) r) Group r
+drawIntersection = \case
+  SingletonPoint p _hs  -> ipeGroup [iO $ defIO p]
+  InSubLine _l _hs _sl  -> ipeGroup [] -- TODO
+  InSlab _hl            -> ipeGroup [] -- TODO
+  BoundedRegion pg      -> ipeGroup [iO $ defIO (pg&vertices %~ view core
+                                                  :: ConvexPolygon (Point 2 r)
+                                                ) ! attr SFill blue
+                                                  ! attr SOpacity "10%"
+                                    ]
+  UnboundedRegion chain -> ipeGroup [iO $ defIO chain ! attr SFill green
+                                                      ! attr SOpacity "10%"
+                                    ]

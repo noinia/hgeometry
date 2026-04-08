@@ -1,5 +1,4 @@
 {-# OPTIONS_GHC -F -pgmF doctest-driver-gen
-                 -fno-warn-partial-type-signatures
                 -optF src
 
                 -optF -XTypeFamilies

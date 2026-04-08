@@ -262,7 +262,8 @@ instance ( Foldable f
                 (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
          , Snoc (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
                 (Point 2 r, halfPlane) (Point 2 r, halfPlane)
-         , HasDirection (BoundingHyperPlane halfPlane 2 r)
+         , GetDirection (BoundingHyperPlane halfPlane 2 r)
+         , HasIntersectionWith (Point 2 r) halfPlane
          , Intersection (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
            ~ Maybe (LineBoxIntersection 2 r)
          , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
@@ -270,7 +271,8 @@ instance ( Foldable f
   type DefaultIpeOut (Chain f r halfPlane) = Path
   defIO  = defIO . toPolyLineIn defaultBox
 
--- | Render the chain as a polyline; slipping the first and last
+-- | Render the chain as a polyline; setting the first and last vertices as intersections
+-- with the
 -- halfplanes at the boundary of the box.
 --
 -- pre: the first and last vertex of the chain lie inside the box.
@@ -279,11 +281,12 @@ toPolyLineIn       :: ( HalfPlane_ halfPlane r
                              (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
                       , Snoc (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
                              (Point 2 r, halfPlane) (Point 2 r, halfPlane)
-                      , HasDirection (BoundingHyperPlane halfPlane 2 r)
+                      , GetDirection (BoundingHyperPlane halfPlane 2 r)
                       , Foldable f, Ord r, Fractional r
                       , Intersection (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
                         ~ Maybe (LineBoxIntersection 2 r)
                       , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r) (Rectangle (Point 2 r))
+                      , HasIntersectionWith (Point 2 r) halfPlane
                       )
                    => Rectangle (Point 2 r)
                    -> Chain f r halfPlane -> PolyLine (Point 2 r)
