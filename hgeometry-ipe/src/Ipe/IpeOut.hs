@@ -466,13 +466,13 @@ drawAsConstraint         :: forall line r.
                             )
                          => IpeColor r
                          -> IpeOut (HalfPlaneF line) Group r
-drawAsConstraint color h = ipeGroup [ iO $ defIO seg
+drawAsConstraint color h = ipeGroup [ iO $ defIO seg ! attr SPen (IpePen "heavier")
                                     , iO $ ipeSimplePolygon poly ! attr SFill color
                                     ]
   where
     l = h^.boundingHyperPlane
-    f n' | pointInteriorTo l .+^ n' `intersects` h = n'
-         | otherwise                               = negated n'
+    f n' | pointInteriorTo l .+^ n' `intersects` h = negated n'
+         | otherwise                               = n'
     n = f $ normalVector l
 
     width' = let q :: Double

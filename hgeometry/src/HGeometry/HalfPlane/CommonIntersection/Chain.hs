@@ -25,7 +25,7 @@ import HGeometry.Intersection
 import HGeometry.Point
 import HGeometry.Sequence.Alternating
 import HGeometry.Properties
-import HGeometry.HalfSpace.Class
+import HGeometry.HalfSpace
 import HGeometry.HalfLine
 import HGeometry.Vector
 import Data.Default
@@ -108,13 +108,16 @@ rightMost :: Lens' (Chain Seq r halfPlane) halfPlane
 rightMost = _ChainAlternating.last1
 
 
--- | Get the unbounded edges of the chain
-unboundedEdges   :: ( HalfPlane_ halfPlane r
+-- | Get the unbounded edges of the chain.
+--
+-- the unbounded edges are edges pointing twoards infinity.
+unboundedEdges   :: ( HalfPlane_ halfPlane r, Ord r, Num r
+                    , HasIntersectionWith (Point 2 r) halfPlane
                     , Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
                            (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
                     , Snoc (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
                            (Point 2 r, halfPlane) (Point 2 r, halfPlane)
-                    , HasDirection (BoundingHyperPlane halfPlane 2 r)
+                    , GetDirection (BoundingHyperPlane halfPlane 2 r)
                     )
                  => Chain f r halfPlane
                  -> Either (BoundingHyperPlane halfPlane 2 r :+ halfPlane)
@@ -122,14 +125,12 @@ unboundedEdges   :: ( HalfPlane_ halfPlane r
 unboundedEdges c = case unconsAlt $ c^._ChainAlternating of
   Left h             -> Left $ (h^.boundingHyperPlane) :+ h
   Right ((h,v),rest) -> Right $ case unsnocAlt rest of
-      Left h'          -> Vector2 (toHalfLine v h :+ h) (toHalfLine v h' :+ h')
-      Right (_,(w,h')) -> Vector2 (toHalfLine v h :+ h) (toHalfLine w h' :+ h')
+      Left h'          -> Vector2 (toHalfLine v h                          :+ h)
+                                  ((toHalfLine v h' &direction %~ negated) :+ h')
+      Right (_,(w,h')) -> Vector2 (toHalfLine v h                          :+ h)
+                                  ((toHalfLine w h' &direction %~ negated) :+ h')
     where
-      toHalfLine p halfPlane = HalfLine p (halfPlane^.boundingHyperPlane.direction)
-      -- TODO: somehow report the right vector
-
-leftBoundingLine   :: halfPlane -> LinePV 2 r
-leftBoundingLine h = undefined -- h^.boundingLine
+      toHalfLine p halfPlane = HalfLine p (leftBoundingVector p halfPlane)
 
 --------------------------------------------------------------------------------
 

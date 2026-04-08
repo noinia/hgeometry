@@ -56,3 +56,7 @@ instance HalfSpace_ core d r => HalfSpace_ (core :+ extra) d r where
   type BoundingHyperPlane (core :+ extra) d r = BoundingHyperPlane core d r
   boundingHyperPlane = core.boundingHyperPlane
   halfSpaceSign = core.halfSpaceSign
+
+
+
+--------------------------------------------------------------------------------

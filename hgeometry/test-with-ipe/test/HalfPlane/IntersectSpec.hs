@@ -84,8 +84,15 @@ allPointsPath = foldOf (pathSegments.folded.to allPoints'')
 ipeSpec = describe "halfplane drawn correctly" $ do
             prop "constraint drawing" $ \(h :: HalfPlane R) ->
               let vs = drawAsConstraint gray h ^.core.groupItems.folded.to allPoints'
-              in all (`intersects` h) vs
-
+                  flipSign = \case
+                    Positive -> Negative
+                    Negative -> Positive
+              in all (`intersects` (h&halfSpaceSign %~ flipSign)) vs
+              -- in the constraint drawing the vertices of the polygon should
+              -- either lie on the bounding line of h, or outside the halfplane.
+              -- so; they should lie in the flipped halfplane.
+            prop "toHalfPlane correct"   $ \(ray :: HalfLine (Point 2 r) :+ ()) ->
+              isRightHalfPlane (toHalfPlane ray)
 
 spec :: Spec
 spec = describe "Cone properties" $ do
@@ -170,7 +177,7 @@ myCone = Cone (Point2 100 100) (Vector2 1 1 :+ ()) (Vector2 1 0 :+ ())
 
 
 testMain = do halfPlanes'' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
-              let halfPlanes' = take 2 halfPlanes''
+              let halfPlanes' = take 4 halfPlanes''
               -- let halfPlanes' :: [HalfPlane R]
               --     halfPlanes' = [ HalfSpace Negative (LinePV (Point2 0 3) (Vector2 0 (-2.33334)))
               --                   , HalfSpace Positive (LinePV (Point2 0 (-1.33334)) (Vector2 2.33333 0.33333))
@@ -254,8 +261,19 @@ drawIntersection = \case
 
 data State r halfPlane = OneChain (Chain Seq r halfPlane)
                        | TwoChains (Chain Seq r halfPlane) (Chain Seq r halfPlane)
+                       deriving (Show)
 
-joinChains pref suf = pref -- FIXME!!!
+timChains pref suf = (pref,suf) -- FIXME!!
+
+-- | Given two chains;  try to join them in a combined convex chain
+--
+--
+joinChains          :: Chain Seq r halfPlane
+                    -- ^ The suffix of the chain; given from right to left
+                    -> Chain Seq r halfPlane
+                    -- ^ The prefix of the chain; given from left to right
+                    -> Maybe (CommonIntersection halfPlane r)
+joinChains suf pref = Just $ UnboundedRegion pref -- FIXME!!!
 
 -- data PossiblyDegenIntersection halfPlane = Subline halfPlane halfPlane
 --                                          | Slab' halfPlane halfPlane
@@ -389,17 +407,18 @@ commonIntersection     :: forall f halfPlane r.
                           , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
                           )
                        => f halfPlane -> Maybe (CommonIntersection halfPlane r)
-commonIntersection = fmap toCommonIntersection
+commonIntersection = (toCommonIntersection =<<)
                    . foldlMap1' (Just . OneChain . singleton . snd) extend
                    . dropRedundants
                    . NonEmptyVector.unsafeFromVector
                    . sortOnCheap fst
                    . fmap (\h -> (halfPlaneType h, h))
   where
-    toCommonIntersection :: State r halfPlane -> CommonIntersection halfPlane r
+    toCommonIntersection :: State r halfPlane -> Maybe (CommonIntersection halfPlane r)
     toCommonIntersection = \case
-      OneChain chain     -> UnboundedRegion chain
-      TwoChains suf pref -> UnboundedRegion $ joinChains pref suf
+      OneChain chain     -> Just $ UnboundedRegion chain
+        -- FIXME: it is not clear that the chain does not just intersect itself!
+      TwoChains suf pref -> joinChains suf pref
       -- FIXME: this is incorrect, but for now it may be ok
       -- i.e. it may also be a polygon
 
@@ -440,11 +459,13 @@ commonIntersection = fmap toCommonIntersection
               Nothing -> undefined -- TODO
                 -- slabOrNothing -- FIXME: whether its a slab or not depends on whether chain
                                        -- still has other items as well.
-              Just i  -> Just $ case i of
+              Just i  -> Just $ traceShowWith ("inters ",h',u,) $ case i of
                 Line_x_Line_Line l  -> subLine -- orPoint? or duplicate constraint
                 Line_x_Line_Point v
-                  | isCCWTurn' u v h -> OneChain $ consChain (h,v) chain
-                  | otherwise        -> TwoChains chain (singleton h)
+                  | orderedCorrectly u v h' -> OneChain $ consChain (h,v) chain
+                    -- should this be orderedCorrectly && isCCWTurn' u v h?
+                  | otherwise               -> traceShowWith ("twoChains",isCCWTurn' u v h,) $
+                    TwoChains chain (singleton h)
           where
             h' = chain^.leftMost
             p = pointInteriorTo t
@@ -454,23 +475,25 @@ commonIntersection = fmap toCommonIntersection
 
             subLine = undefined
 
-            -- test if we make a right turn at a when going from h' to h
-            isCCWTurn  h' a h = let u = a .+^ leftBoundingVec a h'
+            -- test if we make a left turn at a when going from h' to h
+            isCCWTurn  h' a h = let u = a .+^ rightBoundingVector a h'
                                       -- the vector should have the hyperplane to its left
                                 in isCCWTurn' u a h
-            isCCWTurn' u  a h = let v = a .+^ negated (leftBoundingVec a h)
+
+            -- | given the previous vertex u, and the current vertex a
+            -- (that both lie on the boundary of the halfplane h'),
+            -- and so that h' is to the right of the vector from u to
+            -- a., computes whether we make a counter-clockwise (i.e. left) turn
+            -- at a when going to (the bounding line of) h
+            isCCWTurn' u  a h = let v = a .+^ leftBoundingVector a h
                                 in ccw u a v == CCW
 
-            -- | given a point a on the bounding hyperplane; compute a vector
-            -- pointing in the direction of the bounding line so that the
-            -- halfspace is to its left.
-            leftBoundingVec a h' = let l               = h'^.boundingHyperPlane
-                                       v@(Vector2 x y) = inLineVector l
-                                       w               = Vector2 (-y) x
-                                       -- perpendicular to v; pointing left
-                                   in if (a .+^ w) `intersects` h then v else negated v
-             -- it feels a bit silly we have to do this test instead of just looking
-             -- at the sign of the halfplane, but alas.
+            -- | Given the previous vertex u, and the current vertex
+            -- a, test if the vector going from u to a has h to its left
+            orderedCorrectly u a h = let Vector2 x y = a .-. u
+                                         w           = Vector2 (-y) x
+                                     in  a .+^ w `intersects` h
+
 
 
 
@@ -545,6 +568,15 @@ isLeftHalfPlane h = let l             = h^.boundingHyperPlane
                         (Vector2 x y) = inLineVector l
                         w = Vector2 (-y) x -- perpendicular to v; pointing left
                     in (a .+^ w) `intersects` h
+
+-- | Test hether the halfplane is a right halfplane
+isRightHalfPlane :: ( HalfPlane_ halfPlane r, Ord r, Num r
+                    , HasIntersectionWith (Point 2 r) halfPlane
+                    , HasPickInteriorPoint (BoundingHyperPlane halfPlane 2 r) 2 r
+                    , GetDirection (BoundingHyperPlane halfPlane 2 r)
+                    ) => halfPlane -> Bool
+isRightHalfPlane = not . isLeftHalfPlane
+
 
 -- | Compute the halfplane type
 halfPlaneType   :: (HalfPlane_ halfPlane r
