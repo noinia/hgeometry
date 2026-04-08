@@ -1,6 +1,5 @@
 module HalfPlane.Intersection
-  ( leftBoundary
-  , rightBoundary
+  (
   ) where -- TODO: rename to HGeometry.Slab.Intersection
 
 import           HGeometry.Slab
@@ -20,20 +19,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Cyclic
 
 --------------------------------------------------------------------------------
--- move to Slab.Intersect in hgeometry
-
--- | Get the left boundary of the slab
-leftBoundary   :: Slab r side -> LinePV 2 r :+ side
-leftBoundary s = let l = s^.definingLine in l :+ s^.leftData
-
--- | Get the right boundary of the slab
-rightBoundary   :: (Fractional r, Radical r) => Slab r side -> LinePV 2 r :+ side
-rightBoundary s = let (LinePV p v@(Vector2 x y)) = s^.definingLine
-                      n                          = signorm $ Vector2 y (-x)
-                      dist                       = sqrt $ s^.squaredWidth
-                      p'                         = p .+^ (dist *^ n)
-                        --
-                  in (LinePV p' v) :+ s^.rightData
+-- attempt to intersect a slab with a rectangle
 
 {-
 -- TODO: this is actually more annoying

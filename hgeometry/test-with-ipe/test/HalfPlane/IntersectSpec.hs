@@ -51,7 +51,7 @@ import           Ipe.Color (gray)
 import           HGeometry.Cone.Intersection
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck (counterexample, (===), suchThat, discard, Arbitrary(..))
-import           HGeometry.Slab
+import           HGeometry.Slab (Slab(..))
 -- import HalfPlane.Intersection
 import           HGeometry.Ipe.Instances ()
 import           Debug.Trace

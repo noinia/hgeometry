@@ -16,7 +16,7 @@ module HGeometry.Ipe.Instances
 
 import           HGeometry.Cone.Intersection
 import           HGeometry.Cone
-import           HGeometry.Slab
+import qualified HGeometry.Slab as Slab
 import           HGeometry.Ext
 import           HGeometry.Kernel
 import           Ipe
@@ -31,8 +31,8 @@ import           HGeometry.Polygon
 --------------------------------------------------------------------------------
 
 instance (
-         ) => HasDefaultIpeOut (Slab r side) where
-  type DefaultIpeOut (Slab r side) = Group
+         ) => HasDefaultIpeOut (Slab.Slab r side) where
+  type DefaultIpeOut (Slab.Slab r side) = Group
   defIO _s = error "drawing slab not implemented yet"
 
 
