@@ -152,6 +152,7 @@ common quickcheck-setup
       , hgeometry-polyLine:quickcheck
       , hgeometry-polygon:quickcheck
       , hgeometry
+      , hgeometry:intersection-helper
 
 common ipe-setup
     build-depends:
@@ -194,12 +195,12 @@ common ipe-test-setup
 -- * HGeometry Library (main library)
 
 library
-    import:           all-setup,hgeometry-setup
+    import:           all-setup, hgeometry-setup
     hs-source-dirs:   src
+    build-depends:
+         hgeometry:intersection-helper
     exposed-modules:
         HGeometry
-
-        HGeometry.Cone.Intersection
 
         HGeometry.DelaunayTriangulation
         HGeometry.DelaunayTriangulation.DivideAndConquer
@@ -354,6 +355,35 @@ library quickcheck
          hgeometry
        -- , cereal   >= 0.5    && < 1
 
+library intersection-helper
+    import: all-setup, hgeometry-setup
+    visibility: public
+    hs-source-dirs: intersection-src
+    exposed-modules:
+      HGeometry.Cone.Intersection
+    -- other-modules:
+    --   Paths_hgeometry
+    -- autogen-modules:
+    --   Paths_hgeometry
+    build-depends:
+
+
+library with-ipe
+    import: all-setup, hgeometry-setup
+    visibility: public
+    hs-source-dirs: with-ipe-src
+    exposed-modules:
+      HGeometry.Ipe.Instances
+    -- other-modules:
+    --   Paths_hgeometry
+    -- autogen-modules:
+    --   Paths_hgeometry
+    build-depends:
+        hgeometry-ipe          >= 1.0.0.0 && < 1.1
+      , hgeometry:intersection-helper
+
+       -- , cereal   >= 0.5    && < 1
+
 library ply-writer
     import: all-setup
     visibility: public
@@ -364,6 +394,7 @@ library ply-writer
          hgeometry-point
        , hgeometry-kernel
        , colour                  >= 2.3.6         && < 3
+
 
 
 --------------------------------------------------------------------------------
@@ -504,11 +535,11 @@ common with-ipe-hspec-fractional
   build-depends:
         hspec-with-tempfile    >= 0.1
       , hgeometry-ipe
+      , hgeometry:with-ipe
       , hgeometry:quickcheck
       , hgeometry-vector:numtypes
       , wavefront              >= 0.7.1.5 && < 0.8
       , exceptions             >= 0.10.9  && < 0.11
-
 
 test-suite with-ipe-hspec-rational
   import:           all-setup, ipe-setup, all-quickcheck-setup,

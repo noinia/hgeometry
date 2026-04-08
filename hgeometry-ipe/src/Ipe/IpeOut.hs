@@ -149,6 +149,13 @@ instance HasDefaultIpeOut a => HasDefaultIpeOut (NonEmpty a) where
   type DefaultIpeOut (NonEmpty a) = Group
   defIO = ipeGroup . map (iO .  defIO) . toList
 
+instance HasDefaultIpeOut line => HasDefaultIpeOut (Maybe line)  where
+  type DefaultIpeOut (Maybe line) = Group
+  defIO = \case
+    Nothing -> ipeGroup []
+    Just g  -> ipeGroup [iO $ defIO g]
+
+
 instance (HasDefaultIpeOut a, HasDefaultIpeOut b
          , DefaultIpeOut a ~ DefaultIpeOut b, NumType a ~ NumType b
          ) => HasDefaultIpeOut (Either a b) where

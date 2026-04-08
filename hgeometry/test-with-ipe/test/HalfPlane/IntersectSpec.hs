@@ -53,7 +53,7 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck (counterexample, (===), suchThat, discard, Arbitrary(..))
 import           HGeometry.Slab
 -- import HalfPlane.Intersection
-
+import           HGeometry.Ipe.Instances ()
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -234,27 +234,6 @@ myMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
                                    ]
                                  ]
 
-instance (Ord r, Fractional r)
-         => HasDefaultIpeOut (CommonIntersection (HalfPlane r) r) where
-  type DefaultIpeOut (CommonIntersection (HalfPlane r) r)  = Group
-  defIO = drawIntersection
-
---
-drawIntersection :: forall r.
-                    (Fractional r, Ord r)
-                 => IpeOut (CommonIntersection (HalfPlane r) r) Group r
-drawIntersection = \case
-  SingletonPoint p _hs  -> ipeGroup [iO $ defIO p]
-  InSubLine _l _hs _sl  -> ipeGroup [] -- TODO
-  InSlab _hl            -> ipeGroup [] -- TODO
-  BoundedRegion pg      -> ipeGroup [iO $ defIO (pg&vertices %~ view core
-                                                  :: ConvexPolygon (Point 2 r)
-                                                ) ! attr SFill blue
-                                                  ! attr SOpacity "10%"
-                                    ]
-  UnboundedRegion chain -> ipeGroup [iO $ defIO chain ! attr SFill green
-                                                      ! attr SOpacity "10%"
-                                    ]
 
 --------------------------------------------------------------------------------
 
@@ -307,10 +286,6 @@ joinChains suf pref = Just $ UnboundedRegion pref -- FIXME!!!
 
 --------------------------------------------------------------------------------
 
-instance (
-         ) => HasDefaultIpeOut (Slab r orientedLine) where
-  type DefaultIpeOut (Slab r orientedLine) = Group
-  defIO _s = ipeGroup []
 
     -- ipeGroup [ iO $ defIO (h1^.boundingHyperPlane)
     --                              , iO $ defIO (h2^.boundingHyperPlane)
@@ -318,25 +293,6 @@ instance (
     -- -- TODO: do this property; i.e. compute the intersection with the bounding box
 
 
-instance (Point_ point 2 r, Fractional r, Ord r, Show r
-         ) => HasDefaultIpeOut (Cone r point edge) where
-  type DefaultIpeOut (Cone r point edge) = Group
-  defIO c = ipeGroup [ iO $ defIO poly ! attr SFill blue
-                     , iO $ ipeRay hl
-                     , iO $ ipeRay hr
-                     ]
-    where
-      hl = leftBoundary c'  ^.core
-      hr = rightBoundary c' ^.core
-
-      poly :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
-      poly = toConvexPolygonIn rect c'&vertices %~ (^.asPoint)
-      c' :: Cone r (Point 2 r) edge
-      c' = c&apex %~ (^.asPoint)
-      rect :: Rectangle (Point 2 r)
-      rect = boundingBox $ defaultBox :| [boundingBox (c'^.apex) ]
-      -- we have to include the bounding box of the apex since toConvexPolygonIn
-      -- requires the apex to be in the box.
 
 --------------------------------------------------------------------------------
 
@@ -345,39 +301,9 @@ instance (Point_ point 2 r, Fractional r, Ord r, Show r
 
 --------------------------------------------------------------------------------
 
-instance HasDefaultIpeOut line => HasDefaultIpeOut (Maybe line)  where
-  type DefaultIpeOut (Maybe line) = Group
-  defIO = \case
-    Nothing -> ipeGroup []
-    Just g  -> ipeGroup [iO $ defIO g]
-
-instance ( HasDefaultIpeOut line, Fractional r, Ord r, Show r
-         , DefaultIpeOut line ~ Path
-         , NumType line ~ r
-         ) => HasDefaultIpeOut (LineHalfPlaneIntersection r line) where
-  type DefaultIpeOut (LineHalfPlaneIntersection r line) = Path
-  defIO = \case
-    Line_x_HalfPlane_Line line   -> defIO line
-    Line_x_HalfPlane_HalfLine hl -> defIO hl
 
 
-instance ( HasDefaultIpeOut halfPlane
-         , HasDefaultIpeOut (BoundingHyperPlane halfPlane 2 r)
-         , HalfPlane_ halfPlane r
-         , Fractional r, Ord r
-         , Show r
-         -- , DefaultIpeOut halfPlane ~ Path
-         , NumType halfPlane ~ r
-         , Dimension halfPlane ~ 2
-         , Dimension (BoundingHyperPlane halfPlane 2 r) ~ 2
-         , NumType (BoundingHyperPlane halfPlane 2 r) ~ r
-         ) => HasDefaultIpeOut (HalfPlaneIntersection r halfPlane) where
-  type DefaultIpeOut (HalfPlaneIntersection r halfPlane) = Group
-  defIO = \case
-    HalfPlane_x_HalfPlane_Line line           -> ipeGroup [iO $ defIO line]
-    HalfPlane_x_HalfPlane_Slab slab           -> ipeGroup [iO $ defIO slab]
-    HalfPlane_x_HalfPlane_Cone cone           -> ipeGroup [iO $ defIO cone]
-    HalfPlane_x_HalfPlane_HalfPlane halfPlane -> ipeGroup [iO $ defIO halfPlane ]
+
 
 --------------------------------------------------------------------------------
 
@@ -719,3 +645,26 @@ above = HalfSpace Positive
 
 
 --------------------------------------------------------------------------------
+
+
+instance (Ord r, Fractional r)
+         => HasDefaultIpeOut (CommonIntersection (HalfPlane r) r) where
+  type DefaultIpeOut (CommonIntersection (HalfPlane r) r)  = Group
+  defIO = drawIntersection
+
+--
+drawIntersection :: forall r.
+                    (Fractional r, Ord r)
+                 => IpeOut (CommonIntersection (HalfPlane r) r) Group r
+drawIntersection = \case
+  SingletonPoint p _hs  -> ipeGroup [iO $ defIO p]
+  InSubLine _l _hs _sl  -> ipeGroup [] -- TODO
+  InSlab _hl            -> ipeGroup [] -- TODO
+  BoundedRegion pg      -> ipeGroup [iO $ defIO (pg&vertices %~ view core
+                                                  :: ConvexPolygon (Point 2 r)
+                                                ) ! attr SFill blue
+                                                  ! attr SOpacity "10%"
+                                    ]
+  UnboundedRegion chain -> ipeGroup [iO $ defIO chain ! attr SFill green
+                                                      ! attr SOpacity "10%"
+                                    ]
