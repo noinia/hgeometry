@@ -34,6 +34,19 @@ source-repository head
 --     build-depends:
 --         aeson                   >= 2.1
 
+common options
+  if arch(wasm32)
+    ghc-options:
+      -no-hs-main
+      -optl-mexec-model=reactor
+      "-optl-Wl,--export=hs_start"
+    cpp-options:
+      -DWASM
+
+  if arch(javascript)
+     ld-options:
+       -sEXPORTED_RUNTIME_METHODS=HEAP8
+
 common setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
                 -fspecialise-aggressively -fexpose-all-unfoldings
@@ -151,15 +164,17 @@ executable hgeometry-bapc2014-armybase
 -- * ConvexHull
 
 executable hgeometry-convexHull
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: convexHull
   main-is:        Main.hs
+  Other-modules:
+    App
 
 --------------------------------------------------------------------------------
 -- * LineSegment Intersect
 
 executable hgeometry-lineSegmentIntersection
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: lineSegmentIntersection
   main-is:        Main.hs
 
@@ -167,7 +182,7 @@ executable hgeometry-lineSegmentIntersection
 -- * Duality
 
 executable hgeometry-duality
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: duality
   main-is:        Main.hs
 
@@ -176,7 +191,7 @@ executable hgeometry-duality
 -- * Voronoi Diagram
 
 executable hgeometry-voronoi
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: voronoiDiagram
   main-is:        Main.hs
 
@@ -184,7 +199,7 @@ executable hgeometry-voronoi
 -- * Polygon Triangulation
 
 -- executable hgeometry-polygonTriangulation
---   import:         setup, miso-setup
+--   import:         setup, miso-setup, options
 --   hs-source-dirs: polygonTriangulation
 --   main-is:        Main.hs
 
@@ -192,7 +207,7 @@ executable hgeometry-voronoi
 -- * Polyline Drawing
 
 executable hgeometry-polyLineDrawing
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: polyLineDrawing
   main-is:        Main.hs
   -- other-modules:
@@ -202,7 +217,7 @@ executable hgeometry-polyLineDrawing
 -- * GeoJSON example
 
 executable hgeometry-geojson
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: geojson
   main-is:        Main.hs
   other-modules:
@@ -213,7 +228,7 @@ executable hgeometry-geojson
 -- * Polygon Sampler example
 
 executable hgeometry-sampler
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: sampler
   main-is:        Main.hs
   other-modules:
@@ -223,8 +238,12 @@ executable hgeometry-sampler
 --------------------------------------------------------------------------------
 -- * Raytracer example
 
+
 executable hgeometry-raytracer
-  import:         setup, miso-setup
+  import:         setup
+  if arch(wasm32)
+     buildable: False
+
   build-depends:
           JuicyPixels               >= 3.3.9   && < 4
         , terminal-progress-bar     >= 0.4.2   && < 0.5
@@ -237,7 +256,7 @@ executable hgeometry-raytracer
           Types
           Settings
           Paths_hgeometry_examples
-  --      Miso.Event.Extra
+
 
 
 
@@ -283,7 +302,7 @@ executable hgeometry-raytracer
 
 --------------------------------------------------------------------------------
 executable hgeometry-draw
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: draw
   main-is:        Main.hs
   -- other-modules:
@@ -304,7 +323,7 @@ executable hgeometry-triangulateWorld
 
 -- Renders a 3D model of the lower envelope of a set of planes
 executable hgeometry-lowerEnv
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: lowerEnv
   main-is:        Main.hs
   build-depends:
@@ -317,7 +336,7 @@ executable hgeometry-lowerEnv
 
 -- Renders a 3D model of the lower envelope of a set of planes
 executable hgeometry-3dviewer
-  import:         setup, miso-setup
+  import:         setup, miso-setup, options
   hs-source-dirs: 3dviewer
   main-is:        Main.hs
   -- build-depends:
