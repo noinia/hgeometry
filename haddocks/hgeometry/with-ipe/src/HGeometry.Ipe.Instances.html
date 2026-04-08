@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  HGeometry.Ipe.Instances</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Some instances for HasDefaultIpeOut for geometry types that require</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- basic data types (in kernel) as well as polygons or polylines.</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Ipe.Instances.html"><span class="hs-identifier">HGeometry.Ipe.Instances</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-1.0.0.0/l/intersection-helper/doc/html/hgeometry/intersection-helper/src/HGeometry.Cone.Intersection.html"><span class="hs-identifier">HGeometry.Cone.Intersection</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html"><span class="hs-identifier">HGeometry.Cone</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Slab.html"><span class="hs-identifier">HGeometry.Slab</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Slab</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Kernel.html"><span class="hs-identifier">HGeometry.Kernel</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.html"><span class="hs-identifier">Ipe</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Color.html"><span class="hs-identifier">Ipe.Color</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.html"><span class="hs-identifier">HGeometry.HalfSpace</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#NonEmpty"><span class="hs-identifier">NonEmpty</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html"><span class="hs-identifier">HGeometry.Cyclic</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-polygon-1.0.0.0/doc/html/hgeometry-polygon/src/HGeometry.Polygon.html"><span class="hs-identifier">HGeometry.Polygon</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679144530"><span id="local-6989586621679144531"><span class="hs-special">(</span><span>
+</span><span id="line-34"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Slab.html#Slab"><span class="hs-identifier hs-type">Slab.Slab</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144530"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144531"><span class="hs-identifier hs-type">side</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultIpeOut"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#DefaultIpeOut"><span class="hs-identifier hs-var">DefaultIpeOut</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Slab.html#Slab"><span class="hs-identifier hs-type">Slab.Slab</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144530"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144531"><span class="hs-identifier hs-type">side</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679144788"><span class="annot"><span class="annottext">defIO :: IpeOut
+  (Slab r side) (DefaultIpeOut (Slab r side)) (NumType (Slab r side))
+</span><a href="#local-6989586621679144788"><span class="hs-identifier hs-var hs-var hs-var">defIO</span></a></span></span><span> </span><span id="local-6989586621679144790"><span class="annot"><span class="annottext">Slab r side
+</span><a href="#local-6989586621679144790"><span class="hs-identifier hs-var">_s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+-&gt; Group r
+   :+ Attributes' r '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Clip]
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Err.html#error"><span class="hs-identifier hs-var">error</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;drawing slab not implemented yet&quot;</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679144578"><span id="local-6989586621679144579"><span id="local-6989586621679144580"><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144578"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Fractional"><span class="hs-identifier hs-type">Fractional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-type">Show</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-41"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#Cone"><span class="hs-identifier hs-type">Cone</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144578"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144580"><span class="hs-identifier hs-type">edge</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultIpeOut"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#DefaultIpeOut"><span class="hs-identifier hs-var">DefaultIpeOut</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#Cone"><span class="hs-identifier hs-type">Cone</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144578"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144580"><span class="hs-identifier hs-type">edge</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679145066"><span class="annot"><span class="annottext">defIO :: IpeOut
+  (Cone r point edge)
+  (DefaultIpeOut (Cone r point edge))
+  (NumType (Cone r point edge))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var hs-var hs-var">defIO</span></a></span></span><span> </span><span id="local-6989586621679145067"><span class="annot"><span class="annottext">Cone r point edge
+</span><a href="#local-6989586621679145067"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' Path r -&gt; IpeObject r)
+-&gt; IpeObject' Path r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut
+  (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))
+  (DefaultIpeOut (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)))
+  (NumType (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)))
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
+</span><a href="#local-6989586621679145070"><span class="hs-identifier hs-var">poly</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r -&gt; IpeAttributes Path r -&gt; IpeObject' Path r
+forall (i :: * -&gt; *) r.
+IpeObject' i r -&gt; IpeAttributes i r -&gt; IpeObject' i r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#%21"><span class="hs-operator hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Fill
+-&gt; Apply (AttrMapSym1 r) 'Fill
+-&gt; Attributes
+     (AttrMapSym1 r)
+     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+        'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+        'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+forall {u} (at :: u) (ats :: [u]) (proxy :: u -&gt; *) (f :: u ~&gt; *).
+(at &#8712; ats, RecApplicative ats) =&gt;
+proxy at -&gt; Apply f at -&gt; Attributes f ats
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Attributes.html#attr"><span class="hs-identifier hs-var">attr</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Fill
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Attributes.html#SFill"><span class="hs-identifier hs-var">SFill</span></a></span><span> </span><span class="annot"><span class="annottext">IpeColor r
+Apply (AttrMapSym1 r) 'Fill
+forall r. IpeColor r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Color.html#blue"><span class="hs-identifier hs-var">blue</span></a></span><span>
+</span><span id="line-44"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' Path r -&gt; IpeObject r)
+-&gt; IpeObject' Path r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut (HalfLine (Point 2 r)) Path r
+forall r point.
+(Ord r, Fractional r, Point_ point 2 r, Show r, Show point) =&gt;
+IpeOut (HalfLine point) Path r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#ipeRay"><span class="hs-identifier hs-var">ipeRay</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679145076"><span class="hs-identifier hs-var">hl</span></a></span><span>
+</span><span id="line-45"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' Path r -&gt; IpeObject r)
+-&gt; IpeObject' Path r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut (HalfLine (Point 2 r)) Path r
+forall r point.
+(Ord r, Fractional r, Point_ point 2 r, Show r, Show point) =&gt;
+IpeOut (HalfLine point) Path r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#ipeRay"><span class="hs-identifier hs-var">ipeRay</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679145077"><span class="hs-identifier hs-var">hr</span></a></span><span>
+</span><span id="line-46"></span><span>                     </span><span class="hs-special">]</span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>      </span><span id="local-6989586621679145076"><span class="annot"><span class="annottext">hl :: HalfLine (Point 2 r)
+</span><a href="#local-6989586621679145076"><span class="hs-identifier hs-var hs-var">hl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cone r (Point 2 r) edge -&gt; HalfLine (Point 2 r) :+ edge
+forall point r edge.
+(Dimension point ~ 2, NumType point ~ r) =&gt;
+Cone r point edge -&gt; HalfLine point :+ edge
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#leftBoundary"><span class="hs-identifier hs-var">leftBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">Cone r (Point 2 r) edge
+</span><a href="#local-6989586621679145079"><span class="hs-identifier hs-var">c'</span></a></span><span>  </span><span class="annot"><span class="annottext">(HalfLine (Point 2 r) :+ edge)
+-&gt; Getting
+     (HalfLine (Point 2 r))
+     (HalfLine (Point 2 r) :+ edge)
+     (HalfLine (Point 2 r))
+-&gt; HalfLine (Point 2 r)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+  (HalfLine (Point 2 r))
+  (HalfLine (Point 2 r) :+ edge)
+  (HalfLine (Point 2 r))
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span>
+</span><span id="line-49"></span><span>      </span><span id="local-6989586621679145077"><span class="annot"><span class="annottext">hr :: HalfLine (Point 2 r)
+</span><a href="#local-6989586621679145077"><span class="hs-identifier hs-var hs-var">hr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cone r (Point 2 r) edge -&gt; HalfLine (Point 2 r) :+ edge
+forall point r edge.
+(Dimension point ~ 2, NumType point ~ r) =&gt;
+Cone r point edge -&gt; HalfLine point :+ edge
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#rightBoundary"><span class="hs-identifier hs-var">rightBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">Cone r (Point 2 r) edge
+</span><a href="#local-6989586621679145079"><span class="hs-identifier hs-var">c'</span></a></span><span> </span><span class="annot"><span class="annottext">(HalfLine (Point 2 r) :+ edge)
+-&gt; Getting
+     (HalfLine (Point 2 r))
+     (HalfLine (Point 2 r) :+ edge)
+     (HalfLine (Point 2 r))
+-&gt; HalfLine (Point 2 r)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+  (HalfLine (Point 2 r))
+  (HalfLine (Point 2 r) :+ edge)
+  (HalfLine (Point 2 r))
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>      </span><span class="annot"><a href="#local-6989586621679145070"><span class="hs-identifier hs-type">poly</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-polygon-1.0.0.0/doc/html/hgeometry-polygon/src/HGeometry.Polygon.Convex.Internal.html#ConvexPolygonF"><span class="hs-identifier hs-type">ConvexPolygonF</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#NonEmpty"><span class="hs-identifier hs-type">NonEmpty</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>      </span><span id="local-6989586621679145070"><span class="annot"><span class="annottext">poly :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
+</span><a href="#local-6989586621679145070"><span class="hs-identifier hs-var hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r)
+-&gt; Cone r (Point 2 r) edge
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))
+forall rectangle point r edge.
+(Rectangle_ rectangle point, Point_ point 2 r, Ord r,
+ Fractional r) =&gt;
+rectangle
+-&gt; Cone r point edge
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-1.0.0.0/l/intersection-helper/doc/html/hgeometry/intersection-helper/src/HGeometry.Cone.Intersection.html#toConvexPolygonIn"><span class="hs-identifier hs-var">toConvexPolygonIn</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r)
+</span><a href="#local-6989586621679145084"><span class="hs-identifier hs-var">rect</span></a></span><span> </span><span class="annot"><span class="annottext">Cone r (Point 2 r) edge
+</span><a href="#local-6989586621679145079"><span class="hs-identifier hs-var">c'</span></a></span><span class="annot"><span class="annottext">ConvexPolygonF
+  (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))
+-&gt; (ConvexPolygonF
+      (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))
+    -&gt; ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))
+-&gt; ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Function.html#%26"><span class="hs-operator hs-var">&amp;</span></a></span><span class="annot"><span class="annottext">(Vertex
+   (ConvexPolygonF
+      (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r)))
+ -&gt; Identity
+      (Vertex (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))))
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))
+-&gt; Identity (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))
+(OriginalOrExtra (Point 2 r) (Point 2 r) -&gt; Identity (Point 2 r))
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))
+-&gt; Identity (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))
+forall graph graph'.
+HasVertices graph graph' =&gt;
+IndexedTraversal1
+  (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+IndexedTraversal1
+  (VertexIx
+     (ConvexPolygonF
+        (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))))
+  (ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r)))
+  (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))
+  (Vertex
+     (ConvexPolygonF
+        (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))))
+  (Vertex (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span> </span><span class="annot"><span class="annottext">((OriginalOrExtra (Point 2 r) (Point 2 r) -&gt; Identity (Point 2 r))
+ -&gt; ConvexPolygonF
+      (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))
+ -&gt; Identity (ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)))
+-&gt; (OriginalOrExtra (Point 2 r) (Point 2 r) -&gt; Point 2 r)
+-&gt; ConvexPolygonF
+     (Cyclic NonEmpty) (OriginalOrExtra (Point 2 r) (Point 2 r))
+-&gt; ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OriginalOrExtra (Point 2 r) (Point 2 r)
+-&gt; Getting
+     (Point 2 r) (OriginalOrExtra (Point 2 r) (Point 2 r)) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+  (Point 2 r) (OriginalOrExtra (Point 2 r) (Point 2 r)) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (OriginalOrExtra (Point 2 r) (Point 2 r)) (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>      </span><span class="annot"><a href="#local-6989586621679145079"><span class="hs-identifier hs-type">c'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#Cone"><span class="hs-identifier hs-type">Cone</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679144580"><span class="hs-identifier hs-type">edge</span></a></span><span>
+</span><span id="line-54"></span><span>      </span><span id="local-6989586621679145079"><span class="annot"><span class="annottext">c' :: Cone r (Point 2 r) edge
+</span><a href="#local-6989586621679145079"><span class="hs-identifier hs-var hs-var">c'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cone r point edge
+</span><a href="#local-6989586621679145067"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">Cone r point edge
+-&gt; (Cone r point edge -&gt; Cone r (Point 2 r) edge)
+-&gt; Cone r (Point 2 r) edge
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Function.html#%26"><span class="hs-operator hs-var">&amp;</span></a></span><span class="annot"><span class="annottext">(point -&gt; Identity (Point 2 r))
+-&gt; Cone r point edge -&gt; Identity (Cone r (Point 2 r) edge)
+forall r point1 edge point2 (f :: * -&gt; *).
+Functor f =&gt;
+(point1 -&gt; f point2)
+-&gt; Cone r point1 edge -&gt; f (Cone r point2 edge)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#apex"><span class="hs-identifier hs-var">apex</span></a></span><span> </span><span class="annot"><span class="annottext">((point -&gt; Identity (Point 2 r))
+ -&gt; Cone r point edge -&gt; Identity (Cone r (Point 2 r) edge))
+-&gt; (point -&gt; Point 2 r)
+-&gt; Cone r point edge
+-&gt; Cone r (Point 2 r) edge
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>      </span><span class="annot"><a href="#local-6989586621679145084"><span class="hs-identifier hs-type">rect</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Internal.html#Rectangle"><span class="hs-identifier hs-type">Rectangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679144579"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>      </span><span id="local-6989586621679145084"><span class="annot"><span class="annottext">rect :: Rectangle (Point 2 r)
+</span><a href="#local-6989586621679145084"><span class="hs-identifier hs-var hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Rectangle (Point 2 r)) -&gt; Rectangle (Point 2 r)
+forall (d :: Nat) r.
+(d ~ Dimension (NonEmpty (Rectangle (Point 2 r))),
+ r ~ NumType (NonEmpty (Rectangle (Point 2 r))), Ord r) =&gt;
+NonEmpty (Rectangle (Point 2 r)) -&gt; Box (Point d r)
+forall g (d :: Nat) r.
+(IsBoxable g, d ~ Dimension g, r ~ NumType g, Ord r) =&gt;
+g -&gt; Box (Point d r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Boxable.html#boundingBox"><span class="hs-identifier hs-var">boundingBox</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Rectangle (Point 2 r)) -&gt; Rectangle (Point 2 r))
+-&gt; NonEmpty (Rectangle (Point 2 r)) -&gt; Rectangle (Point 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r)
+forall r. Num r =&gt; Rectangle (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defaultBox"><span class="hs-identifier hs-var">defaultBox</span></a></span><span> </span><span class="annot"><span class="annottext">Rectangle (Point 2 r)
+-&gt; [Rectangle (Point 2 r)] -&gt; NonEmpty (Rectangle (Point 2 r))
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3A%7C"><span class="hs-operator hs-var">:|</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r -&gt; Rectangle (Point 2 r)
+forall (d :: Nat) r.
+(d ~ Dimension (Point 2 r), r ~ NumType (Point 2 r), Ord r) =&gt;
+Point 2 r -&gt; Box (Point d r)
+forall g (d :: Nat) r.
+(IsBoxable g, d ~ Dimension g, r ~ NumType g, Ord r) =&gt;
+g -&gt; Box (Point d r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Box.Boxable.html#boundingBox"><span class="hs-identifier hs-var">boundingBox</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cone r (Point 2 r) edge
+</span><a href="#local-6989586621679145079"><span class="hs-identifier hs-var">c'</span></a></span><span class="annot"><span class="annottext">Cone r (Point 2 r) edge
+-&gt; Getting (Point 2 r) (Cone r (Point 2 r) edge) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (Cone r (Point 2 r) edge) (Point 2 r)
+forall r point1 edge point2 (f :: * -&gt; *).
+Functor f =&gt;
+(point1 -&gt; f point2)
+-&gt; Cone r point1 edge -&gt; f (Cone r point2 edge)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Cone.html#apex"><span class="hs-identifier hs-var">apex</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-57"></span><span>      </span><span class="hs-comment">-- we have to include the bounding box of the apex since toConvexPolygonIn</span><span>
+</span><span id="line-58"></span><span>      </span><span class="hs-comment">-- requires the apex to be in the box.</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679144761"><span id="local-6989586621679144762"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144761"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Fractional"><span class="hs-identifier hs-type">Fractional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144762"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144762"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-type">Show</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144762"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-61"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#DefaultIpeOut"><span class="hs-identifier hs-type">DefaultIpeOut</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144761"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-62"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144761"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144762"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-63"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#LineHalfPlaneIntersection"><span class="hs-identifier hs-type">LineHalfPlaneIntersection</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144762"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144761"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultIpeOut"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#DefaultIpeOut"><span class="hs-identifier hs-var">DefaultIpeOut</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#LineHalfPlaneIntersection"><span class="hs-identifier hs-type">LineHalfPlaneIntersection</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144762"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144761"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679145166"><span class="annot"><span class="annottext">defIO :: IpeOut
+  (LineHalfPlaneIntersection r line)
+  (DefaultIpeOut (LineHalfPlaneIntersection r line))
+  (NumType (LineHalfPlaneIntersection r line))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var hs-var hs-var">defIO</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#Line_x_HalfPlane_Line"><span class="hs-identifier hs-type">Line_x_HalfPlane_Line</span></a></span><span> </span><span id="local-6989586621679145168"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679145168"><span class="hs-identifier hs-var">line</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut line (DefaultIpeOut line) (NumType line)
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679145168"><span class="hs-identifier hs-var">line</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#Line_x_HalfPlane_HalfLine"><span class="hs-identifier hs-type">Line_x_HalfPlane_HalfLine</span></a></span><span> </span><span id="local-6989586621679145170"><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679145170"><span class="hs-identifier hs-var">hl</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut
+  (HalfLine (Point 2 r))
+  (DefaultIpeOut (HalfLine (Point 2 r)))
+  (NumType (HalfLine (Point 2 r)))
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679145170"><span class="hs-identifier hs-var">hl</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679144777"><span id="local-6989586621679144778"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span>
+</span><span id="line-70"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-type">BoundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Class.html#HalfPlane_"><span class="hs-identifier hs-type">HalfPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-72"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Fractional"><span class="hs-identifier hs-type">Fractional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-73"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-type">Show</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-74"></span><span>         </span><span class="hs-comment">-- , DefaultIpeOut halfPlane ~ Path</span><span>
+</span><span id="line-75"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-76"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-77"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-type">BoundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-78"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-type">BoundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#~"><span class="hs-operator hs-type">~</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-79"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#HasDefaultIpeOut"><span class="hs-identifier hs-type">HasDefaultIpeOut</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#HalfPlaneIntersection"><span class="hs-identifier hs-type">HalfPlaneIntersection</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultIpeOut"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#DefaultIpeOut"><span class="hs-identifier hs-var">DefaultIpeOut</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#HalfPlaneIntersection"><span class="hs-identifier hs-type">HalfPlaneIntersection</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144778"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679144777"><span class="hs-identifier hs-type">halfPlane</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.Content.html#Group"><span class="hs-identifier hs-type">Group</span></a></span><span>
+</span><span id="line-81"></span><span>  </span><span id="local-6989586621679145205"><span class="annot"><span class="annottext">defIO :: IpeOut
+  (HalfPlaneIntersection r halfPlane)
+  (DefaultIpeOut (HalfPlaneIntersection r halfPlane))
+  (NumType (HalfPlaneIntersection r halfPlane))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var hs-var hs-var">defIO</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#HalfPlane_x_HalfPlane_Line"><span class="hs-identifier hs-type">HalfPlane_x_HalfPlane_Line</span></a></span><span> </span><span id="local-6989586621679145207"><span class="annot"><span class="annottext">BoundingHyperPlane halfPlane 2 r
+</span><a href="#local-6989586621679145207"><span class="hs-identifier hs-var">line</span></a></span></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">IpeObject' (DefaultIpeOut (BoundingHyperPlane halfPlane 2 r)) r
+-&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' (DefaultIpeOut (BoundingHyperPlane halfPlane 2 r)) r
+ -&gt; IpeObject r)
+-&gt; IpeObject' (DefaultIpeOut (BoundingHyperPlane halfPlane 2 r)) r
+-&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut
+  (BoundingHyperPlane halfPlane 2 r)
+  (DefaultIpeOut (BoundingHyperPlane halfPlane 2 r))
+  (NumType (BoundingHyperPlane halfPlane 2 r))
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">BoundingHyperPlane halfPlane 2 r
+</span><a href="#local-6989586621679145207"><span class="hs-identifier hs-var">line</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-83"></span><span>    </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#HalfPlane_x_HalfPlane_Slab"><span class="hs-identifier hs-type">HalfPlane_x_HalfPlane_Slab</span></a></span><span> </span><span id="local-6989586621679145209"><span class="annot"><span class="annottext">Slab r halfPlane
+</span><a href="#local-6989586621679145209"><span class="hs-identifier hs-var">slab</span></a></span></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">IpeObject' Group r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' Group r -&gt; IpeObject r)
+-&gt; IpeObject' Group r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut
+  (Slab r halfPlane)
+  (DefaultIpeOut (Slab r halfPlane))
+  (NumType (Slab r halfPlane))
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">Slab r halfPlane
+</span><a href="#local-6989586621679145209"><span class="hs-identifier hs-var">slab</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#HalfPlane_x_HalfPlane_Cone"><span class="hs-identifier hs-type">HalfPlane_x_HalfPlane_Cone</span></a></span><span> </span><span id="local-6989586621679145211"><span class="annot"><span class="annottext">Cone r (Point 2 r) halfPlane
+</span><a href="#local-6989586621679145211"><span class="hs-identifier hs-var">cone</span></a></span></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">IpeObject' Group r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' Group r -&gt; IpeObject r)
+-&gt; IpeObject' Group r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut
+  (Cone r (Point 2 r) halfPlane)
+  (DefaultIpeOut (Cone r (Point 2 r) halfPlane))
+  (NumType (Cone r (Point 2 r) halfPlane))
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">Cone r (Point 2 r) halfPlane
+</span><a href="#local-6989586621679145211"><span class="hs-identifier hs-var">cone</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-85"></span><span>    </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.HalfSpace.Intersection.html#HalfPlane_x_HalfPlane_HalfPlane"><span class="hs-identifier hs-type">HalfPlane_x_HalfPlane_HalfPlane</span></a></span><span> </span><span id="local-6989586621679145213"><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679145213"><span class="hs-identifier hs-var">halfPlane</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeOut [IpeObject r] Group r
+forall (f :: * -&gt; *) r.
+Foldable f =&gt;
+IpeOut (f (IpeObject r)) Group r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#ipeGroup"><span class="hs-identifier hs-var">ipeGroup</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">IpeObject' (DefaultIpeOut halfPlane) r -&gt; IpeObject r
+forall (i :: * -&gt; *) r. ToObject i =&gt; IpeObject' i r -&gt; IpeObject r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#iO"><span class="hs-identifier hs-var">iO</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeObject' (DefaultIpeOut halfPlane) r -&gt; IpeObject r)
+-&gt; IpeObject' (DefaultIpeOut halfPlane) r -&gt; IpeObject r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">IpeOut halfPlane (DefaultIpeOut halfPlane) (NumType halfPlane)
+forall g.
+HasDefaultIpeOut g =&gt;
+IpeOut g (DefaultIpeOut g) (NumType g)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-ipe-1.0.0.0/doc/html/hgeometry-ipe/src/Ipe.IpeOut.html#defIO"><span class="hs-identifier hs-var">defIO</span></a></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679145213"><span class="hs-identifier hs-var">halfPlane</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-86"></span></pre></body></html>

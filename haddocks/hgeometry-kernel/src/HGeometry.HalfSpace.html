@@ -13,11 +13,121 @@
 </span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html"><span class="hs-identifier">HGeometry.HalfSpace.Class</span></a></span><span>
 </span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Type.html"><span class="hs-identifier">HGeometry.HalfSpace.Type</span></a></span><span>
 </span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Intersection.html"><span class="hs-identifier">HGeometry.HalfSpace.Intersection</span></a></span><span>
-</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-17"></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html"><span class="hs-identifier">HGeometry.HalfSpace.Class</span></a></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Type.html"><span class="hs-identifier">HGeometry.HalfSpace.Type</span></a></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Intersection.html"><span class="hs-identifier">HGeometry.HalfSpace.Intersection</span></a></span><span>
-</span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-23"></span></pre></body></html>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#leftBoundingVector"><span class="hs-identifier">leftBoundingVector</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#rightBoundingVector"><span class="hs-identifier">rightBoundingVector</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html"><span class="hs-identifier">HGeometry.HalfSpace.Class</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Type.html"><span class="hs-identifier">HGeometry.HalfSpace.Type</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Intersection.html"><span class="hs-identifier">HGeometry.HalfSpace.Intersection</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- | given a point a on the bounding hyperplane; compute a vector</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- pointing in the direction of the bounding line so that the</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- halfspace is to its left.</span><span>
+</span><span id="line-33"></span><span id="local-6989586621679500529"><span id="local-6989586621679500530"><span class="annot"><a href="HGeometry.HalfSpace.html#leftBoundingVector"><span class="hs-identifier hs-type">leftBoundingVector</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#HalfPlane_"><span class="hs-identifier hs-type">HalfPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500529"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500530"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-34"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500530"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#Num"><span class="hs-identifier hs-type">Num</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500530"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-35"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500530"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679500529"><span class="hs-identifier hs-type">halfPlane</span></a></span><span>
+</span><span id="line-36"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Intersection.html#GetDirection"><span class="hs-identifier hs-type">GetDirection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-type">BoundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500529"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500530"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>                           </span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>                        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500530"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679500529"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500530"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-39"></span><span id="leftBoundingVector"><span class="annot"><span class="annottext">leftBoundingVector :: forall halfPlane r.
+(HalfPlane_ halfPlane r, Ord r, Num r,
+ HasIntersectionWith (Point 2 r) halfPlane,
+ GetDirection (BoundingHyperPlane halfPlane 2 r)) =&gt;
+Point 2 r -&gt; halfPlane -&gt; Vector 2 r
+</span><a href="HGeometry.HalfSpace.html#leftBoundingVector"><span class="hs-identifier hs-var hs-var">leftBoundingVector</span></a></span></span><span> </span><span id="local-6989586621679500632"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679500632"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679500633"><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679500633"><span class="hs-identifier hs-var">h'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679500634"><span class="annot"><span class="annottext">l :: BoundingHyperPlane halfPlane 2 r
+</span><a href="#local-6989586621679500634"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679500633"><span class="hs-identifier hs-var">h'</span></a></span><span class="annot"><span class="annottext">halfPlane
+-&gt; Getting
+     (BoundingHyperPlane halfPlane 2 r)
+     halfPlane
+     (BoundingHyperPlane halfPlane 2 r)
+-&gt; BoundingHyperPlane halfPlane 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-fd1a000e5c703b247276cab71c381763567eb913f3ec3d76c2064d78512cbab7/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+  (BoundingHyperPlane halfPlane 2 r)
+  halfPlane
+  (BoundingHyperPlane halfPlane 2 r)
+forall halfSpace (d :: Nat) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' halfPlane (BoundingHyperPlane halfPlane 2 r)
+</span><a href="HGeometry.HalfSpace.Class.html#boundingHyperPlane"><span class="hs-identifier hs-var">boundingHyperPlane</span></a></span><span>
+</span><span id="line-40"></span><span>                              </span><span id="local-6989586621679500637"><span class="annot"><span class="annottext">v :: Vector 2 r
+</span><a href="#local-6989586621679500637"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-type">Vector2</span></a></span><span> </span><span id="local-6989586621679500639"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500639"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679500640"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500640"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BoundingHyperPlane halfPlane 2 r -&gt; Vector 2 r
+forall line r (d :: Nat).
+(GetDirection line, r ~ NumType line, d ~ Dimension line) =&gt;
+line -&gt; Vector d r
+forall r (d :: Nat).
+(r ~ NumType (BoundingHyperPlane halfPlane 2 r),
+ d ~ Dimension (BoundingHyperPlane halfPlane 2 r)) =&gt;
+BoundingHyperPlane halfPlane 2 r -&gt; Vector d r
+</span><a href="HGeometry.HalfSpace.Intersection.html#inLineVector"><span class="hs-identifier hs-var">inLineVector</span></a></span><span> </span><span class="annot"><span class="annottext">BoundingHyperPlane halfPlane 2 r
+</span><a href="#local-6989586621679500634"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-41"></span><span>                              </span><span id="local-6989586621679500642"><span class="annot"><span class="annottext">w :: Vector 2 r
+</span><a href="#local-6989586621679500642"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500640"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500639"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-42"></span><span>                              </span><span class="hs-comment">-- perpendicular to v; pointing left</span><span>
+</span><span id="line-43"></span><span>                          </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679500632"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; Point 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#.%2B%5E"><span class="hs-operator hs-var">.+^</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679500642"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; halfPlane -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var">`intersects`</span></a></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><a href="#local-6989586621679500633"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679500637"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r
+forall r vector (d :: Nat).
+(Num r, Vector_ vector d r) =&gt;
+vector -&gt; vector
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Class.html#negated"><span class="hs-identifier hs-var">negated</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679500637"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-44"></span><span> </span><span class="hs-comment">-- it feels a bit silly we have to do this test instead of just looking</span><span>
+</span><span id="line-45"></span><span> </span><span class="hs-comment">-- at the sign of the halfplane, but alas.</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- | given a point a on the bounding hyperplane; compute a vector</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- pointing in the direction of the bounding line so that the</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- halfspace is to its right</span><span>
+</span><span id="line-50"></span><span id="local-6989586621679500646"><span id="local-6989586621679500647"><span class="annot"><a href="HGeometry.HalfSpace.html#rightBoundingVector"><span class="hs-identifier hs-type">rightBoundingVector</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#HalfPlane_"><span class="hs-identifier hs-type">HalfPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500646"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500647"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-51"></span><span>                         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-type">Ord</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500647"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Num.html#Num"><span class="hs-identifier hs-type">Num</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500647"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-52"></span><span>                         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500647"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679500646"><span class="hs-identifier hs-type">halfPlane</span></a></span><span>
+</span><span id="line-53"></span><span>                         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Intersection.html#GetDirection"><span class="hs-identifier hs-type">GetDirection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-type">BoundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500646"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500647"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                         </span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500647"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679500646"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679500647"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-56"></span><span id="rightBoundingVector"><span class="annot"><span class="annottext">rightBoundingVector :: forall halfPlane r.
+(HalfPlane_ halfPlane r, Ord r, Num r,
+ HasIntersectionWith (Point 2 r) halfPlane,
+ GetDirection (BoundingHyperPlane halfPlane 2 r)) =&gt;
+Point 2 r -&gt; halfPlane -&gt; Vector 2 r
+</span><a href="HGeometry.HalfSpace.html#rightBoundingVector"><span class="hs-identifier hs-var hs-var">rightBoundingVector</span></a></span></span><span> </span><span id="local-6989586621679500671"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679500671"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r
+forall r vector (d :: Nat).
+(Num r, Vector_ vector d r) =&gt;
+vector -&gt; vector
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Vector.Class.html#negated"><span class="hs-identifier hs-var">negated</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; Vector 2 r)
+-&gt; (halfPlane -&gt; Vector 2 r) -&gt; halfPlane -&gt; Vector 2 r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; halfPlane -&gt; Vector 2 r
+forall halfPlane r.
+(HalfPlane_ halfPlane r, Ord r, Num r,
+ HasIntersectionWith (Point 2 r) halfPlane,
+ GetDirection (BoundingHyperPlane halfPlane 2 r)) =&gt;
+Point 2 r -&gt; halfPlane -&gt; Vector 2 r
+</span><a href="HGeometry.HalfSpace.html#leftBoundingVector"><span class="hs-identifier hs-var">leftBoundingVector</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679500671"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-57"></span></pre></body></html>
