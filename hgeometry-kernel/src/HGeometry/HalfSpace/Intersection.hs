@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{- HLINT ignore "Use camelCase" -}
 module HGeometry.HalfSpace.Intersection
   ( HalfPlaneIntersection(..)
   , LineHalfPlaneIntersection(..)

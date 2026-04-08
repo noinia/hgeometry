@@ -460,10 +460,9 @@ drawAsConstraint         :: forall line r.
                             ( Fractional r, Real r, Ord r
                             , HyperPlane_ line 2 r
                             , IsIntersectableWith line (Rectangle (Point 2 r))
+                            , HasPickInteriorPoint line 2 r
                             , Intersection line (Rectangle (Point 2 r))
                               ~ Maybe (LineBoxIntersection 2 r)
-
-                            , Show r -- FIXME: drop this one
                             )
                          => IpeColor r
                          -> IpeOut (HalfPlaneF line) Group r
@@ -472,16 +471,15 @@ drawAsConstraint color h = ipeGroup [ iO $ defIO seg
                                     ]
   where
     l = h^.boundingHyperPlane
-    f = case h^.halfSpaceSign of
-          Positive -> negated
-          Negative -> id
+    f n' | pointInteriorTo l .+^ n' `intersects` h = n'
+         | otherwise                               = negated n'
     n = f $ normalVector l
 
     width' = let q :: Double
                  q = realToFrac $ quadrance n
              in constraintDrawingWidth / realToFrac (sqrt q)
 
-    poly = fromMaybe (error "drawAsConstraint: absurd" $ show (seg,seg'))
+    poly = fromMaybe (error "drawAsConstraint: absurd")
          . fromPoints @(SimplePolygon (Point 2 r))
          . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
 
