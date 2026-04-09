@@ -147,7 +147,7 @@ common quickcheck-setup
 --------------------------------------------------------------------------------
 -- * BAPC 2012 Gunslinger
 
-executable hgeometry-bapc2012-gunslinger
+executable bapc2012-gunslinger
   import:         setup
   hs-source-dirs: bapc2012
   main-is:        Gunslinger.hs
@@ -155,7 +155,7 @@ executable hgeometry-bapc2012-gunslinger
 --------------------------------------------------------------------------------
 -- * BAPC 2014 Armybase
 
-executable hgeometry-bapc2014-armybase
+executable bapc2014-armybase
   import:         setup
   hs-source-dirs: bapc2014
   main-is:        Armybase.lhs
@@ -163,7 +163,7 @@ executable hgeometry-bapc2014-armybase
 --------------------------------------------------------------------------------
 -- * ConvexHull
 
-executable hgeometry-convexHull
+executable convexHull
   import:         setup, miso-setup, options
   hs-source-dirs: convexHull
   main-is:        Main.hs
@@ -173,32 +173,38 @@ executable hgeometry-convexHull
 --------------------------------------------------------------------------------
 -- * LineSegment Intersect
 
-executable hgeometry-lineSegmentIntersection
+executable lineSegmentIntersection
   import:         setup, miso-setup, options
   hs-source-dirs: lineSegmentIntersection
   main-is:        Main.hs
+  Other-modules:
+    App
 
 --------------------------------------------------------------------------------
 -- * Duality
 
-executable hgeometry-duality
+executable duality
   import:         setup, miso-setup, options
   hs-source-dirs: duality
   main-is:        Main.hs
+  Other-modules:
+    App
 
 
 --------------------------------------------------------------------------------
 -- * Voronoi Diagram
 
-executable hgeometry-voronoi
+executable voronoi
   import:         setup, miso-setup, options
   hs-source-dirs: voronoiDiagram
   main-is:        Main.hs
+  Other-modules:
+    App
 
 --------------------------------------------------------------------------------
 -- * Polygon Triangulation
 
--- executable hgeometry-polygonTriangulation
+-- executable polygonTriangulation
 --   import:         setup, miso-setup, options
 --   hs-source-dirs: polygonTriangulation
 --   main-is:        Main.hs
@@ -206,18 +212,21 @@ executable hgeometry-voronoi
 --------------------------------------------------------------------------------
 -- * Polyline Drawing
 
-executable hgeometry-polyLineDrawing
+executable polyLineDrawing
   import:         setup, miso-setup, options
   hs-source-dirs: polyLineDrawing
   main-is:        Main.hs
+  Other-modules:
+    App
+
   -- other-modules:
   --      Miso.Event.Extra
 
 --------------------------------------------------------------------------------
 -- * GeoJSON example
 
-executable hgeometry-geojson
-  import:         setup, miso-setup, options
+executable geojson
+  import:         setup
   hs-source-dirs: geojson
   main-is:        Main.hs
   other-modules:
@@ -227,8 +236,8 @@ executable hgeometry-geojson
 --------------------------------------------------------------------------------
 -- * Polygon Sampler example
 
-executable hgeometry-sampler
-  import:         setup, miso-setup, options
+executable sampler
+  import:         setup
   hs-source-dirs: sampler
   main-is:        Main.hs
   other-modules:
@@ -239,7 +248,7 @@ executable hgeometry-sampler
 -- * Raytracer example
 
 
-executable hgeometry-raytracer
+executable raytracer
   import:         setup
   if arch(wasm32)
      buildable: False
@@ -263,7 +272,7 @@ executable hgeometry-raytracer
 --------------------------------------------------------------------------------
 -- * Polyline Drawing
 
--- executable hgeometry-skia
+-- executable skia
 --   import:         setup, miso-setup
 --   hs-source-dirs: skia
 --   main-is:        Main.hs
@@ -301,8 +310,8 @@ executable hgeometry-raytracer
 -- this needs updating to miso 1.9
 
 --------------------------------------------------------------------------------
-executable hgeometry-draw
-  import:         setup, miso-setup, options
+executable draw
+  import:         setup
   hs-source-dirs: draw
   main-is:        Main.hs
   -- other-modules:
@@ -311,7 +320,7 @@ executable hgeometry-draw
 --------------------------------------------------------------------------------
 -- * Triangulate World
 
-executable hgeometry-triangulateWorld
+executable triangulateWorld
   import:         setup
   hs-source-dirs: triangulateWorld
   main-is:        Main.hs
@@ -322,8 +331,8 @@ executable hgeometry-triangulateWorld
 --------------------------------------------------------------------------------
 
 -- Renders a 3D model of the lower envelope of a set of planes
-executable hgeometry-lowerEnv
-  import:         setup, miso-setup, options
+executable lowerEnv
+  import:         setup
   hs-source-dirs: lowerEnv
   main-is:        Main.hs
   build-depends:
@@ -335,7 +344,7 @@ executable hgeometry-lowerEnv
 --------------------------------------------------------------------------------
 
 -- Renders a 3D model of the lower envelope of a set of planes
-executable hgeometry-3dviewer
+executable 3dviewer
   import:         setup, miso-setup, options
   hs-source-dirs: 3dviewer
   main-is:        Main.hs

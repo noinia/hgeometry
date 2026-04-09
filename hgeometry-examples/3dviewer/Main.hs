@@ -9,8 +9,11 @@ import Data.Foldable (toList)
 import HGeometry.Number.Real.Rational
 import HGeometry
 import HGeometry.Ext
-import Language.Javascript.JSaddle.Warp qualified as JSaddle
 import Miso.Html
+import           HGeometry.Miso.OrphanInstances ()
+import           HGeometry.Miso.Svg
+import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates)
+import qualified HGeometry.Miso.Svg.Canvas as Canvas
 
 --------------------------------------------------------------------------------
 
@@ -33,23 +36,17 @@ data Action = Action ()
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = JSaddle.run 8080 $
-         startComponent defaultEvents $
-            Component
-                { model         = initialModel
-                , update        = updateModel
-                , view          = viewModel
-                , subs          = mempty
-                , styles        = []
-                , initialAction = Nothing
-                , mountPoint    = Nothing
-                , logLevel      = Off
-                }
+main = startApp (Canvas.withCanvasEvents defaultEvents) $
+         Miso.component initialModel (wrap updateModel) viewModel
+
+wrap       :: (model -> action -> Effect parent model action') -> action
+           -> Effect parent model action'
+wrap f act = get >>= flip f act
 
 --------------------------------------------------------------------------------
 
--- updateModel :: Action -> Effect parent Model Action
-updateModel _ = pure ()
+updateModel     :: Model -> Action -> Effect parent Model Action
+updateModel _ _ = pure ()
 
 --------------------------------------------------------------------------------
 

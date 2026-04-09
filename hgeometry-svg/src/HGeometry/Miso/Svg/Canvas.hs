@@ -190,7 +190,7 @@ withCanvasEvents = ((touchEvents <> pointerEvents <> custom) <>)
   where
     custom = Map.fromList
              [ ("contextmenu" , CAPTURE)
-             , ("pointermove",  CAPTURE)
+             , ("pointermove",  BUBBLE)
              ]
 
 -- -- | Subscription needed for the iCanvas. In particular, captures the

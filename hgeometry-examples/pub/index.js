@@ -11,7 +11,11 @@ const fds = [
 const options = { debug: false };
 const wasi = new WASI(args, env, fds, options);
 
-const wasmDemoName = "hgeometry-convexHull";
+const urlParams = new URLSearchParams(window.location.search);
+const name = urlParams.get('demo');
+const wasmDemoName = name ? name : "convexHull";
+
+
 const wasmBinary   = wasmDemoName + ".wasm";
 
 const instance_exports = {};

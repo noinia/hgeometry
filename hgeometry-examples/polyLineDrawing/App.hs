@@ -1,0 +1,469 @@
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Main
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Polyline drawing demo
+--
+--------------------------------------------------------------------------------
+module App (main) where
+
+-- import           Control.Monad.IO.Class
+import           Control.Lens hiding (view, element)
+import           Data.Default
+import qualified Data.IntMap as IntMap
+import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import qualified Data.Map as Map
+import           Data.Maybe (maybeToList)
+-- import qualified Data.Sequence as Sequence
+import           Data.Word
+import           GHC.TypeNats
+import           HGeometry.Ext
+import           HGeometry.Miso.OrphanInstances ()
+import           HGeometry.Miso.Svg
+import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates, dimensions)
+import qualified HGeometry.Miso.Svg.Canvas as Canvas
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Point
+import           HGeometry.PolyLine
+-- import           HGeometry.PolyLine.Simplification.DouglasPeucker
+import           HGeometry.Sequence.NonEmpty
+import           HGeometry.Vector
+import           Miso
+import           HGeometry.Miso.Event.Extra
+import           Miso.String (ToMisoString(..))
+import           Miso.Svg hiding (style_)
+import           Miso.Svg.Property
+import           Miso.CSS (style_)
+import           Miso.CSS qualified as CSS
+import           Miso.CSS.Color
+import           Miso.Html.Event (onTouchMove, onTouchEnd, onTouchStart)
+import           Miso.Html.Element hiding (style_)
+import           Miso.Html.Property as Prop
+import           Miso.Html qualified as Html
+import           Debug.Trace
+--------------------------------------------------------------------------------
+
+type R = RealNumber 5
+
+type PolyLine' r = PolyLineF ViewR1 (Point 2 r)
+
+data PartialPolyLine r = StartPoint (Point 2 r)
+                       | PartialPolyLine (PolyLine' r)
+                       deriving (Show,Eq)
+makePrisms ''PartialPolyLine
+
+instance ToMisoString r => Drawable (PartialPolyLine r) where
+  draw = \case
+    StartPoint s      -> draw s
+    PartialPolyLine p -> draw p
+
+
+data Mode = PolyLineMode | PenMode deriving (Show,Read,Eq)
+
+switchMode :: Mode -> Mode
+switchMode = \case
+  PolyLineMode -> PenMode
+  PenMode      -> PolyLineMode
+
+
+{-
+-- | default color presets in goodnotes
+colorPresets :: NonEmpty Color
+colorPresets = NonEmpty.fromList
+               [ RGB 0   0   0
+               , RGB 99  99  99
+               , RGB 155 155 155
+               , RGB 210 210 210
+               , RGB 252 252 252
+
+               , RGB 119 41  135 -- purple
+               , RGB 192 40  27 -- darkish red
+               , RGB 229 95  90  -- lightish red
+               , RGB 241 156 153
+               , RGB 232 158 66 -- orange
+
+               , RGB 53  121 246 -- blue
+               , RGB 28  68  138 -- darkblue
+               , RGB 49  113 86 -- darkgreen
+               , RGB 142 196 79 -- lightgreen
+               , RGB 254 255 149
+               ]
+-}
+
+defaultQuickColors :: Vector 4 Color
+defaultQuickColors = Vector4 black red' blue' green'
+  where
+    red'    = RGB 192 40  27
+    blue'   = RGB 53  121 246
+    green'  = RGB 49  113 86
+
+selectedColor :: Color
+selectedColor = RGB 205 205 205
+
+backgroundColor :: Color
+backgroundColor = RGB 246 246 246
+
+
+data Thickness = Thin | Normal | Thick deriving (Show,Read,Eq,Ord)
+
+toInt :: Thickness -> MisoString
+toInt = ms @Int . \case
+  Thin   -> 1
+  Normal -> 2
+  Thick  -> 3
+
+data PolyAttributes = PolyAttributes { _color      :: {-# UNPACK#-}  !Color
+                                     , _colorIndex :: {-# UNPACK #-} !Int
+                                     , _thickness  :: {-# UNPACK #-} !Thickness
+                                     } deriving (Show,Eq)
+makeLenses ''PolyAttributes
+
+instance Default PolyAttributes where
+  def = PolyAttributes { _color      = RGB 0   0   0
+                       , _colorIndex = 0
+                       , _thickness  = Normal
+                       }
+
+data Model = Model { _canvas       :: Canvas R
+                   , _polyLines    :: IntMap.IntMap (PolyLine' R :+ PolyAttributes)
+                   , _currentPoly  :: Maybe (PartialPolyLine R)
+                   , _mode         :: {-# UNPACK #-} !Mode
+                   , _currentAttrs :: !PolyAttributes
+                   , _quickColors  :: !(Vector 4 Color)
+                   } deriving (Eq,Show)
+makeLenses ''Model
+
+
+
+--------------------------------------------------------------------------------
+
+instance KnownNat p => ToMisoString (RealNumber p) where
+  toMisoString = toMisoString . toFixed
+
+----------------------------------------
+
+initialModel :: Model
+initialModel = Model { _canvas       = blankCanvas 400 400
+                     , _polyLines    = mempty
+                     , _currentPoly  = Nothing
+                     , _mode         = PenMode
+                     , _currentAttrs = def
+                     , _quickColors  = defaultQuickColors
+                     }
+
+--------------------------------------------------------------------------------
+
+
+data Action = CanvasAction !Canvas.InternalCanvasAction
+            | WindowResize !(Vector 2 Int)
+            | SwitchMode
+            | CanvasClicked
+            | CanvasRightClicked
+            | StartMouseDown
+            | StopMouseDown
+            | StartTouch
+            | TouchMove
+            | EndTouch
+            | MouseMove
+            | AddPoint
+            | AddPoly
+            | SelectColor {-# UNPACK #-}!Int {-# UNPACK #-}!Color
+            deriving (Show,Eq)
+
+windowDeltas :: Vector 2 Int
+windowDeltas = Vector2 50 200
+
+
+wrap       :: (model -> action -> Effect p model action') -> action -> Effect p model action'
+wrap f act = get >>= flip f act
+
+
+updateModel   :: Model -> Action -> Effect parent Model Action
+updateModel m = \case
+    CanvasAction ca    -> traceShow ("canvas act: ",ca) $
+      zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
+      -- m&canvas %%~ flip
+    WindowResize dims -> put $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
+    SwitchMode         -> put $ m&mode %~ switchMode
+    CanvasClicked      -> case m^.mode of
+                            PolyLineMode -> m <# pure AddPoint
+                            PenMode      -> put m
+    CanvasRightClicked -> case m^.mode of
+                            PolyLineMode -> m <# pure AddPoly
+                            PenMode      -> put m
+
+    StartMouseDown     -> startMouseDown
+    MouseMove          -> mouseMove
+    StopMouseDown      -> stopMouseDown
+
+    StartTouch         -> traceShow ("startTouch",m^.canvas.mouseCoordinates) startMouseDown
+    TouchMove          -> traceShow ("touchMove",m^.canvas.mouseCoordinates) mouseMove
+    EndTouch           -> traceShow ("endTouch",m^.canvas.mouseCoordinates) stopMouseDown
+
+    AddPoint           -> addPoint
+    AddPoly            -> addPoly
+    SelectColor i c    -> let setColor a = a&color      .~ c
+                                            &colorIndex .~ i
+                          in put $ m&currentAttrs     %~ setColor
+                                      &quickColors.ix i .~ c
+
+  where
+    startMouseDown = case m^.mode of
+        PolyLineMode -> put m
+        PenMode      -> put $ m&currentPoly .~ extend Nothing
+    mouseMove      = case m^.mode of
+        PolyLineMode -> put m
+        PenMode      -> put $ m&currentPoly %~ \mp -> case mp of
+                                                          Nothing -> Nothing
+                                                          Just _  -> extend mp
+    stopMouseDown  = case m^.mode of
+        PolyLineMode -> put m
+        PenMode      -> m <# pure AddPoly
+
+    extend = extendWith (m^.canvas.mouseCoordinates)
+    addPoint = put $ m&currentPoly %~ extend
+
+    addPoly  = put $ m&polyLines   %~ insert' (extend (m^.currentPoly))
+                        &currentPoly .~ Nothing
+
+    insert' = \case
+      Just (PartialPolyLine x) -> insertPoly (x :+ m^.currentAttrs)
+      _                        -> id
+
+
+
+-- | Extend the current partial polyline with the given point (if it is on the canvas.)
+extendWith          :: Eq r => Maybe (Point 2 r)
+                    -> Maybe (PartialPolyLine r) -> Maybe (PartialPolyLine r)
+extendWith mp state = case mp of
+    Nothing -> state
+    Just p  -> Just $ case state of
+      Nothing                   -> StartPoint p
+      Just (StartPoint s)       -> PartialPolyLine . polyLineFromPoints $ s :| [p]
+      Just (PartialPolyLine pl) -> PartialPolyLine $ extendPolyLine pl p
+
+extendPolyLine      :: Eq r => PolyLine' r -> Point 2 r -> PolyLine' r
+extendPolyLine pl p = pl&_PolyLineF %~ \vs@(_ :>> q) -> if p /= q then vs |>> p else vs
+
+-- | Helper to insert a new item into an IntMap
+insertPoly     :: p -> IntMap.IntMap p -> IntMap.IntMap p
+insertPoly p m = let k = case IntMap.lookupMax m of
+                            Nothing    -> 0
+                            Just (i,_) -> succ i
+                 in IntMap.insert k p m
+
+--------------------------------------------------------------------------------
+
+viewModel  :: Model -> View Model Action
+viewModel m =
+    div_ [ style_ [ CSS.display       "flex"
+                  , CSS.flexDirection "column"
+                  ]
+         ]
+         [ theToolbar m
+         , theCanvas m
+         , iconLink
+         ]
+
+singleton :: a -> [a]
+singleton = (:[])
+
+buttonGroup         :: Foldable f
+                    => f (MisoString, MisoString) -> View model action
+buttonGroup buttons =
+    div_ [ ]
+         (foldMap (singleton .  button) buttons)
+  where
+    button (t,icon') =
+      button_ [ class_       "button"
+              , Prop.title_  t
+              ]
+              [ icon icon' ]
+
+theToolbar   :: Model -> View Model Action
+theToolbar m =
+      div_ [ id_    "toolBar"
+           , style_ [ CSS.border  "1px solid black"
+                    , CSS.display "flex"
+                    ]
+           ]
+           [ tools
+           , penProperties
+           , colorSelectors
+           ]
+  where
+    tools =
+      div_ [ style_ [ CSS.width "30%"
+                    , CSS.margin "auto"
+                    ]
+           ]
+           [ buttonGroup [ ("pen", "fas fa-pencil-alt")
+                         , ("poly", "fas fa-pencil-ruler")
+                         , ("eraser", "fas fa-eraser")
+                         ]
+           ]
+    penProperties =
+      div_ [ style_ [ CSS.width "30%"
+                    , CSS.margin "auto"
+                    ]
+           ]
+           [ toolGroup [ tool "pen-width"
+                       ]
+           ]
+    colorSelectors =
+      div_ [ style_ [ CSS.width "30%"
+                    , CSS.margin "auto"
+                    ]
+           ]
+           [ toolGroup $ colorPickers (m^.currentAttrs.color)
+                                      (m^.currentAttrs.colorIndex) (m^.quickColors)
+           ]
+
+    toolGroup = div_ [ ]
+
+    tool t = button_ [ class_ "button" ]
+                     [ text t ]
+
+--------------------------------------------------------------------------------
+
+colorPickers            :: FoldableWithIndex Int f => Color -> Int -> f Color
+                        -> [View Model Action]
+colorPickers selected i = ifoldMap (\j c -> [colorPickerButton (i == j && selected == c) j c])
+
+colorPickerButton              :: Bool -> Int -> Color -> View Model Action
+colorPickerButton selected i c =
+  button_ [ style_ [ CSS.backgroundColor c
+                   , CSS.width           (ms size <> "px")
+                   , CSS.height          (ms size <> "px")
+                   , CSS.display         "display"
+                   , CSS.margin          "3px"
+                   , CSS.cursor          "pointer"
+                   , CSS.border          "none"
+                   , CSS.borderRadius    (ms (size `div` 2) <> "px")
+                   , "outline" =:        (if selected then "3px solid " <>
+                                                               renderColor selectedColor
+                                                      else "none")
+                   ]
+          , onClick $ SelectColor i c
+          ] []
+  where
+    size = 30 :: Int
+
+
+--------------------------------------------------------------------------------
+
+
+theCanvas   :: Model -> View Model Action
+theCanvas m =
+      div_ [ id_ "canvas"
+           , style_ [ "margin-left"  =: "auto"
+                    , "margin-right" =: "auto"
+                    ]
+           ]
+           [ either CanvasAction id <$>
+             Canvas.svgCanvas_ (m^.canvas)
+                               [ onClick      CanvasClicked
+                               , onRightClick CanvasRightClicked
+                               , onMouseDown  StartMouseDown
+                               , onMouseUp    StopMouseDown
+                               , onTouchStart StartTouch
+                               , onTouchMove  TouchMove
+                               , onTouchEnd   EndTouch
+                               , onMouseMove  MouseMove
+                               , style_ [ CSS.border          "1px solid black"
+                                        , CSS.backgroundColor white
+                                        ]
+
+                               ]
+                               canvasBody
+           -- ,  div_ []
+           --         (colorPickers (m^.currentAttrs.color)
+           --                       (m^.currentAttrs.colorIndex) (m^.quickColors)
+           --         )
+           , div_ [ onClick SwitchMode ]
+                  [ text . ms . show $ m^.mode ]
+           , div_ []
+                  [text . ms . show $ m^.canvas.mouseCoordinates ]
+           , div_ []
+                  [text . ms . show $ m^.currentPoly ]
+           , Html.style_ [] $ unlines'
+                [ "html { overscroll-behavior: none; }" -- prevent janky scrolling on ipad
+                , "html body { overflow: hidden; }"     -- more weird scrolling prevent
+                , "body { background-color: " <> renderColor backgroundColor <> ";}"
+                ]
+
+           ]
+  where
+    unlines' = mconcat . List.intersperse "\n"
+
+    canvasBody = [ g_ [] [ draw v [ stroke_        $ renderColor (m^.currentAttrs.color)
+                                  , strokeLinecap_ "round"
+                                  , strokeWidth_   $ toInt (m^.currentAttrs.thickness)
+                                  ]
+                         ]
+                 | v <- currentPoly'
+                 ]
+              <> [ g_ [] [ draw p [ stroke_        $ renderColor (ats^.color)
+                                  , strokeLinecap_ "round"
+                                  , strokeWidth_   $ toInt (ats^.thickness)
+                                  ]
+                         -- , draw (douglasPeucker 20 p) [ stroke_ "gray"]
+                         ]
+                 | (_,p :+ ats) <- m^..polyLines.ifolded.withIndex ]
+
+              -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
+
+    currentPoly' = case m^.currentPoly of
+                     Nothing     -> []
+                     cp@(Just _) -> maybeToList $ extendWith (m^.canvas.mouseCoordinates) cp
+
+--------------------------------------------------------------------------------
+
+instance ToMisoString Word8 where
+  toMisoString = toMisoString @Int . fromIntegral
+
+--------------------------------------------------------------------------------
+
+main :: IO ()
+main = startApp (Canvas.withCanvasEvents defaultEvents) $
+         (Miso.component initialModel (wrap updateModel) viewModel)
+           { subs          = [ windowDimensionsSub WindowResize
+                             ]
+            }
+
+
+
+-- textAt                    :: ToMisoString r
+--                           => Point 2 r
+--                           -> [Attribute action] -> MisoString -> View model action
+-- textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
+--                                   , y_ $ ms y
+--                                   ] <> ats
+--                                   ) [text t]
+
+
+-- | Subscription that gets the window dimensions.
+windowDimensionsSub   :: (Vector 2 Int -> action) -> Sub action
+windowDimensionsSub f = windowCoordsSub (\(h,w) -> f $ Vector2 (truncate w) (truncate h))
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Produce an icon
+icon    :: MisoString -> View model action
+icon cs = i_ [ class_ cs, textProp "aria-hidden" "true"] []
+
+-- | Produce a linked icon
+iconLink :: View model action
+iconLink = Html.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/all.js"
+                        , defer_ True
+                        ] mempty
