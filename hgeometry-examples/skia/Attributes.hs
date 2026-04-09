@@ -23,8 +23,8 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 import           GHC.TypeNats
-import           GHCJS.Marshal
-import           GHCJS.Types
+-- import           GHCJS.Marshal
+-- import           GHCJS.Types
 import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Interval
@@ -36,18 +36,17 @@ import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
 import           HGeometry.Viewport (ZoomConfig(..), currentLevel, range)
 import           HGeometry.VoronoiDiagram
-import qualified Language.Javascript.JSaddle as JSAddle
-import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
-import qualified Language.Javascript.JSaddle.Object as JS
+-- import qualified Language.Javascript.JSaddle as JSAddle
+-- import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
+-- import qualified Language.Javascript.JSaddle.Object as JS
 import           Layers
 import           Miso
 import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
 import           Miso.Bulma.Generic
-import qualified Miso.Bulma.JSAddle as Run
+-- import qualified Miso.Bulma.JSAddle as Run
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Modes
-import           Options
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRefs, surfaceRef)
 import qualified SkiaCanvas.CanvasKit as CanvasKit

@@ -39,6 +39,7 @@ import           Miso.Html.Event ( onPointerLeave
                                  , onPointerMove
                                  , onPointerEnter
                                  )
+
 --------------------------------------------------------------------------------
 -- *A Canvas
 
@@ -189,6 +190,7 @@ withCanvasEvents = ((touchEvents <> pointerEvents <> custom) <>)
   where
     custom = Map.fromList
              [ ("contextmenu" , CAPTURE)
+             , ("pointermove",  BUBBLE)
              ]
 
 -- -- | Subscription needed for the iCanvas. In particular, captures the

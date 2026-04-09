@@ -1,6 +1,8 @@
-Write-ghc-environment-files: always
-tests: True
-benchmarks: True
+-- with-compiler:  wasm32-wasi-ghc
+-- with-hc-pkg: wasm32-wasi-ghc-pkg
+-- wasm32-wasi-ghc-pkg
+tests: False
+benchmarks: False
 -- multi-repl: True
 packages:
   hgeometry-combinatorial
@@ -16,25 +18,7 @@ packages:
   hgeometry-geojson
   hgeometry
   hgeometry-examples
-  -- ../hiraffe
-  -- ../miso-bulma
-  -- ../approximate-equality
-
--- ghc-options: -Werror
-
--- allow-newer:
-    -- pretty:deepseq,
-    -- pretty:dlist,
-    -- geojson:deepseq,
-    -- geojson:text,
-    -- geojson:containers,
-    -- servant:base,
-    -- websockets:containers,
-    -- websockets:random,
-    -- http-api-data:base,
-    -- wavefront:base,
-    -- wavefront:filepath,
-    -- wavefront:text,
+  ../haskell-floating-point/rounded-hw
 
 source-repository-package
     type: git
@@ -57,3 +41,9 @@ source-repository-package
     type: git
     location: https://github.com/noinia/approximate-equality
     tag: 02fc43ca97dd66940dc3d4ac61ecda7888ec252e
+
+package hexpat
+    flags: +bundle
+
+package rounded-hw
+    flags: +pure-hs

@@ -23,25 +23,21 @@ module SkiaCanvas.CanvasKit.Core
 
   ) where
 
-import           Control.Lens
-import           Control.Monad (void)
-import           Data.Functor.Apply (Apply(..))
-import           Data.Text (Text)
-import           GHCJS.Marshal (ToJSVal(..))
-import           GHCJS.Types
-import qualified Language.Javascript.JSaddle as JSAddle
-import           Language.Javascript.JSaddle (JSM)
-import           Language.Javascript.JSaddle.Object (js0, js1)
-import qualified Language.Javascript.JSaddle.Object as JS
-import           Miso
-import           Miso.String (MisoString)
+import Control.Lens
+import Control.Monad (void)
+import Data.Functor.Apply (Apply(..))
+import Data.Text (Text)
+import Data.Coerce
+import Miso hiding (requestAnimationFrame, flush)
+import Miso.String (MisoString)
+import Miso.FFI hiding (flush)
 
 --------------------------------------------------------------------------------
 -- * The CanvasKit object
 
  -- ^ the CanvasKit object
 newtype CanvasKit = MkCanvasKit { ckAsJSVal :: JSVal}
-  deriving newtype (JS.MakeObject,ToJSVal)
+  deriving newtype (ToJSVal, ToObject)
 
 instance Show CanvasKit where
   show _ = "CanvasKitObj"
@@ -54,7 +50,7 @@ instance Eq CanvasKit where
 
  -- ^ the SurfaceRef object
 newtype SurfaceRef = MkSurfaceRef JSVal
-  deriving newtype (JS.MakeObject, ToJSVal)
+  deriving newtype (ToJSVal, ToObject)
 
 instance Show SurfaceRef where
   show _ = "SurfaceObj"
@@ -63,18 +59,20 @@ instance Eq SurfaceRef where
   -- we should only have one
 
 -- | Flush drawing to the survace
-flush         :: SurfaceRef -> JSM ()
-flush surface = void $ surface ^.js0 ("flush" :: MisoString)
+flush         :: SurfaceRef -> IO ()
+flush surface = void $ callFunction (coerce surface) ("flush" :: MisoString) ()
 
 --------------------------------------------------------------------------------
 -- * SkCanvasRef
 
 -- | Types that can act as a SkCanvas
-class (ToJSVal skCanvas, JS.MakeObject skCanvas) => SkCanvas_ skCanvas
+class ( ToJSVal skCanvas, ToObject skCanvas
+      , Coercible skCanvas JSVal
+      ) => SkCanvas_ skCanvas
 
  -- | A reference to the SkCanvas
 newtype SkCanvasRef = MkSkCanvasRef JSVal
-  deriving newtype (JS.MakeObject, ToJSVal)
+  deriving newtype (ToJSVal, ToObject, ToArgs)
 
 instance Show SkCanvasRef where
   show _ = "SkCanvasRef"
@@ -89,46 +87,40 @@ instance SkCanvas_ SkCanvasRef
 -- | Calls requestAnimationFrame
 requestAnimationFrame                        :: CanvasKit
                                              -> SurfaceRef
-                                             -> (CanvasKit -> SkCanvasRef -> JSM ())
+                                             -> (CanvasKit -> SkCanvasRef -> IO ())
                                              -- ^ the drawing function
-                                             -> JSM ()
+                                             -> IO ()
 requestAnimationFrame canvasKit surface draw = do
-    runDraw' <- JS.function draw'
-    _        <- surface ^.js1 ("requestAnimationFrame" :: MisoString) runDraw'
-    pure ()
-  where
-    draw'     :: JS.JSCallAsFunction
-    draw' _ _ = \case
-      [skCanvasRefJSVal] -> draw canvasKit (MkSkCanvasRef skCanvasRefJSVal)
-      _                  -> pure () -- TODO: again, this should probably be an error
+    runDraw' <- syncCallback1 $ draw (coerce canvasKit) . MkSkCanvasRef
+    void $ callFunction (coerce surface) ("requestAnimationFrame" :: MisoString) runDraw'
 
 --------------------------------------------------------------------------------
 
 -- | An input color, in Skia's setup
 newtype SkInputColor = SkInputColor JSVal
-  deriving (ToJSVal)
+  deriving newtype (ToJSVal,ToArgs)
 
 
 
 -- | Clear the canvas with white
-clear                  :: SkCanvas_ skCanvas => CanvasKit -> skCanvas -> JSM ()
+clear                  :: SkCanvas_ skCanvas => CanvasKit -> skCanvas -> IO ()
 clear canvasKit canvas = do white <- mkWhite canvasKit
                             clearWith canvas white
 
 -- | Clear with a given color
-clearWith              :: SkCanvas_ skCanvas => skCanvas -> SkInputColor -> JSM ()
-clearWith canvas color = void $ canvas ^.js1 ("clear" :: MisoString) color
+clearWith              :: SkCanvas_ skCanvas => skCanvas -> SkInputColor -> IO ()
+clearWith canvas color = void $ callFunction (coerce canvas) "clear" color
 
-
-mkWhite           :: CanvasKit -> JSM SkInputColor
-mkWhite canvasKit = SkInputColor <$> canvasKit JS.! ("WHITE" :: MisoString)
+mkWhite           :: CanvasKit -> IO SkInputColor
+mkWhite canvasKit = SkInputColor <$> getProperty (coerce canvasKit) "WHITE"
 
 
 -- | Save the canvas using the given codec to a base64 encoded string.
-toDataURL              :: SkCanvas_ skCanvas => skCanvas -> Codec -> JSM Base64EncodedString
+toDataURL              :: SkCanvas_ skCanvas => skCanvas -> Codec -> IO Base64EncodedString
 toDataURL canvas codec = do
-    jsValStr <- canvas ^.js1 ("toDataURL" :: MisoString) (codecStr :: MisoString)
-    JSAddle.fromJSValUnchecked jsValStr
+    jsValStr <- callFunction (coerce canvas) ("toDataURL" :: MisoString)
+                                             (codecStr :: MisoString)
+    fromJSValUnchecked jsValStr
   where
     codecStr = case codec of
                  PngCodec -> "image/png"
@@ -141,12 +133,14 @@ data Codec = PngCodec | JpgCodec
 --------------------------------------------------------------------------------
 
 -- | Base64 encoded strings
-newtype Base64EncodedString = Base64EncodedString Text
+newtype Base64EncodedString = Base64EncodedString MisoString
   deriving (Show,Eq,Ord)
+  deriving newtype (ToJSVal, FromJSVal)
 
-instance JSAddle.FromJSVal Base64EncodedString where
-  fromJSVal jsv =
-    fmap (\(JSAddle.JSString t) -> Base64EncodedString t) <$> JSAddle.fromJSVal jsv
+
+-- instance JSAddle.FromJSVal Base64EncodedString where
+--   fromJSVal jsv =
+--     fmap (\(JSAddle.JSString t) -> Base64EncodedString t) <$> JSAddle.fromJSVal jsv
 
 -- writeToFile :: Base64EncodedString -> OsPath -> IO ()
 -- writeToFile (Base64EncodedString t) =  undefined
@@ -175,7 +169,3 @@ instance JSAddle.FromJSVal Base64EncodedString where
 --------------------------------------------------------------------------------
 
 --
-instance Apply JSM where
-  (<.>) = (<*>)
-  (<. ) = (<* )
-  ( .>) = ( *>)
