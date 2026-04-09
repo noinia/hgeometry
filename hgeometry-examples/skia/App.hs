@@ -41,7 +41,6 @@ import           Miso.String (MisoString, ms)
 import           Miso.Style (style_, (=:), styleInline_)
 import           Model
 import           Modes
-import           Options
 import           PolyLineMode
 import           PolygonMode
 import           RectangleMode
@@ -116,6 +115,7 @@ onLoad m = pure m -- FIXME: TODO!!
 
 --------------------------------------------------------------------------------
 
+
 -- | Handles a left click action on the canvas.
 handleClick   :: Model -> Effect Model Action
 handleClick m = case m^.mode of
@@ -125,17 +125,17 @@ handleClick m = case m^.mode of
            () <# pure Draw
            return m'
     PointMode              -> addPoint
-    PenMode                -> noEff m
+    PenMode                -> pure ()
     PolyLineMode{}         -> (m&mode._PolyLineMode.currentPoly %~ extend)
                               <# pure Draw
     PolygonMode{}          -> (m&mode._PolygonMode.currentPolygon %~ extendPolygon)
                               <# pure Draw
 
     RectangleMode mData -> case mData^.currentRect of
-      Just _  -> noEff m
+      Just _  -> pure ()
       Nothing -> (m&mode._RectangleMode %~ startRectangleWith (m^.canvas.mouseCoordinates))
                  <# pure Draw
-    _                      -> noEff m
+    _                      -> pure ()
   where
     extend        = extendWith        (m^.canvas.mouseCoordinates)
     extendPolygon = extendPolygonWith (m^.canvas.mouseCoordinates)
@@ -198,7 +198,7 @@ handleRightClick m = case m^.mode of
 -- | The main entry point of our controller.
 updateModel   :: Model -> Action -> Effect Model Action
 updateModel m = \case
-    Id                     -> noEff m
+    Id                     -> pure ()
     OnLoad                 -> onLoad m
     CanvasKitAction act    -> zoom canvas $ wrap SkiaCanvas.handleCanvasKitAction act
     CanvasResizeAction act -> do zoom canvas $ wrap SkiaCanvas.handleCanvasResize act
@@ -209,7 +209,7 @@ updateModel m = \case
                                case ca of
                                  SkiaCanvas.PointerMove _ -> () <# notifyOnError (handleDraw m)
                                                            -- run the draw handler directly
-                                 _                        -> noEff () -- otherwise just return
+                                 _                        -> pure () -- otherwise just return
 
     CanvasClicked      -> handleClick m
     CanvasRightClicked -> handleRightClick m
@@ -237,25 +237,25 @@ updateModel m = \case
     --                              Just c  -> cs&fillStatus       .~ Active
     --                                           &currentFillColor .~ c
 
-    NotifyError err -> noEff m -- TODO
+    NotifyError err -> pure ()
 
 
-    SwitchMode mode' -> noEff $ m&mode .~ mode'
+    SwitchMode mode' -> put $ m&mode .~ mode'
 
     -- allow toggling the stroke and fill modals base on the status and fillStatus
-    StrokeAction act -> noEff $ m&currentModal .~ cm
-                                 &stroke       %~ maybe id const ms'
+    StrokeAction act -> put $ m&currentModal .~ cm
+                               &stroke       %~ maybe id const ms'
       where
         (cm, ms') = handleColorAction (m^.stroke) (m^.currentModal) StrokeModal act
-    FillAction act   -> noEff $ m&currentModal .~ cm
-                                 &fill         %~ maybe id const mf
+    FillAction act   -> put $ m&currentModal .~ cm
+                               &fill         %~ maybe id const mf
       where
         (cm, mf) = handleColorAction (m^.fill) (m^.currentModal) FillModal act
 
 
-    AddLayer         -> noEff $ m&layers %~ addLayer
+    AddLayer         -> put $ m&layers %~ addLayer
 
-    ComputeSelection rng -> noEff $ m -- TODO
+    ComputeSelection rng -> pure ()
 
     SaveSkpFile     -> m <# do pic <- drawToPicture m
                                bs <- serialize pic
@@ -286,7 +286,7 @@ updateModel m = \case
 
     TriangulateSelectedPolygon -> let selectedId = 0 in  -- TODO
                                   case m^?polygons.ix selectedId of
-      Nothing -> noEff m -- todo; notify on error?
+      Nothing -> pure () -- todo; notify on error?
       Just pg -> let t  = triangulate pg
                      m' = m&planeGraphs %~ insert t
                  in m' <# pure ReDraw

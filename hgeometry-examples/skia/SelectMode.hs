@@ -71,9 +71,9 @@ updateSelection                                 :: (Rectangle' R -> computeSelec
                                                 -> SelectModeData
                                                 -> Effect parent SelectModeData computeSelectionAction
 updateSelection computeSelection mousePos mData = case mousePos of
-    Nothing -> noEff mData
+    Nothing -> put mData
     Just p  -> case mData^.selectionRange of
-      Nothing -> noEff $ startSelection p
+      Nothing -> put $ startSelection p
       Just pr -> (mData&selectionRange .~ Nothing) -- reset the selection range
                  <# pure (computeSelection $ extend (pr^.rectangleRange) p) -- send a ComputeSelection action
   where

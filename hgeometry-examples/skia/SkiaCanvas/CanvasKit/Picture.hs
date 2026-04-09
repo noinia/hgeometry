@@ -18,17 +18,17 @@ import qualified Data.ByteString.Builder as Builder
 import qualified Data.ByteString.Lazy as Lazy
 import           Data.Coerce
 import qualified GHC.IsList as Lazy
-import           GHCJS.Marshal (ToJSVal(..))
-import           GHCJS.Types
-import qualified JavaScript.TypedArray as TypedArray
-import           JavaScript.TypedArray.Internal.Types ( SomeTypedArray(..)
-                                                      , IOUint8Array
-                                                      , Uint8Array
-                                                      )
-import           Language.Javascript.JSaddle (JSM, ghcjsPure)
-import qualified Language.Javascript.JSaddle as JSAddle
-import           Language.Javascript.JSaddle.Object (js0, js1)
-import qualified Language.Javascript.JSaddle.Object as JS
+-- import           GHCJS.Marshal (ToJSVal(..))
+-- import           GHCJS.Types
+-- import qualified JavaScript.TypedArray as TypedArray
+-- import           JavaScript.TypedArray.Internal.Types ( SomeTypedArray(..)
+--                                                       , IOUint8Array
+--                                                       , Uint8Array
+--                                                       )
+-- import           Language.Javascript.JSaddle (JSM, ghcjsPure)
+-- import qualified Language.Javascript.JSaddle as JSAddle
+-- import           Language.Javascript.JSaddle.Object (js0, js1)
+-- import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso hiding (go)
 import           Miso.String (MisoString)
 import           SkiaCanvas.CanvasKit.Core
