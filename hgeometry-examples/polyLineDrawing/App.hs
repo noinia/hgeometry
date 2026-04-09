@@ -49,6 +49,8 @@ import           Miso.Html.Element hiding (style_)
 import           Miso.Html.Property as Prop
 import           Miso.Html qualified as Html
 import           Debug.Trace
+import qualified Miso.FFI as FFI
+import           Miso.Subscription.Util (createSub)
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -163,6 +165,7 @@ initialModel = Model { _canvas       = blankCanvas 400 400
 
 
 data Action = CanvasAction !Canvas.InternalCanvasAction
+            | GetWindowSize
             | WindowResize !(Vector 2 Int)
             | SwitchMode
             | CanvasClicked
@@ -188,10 +191,11 @@ wrap f act = get >>= flip f act
 
 updateModel   :: Model -> Action -> Effect parent Model Action
 updateModel m = \case
-    CanvasAction ca    -> traceShow ("canvas act: ",ca) $
-      zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
+    CanvasAction ca     -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
       -- m&canvas %%~ flip
-    WindowResize dims -> put $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
+    WindowResize dims  -> put $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
+    GetWindowSize      -> sync . fmap WindowResize $
+                            (Vector2 <$> FFI.windowInnerWidth <*> FFI.windowInnerHeight)
     SwitchMode         -> put $ m&mode %~ switchMode
     CanvasClicked      -> case m^.mode of
                             PolyLineMode -> m <# pure AddPoint
@@ -435,7 +439,8 @@ instance ToMisoString Word8 where
 main :: IO ()
 main = startApp (Canvas.withCanvasEvents defaultEvents) $
          (Miso.component initialModel (wrap updateModel) viewModel)
-           { subs          = [ windowDimensionsSub WindowResize
+           { mount         = Just GetWindowSize
+           , subs          = [ windowDimensionsSub WindowResize
                              ]
             }
 
@@ -451,9 +456,48 @@ main = startApp (Canvas.withCanvasEvents defaultEvents) $
 
 
 -- | Subscription that gets the window dimensions.
-windowDimensionsSub   :: (Vector 2 Int -> action) -> Sub action
-windowDimensionsSub f = windowCoordsSub (\(h,w) -> f $ Vector2 (truncate w) (truncate h))
+windowDimensionsSub        :: (Vector 2 Int -> action) -> Sub action
+windowDimensionsSub f sink = createSub acquire release sink
+  where
+    eventName = "resize"
+    release   = windowRemoveEventListener eventName
+    acquire   = windowAddEventListener eventName $ \_e -> do
+                   w <- FFI.windowInnerWidth
+                   h <- FFI.windowInnerHeight
+                   sink $ f (Vector2 w h)
 
+
+
+-- -- | Captures window coordinates changes as they occur and writes them to
+-- -- an event sink.
+-- windowCoordsSub'   :: (Coord -> action) -> Sub action
+-- windowCoordsSub' f = windowPointerMoveSub (f . client)
+
+-- | Removes an event listener from window
+windowRemoveEventListener
+  :: MisoString
+  -- ^ Type of event to listen to (e.g. "click")
+  -> Function
+  -- ^ Callback which will be called when the event occurs,
+  -- the event will be passed to it as a parameter.
+  -> IO ()
+{-# INLINABLE windowRemoveEventListener #-}
+windowRemoveEventListener name cb = do
+  win <- jsg "window"
+  removeEventListener win name cb
+-----------------------------------------------------------------------------
+-- | Registers an event listener on window
+windowAddEventListener
+  :: MisoString
+  -- ^ Type of event to listen to (e.g. "click")
+  -> (JSVal -> IO ())
+  -- ^ Callback which will be called when the event occurs,
+  -- the event will be passed to it as a parameter.
+  -> IO Function
+{-# INLINABLE windowAddEventListener #-}
+windowAddEventListener name cb = do
+  win <- jsg "window"
+  addEventListener win name cb
 
 
 --------------------------------------------------------------------------------
