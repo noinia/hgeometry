@@ -113,17 +113,8 @@ viewModel m = div_ [ ]
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = startComponent (Canvas.withCanvasEvents defaultEvents) $
-            Component
-                { model         = initialModel
-                , update        = wrap updateModel
-                , view          = viewModel
-                , subs          = mempty
-                , initialAction = Nothing
-                , styles        = []
-                , mountPoint    = Nothing
-                , logLevel      = Off
-                }
+main = startApp (Canvas.withCanvasEvents defaultEvents) $
+         component initialModel (wrap updateModel) viewModel
 
 textAt                    :: ToMisoString r
                           => Point 2 r
