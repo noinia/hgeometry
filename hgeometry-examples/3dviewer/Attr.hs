@@ -35,6 +35,9 @@ import           Data.Coerce
 
 import           HGeometry.Point
 import           HGeometry.Polygon
+
+
+
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -519,6 +522,20 @@ instance IsDrawable (Ipe r) (Point 2 r) where
   type AttrOf (Ipe r) (Point 2 r) = SymbolAttributes r
   draw ats p = [ Ipe.iO $ extendSymbolAts ats (Ipe.ipeDiskMark p)
                ]
+
+
+instance IsDrawable backend geom => IsDrawable backend (Maybe geom) where
+  type AttrOf backend (Maybe geom) = AttrOf backend geom
+  draw ats = maybe mempty (draw (coerce @_ @[Attr backend geom] ats))
+
+
+--------------------------------------------------------------------------------
+
+-- type data MisoSvg
+
+-- type instance Rendered MisoSVG = []
+
+
 
 
     -- let path :+ ats' =
