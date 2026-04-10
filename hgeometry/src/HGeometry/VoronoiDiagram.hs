@@ -14,6 +14,7 @@ module HGeometry.VoronoiDiagram
   , voronoiDiagram
   , voronoiVertices
   , asMap
+  , cbifoldMap
   , voronoiDiagramWith
   , voronoiDiagramWith'
   ) where

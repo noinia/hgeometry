@@ -53,10 +53,6 @@ instance ( Fractional r, Ord r
          ) => IsIntersectableWith (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) where
   intersect = intersectTwo
 
--- | move to LinePV or so
-instance (Num r) => HasSupportingLine (LineEQ r) where
-  supportingLine = fromLineEQ
-
 --------------------------------------------------------------------------------
 
 

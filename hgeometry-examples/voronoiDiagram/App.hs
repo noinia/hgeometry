@@ -1,8 +1,13 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE  UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module App(main) where
 
+import           Data.Bifunctor
+import           Data.Foldable1
+import qualified Data.Set.NonEmpty as NESet
+import qualified Data.Map.NonEmpty as NEMap
 import           Control.Monad.State.Class
 import           Control.Lens hiding (view, element)
 import           Data.Foldable (toList)
@@ -11,12 +16,18 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import           GHC.TypeNats
 import           HGeometry.Ext
+import           HGeometry.Sequence.Alternating (Alternating, unsnocAlt, unconsAlt)
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Miso.Svg
-import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates)
+import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates, theViewport)
+import           HGeometry.Viewport
 import qualified HGeometry.Miso.Svg.Canvas as Canvas
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Point
+import           HGeometry.Kernel
+import           HGeometry.HalfSpace
+import           HGeometry.Slab
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
+import           HGeometry.Box.Boxable
 import           HGeometry.VoronoiDiagram
 import           Miso hiding (text_)
 import           Miso.String (ToMisoString(..))
@@ -26,9 +37,19 @@ import           Miso.Svg.Property
 import           Miso.Html hiding (style_)
 import           Miso.CSS.Color as Miso
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Vector as Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector.NonEmpty as NonEmptyV
+import qualified Ipe
 
+import           Data.Coerce
+import           HGeometry.Polygon.Convex.Unbounded
+import           Data.Bifoldable
+import           Data.Bifoldable1
+import           HGeometry.Plane.LowerEnvelope.Connected ( MinimizationDiagram(MinimizationDiagram)
+                                                         , Region, RegionF(..)
+                                                         , toConvexPolygonIn
+                                                         )
 
 --------------------------------------------------------------------------------
 
@@ -39,7 +60,7 @@ type R = RealNumber 5
 
 data Model = Model { _canvas         :: Canvas R
                    , _points         :: IntMap.IntMap (Point 2 R :+ Color)
-                   , _diagram        :: Maybe (Set.Set (Point 2 R))
+                   , _diagram        :: Maybe (VoronoiDiagram (Point 2 R :+ (Int, Color)) ())
                    , _currentColorIx :: !Int
                    } deriving (Eq)
 makeLenses ''Model
@@ -86,8 +107,10 @@ recomputeDiagram   :: Model -> Model
 recomputeDiagram m
   | m^.points.to length <= 2  = m&diagram .~ Nothing
   | otherwise                 = let pts = NonEmpty.nonEmpty
-                                          [ p :+ i | (i,p) <- IntMap.assocs (m^.points)]
-                                in m&diagram .~ fmap voronoiVertices pts
+                                          [ p&extra %~ (i,)
+                                          | (i,p) <- IntMap.assocs (m^.points)
+                                          ]
+                                in m&diagram .~ fmap voronoiDiagram pts
 
 insertPoint     :: p -> IntMap.IntMap p -> IntMap.IntMap p
 insertPoint p m = let k = case IntMap.lookupMax m of
@@ -96,6 +119,66 @@ insertPoint p m = let k = case IntMap.lookupMax m of
                   in IntMap.insert k p m
 
 --------------------------------------------------------------------------------
+
+
+
+-- to Line.General
+
+
+-- to Halfspace
+
+--------------------------------------------------------------------------------
+
+-- | Computes the Voronoi regions of the Colinear diagrams
+colinearVoronoiRegions :: (Point_ point 2 r, Ord r, Num r)
+                       => Alternating Vector.Vector (VerticalOrLineEQ r) point
+                       -> Either point
+                                 ( HalfPlaneF (VerticalOrLineEQ r) :+ point
+                                 , Vector.Vector (Slab r () :+ point)
+                                 , HalfPlaneF (VerticalOrLineEQ r) :+ point
+                                 )
+colinearVoronoiRegions = fmap f . unconsAlt . first (\l -> (l,supportingLine l))
+  where
+    f ((p,b),rest) = case unsnocAlt rest of
+      Left q                -> (closerHalfPlane p q (fst b) :+ p
+                               , mempty
+                               , closerHalfPlane q p (fst b) :+ q
+                               )
+      Right (middle,(b',q)) -> ( closerHalfPlane p (middle^.head1) (fst b) :+ p
+                               , mempty -- TODO
+                               , closerHalfPlane (middle^.last1) p (fst b') :+ q
+                               )
+
+-- | Given two points p and q, and their bisector, compute the halfplane where p is
+-- closer than q.
+--
+closerHalfPlane       :: (Point_ point 2 r, Ord r, Num r)
+                      => point -> point -> VerticalOrLineEQ r -> HalfPlaneF (VerticalOrLineEQ r)
+closerHalfPlane p q b
+    | dist p < dist q = h
+    | otherwise       = HalfSpace Positive b
+  where
+    dist = squaredEuclideanDist (pointInteriorTo h)
+    h = HalfSpace Negative b
+
+--------------------------------------------------------------------------------
+
+
+
+
+
+-- instance IsIntersectableWith
+--                          (HalfPlaneF (VerticalOrLineEQ r))
+--                          (Rectangle corner) where
+
+
+
+-- TODO: make sure the signs remain consistent when computing the bounding hyperplane
+
+
+--------------------------------------------------------------------------------
+
+
 
 viewModel       :: Model -> View Model Action
 viewModel m = div_ [ ]
@@ -117,10 +200,7 @@ viewModel m = div_ [ ]
 
   where
     currentColor = colorPresets NonEmptyV.! (m^.currentColorIx)
-    canvasBody = [ g_ [] [ draw v [ fill_ "red"
-                                  ]
-                         ]
-                 | v <- m^..diagram.folded.to toList.traverse ]
+    canvasBody = theDiagram
               <> [ g_ [] [ draw p [ fill_ (renderColor c)
                                   ]
                          , textAt p [] (ms i)
@@ -128,12 +208,85 @@ viewModel m = div_ [ ]
                  | (i,p :+ c) <- m^..points.ifolded.withIndex ]
               -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
 
+    theDiagram = case m^.diagram of
+        Nothing -> []
+        Just vd -> case vd of
+          AllColinear vd' -> case colinearVoronoiRegions vd' of
+            Left (s :+ (_,c))  -> [draw boundingBox' (voronoiRegionAts c)]
+                                  -- there is only one point;
+            Right (l,middle,r) -> mconcat
+                                  [ drawHalfPlane (l^.core) (voronoiRegionAts $ l^.extra.extra._2)
+                                   -- TODO draw middle
+                                  , drawHalfPlane (l^.core) (voronoiRegionAts $ l^.extra.extra._2)
+                                  ]
+            where
+              drawHalfPlane h ats = case h `intersect` boundingBox' of
+                Nothing -> []
+                Just is -> case is of
+                  ActualPolygon poly -> [draw poly ats]
+                  _                  -> [] -- don't draw degenerate things
+
+              boundingBox' :: Rectangle (Point 2 R)
+              boundingBox' = m^.canvas.theViewport.viewPort
+
+          ConnectedVD vd'   -> [ drawVoronoiRegion reg (voronoiRegionAts c)
+                               | (s :+ (_, c), reg) <- toList . NEMap.assocs . asMap $ vd'
+                               ]
+            where
+              drawVoronoiRegion reg =
+                either dSimplePolygon dSimplePolygon (toConvexPolygonIn boundingBox' reg)
+
+              boundingBox' :: Rectangle (Point 2 R)
+              boundingBox' = unUnion $ Union (m^.canvas.theViewport.viewPort)
+                                        <>
+                                       cbifoldMap (Union . boundingBox)
+                                                  (Union . boundingBox) vd'
+      where
+        voronoiRegionAts c = [ fill_ (renderColor c)
+                             , fillOpacity_ "0.5"
+                             ]
+      --
+
+
+
+
+
+
+-- instance Bifoldable (MinimizationDiagram r) where
+--   bifoldMap = bifoldMap1
+
+-- instance Bifoldable1 (MinimizationDiagram r) where
+--   bifoldMap1 f g (MinimizationDiagram m) = NEMap.foldMapWithKey (\k v -> f k <> g v) m
+
+
+
+-- instance Bifoldable VoronoiDiagram' where
+--   bifoldMap = bifoldMap1
+--   -- f g (VoronoiDiagram' m) = NEMap.foldMapWithKey (\k v -> f k <> g v) m
+-- instance Bifoldable1 VoronoiDiagram' where
+--   bifoldMap1 f g (VoronoiDiagram' m) = undefined
+
+
+
+
+getVertices :: Ord vertex => VoronoiDiagram' vertex point -> NonEmpty vertex
+getVertices = NonEmpty.fromList . cbifoldMap (:[]) (const [])
+
+
+
+-- instance ( Point_ vertex 2 r
+--          , Ord r, Fractional r, ToMisoString r
+--          ) => Drawable (Region r vertex) where
+--   draw reg = either
+--     where
+--       boundingBox = Ipe.defaultBox
+
 --------------------------------------------------------------------------------
 
 
 main :: IO ()
 main = startApp (Canvas.withCanvasEvents defaultEvents) $
-         component initialModel updateModel viewModel
+         Miso.component initialModel updateModel viewModel
 
 textAt                    :: ToMisoString r
                           => Point 2 r

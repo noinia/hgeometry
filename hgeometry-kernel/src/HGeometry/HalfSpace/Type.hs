@@ -33,6 +33,7 @@ import HGeometry.Point
 import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Sign
 import HGeometry.Vector
+import GHC.TypeNats
 
 --------------------------------------------------------------------------------
 
@@ -149,6 +150,20 @@ instance ( HasIntersectionWith line line'
     l `intersects` l' || pointInteriorTo l `intersects`  h' || pointInteriorTo l' `intersects`  h
 
 
+instance ( HasPickInteriorPoint hyperPlane d r
+         , HyperPlane_ hyperPlane d r
+         , 1 <= d, Eq r, Num r
+         , Has_ Additive_ d r
+         , Has_ Vector_ (1+d) r
+         ) => HasPickInteriorPoint (HalfSpaceF hyperPlane) d r where
+  pointInteriorTo h = p .+^ f (normalVector l)
+    where
+      l = h^.boundingHyperPlane
+      p = pointInteriorTo l
+      f = case h^.halfSpaceSign of
+            Positive -> id
+            Negative -> negated
+      -- the normalVector of l should point towards the positive halfspace of l
 
 
 --------------------------------------------------------------------------------

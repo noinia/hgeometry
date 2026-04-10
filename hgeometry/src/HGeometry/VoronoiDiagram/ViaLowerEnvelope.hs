@@ -14,6 +14,7 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   ( VoronoiDiagram, VoronoiDiagram_(..)
   , VoronoiDiagram'(..)
   , asMap
+  , cbifoldMap
   , voronoiDiagram
   , voronoiDiagramWith
   , voronoiDiagramWith'
@@ -22,6 +23,7 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   , pointToPlane
   ) where
 
+import Data.Coerce
 import Control.Lens
 import Control.Subcategory.Functor
 import Data.Bifunctor
@@ -109,6 +111,17 @@ _VoronoiDiagramLowerEnvelope = coerced
 asMap :: (Point_ point 2 r, Ord point)
       => VoronoiDiagram' vertex point -> NEMap.NEMap point (Region r vertex)
 asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
+
+-- | Applies a folding function over the Voronoi diagram.
+--
+-- The the function is applied exactly once for each vertex (and once
+-- for every site)
+cbifoldMap     :: (Semigroup s, Ord vertex)
+               => (vertex -> s)
+               -> (point -> s)
+               -> VoronoiDiagram' vertex point -> s
+cbifoldMap f g = LowerEnvelope.cbifoldMap f g . coerce
+
 
 --------------------------------------------------------------------------------
 

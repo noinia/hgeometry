@@ -625,12 +625,12 @@ type instance Intersection (HalfSpaceF line) (Rectangle corner) =
 
 instance ( Point_ corner 2 r, Num r, Ord r
          ) => HasIntersectionWith (HalfSpaceF (LinePV 2 r)) (Rectangle corner) where
-  halfPlane `intersects` rect' = any (`intersects` halfPlane) ((^.asPoint) <$> Box.corners rect')
+  halfPlane `intersects` rect' = any ((`intersects` halfPlane) . (^.asPoint)) (Box.corners rect')
 
 instance ( Point_ corner 2 r, Fractional r, Ord r
          ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (Rectangle corner) where
   halfPlane `intersect` rect' = fmap (fmap flatten')
-                             <$> halfPlane `intersect` (toConvexPolygon rect')
+                             <$> halfPlane `intersect` toConvexPolygon rect'
     where
       flatten' = \case
         Original p -> p
@@ -638,6 +638,32 @@ instance ( Point_ corner 2 r, Fractional r, Ord r
 
       toConvexPolygon :: Rectangle corner -> ConvexPolygon (Point 2 r)
       toConvexPolygon = uncheckedFromCCWPoints . fmap (^.asPoint) . Box.corners
+
+----------------------------------------
+-- Halfspaces represented by LineEQ
+
+instance ( Point_ corner 2 r, Num r, Ord r
+         ) => HasIntersectionWith (HalfSpaceF (LineEQ r)) (Rectangle corner) where
+  halfPlane `intersects` rect' = any ((`intersects` halfPlane) . (^.asPoint)) (Box.corners rect')
+
+instance ( Point_ corner 2 r, Fractional r, Ord r
+         ) => IsIntersectableWith (HalfSpaceF (LineEQ r)) (Rectangle corner) where
+  (HalfSpace s l) `intersect` rect' = HalfSpace s (supportingLine l)
+                                      `intersect` rect'
+
+----------------------------------------
+-- Halfspaces represented by VerticalOrLineEQ
+
+instance ( Point_ corner 2 r, Num r, Ord r
+         ) => HasIntersectionWith (HalfSpaceF (VerticalOrLineEQ r)) (Rectangle corner) where
+  (HalfSpace s l) `intersects` rect' = case l of
+    VerticalLineThrough x -> Point1 x `intersects` (extent rect' ^.component @0)
+    NonVertical l'        -> HalfSpace s l' `intersects` rect'
+
+instance ( Point_ corner 2 r, Fractional r, Ord r
+         ) => IsIntersectableWith (HalfSpaceF (VerticalOrLineEQ r)) (Rectangle corner) where
+  (HalfSpace s l) `intersect` rect' = HalfSpace s (supportingLine l)
+                                      `intersect` rect'
 
 --------------------------------------------------------------------------------
 -- * Halfspace x Triangle Intersection
