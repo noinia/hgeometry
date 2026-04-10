@@ -33,6 +33,8 @@ import           Data.Vinyl.Notation
 import           Data.Vinyl
 import           Data.Coerce
 
+import           HGeometry.Point
+import           HGeometry.Polygon
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -250,30 +252,37 @@ extendCommon k (Identity val) acc = case k of
 instance ( GCompare (PathAttributes r)
          ) => IsDrawable (Ipe r) (Ipe.Path r) where
   type AttrOf (Ipe r) (Ipe.Path r) = PathAttributes r
-  draw ats path = [ Ipe.IpePath $ path :+ ats' ]
-    where
-      ats' :: Ipe.IpeAttributes Ipe.Path r
-      ats' = foldrWithKey extend' mempty (mconcat ats)
-        where
-          extend'                      :: PathAttributes r v
-                                       -> Identity v
-                                       -> Ipe.IpeAttributes Ipe.Path r
-                                       -> Ipe.IpeAttributes Ipe.Path r
-          extend' k (Identity val) acc = case k of
-            PathCommon k' -> extendCommon @Ipe.Path k' (Identity val) acc
-            PathStroke    -> acc <> Ipe.attr Ipe.SStroke        val
-            PathFill      -> acc <> Ipe.attr Ipe.SFill          val
-            Dash          -> acc <> Ipe.attr Ipe.SDash          val
-            PathPen       -> acc <> Ipe.attr Ipe.SPen           val
-            LineCap       -> acc <> Ipe.attr Ipe.SLineCap       val
-            LineJoin      -> acc <> Ipe.attr Ipe.SLineJoin      val
-            FillRule      -> acc <> Ipe.attr Ipe.SFillRule      val
-            Arrow         -> acc <> Ipe.attr Ipe.SArrow         val
-            RArrow        -> acc <> Ipe.attr Ipe.SRArrow        val
-            StrokeOpacity -> acc <> Ipe.attr Ipe.SStrokeOpacity val
-            Opacity       -> acc <> Ipe.attr Ipe.SOpacity       val
-            Tiling        -> acc <> Ipe.attr Ipe.STiling        val
-            Gradient      -> acc <> Ipe.attr Ipe.SGradient      val
+  draw ats path = [ Ipe.IpePath $ extendPathAts ats (path :+ mempty)  ]
+
+extendPathAts        :: forall backend geom r.
+                        (AttrOf backend geom ~ PathAttributes r)
+                     => [Attr backend geom]
+                     -> Ipe.Path r :+ Ipe.IpeAttributes Ipe.Path r
+                     -> Ipe.Path r :+ Ipe.IpeAttributes Ipe.Path r
+extendPathAts ats o' = o'&Ipe.attributes %~ \z -> foldrWithKey extend z (mconcat ats)
+  where
+    extend k (Identity val) acc = case k of
+      PathCommon k' -> extendCommon @Ipe.Path k' (Identity val) acc
+      PathStroke    -> acc <> Ipe.attr Ipe.SStroke        val
+      PathFill      -> acc <> Ipe.attr Ipe.SFill          val
+      Dash          -> acc <> Ipe.attr Ipe.SDash          val
+      PathPen       -> acc <> Ipe.attr Ipe.SPen           val
+      LineCap       -> acc <> Ipe.attr Ipe.SLineCap       val
+      LineJoin      -> acc <> Ipe.attr Ipe.SLineJoin      val
+      FillRule      -> acc <> Ipe.attr Ipe.SFillRule      val
+      Arrow         -> acc <> Ipe.attr Ipe.SArrow         val
+      RArrow        -> acc <> Ipe.attr Ipe.SRArrow        val
+      StrokeOpacity -> acc <> Ipe.attr Ipe.SStrokeOpacity val
+      Opacity       -> acc <> Ipe.attr Ipe.SOpacity       val
+      Tiling        -> acc <> Ipe.attr Ipe.STiling        val
+      Gradient      -> acc <> Ipe.attr Ipe.SGradient      val
+
+--   foldrWithKey extendPathAts z (mconcat ats)
+
+-- '                      :: PathAttributes r v
+--                                    -> Identity v
+--                                    -> Ipe.IpeAttributes Ipe.Path r
+--                                    -> Ipe.IpeAttributes Ipe.Path r
 
 ----------------------------------------
 
@@ -310,21 +319,21 @@ instance ( GCompare (TextAttributes r)
 instance ( GCompare (SymbolAttributes r)
          ) => IsDrawable (Ipe r) (Ipe.IpeSymbol r) where
   type AttrOf (Ipe r) (Ipe.IpeSymbol r) = SymbolAttributes r
-  draw ats sym = [ Ipe.IpeUse $ sym :+ ats' ]
+  draw ats sym = [ Ipe.IpeUse $ extendSymbolAts ats (sym :+ mempty) ]
+
+extendSymbolAts        :: forall backend geom r.
+                        (AttrOf backend geom ~ SymbolAttributes r)
+                       => [Attr backend geom]
+                       -> Ipe.IpeSymbol r :+ Ipe.IpeAttributes Ipe.IpeSymbol r
+                       -> Ipe.IpeSymbol r :+ Ipe.IpeAttributes Ipe.IpeSymbol r
+extendSymbolAts ats o' = o'&Ipe.attributes %~ \z -> foldrWithKey extend z (mconcat ats)
     where
-      ats' :: Ipe.IpeAttributes Ipe.IpeSymbol r
-      ats' = foldrWithKey extend' mempty (mconcat ats)
-        where
-          extend'                      :: SymbolAttributes r v
-                                       -> Identity v
-                                       -> Ipe.IpeAttributes Ipe.IpeSymbol r
-                                       -> Ipe.IpeAttributes Ipe.IpeSymbol r
-          extend' k (Identity val) acc = case k of
-            SymbolCommon k' -> extendCommon @Ipe.IpeSymbol k' (Identity val) acc
-            SymbolStroke    -> acc <> Ipe.attr Ipe.SStroke        val
-            SymbolFill      -> acc <> Ipe.attr Ipe.SFill          val
-            SymbolSize      -> acc <> Ipe.attr Ipe.SSize          val
-            SymbolPen       -> acc <> Ipe.attr Ipe.SPen           val
+      extend k (Identity val) acc = case k of
+        SymbolCommon k' -> extendCommon @Ipe.IpeSymbol k' (Identity val) acc
+        SymbolStroke    -> acc <> Ipe.attr Ipe.SStroke        val
+        SymbolFill      -> acc <> Ipe.attr Ipe.SFill          val
+        SymbolSize      -> acc <> Ipe.attr Ipe.SSize          val
+        SymbolPen       -> acc <> Ipe.attr Ipe.SPen           val
 
 instance ( GCompare (GroupAttributes r)
          ) => IsDrawable (Ipe r) (Ipe.Group r) where
@@ -350,13 +359,10 @@ instance ( GCompare (GroupAttributes r)
 
 class LayerAttr backend geom val | backend geom -> val where
   layer :: val -> Attr backend geom
-
 class MatrixAttr backend geom val | backend geom -> val where
   matrix :: val -> Attr backend geom
-
 class PinAttr backend geom val | backend geom -> val where
   pin :: val -> Attr backend geom
-
 class TransformationsAttr backend geom val | backend geom -> val where
   transformations :: val -> Attr backend geom
 
@@ -427,18 +433,59 @@ class StrokeAndFillAttr backend geom val | backend geom -> val where
 --------------------------------------------------------------------------------
 -- * Instances
 
+---------------------------------------- Path
 
-
-
-
-
-
-
-
+instance LayerAttr (Ipe r) (Ipe.Path r) Ipe.LayerName where
+  layer = singleton (PathCommon Layer)
+instance MatrixAttr (Ipe r) (Ipe.Path r) (Matrix 3 3 r) where
+  matrix = singleton (PathCommon Matrix)
+instance PinAttr (Ipe r) (Ipe.Path r) Ipe.PinType where
+  pin = singleton (PathCommon Pin)
+instance TransformationsAttr (Ipe r) (Ipe.Path r) Ipe.TransformationTypes where
+  transformations = singleton (PathCommon Transformations)
 instance StrokeAttr (Ipe r) (Ipe.Path r) (Ipe.IpeColor r) where
   stroke = singleton PathStroke
+instance FillAttr (Ipe r) (Ipe.Path r) (Ipe.IpeColor r) where
+  fill  = singleton PathFill
+instance DashAttr (Ipe r) (Ipe.Path r) (Ipe.IpeDash r) where
+  dash = singleton Dash
+instance PenAttr (Ipe r) (Ipe.Path r) (Ipe.IpePen r) where
+  pen = singleton PathPen
+instance LineCapAttr (Ipe r) (Ipe.Path r) Int where
+  lineCap = singleton LineCap
+instance LineJoinAttr (Ipe r) (Ipe.Path r) Int where
+  lineJoin = singleton LineJoin
+instance FillRuleAttr (Ipe r) (Ipe.Path r) Ipe.FillType where
+  fillRule = singleton FillRule
+instance ArrowAttr (Ipe r) (Ipe.Path r) (Ipe.IpeArrow r) where
+  arrow = singleton Arrow
+instance RArrowAttr (Ipe r) (Ipe.Path r) (Ipe.IpeArrow r) where
+  rArrow = singleton RArrow
+instance StrokeOpacityAttr (Ipe r) (Ipe.Path r) Ipe.IpeOpacity where
+  strokeOpacity = singleton StrokeOpacity
+instance OpacityAttr (Ipe r) (Ipe.Path r) Ipe.IpeOpacity where
+  opacity = singleton Opacity
+instance GradientAttr (Ipe r) (Ipe.Path r) Ipe.IpeGradient where
+  gradient = singleton Gradient
 
 
+----------------------------------------
+instance LayerAttr (Ipe r) (Ipe.IpeSymbol r) Ipe.LayerName where
+  layer = singleton (SymbolCommon Layer)
+instance MatrixAttr (Ipe r) (Ipe.IpeSymbol r) (Matrix 3 3 r) where
+  matrix = singleton (SymbolCommon Matrix)
+instance PinAttr (Ipe r) (Ipe.IpeSymbol r) Ipe.PinType where
+  pin = singleton (SymbolCommon Pin)
+instance TransformationsAttr (Ipe r) (Ipe.IpeSymbol r) Ipe.TransformationTypes where
+  transformations = singleton (SymbolCommon Transformations)
+instance StrokeAttr (Ipe r) (Ipe.IpeSymbol r) (Ipe.IpeColor r) where
+  stroke = singleton SymbolStroke
+instance FillAttr (Ipe r) (Ipe.IpeSymbol r) (Ipe.IpeColor r) where
+  fill  = singleton SymbolFill
+instance PenAttr (Ipe r) (Ipe.IpeSymbol r) (Ipe.IpePen r) where
+  pen = singleton SymbolPen
+instance SizeAttr (Ipe r) (Ipe.IpeSymbol r) (Ipe.IpeSize r)  where
+  size = singleton SymbolSize
 
 
 
@@ -451,8 +498,6 @@ instance StrokeAttr (Ipe r) (Ipe.Path r) (Ipe.IpeColor r) where
 instance LayerAttr (Ipe r) (Ipe.IpeObject r) Ipe.LayerName where
   layer = singleton Layer
 
-instance LayerAttr (Ipe r) (Ipe.Path r) Ipe.LayerName where
-  layer = singleton (PathCommon Layer)
 
 
 
@@ -463,6 +508,22 @@ instance LayerAttr (Ipe r) (Ipe.Path r) Ipe.LayerName where
 
 --------------------------------------------------------------------------------
 
+instance ( Point_ point 2 r
+         , SimplePolygon_ (SimplePolygonF f point) point r
+         ) => IsDrawable (Ipe r) (SimplePolygonF f point) where
+  type AttrOf (Ipe r) (SimplePolygonF f point) = PathAttributes r
+  draw ats poly = [ Ipe.iO $ extendPathAts ats (Ipe.ipeSimplePolygon poly)
+                  ]
+
+instance IsDrawable (Ipe r) (Point 2 r) where
+  type AttrOf (Ipe r) (Point 2 r) = SymbolAttributes r
+  draw ats p = [ Ipe.iO $ extendSymbolAts ats (Ipe.ipeDiskMark p)
+               ]
+
+
+    -- let path :+ ats' =
+    --               in [ IpePath path :+ foldrWithKey extendPathAts ats' (mconcat ats)
+    --                  ]
 
 -- test :: [IpeObject Double]
 -- test = draw [ layer "intersection"
