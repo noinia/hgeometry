@@ -38,6 +38,13 @@ type instance NumType (Matrix n m r) = r
 type instance Index   (Matrix n m r) = (Int,Int)
 type instance IxValue (Matrix n m r) = r
 
+instance (Functor (Vector n), Functor (Vector m)) => Functor (Matrix n m) where
+  fmap f (Matrix rows') = Matrix (fmap (fmap f) rows')
+instance (Foldable (Vector n), Foldable (Vector m)) => Foldable (Matrix n m) where
+  foldMap f (Matrix rows') = foldMap (foldMap f) rows'
+instance (Traversable (Vector n), Traversable (Vector m)) => Traversable  (Matrix n m) where
+  traverse f (Matrix rows') = Matrix <$> traverse (traverse f) rows'
+
 
 _MatrixVector :: Iso (Matrix n m r)          (Matrix n m s)
                      (Vector n (Vector m r)) (Vector n (Vector m s))
