@@ -60,6 +60,7 @@ import qualified HGeometry.Triangle as Triangle
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Data.Functor.Classes
+import           HGeometry.Sign
 
 --------------------------------------------------------------------------------
 
@@ -662,8 +663,14 @@ instance ( Point_ corner 2 r, Num r, Ord r
 
 instance ( Point_ corner 2 r, Fractional r, Ord r
          ) => IsIntersectableWith (HalfSpaceF (VerticalOrLineEQ r)) (Rectangle corner) where
-  (HalfSpace s l) `intersect` rect' = HalfSpace s (supportingLine l)
-                                      `intersect` rect'
+  h `intersect` rect' = consistentHalfSpace h `intersect` rect'
+
+-- | Convert a halfspace from VerticalorLineEQ to LinePV
+consistentHalfSpace                 :: Num r
+                                    => HalfSpaceF (VerticalOrLineEQ r) -> HalfSpaceF (LinePV 2 r)
+consistentHalfSpace (HalfSpace s l) = case l of
+    VerticalLineThrough _ -> HalfSpace (flipSign s) (supportingLine l)
+    NonVertical _         -> HalfSpace s            (supportingLine l)
 
 --------------------------------------------------------------------------------
 -- * Halfspace x Triangle Intersection
@@ -682,7 +689,7 @@ instance ( Point_ corner 2 r, Num r, Ord r
 instance ( Point_ corner 2 r, Fractional r, Ord r
          ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (Triangle corner) where
   halfPlane `intersect` tri = fmap (fmap flatten')
-                           <$> halfPlane `intersect` (toConvexPolygon tri)
+                           <$> halfPlane `intersect` toConvexPolygon tri
     where
       flatten' = \case
         Original p -> p

@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{- HLINT ignore "Use camelCase" -}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.HalfSpace.Type

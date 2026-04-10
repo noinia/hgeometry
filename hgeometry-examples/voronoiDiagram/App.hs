@@ -16,6 +16,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import           GHC.TypeNats
 import           HGeometry.Ext
+import           HGeometry.Sign
 import           HGeometry.Sequence.Alternating (Alternating, unsnocAlt, unconsAlt)
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Miso.Svg
@@ -51,6 +52,8 @@ import           HGeometry.Plane.LowerEnvelope.Connected ( MinimizationDiagram(M
                                                          , toConvexPolygonIn
                                                          )
 
+
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -82,6 +85,13 @@ instance KnownNat p => ToMisoString (RealNumber p) where
 initialModel :: Model
 initialModel = Model (blankCanvas 1024  576) mempty Nothing 0
 
+  -- recomputeDiagram $ Model (blankCanvas 1024  576) pts Nothing 0
+  -- where
+  --   pts = IntMap.fromAscList [ (0, Point2 100 100 :+ Miso.red )
+  --                            , (1, Point2 200 100 :+ Miso.blue )
+  --                            , (2, Point2 300 100 :+ Miso.green )
+  --                            , (3, Point2 400 100 :+ Miso.black )
+  --                            ]
 
 
 --------------------------------------------------------------------------------
@@ -104,13 +114,11 @@ updateModel = \case
                     in recomputeDiagram m'
 
 recomputeDiagram   :: Model -> Model
-recomputeDiagram m
-  | m^.points.to length <= 2  = m&diagram .~ Nothing
-  | otherwise                 = let pts = NonEmpty.nonEmpty
-                                          [ p&extra %~ (i,)
-                                          | (i,p) <- IntMap.assocs (m^.points)
-                                          ]
-                                in m&diagram .~ fmap voronoiDiagram pts
+recomputeDiagram m = let pts = NonEmpty.nonEmpty
+                               [ p&extra %~ (i,)
+                               | (i,p) <- IntMap.assocs (m^.points)
+                               ]
+                     in m&diagram .~ fmap voronoiDiagram pts
 
 insertPoint     :: p -> IntMap.IntMap p -> IntMap.IntMap p
 insertPoint p m = let k = case IntMap.lookupMax m of
@@ -130,7 +138,9 @@ insertPoint p m = let k = case IntMap.lookupMax m of
 --------------------------------------------------------------------------------
 
 -- | Computes the Voronoi regions of the Colinear diagrams
-colinearVoronoiRegions :: (Point_ point 2 r, Ord r, Num r)
+colinearVoronoiRegions :: (Point_ point 2 r, Ord r, Num r
+                          , Show point, Show r
+                          )
                        => Alternating Vector.Vector (VerticalOrLineEQ r) point
                        -> Either point
                                  ( HalfPlaneF (VerticalOrLineEQ r) :+ point
@@ -140,13 +150,13 @@ colinearVoronoiRegions :: (Point_ point 2 r, Ord r, Num r)
 colinearVoronoiRegions = fmap f . unconsAlt . first (\l -> (l,supportingLine l))
   where
     f ((p,b),rest) = case unsnocAlt rest of
-      Left q                -> (closerHalfPlane p q (fst b) :+ p
+      Left q                -> ( closerHalfPlane p q (fst b) :+ p
                                , mempty
                                , closerHalfPlane q p (fst b) :+ q
                                )
       Right (middle,(b',q)) -> ( closerHalfPlane p (middle^.head1) (fst b) :+ p
                                , mempty -- TODO
-                               , closerHalfPlane (middle^.last1) p (fst b') :+ q
+                               , closerHalfPlane q (middle^.last1) (fst b') :+ q
                                )
 
 -- | Given two points p and q, and their bisector, compute the halfplane where p is
@@ -155,11 +165,13 @@ colinearVoronoiRegions = fmap f . unconsAlt . first (\l -> (l,supportingLine l))
 closerHalfPlane       :: (Point_ point 2 r, Ord r, Num r)
                       => point -> point -> VerticalOrLineEQ r -> HalfPlaneF (VerticalOrLineEQ r)
 closerHalfPlane p q b
-    | dist p < dist q = h
-    | otherwise       = HalfSpace Positive b
+    | (p^.asPoint) `intersects` h = h
+    | otherwise                   = h&halfSpaceSign %~ flipSign
   where
-    dist = squaredEuclideanDist (pointInteriorTo h)
     h = HalfSpace Negative b
+
+
+
 
 --------------------------------------------------------------------------------
 
@@ -176,8 +188,18 @@ closerHalfPlane p q b
 -- TODO: make sure the signs remain consistent when computing the bounding hyperplane
 
 
+
+
 --------------------------------------------------------------------------------
 
+-- type instance Intersection (Slab r side) (Rectangle corner) =
+--   Maybe (PossiblyDegenerateSimplePolygon (ConvexPolygonF (Cyclic NonEmpty)))
+
+
+-- instance HasIntersectionWith (Slab r side) (Rectangle corner) where
+--   slab `intersects` rect =
+
+--     any  (corners rect)
 
 
 viewModel       :: Model -> View Model Action
@@ -217,7 +239,7 @@ viewModel m = div_ [ ]
             Right (l,middle,r) -> mconcat
                                   [ drawHalfPlane (l^.core) (voronoiRegionAts $ l^.extra.extra._2)
                                    -- TODO draw middle
-                                  , drawHalfPlane (l^.core) (voronoiRegionAts $ l^.extra.extra._2)
+                                  , drawHalfPlane (r^.core) (voronoiRegionAts $ r^.extra.extra._2)
                                   ]
             where
               drawHalfPlane h ats = case h `intersect` boundingBox' of
