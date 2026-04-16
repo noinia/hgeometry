@@ -76,6 +76,10 @@ type instance Dimension (UnboundedConvexRegionF r nonEmpty vertex) = 2
 instance (NFData r, NFData (nonEmpty vertex)
          ) => NFData (UnboundedConvexRegionF r nonEmpty vertex)
 
+instance Foldable1 nonEmpty => Foldable1 (UnboundedConvexRegionF r nonEmpty) where
+  foldMap1 f (Unbounded _ pts _) = foldMap1 f pts
+
+
 -- | Lens to access the chain of vertices in CCW order
 chain :: Lens (UnboundedConvexRegionF r nonEmpty vertex)
               (UnboundedConvexRegionF r nonEmpty' vertex')

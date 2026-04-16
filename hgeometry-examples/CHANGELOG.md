@@ -1,4 +1,4 @@
-# Revision history for hgeometry-vector
+# Revision history for hgeometry-examples
 
 ## 1.0.0.0 -- YYYY-mm-dd
 

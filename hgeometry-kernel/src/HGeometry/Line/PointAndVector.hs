@@ -16,6 +16,7 @@ module HGeometry.Line.PointAndVector
   , isIdenticalTo
   , HasSupportingLine(..)
   , fromLinearFunction
+  , fromLineEQ
   , toLinearFunction
 
 
@@ -257,6 +258,18 @@ instance HasSupportingLine t => HasSupportingLine (t :+ extra) where
 
 instance HasSupportingLine (LinePV d r) where
   supportingLine = id
+
+instance (Num r) => HasSupportingLine (LineEQ r) where
+  supportingLine = fromLineEQ
+
+-- | Convert from a LineEQ to a Point and Line
+fromLineEQ              :: Num r => LineEQ r -> LinePV 2 r
+fromLineEQ (LineEQ a b) = fromLinearFunction a b
+
+instance Num r => HasSupportingLine (VerticalOrLineEQ r) where
+  supportingLine = \case
+    VerticalLineThrough x -> LinePV (Point2 x 0) (Vector2 0 1)
+    NonVertical l         -> supportingLine l
 
 --------------------------------------------------------------------------------
 -- * Convenience functions on Two dimensional lines

@@ -17,6 +17,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   , toConvexPolygonIn
 
   , mapVertices
+  , cbifoldMap
 
   --   LowerEnvelope'(LowerEnvelope)
   -- , theUnboundedVertex, boundedVertices
@@ -49,13 +50,9 @@ import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Map.NonEmpty (NEMap)
 import Data.Map.NonEmpty qualified as NEMap
-import Data.Monoid (First(..))
 import HGeometry.Box
 import HGeometry.Cyclic
-import HGeometry.Direction
 import HGeometry.HalfLine
-import HGeometry.Intersection
-import HGeometry.LineSegment
 import HGeometry.Plane.LowerEnvelope.Connected.Region
 import HGeometry.Point
 import HGeometry.Point.Either
@@ -68,6 +65,8 @@ import HGeometry.Vector.NonEmpty.Util ()
 import GHC.Generics (Generic)
 import Control.DeepSeq
 import HGeometry.Cone.Intersection (extraPoints)
+import Data.Set.NonEmpty qualified as NESet
+import Data.Foldable1
 
 --------------------------------------------------------------------------------
 -- * The Minimization Diagram, i.e. the type that we use to represent our
@@ -82,6 +81,9 @@ newtype MinimizationDiagram r vertex plane = MinimizationDiagram (NEMap plane (R
 type instance NumType   (MinimizationDiagram r vertex plane) = r
 type instance Dimension (MinimizationDiagram r vertex plane) = 2
 
+
+instance Foldable (MinimizationDiagram r vertex) where
+  foldMap f (MinimizationDiagram m) = NEMap.foldMapWithKey (\k _ -> f k) m
 
 instance Constrained (MinimizationDiagram r vertex) where
   type Dom (MinimizationDiagram r vertex) plane = ( Ord plane, NumType plane ~ r
@@ -102,6 +104,20 @@ mapVertices                           :: (vertex -> vertex')
                                       -> MinimizationDiagram r vertex plane
                                       -> MinimizationDiagram r vertex' plane
 mapVertices f (MinimizationDiagram m) = MinimizationDiagram $ fmap (fmap f) m
+
+-- | Applies some folding functions over the minimization diagram.
+--
+-- The the function is applied exactly once for each vertex (and also
+-- once for every plane).
+cbifoldMap :: (Semigroup s, Ord vertex)
+           => (vertex -> s)
+           -> (plane -> s)
+           -> MinimizationDiagram r vertex plane -> s
+cbifoldMap f g (MinimizationDiagram m) =
+    NEMap.foldMapWithKey (\h _ -> g h) m <> foldMap1 f verts
+  where
+    verts = foldMap1 (foldMap1 NESet.singleton) m
+
 
 -- -- | Apply some mapping function to both the vertices and the planes.
 -- cbimap :: (Ord plane, Ord plane', NumType plane ~ r, NumType plane' ~ r)
