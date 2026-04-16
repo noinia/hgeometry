@@ -23,11 +23,10 @@ import Codec.Wavefront.IO qualified
 import Codec.Wavefront.Face qualified as Face
 import Codec.Wavefront.Object (WavefrontOBJ, objFaces, objLocations
                               )
-import Codec.Wavefront.Element (Element, ElementF(Element))
+import Codec.Wavefront.Element (Element, ElementF())
 import Codec.Wavefront.Element qualified as Element
 import Codec.Wavefront.Location
 import HGeometry.Triangle
-import Hiraffe.Graph.Class (HasVertices(..), HasVertices'(..))
 import System.OsPath
 import HGeometry.Point
 import Data.Vector qualified as Vector
@@ -81,7 +80,8 @@ allTriangles objFile = foldMap (traverse toTriangle) $ objFaces objFile
                                  vis = map vtx is
                              in Triangle vi vj vk : map (Triangle vi vk) vis
 
-    vtx i = toPoint $ objLocations objFile Vector.! (Face.faceLocIndex i)
+    vtx i = toPoint $ objLocations objFile Vector.! (Face.faceLocIndex i - 1)
+    -- vertices are 1-indexed.
 
     toPoint (Location x y z _w) = Point3 x (negate z) y
     -- we ignore the _w value, if they exist

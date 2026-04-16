@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -F -pgmF doctest-driver-gen
+                 -fno-warn-partial-type-signatures
+
                 -optF src
-                -optF polygon/src
-                -optF polyLine/src
 
                 -optF -XTypeFamilies
                 -optF -XGADTs
@@ -33,6 +33,7 @@
 
                 -optF -package=hgeometry-combinatorial
                 -optF -package=hiraffe
+                -optF -package=hgeometry-spline
                 -optF -package=hgeometry
 
 #-}

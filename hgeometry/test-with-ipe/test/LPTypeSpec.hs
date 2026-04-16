@@ -408,7 +408,9 @@ toLineEQ (HalfSpace _ l)
     | l^.direction.xComponent > 0 = HalfSpace Positive l' -- sign was already positive
     | otherwise                   = HalfSpace Negative l'
   where
-    l' = fromJust . toLinearFunction $ l
+    l' = case toLinearFunction l of
+           NonVertical l''       -> l''
+           VerticalLineThrough _ -> error "toLineEQ absurd?"
 
 
     -- goldenWith [osp|data/test-with-ipe/golden/|]

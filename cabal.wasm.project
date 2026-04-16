@@ -1,0 +1,49 @@
+-- with-compiler:  wasm32-wasi-ghc
+-- with-hc-pkg: wasm32-wasi-ghc-pkg
+-- wasm32-wasi-ghc-pkg
+tests: False
+benchmarks: False
+-- multi-repl: True
+packages:
+  hgeometry-combinatorial
+  hgeometry-vector
+  hgeometry-point
+  hgeometry-kernel
+  hgeometry-polyLine
+  hgeometry-spline
+  hgeometry-lineSegmentIntersection
+  hgeometry-polygon
+  hgeometry-ipe
+  hgeometry-svg
+  hgeometry-geojson
+  hgeometry
+  hgeometry-examples
+  ../haskell-floating-point/rounded-hw
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hiraffe
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hspec-with-tempfile
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/miso-bulma
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/wavefront
+
+-- for the approximate  equality that supports typelits
+source-repository-package
+    type: git
+    location: https://github.com/noinia/approximate-equality
+    tag: 02fc43ca97dd66940dc3d4ac61ecda7888ec252e
+
+package hexpat
+    flags: +bundle
+
+package rounded-hw
+    flags: +pure-hs

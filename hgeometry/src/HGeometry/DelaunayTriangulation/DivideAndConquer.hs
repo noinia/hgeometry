@@ -149,11 +149,11 @@ firsts pg = IM.fromList . map (bimap (^.extra) (^.extra)) $ pg^..outerBoundaryEd
 -- pre: at least two elements
 fromHull              :: (Point_ point 2 r, Ord point)
                       => Mapping point -> ConvexPolygon (point :+ VertexID) -> Adj
-fromHull (vtxMap,_) p = let vs@(u:v:vs') = lookup' vtxMap . (^.core)
-                                        <$> p^..vertices
-                            es           = zipWith3 f vs (List.drop 1 vs ++ [u]) (vs' ++ [u,v])
-                            f prv c nxt  = (c,CL.fromList . List.nub $ [prv, nxt])
-                        in IM.fromList es
+fromHull (vtxMap,_) p = case lookup' vtxMap . (^.core) <$> p^..vertices of
+  vs@(u:v:vs') -> let es           = zipWith3 f vs (List.drop 1 vs ++ [u]) (vs' ++ [u,v])
+                      f prv c nxt  = (c,CL.fromList . List.nub $ [prv, nxt])
+                  in IM.fromList es
+  _            -> error "fromHull: precondition failed"
 
 
 -- | Merge the two delaunay triangulations.

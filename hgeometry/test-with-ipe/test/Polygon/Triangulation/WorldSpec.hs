@@ -12,7 +12,6 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances (shrinkPolygon)
 import           HGeometry.Polygon.Triangulation
-import           HGeometry.Properties
 import           Ipe
 import           Ipe.Reader
 import           System.IO.Unsafe

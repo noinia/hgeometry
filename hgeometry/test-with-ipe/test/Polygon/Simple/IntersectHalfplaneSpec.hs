@@ -9,9 +9,7 @@ import           Data.Foldable (for_)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust, maybeToList)
-import qualified Data.Text as Text
 import           Golden
-import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine

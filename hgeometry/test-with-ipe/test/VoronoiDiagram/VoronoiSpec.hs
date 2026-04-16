@@ -128,6 +128,7 @@ degenerateTests = describe "degnereate inputs" $ do
     let v     = Point3 15 15 (-200)
         fromCCWList' = fromCCWList . NonEmpty.fromList
         nonVerticalHyperPlane [a,b,c] = Plane a b c
+        nonVerticalHyperPlane _       = error "absurd"
         defs1 = fromCCWList'
                 [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
                 , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0

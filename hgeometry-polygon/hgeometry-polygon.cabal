@@ -1,0 +1,358 @@
+cabal-version:      3.4
+name:               hgeometry-polygon
+version:            1.0.0.0
+synopsis:           Various polygon data types and typeclasses used in HGeometry
+description:
+  Various polygon data types and typeclasses used in HGeometry.
+homepage:           https://fstaals.net/software/hgeometry
+license:            MIT
+license-file:       LICENSE
+author:             Frank Staals
+maintainer:         frank@fstaals.net
+-- copyright:
+category:           Geometry
+build-type:         Simple
+extra-doc-files:
+    README.md
+    changelog.txt
+-- extra-source-files:
+data-dir: data
+data-files:
+    polygons.simple.json
+tested-with:
+    GHC == 9.12.2
+  -- , GHC == 9.10.1
+  -- , GHC == 9.8.2
+
+source-repository head
+  type:     git
+  location: https://github.com/noinia/hgeometry
+
+--------------------------------------------------------------------------------
+
+common all-setup
+    ghc-options: -O2 -fspecialise-aggressively -fexpose-all-unfoldings
+                 -Wall
+                 -fno-warn-unticked-promoted-constructors
+                 -fno-warn-type-defaults
+                 -fno-warn-partial-type-signatures
+                 -Werror=missing-methods
+
+    build-depends:
+        base                      >= 4.16.1        && < 5
+      , hgeometry-combinatorial   >= 1             && < 1.1
+      , hgeometry-vector          >= 1             && < 1.1
+      , hgeometry-point           >= 1             && < 1.1
+      , hgeometry-kernel          >= 1             && < 1.1
+      , hgeometry-lineSegmentIntersection           >= 1             && < 1.1
+      -- , hgeometry-polyLine        >= 1             && < 1.1
+      -- , hgeometry-spline          >= 1             && < 1.1
+      , hiraffe                   >= 0.1           && < 1
+      , containers                >= 0.6           && < 1
+      -- , nonempty-containers       >= 0.3.4.5       && < 0.4
+      -- , monoidal-containers       >= 0.6.6         && < 0.7
+      -- , fingertree                >= 0.1.5         && < 0.2
+      -- , dlist                     >= 0.7           && < 1.1
+      -- , bytestring                >= 0.11          && < 1
+      , vector:vector             >= 0.13          && < 1
+      -- , array                     >= 0.5           && < 1
+      , lens                      >= 5.2           && < 6
+      , deepseq                   >= 1.1           && < 2
+      , semigroupoids             >= 6.0.0.2       && < 7
+      -- , foldable1-classes-compat  >= 0.1           && < 1
+      -- , semigroups                >= 0.18          && < 1
+      -- , witherable                >= 0.4           && < 1
+      -- , linear                    >= 1.21          && < 2
+      -- , data-clist                >= 0.2           && < 1
+      , aeson                     >= 2.1           && < 3
+      , nonempty-vector           >= 0.2           && < 1
+      , data-default              >= 0.8           && < 1
+      -- , MonadRandom               >= 0.5           && < 1
+      -- , reflection                >= 2.1.7         && < 3
+      -- , filepath                  >= 1.4.100       && < 2
+      -- , file-io                   >= 0.1           && < 1
+      -- , indexed-traversable       >= 0.1.3         && < 1
+      -- , vector-builder            >= 0.3.8         && < 1
+      -- -- , HsYAML                    >= 0.2           && < 1
+      -- , semialign                 >= 1.3           && < 1.4
+      -- , these                     >= 1.0.1         && < 1.3
+      -- , subcategories             >= 0.2           && < 0.3
+
+      -- , ghc-typelits-natnormalise >= 0.9           && < 0.10
+      -- , ghc-typelits-knownnat     >= 0.8.2         && < 0.9
+
+      -- , entropy                   >= 0.4.1.10      && < 0.5
+      -- , pretty-simple             >= 4.1.2.0       && < 5
+
+
+    default-language: GHC2024
+
+    default-extensions:
+        DataKinds
+      , TypeFamilies
+      , GADTs
+      , KindSignatures
+      , ScopedTypeVariables
+      , DerivingStrategies
+      , DerivingVia
+      , GeneralizedNewtypeDeriving
+      , DeriveGeneric
+      , DeriveFunctor
+      , PatternSynonyms
+      , TupleSections
+      , LambdaCase
+      , ViewPatterns
+      , FunctionalDependencies
+      , PartialTypeSignatures
+
+common doctest
+    build-depends:
+      , doctest                    >= 0.8      && < 1
+
+common all-quickcheck-setup
+    ghc-options:
+         -Wall
+         -fno-warn-unticked-promoted-constructors
+         -fno-warn-partial-type-signatures
+         -fno-warn-missing-signatures
+         -fno-warn-type-defaults
+         -fno-warn-orphans
+    build-depends:
+        hspec                           >= 2.9           && < 3
+      , QuickCheck                      >= 2.10          && < 3
+      , quickcheck-instances            >= 0.3           && < 1
+      , approximate-equality            >= 1.1.0.2       && < 1.2
+      -- , mtl                             >= 2.2           && < 3
+      -- , random                          >= 1.3           && < 2
+
+common quickcheck-setup
+    build-depends:
+        hgeometry-kernel:quickcheck
+      , hgeometry-vector:quickcheck
+      , hgeometry-point:quickcheck
+      , hgeometry-polyLine:quickcheck
+      , hgeometry-polygon
+
+--------------------------------------------------------------------------------
+-- * Libraries
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- * Polygon Library
+
+library
+    import:           all-setup
+    hs-source-dirs:   src
+    exposed-modules:
+        HGeometry.Polygon
+        HGeometry.Polygon.Class
+
+        HGeometry.Polygon.Convex
+        HGeometry.Polygon.Convex.Class
+        HGeometry.Polygon.Convex.Internal
+        HGeometry.Polygon.Convex.Unbounded
+
+        HGeometry.Polygon.Simple
+        HGeometry.Polygon.Simple.Class
+        HGeometry.Polygon.Simple.PossiblyDegenerate
+
+        HGeometry.Polygon.WithHoles
+
+    other-modules:
+        HGeometry.Polygon.Simple.Type
+        HGeometry.Polygon.Simple.Implementation
+        HGeometry.Polygon.Simple.InPolygon
+
+--------------------------------------------------------------------------------
+-- * HGeometry-quickcheck
+
+library quickcheck
+    import: all-setup, all-quickcheck-setup, quickcheck-setup
+    visibility: public
+    hs-source-dirs: src-quickcheck
+    exposed-modules:
+      HGeometry.Polygon.Instances
+      -- HGeometry.Polygon.Convex.Instances
+    other-modules:
+      Paths_hgeometry_polygon
+    autogen-modules:
+      Paths_hgeometry_polygon
+    build-depends:
+         hgeometry-polygon
+--       , cereal   >= 0.5    && < 1
+
+--------------------------------------------------------------------------------
+-- * Test Suites
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- ** HGeometry
+
+common test-fractional
+  build-tool-depends: hspec-discover:hspec-discover
+  build-depends:
+      hgeometry-vector:numtypes
+    , hgeometry-polygon:quickcheck
+  hs-source-dirs: test/fractional
+  other-modules:
+      Spec
+      -- Polygon.Convex.ConvexSpec
+      -- Polygon.Convex.UnboundedSpec
+      -- Polygon.TriangulateSpec
+
+      Polygon.NoDupsSpec
+
+      -- Polygon.Triangulation.MakeMonotoneSpec
+      Polygon.PickPointSpec
+
+
+-- test-suite hspec-rational
+--   import:           all-setup, all-quickcheck-setup,
+--                     quickcheck-setup, test-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   mixins:
+--       hgeometry-vector:numtypes (Rational as R)
+
+test-suite hspec-fractional
+  import:           all-setup, all-quickcheck-setup,
+                    quickcheck-setup, test-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  mixins:
+      hgeometry-vector:numtypes (IntervalReal as R)
+
+-- -- test-suite hspec-double
+-- --   import:           all-setup, all-quickcheck-setup,
+-- --                     quickcheck-setup, test-fractional
+-- --   type:             exitcode-stdio-1.0
+-- --   main-is:          Main.hs
+-- --   mixins:
+-- --       hgeometry-vector:numtypes (Double as R)
+
+test-suite hspec-integral
+  import:           all-setup, all-quickcheck-setup, quickcheck-setup
+  build-tool-depends: hspec-discover:hspec-discover
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs: test/integral
+  build-depends:
+      hgeometry-vector:numtypes
+  mixins:
+      hgeometry-vector:numtypes (Int as R)
+  other-modules:
+      Spec
+      Polygon.VerticesSpec
+      Polygon.SeqSpec
+
+test-suite doctest
+    import:           all-setup, all-quickcheck-setup, quickcheck-setup, doctest
+    type:             exitcode-stdio-1.0
+    main-is:          doctests.hs
+    build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+
+-- common with-ipe-hspec-fractional
+--   build-tool-depends: hspec-discover:hspec-discover
+--   other-modules:
+--       Spec
+--       Paths_hgeometry
+--       Golden
+--       Disk.MinDiskSpec
+--       Test.Util
+--       DelaunayTriangulation.DTSpec
+--       Polygon.Simple.InPolygonSpec
+--       Polygon.Convex.ConvexSpec
+--       Polygon.Convex.UnboundedSpec
+--       Polygon.Convex.IntersectTriangleSpec
+--       Polygon.VisibilitySpec
+--       VoronoiDiagram.VoronoiSpec
+
+--       Plane.LowerEnvelopeSpec
+--       Plane.NaiveLowerEnvSpec
+--       Plane.RenderEnvelopeSpec
+--       Plane.RenderProps
+--           -- TODO: move these ones
+
+--       Plane.BatchPointLocationSpec
+
+--       LineSegmentSpec
+--       LineSegment.Intersection.WithHalfSpaceSpec
+--       LPTypeSpec
+--       HalfLineSpec
+--       Polygon.Simple.SPTSpec
+--       Polygon.Simple.IntersectHalfplaneSpec
+--       Polygon.Triangulation.TriangulateMonotoneSpec
+--       Polygon.Triangulation.TriangulateSpec
+--       Polygon.Triangulation.WorldSpec
+--       LineSegment.Intersection.BentleyOttmannSpec
+--       PlaneGraph.RenderSpec
+--       PlaneGraph.FromPolygonsSpec
+--       PlaneGraph.RenderOverlaySpec
+--       PlaneGraph.PolygonOverlaySpec
+
+
+
+--       HalfPlane.CommonIntersectionSpec
+--       Line.LowerEnvelopeSpec
+--       Paths_hgeometry
+--       BallSpec
+--       TriangleUnboundedConvexSpec
+
+--       Wavefront
+
+  -- autogen-modules:
+  --     Paths_hgeometry
+  -- build-depends:
+  --       hspec-with-tempfile    >= 0.1
+  --     , hgeometry:ipe
+  --     , hgeometry:quickcheck
+  --     , hgeometry-vector:numtypes
+  --     , wavefront              >= 0.7.1.5 && < 0.8
+  --     , exceptions             >= 0.10.9  && < 0.11
+
+
+-- test-suite with-ipe-hspec-rational
+--   import:           all-setup, ipe-setup, all-quickcheck-setup,
+--                     quickcheck-setup, with-ipe-hspec-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   hs-source-dirs:   test-with-ipe/test
+--   mixins:
+--       hgeometry-vector:numtypes (Rational as R)
+
+-- test-suite with-ipe-hspec-intervalreal
+--   import:           all-setup, ipe-setup, all-quickcheck-setup,
+--                     quickcheck-setup, with-ipe-hspec-fractional
+--   type:             exitcode-stdio-1.0
+--   main-is:          Main.hs
+--   hs-source-dirs:   test-with-ipe/test
+--   mixins:
+--       hgeometry-vector:numtypes (IntervalReal as R)
+
+--------------------------------------------------------------------------------
+-- * Benchmarks
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- ** HGeometry Benchmarks
+
+-- common bench-setup
+--   build-depends:
+--       tasty-bench           >= 0.3  && < 1
+--     , hgeometry-polygon
+--     , deepseq-generics      >= 0.2  && < 1
+--     , hashable              >= 1.4  && < 2
+--     , hgeometry-vector:numtypes
+
+-- benchmark benchmarks
+--   import: all-setup, bench-setup
+--   hs-source-dirs: bench
+--   main-is:        Benchmarks.hs
+--   type: exitcode-stdio-1.0
+--   other-modules:
+--     ConvexHull.Bench
+--     ConvexHull.GrahamBench
+--     ConvexHull.GrahamV2
+--     ConvexHull.GrahamInt
+--     ConvexHull.GrahamFastest
+--     -- ConvexHull.GrahamClassy
+--     Util

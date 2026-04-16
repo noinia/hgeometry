@@ -89,7 +89,7 @@ distinguish                :: ( Plane_ plane r, Eq r, Fractional r
                            => NonEmpty plane -> Either (NonEmpty (LineEQ r :+ plane))
                                                        (Vector 3 plane, [plane])
 distinguish hs@(h :| rest) = case findDifferent lines' of
-    Left baseLine                -> Left $ fmap (flip asLine baseLine) hs
+    Left baseLine                -> Left $ fmap (flip asLine' baseLine) hs
     Right (Vector2 h2 h3, rest') -> Right (Vector3 h h2 h3, rest')
 
   where
@@ -130,9 +130,9 @@ findDifferent xs = case partitionEithers $ map distinguishParallel xs of
 
 -- | given a plane h, and a line l, erect a vertical plane through l, and return the line
 -- in which h intersects this vertical plane.
-asLine                  :: (Plane_ plane r, Num r)
-                        => plane -> VerticalOrLineEQ r -> LineEQ r :+ plane
-asLine h@(Plane_ a b c) = \case
+asLine'                  :: (Plane_ plane r, Num r)
+                         => plane -> VerticalOrLineEQ r -> LineEQ r :+ plane
+asLine' h@(Plane_ a b c) = \case
   VerticalLineThrough x      -> LineEQ b          (a*x + c)  :+ h
   NonVertical (LineEQ a' b') -> LineEQ (a + a'*b) (b*b' + c) :+ h
   -- we simply fill in the coordinates of the line into the equation for h.  this gives us

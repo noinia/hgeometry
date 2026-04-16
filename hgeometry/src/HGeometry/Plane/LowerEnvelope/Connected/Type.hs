@@ -17,6 +17,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   , toConvexPolygonIn
 
   , mapVertices
+  , cbifoldMap
 
   --   LowerEnvelope'(LowerEnvelope)
   -- , theUnboundedVertex, boundedVertices
@@ -49,13 +50,9 @@ import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Map.NonEmpty (NEMap)
 import Data.Map.NonEmpty qualified as NEMap
-import Data.Monoid (First(..))
 import HGeometry.Box
 import HGeometry.Cyclic
-import HGeometry.Direction
 import HGeometry.HalfLine
-import HGeometry.Intersection
-import HGeometry.LineSegment
 import HGeometry.Plane.LowerEnvelope.Connected.Region
 import HGeometry.Point
 import HGeometry.Point.Either
@@ -67,6 +64,9 @@ import HGeometry.Vector
 import HGeometry.Vector.NonEmpty.Util ()
 import GHC.Generics (Generic)
 import Control.DeepSeq
+import HGeometry.Cone.Intersection (extraPoints)
+import Data.Set.NonEmpty qualified as NESet
+import Data.Foldable1
 
 --------------------------------------------------------------------------------
 -- * The Minimization Diagram, i.e. the type that we use to represent our
@@ -81,6 +81,9 @@ newtype MinimizationDiagram r vertex plane = MinimizationDiagram (NEMap plane (R
 type instance NumType   (MinimizationDiagram r vertex plane) = r
 type instance Dimension (MinimizationDiagram r vertex plane) = 2
 
+
+instance Foldable (MinimizationDiagram r vertex) where
+  foldMap f (MinimizationDiagram m) = NEMap.foldMapWithKey (\k _ -> f k) m
 
 instance Constrained (MinimizationDiagram r vertex) where
   type Dom (MinimizationDiagram r vertex) plane = ( Ord plane, NumType plane ~ r
@@ -101,6 +104,20 @@ mapVertices                           :: (vertex -> vertex')
                                       -> MinimizationDiagram r vertex plane
                                       -> MinimizationDiagram r vertex' plane
 mapVertices f (MinimizationDiagram m) = MinimizationDiagram $ fmap (fmap f) m
+
+-- | Applies some folding functions over the minimization diagram.
+--
+-- The the function is applied exactly once for each vertex (and also
+-- once for every plane).
+cbifoldMap :: (Semigroup s, Ord vertex)
+           => (vertex -> s)
+           -> (plane -> s)
+           -> MinimizationDiagram r vertex plane -> s
+cbifoldMap f g (MinimizationDiagram m) =
+    NEMap.foldMapWithKey (\h _ -> g h) m <> foldMap1 f verts
+  where
+    verts = foldMap1 (foldMap1 NESet.singleton) m
+
 
 -- -- | Apply some mapping function to both the vertices and the planes.
 -- cbimap :: (Ord plane, Ord plane', NumType plane ~ r, NumType plane' ~ r)
@@ -133,44 +150,6 @@ toConvexPolygonIn rect = \case
                                                                 (rect^.maxPoint.asPoint)
                          in Right . uncheckedFromCCWPoints $
                                 (Extra <$> extras) <> (Original <$> pts)
-
--- | computes the extra vertices that we have to insert to make an unbounded region bounded
-extraPoints            :: ( Rectangle_ rectangle corner, Point_ corner 2 r
-                          , Point_ point 2 r, Fractional r, Ord r
-                          , IsIntersectableWith (HalfLine point) (ClosedLineSegment corner)
-                          , Intersection (HalfLine point) (ClosedLineSegment corner)
-                            ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
-                                                                     (ClosedLineSegment corner))
-                          )
-                       => HalfLine point -> HalfLine point -> rectangle
-                       -> NonEmpty (Point 2 r)
-extraPoints hp hq rect = noDuplicates $ q :| cornersInBetween qSide pSide rect <> [p]
-    -- if the intersection point coincides with a corner then the current code includes
-    -- the corner. We use the noDuplicates to get rid of those.
-  where
-    (q,qSide) = intersectionPoint hq
-    (p,pSide) = intersectionPoint hp
-
-    intersectionPoint  h = case getFirst $ intersectionPoint' h of
-                             Nothing -> error "extraPoints: precondititon failed "
-                             Just x  -> x
-    intersectionPoint' h = flip ifoldMap (sides rect) $ \side seg ->
-      case h `intersect` seg of
-        Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
-        _                                     -> First   Nothing
-
-    noDuplicates = fmap NonEmpty.head . NonEmpty.group1
-
-
--- | Computes the corners in between the two given sides (in CCW order)
-cornersInBetween          :: (Rectangle_ rectangle point, Point_ point 2 r, Num r)
-                          => CardinalDirection -> CardinalDirection -> rectangle -> [Point 2 r]
-cornersInBetween s e rect = map snd
-                          . takeWhile ((/= e) . fst) . dropWhile ((/= s) . fst)
-                          $ cycle [(East,tr),(North,tl),(West,bl),(South,br)]
-  where
-    Corners tl tr br bl = view asPoint <$> corners rect
-
 
 --------------------------------------------------------------------------------
 
