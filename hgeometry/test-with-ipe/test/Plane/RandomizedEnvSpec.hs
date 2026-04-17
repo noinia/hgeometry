@@ -38,6 +38,45 @@ import Debug.Trace
 instance Arbitrary StdGen where
   arbitrary = mkStdGen <$> arbitrary
 
+data Queries = Queries (Triangle (Point 2 R)) (NonEmpty (Point 2 R))
+             deriving (Show,Eq)
+
+
+barrycentric :: Triangle (Point 2 R) -> Vector 3 R -> Point 2 R
+barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y z) =
+    Point $ (x *^ a) ^+^ (y *^ b) ^+^ (z *^ c)
+
+normalize   :: Vector 3 R -> Vector 3 R
+normalize v = let s = sum v in (/s) <$> v
+
+instance Arbitrary Queries where
+  arbitrary = do domain   <- arbitrary
+                 queries' <- fmap NonEmpty.fromList . listOf1 $
+                             arbitrary `suchThat` (> zero)
+                 let queries = barrycentric domain <$> queries'
+                 pure $ Queries domain queries
+
+verifyLowest          :: [MyPlane] -> Point 2 R
+                      -> TriangulatedLowerEnvelope R MyPlane
+                      -> Property
+verifyLowest hs q = counterexample (show q) . ifoldMap allPrismsCorrect
+  where
+    allPrismsCorrect   :: MyPlane -> NonEmpty (Prism R MyPlane :+ extra) -> Every
+    allPrismsCorrect h = Every . counterexample (show h) . foldMap (prismIsCorrect h)
+
+    prismIsCorrect         :: MyPlane -> Prism R MyPlane :+ extra -> Every
+    prismIsCorrect h (tri :+ _)
+      | q `intersects` projectPrism tri = Every $ counterexample (show tri) $ isLowestAtQ h
+      | otherwise                       = mempty
+
+    isLowestAtQ   :: MyPlane -> Every
+    isLowestAtQ h = let z = evalAt q h
+                    in foldMap (\h' -> Every $
+                                 counterexample (show h') $
+                                 counterexample (show (z,evalAt q h')) $
+                                 z <= evalAt q h'
+                               ) hs
+
 spec :: Spec
 spec = describe "Plane.RandomizedEnvSpec" $ do
          modifyMaxSize (const 60) $ do
@@ -61,8 +100,13 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
            --       show () === "foo"
 
 
-
-
+           prop "brute force triangulated envelope; indeed lowest at query points" $
+             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
+               let input = Sample (toList planes) (length planes) [] (length planes)
+                   env   = bruteForceTriangulatedEnvelopeIn domain input
+               in conjoin [ verifyLowest (toList planes) q env
+                          | q <- toList queries
+                          ]
 
            prop "dummy" $
              \(planes :: NESet.NESet MyPlane) ->

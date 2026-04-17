@@ -7,6 +7,7 @@ module Plane.BruteForce
 
 
   , bruteForceTriangulatedEnvelope
+  , bruteForceTriangulatedEnvelopeIn
   , TriangulatedLowerEnvelope
   , Prism
   , Vertex'(..)
