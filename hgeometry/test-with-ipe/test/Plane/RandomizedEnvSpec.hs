@@ -29,6 +29,8 @@ import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import HGeometry.Ext
 import Ipe.Color
+import HGeometry.Polygon.Simple.PossiblyDegenerate
+import HGeometry.Intersection
 
 import Debug.Trace
 --------------------------------------------------------------------------------
@@ -45,6 +47,22 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
                                                       (length planes) [] (length planes)))
                ===
                Map.keys (Original.computeVertexForm planes)
+
+           -- prop "prisms are interiorly disjoint" $
+           --   \(planes :: NESet.NESet MyPlane) ->
+           --     let input  = Sample (toList planes) (length planes) [] (length planes)
+           --         env    = bruteForceTriangulatedEnvelope input
+           --         prisms = toList $ foldMap (^.core) env
+           --     in
+           --       mconcat [ counterexample (show (a,b)) $ interiorlyDisjoint a b
+           --               | a <- prisms, b <- prisms, a /= b
+           --               ]
+
+           --       show () === "foo"
+
+
+
+
 
            prop "dummy" $
              \(planes :: NESet.NESet MyPlane) ->
@@ -66,8 +84,15 @@ verticesOf :: (Plane_ plane r, Ord r, Fractional r)
 verticesOf = sort . map location   . MonoidalMap.keys
 
 
+{-
+-- | Test whether two prisms are interiorly disjoint
+interiorlyDisjoint     :: (Plane_ plane r, Fractional r, Ord plane, Ord r)
+                       => Prism r plane -> Prism r plane -> Bool
+interiorlyDisjoint a b = case projectPrism a `intersect` projectPrism b  of
+  Just (ActualPolygon _) -> False
+  _                      -> True
 
-
+-}
 --------------------------------------------------------------------------------
 
 
@@ -87,6 +112,7 @@ test = writeIpeFile [osp|env.ipe|] $ singlePageFromContent . concat $
              , Plane 1.66666 1.66666 (-3) :+ blue
              , Plane 2.66666 (-1) 0.5      :+ green
              , Plane 0 0 1               :+ orange
+             , Plane (-2) 2 2              :+ yellow
              ]
 
     vertices   = bruteForceVertices input
@@ -106,20 +132,23 @@ draw = ifoldMap draw'
   where
     draw' (h :+ color) = foldMap draw''
       where
-        draw'' (Triangle u v w :+ cl) =
-          [ iO $ defIO (Triangle (loc u) (loc v) (loc w))
-                       ! attr SFill color
+        draw'' (prism :+ cl) =
+          [ iO $ defIO (projectPrism prism) ! attr SFill color
           ]
-        loc :: Vertex' r (plane :+ IpeColor r) -> Point 2 r
-        loc = \case
-          Real v  -> location2 v
-          Dummy p -> projectPoint p
+        -- loc :: Vertex' r (plane :+ IpeColor r) -> Point 2 r
+        -- loc = \case
+        --   Real v  -> location2 v
+        --   Dummy p -> projectPoint p
 
           -- Cone v           -> [iO $ defIO $ location2 v]
           -- ClippedCone u v  -> [iO $ defIO $ ClosedLineSegment (location2 u) (location2 v)]
 
 
-
+projectPrism :: (Plane_ plane r, Fractional r, Ord r)
+             => Prism r plane -> Triangle (Point 2 r)
+projectPrism = fmap $ \case
+  Real v  -> location2 v
+  Dummy p -> projectPoint p
 
 
 

@@ -150,8 +150,8 @@ triangulate              :: forall plane r conflictList.
                          -> NonEmpty (Vertex r plane :+ conflictList)
                          -> Maybe (NonEmpty (Prism r plane :+ conflictList))
 triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
-    v1 :| []          -> coverCone v1
-    v1 :| v2 : []     -> coverClippedCone v1 v2
+    v1 :| []          -> traceShowWith ("cone",h,"->",) $ coverCone v1
+    v1 :| v2 : []     -> traceShowWith ("clippedCone",h,"->",) $ coverClippedCone v1 v2
     v1 :| v2 : v3 : _ -> let p  = pointInteriorTo (Triangle (location2 $ v1^.core)
                                                             (location2 $ v2^.core)
                                                             (location2 $ v3^.core)
@@ -159,7 +159,8 @@ triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
                              vs'' = NonEmpty.sortBy (cmpAround p) vs'
                          in Just $ case boundedOrUnBounded h p vs'' of
         Bounded vs       -> triangulate' (real <$> vs)
-        Unbounded u v vs -> coverClippedCone u v `mcons` triangulate' (real <$> vs)
+        Unbounded u v vs -> traceShowWith ("unbounded region found",h,u,v,vs,"->",) $
+          coverClippedCone u v `mcons` triangulate' (real <$> vs)
 
   where
     mcons m xs = maybe xs (<> xs) m
@@ -185,7 +186,7 @@ triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
                                        z <= evalAt q h') (otherPlanes <> extraPlanes)
 
 
-    lambda = 100000 -- TODO; this should somehow use the domain
+    lambda = 1000 -- TODO; this should somehow use the domain
 
     -- | Computes a prism to cover the cone defined by v.
     coverCone           :: Vertex r plane :+ conflictList
@@ -217,7 +218,6 @@ triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
 
     real = over core Real
 
-computeConflictLists v a b = [] -- TODO
 
 -- | Given a plane h, a point p at which h defines the lower envelope;
 -- and the vertices of the lower envelope region of h. Compute whether
