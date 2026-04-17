@@ -19,6 +19,9 @@ data Sample sample a = Sample { sampled   :: sample a
                               }
                      deriving Show
 
+instance Foldable sample => Foldable (Sample sample) where
+  foldMap f (Sample xs _ ys _) = foldMap f xs <> foldMap f ys
+  length = totalSize
 
 -- | Given a parameter r, the main idea is to take a (r/n)-sample of
 -- the given set; we return both the sampled set, as well as the

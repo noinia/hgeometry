@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Plane.RandomizedEnvSpec
   where
 
@@ -27,7 +28,9 @@ import Plane.Randomized2
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import HGeometry.Ext
+import Ipe.Color
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 instance Arbitrary StdGen where
@@ -46,9 +49,7 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
            prop "dummy" $
              \(planes :: NESet.NESet MyPlane) ->
                let input = Sample (toList planes) (length planes) [] (length planes)
-               in case bruteForceTriangulatedEnvelope input of
-                    (_, Nothing)      -> discard
-                    (env, Just _bBox) -> show env === "foo"
+               in show (bruteForceTriangulatedEnvelope input) === "foo"
 
            prop "randomized2 same as (new) brute force" $
              \(planes :: NESet.NESet MyPlane) (gen :: StdGen) ->
@@ -69,27 +70,59 @@ verticesOf = sort . map location   . MonoidalMap.keys
 
 --------------------------------------------------------------------------------
 
-test = writeIpeFile [osp|env.ipe|] $ singlePageFromContent $ draw env
-  where
-    input   = Sample (toList planes) (length planes) [] (length planes)
-    (env,_) = bruteForceTriangulatedEnvelope input
 
-    planes = NonEmpty.fromList
-             [ Plane (-1) 3 1
-             , Plane 1.66666 1.66666 (-3)
-             , Plane 2.66666 (-1) 0.5
-             , Plane 0 0 1
+test = writeIpeFile [osp|env.ipe|] $ singlePageFromContent . concat $
+                                   [ draw env
+                                   , drawVertices vertices
+                                   ,  [iO $ defIO (computeDomain planes)
+                                                 ! attr SLayer "domain"]
+                                   ]
+  where
+    input = Sample (toList planes) (length planes) [] (length planes)
+    env   = bruteForceTriangulatedEnvelope input
+
+    planes :: NonEmpty (MyPlane :+ IpeColor R)
+    planes = NonEmpty.fromList . fmap (over core MyPlane) $
+             [ Plane (-1) 3 1           :+ red
+             , Plane 1.66666 1.66666 (-3) :+ blue
+             , Plane 2.66666 (-1) 0.5      :+ green
+             , Plane 0 0 1               :+ orange
              ]
 
+    vertices   = bruteForceVertices input
 
-draw :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
-     => TriangulatedLowerEnvelope r plane -> [IpeObject r]
+
+drawVertices :: (Plane_ plane r, Fractional r, Ord plane, Ord r)
+             => MonoidalMap (Vertex r plane) [plane]
+             -> [IpeObject r]
+drawVertices = ifoldMap $ \v _ -> [iO $ defIO (location2 v)
+                                             ! attr SLayer "vertices"
+                                  ]
+
+draw :: forall plane r.
+        (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r)
+     => TriangulatedLowerEnvelope r (plane :+ IpeColor r) -> [IpeObject r]
 draw = ifoldMap draw'
   where
-    draw' h = foldMap draw''
+    draw' (h :+ color) = foldMap draw''
       where
-        draw'' (cell :+ cl) = case cell of
-          Triangular u v w -> [iO $ defIO $ Triangle (location2 u) (location2 v) (location2 w)
-                              ]
-          Cone v           -> [iO $ defIO $ location2 v]
-          ClippedCone u v  -> [iO $ defIO $ ClosedLineSegment (location2 u) (location2 v)]
+        draw'' (Triangle u v w :+ cl) =
+          [ iO $ defIO (Triangle (loc u) (loc v) (loc w))
+                       ! attr SFill color
+          ]
+        loc :: Vertex' r (plane :+ IpeColor r) -> Point 2 r
+        loc = \case
+          Real v  -> location2 v
+          Dummy p -> projectPoint p
+
+          -- Cone v           -> [iO $ defIO $ location2 v]
+          -- ClippedCone u v  -> [iO $ defIO $ ClosedLineSegment (location2 u) (location2 v)]
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------

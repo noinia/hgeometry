@@ -1,13 +1,15 @@
 {- HLINT ignore "Use list literal pattern" -}
 module Plane.BruteForce
   ( bruteForceVertices
+  , computeDomain
 
   , Vertex(..), location, location2
 
 
   , bruteForceTriangulatedEnvelope
   , TriangulatedLowerEnvelope
-  , Prism(..)
+  , Prism
+  , Vertex'(..)
 
   -- , allZippers
   ) where
@@ -45,37 +47,72 @@ import           Witherable
 import           HGeometry.Cyclic (Cyclic)
 import Control.Applicative
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 
 instance Ord k => FilterableWithIndex k (MonoidalMap k) where
 
+computeDomain   :: (Foldable set, Plane_ plane r, Ord r, Fractional r
+                   ) => set plane -> Triangle (Point 2 r)
+computeDomain _ = Triangle (Point2 x          x)
+                           (Point2 x          (negate $ 2*x))
+                           (Point2 (negate x) x)
+  where
+    x = 10000
+  -- TODO: this should do something more sensible
 
 
--- | Given two sets H and R of planes; compute the lower envelope of R using a brute force
--- method, and compute the conflict lists of every vertex w.r.t the first set H.
+-- | Given a triangular domain \(\Delta\), and two sets H and R of
+-- planes; compute the lower envelope of R above \(\Delta\) using a
+-- brute force method, and compute the conflict lists of every prism
+-- w.r.t the first set H.
+--
+-- In particular, for each plane h we return a bunch of prisms that
+-- cover the region (of \(\Delta\)) in which h is the lowest
+-- plane. Note that the prisms may also cover things outside of
+-- \(\Delta\).
 --
 -- In addition, we return a bounding box of the vertices of the lower envelope (if there are)
 -- any vertices.
 --
 -- O(r^4 + rn)
-bruteForceTriangulatedEnvelope  :: ( Plane_ plane r
-                                   , Ord r, Fractional r, Ord plane
-                                   , Foldable subset
-                                   )
-                                => Sample subset plane ->
-                                   ( TriangulatedLowerEnvelope r plane
-                                   , Maybe (Box (Point 2 r))
-                                   )
-bruteForceTriangulatedEnvelope sample@(Sample rs _ rest _) = (env, bBox)
+bruteForceTriangulatedEnvelope        :: ( Plane_ plane r
+                                         , Ord r, Fractional r, Ord plane
+                                         , Foldable subset
+                                         , Show plane, Show r -- TODO: remove
+                                         )
+                                      => Sample subset plane
+                                      -> TriangulatedLowerEnvelope r plane
+bruteForceTriangulatedEnvelope sample =
+  bruteForceTriangulatedEnvelopeIn (computeDomain $ toList sample) sample
+
+
+
+bruteForceTriangulatedEnvelopeIn                :: ( Plane_ plane r
+                                                 , Ord r, Fractional r, Ord plane
+                                                 , Foldable subset
+                                                 , Show plane, Show r -- TODO: remove
+                                                 )
+                                              => Triangle (Point 2 r)
+                                              -> Sample subset plane
+                                              -> TriangulatedLowerEnvelope r plane
+bruteForceTriangulatedEnvelopeIn domain sample =
+    fmap (fmap (computeDummyConflicts $ remaining sample))
+  . imapMaybe (triangulate domain) . fromVertices . bruteForceVertices $ sample
+
+
+computeDummyConflicts                :: ( Plane_ plane r, Ord r, Fractional r
+                                        , Filterable set, Monoid (set plane)
+                                        )
+                                     => set plane
+                                     -> Prism r plane :+ set plane
+                                     -> Prism r plane :+ set plane
+computeDummyConflicts hs (tri :+ cl) = tri :+ cl <> foldMap clOf tri
   where
-    env = imapMaybe triangulate $ fromVertices vertices'
-    bBox = fmap (boundingBox . fmap location2)
-         . NonEmpty.nonEmpty $ MonoidalMap.keys vertices'
-
-    vertices' = bruteForceVertices sample
-
-
+    clOf = \case
+      Real _  -> mempty
+      Dummy p -> filter (\h -> verticalSideTest p h == LT) hs
 
 
 -- | A triangulated lower envelope; with conflict lists.
@@ -83,126 +120,104 @@ type TriangulatedLowerEnvelope r plane =
   MonoidalMap plane (NonEmpty (Prism r plane :+ [plane]))
 -- make this a monoidalNEMap?
 
---------------------------------------------------------------------------------
+type Prism r plane = Triangle (Vertex' r plane)
 
-data Prism r plane = Triangular (Vertex r plane) (Vertex r plane) (Vertex r plane)
-                   | Cone (Vector 2 r)
-                          (Vertex r plane)
-                          (Vector 2 r)
-                     -- ^ the (projected) vectors pointing towards the unbounded direction.
-                   | ClippedCone (Vector 2 r)
-                                 (Vertex r plane) (Vertex r plane)
-                                 (Vector 2 r)
-                     -- ^ the (projected) vectors pointing towards the unbounded direction.
-                   deriving (Show,Eq)
-
-
-
-
-
-
-
-
-
-
+-- | A Vertex wich may just be a dummy point
+data Vertex' r plane = Dummy (Point 3 r)
+                     | Real (Vertex r plane)
+                     deriving (Show,Eq,Ord)
 
 --------------------------------------------------------------------------------
-
--- | A (not so great) representation of the Lower envelope;
---
--- the vertices bounding a plane are given in arbitrary order.
---
--- (this assumes there is at least one vertex) in the lower envelope.
-type LowerEnvelope r plane = MonoidalMap plane (NonEmpty (Vertex r plane :+ [plane]))
-
-
--- |
--- Given the vertices of the lower envelope; compute the envelope itself; i.e. for every
--- plane, compute the vertices at which it appears on the lower envelope.
---
---
--- O(h\log h), where \(h\) is the complexity of the envelope.
-fromVertices :: Ord plane => MonoidalMap (Vertex r plane) [plane] -> LowerEnvelope r plane
-fromVertices = ifoldMap $ \v cl -> let v' = NonEmpty.singleton $ v :+ cl
-                                   in MonoidalMap.fromList [ (h,v') | h <- planesOf v ]
-  -- TODO: what do we do with empty maps
-  -- TODO: verify that the monoidal combinations are not too expensive.
-  --
-  -- we may want to use some DList like thing rather than NonEmpty? to guarantee O(1)
-  -- time (<>)
-
--- | Comutes the lower envelope of the sampled planes as well as the conflict lists
--- of every vertex.
---
--- O(r^4 + rn)
-bruteForceEnvelope :: (Plane_ plane r, Ord r, Fractional r, Ord plane, Foldable subset)
-                   => Sample subset plane -> LowerEnvelope r plane
-bruteForceEnvelope = fromVertices . bruteForceVertices
-
-{-
--- | Comutes the lower envelope of the sampled planes as well as the conflict lists
--- of every vertex.
---
--- O(r^4 + rn)
-bruteForceTriangulatedLowerEnvelope :: Sample subset plane -> TriangulatedLowerEnvelope plane
-bruteForceTriangulatedLowerEnvelope = imap triangulate . bruteForceEnvelope
-
--}
-
 
 -- | Given a plane h, and the k vertices bounding the region at which h appears on the
 -- lower envelope; produce a list of prisms at which the vertex appears.
 --
--- for each prism, we additionally compute its (partial) conflict list.
--- partial in the sense that we include only the conflict lists at vertices of the prism.
--- so for unbounded prisms cells may be missing.
+-- for each prism, we additionally compute partial conflict lists; i.e. the conflict lists
+-- from the real vertices.
 --
 -- this may prdouce an empty list in case the plane was redundant; i.e. it only appeared
 -- on the lower envelope in a point or line segment.
 --
 -- O(k\log k)
-triangulate       :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
-                  => plane
-                  -> NonEmpty (Vertex r plane :+ [plane])
-                  -> Maybe (NonEmpty (Prism r plane :+ [plane]))
-triangulate h vs' = case vs' of
-    v1 :| []          -> cone v1           <$ findDirectionOf h v1
-    v1 :| v2 : []     -> clippedCone v1 v2 <$ (findDirectionOf h v1 <|> findDirectionOf h v2)
-    v1 :| v2 : v3 : _ -> Just $
-                         let p  = pointInteriorTo (Triangle (location2 $ v1^.core)
+triangulate              :: forall plane r conflictList.
+                            ( Plane_ plane r, Ord plane, Ord r, Fractional r
+                            , Semigroup conflictList
+
+                            , Show plane, Show r, Show conflictList
+                            )
+                         => Triangle (Point 2 r)
+                         -> plane
+                         -> NonEmpty (Vertex r plane :+ conflictList)
+                         -> Maybe (NonEmpty (Prism r plane :+ conflictList))
+triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
+    v1 :| []          -> coverCone v1
+    v1 :| v2 : []     -> coverClippedCone v1 v2
+    v1 :| v2 : v3 : _ -> let p  = pointInteriorTo (Triangle (location2 $ v1^.core)
                                                             (location2 $ v2^.core)
                                                             (location2 $ v3^.core)
                                                   )
                              vs'' = NonEmpty.sortBy (cmpAround p) vs'
-                         in case boundedOrUnBounded h p vs'' of
-        Bounded vs       -> triangulate' vs
-        Unbounded u v vs -> clippedCone u v <> triangulate' vs
+                         in Just $ case boundedOrUnBounded h p vs'' of
+        Bounded vs       -> triangulate' (real <$> vs)
+        Unbounded u v vs -> coverClippedCone u v `mcons` triangulate' (real <$> vs)
+
   where
-    cone (v :+ cl)                   = NonEmpty.singleton $ Cone dummy v dummy :+ cl
-    clippedCone (u :+ cl) (v :+ cl') = NonEmpty.singleton $ ClippedCone dummy u v dummy
-                                                            :+ (cl <> cl')
+    mcons m xs = maybe xs (<> xs) m
+
+    dummy q@(Point2 x y) = let z = evalAt q h in Dummy $ Point3 x y z
+
+    -- | Compute candidate dummy corners for the prism based on the edges incident to v
+    -- we also check against the extra planes to see whether we should be a vtx or not
+    candidates               :: [plane] -> Vertex r plane -> [Point 2 r]
+    candidates extraPlanes v = concatMap ( (filter hIsLowestAt
+                                . traceShowWith ("before filtering",h,v,)
+                                . (\w -> [p .+^ w, p .-^ w ]))
+                               . (lambda *^)
+                             )
+                             . mapMaybe (intersectionVector h) $ otherPlanes
+      where
+        p = location2 v
+        otherPlanes = List.delete h (planesOf v)
+        hIsLowestAt q = let z = evalAt q h
+                        in all (\h' -> traceShowWith ("eval",h,q,"---",h',z,evalAt q h',
+                                                      z `compare` evalAt q h',
+                                                      "->",) $
+                                       z <= evalAt q h') (otherPlanes <> extraPlanes)
+
+
+    lambda = 100000 -- TODO; this should somehow use the domain
+
+    -- | Computes a prism to cover the cone defined by v.
+    coverCone           :: Vertex r plane :+ conflictList
+                        -> Maybe (NonEmpty (Prism r plane :+ conflictList))
+    coverCone (v :+ cl) = case traceShowWith ("candidates for", h,v, " ",) $ candidates [] v of
+      [a,b] -> NonEmpty.nonEmpty [Triangle (Real v) (dummy a) (dummy b) :+ cl]
+      _     -> Nothing -- h only appears at the vertex
+
+    coverClippedCone (v1 :+ cl1) (v2 :+ cl2) = case traceShowWith ("candidates v1",h,v1,) $ candidates (extras v2) v1 of
+      [a] -> case traceShowWith ("candidates v2",h,v2,) $ candidates (extras v1) v2 of
+               [b] -> NonEmpty.nonEmpty
+                      [ Triangle (Real v1) (Real v2) (dummy a) :+ cl1 <> cl2
+                      , Triangle (Real v2) (dummy a) (dummy b) :+ cl2
+                      ]
+               _   -> Nothing
+      _   -> Nothing
+      -- There should be at least one candidate dummy point for each unbounded vertex.
+      -- moreover, I think there should also be only at most one.
+
+    extras :: Vertex r plane -> [plane]
+    extras = List.delete h . planesOf
 
     cmpAround p (u :+ _) (v :+ _) = ccwCmpAround p (location2 u) (location2 v)
-
-    dummy = Vector2 0 0 -- FIXME!!!!
     triangulate' = \case
       (v0 :+ cl0) :| (v:vs) -> NonEmpty.zipWith mkPrism (v :| vs) (NonEmpty.fromList vs)
         where
-          mkPrism (v1 :+ cl1) (v2 :+ cl2) = Triangular v0 v1 v2 :+ (cl0 <> cl1 <> cl2)
+          mkPrism (v1 :+ cl1) (v2 :+ cl2) = Triangle v0 v1 v2 :+ (cl0 <> cl1 <> cl2)
       _                      -> error "triangulate': absurd"
 
+    real = over core Real
 
--- | Given a plane h (that is one of the definers of the vertex) v, compute a direction w
--- in which h is the lowest plane among the definers of v.
-findDirectionOf     :: Plane_ plane r
-                    => plane -> Vertex r plane :+ a -> Maybe (Vector 2 r)
-findDirectionOf h v = Just undefined -- Nothing -- TODO
-  -- TODO: for now we assume none of the planes are redundant. So just output them anyway!
-  -- we are not really using anythign of the reutnr type anyway.
-
-
-
-
+computeConflictLists v a b = [] -- TODO
 
 -- | Given a plane h, a point p at which h defines the lower envelope;
 -- and the vertices of the lower envelope region of h. Compute whether
@@ -272,6 +287,50 @@ data Boundary vertex = Unbounded vertex vertex (NonEmpty vertex)
                      -- ^ the two vertices incident to the unbounded edges
                      -- and the list of all vertices (including those unbounded ones)
                      | Bounded (NonEmpty vertex)
+
+--------------------------------------------------------------------------------
+
+-- | A (not so great) representation of the Lower envelope;
+--
+-- the vertices bounding a plane are given in arbitrary order.
+--
+-- (this assumes there is at least one vertex) in the lower envelope.
+type LowerEnvelope r plane = MonoidalMap plane (NonEmpty (Vertex r plane :+ [plane]))
+
+-- |
+-- Given the vertices of the lower envelope; compute the envelope itself; i.e. for every
+-- plane, compute the vertices at which it appears on the lower envelope.
+--
+--
+-- O(h\log h), where \(h\) is the complexity of the envelope.
+fromVertices :: Ord plane => MonoidalMap (Vertex r plane) [plane] -> LowerEnvelope r plane
+fromVertices = ifoldMap $ \v cl -> let v' = NonEmpty.singleton $ v :+ cl
+                                   in MonoidalMap.fromList [ (h,v') | h <- planesOf v ]
+  -- TODO: what do we do with empty maps
+  -- TODO: verify that the monoidal combinations are not too expensive.
+  --
+  -- we may want to use some DList like thing rather than NonEmpty? to guarantee O(1)
+  -- time (<>)
+
+-- | Comutes the lower envelope of the sampled planes as well as the conflict lists
+-- of every vertex.
+--
+-- O(r^4 + rn)
+bruteForceEnvelope :: (Plane_ plane r, Ord r, Fractional r, Ord plane, Foldable subset)
+                   => Sample subset plane -> LowerEnvelope r plane
+bruteForceEnvelope = fromVertices . bruteForceVertices
+
+{-
+-- | Comutes the lower envelope of the sampled planes as well as the conflict lists
+-- of every vertex.
+--
+-- O(r^4 + rn)
+bruteForceTriangulatedLowerEnvelope :: Sample subset plane -> TriangulatedLowerEnvelope plane
+bruteForceTriangulatedLowerEnvelope = imap triangulate . bruteForceEnvelope
+
+-}
+
+
 
 -- --------------------------------------------------------------------------------
 
