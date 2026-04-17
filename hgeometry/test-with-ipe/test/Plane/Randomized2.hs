@@ -1,6 +1,5 @@
 module Plane.Randomized2
-  (
-
+  ( randomizedVertices
   ) where
 
 
@@ -17,6 +16,7 @@ import Data.Foldable1
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List qualified as List
 import Data.List.NonEmpty qualified as NonEmpty
+import Plane.BruteForce
 import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
 import HGeometry.Plane.LowerEnvelope.Connected( mapVertices
                                               , MinimizationDiagram
@@ -29,9 +29,25 @@ import Data.Map (Map)
 import Data.Map qualified as Map
 import Prelude hiding (filter)
 import Plane.Sample
+import Data.Map.Monoidal (MonoidalMap)
+import Data.Map.Monoidal qualified as MonoidalMap
 
 --------------------------------------------------------------------------------
 
+
+-- | Randomzied algoirhtm to compute the vertices of the lwoer envelope
+randomizedVertices :: ( Plane_ plane r, Ord r, Fractional r
+                      , RandomGen gen
+                      , Foldable subset, Ord plane
+                      )
+                   => gen
+                   -> Sample subset plane
+                   -> MonoidalMap (Vertex r plane) [plane]
+randomizedVertices gen = undefined
+
+
+
+{-
 
 
 -- | For every plane, the list of prisms, each together with their conflict list
@@ -207,5 +223,7 @@ triangulate = MonoidalNEMap . fmap triangulate' . asMap
   where
     triangulate'        :: Region r (MDVertex r plane [plane]) -> NonEmpty (Prism r plane)
     triangulate' region = undefined
+
+-}
 
 -}

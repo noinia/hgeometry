@@ -1,65 +1,112 @@
+{- HLINT ignore "Use list literal pattern" -}
 module Plane.BruteForce
   ( bruteForceVertices
 
-
   , Vertex(..), location, location2
+
+
+  , bruteForceTriangulatedEnvelope
+  , TriangulatedLowerEnvelope
+  , Prism(..)
 
   -- , allZippers
   ) where
 
-import Data.Foldable.WithIndex
-import Data.Foldable
-import Data.Maybe (fromMaybe)
-import Plane.Sample
-import HGeometry.Kernel
-import HGeometry.HyperPlane.Class
-import HGeometry.Ext
-import Data.List.NonEmpty (NonEmpty(..))
+
+import           Control.Lens hiding (Prism)
+import           Prelude hiding (filter)
+import           Data.Set (Set)
+import qualified Data.Set as Set
+import           Data.Foldable1
+import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
+import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
+import           Data.Foldable.WithIndex
+import           Data.Foldable
+import           Data.Maybe (fromMaybe)
+import           Plane.Sample
+import           HGeometry.Kernel
+import           HGeometry.HyperPlane.Class
+import           HGeometry.Ext
+import           Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.List qualified as List
-import Data.Map.Monoidal (MonoidalMap)
+import           Data.Map.Monoidal (MonoidalMap)
 import Data.Map.Monoidal qualified as MonoidalMap
-import HGeometry.Combinatorial.Util
-import Data.List (inits, tails)
-import HGeometry.List.Util
-import Data.Map (Map)
+import           HGeometry.Combinatorial.Util
+import           Data.List (inits, tails)
+import           HGeometry.List.Util
+import           Data.Map (Map)
 import Data.Map qualified as Map
-import HGeometry.Plane.LowerEnvelope.Connected.Primitives
-import Control.DeepSeq
-import GHC.Generics (Generic)
+import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import           Control.DeepSeq
+import           GHC.Generics (Generic)
+import           Data.Functor.WithIndex
+import           Witherable
+import           HGeometry.Cyclic (Cyclic)
+import Control.Applicative
 
 --------------------------------------------------------------------------------
 
--- data Prism r plane
+
+instance Ord k => FilterableWithIndex k (MonoidalMap k) where
 
 
-{-
+
 -- | Given two sets H and R of planes; compute the lower envelope of R using a brute force
 -- method, and compute the conflict lists of every vertex w.r.t the first set H.
 --
+-- In addition, we return a bounding box of the vertices of the lower envelope (if there are)
+-- any vertices.
+--
 -- O(r^4 + rn)
-bruteForceEnvelope                       :: Sample subset plane ->
-                                            ( TriangulatedEnvelope r plane
-                                            , Box (Point 2 r)
-                                            )
-bruteForceEnvelope (Sample rs _ rest _) = (env, bBox)
+bruteForceTriangulatedEnvelope  :: ( Plane_ plane r
+                                   , Ord r, Fractional r, Ord plane
+                                   , Foldable subset
+                                   )
+                                => Sample subset plane ->
+                                   ( TriangulatedLowerEnvelope r plane
+                                   , Maybe (Box (Point 2 r))
+                                   )
+bruteForceTriangulatedEnvelope sample@(Sample rs _ rest _) = (env, bBox)
   where
-    env = undefined
-    bBox = undefined
+    env = imapMaybe triangulate $ fromVertices vertices'
+    bBox = fmap (boundingBox . fmap location2)
+         . NonEmpty.nonEmpty $ MonoidalMap.keys vertices'
 
--}
+    vertices' = bruteForceVertices sample
 
--- type TriangulatedLowerEnvelope plane = Map plane
 
+
+
+-- | A triangulated lower envelope; with conflict lists.
+type TriangulatedLowerEnvelope r plane =
+  MonoidalMap plane (NonEmpty (Prism r plane :+ [plane]))
+-- make this a monoidalNEMap?
+
+--------------------------------------------------------------------------------
 
 data Prism r plane = Triangular (Vertex r plane) (Vertex r plane) (Vertex r plane)
-                   | Cone (Vertex r plane)
-                   | ClippedCone (Vertex r plane) (Vertex r plane)
+                   | Cone (Vector 2 r)
+                          (Vertex r plane)
+                          (Vector 2 r)
+                     -- ^ the (projected) vectors pointing towards the unbounded direction.
+                   | ClippedCone (Vector 2 r)
+                                 (Vertex r plane) (Vertex r plane)
+                                 (Vector 2 r)
+                     -- ^ the (projected) vectors pointing towards the unbounded direction.
+                   deriving (Show,Eq)
 
 
 
 
 
+
+
+
+
+
+
+--------------------------------------------------------------------------------
 
 -- | A (not so great) representation of the Lower envelope;
 --
@@ -114,18 +161,138 @@ bruteForceTriangulatedLowerEnvelope = imap triangulate . bruteForceEnvelope
 -- on the lower envelope in a point or line segment.
 --
 -- O(k\log k)
-triangulate       :: plane -> NonEmpty (Vertex r plane :+ [plane]) -> [Prism r plane :+ [plane]]
-triangulate = undefined
--- triangulate h vs' = case vs' of
---   v1 :| []          -> _ -- cone or nothing
---   v1 :| v2 : []     -> _  -- clipped cone or nothing
---   v1 :| v2 : v3 : _ -> let p  = undefined  -- some point in the triangle
---                            vs = sortAround p vs'
---                        in
+triangulate       :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
+                  => plane
+                  -> NonEmpty (Vertex r plane :+ [plane])
+                  -> Maybe (NonEmpty (Prism r plane :+ [plane]))
+triangulate h vs' = case vs' of
+    v1 :| []          -> cone v1           <$ findDirectionOf h v1
+    v1 :| v2 : []     -> clippedCone v1 v2 <$ (findDirectionOf h v1 <|> findDirectionOf h v2)
+    v1 :| v2 : v3 : _ -> Just $
+                         let p  = pointInteriorTo (Triangle (location2 $ v1^.core)
+                                                            (location2 $ v2^.core)
+                                                            (location2 $ v3^.core)
+                                                  )
+                             vs'' = NonEmpty.sortBy (cmpAround p) vs'
+                         in case boundedOrUnBounded h p vs'' of
+        Bounded vs       -> triangulate' vs
+        Unbounded u v vs -> clippedCone u v <> triangulate' vs
+  where
+    cone (v :+ cl)                   = NonEmpty.singleton $ Cone dummy v dummy :+ cl
+    clippedCone (u :+ cl) (v :+ cl') = NonEmpty.singleton $ ClippedCone dummy u v dummy
+                                                            :+ (cl <> cl')
+
+    cmpAround p (u :+ _) (v :+ _) = ccwCmpAround p (location2 u) (location2 v)
+
+    dummy = Vector2 0 0 -- FIXME!!!!
+    triangulate' = \case
+      (v0 :+ cl0) :| (v:vs) -> NonEmpty.zipWith mkPrism (v :| vs) (NonEmpty.fromList vs)
+        where
+          mkPrism (v1 :+ cl1) (v2 :+ cl2) = Triangular v0 v1 v2 :+ (cl0 <> cl1 <> cl2)
+      _                      -> error "triangulate': absurd"
 
 
-data Boundary plane = Unbounded (NonEmpty plane)
-                    | Bounded (NonEmpty plane)
+-- | Given a plane h (that is one of the definers of the vertex) v, compute a direction w
+-- in which h is the lowest plane among the definers of v.
+findDirectionOf     :: Plane_ plane r
+                    => plane -> Vertex r plane :+ a -> Maybe (Vector 2 r)
+findDirectionOf h v = Just undefined -- Nothing -- TODO
+  -- TODO: for now we assume none of the planes are redundant. So just output them anyway!
+  -- we are not really using anythign of the reutnr type anyway.
+
+
+
+
+
+-- | Given a plane h, a point p at which h defines the lower envelope;
+-- and the vertices of the lower envelope region of h. Compute whether
+-- the region is bounded or unbounded. if it is bounded; make sure
+-- that the vertices the unbounded direction is between the last and
+-- first vertex.
+--
+-- pre: there are at least 3 vertices:
+boundedOrUnBounded                :: forall plane r a.
+                                     (Plane_ plane r, Ord plane, Ord r, Fractional r)
+                                  => plane
+                                  -> Point 2 r
+                                  -> NonEmpty (Vertex r plane :+ a)
+                                  -> Boundary (Vertex r plane :+ a)
+boundedOrUnBounded h p vs@(v1:|_) = combine $ foldr findSplit (Left (v1, [])) vs
+  where
+    combine = \case
+      Left (_, _)            -> Bounded vs
+      Right (w, suff,start') -> let vs'@(v :| _) = start' <>> suff
+                                in Unbounded v w vs'
+
+    -- we assume we are unbounded; and the goal is to find that place
+    findSplit   :: Vertex r plane :+ a -> State plane r a -> State plane r a
+    findSplit v = \case
+      Right (w, suff, start')            -> Right (w, v NonEmpty.<| suff, start')
+        -- we already found the split
+      Left (u, start')
+          | all hBelowAllAtQ otherPlanes -> Right (v, NonEmpty.singleton v,start')
+                                            -- we found the unbounded direction
+          | otherwise                    -> Left (v, v:start')
+        where
+          u' = location2 (u^.core)
+          v' = location2 (v^.core)
+          m  = u' .+^ ((1/2) *^ (v' .-. u'))
+          -- midpoint on the "edge" uv
+          q = m .+^ (m .-. p)
+          -- q is a point just "beyond"  the edge uv as seen from p; i.e.
+          -- q lies outside the cell corresponding to h.
+          otherPlanes = Set.delete h $ planesOf' (u^.core) <> planesOf' (v^.core)
+          -- collect whatever planes u and v have in common (other than h).
+          hBelowAllAtQ h' = z <= evalAt q h'
+          z = evalAt q h
+  -- the main idea is as follows: for every consecutive pair of
+  -- vertices v_i v_i+1 in the cyclic order compute the midpoint m;
+  -- then consider the vector w from p to m, and let q = m + w then if
+  -- h is still cheaper than the other planes then we are unbounded in
+  -- between v_i and v_i+1
+
+    xs <>> ys = case NonEmpty.nonEmpty xs of
+                  Nothing  -> ys
+                  Just xs' -> xs' <> ys
+
+-- | The state while trying to find whether we are bounded or unbounded
+type State plane r a =
+  Either ( Vertex r plane :+ a -- the right neighbour of v_i
+         , [Vertex r plane :+ a] -- all vertices [v_{i+1},..v_n]
+         )
+         ( Vertex r plane :+ a -- the last vertex before the gap
+         , NonEmpty (Vertex r plane :+ a) -- the suffix; i.e. the last
+           -- vertices before the gap
+
+         , [Vertex r plane :+ a] -- the start vertices that should still
+           -- be added to the list.
+         )
+
+data Boundary vertex = Unbounded vertex vertex (NonEmpty vertex)
+                     -- ^ the two vertices incident to the unbounded edges
+                     -- and the list of all vertices (including those unbounded ones)
+                     | Bounded (NonEmpty vertex)
+
+-- --------------------------------------------------------------------------------
+
+-- -- | Given a list hs of halfplanes that define the boundary of their
+-- -- (non-empty) common intersection (in CCW orientation) (and a point
+-- -- inside this common intersection). Compute whether the comon
+-- -- intersection is bounded or unbounded. In ase it is unbounded, return the planes
+-- -- in CCW order (i.e. so that the first and last halfplane bound the unbounded region)
+-- boundedOrUnbounded :: ( HalfPlane_ halfPlane 2 r, Ord r, Num r
+--                       , Foldable1 nonEmpty
+--                       )
+--                    => nonEmpty halfPlane
+--                    -> Point 2 r
+--                    -> Either (NonEmpty halfPlane)
+--                              (Cyclic nonEmpty halfPlane)
+-- boundedOrUnbounded hs _ = undefined
+
+-- asCone   :: Vertex r plane :+ [plane] -> Maybe (Cone r (Vertex r plane :+ [plane]) plane)
+-- asCone v = undefined
+
+
 
 
 --------------------------------------------------------------------------------
@@ -156,9 +323,18 @@ instance Ord plane => Ord (Vertex r plane) where
 
 instance (NFData r, NFData plane) => NFData (Vertex r plane)
 
+-- instance IsBoxable (Vertex r plane)
+
+
+
+
 -- | Report all planes passing through a vertex (even possibly redundant ones)
 planesOf :: Vertex r plane -> [plane]
 planesOf = toList
+
+-- | Report all planes passing through a vertex (even possibly redundant ones)
+planesOf' :: Ord plane => Vertex r plane -> Set plane
+planesOf' = Set.fromList . planesOf
 
 -- | Compute the exact location of a vertex
 location                     :: (Plane_ plane r, Ord r, Fractional r)
