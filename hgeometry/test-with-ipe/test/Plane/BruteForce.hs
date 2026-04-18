@@ -150,9 +150,9 @@ triangulate              :: forall plane r conflictList.
                          -> plane
                          -> NonEmpty (Vertex r plane :+ conflictList)
                          -> Maybe (NonEmpty (Prism r plane :+ conflictList))
-triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
-    v1 :| []          -> traceShowWith ("cone",h,"->",) $ coverCone v1
-    v1 :| v2 : []     -> traceShowWith ("clippedCone",h,"->",) $ coverClippedCone v1 v2
+triangulate domain h vs' = case vs' of
+    v1 :| []          -> coverCone v1
+    v1 :| v2 : []     -> coverClippedCone v1 v2
     v1 :| v2 : v3 : _ -> let p  = pointInteriorTo (Triangle (location2 $ v1^.core)
                                                             (location2 $ v2^.core)
                                                             (location2 $ v3^.core)
@@ -160,7 +160,8 @@ triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
                              vs'' = NonEmpty.sortBy (cmpAround p) vs'
                          in Just $ case boundedOrUnBounded h p vs'' of
         Bounded vs       -> triangulate' (real <$> vs)
-        Unbounded u v vs -> traceShowWith ("unbounded region found",h,u,v,vs,"->",) $
+        Unbounded u v vs ->
+          traceShowWith ("unbounded",h,u,v,vs,"->",) $
           coverClippedCone u v `mcons` triangulate' (real <$> vs)
 
   where
@@ -172,32 +173,28 @@ triangulate domain h vs' = traceShowWith ("prisms for", h, ) $ case vs' of
     -- we also check against the extra planes to see whether we should be a vtx or not
     candidates               :: [plane] -> Vertex r plane -> [Point 2 r]
     candidates extraPlanes v = concatMap ( (filter hIsLowestAt
-                                . traceShowWith ("before filtering",h,v,)
                                 . (\w -> [p .+^ w, p .-^ w ]))
-                               . (lambda *^)
+                                . (lambda *^)
                              )
                              . mapMaybe (intersectionVector h) $ otherPlanes
       where
         p = location2 v
         otherPlanes = List.delete h (planesOf v)
         hIsLowestAt q = let z = evalAt q h
-                        in all (\h' -> traceShowWith ("eval",h,q,"---",h',z,evalAt q h',
-                                                      z `compare` evalAt q h',
-                                                      "->",) $
-                                       z <= evalAt q h') (otherPlanes <> extraPlanes)
+                        in all (\h' -> z <= evalAt q h') (otherPlanes <> extraPlanes)
 
 
-    lambda = 1000 -- TODO; this should somehow use the domain
+    lambda = 100 -- TODO; this should somehow use the domain
 
     -- | Computes a prism to cover the cone defined by v.
     coverCone           :: Vertex r plane :+ conflictList
                         -> Maybe (NonEmpty (Prism r plane :+ conflictList))
-    coverCone (v :+ cl) = case traceShowWith ("candidates for", h,v, " ",) $ candidates [] v of
+    coverCone (v :+ cl) = case candidates [] v of
       [a,b] -> NonEmpty.nonEmpty [Triangle (Real v) (dummy a) (dummy b) :+ cl]
       _     -> Nothing -- h only appears at the vertex
 
-    coverClippedCone (v1 :+ cl1) (v2 :+ cl2) = case traceShowWith ("candidates v1",h,v1,) $ candidates (extras v2) v1 of
-      [a] -> case traceShowWith ("candidates v2",h,v2,) $ candidates (extras v1) v2 of
+    coverClippedCone (v1 :+ cl1) (v2 :+ cl2) = case candidates (extras v2) v1 of
+      [a] -> case candidates (extras v1) v2 of
                [b] -> NonEmpty.nonEmpty
                       [ Triangle (Real v1) (Real v2) (dummy a) :+ cl1 <> cl2
                       , Triangle (Real v2) (dummy a) (dummy b) :+ cl2
