@@ -100,6 +100,11 @@ spec = describe "HyperPlane Tests" $ do
              (quadrance n > 0 && n^.zComponent /= 0) ==>
                normalVector (fromPointAndNormal p n :: NonVerticalHyperPlane 3 R) `isScalarMultipleOf` n
 
+         prop "cmpInDirection consistent with cmpInDirection2" $
+           \(v :: Vector 2 R) (p :: Point 2 R) (q :: Point 2 R) ->
+             cmpInDirection v p q === cmpInDirection2 v p q
+
+
 
 
 
