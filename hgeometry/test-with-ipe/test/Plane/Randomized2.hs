@@ -42,7 +42,7 @@ randomizedVertices :: ( Plane_ plane r, Ord r, Fractional r
                       )
                    => gen
                    -> Sample subset plane
-                   -> MonoidalMap (Vertex r plane) [plane]
+                   -> MonoidalMap (EnvVertex r plane) [plane]
 randomizedVertices gen = undefined
 
 

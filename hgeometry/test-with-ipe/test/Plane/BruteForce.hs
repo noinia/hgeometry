@@ -24,6 +24,7 @@ module Plane.BruteForce
   -- , allZippers
 
   , coverCone
+  , coverClippedCone
   , findUnbounded
   , findRotateTo
   ) where
@@ -60,7 +61,8 @@ import           Witherable
 import           HGeometry.Cyclic (Cyclic)
 import Control.Applicative
 
-import Debug.Trace
+
+import Plane.Debug
 import HGeometry.Polygon
 import HGeometry.Point.Either
 import Data.Bifunctor
@@ -185,6 +187,12 @@ lowerEnvelopeOn        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                         => Triangle (Point 2 r) -> set plane -> BoundedLowerEnvelope r plane
 lowerEnvelopeOn domain = fromVertices domain . bruteForceVertices
 
+
+
+xs <<> ys = case NonEmpty.nonEmpty xs of
+              Nothing  -> ys
+              Just xs' -> xs' <> ys
+
 -- | Given a bounded region and a set of vertices, compute the bounded lower envelope
 -- from them.
 --
@@ -195,7 +203,7 @@ fromVertices        :: forall plane r.
                        )
                     => Triangle (Point 2 r) -> Set (EnvVertex r plane)
                     -> BoundedLowerEnvelope r plane
-fromVertices domain = imap sortAround . foldMap collect
+fromVertices domain = imap computeCell . foldMap collect
                     -- . Set.mapMonotonic (\v -> v :+ v `intersects` domain)
   where
     -- | For each plane; collects the vertices that appear on the region corresponding to
@@ -206,24 +214,114 @@ fromVertices domain = imap sortAround . foldMap collect
                -- note: this uses the Foldable1 instance on EndVertex; which
                -- essentially folds over the planes defining the vertex :)
 
+    sortAroundBoundary (v0 :| xs) = v0 :| List.sortBy (ccwCmpAround v0) xs
+
     -- | For a plane; compute the vertices in CCW order around the its boundary, and
-    -- extend it into
-    sortAround               :: plane
-                             -> NonEmpty (EnvVertex r plane)
-                             -> ConvexPolygon (Vertex' r plane)
-    sortAround h (v0 :| vs0) = case NonEmpty.nonEmpty $ List.sortBy (ccwCmpAround v0) vs0 of
-        Nothing -> second (\v -> v :+ evalAt v h) <$> traceShowWith ("calling",h,w1',w2',) (coverCone domain v0 w1' w2')
-          where
-            Vector2 (h1,w1) (_,w2) = fromMaybe err . (\h' -> (h',) <$> intersectionVector h h')
-                                  <$> otherPlanes h v0
-            (w1',w2') = let f = evalAt (v0 .+^w2)
-                        in if f h < f h1 then (w1,w2) else (w2,w1)
-        Just vs -> undefined
+    -- extend to cover the domain
+    computeCell                                        :: plane
+                                                       -> NonEmpty (EnvVertex r plane)
+                                                       -> ConvexPolygon (Vertex' r plane)
+    computeCell h (sortAroundBoundary -> vs'@(v0:|rest'))
+      | traceShow ("computeCell",h,toList vs') False = undefined
+      | otherwise
+      =
+
+        uncheckedFromCCWPoints $ (extra' <$> extras) <<> (Original <$> originals)
       where
+        -- | The vertices in sorted order around some arbitrary first vertex.
+        (originals, extras) = case NonEmpty.nonEmpty rest' of
+          Nothing   -> let a                      = v0^.asPoint
+                           f                      = evalAt (v0 .+^w2)
+                           Vector2 (h1,w1) (_,w2) = boundingPlanes v0
+                           (w1',w2')              = if f h < f h1 then (w1,w2) else (w2,w1)
+                       in (vs', coverCone'' a w1' a w2')
+          Just rest -> case traceShowWith ("UB",) $ findUnbounded isUnboundedEdge v0 rest of
+            Nothing        -> (vs', [])
+            Just vs@(u:|_) -> (vs, extraVertices u $ NonEmpty.last vs)
+
+        extra' p = Extra $ p :+ evalAt p h
+
+        -- | Computes extra vertices required to cover the (clipped) cone with apices al and ar.
+        -- al is the vector pointing into al. ar is the vector pointing away from ar.
+        -- both vectors have h to their left.
+        coverCone''             :: Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
+                                -> [Point 2 r]
+        coverCone'' al wl ar wr = toList $ coverCone' domain al wl ar wr
+
+        -- | Given a vertex, compute the two planes that together with h define this vertex.
+        -- (as well as for both planes) the direction vector so that h is to the left
+        -- of the line with this direction vector (through v).
+        boundingPlanes   :: EnvVertex r plane -> Vector 2 (plane, Vector 2 r)
+        boundingPlanes v = traceShowWith ("boundingPlanes",h,v,"->",) $
+          fromMaybe err
+                           . (\h' -> (h',) <$> intersectionVector h h')
+                        <$> otherPlanes h v
         err = error "absurd: fromVertices. planes don't intersect !?"
-        isUnboundedEdge u v = undefined
 
+        -- | Given two neighbouring vertices u and v test if v is
+        -- really a CCW neighbor of u; i.e. if uv is an edge of the
+        -- polygon, or not. This function returns True if uv is *not* an edge.
+        isUnboundedEdge     :: EnvVertex r plane -> EnvVertex r plane -> Bool
+        isUnboundedEdge u v
+          -- | traceShow (u /= v ) False
 
+          = traceShowWith ("isUnboundedEdge",u,v,"->",) $
+
+          case otherPlane u v of
+          Nothing -> False
+          Just h' -> let Vector2 x y = v .-. u
+                         w           = Vector2 y (-x)
+                         f           = evalAt (traceShowWith ("loc",) $ u .+^ w)
+                     in f h < f h'
+            -- w should be a vector pointing into the right halfplane
+            -- of the edge uuv
+           -- if uv is a CCW edge; then h should be cheaper just left of the
+           -- edge. Conversely, it should be more expensive on the right side of the edge
+
+                        -- test if really lies left of the vector from v to u.
+
+        -- | Given two vertices u and v, compute the plane other than
+        -- h that they have in common (if any)
+        otherPlane     :: EnvVertex r plane -> EnvVertex r plane -> Maybe plane
+        otherPlane u v = let f = foldMap Set.singleton in
+                         case traceShowWith ("otherPlane",h,u,v,"->",) $
+                              toList $ Set.delete h (f u `Set.intersection` f v) of
+                           [h'] -> Just h'
+                           []   -> Nothing
+                           xs    -> traceStack (show ("multiple",h,u,v,xs)) $
+                             error "otherPlane: Multiple planes intersecting in a line?"
+
+        -- | Computes the additional vertices (when we are in the unbounded case)
+        --
+        -- u is the first vertex of the chain and v is the last vertex of the chain.
+        extraVertices     :: EnvVertex r plane -> EnvVertex r plane -> [Point 2 r]
+        extraVertices u v
+          | traceShow ("extraVertices",u, v) False = undefined
+          | otherwise
+          = case otherPlane u v of
+          Nothing -> error "absurd. other plane not found?"
+          Just h' -> coverCone'' (u^.asPoint) (dir u) (v^.asPoint) (dir v)
+            where
+              dir z = let Vector2 (h1,w1) (_,w2) = traceShowWith ("dir,",h,h',"dirs",) $
+                                                   boundingPlanes z
+                      in if h' == h1 then w2 else w1
+              -- computes the direction of the unbounded edges
+
+--------------------------------------------------------------------------------
+
+-- | cover the clipped cone.
+coverClippedCone                         :: forall apex r. ( Point_ apex 2 r, Ord r, Num r
+                                                  , Show r
+                                                  )
+                                     => Triangle (Point 2 r)
+                                     -> apex -> Vector 2 r -> apex -> Vector 2 r
+                                     -> ConvexPolygon (OriginalOrExtra apex (Point 2 r))
+coverClippedCone domain al leftV ar rightV =
+  let al' = al^.asPoint
+      ar' = ar^.asPoint
+  in uncheckedFromCCWPoints $
+     (Extra <$> coverCone' domain al' leftV ar' rightV) <>
+     (Original <$> al :| [ar])
 
 -- | Given the domain, and a cone; given by its apex, its left vector,
 -- and its right vector (both given so that the cone is to the left of
@@ -234,42 +332,66 @@ coverCone :: forall apex r. (Point_ apex 2 r, Ord r, Num r
              )
           => Triangle (Point 2 r) -> apex -> Vector 2 r -> Vector 2 r
           -> ConvexPolygon (OriginalOrExtra apex (Point 2 r))
-coverCone domain a leftV rightV
-  | traceShow ("coverCone", a, leftV, rightV) False = undefined
+coverCone domain a leftV rightV =
+  let a' = a^.asPoint
+  in uncheckedFromCCWPoints $
+     (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
+
+-- | computes the vertices of the clipped cone cover.
+coverCone'                           :: forall r. ( Ord r, Num r
+                                                  , Show r
+                                                  )
+                                     => Triangle (Point 2 r)
+                                     -> Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
+                                     -> NonEmpty (Point 2 r)
+coverCone' domain al leftV ar rightV
+  | traceShow ("coverCone'",al,leftV,".....",ar,rightV) False = undefined
   | otherwise
-  = uncheckedFromCCWPoints (Original a :| (Extra <$> [l] <> mp <> [r]))
+  = r :| mp <> [l]
   where
-    Vector2 h1 h2  = leftHalfPlane . LinePV (a^.asPoint) <$> Vector2 leftV rightV
+    Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
+                                               (LinePV ar rightV)
+
     left'' = traceShowWith ("left''",) $ negated leftV
 
     l' = traceShowWith ("l'",) $ maximumBy (cmpInDirection2 left'') domain
     r' = traceShowWith ("r'",) $ maximumBy (cmpInDirection2 rightV) domain
 
-    l = traceShowWith ("l",) $ projectOnto left'' l'
-    r = traceShowWith ("r",) $ projectOnto rightV r'
+    l = traceShowWith ("l",) $ projectOnto al left'' l'
+    r = traceShowWith ("r",) $ projectOnto ar rightV r'
 
     -- the halfplane not containing v
     h' = leftHalfPlane $ LinePV l (r .-. l)
-    h = traceShow ("verify", (a^.asPoint) `intersects` h') h'
+    h = traceShow ("verify", al `intersects` h', ar `intersects` h') h'
 
     -- the corners of the domain that are in the cone, and still on the wrong side of the
     -- halfplane defined by l and r
-    mp = List.sortBy (ccwCmpAroundWith rightV a)
+    mp = List.sortBy (ccwCmpAroundWith rightV ar)
        $ filter (\q -> all (q `intersects`) [h1,h2,h]) (toList domain)
 
     -- we are overestimating the length of the vector from q to a and using that
-    projectOnto        :: Vector 2 r -> Point 2 r -> Point 2 r
-    projectOnto base q = let a' = a^.asPoint
-                             b  = quadrance (q .-. a') *^ base
-                         in a' .+^ b
+    projectOnto          :: Point 2 r -> Vector 2 r -> Point 2 r -> Point 2 r
+    projectOnto a base q = let b  = quadrance (q .-. a) *^ base
+                           in a .+^ b
 
--- | Try to find the unbounded edge (where the predicate soemhow can test whether the
--- pair of subsequent vertices define an edge).
-findUnbounded      :: (vertex -> vertex -> Bool)
-                   -> NonEmpty vertex
-                   -> Maybe (NonEmpty vertex)
-findUnbounded p vs = fmap (fmap fst) . findRotateTo snd
-                   $ NonEmpty.zipWith (\u v -> (v, p u v)) vs (NonEmpty.cycle vs)
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Try to find the unbounded edge (where the predicate somehow can
+-- test whether the pair of subsequent vertices define an edge).
+findUnbounded          :: (vertex -> vertex -> Bool)
+                       -> vertex -> NonEmpty vertex
+                       -> Maybe (NonEmpty vertex)
+findUnbounded p v0 vs' = let vs = v0 NonEmpty.<| vs'
+                         in fmap (fmap fst)
+                          . findRotateTo snd
+                          $ NonEmpty.zipWith (\u v -> (v, p u v)) vs (vs' <> vs)
+
+
 
 -- | rotate so that we start with an element that satisfies the predicate.
 findRotateTo   :: (a -> Bool) -> NonEmpty a -> Maybe (NonEmpty a)
