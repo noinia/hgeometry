@@ -3,6 +3,7 @@
 module Plane.RandomizedEnvSpec
   where
 
+import qualified Data.Set as Set
 import           Data.Ord
 import           Control.Lens hiding (Prism)
 import           System.OsPath
@@ -41,9 +42,23 @@ import           HGeometry.Ipe.Instances
 import           Ipe.AllColors
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 
-import Debug.Pretty.Simple
+import           Debug.Pretty.Simple
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
+
+newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
+                          deriving (Show,Eq)
+
+-- instance Arbtirary (InputPlanes MyPlane) where
+--   arbitrary = do coeffs <-
+
+
+    -- arbitrary >>= go (mempty,mempty,mempty)
+    -- where
+    --   go   :: (Set r, Set r, Set r) -> Int -> Gen (InputPlanes plane)
+    --   go n =
+
+
 
 instance Arbitrary StdGen where
   arbitrary = mkStdGen <$> arbitrary
@@ -69,41 +84,40 @@ instance Arbitrary Queries where
   shrink (Queries tri qs) = [ Queries tri qs' | qs' <- shrink qs ]
 
 
--- verifyLowest          :: [MyPlane] -> Point 2 R
---                       -> TriangulatedLowerEnvelope R MyPlane
---                       -> Property
--- verifyLowest hs q = counterexample (show q)
---                   . allAtLowest
---                   . ifoldMap findContainingPrisms
---   where
---     findContainingPrisms    :: MyPlane -> NonEmpty (Prism R MyPlane :+ extra)
---                             -> [(MyPlane, Prism R MyPlane)]
---     findContainingPrisms h = foldMap $ \(tri :+ _) ->
---                                          ([(h, tri) | q `intersects` projectPrism tri])
+verifyLowest          :: [MyPlane] -> Point 2 R
+                      -> TriangulatedLowerEnvelope R MyPlane
+                      -> Property
+verifyLowest hs q = counterexample (show q)
+                  . allAtLowest
+                  . ifoldMap findContainingPrisms
+  where
+    findContainingPrisms    :: MyPlane -> NonEmpty (Prism R MyPlane)
+                            -> [(MyPlane, Prism R MyPlane)]
+    findContainingPrisms h = foldMap $ \tri -> ([(h, tri) | q `intersects` tri])
 
---     allAtLowest = \case
---       []   -> Every $ counterexample "No prism containing the query point!"
---                     $ counterexample ("lowest should be: " <> show lowestAtQ) False
---       tris -> foldMap (\(h,tri) -> Every $ counterexample (show tri) $ isLowestAtQ h) tris
+    allAtLowest = \case
+      []   -> Every $ counterexample "No prism containing the query point!"
+                    $ counterexample ("lowest should be: " <> show lowestAtQ) False
+      tris -> foldMap (\(h,tri) -> Every $ counterexample (show tri) $ isLowestAtQ h) tris
 
 
---     -- allPrismsCorrect   :: MyPlane -> NonEmpty (Prism R MyPlane :+ extra) -> Every
---     -- allPrismsCorrect h = Every . counterexample (show h) . foldMap (prismIsCorrect h)
+    -- allPrismsCorrect   :: MyPlane -> NonEmpty (Prism R MyPlane :+ extra) -> Every
+    -- allPrismsCorrect h = Every . counterexample (show h) . foldMap (prismIsCorrect h)
 
---     -- prismIsCorrect         :: MyPlane -> Prism R MyPlane :+ extra -> Every
---     -- prismIsCorrect h (tri :+ _)
---     --   | q `intersects` projectPrism tri = Every $ counterexample (show tri) $ isLowestAtQ h
---     --   | otherwise                       = mempty
+    -- prismIsCorrect         :: MyPlane -> Prism R MyPlane :+ extra -> Every
+    -- prismIsCorrect h (tri :+ _)
+    --   | q `intersects` projectPrism tri = Every $ counterexample (show tri) $ isLowestAtQ h
+    --   | otherwise                       = mempty
 
---     isLowestAtQ   :: MyPlane -> Every
---     isLowestAtQ h = let z = evalAt q h
---                     in foldMap (\h' -> Every $
---                                  counterexample (show h') $
---                                  counterexample (show (z,evalAt q h')) $
---                                  z <= evalAt q h'
---                                ) hs
+    isLowestAtQ   :: MyPlane -> Every
+    isLowestAtQ h = let z = evalAt q h
+                    in foldMap (\h' -> Every $
+                                 counterexample (show h') $
+                                 counterexample (show (z,evalAt q h')) $
+                                 z <= evalAt q h'
+                               ) hs
 
---     lowestAtQ = minimumBy (comparing $ evalAt q) hs
+    lowestAtQ = minimumBy (comparing $ evalAt q) hs
 
 
 
@@ -111,12 +125,13 @@ spec :: Spec
 spec = describe "Plane.RandomizedEnvSpec" $ do
 
 
-         it "coverCone" $
+         it "coverCone" $ do
+           let testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
+               domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
+
            testCoverCone `shouldBe`
-           uncheckedFromCCWPoints (NonEmpty.fromList [ Original (Point2 1 3)
-                                                     ,Extra origin
-                                                     ,Extra origin
-                                                     ])
+             uncheckedFromCCWPoints (NonEmpty.fromList
+               [Extra (Point2 371 3),Extra (Point2 291 293),Original (Point2 1 3)])
 
          prop "cone cover contains corners comain" $
            \(domain :: Triangle (Point 2 R)) (cone :: Cone R (Point 2 R) ()) ->
@@ -147,14 +162,13 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
            --       show () === "foo"
 
 
-           -- prop "brute force triangulated envelope; indeed lowest at query points" $
-           --   \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
-           --     let input = Sample (toList planes) (length planes) [] (length planes)
-           --         env   = bruteForceTriangulatedEnvelopeIn domain input
-           --     in counterexample (show env) $
-           --       not (null env) ==> conjoin [ verifyLowest (toList planes) q env
-           --                                  | q <- toList queries
-           --                                  ]
+           prop "brute force triangulated envelope; indeed lowest at query points" $
+             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
+               let env   = triangulatedLowerEnvelopeOn domain planes
+               in counterexample (show env) $
+                 not (null env) ==> conjoin [ verifyLowest (toList planes) q env
+                                            | q <- toList queries
+                                            ]
 {-
            prop "dummy" $
              \(planes :: NESet.NESet MyPlane) ->
@@ -196,11 +210,7 @@ myColors = nonRepeated allColors
 mkCone                     :: Num r => apex -> Vector 2 r -> Vector 2 r -> Cone r apex ()
 mkCone a incoming outgoing = Cone a (negated incoming :+ ()) (outgoing :+ ())
 
-testCoverCone :: ConvexPolygon (OriginalOrExtra (Point 2 R) (Point 2 R))
-testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
 
-domain :: Triangle (Point 2 R)
-domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
 -- domain = Triangle (Point2 100 100) (Point2 110 100) (Point2 100 110)
 
 test = do
@@ -208,7 +218,10 @@ test = do
             . addStyleSheet (createIpeStyle "myColors" myColors)
             . addStyleSheet opacitiesStyle
             . ipeFile . NonEmpty.fromList . fmap (fromContent . concat) $
-              [ [ [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
+              [ [ let testCoverCone :: ConvexPolygon (OriginalOrExtra (Point 2 R) (Point 2 R))
+                      testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
+                  in
+                  [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
                   , iO $ defIO domain  ! attr SLayer "domain"
                   , iO $ ipeSimplePolygon testCoverCone ! attr SLayer "result"
                       ! attr SFill seagreen
@@ -256,6 +269,57 @@ test = do
                           ! attr SStroke black
                   ] ]
               ]
+  where
+    domain :: Triangle (Point 2 R)
+    domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
+
+
+isInGeneralPosition        :: (Foldable set, Plane_ plane r, Ord plane, Fractional r, Ord r)
+                           => set plane -> Bool
+isInGeneralPosition planes = and
+  [ -- uniqueOn (\(Plane_ a _ _) -> a) planes
+  -- , uniqueOn (\(Plane_ _ b _) -> b) planes
+  -- , uniqueOn (\(Plane_ _ _ c) -> c) planes
+   all (null . view extraDefiners) $ bruteForceVertices planes
+  ]
+
+
+uniqueOn f = snd . foldr (\x (s,b) -> let y = f x in (Set.insert y s, b && Set.notMember y s))
+                         (mempty,True)
+
+
+
+data Input plane = Input (Triangle (Point 2 R))
+                         (NESet.NESet plane)
+                         [Point 2 R] -- possible queries
+                 deriving (Show,Read)
+
+test2 = runTest $ Input domain planes []
+  where
+    domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
+
+    planes :: NESet.NESet (MyPlane :+ IpeColor R)
+    planes = NESet.fromList
+           . NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
+            -- [ Plane 0    1    0
+            -- , Plane 0    (-1) 0
+            -- , Plane 1    0    2
+            -- , Plane (-1) (1/100)    2
+            -- ]
+             -- [ Plane (-1) 3 1
+             -- , Plane 1.66666 1.66666 (-3)
+             -- , Plane 2.66666 (-1) 0.5
+             -- , Plane 0 0 1
+             -- , Plane (-2) 2 2
+             -- ]
+
+             -- [ Plane (-15.9) (-2.83334) (-4.16667)
+             -- , Plane (-14.5) 17.57894 (-5.21053)
+             -- ,Plane (-14.23530) 17.6 2.1
+             -- ,Plane (-5) (-11.6) (-16)
+             -- ,Plane 11 (-7.26667) (-7.23077)]
+
+             [Plane (-17.10527) 14 15.77777, Plane (-4.3) (-12.93334) 0.28571,Plane (-2.42858) (-3.57143) (-9.92858),Plane (-0.27273) (-21.44445) 8.8,Plane 0.625 (-0.875) (-17.18182),Plane 1.2 0.28571 4.4,Plane 1.73333 (-10.9) 18,Plane 5.28571 4.85714 14,Plane 7.75 (-10.11112) (-16.14286),Plane 8.85714 7.25 (-13.3125),Plane 9.07142 3.5 21.44444,Plane 12.66666 (-5.52942) 17.77272,Plane 17.85714 10.8 (-5),Plane 18.4375 (-9.5) (-6.47620),Plane 20.1 9 14,Plane 21.29411 13.38461 3]
 
 
 
@@ -263,9 +327,9 @@ test = do
 
 
 
-
-
-test2 = do
+runTest (Input domain planes queries) = do
+  print $ isInGeneralPosition planes
+{-
           traverse_  print planes
           putStrLn "========================="
 
@@ -285,28 +349,13 @@ test2 = do
                 ]
               ]
 
-
+-}
           -- print $ intersectionVector orangePlane greenPlane
 
   where
+
     env = lowerEnvelopeOn domain planes
     vertices = bruteForceVertices planes
-    planes :: NonEmpty (MyPlane :+ IpeColor R)
-    planes = NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
-            -- [ Plane 0    1    0
-            -- , Plane 0    (-1) 0
-            -- , Plane 1    0    2
-            -- , Plane (-1) (1/100)    2
-            -- ]
-             [ Plane (-1) 3 1
-             , Plane 1.66666 1.66666 (-3)
-             , Plane 2.66666 (-1) 0.5
-             , Plane 0 0 1
-             , Plane (-2) 2 2
-             ]
-
--- green should be the lower part; not the upper!
--- blue should be upper; not lower
 
     subPlanes = NonEmpty.fromList [planes `ix` 0, planes `ix` 2, planes `ix` 3]
     env' = lowerEnvelopeOn domain subPlanes

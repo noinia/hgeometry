@@ -7,7 +7,7 @@ module Plane.BruteForce
   , BoundedLowerEnvelope
   , Prism
   , Vertex'
-  , EnvVertex(..), location
+  , EnvVertex(..), location, extraDefiners
   -- , computeDomain
 
 
@@ -100,7 +100,13 @@ location (EnvVertex _ _ _ _ (Point2 x y) z) = Point3 x y z
 -- | Get the 2d location of the vertex.
 location2 :: Lens' (EnvVertex r plane) (Point 2 r)
 location2 = lens (\(EnvVertex _ _ _  _ p _) -> p)
-                (\(EnvVertex h1 h2 h3 hs _ z) p -> EnvVertex h1 h2 h3 hs p z)
+                 (\(EnvVertex h1 h2 h3 hs _ z) p -> EnvVertex h1 h2 h3 hs p z)
+
+-- | Access the extra definers
+extraDefiners :: Lens' (EnvVertex r plane) [plane]
+extraDefiners = lens (\(EnvVertex _ _ _  hs _ _) -> hs)
+                 (\(EnvVertex h1 h2 h3 _ p z) hs -> EnvVertex h1 h2 h3 hs p z)
+
 
 instance Eq plane => Eq (EnvVertex r plane) where
   (EnvVertex u v w _ _ _) == (EnvVertex u' v' w' _ _ _) = u == u' && v == v' && w == w'
@@ -312,27 +318,6 @@ fromVertices domain = imap computeCell . foldMap collect
 
 
 
-            -- (leftV,rightV) = case otherPlane u v of
-            --   Nothing -> (dir u (>), dir v (<))
-            --     -- for the left vector, the vector should be incoming at u
-            --     -- so at u + w1 h should be more expensive than h2.
-            --     -- ( and equally expensive as h1)
-            --     -- for the right vector, the vector should be outgoing at u
-            --     -- so at u + w1 h should be cheaper then h2.
-
-
-            --     error "absurd. other plane not found?"
-            -- -- FIXME: if we are shortcutting between u and v then
-            -- -- there indeed is no plane; i.e. we are closest on both sides of
-            --     where
-
-            --   Just h' -> (dir u, dir v)
-            --     where
-            --       dir z = let Vector2 (h1,w1) (_,w2) = traceShowWith ("dir,",h,h',"dirs",) $
-            --                                        boundingPlanes z
-            --               in if h' == h1 then w2 else w1
-            --   -- computes the direction of the unbounded edges
-
 --------------------------------------------------------------------------------
 
 -- | cover the clipped cone.
@@ -378,17 +363,16 @@ coverCone' domain al leftV ar rightV
     Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
                                                (LinePV ar rightV)
 
-    left'' = traceShowWith ("left''",) $ negated leftV
+    left'' = negated leftV
 
-    l' = traceShowWith ("l'",) $ maximumBy (cmpInDirection2 left'') domain
-    r' = traceShowWith ("r'",) $ maximumBy (cmpInDirection2 rightV) domain
+    l' = maximumBy (cmpInDirection2 left'') domain
+    r' = maximumBy (cmpInDirection2 rightV) domain
 
-    l = traceShowWith ("l",) $ projectOnto al left'' l'
-    r = traceShowWith ("r",) $ projectOnto ar rightV r'
+    l = projectOnto al left'' l'
+    r = projectOnto ar rightV r'
 
     -- the halfplane not containing v
-    h' = leftHalfPlane $ LinePV l (r .-. l)
-    h = traceShow ("verify", al `intersects` h', ar `intersects` h') h'
+    h = leftHalfPlane $ LinePV l (r .-. l)
 
     -- the corners of the domain that are in the cone, and still on the wrong side of the
     -- halfplane defined by l and r
