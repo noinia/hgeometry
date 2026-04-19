@@ -1,6 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
+{- HLINT ignore "Use <=<" -}
 {- HLINT ignore "Use ++" -}
 module HalfPlane.IntersectSpec
   ( commonIntersection
