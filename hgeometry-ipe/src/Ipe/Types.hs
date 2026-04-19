@@ -1,5 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{- HLINT ignore "Avoid lambda using `infix`" -}
+{- HLINT ignore "Avoid lambda" -}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.Types

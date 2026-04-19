@@ -202,7 +202,7 @@ verticesOf = sort . map location . toList
 -- --------------------------------------------------------------------------------
 
 colors :: [IpeColor R]
-colors = cycle (drop 3 basicNamedColors <> (toList $ namedSet myColors))
+colors = cycle (drop 3 basicNamedColors <> toList (namedSet myColors))
 
 myColors :: Map.Map _ (IpeValue (RGB R))
 myColors = nonRepeated allColors
