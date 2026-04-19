@@ -9,6 +9,7 @@ module HalfPlane.IntersectSpec
   , spec
   ) where
 
+import           Data.Foldable
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import qualified Data.Text as Text
