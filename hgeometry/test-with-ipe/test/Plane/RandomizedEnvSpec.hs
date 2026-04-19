@@ -302,7 +302,7 @@ test2 = do
              , Plane 1.66666 1.66666 (-3)
              , Plane 2.66666 (-1) 0.5
              , Plane 0 0 1
-             -- , Plane (-2) 2 2
+             , Plane (-2) 2 2
              ]
 
 -- green should be the lower part; not the upper!

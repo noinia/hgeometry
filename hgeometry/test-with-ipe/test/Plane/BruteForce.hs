@@ -268,9 +268,9 @@ fromVertices domain = imap computeCell . foldMap collect
           = traceShowWith ("isUnboundedEdge",u,v,"->",) $
 
           case otherPlane u v of
-          Nothing -> False
+          Nothing -> True
           Just h' -> let Vector2 x y = v .-. u
-                         w           = Vector2 y (-x)
+                         w           = traceShowWith ("w",u,v,"->",) $ Vector2 y (-x)
                          f           = evalAt (traceShowWith ("loc",) $ u .+^ w)
                      in f h < f h'
             -- w should be a vector pointing into the right halfplane
@@ -298,14 +298,40 @@ fromVertices domain = imap computeCell . foldMap collect
         extraVertices u v
           | traceShow ("extraVertices",u, v) False = undefined
           | otherwise
-          = case otherPlane u v of
-          Nothing -> error "absurd. other plane not found?"
-          Just h' -> coverCone'' (u^.asPoint) (dir u) (v^.asPoint) (dir v)
-            where
-              dir z = let Vector2 (h1,w1) (_,w2) = traceShowWith ("dir,",h,h',"dirs",) $
-                                                   boundingPlanes z
-                      in if h' == h1 then w2 else w1
-              -- computes the direction of the unbounded edges
+          = coverCone'' (u^.asPoint) (dir u (>)) (v^.asPoint) (dir v (<))
+          where
+            dir z cmp = let Vector2 (h1,w1) (h2,w2) = boundingPlanes z
+                            f = evalAt (z .+^ w1)
+                        in if f h `cmp` f h2 then w1 else w2
+            -- for the left vector, the vector should be incoming at u
+            -- so at u + w1 h should be more expensive than h2.
+            -- ( and equally expensive as h1)
+            -- for the right vector, the vector should be outgoing at u
+            -- so at u + w1 h should be cheaper then h2.
+
+
+
+
+            -- (leftV,rightV) = case otherPlane u v of
+            --   Nothing -> (dir u (>), dir v (<))
+            --     -- for the left vector, the vector should be incoming at u
+            --     -- so at u + w1 h should be more expensive than h2.
+            --     -- ( and equally expensive as h1)
+            --     -- for the right vector, the vector should be outgoing at u
+            --     -- so at u + w1 h should be cheaper then h2.
+
+
+            --     error "absurd. other plane not found?"
+            -- -- FIXME: if we are shortcutting between u and v then
+            -- -- there indeed is no plane; i.e. we are closest on both sides of
+            --     where
+
+            --   Just h' -> (dir u, dir v)
+            --     where
+            --       dir z = let Vector2 (h1,w1) (_,w2) = traceShowWith ("dir,",h,h',"dirs",) $
+            --                                        boundingPlanes z
+            --               in if h' == h1 then w2 else w1
+            --   -- computes the direction of the unbounded edges
 
 --------------------------------------------------------------------------------
 
