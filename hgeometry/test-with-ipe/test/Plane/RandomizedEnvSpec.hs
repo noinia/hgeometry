@@ -46,8 +46,8 @@ import           Debug.Pretty.Simple
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
 
-newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
-                          deriving (Show,Eq)
+-- newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
+--                           deriving (Show,Eq)
 
 -- instance Arbtirary (InputPlanes MyPlane) where
 --   arbitrary = do coeffs <-
@@ -63,16 +63,10 @@ newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
 instance Arbitrary StdGen where
   arbitrary = mkStdGen <$> arbitrary
 
+----------------------------------------
+
 data Queries = Queries (Triangle (Point 2 R)) (NonEmpty (Point 2 R))
              deriving (Show,Eq)
-
-
-barrycentric :: Triangle (Point 2 R) -> Vector 3 R -> Point 2 R
-barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y z) =
-    Point $ (x *^ a) ^+^ (y *^ b) ^+^ (z *^ c)
-
-normalize   :: Vector 3 R -> Vector 3 R
-normalize v = let s = sum v in (/s) <$> v
 
 instance Arbitrary Queries where
   arbitrary = do domain   <- arbitrary
@@ -83,43 +77,14 @@ instance Arbitrary Queries where
                  pure $ Queries domain queries
   shrink (Queries tri qs) = [ Queries tri qs' | qs' <- shrink qs ]
 
+barrycentric :: Triangle (Point 2 R) -> Vector 3 R -> Point 2 R
+barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y z) =
+    Point $ (x *^ a) ^+^ (y *^ b) ^+^ (z *^ c)
 
-verifyLowest          :: [MyPlane] -> Point 2 R
-                      -> TriangulatedLowerEnvelope R MyPlane
-                      -> Property
-verifyLowest hs q = counterexample (show q)
-                  . allAtLowest
-                  . ifoldMap findContainingPrisms
-  where
-    findContainingPrisms    :: MyPlane -> NonEmpty (Prism R MyPlane)
-                            -> [(MyPlane, Prism R MyPlane)]
-    findContainingPrisms h = foldMap $ \tri -> ([(h, tri) | q `intersects` tri])
+normalize   :: Vector 3 R -> Vector 3 R
+normalize v = let s = sum v in (/s) <$> v
 
-    allAtLowest = \case
-      []   -> Every $ counterexample "No prism containing the query point!"
-                    $ counterexample ("lowest should be: " <> show lowestAtQ) False
-      tris -> foldMap (\(h,tri) -> Every $ counterexample (show tri) $ isLowestAtQ h) tris
-
-
-    -- allPrismsCorrect   :: MyPlane -> NonEmpty (Prism R MyPlane :+ extra) -> Every
-    -- allPrismsCorrect h = Every . counterexample (show h) . foldMap (prismIsCorrect h)
-
-    -- prismIsCorrect         :: MyPlane -> Prism R MyPlane :+ extra -> Every
-    -- prismIsCorrect h (tri :+ _)
-    --   | q `intersects` projectPrism tri = Every $ counterexample (show tri) $ isLowestAtQ h
-    --   | otherwise                       = mempty
-
-    isLowestAtQ   :: MyPlane -> Every
-    isLowestAtQ h = let z = evalAt q h
-                    in foldMap (\h' -> Every $
-                                 counterexample (show h') $
-                                 counterexample (show (z,evalAt q h')) $
-                                 z <= evalAt q h'
-                               ) hs
-
-    lowestAtQ = minimumBy (comparing $ evalAt q) hs
-
-
+--------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "Plane.RandomizedEnvSpec" $ do
@@ -184,6 +149,45 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
 -}
          -- runIO test
 
+--------------------------------------------------------------------------------
+
+verifyLowest          :: [MyPlane] -> Point 2 R
+                      -> TriangulatedLowerEnvelope R MyPlane
+                      -> Property
+verifyLowest hs q = counterexample (show q)
+                  . allAtLowest
+                  . ifoldMap findContainingPrisms
+  where
+    findContainingPrisms    :: MyPlane -> NonEmpty (Prism R MyPlane)
+                            -> [(MyPlane, Prism R MyPlane)]
+    findContainingPrisms h = foldMap $ \tri -> ([(h, tri) | q `intersects` tri])
+
+    allAtLowest = \case
+      []   -> Every $ counterexample "No prism containing the query point!"
+                    $ counterexample ("lowest should be: " <> show lowestAtQ) False
+      tris -> foldMap (\(h,tri) -> Every $ counterexample (show tri) $ isLowestAtQ h) tris
+
+
+    -- allPrismsCorrect   :: MyPlane -> NonEmpty (Prism R MyPlane :+ extra) -> Every
+    -- allPrismsCorrect h = Every . counterexample (show h) . foldMap (prismIsCorrect h)
+
+    -- prismIsCorrect         :: MyPlane -> Prism R MyPlane :+ extra -> Every
+    -- prismIsCorrect h (tri :+ _)
+    --   | q `intersects` projectPrism tri = Every $ counterexample (show tri) $ isLowestAtQ h
+    --   | otherwise                       = mempty
+
+    isLowestAtQ   :: MyPlane -> Every
+    isLowestAtQ h = let z = evalAt q h
+                    in foldMap (\h' -> Every $
+                                 counterexample (show h') $
+                                 counterexample (show (z,evalAt q h')) $
+                                 z <= evalAt q h'
+                               ) hs
+
+    lowestAtQ = minimumBy (comparing $ evalAt q) hs
+
+
+
 
 verticesOf :: (Plane_ plane r, Ord r, Fractional r)
            => Set (EnvVertex r plane) -> [Point 3 r]
@@ -199,7 +203,23 @@ verticesOf = sort . map location . toList
 --   _                      -> True
 
 -- -}
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+-- * Some helper utils for firuting out whether the input planes are in general position
+
+isInGeneralPosition        :: (Foldable set, Plane_ plane r, Ord plane, Fractional r, Ord r)
+                           => set plane -> Bool
+isInGeneralPosition planes = and
+  [ -- uniqueOn (\(Plane_ a _ _) -> a) planes
+  -- , uniqueOn (\(Plane_ _ b _) -> b) planes
+  -- , uniqueOn (\(Plane_ _ _ c) -> c) planes
+   all (null . view extraDefiners) $ bruteForceVertices planes
+  ]
+
+
+uniqueOn f = snd . foldr (\x (s,b) -> let y = f x in (Set.insert y s, b && Set.notMember y s))
+                         (mempty,True)
+
+--------------------------------------------------------------------------------
 
 colors :: [IpeColor R]
 colors = cycle (drop 3 basicNamedColors <> toList (namedSet myColors))
@@ -211,8 +231,18 @@ mkCone                     :: Num r => apex -> Vector 2 r -> Vector 2 r -> Cone 
 mkCone a incoming outgoing = Cone a (negated incoming :+ ()) (outgoing :+ ())
 
 
+--------------------------------------------------------------------------------
+-- * Debugging things
+
+
+data Input plane = Input (Triangle (Point 2 R))
+                         (NESet.NESet plane)
+                         [Point 2 R] -- possible queries
+                 deriving (Show,Read)
+
 -- domain = Triangle (Point2 100 100) (Point2 110 100) (Point2 100 110)
 
+test :: IO ()
 test = do
           writeIpeFile [osp|tri.ipe|]
             . addStyleSheet (createIpeStyle "myColors" myColors)
@@ -274,25 +304,7 @@ test = do
     domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
 
 
-isInGeneralPosition        :: (Foldable set, Plane_ plane r, Ord plane, Fractional r, Ord r)
-                           => set plane -> Bool
-isInGeneralPosition planes = and
-  [ -- uniqueOn (\(Plane_ a _ _) -> a) planes
-  -- , uniqueOn (\(Plane_ _ b _) -> b) planes
-  -- , uniqueOn (\(Plane_ _ _ c) -> c) planes
-   all (null . view extraDefiners) $ bruteForceVertices planes
-  ]
 
-
-uniqueOn f = snd . foldr (\x (s,b) -> let y = f x in (Set.insert y s, b && Set.notMember y s))
-                         (mempty,True)
-
-
-
-data Input plane = Input (Triangle (Point 2 R))
-                         (NESet.NESet plane)
-                         [Point 2 R] -- possible queries
-                 deriving (Show,Read)
 
 test2 = runTest $ Input domain planes []
   where
@@ -400,20 +412,6 @@ runTest (Input domain planes queries) = do
 --     vertices   = bruteForceVertices input
 
 
-drawVertices :: (Plane_ plane r, Fractional r, Ord plane, Ord r)
-             => Set (EnvVertex r plane)
-             -> [IpeObject r]
-drawVertices = foldMap $ \v -> [iO $ defIO (v^.asPoint) ! attr SLayer "vertices"
-                               ]
-
-draw :: forall plane r.
-        (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r)
-     => BoundedLowerEnvelope r (plane :+ IpeColor r) -> [IpeObject r]
-draw = ifoldMap draw'
-  where
-    draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell ! attr SFill color
-                                                           ! attr SLayer "env"
-                              ]
 
 --         draw'' (prism :+ cl) =
 --           [ iO $ defIO (projectPrism prism) ! attr SFill color
@@ -437,4 +435,20 @@ draw = ifoldMap draw'
 
 
 
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+-- * Drawing Utilities
+
+drawVertices :: (Plane_ plane r, Fractional r, Ord plane, Ord r)
+             => Set (EnvVertex r plane)
+             -> [IpeObject r]
+drawVertices = foldMap $ \v -> [iO $ defIO (v^.asPoint) ! attr SLayer "vertices"
+                               ]
+
+draw :: forall plane r.
+        (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r)
+     => BoundedLowerEnvelope r (plane :+ IpeColor r) -> [IpeObject r]
+draw = ifoldMap draw'
+  where
+    draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell ! attr SFill color
+                                                           ! attr SLayer "env"
+                              ]

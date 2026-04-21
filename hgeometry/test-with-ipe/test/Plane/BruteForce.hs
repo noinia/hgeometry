@@ -210,14 +210,11 @@ fromVertices        :: forall plane r.
                     => Triangle (Point 2 r) -> Set (EnvVertex r plane)
                     -> BoundedLowerEnvelope r plane
 fromVertices domain = imap computeCell . foldMap collect
-                    -- . Set.mapMonotonic (\v -> v :+ v `intersects` domain)
   where
-    -- | For each plane; collects the vertices that appear on the region corresponding to
-    -- h
-    collect   :: EnvVertex r plane
-              -> MonoidalMap plane (NonEmpty (EnvVertex r plane))
+    -- | For each plane h; collects the vertices that appear on the region corresponding to h
+    collect   :: EnvVertex r plane -> MonoidalMap plane (NonEmpty (EnvVertex r plane))
     collect v = foldMap (\h -> MonoidalMap.singleton h (NonEmpty.singleton v)) v
-               -- note: this uses the Foldable1 instance on EndVertex; which
+               -- note: this uses the Foldable instance on EndVertex; which
                -- essentially folds over the planes defining the vertex :)
 
     sortAroundBoundary (v0 :| xs) = v0 :| List.sortBy (ccwCmpAround v0) xs
