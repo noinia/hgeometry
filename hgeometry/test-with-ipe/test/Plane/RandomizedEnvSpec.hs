@@ -3,6 +3,8 @@
 module Plane.RandomizedEnvSpec
   where
 
+import           Data.Maybe
+import           Golden
 import           Data.Bifunctor
 import           Data.Foldable1
 import qualified Data.Set as Set
@@ -496,6 +498,51 @@ drawVD = ifoldMap draw'
                               ]
 
 --------------------------------------------------------------------------------
+
+voronoiSpec :: Spec
+voronoiSpec = describe "Vornoi specs" $ do
+                testIpe [osp|trivial.ipe|]
+                        [osp|trivial_out|]
+                testIpe [osp|simplest.ipe|]
+                        [osp|simplest_out|]
+                testIpe [osp|simpler.ipe|]
+                        [osp|simpler_out|]
+                testIpe [osp|simple.ipe|]
+                        [osp|simple_out|]
+                testIpe [osp|simple1.ipe|]
+                        [osp|simple1_out|]
+                testIpe [osp|foo.ipe|]
+                        [osp|foo_out|]
+                testIpe [osp|colinear.ipe|]
+                        [osp|colinear_out|]
+                testIpe [osp|pair.ipe|]
+                        [osp|pair_out|]
+                -- testIpe [osp|buggy.ipe|]
+                --         [osp|buggy_out|]
+
+testIpe            :: OsPath -> OsPath -> Spec
+testIpe inFp outFp = do
+    (points, domain) <- runIO $ do
+        inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
+        (points' :: NonEmpty (Point 2 R :+ _))   <- NonEmpty.fromList <$> readAllFrom inFp'
+        (domain' :: Triangle (Point 2 R) :+ _):_ <- readAllFrom inFp'
+        pure (points'&mapped.extra %~ fromMaybe blue . lookupAttr SStroke
+             ,domain'^.core)
+
+    let vd = voronoiDiagramIn     domain points
+        -- vv = bruteForceVerticesIn domain points
+        out = concat [ [iO $ defIO domain ! attr SLayer "domain" ]
+                     , drawVD vd
+                     , [ iO $ defIO p ! attr SStroke c
+                                      ! attr SLayer "sites"
+                                      ! attr SSize (IpeSize $ Named "normal")
+                       | p :+ c <- toList points
+                       ]
+                     ]
+    goldenWith [osp|data/test-with-ipe/VoronoiDiagram/new/|]
+               (ipeFileGolden { name = outFp })
+               (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
 
 type MyPoint = Point 2 R :+ IpeColor R
 

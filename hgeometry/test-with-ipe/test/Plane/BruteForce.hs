@@ -349,7 +349,7 @@ fromVertices domain = imap computeCell . foldMap collect
 -- | cover the clipped cone.
 coverClippedCone                         :: forall apex corner r.
                                             ( Point_ apex 2 r, Point_ corner 2 r
-                                            , Ord r, Num r
+                                            , Ord r, Fractional r
                                             , Show r
                                                   )
                                      => Triangle corner
@@ -366,7 +366,7 @@ coverClippedCone domain al leftV ar rightV =
 -- and its right vector (both given so that the cone is to the left of
 -- the vectors).  compute a convex polygon of contant complexity that
 -- covers the cone
-coverCone :: forall apex corner r. (Point_ apex 2 r, Point_ corner 2 r, Ord r, Num r
+coverCone :: forall apex corner r. (Point_ apex 2 r, Point_ corner 2 r, Ord r, Fractional r
              , Show apex, Show r
              )
           => Triangle corner -> apex -> Vector 2 r -> Vector 2 r
@@ -377,7 +377,7 @@ coverCone domain a leftV rightV =
      (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
 
 -- | computes the vertices of the clipped cone cover.
-coverCone'                           :: forall corner r. ( Ord r, Num r
+coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                                          , Show r
                                                          , Point_ corner 2 r
                                                          )
@@ -411,13 +411,16 @@ coverCone' domain al leftV ar rightV
 
     -- we are overestimating the length of the vector from q to a and using that
     projectOnto          :: Point 2 r -> Vector 2 r -> Point 2 r -> Point 2 r
-    projectOnto a base q = let b  = quadrance (q .-. a) *^ base
+    projectOnto a base q = let vLen = quadrance $ q .-. a
+                               bLen = quadrance base
+                               b    = (vLen / bLen) *^ base
                            in a .+^ b
-
-
-
-
-
+      -- consider the vector v from q to a, and let v' be its projection onto base.
+      -- we want to compute some point that lies on the base, and is "further away"
+      -- than v'.
+      --
+      -- observe that the length of v is at least the length of v'. So we will compute
+      -- a vector b whose (squared) length is at least the (squared) length of v.
 
 --------------------------------------------------------------------------------
 
