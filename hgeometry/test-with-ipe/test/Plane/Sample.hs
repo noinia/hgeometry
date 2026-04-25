@@ -1,5 +1,6 @@
 module Plane.Sample
   ( Sample(..)
+  , sampleSubset
   ) where
 
 import Data.Foldable
