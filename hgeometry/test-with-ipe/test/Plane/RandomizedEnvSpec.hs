@@ -3,6 +3,8 @@
 module Plane.RandomizedEnvSpec
   where
 
+import           Data.Bifunctor
+import           Data.Foldable1
 import qualified Data.Set as Set
 import           Data.Ord
 import           Control.Lens hiding (Prism)
@@ -10,7 +12,7 @@ import           System.OsPath
 import           Ipe
 import           System.Random
 import           Data.List (sort)
-import           Data.Foldable
+import           Data.Foldable (Foldable(..))
 import           HGeometry.Kernel
 import           Plane.BruteForce
 import           Plane.Sample
@@ -43,6 +45,7 @@ import           Ipe.AllColors
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           Data.Text (Text)
 import           Debug.Pretty.Simple
+import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 -- import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -131,7 +134,7 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
              \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
                let env   = triangulatedLowerEnvelopeOn domain planes
                in counterexample (show env) $
-                 not (null env) ==> conjoin [ verifyLowest (toList planes) q env
+                 not (null env) ==> conjoin [ verifyLowest (toNonEmpty planes) q env
                                             | q <- toList queries
                                             ]
 {-
@@ -151,7 +154,7 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
 
 --------------------------------------------------------------------------------
 
-verifyLowest          :: [MyPlane] -> Point 2 R
+verifyLowest          :: NonEmpty MyPlane -> Point 2 R
                       -> TriangulatedLowerEnvelope R MyPlane
                       -> Property
 verifyLowest hs q = counterexample (show q)
@@ -452,3 +455,73 @@ draw = ifoldMap draw'
     draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell ! attr SFill color
                                                            ! attr SLayer "env"
                               ]
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+type BoundedVoronoiDiagram r site =
+  MonoidalMap site (ConvexPolygon (Vertex' r site))
+
+-- | Computes the voronoi diagram in a given region
+voronoiDiagramIn        :: ( Point_ point 2 r, Ord r, Fractional r
+                           , Foldable1 set, Functor set
+                           , Ord point
+                           , Show point, Show r -- TODO
+                           )
+                        => Triangle (Point 2 r) -> set point -> BoundedVoronoiDiagram r point
+voronoiDiagramIn domain = MonoidalMap.mapKeys (^.extra)
+                        . fmap (over vertices (first (fmap (^.extra))))
+                        . lowerEnvelopeOn domain
+                        . fmap (\p -> pointToPlane p :+ p)
+  -- TODO: figure out if mapping monotonically is safe...
+
+
+--------------------------------------------------------------------------------
+
+
+drawVD :: forall site r.
+          (Ord site, Ord r, Fractional r, Show r)
+       => BoundedVoronoiDiagram r (site :+ IpeColor r) -> [IpeObject r]
+drawVD = ifoldMap draw'
+  where
+    draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell ! attr SFill color
+                                                           ! attr SLayer "env"
+                                                           ! attr SOpacity "30%"
+                              ]
+
+--------------------------------------------------------------------------------
+
+type MyPoint = Point 2 R :+ IpeColor R
+
+myPoints :: NonEmpty MyPoint
+myPoints = NonEmpty.fromList . flip (zipWith (:+)) colors $
+           [ Point2 0 0
+           , Point2 10 10
+           , Point2 100 20
+           , Point2 20  200
+           , Point2 30 40
+           ]
+
+testVD = writeIpeFile [osp|vd.ipe|]
+            . addStyleSheet (createIpeStyle "myColors" myColors)
+            . addStyleSheet opacitiesStyle
+            . singlePageFromContent $
+              [ iO $ defIO p  ! attr SStroke c
+                              ! attr SLayer "sites"
+              | p :+ c <- toList myPoints ]
+              <>
+              drawVD vd
+              <>
+              [ iO $ defIO domain  ! attr SLayer "domain" ]
+
+  where
+    vd =   voronoiDiagramIn domain myPoints
+    domain = Triangle (Point2 (-200) (-200)) (Point2 500 0) (Point2 0 500)
+
+
+-- voronoiSpec = describe "Voronoi diagrams again" $ do
+--                 prop "closest pair shares edge" $
+--                   \(sites :: NESet.NESet MyPoint) ->
