@@ -1,22 +1,28 @@
 module Plane.Randomized2
-  ( randomizedVertices
+  ( verticesIn
+  , lowerEnvelopeOn'
   ) where
 
-
-import Data.Foldable
-import Witherable
-import HGeometry.Plane
-import HGeometry.Ext
-import HGeometry.Kernel
-import HGeometry.HalfLine
-import HGeometry.Map.NonEmpty.Monoidal
-import System.Random
-import Control.Lens hiding (Prism)
-import Data.Foldable1
-import Data.List.NonEmpty (NonEmpty(..))
+import           Data.Bifoldable
+import           Data.Foldable
+import           Witherable
+import           HGeometry.Plane
+import           HGeometry.Ext
+import           HGeometry.Point.Either
+import           HGeometry.Kernel
+import           HGeometry.Polygon
+import           HGeometry.HalfLine
+import           HGeometry.Map.NonEmpty.Monoidal
+import           Data.Set (Set)
+import qualified Data.Set as Set
+import           System.Random
+import           Control.Lens hiding (Prism, Prism')
+import           Data.Foldable1
+import           Data.List.NonEmpty (NonEmpty(..))
 import Data.List qualified as List
 import Data.List.NonEmpty qualified as NonEmpty
-import Plane.BruteForce
+import           Plane.BruteForce
+import           Plane.Sample
 import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
 import HGeometry.Plane.LowerEnvelope.Connected( mapVertices
                                               , MinimizationDiagram
@@ -25,26 +31,140 @@ import HGeometry.Plane.LowerEnvelope.Connected( mapVertices
                                               , fromVertexForm
                                               )
 import Data.Map.NonEmpty qualified as NEMap
-import Data.Map (Map)
+import           Data.Map (Map)
 import Data.Map qualified as Map
-import Prelude hiding (filter)
-import Plane.Sample
-import Data.Map.Monoidal (MonoidalMap)
+import           Prelude hiding (filter)
+import           Plane.Sample
+import           Data.Map.Monoidal (MonoidalMap)
 import Data.Map.Monoidal qualified as MonoidalMap
+import           HGeometry.Triangle
 
 --------------------------------------------------------------------------------
 
+-- | Given a domain and a set of planes; computes for each plane the region at which it is
+-- lowest.
+--
+-- The union of these regions covers the domain.
+--
+lowerEnvelopeOn'            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
+                              , Foldable1 set, RandomGen gen
+                              , Show plane, Show r
+                              )
+                           => gen -> Triangle (Point 2 r) -> set plane
+                           -> BoundedLowerEnvelope r plane
+lowerEnvelopeOn' gen domain = fromVertices domain . verticesIn gen domain
 
--- | Randomzied algoirhtm to compute the vertices of the lwoer envelope
-randomizedVertices :: ( Plane_ plane r, Ord r, Fractional r
-                      , RandomGen gen
-                      , Foldable subset, Ord plane
-                      )
-                   => gen
-                   -> Sample subset plane
-                   -> MonoidalMap (EnvVertex r plane) [plane]
-randomizedVertices gen = undefined
 
+-- | Randomzied algorithm to compute the vertices of the lower envelope
+--
+-- we return only the vertices strictly inside the domain
+verticesIn               :: forall gen set plane corner r.
+                            ( Plane_ plane r, Ord r, Fractional r
+                            , RandomGen gen
+                            , Foldable1 set, Ord plane
+                            , Point_ corner 2 r
+
+                            , Show r, Show plane
+                            )
+                         => gen
+                         -> Triangle corner
+                         -> set plane
+                         -> Set (EnvVertex r plane)
+verticesIn gen0 domain hs
+  | n <= n0   = bruteForceVerticesIn domain hs
+  | otherwise = lowerEnv $ sampleSubset gen0 r n hs
+ where
+   n = length hs
+   -- r = n^{1/4}
+   r = ceiling . sqrt . sqrt $ fromIntegral n
+
+   lowerEnv :: (Sample NonEmpty plane, gen) -> Set (EnvVertex r plane)
+   lowerEnv (Sample rs _ rest _, gen) =
+
+
+     ifoldMap (foldMap . recurse) env
+     where
+       -- | The envelope; in which each vertex is tagged with whether it lies in the domain
+       -- and its conflict list
+       env :: TriangulatedLowerEnvelope'' r plane
+       env = mapMaybe (intersectsDomain . triangulate) env'
+
+       env' :: MonoidalMap plane (ConvexPolygon (V r plane))
+       env' = fmap withExtraConflictLists env''
+
+       -- env'' :: MonoidalMap plane (ConvexPolygon (OriginalOrExtra
+       --                                               (EnvVertex r plane :+ (Bool, [plane]))
+       --                                               (Point 2 r :+ r)
+       --                                           ))
+       env'' :: BoundedLowerEnvelope' (EnvVertex r plane :+ (Bool, [plane])) r plane
+       env'' = fromVertices domain
+             . Set.map mkVertex
+             . bruteForceVertices $ rs
+
+       -- | We recurse on every prism
+       recurse        :: plane
+                      -> Prism'' r plane
+                      -> Set (EnvVertex r plane)
+       recurse h cell = case NonEmpty.nonEmpty $ conflictListOf cell of
+           Nothing -> mempty
+           Just cl -> verticesIn gen cell (h NonEmpty.<| cl)
+         where
+           report (v :+ inside, cl) = if inside && null cl then Set.singleton v else mempty
+
+
+       -- | Tag the vertex with whether it lies inside the domain, and its conflict list
+       mkVertex   :: EnvVertex r plane -> EnvVertex r plane :+ (Bool, [plane])
+       mkVertex v = undefined
+
+
+       intersectsDomain :: NonEmpty (Prism'' r plane) -> Maybe (NonEmpty (Prism'' r plane))
+       intersectsDomain = NonEmpty.nonEmpty
+                        . NonEmpty.filter (`intersects` domain)
+         -- TODO we may be able to use the bools about vertex locations already to speed this up
+
+-- Every vertex is tagged with whether it lies in the domain, and its conflict list.
+type V r plane = OriginalOrExtra (EnvVertex r plane :+ (Bool, [plane]))
+                                 ((Point 2 r :+ r)  :+ (Bool, [plane]))
+
+type Prism'' r plane = Triangle (V r plane)
+
+type BoundedLowerEnvelope'' r plane =
+  MonoidalMap plane (ConvexPolygon (V r plane))
+
+-- | Triangulated lower envelope; with conflict lists
+type TriangulatedLowerEnvelope'' r plane =
+  MonoidalMap plane (NonEmpty (Prism'' r plane))
+
+withExtraConflictLists :: ConvexPolygon (OriginalOrExtra (EnvVertex r plane :+ (Bool, [plane]))
+                                                         (Point 2 r :+ r)
+                                        )
+                       -> ConvexPolygon (V r plane)
+  -- BoundedLowerEnvelope'  (EnvVertex r plane :+ (Bool, [plane])) r plane
+  --                      -> BoundedLowerEnvelope'' r plane
+withExtraConflictLists = undefined
+
+
+
+
+-- | minimum value below which we just use the bruteForce method anyway
+n0 :: Int
+n0 = 5
+
+-- | computes the conflict list of a prism
+conflictListOf :: Triangle (OriginalOrExtra (orig :+ (bool,[plane]))
+                                            (extra :+ (bool,[plane]))
+                           ) -> [plane]
+conflictListOf = foldMap (bifoldMap (^.extra._2) (^.extra._2))
+
+  -- toListOf (folded.both.extra._2.folded)
+
+
+  -- foldMap (
+
+  -- both (^.extra._2))
+
+
+-- bruteForceEnvelope =
 
 
 {-
@@ -63,9 +183,6 @@ type Probability = Double
 
 
 
--- | minimum value below which we just use the bruteForce method anyway
-n0 :: Int
-n0 = 5
 
 
 
