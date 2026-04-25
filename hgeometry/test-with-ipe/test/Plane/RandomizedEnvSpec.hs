@@ -101,7 +101,9 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
 
            testCoverCone `shouldBe`
              uncheckedFromCCWPoints (NonEmpty.fromList
-               [Extra (Point2 371 3),Extra (Point2 291 293),Original (Point2 1 3)])
+               [Extra (Point2 371 3),Extra (Point2 146 148),Original (Point2 1 3)])
+
+
 
          prop "cone cover contains corners comain" $
            \(domain :: Triangle (Point 2 R)) (cone :: Cone R (Point 2 R) ()) ->
