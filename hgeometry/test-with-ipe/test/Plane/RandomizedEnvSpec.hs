@@ -29,7 +29,7 @@ import           Data.Set (Set)
 import Data.Map qualified as Map
 import Data.Map.Monoidal qualified as MonoidalMap
 import           Data.Map.Monoidal (MonoidalMap)
-import           Plane.Randomized2
+import qualified Plane.Randomized2 as Randomized
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
@@ -137,18 +137,21 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
                  not (null env) ==> conjoin [ verifyLowest (toNonEmpty planes) q env
                                             | q <- toList queries
                                             ]
+
+           prop "randomized2 same as (new) brute force" $
+             \(planes :: NESet.NESet MyPlane)
+              (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
+               verticesOf (Randomized.verticesIn gen domain planes)
+               ===
+               verticesOf (bruteForceVerticesIn domain planes)
+
+
 {-
            prop "dummy" $
              \(planes :: NESet.NESet MyPlane) ->
                let input = Sample (toList planes) (length planes) [] (length planes)
                in show (bruteForceTriangulatedEnvelope input) === "foo"
 
-           prop "randomized2 same as (new) brute force" $
-             \(planes :: NESet.NESet MyPlane) (gen :: StdGen) ->
-               let input = Sample (toList planes) (length planes) [] (length planes) in
-               verticesOf (randomizedVertices gen input)
-               ===
-               verticesOf (bruteForceVertices input)
 -}
          -- runIO test
 
@@ -463,7 +466,7 @@ draw = ifoldMap draw'
 
 
 type BoundedVoronoiDiagram r site =
-  MonoidalMap site (ConvexPolygon (Vertex' r site))
+  MonoidalMap site (ConvexPolygon (Vertex' (EnvVertex r site) r site))
 
 -- | Computes the voronoi diagram in a given region
 voronoiDiagramIn        :: ( Point_ point 2 r, Ord r, Fractional r
