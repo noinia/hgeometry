@@ -250,14 +250,8 @@ fromVertices domain = imap computeCell . foldMap collect
 
     -- | For a plane; compute the vertices in CCW order around the its boundary, and
     -- extend to cover the domain
-    computeCell                                        :: plane
-                                                       -> NonEmpty vertex
-                                                       -> ConvexPolygon (Vertex' vertex r plane)
-    computeCell h (sortAroundBoundary -> vs'@(v0:|rest'))
-      | traceShow ("computeCell",h,toList vs') False = undefined
-      | otherwise
-      =
-
+    computeCell :: plane -> NonEmpty vertex -> ConvexPolygon (Vertex' vertex r plane)
+    computeCell h (sortAroundBoundary -> vs'@(v0:|rest')) =
         uncheckedFromCCWPoints $ (extra' <$> extras) <<> (Original <$> originals)
       where
         -- | The vertices in sorted order around some arbitrary first vertex.
@@ -267,7 +261,7 @@ fromVertices domain = imap computeCell . foldMap collect
                            Vector2 (h1,w1) (_,w2) = boundingPlanes v0
                            (w1',w2')              = if f h < f h1 then (w1,w2) else (w2,w1)
                        in (vs', coverCone'' a w1' a w2')
-          Just rest -> case traceShowWith ("UB",) $ findUnbounded isUnboundedEdge v0 rest of
+          Just rest -> case findUnbounded isUnboundedEdge v0 rest of
             Nothing        -> (vs', [])
             Just vs@(u:|_) -> (vs, extraVertices u $ NonEmpty.last vs)
 
@@ -284,9 +278,7 @@ fromVertices domain = imap computeCell . foldMap collect
         -- (as well as for both planes) the direction vector so that h is to the left
         -- of the line with this direction vector (through v).
         boundingPlanes   :: vertex -> Vector 2 (plane, Vector 2 r)
-        boundingPlanes v = traceShowWith ("boundingPlanes",h,v,"->",) $
-          fromMaybe err
-                           . (\h' -> (h',) <$> intersectionVector h h')
+        boundingPlanes v = fromMaybe err . (\h' -> (h',) <$> intersectionVector h h')
                         <$> otherPlanes h (definingPlanes v)
         err = error "absurd: fromVertices. planes don't intersect !?"
 
@@ -294,16 +286,11 @@ fromVertices domain = imap computeCell . foldMap collect
         -- really a CCW neighbor of u; i.e. if uv is an edge of the
         -- polygon, or not. This function returns True if uv is *not* an edge.
         isUnboundedEdge     :: vertex -> vertex -> Bool
-        isUnboundedEdge u v
-          -- | traceShow (u /= v ) False
-
-          = traceShowWith ("isUnboundedEdge",u,v,"->",) $
-
-          case otherPlane u v of
+        isUnboundedEdge u v = case otherPlane u v of
           Nothing -> True
           Just h' -> let Vector2 x y = v .-. u
-                         w           = traceShowWith ("w",u,v,"->",) $ Vector2 y (-x)
-                         f           = evalAt (traceShowWith ("loc",) $ u .+^ w)
+                         w           = Vector2 y (-x)
+                         f           = evalAt (u .+^ w)
                      in f h < f h'
             -- w should be a vector pointing into the right halfplane
             -- of the edge uuv
@@ -316,8 +303,7 @@ fromVertices domain = imap computeCell . foldMap collect
         -- h that they have in common (if any)
         otherPlane     :: vertex -> vertex -> Maybe plane
         otherPlane u v = let f = foldMap Set.singleton . planesOf in
-                         case traceShowWith ("otherPlane",h,u,v,"->",) $
-                              toList $ Set.delete h (f u `Set.intersection` f v) of
+                         case toList $ Set.delete h (f u `Set.intersection` f v) of
                            [h'] -> Just h'
                            []   -> Nothing
                            xs    -> traceStack (show ("multiple",h,u,v,xs)) $
@@ -327,10 +313,7 @@ fromVertices domain = imap computeCell . foldMap collect
         --
         -- u is the first vertex of the chain and v is the last vertex of the chain.
         extraVertices     :: vertex -> vertex -> [Point 2 r]
-        extraVertices u v
-          | traceShow ("extraVertices",u, v) False = undefined
-          | otherwise
-          = coverCone'' (u^.asPoint) (dir u (>)) (v^.asPoint) (dir v (<))
+        extraVertices u v = coverCone'' (u^.asPoint) (dir u (>)) (v^.asPoint) (dir v (<))
           where
             dir z cmp = let Vector2 (_h1,w1) (h2,w2) = boundingPlanes z
                             f = evalAt (z .+^ w1)
@@ -384,10 +367,7 @@ coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                      => Triangle corner
                                      -> Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
                                      -> NonEmpty (Point 2 r)
-coverCone' domain al leftV ar rightV
-  | traceShow ("coverCone'",al,leftV,".....",ar,rightV) False = undefined
-  | otherwise
-  = r :| mp <> [l]
+coverCone' domain al leftV ar rightV = r :| mp <> [l]
   where
     domain' = fmap (^.asPoint) domain
     Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
