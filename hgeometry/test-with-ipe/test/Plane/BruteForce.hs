@@ -132,7 +132,8 @@ instance HasCoordinates (EnvVertex r plane) (EnvVertex r plane) where
 instance Affine_ (EnvVertex r plane) 2 r
 instance Point_ (EnvVertex r plane) 2 r
 
-instance (Num r, Ord r) => HasIntersectionWith (EnvVertex r plane) (Triangle (Point 2 r)) where
+instance (Point_ corner 2 r, Num r, Ord r
+         ) => HasIntersectionWith (EnvVertex r plane) (Triangle corner) where
   v `intersects` t = (v^.asPoint) `intersects` t
 
 instance Foldable1 (EnvVertex r) where
