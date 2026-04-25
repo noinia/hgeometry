@@ -78,28 +78,22 @@ verticesIn gen0 domain hs
    -- r = n^{1/4}
    r = ceiling . sqrt . sqrt $ fromIntegral n
 
-   lowerEnv :: (Sample NonEmpty plane, gen) -> Set (EnvVertex r plane)
-   lowerEnv (Sample rs _ rest _, gen) =
-
-
-     ifoldMap (foldMap . recurse) env
+   lowerEnv                           :: (Sample NonEmpty plane, gen) -> Set (EnvVertex r plane)
+   lowerEnv (Sample rs _ rest _, gen) = foldMap report vs
+                                     <> ifoldMap (foldMap . recurse) env
      where
        -- | The envelope; in which each vertex is tagged with whether it lies in the domain
        -- and its conflict list
        env :: TriangulatedLowerEnvelope'' r plane
-       env = mapMaybe (intersectsDomain . triangulate) env'
+       env = mapMaybe ((intersectsDomain . triangulate) . withExtraConflictLists rest)
+           $ fromVertices domain vs
 
-       env' :: MonoidalMap plane (ConvexPolygon (V r plane))
-       env' = fmap withExtraConflictLists env''
+       -- | Compute the vertices of the sample using a brute force manner
+       vs = Set.mapMonotonic mkVertex $ bruteForceVertices rs
+         -- note: we will just tag the vertex with additional info; so mkVertex is monotonic
 
-       -- env'' :: MonoidalMap plane (ConvexPolygon (OriginalOrExtra
-       --                                               (EnvVertex r plane :+ (Bool, [plane]))
-       --                                               (Point 2 r :+ r)
-       --                                           ))
-       env'' :: BoundedLowerEnvelope' (EnvVertex r plane :+ (Bool, [plane])) r plane
-       env'' = fromVertices domain
-             . Set.map mkVertex
-             . bruteForceVertices $ rs
+       -- | Test if we should report some vertex  from the sample
+       report (v :+ (inside', cl)) = if inside' && null cl then Set.singleton v else mempty
 
        -- | We recurse on every prism
        recurse        :: plane
@@ -108,19 +102,25 @@ verticesIn gen0 domain hs
        recurse h cell = case NonEmpty.nonEmpty $ conflictListOf cell of
            Nothing -> mempty
            Just cl -> verticesIn gen cell (h NonEmpty.<| cl)
-         where
-           report (v :+ inside, cl) = if inside && null cl then Set.singleton v else mempty
 
 
        -- | Tag the vertex with whether it lies inside the domain, and its conflict list
        mkVertex   :: EnvVertex r plane -> EnvVertex r plane :+ (Bool, [plane])
-       mkVertex v = undefined
+       mkVertex v = v :+ ( v `intersects` domain
+                         , computeConflictList v
+                         )
 
 
        intersectsDomain :: NonEmpty (Prism'' r plane) -> Maybe (NonEmpty (Prism'' r plane))
        intersectsDomain = NonEmpty.nonEmpty
                         . NonEmpty.filter (`intersects` domain)
          -- TODO we may be able to use the bools about vertex locations already to speed this up
+
+
+       computeConflictList v = let v' = location v
+                               in filter (\h -> verticalSideTest v' h == LT) (toList rest)
+       -- TODO: this should use the batched point loc, but whatever.
+
 
 -- Every vertex is tagged with whether it lies in the domain, and its conflict list.
 type V r plane = OriginalOrExtra (EnvVertex r plane :+ (Bool, [plane]))
@@ -135,13 +135,24 @@ type BoundedLowerEnvelope'' r plane =
 type TriangulatedLowerEnvelope'' r plane =
   MonoidalMap plane (NonEmpty (Prism'' r plane))
 
-withExtraConflictLists :: ConvexPolygon (OriginalOrExtra (EnvVertex r plane :+ (Bool, [plane]))
-                                                         (Point 2 r :+ r)
-                                        )
-                       -> ConvexPolygon (V r plane)
-  -- BoundedLowerEnvelope'  (EnvVertex r plane :+ (Bool, [plane])) r plane
-  --                      -> BoundedLowerEnvelope'' r plane
-withExtraConflictLists = undefined
+withExtraConflictLists    :: (Plane_ plane r, Ord r, Num r, Foldable set
+                             )
+                          => set plane
+                          -> ConvexPolygon (OriginalOrExtra
+                                               (EnvVertex r plane :+ (Bool, [plane]))
+                                               (Point 2 r :+ r)
+                                           )
+                          -> ConvexPolygon (V r plane)
+withExtraConflictLists hs = over (vertices._Extra) $ \p@(Point2 x y :+ z) ->
+                              p :+ (False, computeConflictList (Point3 x y z))
+  where
+    computeConflictList q = filter (\h -> verticalSideTest q h == LT) (toList hs)
+                            -- TODO: this should use the batched point loc, but whatever.
+
+
+-- instance (Point_ corner 2 r, Ord r, Num r
+--          ) => HasIntersectionWith (EnvVertex r plane) (Triangle corner) where
+--   v `intersects` tri = (v^.asPoint) `intersects` tri
 
 
 
