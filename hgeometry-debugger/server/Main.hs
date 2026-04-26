@@ -90,8 +90,12 @@ runDebugServer port act = do putStrLn $ "Starting the server on port " <> show p
 
 --------------------------------------------------------------------------------
 
-clientDrawing :<|> clientDrawLayer :<|> clientClearLayer :<|> clientClear = client (Proxy @API)
-
+clientStatic
+  :<|> clientDrawing
+  :<|> clientDrawLayer
+  :<|> clientClearLayer
+  :<|> clientClear
+  = client (Proxy @API)
 
 -- type Client = ReaderT ClientEnv IO
 
@@ -117,11 +121,10 @@ defaultBaseUrl = BaseUrl Http "localhost" defaultPort ""
 defaultPort :: Port
 defaultPort = 8000
 
-
-
 --------------------------------------------------------------------------------
 
-type API =    "drawing"    :> Get '[ PlainText ] String
+type API =    "pub"        :> Raw
+         :<|> "drawing"    :> Get '[ PlainText ] String
          :<|> "drawLayer"  :> ReqBody '[ JSON ] (LayerName, String, Drawing) :> Put '[JSON] ()
          :<|> "clearLayer" :> ReqBody '[ PlainText ] LayerName               :> Put '[JSON] ()
          :<|> "clear"      :> Put '[JSON] ()
@@ -177,7 +180,8 @@ instance MonadState State Handler' where
 
 
 server :: Server' API
-server =   handleDrawing
+server =   serveDirectoryWebApp "pub"
+      :<|> handleDrawing
       :<|> handleDrawLayer
       :<|> handleClearLayer
       :<|> handleClear

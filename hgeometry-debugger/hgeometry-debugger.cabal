@@ -17,9 +17,13 @@ build-type:         Simple
 extra-doc-files:
     README.md
     changelog.txt
--- extra-source-files:
+extra-source-files:
+    pub/index.html
+    pub/index.js
+    ghc_wasm_jsffi.js
 data-dir: data
 data-files:
+    pub/viewer.wasm
 tested-with:
     GHC == 9.12.2
   -- , GHC == 9.10.1
@@ -210,8 +214,8 @@ executable hgeometry-debugger
     , http-media           >= 0.8.1     && < 0.9
 
 executable viewer
-  import:         setup, miso-options
-  hs-source-dirs: convexHull
+  import:         all-setup, miso-options
+  hs-source-dirs: viewer
   main-is:        Main.hs
   Other-modules:
     App
