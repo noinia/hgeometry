@@ -7,18 +7,27 @@ import qualified Data.Sequence as Seq
 import           Data.Sequence (Seq(..))
 import           Control.Monad.State.Class
 import           Data.IORef
-import           Miso (View)
+import           Miso (View, ms, text)
+import           Data.ByteString (ByteString, toStrict)
+import           Data.ByteString.Char8 (pack)
+import           Miso.Html.Element (div_)
+import           Miso.Html.Render
 import           Servant
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import qualified Data.Map as Map
 import           Data.Map (Map)
 import           Data.Aeson
+import           Data.Text (Text)
+import           Data.Text.Encoding (decodeUtf8Lenient)
 import           GHC.Generics
 import           System.IO.Unsafe (unsafePerformIO)
 import           Data.Kind (Type)
-import           Servant.Client
+import           Servant.Client ( ClientM, runClientM, ClientEnv, mkClientEnv
+                                , BaseUrl(..), client, Scheme(..)
+                                )
 import           Control.Concurrent.Async
+import           Network.HTTP.Media ((//), (/:))
 
 --------------------------------------------------------------------------------
 
@@ -31,9 +40,11 @@ class Draw t where
   draw :: t -> View model action
 
 instance Draw Int where
-  draw = undefined
+  draw x = div_ [] [text $ ms x]
 
-draw' _ = Drawing
+
+draw' :: Draw a => a -> Drawing
+draw' = Drawing . decodeUtf8Lenient . toStrict . toHtml . draw
 
 --------------------------------------------------------------------------------
 -- * Our API
@@ -120,17 +131,29 @@ type API =    "drawing"    :> Get '[ PlainText ] String
 
 --------------------------------------------------------------------------------
 
-data Drawing = Drawing -- dummy
-  deriving (Generic,Show)
+newtype Drawing = Drawing Text
+  deriving (Generic, Show)
+
+instance ToJSON Drawing where
+instance FromJSON Drawing where
 
 
-instance ToJSON Drawing
-instance FromJSON Drawing
-
+--------------------------------------------------------------------------------
 data Svg = Svg
 
 
-data MisoHtml
+data HTMLMiso
+
+instance Accept HTMLMiso where
+    contentType _ = pack "text" // pack "html" /: (pack "charset", pack "utf-8")
+
+instance ToHtml a => MimeRender HTMLMiso a where
+    mimeRender _ = toHtml
+
+instance MimeRender HTMLMiso (View model action) where
+    mimeRender _ = toHtml
+
+--------------------------------------------------------------------------------
 
 type State = Map LayerName (Seq (String, Drawing))
 
@@ -183,7 +206,7 @@ app stateRef = serve api $ hoistServer api (liftIO . flip runReaderT stateRef . 
 main :: IO ()
 main = runDebugServer defaultPort $ do
   print "woei"
-  debugClient $ clientDrawLayer ("myLayer","my layer content", Drawing)
+  debugClient $ clientDrawLayer ("myLayer","my layer content", draw' (5 :: Int))
   x <- read <$> getLine
   print $ fib x
 
