@@ -7,23 +7,18 @@ module Triangle.InTriangleSpec
 import           System.OsPath
 import           Control.Lens
 import           Data.Foldable
-import           Data.Foldable1
 import           HGeometry
 import           Data.Maybe
 import           HGeometry.Triangle
-import           HGeometry.HalfSpace
-import           HGeometry.Line
 import           HGeometry.Polygon
 import           HGeometry.Boundary
-import qualified HGeometry.Sign as Sign
 import           HGeometry.Ext
-import           HGeometry.Instances
+import           HGeometry.Instances()
 import           Test.Hspec
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Golden
 import           Ipe
-import           Ipe.Color
 import           R
 import           Data.Text (Text)
 import           Test.Hspec.QuickCheck
