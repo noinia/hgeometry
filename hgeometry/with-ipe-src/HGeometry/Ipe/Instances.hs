@@ -22,9 +22,7 @@ import           HGeometry.Kernel
 import           Ipe
 import           Ipe.Color
 import           Control.Lens
-import           HGeometry.HalfSpace
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Cyclic
 import           HGeometry.Polygon
 
