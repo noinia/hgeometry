@@ -28,10 +28,10 @@ import           Servant.Client ( ClientM, runClientM, ClientEnv, mkClientEnv
                                 )
 import           Control.Concurrent.Async
 import           Network.HTTP.Media ((//), (/:))
+import           Debugger.API
 
 --------------------------------------------------------------------------------
 
-type LayerName = String
 
 -- type Svg =
 
@@ -90,12 +90,6 @@ runDebugServer port act = do putStrLn $ "Starting the server on port " <> show p
 
 --------------------------------------------------------------------------------
 
-clientStatic
-  :<|> clientDrawing
-  :<|> clientDrawLayer
-  :<|> clientClearLayer
-  :<|> clientClear
-  = client (Proxy @API)
 
 -- type Client = ReaderT ClientEnv IO
 
@@ -123,22 +117,11 @@ defaultPort = 8000
 
 --------------------------------------------------------------------------------
 
-type API =    "pub"        :> Raw
-         :<|> "drawing"    :> Get '[ PlainText ] String
-         :<|> "drawLayer"  :> ReqBody '[ JSON ] (LayerName, String, Drawing) :> Put '[JSON] ()
-         :<|> "clearLayer" :> ReqBody '[ PlainText ] LayerName               :> Put '[JSON] ()
-         :<|> "clear"      :> Put '[JSON] ()
 
   -- "traceDraw" :>
 
 
 --------------------------------------------------------------------------------
-
-newtype Drawing = Drawing Text
-  deriving (Generic, Show)
-
-instance ToJSON Drawing where
-instance FromJSON Drawing where
 
 
 --------------------------------------------------------------------------------
