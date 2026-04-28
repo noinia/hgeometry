@@ -2,7 +2,7 @@ module Debugger.API
   ( API
 
   , LayerName
-  , Drawing
+  , Drawing(Drawing)
 
 
   , clientDrawing
@@ -11,12 +11,14 @@ module Debugger.API
   , clientClear
   ) where
 
-import Servant
+import Servant.API
 import GHC.Generics
 import Data.Aeson
-import           Servant.Client ( ClientM, runClientM, ClientEnv, mkClientEnv
-                                , BaseUrl(..), client, Scheme(..)
-                                )
+import Servant.Client ( ClientM, runClientM, ClientEnv, mkClientEnv
+                      , BaseUrl(..), client, Scheme(..)
+                      )
+import Data.Text (Text)
+import Data.Proxy
 
 --------------------------------------------------------------------------------
 
