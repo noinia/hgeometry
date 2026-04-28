@@ -253,7 +253,7 @@ instance ( HoleContainer h nonEmpty vertex
       tri    = Triangle u v w
       diag   = LinePV (u^.asPoint) (w .-. u)
       farthest p
-        | p `inTriangle` tri == StrictlyInside =
+        | p `inTriangle` tri == Inside =
             Just (Max (Arg (p `squaredEuclideanDistTo` diag) p))
         | otherwise         = Nothing
   -- The overall strategy follows the "a polygon can be triangulated
@@ -269,8 +269,9 @@ instance ( HoleContainer h nonEmpty vertex
   -- [*] it could be that there is a vertex on the interior of the
   -- segment uw (and no vertices strictly in the interior). However, then
   -- picking a point inside the triangle is also fine.
-      inTriangle q tr = q `inPolygon` (uncheckedFromCCWPoints tr :: SimplePolygon _)
-      -- TOOD: just make triangle an instance of SimplePolygon_
+
+      -- inTriangle q tr = q `inPolygon` (uncheckedFromCCWPoints tr :: SimplePolygon _)
+      -- -- TOOD: just make triangle an instance of SimplePolygon_
 
 
 

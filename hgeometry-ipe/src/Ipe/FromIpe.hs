@@ -272,6 +272,27 @@ class HasDefaultFromIpe g where
   defaultFromIpe :: (r ~ NumType g)
                  => Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
 
+
+instance HasDefaultFromIpe (IpeSymbol r) where
+  type DefaultFromIpe (IpeSymbol r) = IpeSymbol
+  defaultFromIpe = _IpeUse
+instance HasDefaultFromIpe (Group r) where
+  type DefaultFromIpe (Group r) = Group
+  defaultFromIpe = _IpeGroup
+instance HasDefaultFromIpe (Path r) where
+  type DefaultFromIpe (Path r) = Path
+  defaultFromIpe = _IpePath
+instance HasDefaultFromIpe (TextLabel r) where
+  type DefaultFromIpe (TextLabel r) = TextLabel
+  defaultFromIpe = _IpeTextLabel
+instance HasDefaultFromIpe (MiniPage r) where
+  type DefaultFromIpe (MiniPage r) = MiniPage
+  defaultFromIpe = _IpeMiniPage
+instance HasDefaultFromIpe (Image r) where
+  type DefaultFromIpe (Image r) = Image
+  defaultFromIpe = _IpeImage
+
+
 instance HasDefaultFromIpe (Point 2 r) where
   type DefaultFromIpe (Point 2 r) = IpeSymbol
   defaultFromIpe = _withAttrs _IpeUse _asPoint

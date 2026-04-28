@@ -31,6 +31,7 @@ type instance Dimension (Boundary g) = Dimension g
 _Boundary :: Iso g h (Boundary g) (Boundary h)
 _Boundary = iso Boundary (\(Boundary b) -> b)
 
+--------------------------------------------------------------------------------
 
 -- | Result of a query that asks if something is Inside a g, *on* the boundary
 -- of the g, or outside.
@@ -38,6 +39,17 @@ data PointLocationResult = Inside
                          | OnBoundary
                          | Outside
                          deriving (Show,Read,Eq)
+
+instance Semigroup PointLocationResult where
+  -- ^ The semigroup instance essentially interrsects the various results
+  Inside     <> x = x
+  Outside    <> _ = Outside
+  OnBoundary <> x = case x of
+                      Outside    -> Outside
+                      Inside     -> OnBoundary
+                      OnBoundary -> OnBoundary
+
+--------------------------------------------------------------------------------
 
 -- | Result of a query that asks if something is Inside a g, *on* the
 -- boundary of the g, or outside. This type allows us to provide some

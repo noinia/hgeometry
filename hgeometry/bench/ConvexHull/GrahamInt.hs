@@ -5,10 +5,8 @@ module ConvexHull.GrahamInt( convexHull
 
 
 import           Control.DeepSeq
-import           Control.Lens ((^.))
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Monoid
 import           GHC.Generics
 import           HGeometry.Point
 
@@ -20,8 +18,10 @@ data MyPoint = MyPoint {-# UNPACK #-}!Int
 
 instance NFData MyPoint
 
+fromP               :: Point_ point 2 Int => point -> MyPoint
 fromP (Point2_ x y) = MyPoint x y
 
+subt :: MyPoint -> MyPoint -> MyPoint
 (MyPoint x y) `subt` (MyPoint a b) = MyPoint (x-a) (y-b)
 
 
@@ -68,6 +68,7 @@ hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
       | rightTurn x y z           = h
       | otherwise                 = cleanMiddle (z:x:rest)
     cleanMiddle _                 = error "cleanMiddle: too few points"
+hull' _        = error "hull': absurd"
 
 rightTurn       :: MyPoint -> MyPoint -> MyPoint -> Bool
 rightTurn a b c = ccwP a b c == CW

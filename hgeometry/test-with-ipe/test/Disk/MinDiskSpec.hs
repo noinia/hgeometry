@@ -35,10 +35,6 @@ spec = describe "Disk.MinDisk" $ do
                smallestEnclosingDisk (mkStdGen gen) pts `sameDisk`
                Naive.smallestEnclosingDisk pts
 
-instance HasDefaultFromIpe (IpeSymbol r) where
-  type DefaultFromIpe (IpeSymbol r) = IpeSymbol
-  defaultFromIpe = _withAttrs _IpeUse id
-
 testCases    :: OsPath -> Spec
 testCases fp = describe ("tests from" <> show fp) $
                  do pts <- runIO $ readAllFrom =<< getDataFileName fp
