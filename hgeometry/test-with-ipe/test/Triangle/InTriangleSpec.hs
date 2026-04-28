@@ -74,7 +74,7 @@ ipeTest inFp = do
 
   for_ triangles $ \(tri :+ triAts) -> do
     for_ points $ \(p :+ pAts) ->
-      it ("inTriangle: " <> show tri <> " " <> show p) $
+      it ("inTriangle: " <> show tri <> ", " <> show (p^.symbolPoint)) $
         inTriangle (p^.symbolPoint) tri `shouldBe` answer (triAts^?_Attr SStroke)
                                                           (pAts^?_Attr SStroke)
                                                           (p^.symbolName)
@@ -84,36 +84,3 @@ answer triCol ptCol sym
   | triCol == ptCol && sym == "mark/disk(sx)" = Inside
   | triCol == ptCol && sym == "mark/box(sx)"  = OnBoundary
   | otherwise                                 = Outside
-
-
--- | Test where the query point lies with respect to the triangle
-inTriangle   :: ( Point_ corner 2 r
-                , Point_ point 2 r, Ord r, Num r, Triangle_ triangle corner)
-             => point -> triangle -> PointLocationResult
-inTriangle q = foldMap1 (q `inHalfSpace`) . intersectingHalfPlanes
-
-
-instance Semigroup PointLocationResult where
-  -- ^ The semigroup instance essentially interrsects the various results
-  Inside     <> x = x
-  Outside    <> _ = Outside
-  OnBoundary <> x = case x of
-                      Outside    -> Outside
-                      Inside     -> OnBoundary
-                      OnBoundary -> OnBoundary
-
-
--- | Test if a point lies inside a halfspace
-inHalfSpace     :: ( Point_ point d r, Ord r, Num r
-                   , HalfSpace_ halfSpace d r
-                   , HyperPlane_ (BoundingHyperPlane halfSpace d r) d r
-                   )
-                => point -> halfSpace -> PointLocationResult
-inHalfSpace q h = case q `onSideTest` (h^.boundingHyperPlane) of
-                    LT -> case h^.halfSpaceSign of
-                            Sign.Negative -> Inside
-                            Sign.Positive -> Outside
-                    GT -> case h^.halfSpaceSign of
-                            Sign.Negative -> Outside
-                            Sign.Positive -> Inside
-                    EQ -> OnBoundary

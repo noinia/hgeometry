@@ -37,9 +37,9 @@ spec = describe "intersection tests" $ do
             --     `shouldBe` (coRec $ Point2 10 (10 :: Rational))
             --   (hor 11 `intersect` t)
             --     `shouldBe` Nothing
-          -- prop "inTriangle same as inTriangleFrac" $
-          --   \(q :: Point 2 R) (t :: Triangle (Point 2 R)) ->
-          --     (q `inTriangle` t) `shouldBe` (q `inTriangleFrac` t)
+          prop "inTriangle same as inTriangleFrac" $
+            \(q :: Point 2 R) (t :: Triangle (Point 2 R)) ->
+              (q `inTriangle` t) `shouldBe` (q `inTriangleFrac` t)
           prop "onTriangle same as onTriangleFrac" $ \(q :: Point 2 R)
                                                       (t :: Triangle (Point 2 R)) ->
               (q `intersects` t) `shouldBe` (q `onTriangleFrac` t)
@@ -70,9 +70,10 @@ spec = describe "intersection tests" $ do
 
 --------------------------------------------------------------------------------
 
-_inTriangleFrac   :: (Ord r, Fractional r)
+-- | Implementation of InTriangle that uses Fractional
+inTriangleFrac   :: (Ord r, Fractional r)
                  => Point 2 r -> Triangle (Point 2 r) -> PointLocationResult
-_inTriangleFrac q t
+inTriangleFrac q t
     | all (`inRange` OpenInterval   0 1) [a,b,c] = Inside
     | all (`inRange` ClosedInterval 0 1) [a,b,c] = OnBoundary
     | otherwise                                  = Outside
