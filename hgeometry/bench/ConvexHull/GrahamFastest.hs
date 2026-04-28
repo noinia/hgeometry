@@ -1,4 +1,4 @@
-odule ConvexHull.GrahamFastest( convexHull
+module ConvexHull.GrahamFastest( convexHull
                                , upperHull
                                , lowerHull, fromP
                                ) where
