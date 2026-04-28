@@ -33,7 +33,7 @@ import           Data.Text (Text)
 
 
 type LayerName = String -- TODO: fix
-type Drawing = Text -- TOEDO: fix
+type Drawing = Text
 
 --------------------------------------------------------------------------------
 
@@ -80,15 +80,15 @@ viewModel model = div_ []
                               , height_ "700px"
                               , style_ [border "1px solid black"]
                               ]
-                              content
+                              content'
                        , dl_ [ class_ "max-w-md text-heading divide-y divide-default"]
                              drawingItems
                        , flowBite
                        ]
   where
-    content = [
-
-              ]
+    content' = [ circle_ []
+               | d <- model^..drawings.folded.folded.filteredBy isVisible.drawing
+               ]
     drawingItems = [ div_ [class_ "flex flex-col pb-3"]
                           [ dt_ [ class_ "mb-1 text-body"
                                 ]
@@ -102,6 +102,7 @@ viewModel model = div_ []
 
 
 
+flowBite :: View model action
 flowBite = script_ [src_ "https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"
                    ] ""
 
