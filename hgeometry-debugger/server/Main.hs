@@ -89,7 +89,14 @@ runDebugServer port act = do putStrLn $ "Starting the server on port " <> show p
 
 
 --------------------------------------------------------------------------------
+-- * The client
 
+clientStatic
+  :<|> clientDrawing
+  :<|> clientDrawLayer
+  :<|> clientClearLayer
+  :<|> clientClear
+  = client (Proxy @API)
 
 -- type Client = ReaderT ClientEnv IO
 

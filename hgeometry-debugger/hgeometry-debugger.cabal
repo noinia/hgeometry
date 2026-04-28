@@ -51,8 +51,7 @@ common all-setup
       , containers                >= 0.6           && < 1
       , bytestring                >= 0.12          && < 0.13
       , text                      >= 2.1           && < 2.2
-      , servant              >= 0.20.3.0  && < 0.21
-      , servant-client       >= 0.20.3.0  && < 0.21
+      , servant                   >= 0.20.3.0  && < 0.21
 
       -- , nonempty-containers       >= 0.3.4.5       && < 0.4
       -- , monoidal-containers       >= 0.6.6         && < 0.7
@@ -207,6 +206,7 @@ executable hgeometry-debugger
     , optparse-applicative >= 0.18      && < 0.19
     , filepath             >= 1.4.100   && < 1.6
     , servant-server       >= 0.20.3.0  && < 0.21
+    , servant-client       >= 0.20.3.0  && < 0.21
     , wai                  >= 3.2       && < 3.3
     , warp                 >= 3.4       && < 3.5
     , mtl                  >= 2.3       && < 2.4
@@ -220,3 +220,5 @@ executable viewer
   main-is:        Main.hs
   Other-modules:
     App
+  build-depends:
+    servant-miso-client    >= 0.2.0.0   && < 0.3

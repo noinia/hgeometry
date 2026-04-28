@@ -3,20 +3,11 @@ module Debugger.API
 
   , LayerName
   , Drawing(Drawing)
-
-
-  , clientDrawing
-  , clientDrawLayer
-  , clientClearLayer
-  , clientClear
   ) where
 
 import Servant.API
 import GHC.Generics
 import Data.Aeson
-import Servant.Client ( ClientM, runClientM, ClientEnv, mkClientEnv
-                      , BaseUrl(..), client, Scheme(..)
-                      )
 import Data.Text (Text)
 import Data.Proxy
 
@@ -41,10 +32,3 @@ type API =    "pub"        :> Raw
 
 
 --------------------------------------------------------------------------------
-
-clientStatic
-  :<|> clientDrawing
-  :<|> clientDrawLayer
-  :<|> clientClearLayer
-  :<|> clientClear
-  = client (Proxy @API)
