@@ -10,13 +10,13 @@ import           Ipe
 import qualified Paths_hgeometry as Paths
 import           System.OsPath
 import           Test.Hspec.WithTempFile
-import           Test.Hspec.QuickCheck
+import           Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
 -- | Adds the item as an ipe-selection xml to the output (so that we
 -- can easily copy paste it into ipe).
-withIpeSelection   :: (IpeWrite t, Property prop) => t -> prop -> Prop
+withIpeSelection   :: (IpeWrite t, Testable prop) => t -> prop -> Property
 withIpeSelection g = counterexample (maybe err show $ toIpeSelectionXML g)
   where
     err = "error showing as ipe !?"
