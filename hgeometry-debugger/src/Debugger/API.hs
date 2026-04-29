@@ -1,15 +1,18 @@
 module Debugger.API
   ( API
+  , ServerAPI
 
   , LayerName
   , Drawing(Drawing)
+
+  , defaultHost
+  , defaultPort
   ) where
 
 import Servant.API
 import GHC.Generics
 import Data.Aeson
 import Data.Text (Text)
-import Data.Proxy
 
 --------------------------------------------------------------------------------
 
@@ -17,18 +20,24 @@ import Data.Proxy
 type LayerName = String
 
 newtype Drawing = Drawing Text
-  deriving (Generic, Show)
+  deriving (Generic, Eq, Show)
 
 instance ToJSON Drawing where
 instance FromJSON Drawing where
 
 
-type API =    "pub"        :> Raw
-         :<|> "drawing"    :> Get '[ PlainText ] String
+type API =    "drawing"    :> Get '[ PlainText ] String
          :<|> "drawLayer"  :> ReqBody '[ JSON ] (LayerName, String, Drawing) :> Put '[JSON] ()
          :<|> "clearLayer" :> ReqBody '[ PlainText ] LayerName               :> Put '[JSON] ()
          :<|> "clear"      :> Put '[JSON] ()
 
-
+type ServerAPI = "pub"        :> Raw
+         :<|> API
 
 --------------------------------------------------------------------------------
+
+defaultPort :: Int -- Port
+defaultPort = 8000
+
+defaultHost :: String
+defaultHost = "localhost"

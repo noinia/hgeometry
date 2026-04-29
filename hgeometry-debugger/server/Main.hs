@@ -91,8 +91,7 @@ runDebugServer port act = do putStrLn $ "Starting the server on port " <> show p
 --------------------------------------------------------------------------------
 -- * The client
 
-clientStatic
-  :<|> clientDrawing
+clientDrawing
   :<|> clientDrawLayer
   :<|> clientClearLayer
   :<|> clientClear
@@ -117,10 +116,8 @@ debugClientEnv' = do mgr <- newManager defaultManagerSettings
                      pure $ mkClientEnv mgr defaultBaseUrl
 
 defaultBaseUrl :: BaseUrl
-defaultBaseUrl = BaseUrl Http "localhost" defaultPort ""
+defaultBaseUrl = BaseUrl Http defaultHost defaultPort ""
 
-defaultPort :: Port
-defaultPort = 8000
 
 --------------------------------------------------------------------------------
 
@@ -169,7 +166,7 @@ instance MonadState State Handler' where
                liftIO $ atomicModifyIORef ref (swap . f)
 
 
-server :: Server' API
+server :: Server' ServerAPI
 server =   serveDirectoryWebApp "pub"
       :<|> handleDrawing
       :<|> handleDrawLayer
@@ -195,7 +192,7 @@ handleClear = put mempty
 app          :: StateRef -> Application
 app stateRef = serve api $ hoistServer api (liftIO . flip runReaderT stateRef . unHandler') server
   where
-    api = Proxy @API
+    api = Proxy @ServerAPI
 
 main :: IO ()
 main = runDebugServer defaultPort $ do

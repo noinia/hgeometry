@@ -28,12 +28,11 @@ import           Data.Map (Map)
 import qualified Data.Sequence as Seq
 import           Data.Sequence (Seq(..))
 import           Data.Text (Text)
-
---------------------------------------------------------------------------------
-
-
-type LayerName = String -- TODO: fix
-type Drawing = Text
+import           Data.Proxy
+import           Servant.Miso.Client
+import           Servant.API ((:<|>)(..), PlainText)
+import           Debugger.API
+import qualified Miso.JSON
 
 --------------------------------------------------------------------------------
 
@@ -57,21 +56,51 @@ makeLenses ''Model
 initialModel :: Model
 initialModel = Model dummy -- mempty
 
-dummy = Map.fromList [ ("myLayer", Seq.fromList [Item "foo" "foodrawing" True])
-                     , ("bar", Seq.fromList [ Item "bar" "bar" True
-                                            , Item "baz" "bazz" False
+dummy = Map.fromList [ ("myLayer", Seq.fromList [Item "foo" (Drawing "foodrawing") True])
+                     , ("bar", Seq.fromList [ Item "bar" (Drawing "bar") True
+                                            , Item "baz" (Drawing "bazz") False
                                             ])
                      ]
 
+instance MimeRender PlainText String where
+  type MimeRenderType String = IO JSVal
+  mimeRender Proxy = toJSVal
+
+instance MimeUnrender PlainText String where
+  type MimeUnrenderType String = JSVal
+  mimeUnrenderType Proxy Proxy = TEXT
+  mimeUnrender Proxy = fmap pure . fromJSValUnchecked
+
+deriving instance ToJSVal Drawing
+instance Miso.JSON.ToJSON Drawing
+instance Miso.JSON.FromJSON Drawing
 
 --------------------------------------------------------------------------------
 
-data Action
-
+data Action = AcquireData
+            | LoadDrawing String -- this should not really be a string
+            | ClearLayer LayerName
+            | FetchError (Response MisoString)
+            | Clear
 
 updateModel   :: Action -> Effect parent Model Action
-updateModel _ = pure ()
+updateModel = \case
+  AcquireData         -> withSink $ \sink ->
+    clientDrawing (sink . LoadDrawing . body) (sink . FetchError)
+  LoadDrawing str  -> io_ (consoleLog $ ms str)
+  FetchError err   -> io_ $ consoleError $ ms (show $ errorMessage err)
+  Clear            -> pure ()
+  ClearLayer layer -> pure ()
 
+
+clientDrawing
+  :<|> clientDrawLayer
+  :<|> clientClearLayer
+  :<|> clientClear
+  = toClient baseUrl (Proxy @API)
+
+baseUrl :: MisoString
+baseUrl = toMisoString $ "http://" <> defaultHost <> ":" <> show defaultPort
 --------------------------------------------------------------------------------0
 
 viewModel       :: Model -> View Model Action
@@ -128,4 +157,7 @@ flowBite = script_ [src_ "https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowb
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = startApp defaultEvents $ component initialModel updateModel viewModel
+main = startApp defaultEvents $
+         (component initialModel updateModel viewModel)
+           { mount = Just AcquireData
+           }
