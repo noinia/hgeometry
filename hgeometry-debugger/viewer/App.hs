@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module App(main) where
 
+import           Control.Monad.State (evalState, gets, modify)
 import           Control.Lens hiding (view, element)
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
@@ -17,7 +18,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 -- import           HGeometry.Point
 -- import           HGeometry.Polygon.Convex
 import           Miso hiding (text_)
-import           Miso.String (ToMisoString(..), unwords)
+import           Miso.String (ToMisoString(..), toLower)
 import           Miso.CSS (style_, border)
 import           Miso.Svg hiding (style_, script_)
 import           Miso.Svg.Property hiding (path_)
@@ -36,14 +37,20 @@ import           Servant.Miso.Client
 import           Servant.API ((:<|>)(..), PlainText)
 import           Debugger.API
 import qualified Miso.JSON
+import           Text.Pretty.Simple (defaultOutputOptionsLightBg)
 import           Text.Pretty.Simple.Internal (Annotation (..), layoutStringAbstract)
 import           Prettyprinter.Render.Util.SimpleDocTree (SimpleDocTree (..), treeForm)
-import           Text.Pretty.Simple (OutputOptions)
+import           Text.Pretty.Simple (OutputOptions(..))
 -- import           SideBar
 
 --------------------------------------------------------------------------------
-defaultOptions' = undefined
 
+outputOptions :: OutputOptions
+outputOptions = defaultOutputOptionsLightBg
+                 { outputOptionsPageWidth     = 120
+                 , outputOptionsCompact       = True
+                 , outputOptionsCompactParens = True
+                 }
 
 type R = Double
 
@@ -156,7 +163,9 @@ viewModel model = div_ []
                                          ]
                                 , onClick $ ToggleVisibility (currentLayer,i)
                                 ]
-                                [ pPrintStringHtml [] defaultOptions' $ item^.content ]
+                                [ pPrintStringHtml [] outputOptions $
+                                  item^.content
+                                ]
                           | currentLayer <- model^..currentLayer.folded
                           , (i, item)    <- model^..drawings.ix currentLayer.ifolded.withIndex
                           ]
@@ -279,17 +288,16 @@ data ParensLevel
     deriving (Eq, Show, Bounded, Enum)
 
 pPrintStringHtml          :: [Attribute action] -> OutputOptions -> String -> View model action
-pPrintStringHtml _ _ = text . ms
-{-
 pPrintStringHtml as opts = renderHtml as . treeForm . annotateWithIndentation . layoutStringAbstract opts
   where
     annotateWithIndentation =
-        flip evalState (prev Parens0) . traverse $ \ann ->
+        flip evalState (prev Parens0) . traverse (\ann ->
             (++ [Class "annotation", toClassName @Annotation ann]) <$> case ann of
                 Open -> modify next *> g
                 Close -> g <* modify prev
                 Comma -> g
                 _ -> pure []
+                                                 )
       where
         g = gets (pure . toClassName @ParensLevel)
         toClassName :: Show a => a -> Class
@@ -307,7 +315,16 @@ renderHtml as =
             STAnn cs content -> [span_ [classes_ $ map unClass cs] $ go content]
             STConcat contents -> foldMap go contents
      in pre_ as . go
--}
+
+-- | Safe, wrapping around, as in 'relude'
+next, prev :: (Eq a, Bounded a, Enum a) => a -> a
+next e
+    | e == maxBound = minBound
+    | otherwise = succ e
+prev e
+    | e == minBound = maxBound
+    | otherwise = pred e
+
 --------------------------------------------------------------------------------
 
 main :: IO ()

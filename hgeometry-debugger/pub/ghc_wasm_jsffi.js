@@ -1231,6 +1231,7 @@ else if ($1 > $2) return 1;
 else return -1;},
 ZC14ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {return $1.length === 0},
 ZC15ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1,$2) => ((new TextDecoder('utf-8', {fatal: true})).decode(new Uint8Array(__exports.memory.buffer, $1, $2))),
+ZC35ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {return $1.toLowerCase();},
 ZC41ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1,$2) => {return $1 + String.fromCharCode($2);},
 ZC0ZCghczminternalZCGHCziInternalziWasmziPrimziExportsZC: ($1,$2) => ($1.reject(new WebAssembly.RuntimeError($2))),
 ZC19ZCghczminternalZCGHCziInternalziWasmziPrimziExportsZC: ($1) => ($1.resolve()),
