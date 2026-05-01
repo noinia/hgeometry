@@ -20,9 +20,11 @@ import           Miso hiding (text_)
 import           Miso.String (ToMisoString(..))
 import           Miso.CSS (style_, border)
 import           Miso.Svg hiding (style_, script_)
-import           Miso.Svg.Property
+import           Miso.Svg.Property hiding (path_)
+import qualified Miso.Svg.Property as SvgProp
 import           Miso.Html.Element hiding (style_)
 import           Miso.Html.Property
+import qualified Miso.Html.Property as Prop
 import qualified Data.Map as Map
 import           Data.Map (Map)
 import qualified Data.Sequence as Seq
@@ -33,6 +35,7 @@ import           Servant.Miso.Client
 import           Servant.API ((:<|>)(..), PlainText)
 import           Debugger.API
 import qualified Miso.JSON
+-- import           SideBar
 
 --------------------------------------------------------------------------------
 
@@ -47,14 +50,15 @@ data Item = Item { _content   :: String
 makeLenses ''Item
 
 
-data Model = Model { _drawings :: Map LayerName (Seq Item)
+data Model = Model { _drawings     :: Map LayerName (Seq Item)
+                   , _currentLayer :: Maybe LayerName
                    }
            deriving (Eq)
 
 makeLenses ''Model
 
 initialModel :: Model
-initialModel = Model dummy -- mempty
+initialModel = Model dummy (Just "myLayer")
 
 dummy = Map.fromList [ ("myLayer", Seq.fromList [Item "foo" (Drawing "foodrawing") True])
                      , ("bar", Seq.fromList [ Item "bar" (Drawing "bar") True
@@ -82,22 +86,32 @@ data Action = AcquireData
             | ClearLayer LayerName
             | FetchError (Response MisoString)
             | Clear
+            | SetCurrentLayer LayerName
+            | ToggleVisibility (LayerName, Int)
+                -- toggle the visibility of the item indicated by the given location
 
 updateModel   :: Action -> Effect parent Model Action
 updateModel = \case
-  AcquireData         -> withSink $ \sink ->
+  AcquireData      -> withSink $ \sink ->
     clientDrawing (sink . LoadDrawing . body) (sink . FetchError)
   LoadDrawing str  -> io_ (consoleLog $ ms str)
   FetchError err   -> io_ $ consoleError $ ms (show $ errorMessage err)
   Clear            -> pure ()
   ClearLayer layer -> pure ()
 
+  SetCurrentLayer layer      -> currentLayer ?= layer
+  ToggleVisibility (layer,i) -> drawings.ix layer.traverse.isVisible %= not
 
+-- TODO: Add the types of these things;
 clientDrawing
   :<|> clientDrawLayer
   :<|> clientClearLayer
   :<|> clientClear
   = toClient baseUrl (Proxy @API)
+
+
+
+
 
 baseUrl :: MisoString
 baseUrl = toMisoString $ "http://" <> defaultHost <> ":" <> show defaultPort
@@ -105,29 +119,125 @@ baseUrl = toMisoString $ "http://" <> defaultHost <> ":" <> show defaultPort
 
 viewModel       :: Model -> View Model Action
 viewModel model = div_ []
-                       [ svg_ [ width_  "1024px"
-                              , height_ "700px"
-                              , style_ [border "1px solid black"]
-                              ]
-                              content'
-                       , dl_ [ class_ "max-w-md text-heading divide-y divide-default"]
-                             drawingItems
-                       , flowBite
-                       ]
+    [ svg_ [ width_  "1024px"
+             , height_ "700px"
+             ,   style_ [border "1px solid black"]
+             ]
+             content'
+    , div_ [ class_ "flex columns-2"]
+           [ theLayers
+           , itemsOnTheLayer
+           ]
+    , flowBite
+    ]
   where
+    theLayers = ul_ [ class_ "w-48 text-sm font-medium text-heading bg-neutral-primary-soft border border-default rounded-base"
+                    ]
+                    [ li_ [ class_ "w-full px-4 py-2 border-b border-default cursor-pointer"
+                          , classes_ [ "bg-blue-500"
+                                     | model^.currentLayer == Just layer
+                                     ]
+                          , onClick $ SetCurrentLayer layer
+                          ]
+                          [ text . ms $ layer
+                          ]
+                    | layer <- model^..drawings.ifolded.asIndex
+                    ]
+    itemsOnTheLayer = ul_ [ class_ "flex-1"]
+                          [ li_ [ class_ "w-full px-4 py-2 border-b border-default cursor-pointer"
+                                , style_ [ border "1px solid blue"
+                                         | item^.isVisible
+                                         ]
+                                , onClick $ ToggleVisibility (currentLayer,i)
+                                ]
+                                [ text . ms $ item^.content ]
+                          | currentLayer <- model^..currentLayer.folded
+                          , (i, item)    <- model^..drawings.ix currentLayer.ifolded.withIndex
+                          ]
+
+
+
+
+-- dl_ [ class_ "max-w-md text-heading divide-y divide-default"]
+      --                 --      drawingItems
+
+
+
+
+
+    -- mainContent = div_ [class_ "p-4 sm:ml-64"]
+    --   [
+    --   , div_ [class_ "flex items-center justify-center h-48 rounded-base bg-neutral-secondary-soft mb-4" ]
+    --          [ text "Layers"
+    --          ]
+    --   ]
+
+
+
+      -- [ div_ [ class_ "p-4 border-1 border-default border-dashed rounded-base"]
+      --        [ div_ [class_ "flex items-center justify-center h-48 rounded-base bg-neutral-secondary-soft mb-4" ]
+      --               [ p_ [class_ "text-fg-disabled"]
+      --                    [ svg_ [ width_  "1024px"
+      --                           , height_ "700px"
+      --                           ,   style_ [border "1px solid black"]
+      --                           ]
+      --                          content'
+      --               -- , layers
+      --                 -- dl_ [ class_ "max-w-md text-heading divide-y divide-default"]
+      --                 --      drawingItems
+
+      --                   ]
+
+      --               ]
+      --        ]
+      -- ]
+
     content' = [ circle_ []
                | d <- model^..drawings.folded.folded.filteredBy isVisible.drawing
                ]
-    drawingItems = [ div_ [class_ "flex flex-col pb-3"]
-                          [ dt_ [ class_ "mb-1 text-body"
-                                ]
-                                [ text $ ms layer
-                                ]
-                          , dd_ [ class_ "text-lg font-medium"]
-                                [ text $ ms $ show items ]
-                          ]
-                   | (layer,items) <- model^..drawings.ifolded.withIndex
-                   ]
+
+    -- layers = div_ [ class_ "grid grid-cols-3 gap-4 mb-4" ]
+    --               [ left
+    --               , right
+    --               ]
+    --   where
+    --     left = div_ [ class_ "flex items-center justify-center h-24 rounded-base bg-neutral-secondary-soft"
+    --                 ]
+    --                 [ p_ [class_ "text-fg-disabled"]
+    --                      [ text "layers go here " ]
+    --                 ]
+
+    --     right  = div_ [ class_ "flex items-center justify-center h-24 rounded-base bg-neutral-secondary-soft"
+    --                 ]
+    --                 [ p_ [class_ "text-fg-disabled"]
+    --                      [ text "more info goes here " ]
+    --                 ]
+
+    -- drawingItems = [ div_ [class_ "flex flex-col pb-3"]
+    --                       [ dt_ [ class_ "mb-1 text-body"
+    --                             ]
+    --                             [ text $ ms layer
+    --                             ]
+    --                       , dd_ [ class_ "text-lg font-medium"]
+    --                             [ text $ ms $ show items ]
+    --                       ]
+    --                | (layer,items) <- model^..drawings.ifolded.withIndex
+    --                ]
+
+
+
+
+
+  -- div_ []
+  --                      [ svg_ [ width_  "1024px"
+  --                             , height_ "700px"
+  --                             , style_ [border "1px solid black"]
+  --                             ]
+  --                             content'
+  --                      , dl_ [ class_ "max-w-md text-heading divide-y divide-default"]
+  --                            drawingItems
+  --                      , flowBite
+  --                      ]
 
 
 
