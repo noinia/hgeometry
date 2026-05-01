@@ -17,7 +17,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 -- import           HGeometry.Point
 -- import           HGeometry.Polygon.Convex
 import           Miso hiding (text_)
-import           Miso.String (ToMisoString(..))
+import           Miso.String (ToMisoString(..), unwords)
 import           Miso.CSS (style_, border)
 import           Miso.Svg hiding (style_, script_)
 import           Miso.Svg.Property hiding (path_)
@@ -30,14 +30,20 @@ import           Data.Map (Map)
 import qualified Data.Sequence as Seq
 import           Data.Sequence (Seq(..))
 import           Data.Text (Text)
+import qualified Data.Text as Text
 import           Data.Proxy
 import           Servant.Miso.Client
 import           Servant.API ((:<|>)(..), PlainText)
 import           Debugger.API
 import qualified Miso.JSON
+import           Text.Pretty.Simple.Internal (Annotation (..), layoutStringAbstract)
+import           Prettyprinter.Render.Util.SimpleDocTree (SimpleDocTree (..), treeForm)
+import           Text.Pretty.Simple (OutputOptions)
 -- import           SideBar
 
 --------------------------------------------------------------------------------
+defaultOptions' = undefined
+
 
 type R = Double
 
@@ -60,9 +66,9 @@ makeLenses ''Model
 initialModel :: Model
 initialModel = Model dummy (Just "myLayer")
 
-dummy = Map.fromList [ ("myLayer", Seq.fromList [Item "foo" (Drawing "foodrawing") True])
-                     , ("bar", Seq.fromList [ Item "bar" (Drawing "bar") True
-                                            , Item "baz" (Drawing "bazz") False
+dummy = Map.fromList [ ("myLayer", Seq.fromList [Item "Item \"bar\" (Drawing \"bar\") True" (Drawing "foodrawing") True])
+                     , ("bar", Seq.fromList [ Item "5" (Drawing "bar") True
+                                            , Item "Just (5,\"True\")" (Drawing "bazz") False
                                             ])
                      ]
 
@@ -150,7 +156,7 @@ viewModel model = div_ []
                                          ]
                                 , onClick $ ToggleVisibility (currentLayer,i)
                                 ]
-                                [ text . ms $ item^.content ]
+                                [ pPrintStringHtml [] defaultOptions' $ item^.content ]
                           | currentLayer <- model^..currentLayer.folded
                           , (i, item)    <- model^..drawings.ix currentLayer.ifolded.withIndex
                           ]
@@ -263,7 +269,45 @@ flowBite = script_ [src_ "https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowb
 -- </dl>
 
 
+--------------------------------------------------------------------------------
+-- * Stealing this from the pretty-simple web demo
 
+data ParensLevel
+    = Parens0
+    | Parens1
+    | Parens2
+    deriving (Eq, Show, Bounded, Enum)
+
+pPrintStringHtml          :: [Attribute action] -> OutputOptions -> String -> View model action
+pPrintStringHtml _ _ = text . ms
+{-
+pPrintStringHtml as opts = renderHtml as . treeForm . annotateWithIndentation . layoutStringAbstract opts
+  where
+    annotateWithIndentation =
+        flip evalState (prev Parens0) . traverse $ \ann ->
+            (++ [Class "annotation", toClassName @Annotation ann]) <$> case ann of
+                Open -> modify next *> g
+                Close -> g <* modify prev
+                Comma -> g
+                _ -> pure []
+      where
+        g = gets (pure . toClassName @ParensLevel)
+        toClassName :: Show a => a -> Class
+        toClassName = Class . toLower . ms . show
+
+newtype Class = Class {unClass :: MisoString}
+
+renderHtml :: [Attribute action] -> SimpleDocTree [Class] -> View model action
+renderHtml as =
+    let go = \case
+            STEmpty -> [text ""]
+            STChar c -> [text $ ms $ Text.singleton c]
+            STText _ t -> [text $ ms t]
+            STLine i -> [br_ [], text $ ms $ Text.replicate i $ Text.singleton ' ']
+            STAnn cs content -> [span_ [classes_ $ map unClass cs] $ go content]
+            STConcat contents -> foldMap go contents
+     in pre_ as . go
+-}
 --------------------------------------------------------------------------------
 
 main :: IO ()
