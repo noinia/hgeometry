@@ -45,7 +45,7 @@ import           Ipe.Attributes hiding (Matrix)
 import           Ipe.Color
 import           Ipe.Layer
 import           Ipe.Path
-
+import           Ipe.Attributes.Types
 
 --------------------------------------------------------------------------------
 -- | Image Objects

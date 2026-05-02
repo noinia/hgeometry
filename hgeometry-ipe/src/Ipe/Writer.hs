@@ -66,6 +66,7 @@ import           System.IO (hPutStrLn, stderr)
 import           System.OsPath
 import           Text.XML.Expat.Format (format)
 import           Text.XML.Expat.Tree
+import           Ipe.Attributes.Types
 
 --------------------------------------------------------------------------------
 
@@ -320,7 +321,7 @@ instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (SimplePolygon point
   ipeWriteText pg = ipeWriteTextPolygonVertices $ toNonEmptyOf (outerBoundary.asPoint) pg
 
 ipeWriteTextPolygonVertices :: IpeWriteText r => NonEmpty (Point 2 r) -> Maybe Text
-ipeWriteTextPolygonVertices = \case 
+ipeWriteTextPolygonVertices = \case
     (p :| rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest ++ [ClosePath]
 
 instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (CubicBezier point) where
@@ -334,7 +335,7 @@ instance IpeWriteText r => IpeWriteText (PathSegment r) where
     Reversed -> ipeWriteTextPolygonVertices . NonEmpty.reverse
               $ toNonEmptyOf (outerBoundary.asPoint) p
   ipeWriteText (EllipseSegment     e) = ipeWriteText $ Ellipse (e^.ellipseMatrix)
-  ipeWriteText (CubicBezierSegment b) = ipeWriteText b 
+  ipeWriteText (CubicBezierSegment b) = ipeWriteText b
   ipeWriteText _                      = error "ipeWriteText: PathSegment, not implemented yet."
 
 instance IpeWriteText r => IpeWrite (Path r) where

@@ -12,6 +12,7 @@ import           HGeometry.Vector
 import           Ipe.Attributes
 import           Ipe.Path
 import           Ipe.Types
+import           Ipe.Attributes.Types
 
 -------------------------------------------------------------------------------
 

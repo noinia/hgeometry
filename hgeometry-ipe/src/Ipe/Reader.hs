@@ -72,6 +72,8 @@ import           Ipe.Value
 import qualified System.File.OsPath as File
 import           System.OsPath
 import           Text.XML.Expat.Tree
+import           Ipe.Attributes.Types
+
 
 --------------------------------------------------------------------------------
 

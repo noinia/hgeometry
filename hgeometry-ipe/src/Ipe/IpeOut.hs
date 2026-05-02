@@ -59,6 +59,7 @@ import           Ipe.FromIpe
 import           Ipe.FromIpe.UnboundedConvexChain
 import           Ipe.Path (Orientation(..))
 import           Ipe.Types
+import           Ipe.Attributes.Types
 
 --------------------------------------------------------------------------------
 

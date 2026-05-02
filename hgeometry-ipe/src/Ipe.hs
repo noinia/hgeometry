@@ -91,6 +91,7 @@ module Ipe(
   -- , module Ipe.Types
   -- , module Ipe.FromIpe
   , module Ipe.Attributes
+  , module Ipe.Attributes.Types
   , module Ipe.Value
   , IpeColor(..), named
   ) where
@@ -109,6 +110,7 @@ import Ipe.Reader
 import Ipe.Types
 import Ipe.Value
 import Ipe.Writer
+import Ipe.Attributes.Types
 
 --------------------------------------------------------------------------------
 
