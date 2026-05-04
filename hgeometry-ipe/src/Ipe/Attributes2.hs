@@ -44,13 +44,31 @@ import HGeometry.Matrix
 import Ipe.Value
 import Text.Read (lexP, step, parens, prec, (+++)
                 , Lexeme(Ident), readPrec, readListPrec, readListPrecDefault)
-import GHC.Generics(Generic)
+import GHC.Generics (Generic)
 import Ipe.Types hiding (commonAttributes)
 import Ipe.Color
+import Barbies
+import Barbies.Constraints (Dict(..))
 
 --------------------------------------------------------------------------------
 type ConversionError = String -- FIXME: remove
 
+class IpeWriteText t
+class IpeReadText t
+instance IpeWriteText LayerName
+instance IpeWriteText PinType
+instance IpeWriteText ()
+instance IpeReadText ()
+instance IpeWriteText r => IpeWriteText (Matrix 3 3 r)
+instance IpeWriteText r => IpeWriteText (IpeColor r)
+instance IpeWriteText r => IpeWriteText (IpeSize r)
+instance IpeWriteText TransformationTypes
+
+ipeWriteText :: IpeWriteText r => r -> Text
+ipeWriteText = undefined
+
+ipeReadText :: IpeReadText r => Text -> Either ConversionError r
+ipeReadText = undefined
 ----------------------------------------
 
 -- instance Read r => Read (Matrix n m r) where
@@ -70,80 +88,56 @@ type ConversionError = String -- FIXME: remove
 
 --------------------------------------------------------------------------------
 
-data CommonAttributes f r = CommonAttributes
+data CommonAttributes r f = CommonAttributes
   { _layer           :: f LayerName
   , _matrix          :: f (Matrix 3 3 r)
   , _pin             :: f PinType
   , _transformations :: f TransformationTypes
   } deriving (Generic)
 
-deriving instance (Show1 f, Show r) => Show (CommonAttributes f r)
--- deriving instance (Read1 f, Read r) => Read (CommonAttributes f r)
-deriving instance (Eq1 f, Eq r)     => Eq   (CommonAttributes f r)
--- deriving instance (Ord1 f, Ord r)   => Ord  (CommonAttributes f r)
+instance FunctorB     (CommonAttributes r)
+instance TraversableB (CommonAttributes r)
+instance ApplicativeB (CommonAttributes r)
+instance ConstraintsB (CommonAttributes r)
 
-instance Functor f => Functor (CommonAttributes f) where
-  fmap f (CommonAttributes l m p t) = CommonAttributes l (fmap (fmap f) m) p t
-instance Foldable f => Foldable (CommonAttributes f) where
-  foldMap f (CommonAttributes _ m _ _) = foldMap (foldMap f) m
-instance Traversable f => Traversable (CommonAttributes f) where
-  traverse f (CommonAttributes l m p t) =
-    (\m' -> CommonAttributes l m' p t) <$> traverse (traverse f) m
+deriving instance (Show1 f, Show r) => Show (CommonAttributes r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (CommonAttributes r f)
 
-instance (forall a. Default (f a)) => Default (CommonAttributes f r) where
-  def = CommonAttributes def def def def
+instance (forall a. Default (f a)) => Default (CommonAttributes r f) where
+  def = bpure def
 
 --------------------------------------------------------------------------------
 
-type SymbolAttributes = SymbolAttributesF Maybe
+type SymbolAttributes r = SymbolAttributesF r Maybe
 
-data SymbolAttributesF f r = SymbolAttributes
-  { _commonAttrs :: !(CommonAttributes f r)
+data SymbolAttributesF r f = SymbolAttributes
+  { _commonAttrs :: !(CommonAttributes r f)
   , _stroke      :: f (IpeColor r)
   , _fill        :: f (IpeColor r)
   , _pen         :: f (IpeColor r)
   , _symbolSize  :: f (IpeSize r)
   } deriving (Generic)
 
-deriving instance (Show1 f, Show r) => Show (SymbolAttributesF f r)
--- deriving instance (Read1 f, Read r) => Read (SymbolAttributesF f r)
-deriving instance (Eq1 f, Eq r)     => Eq   (SymbolAttributesF f r)
--- deriving instance (Ord1 f, Ord r)   => Ord  (SymbolAttributesF f r)
+instance FunctorB     (SymbolAttributesF r)
+instance TraversableB (SymbolAttributesF r)
+instance ApplicativeB (SymbolAttributesF r)
+instance ConstraintsB (SymbolAttributesF r)
 
-instance Functor f => Functor (SymbolAttributesF f) where
-  fmap f (SymbolAttributes com s fi p si) =
-    SymbolAttributes (fmap f com)
-                     (fmap (fmap f) s)
-                     (fmap (fmap f) fi)
-                     (fmap (fmap f) p)
-                     (fmap (fmap f) si)
+deriving instance (Show1 f, Show r) => Show (SymbolAttributesF r f)
+-- deriving instance (Read1 f, Read r) => Read (SymbolAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (SymbolAttributesF r f)
+-- deriving instance (Ord1 f, Ord r)   => Ord  (SymbolAttributesF r f)
 
-instance Foldable f => Foldable (SymbolAttributesF f) where
-  foldMap f (SymbolAttributes com s fi p si) = foldMap f com
-                                            <> foldMap (foldMap f) s
-                                            <> foldMap (foldMap f) fi
-                                            <> foldMap (foldMap f) p
-                                            <> foldMap (foldMap f) si
-
-instance Traversable f => Traversable (SymbolAttributesF f) where
-  traverse f (SymbolAttributes com s fi p si) =
-    SymbolAttributes <$> traverse f com
-                     <*> traverse (traverse f) s
-                     <*> traverse (traverse f) fi
-                     <*> traverse (traverse f) p
-                     <*> traverse (traverse f) si
-
-
-instance (forall a. Default (f a)) => Default (SymbolAttributesF f r) where
-  def = SymbolAttributes def def def def def
+instance (forall a. Default (f a)) => Default (SymbolAttributesF r f) where
+  def = bpure def
 
 --------------------------------------------------------------------------------
 
-type PathAttributes   = PathAttributesF Maybe
+type PathAttributes r = PathAttributesF r Maybe
 
 -- | Path Attributes
-data PathAttributesF f r = PathAttributes
-  { _commonAttrs   :: !(CommonAttributes f r)
+data PathAttributesF r f = PathAttributes
+  { _commonAttrs   :: !(CommonAttributes r f)
   , _stroke        :: f (IpeColor r)
   , _fill          :: f (IpeColor r)
   , _pen           :: f (IpeColor r)
@@ -159,22 +153,25 @@ data PathAttributesF f r = PathAttributes
   , _gradient      :: f IpeGradient
   } deriving (Generic)
 
+instance FunctorB     (PathAttributesF r)
+instance TraversableB (PathAttributesF r)
+instance ApplicativeB (PathAttributesF r)
+instance ConstraintsB (PathAttributesF r)
 
-deriving instance (Show1 f, Show r) => Show (PathAttributesF f r)
--- deriving instance (Read1 f, Read r) => Read (PathAttributesF f r)
-deriving instance (Eq1 f, Eq r)     => Eq   (PathAttributesF f r)
--- deriving instance (Ord1 f, Ord r)   => Ord  (PathAttributesF f r)
+deriving instance (Show1 f, Show r) => Show (PathAttributesF r f)
+-- deriving instance (Read1 f, Read r) => Read (PathAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (PathAttributesF r f)
+-- deriving instance (Ord1 f, Ord r)   => Ord  (PathAttributesF r f)
 
-
-instance (forall a. Default (f a)) => Default (PathAttributesF f r) where
-  def = PathAttributes def def def def def def def def def def def def def def
+instance (forall a. Default (f a)) => Default (PathAttributesF r f) where
+  def = bpure def
 
 --------------------------------------------------------------------------------
 
-type TextAttributes   = TextAttributesF Maybe
+type TextAttributes r  = TextAttributesF r Maybe
 
-data TextAttributesF f r = TextAttributes
-  { _commonAttrs :: !(CommonAttributes f r)
+data TextAttributesF r f = TextAttributes
+  { _commonAttrs :: !(CommonAttributes r f)
   , _stroke      :: f (IpeColor r)
   , _textSize    :: f (IpeSize r)
   , _opacity     :: f (IpeValue r)
@@ -186,32 +183,36 @@ data TextAttributesF f r = TextAttributes
   , _style       :: f TeXStyle
   } deriving (Generic)
 
+instance FunctorB     (TextAttributesF r)
+instance TraversableB (TextAttributesF r)
+instance ApplicativeB (TextAttributesF r)
+instance ConstraintsB (TextAttributesF r)
 
-deriving instance (Show1 f, Show r) => Show (TextAttributesF f r)
--- deriving instance (Read1 f, Read r) => Read (TextAttributesF f r)
-deriving instance (Eq1 f, Eq r)     => Eq   (TextAttributesF f r)
--- deriving instance (Ord1 f, Ord r)   => Ord  (TextAttributesF f r)
+deriving instance (Show1 f, Show r) => Show (TextAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (TextAttributesF r f)
 
-instance (forall a. Default (f a)) => Default (TextAttributesF f r) where
-  def = TextAttributes def def def def def def def def def def
+instance (forall a. Default (f a)) => Default (TextAttributesF r f) where
+  def = bpure def
 
 --------------------------------------------------------------------------------
 
-type GroupAttributes  = GroupAttributesF Maybe
+type GroupAttributes r = GroupAttributesF r Maybe
 
-data GroupAttributesF f r = GroupAttributes
-  { _commonAttrs :: !(CommonAttributes f r)
+data GroupAttributesF r f = GroupAttributes
+  { _commonAttrs :: !(CommonAttributes r f)
   , _clip        :: f () -- FIXME!!
   } deriving (Generic)
 
+instance FunctorB     (GroupAttributesF r)
+instance TraversableB (GroupAttributesF r)
+instance ApplicativeB (GroupAttributesF r)
+instance ConstraintsB (GroupAttributesF r)
 
-deriving instance (Show1 f, Show r) => Show (GroupAttributesF f r)
--- deriving instance (Read1 f, Read r) => Read (GroupAttributesF f r)
-deriving instance (Eq1 f, Eq r)     => Eq   (GroupAttributesF f r)
--- deriving instance (Ord1 f, Ord r)   => Ord  (GroupAttributesF f r)
+deriving instance (Show1 f, Show r) => Show (GroupAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (GroupAttributesF r f)
 
-instance (forall a. Default (f a)) => Default (GroupAttributesF f r) where
-  def = GroupAttributes def def
+instance (forall a. Default (f a)) => Default (GroupAttributesF r f) where
+  def = bpure def
 
 --------------------------------------------------------------------------------
 
@@ -222,205 +223,167 @@ makeFieldsNoPrefix ''PathAttributesF
 makeFieldsNoPrefix ''TextAttributesF
 makeFieldsNoPrefix ''GroupAttributesF
 
--- TODO: maybe I want the common attributes to be fieldsNoPrefix after all
--- so that all fields are a class on their own
 
-instance HasCommonAttributes (SymbolAttributesF f r) f r where
+instance HasCommonAttributes (SymbolAttributesF r f) r f where
   commonAttributes = commonAttrs
-instance HasCommonAttributes (PathAttributesF f r) f r where
+instance HasCommonAttributes (PathAttributesF r f) r f where
   commonAttributes = commonAttrs
-instance HasCommonAttributes (TextAttributesF f r) f r where
+instance HasCommonAttributes (TextAttributesF r f) r f where
   commonAttributes = commonAttrs
-instance HasCommonAttributes (GroupAttributesF f r) f r where
+instance HasCommonAttributes (GroupAttributesF r f) r f where
   commonAttributes = commonAttrs
 
 --------------------------------------------------------------------------------
 
-type ImageAttributes  = CommonAttributes
+type ImageAttributes r = CommonAttributes r Maybe
 
 --------------------------------------------------------------------------------
 
+class AttributeNames ats where
+  -- | Construct the attribute names
+  attributeNames :: ats (Const Text)
 
 class IpeWriteAttributes ats where
   -- | Write the attributes to pairs of texts
   ipeWriteAttrs :: ats -> [(Text,Text)]
 
 class IpeReadAttributes ats where
+  -- | Given the attributes in their text form, try to parse them
   ipeReadAttrs :: [(Text,Text)] -> Either ConversionError ats
-
-data Field attr where
-  Field ::
-           Lens' attr value
-        -> Text
-        -> (Text -> Either ConversionError value)
-        -> (value -> Text)
-        -- ((value -> Text) -> Maybe value -> [(Text,Text)])
-        -> Field attr
-
-
--- prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-
-thePrsm :: forall value. Prism Text ConversionError value value
-thePrsm = prism f g
-  where
-    f :: value -> Text
-    g = ipeWriteText
-
-    g :: Text -> Either ConversionError value
-    g = ipeReadText
-
-
--- _Cons' :: forall a b. Prism [a] [b] (a,[a]) (b,[b])
--- _Cons' = prism bToT sToEithera
---   where
---     bToT :: (b,[b]) -> [b]
---     bToT = uncurry (:)
-
---     sToEitherTa     :: [a] -> Either [b] a
---     sToEitherTa aas = case aas of
---       (a:as) -> Right (a, as)
---       []     -> Left  []
-
-commonFields :: [Field (CommonAttributes Maybe r)]
-commonFields = [ Field layer "layer" ipeReadText ipeWriteText
-
-               ]
-
-mkAttr n ipeWriteText
-
-
--- bar :: [(Lens' s value, Text),  ]
--- bar = [ (layer, "layer")
-
-
---       ]
-
-
-instance IpeReadAttributes (CommonAttributes Maybe r) where
-  ipeReadAttrs textAts = fmap (($ def) . foldr (.) id) . sequence $
-      [ foo' layer "layer" textAts
-      , foo' matrix "matrix" textAts
-      , foo' pin  "pin" textAts
-      , foo' transformations "transformations" textAts
-      ]
---     where
---       parse (field, k) = \case
---         Left err  -> Left err
---         Right ats -> ats&field %%~ ipeReadText <$> lookup k textAts
-
-
-foo'                :: Setter ats ats (Maybe value) (Maybe value)
-                    -> Text
-                    -> [(Text,Text)]
-                    -> Either ConversionError (ats -> ats)
-foo' field name ats = case lookup name ats of
-                        Nothing  -> Right id
-                        Just txt -> ipeReadText txt <&> \val ats -> ats&field ?~ val
-
-
-instance IpeWriteAttributes (CommonAttributes Maybe r) where
-  ipeWriteAttrs ats = mconcat . map (ats^.) $
-                      [ layer.attrName "layer"
-                      , matrix.attrName "matrix"
-                      , pin.attrName "pin"
-                      , transformations.attrName "transformations"
-                      ]
-
-instance IpeWriteAttributes (SymbolAttributes r) where
-  ipeWriteAttrs ats = mconcat . map (ats^.) $
-    [ commonAttrs.to ipeWriteAttrs
-    , stroke.attrName "stroke"
-    , fill.attrName "fill"
-    , pen.attrName "pen"
-    , symbolSize.attrName "size"
-    ]
-
-instance IpeWriteAttributes (PathAttributes r) where
-  ipeWriteAttrs ats = mconcat . map (ats^.) $
-    [ commonAttrs.to ipeWriteAttrs
-    , stroke.attrName "stroke"
-    , fill.attrName "fill"
-    , pen.attrName "pen"
-    , dash.attrName "dash"
-    , lineCap.attrName "cap"
-    , lineJoin.attrName "join"
-    , fillRule.attrName "fillrule"
-    , arrow.attrName "arrow"
-    , rArrow.attrName "rarrow"
-    , strokeOpacity.attrName "stroke-opacity"
-    , opacity.attrName "opacity"
-    , tiling.attrName "tiling"
-    , gradient.attrName "gradient"
-    ]
-
-instance IpeWriteAttributes (TextAttributes r) where
-  ipeWriteAttrs ats = mconcat . map (ats^.) $
-    [ commonAttrs.to ipeWriteAttrs
-    , stroke.attrName "stroke"
-    , textSize.attrName "size"
-    , opacity.attrName "opacity"
-    , textWidth.attrName "width"
-    , textHeight.attrName "height"
-    , depth.attrName "depth"
-    , hAlign.attrName "halign"
-    , vAlign.attrName "valign"
-    , style.attrName "style"
-    ]
-
-instance IpeWriteAttributes (GroupAttributes r) where
-  ipeWriteAttrs ats = mconcat . map (ats^.) $
-    [ commonAttrs.to ipeWriteAttrs
-    , clip.attrName "clip"
-    ]
-
-
-
-ipeWriteText = undefined
-ipeReadText = undefined
-
-
-attrName   :: Text -> Getter (Maybe value) [(Text,Text)]
-attrName n = to $ mkAttr n ipeWriteText
-
-
-
-
--- prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-
--- attr :: Text -> Prism (Maybe value) ConversionError Text Text
--- -- Prism' (Maybe value) Text
--- attr =
-
--- | Tyep that tells us how to read and write ipe values from/into attributes
-type IpeRW value = ( Text -> Either ConversionError value
-                   , (value -> Text) -> Maybe value -> [(Text,Text)]
-                   )
-
-
-
-mkAttr'     :: Text -> IpeRW value
-mkAttr' key = ( ipeReadText
-              , mkAttr key
-              )
-
-
-
-mkAttr       :: Text -> (value -> Text) -> Maybe value -> [(Text,Text)]
-mkAttr key f = maybe mempty ((:[]) . (key,) . f)
-
 
 --------------------------------------------------------------------------------
 
+instance AttributeNames (CommonAttributes r) where
+  attributeNames = CommonAttributes
+   { _layer           = Const "layer"
+   , _matrix          = Const "matrix"
+   , _pin             = Const "pin"
+   , _transformations = Const "transformations"
+   }
 
-test :: CommonAttributes Maybe Int
-test = def&layer ?~ "foo"
+instance ( AllB IpeWriteText (CommonAttributes r)
+         ) => IpeWriteAttributes (CommonAttributes r Maybe) where
+  ipeWriteAttrs = bfoldMap getConst . bzipWithC @IpeWriteText writeAttr attributeNames
 
+writeAttr :: forall a. (IpeWriteText a) => Const Text a -> Maybe a -> Const [(Text,Text)] a
+writeAttr (Const attr) = Const . \case
+  Nothing  -> []
+  Just val -> [(attr,ipeWriteText val)]
 
+instance ( AllB IpeReadText (CommonAttributes r)
+         ) => IpeReadAttributes (CommonAttributes r Maybe) where
+  ipeReadAttrs textAts = btraverseC @IpeReadText (parseAttr textAts) attributeNames
+
+-- | Parse some text attribute
+parseAttr                      :: [(Text,Text)]
+                               -> IpeReadText value
+                               => Const Text value -> Either ConversionError (Maybe value)
+parseAttr textAts (Const name) = traverse ipeReadText $ lookup name textAts
+  -- case lookup name textAts of
+  --                      Nothing  -> Right Nothing
+  --                      Just txt -> Just <$> ipeReadText txt
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (SymbolAttributesF r) where
+  attributeNames = SymbolAttributes
+    { _commonAttrs = attributeNames
+    , _stroke      = Const "stroke"
+    , _fill        = Const "fill"
+    , _pen         = Const "pen"
+    , _symbolSize  = Const "size"
+    }
+
+instance ( AllB IpeWriteText (CommonAttributes r), IpeWriteText r
+         ) => IpeWriteAttributes (SymbolAttributes r) where
+  ipeWriteAttrs = ipeWriteAttrs'
+
+instance ( AllB IpeReadText (SymbolAttributesF r), AllB IpeWriteText (CommonAttributes r)
+         ) => IpeReadAttributes (SymbolAttributes r) where
+  ipeReadAttrs = ipeReadAttrs'
+
+-- | Implementation of ipeWriteAttrs for the various attribue types
+ipeWriteAttrs'     :: ( AllB IpeWriteText b, HasCommonAttributes (b Maybe) r f
+                      , IpeWriteAttributes (CommonAttributes r f), TraversableB b
+                      , ConstraintsB b, ApplicativeB b, AttributeNames b
+                      ) => b Maybe -> [(Text, Text)]
+ipeWriteAttrs' ats = foldMapOf commonAttributes ipeWriteAttrs ats
+                  <> bfoldMap getConst (bzipWithC @IpeWriteText writeAttr attributeNames ats)
+
+-- | Implementation of ipeReadAttrs for the various attribue types
+ipeReadAttrs'         :: (AllB IpeReadText b,
+                          HasCommonAttributes (b Maybe) r f,
+                          IpeReadAttributes (CommonAttributes r f), TraversableB b,
+                          ConstraintsB b, AttributeNames b
+                         ) => [(Text, Text)] -> Either ConversionError (b Maybe)
+ipeReadAttrs' textAts = combine <$> ipeReadAttrs textAts
+                                <*> btraverseC @IpeReadText (parseAttr textAts) attributeNames
+  where
+    combine common rest = rest&commonAttributes .~ common
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (GroupAttributesF r) where
+  attributeNames = GroupAttributes
+    { _commonAttrs = attributeNames
+    , _clip        = Const "clip"
+    }
+
+instance ( AllB IpeWriteText (CommonAttributes r), IpeWriteText r
+         ) => IpeWriteAttributes (GroupAttributes r) where
+  ipeWriteAttrs = ipeWriteAttrs'
+
+instance ( AllB IpeReadText (SymbolAttributesF r), AllB IpeWriteText (CommonAttributes r)
+         ) => IpeReadAttributes (GroupAttributes r) where
+  ipeReadAttrs = ipeReadAttrs'
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (PathAttributesF r) where
+  attributeNames = PathAttributes
+    { _commonAttrs = attributeNames
+    , _stroke        = Const "stroke"
+    , _fill          = Const "fill"
+    , _pen           = Const "pen"
+    , _dash          = Const "dash"
+    , _lineCap       = Const "linecap"
+    , _lineJoin      = Const "linejoin"
+    , _fillRule      = Const "fillrule"
+    , _arrow         = Const "arrow"
+    , _rArrow        = Const "rarrow"
+    , _strokeOpacity = Const "stroke-opacity"
+    , _opacity       = Const "opacity"
+    , _tiling        = Const "tiling"
+    , _gradient      = Const "gradient"
+    }
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (TextAttributesF r) where
+  attributeNames = TextAttributes
+    { _commonAttrs = attributeNames
+    , _stroke      = Const "stroke"
+    , _textSize    = Const "size"
+    , _opacity     = Const "opacity"
+    , _textWidth   = Const "width"
+    , _textHeight  = Const "height"
+    , _depth       = Const "depth"
+    , _hAlign      = Const "halign"
+    , _vAlign      = Const "valign"
+    , _style       = Const "style"
+    }
 
 --------------------------------------------------------------------------------
 
 -- red :: IpeColor Int
 -- red = undefined
+
+
+
+-- draw :: [lenses]
+--      -> Path r -> [IpeObject r]
+-- draw ats g = g :+
+
 
 type Attr g = g -> g
 
@@ -431,7 +394,5 @@ foo = [ stroke ?~ red
       , fill   ?~ green
       ]
 
-
--- draw :: [lenses]
---      -> Path r -> [IpeObject r]
--- draw ats g = g :+
+test :: CommonAttributes Int Maybe
+test = def&layer ?~ "foo"

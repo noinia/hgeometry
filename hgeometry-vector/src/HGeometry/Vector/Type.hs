@@ -47,6 +47,7 @@ type instance NumType   (Vector d r) = r
 type instance IxValue   (Vector d r) = r
 type instance Index     (Vector d r) = Int
 
+
 --------------------------------------------------------------------------------
 
 {- $setup

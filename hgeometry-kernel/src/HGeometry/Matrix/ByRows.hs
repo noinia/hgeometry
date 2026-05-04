@@ -15,20 +15,18 @@ module HGeometry.Matrix.ByRows(
   , OptMatrix_
   ) where
 
-import           Control.Lens
--- import           GHC.TypeNats
-import           HGeometry.Matrix.Class
-import           HGeometry.Vector
-import           HGeometry.Properties
--- import           Linear.Matrix (M22, M33, M44)
--- import qualified Linear.Matrix as Lin
+import Control.Lens
+import HGeometry.Matrix.Class
+import HGeometry.Vector
+import HGeometry.Properties
+import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 -- * Matrices
 
 -- | A matrix of n rows, each of m columns, storing values of type r.
 newtype Matrix n m r = Matrix (Vector n (Vector m r))
-
+                     deriving (Generic)
 
 -- transpose :: Matrix n m r -> Matrix m n r
 -- transpose = undefined
