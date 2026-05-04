@@ -3,6 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.Attributes
@@ -35,6 +36,7 @@ module Ipe.Attributes2
   , test
   ) where
 
+import Data.Kind (Type)
 import Data.Functor.Classes
 import Ipe.Attributes.Types
 import Control.Lens hiding (elements)
@@ -50,7 +52,10 @@ import Ipe.Color
 import Barbies
 import Barbies.Constraints (Dict(..))
 
+
+
 --------------------------------------------------------------------------------
+
 type ConversionError = String -- FIXME: remove
 
 class IpeWriteText t
@@ -375,6 +380,39 @@ instance AttributeNames (TextAttributesF r) where
 
 --------------------------------------------------------------------------------
 
+  -- | The type of objects a backend renders
+type family Rendered  backend :: Type
+
+
+-- | An Attribute Assignment
+type Attr backend geom = AttrOf backend geom -> AttrOf backend geom
+
+-- | A class that expresses that something is drawable using a particular backend
+class ( Monoid (Rendered backend)
+      ) => IsDrawable backend geom where
+
+  -- | A GADT that expresses possible attributes for a particular object
+  type AttrOf backend geom :: Type
+
+  -- | Draw some objects
+  draw :: [Attr backend geom] -> geom -> Rendered backend
+
+
+
+-- type data Ipe r
+-- type instance Rendered (Ipe r) = [Ipe.IpeObject r]
+
+
+attrs :: Default at => [at -> at] -> at
+attrs = foldl' (\a f -> f a) def
+
+-- instance IsDrawable (Ipe r) (Path r) where
+--   type AttrOf (Ipe r) (Path r) = PathAttributes r -> PathAttributes r
+--   draw ats g = [ attrs ats
+--                ]
+
+
+
 -- red :: IpeColor Int
 -- red = undefined
 
@@ -385,14 +423,13 @@ instance AttributeNames (TextAttributesF r) where
 -- draw ats g = g :+
 
 
-type Attr g = g -> g
 
-foo :: ( HasFill   g (Maybe (IpeColor Int))
-       , HasStroke g (Maybe (IpeColor Int))
-       ) => [Attr g]
-foo = [ stroke ?~ red
-      , fill   ?~ green
-      ]
+-- foo :: ( HasFill   g (Maybe (IpeColor Int))
+--        , HasStroke g (Maybe (IpeColor Int))
+--        ) => [Attr g]
+-- foo = [ stroke ?~ red
+--       , fill   ?~ green
+--       ]
 
 test :: CommonAttributes Int Maybe
 test = def&layer ?~ "foo"
