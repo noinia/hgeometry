@@ -49,7 +49,9 @@ import Ipe.Types hiding (commonAttributes)
 import Ipe.Color
 
 --------------------------------------------------------------------------------
+type ConversionError = String -- FIXME: remove
 
+----------------------------------------
 
 -- instance Read r => Read (Matrix n m r) where
 --   readPrec = undefined  -- parens $ (prec app_prec $ do
@@ -238,9 +240,83 @@ type ImageAttributes  = CommonAttributes
 
 --------------------------------------------------------------------------------
 
+
 class IpeWriteAttributes ats where
   -- | Write the attributes to pairs of texts
   ipeWriteAttrs :: ats -> [(Text,Text)]
+
+class IpeReadAttributes ats where
+  ipeReadAttrs :: [(Text,Text)] -> Either ConversionError ats
+
+data Field attr where
+  Field ::
+           Lens' attr value
+        -> Text
+        -> (Text -> Either ConversionError value)
+        -> (value -> Text)
+        -- ((value -> Text) -> Maybe value -> [(Text,Text)])
+        -> Field attr
+
+
+-- prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
+
+thePrsm :: forall value. Prism Text ConversionError value value
+thePrsm = prism f g
+  where
+    f :: value -> Text
+    g = ipeWriteText
+
+    g :: Text -> Either ConversionError value
+    g = ipeReadText
+
+
+-- _Cons' :: forall a b. Prism [a] [b] (a,[a]) (b,[b])
+-- _Cons' = prism bToT sToEithera
+--   where
+--     bToT :: (b,[b]) -> [b]
+--     bToT = uncurry (:)
+
+--     sToEitherTa     :: [a] -> Either [b] a
+--     sToEitherTa aas = case aas of
+--       (a:as) -> Right (a, as)
+--       []     -> Left  []
+
+commonFields :: [Field (CommonAttributes Maybe r)]
+commonFields = [ Field layer "layer" ipeReadText ipeWriteText
+
+               ]
+
+mkAttr n ipeWriteText
+
+
+-- bar :: [(Lens' s value, Text),  ]
+-- bar = [ (layer, "layer")
+
+
+--       ]
+
+
+instance IpeReadAttributes (CommonAttributes Maybe r) where
+  ipeReadAttrs textAts = fmap (($ def) . foldr (.) id) . sequence $
+      [ foo' layer "layer" textAts
+      , foo' matrix "matrix" textAts
+      , foo' pin  "pin" textAts
+      , foo' transformations "transformations" textAts
+      ]
+--     where
+--       parse (field, k) = \case
+--         Left err  -> Left err
+--         Right ats -> ats&field %%~ ipeReadText <$> lookup k textAts
+
+
+foo'                :: Setter ats ats (Maybe value) (Maybe value)
+                    -> Text
+                    -> [(Text,Text)]
+                    -> Either ConversionError (ats -> ats)
+foo' field name ats = case lookup name ats of
+                        Nothing  -> Right id
+                        Just txt -> ipeReadText txt <&> \val ats -> ats&field ?~ val
+
 
 instance IpeWriteAttributes (CommonAttributes Maybe r) where
   ipeWriteAttrs ats = mconcat . map (ats^.) $
@@ -297,13 +373,41 @@ instance IpeWriteAttributes (GroupAttributes r) where
     , clip.attrName "clip"
     ]
 
+
+
+ipeWriteText = undefined
+ipeReadText = undefined
+
+
+attrName   :: Text -> Getter (Maybe value) [(Text,Text)]
 attrName n = to $ mkAttr n ipeWriteText
+
+
+
+
+-- prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
+
+-- attr :: Text -> Prism (Maybe value) ConversionError Text Text
+-- -- Prism' (Maybe value) Text
+-- attr =
+
+-- | Tyep that tells us how to read and write ipe values from/into attributes
+type IpeRW value = ( Text -> Either ConversionError value
+                   , (value -> Text) -> Maybe value -> [(Text,Text)]
+                   )
+
+
+
+mkAttr'     :: Text -> IpeRW value
+mkAttr' key = ( ipeReadText
+              , mkAttr key
+              )
+
+
 
 mkAttr       :: Text -> (value -> Text) -> Maybe value -> [(Text,Text)]
 mkAttr key f = maybe mempty ((:[]) . (key,) . f)
 
-
-ipeWriteText = undefined
 
 --------------------------------------------------------------------------------
 
@@ -315,7 +419,17 @@ test = def&layer ?~ "foo"
 
 --------------------------------------------------------------------------------
 
+-- red :: IpeColor Int
+-- red = undefined
 
+type Attr g = g -> g
+
+foo :: ( HasFill   g (Maybe (IpeColor Int))
+       , HasStroke g (Maybe (IpeColor Int))
+       ) => [Attr g]
+foo = [ stroke ?~ red
+      , fill   ?~ green
+      ]
 
 
 -- draw :: [lenses]
