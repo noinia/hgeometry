@@ -21,13 +21,14 @@ import           Ipe.Attributes.Types
 -- >>> import Ipe.Attributes
 -- >>> import Ipe.Color(IpeColor(..))
 -- >>> import qualified HGeometry.PolyLine as PolyLine
+-- >>> import Data.Default
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
 --              . PolyLine.polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
---     testPathAttrs = attr SStroke (IpeColor "red")
+--     testPathAttrs = def & stroke ?~ IpeColor "red"
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}

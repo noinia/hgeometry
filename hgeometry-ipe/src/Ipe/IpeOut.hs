@@ -82,46 +82,25 @@ type IpeOut g i r = g -> IpeObject' i r
 type IpeOut' f g i r = g -> f (IpeObject' i r)
 
 
--- -- | Add attributes to an IpeObject'
--- (!)       :: IpeObject' i r -> IpeAttributes i r -> IpeObject' i r
--- (!) i ats = i&extra %~ (<> ats)
-
 -- | Render an ipe object
 --
 --
 -- >>> :{
---   iO $ defIO myPolygon ! attr SFill (IpeColor "blue")
---                        ! attr SLayer "alpha"
---                        ! attr SLayer "beta"
+--   iO $ defIO myPolygon & fill  ?~  IpeColor "blue"
+--                        & layer ?~ "alpha"
+--                        & layer ?~ "beta"
 -- :}
--- IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "blue"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+-- IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ PathAttributes {_commonAttrs = CommonAttributes {_layer = Just (LayerName {_layerName = "beta"}), _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _stroke = Nothing, _fill = Just (IpeColor (Named "blue")), _pen = Nothing, _dash = Nothing, _lineCap = Nothing, _lineJoin = Nothing, _fillRule = Nothing, _arrow = Nothing, _rArrow = Nothing, _strokeOpacity = Nothing, _opacity = Nothing, _tiling = Nothing, _gradient = Nothing})
+--
+--
 --
 -- >>> :{
---   iO $ ipeGroup [ iO $ ipePolygon myPolygon ! attr SFill (IpeColor "red")
---                 ] ! attr SLayer "alpha"
+--   iO $ ipeGroup [ iO $ ipePolygon myPolygon & fill ?~ IpeColor "red"
+--                 ] & layer ?~ "alpha"
 -- :}
--- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
---
+-- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ PathAttributes {_commonAttrs = CommonAttributes {_layer = Nothing, _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _stroke = Nothing, _fill = Just (IpeColor (Named "red")), _pen = Nothing, _dash = Nothing, _lineCap = Nothing, _lineJoin = Nothing, _fillRule = Nothing, _arrow = Nothing, _rArrow = Nothing, _strokeOpacity = Nothing, _opacity = Nothing, _tiling = Nothing, _gradient = Nothing})] :+ GroupAttributes {_commonAttrs = CommonAttributes {_layer = Just (LayerName {_layerName = "alpha"}), _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _clip = Nothing})
 iO :: ToObject i => IpeObject' i r -> IpeObject r
 iO = mkIpeObject
-
--- | Render to an ipe object using the defIO IpeOut
---
---
--- >>> :{
---   iO'' myPolygon $  attr SFill (IpeColor "red")
---                  <> attr SLayer "alpha"
---                  <> attr SLayer "beta"
--- :}
--- IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
---
--- >>> iO'' [ myPolygon , myPolygon ] $ attr SLayer "alpha"
--- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr}),IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
--- iO''       :: ( HasDefaultIpeOut g, NumType g ~ r
---              , DefaultIpeOut g ~ i, ToObject i
---              ) => g -> IpeAttributes i r
---            -> IpeObject r
--- iO'' g ats = iO $ defIO g ! ats
 
 -- | generate an ipe object without any specific attributes
 iO' :: HasDefaultIpeOut g => g -> IpeObject (NumType g)
@@ -139,10 +118,6 @@ class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   -- an ipe object of type 'DefaultIpeOut g'
   defIO :: IpeOut g (DefaultIpeOut g) (NumType g)
 
--- instance (HasDefaultIpeOut g, a ~ IpeAttributes (DefaultIpeOut g) (NumType g))
---         => HasDefaultIpeOut (g :+ a) where
---   type DefaultIpeOut (g :+ a) = DefaultIpeOut g
---   defIO (g :+ ats) = defIO g ! ats
 
 instance HasDefaultIpeOut a => HasDefaultIpeOut [a] where
   type DefaultIpeOut [a] = Group

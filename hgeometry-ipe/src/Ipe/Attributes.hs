@@ -38,6 +38,7 @@ module Ipe.Attributes
   , traverseCommon, traverseText, traversePath, traverseSymbol, traverseGroup
   ) where
 
+import HGeometry.Ext
 import Data.Functor.Apply
 import Data.Coerce
 import Data.Kind (Type)
@@ -49,8 +50,6 @@ import Data.Default
 import Data.Text (Text)
 import HGeometry.Matrix
 import Ipe.Value
-import Text.Read (lexP, step, parens, prec, (+++)
-                , Lexeme(Ident), readPrec, readListPrec, readListPrecDefault)
 import GHC.Generics (Generic)
 import Ipe.Color
 import Barbies
@@ -403,34 +402,62 @@ applyAttrs       :: [at -> at] -> at -> at
 applyAttrs ats z = foldl' (flip ($)) z ats
 
 
--- type data Ipe r
--- type instance Rendered (Ipe r) = [Ipe.IpeObject r]
-
-
--- instance IsDrawable (Ipe r) (Path r) where
---   type AttrOf (Ipe r) (Path r) = PathAttributes r -> PathAttributes r
---   draw ats g = [ attrs ats
---                ]
 
 
 
--- red :: IpeColor Int
--- red = undefined
 
 
+--------------------------------------------------------------------------------
 
--- draw :: [lenses]
---      -> Path r -> [IpeObject r]
--- draw ats g = g :+
+instance HasCommonAttributes (g :+ PathAttributesF r f) r f where
+  commonAttributes = extra.commonAttributes
 
+instance HasStroke (g :+ PathAttributes r) (Maybe (IpeColor r)) where
+  stroke = extra.stroke
+instance HasFill (g :+ PathAttributes r) (Maybe (IpeColor r)) where
+  fill = extra.fill
+instance HasPen (g :+ PathAttributes r) (Maybe (IpePen r)) where
+  pen = extra.pen
+instance HasDash (g :+ PathAttributes r) (Maybe (IpeDash r)) where
+  dash = extra.dash
+instance HasLineCap (g :+ PathAttributes r) (Maybe Int) where
+  lineCap = extra.lineCap
+instance HasLineJoin (g :+ PathAttributes r) (Maybe Int) where
+  lineJoin = extra.lineJoin
+instance HasFillRule (g :+ PathAttributes r) (Maybe FillType) where
+  fillRule = extra.fillRule
+instance HasArrow (g :+ PathAttributes r) (Maybe (IpeArrow r)) where
+  arrow = extra.arrow
+instance HasRArrow (g :+ PathAttributes r) (Maybe (IpeArrow r)) where
+  rArrow = extra.rArrow
+instance HasStrokeOpacity (g :+ PathAttributes r) (Maybe (IpeValue r)) where
+  strokeOpacity = extra.strokeOpacity
+instance HasOpacity (g :+ PathAttributes r) (Maybe (IpeValue r)) where
+  opacity = extra.opacity
+instance HasTiling (g :+ PathAttributes r) (Maybe IpeTiling) where
+  tiling = extra.tiling
+instance HasGradient (g :+ PathAttributes r) (Maybe IpeGradient) where
+  gradient = extra.gradient
 
+----------------------------------------
+-- * Symbol attributes
 
--- foo :: ( HasFill   g (Maybe (IpeColor Int))
---        , HasStroke g (Maybe (IpeColor Int))
---        ) => [Attr g]
--- foo = [ stroke ?~ red
---       , fill   ?~ green
---       ]
+instance HasCommonAttributes (g :+ SymbolAttributesF r f) r f where
+  commonAttributes = extra.commonAttributes
 
-test :: CommonAttributes Int Maybe
-test = def&layer ?~ "foo"
+instance HasStroke (g :+ SymbolAttributes r) (Maybe (IpeColor r)) where
+  stroke = extra.stroke
+instance HasFill (g :+ SymbolAttributes r) (Maybe (IpeColor r)) where
+  fill = extra.fill
+instance HasPen (g :+ SymbolAttributes r) (Maybe (IpePen r)) where
+  pen = extra.pen
+instance HasSymbolSize (g :+ SymbolAttributes r) (Maybe (IpeSize r)) where
+  symbolSize = extra.symbolSize
+
+----------------------------------------
+-- * group
+
+instance HasCommonAttributes (g :+ GroupAttributesF r f) r f where
+  commonAttributes = extra.commonAttributes
+instance HasClip (g :+ GroupAttributes r) (Maybe (Path r)) where
+  clip = extra.clip

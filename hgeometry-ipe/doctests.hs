@@ -28,5 +28,6 @@
                 -optF -XFlexibleContexts
                 -optF -XDerivingStrategies
                 -optF -XDerivingVia
+                -optF -XTypeData
 
 #-}
