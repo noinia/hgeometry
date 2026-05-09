@@ -3,7 +3,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.Attributes
@@ -35,7 +34,7 @@ module Ipe.Attributes
 
 
   , AttributeNames(..)
-  , mkAttrs
+  , mkAttrs, applyAttrs
   , traverseCommon, traverseText, traversePath, traverseSymbol, traverseGroup
   ) where
 
@@ -120,7 +119,7 @@ data SymbolAttributesF r f = SymbolAttributes
   { _commonAttrs :: !(CommonAttributes r f)
   , _stroke      :: f (IpeColor r)
   , _fill        :: f (IpeColor r)
-  , _pen         :: f (IpeColor r)
+  , _pen         :: f (IpePen r)
   , _symbolSize  :: f (IpeSize r)
   } deriving (Generic)
 
@@ -150,7 +149,7 @@ data PathAttributesF r f = PathAttributes
   , _dash          :: f (IpeDash r)
   , _lineCap       :: f Int
   , _lineJoin      :: f Int
-  , _fillRule      :: f (IpeArrow r)
+  , _fillRule      :: f FillType
   , _arrow         :: f (IpeArrow r)
   , _rArrow        :: f (IpeArrow r)
   , _strokeOpacity :: f (IpeValue r)
@@ -277,7 +276,7 @@ traversePath g (PathAttributes common s f p d lc lj fr a ra so o t gr) =
                  <*> traverse (traverse g) d
                  <*> pure lc
                  <*> pure lj
-                 <*> traverse (traverse g) fr
+                 <*> pure fr
                  <*> traverse (traverse g) a
                  <*> traverse (traverse g) ra
                  <*> traverse (traverse g) so
@@ -395,31 +394,18 @@ instance AttributeNames (TextAttributesF r) where
 
 --------------------------------------------------------------------------------
 
-  -- | The type of objects a backend renders
-type family Rendered  backend :: Type
+-- | Constructs attrs
+mkAttrs :: Default at => [at -> at] -> at
+mkAttrs = flip applyAttrs def
 
-
--- | An Attribute Assignment
-type Attr backend geom = AttrOf backend geom -> AttrOf backend geom
-
--- | A class that expresses that something is drawable using a particular backend
-class ( Monoid (Rendered backend)
-      ) => IsDrawable backend geom where
-
-  -- | A GADT that expresses possible attributes for a particular object
-  type AttrOf backend geom :: Type
-
-  -- | Draw some objects
-  draw :: [Attr backend geom] -> geom -> Rendered backend
-
+-- | Apply a the attributes
+applyAttrs       :: [at -> at] -> at -> at
+applyAttrs ats z = foldl' (flip ($)) z ats
 
 
 -- type data Ipe r
 -- type instance Rendered (Ipe r) = [Ipe.IpeObject r]
 
-
-mkAttrs :: Default at => [at -> at] -> at
-mkAttrs = foldl' (\a f -> f a) def
 
 -- instance IsDrawable (Ipe r) (Path r) where
 --   type AttrOf (Ipe r) (Path r) = PathAttributes r -> PathAttributes r

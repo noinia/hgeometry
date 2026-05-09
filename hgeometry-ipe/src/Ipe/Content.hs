@@ -23,6 +23,7 @@ module Ipe.Content(
   , flattenGroups
   ) where
 
+import           Ipe.Value
 import           Data.Bitraversable
 import           Control.Lens hiding (views, elements)
 import           Data.Kind
@@ -285,3 +286,43 @@ flattenGroups = concatMap flattenGroups'
         where
           applyAts _ = id
     flattenGroups' o                            = [o]
+
+
+--------------------------------------------------------------------------------
+
+instance HasStroke (g :+ PathAttributes r) (Maybe (IpeColor r)) where
+  stroke = extra.stroke
+instance HasFill (g :+ PathAttributes r) (Maybe (IpeColor r)) where
+  fill = extra.fill
+instance HasPen (g :+ PathAttributes r) (Maybe (IpePen r)) where
+  pen = extra.pen
+instance HasDash (g :+ PathAttributes r) (Maybe (IpeDash r)) where
+  dash = extra.dash
+instance HasLineCap (g :+ PathAttributes r) (Maybe Int) where
+  lineCap = extra.lineCap
+instance HasLineJoin (g :+ PathAttributes r) (Maybe Int) where
+  lineJoin = extra.lineJoin
+instance HasFillRule (g :+ PathAttributes r) (Maybe FillType) where
+  fillRule = extra.fillRule
+instance HasArrow (g :+ PathAttributes r) (Maybe (IpeArrow r)) where
+  arrow = extra.arrow
+instance HasRArrow (g :+ PathAttributes r) (Maybe (IpeArrow r)) where
+  rArrow = extra.rArrow
+instance HasStrokeOpacity (g :+ PathAttributes r) (Maybe (IpeValue r)) where
+  strokeOpacity = extra.strokeOpacity
+instance HasOpacity (g :+ PathAttributes r) (Maybe (IpeValue r)) where
+  opacity = extra.opacity
+instance HasTiling (g :+ PathAttributes r) (Maybe IpeTiling) where
+  tiling = extra.tiling
+instance HasGradient (g :+ PathAttributes r) (Maybe IpeGradient) where
+  gradient = extra.gradient
+
+
+instance HasStroke (g :+ SymbolAttributes r) (Maybe (IpeColor r)) where
+  stroke = extra.stroke
+instance HasFill (g :+ SymbolAttributes r) (Maybe (IpeColor r)) where
+  fill = extra.fill
+instance HasPen (g :+ SymbolAttributes r) (Maybe (IpePen r)) where
+  pen = extra.pen
+instance HasSymbolSize (g :+ SymbolAttributes r) (Maybe (IpeSize r)) where
+  symbolSize = extra.symbolSize

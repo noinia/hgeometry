@@ -338,7 +338,7 @@ ipeHalfLine (HalfLine p v) = ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
 -- pre: the intersection of the box with the line is non-empty
 ipeRay    :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point)
           => IpeOut (HalfLine point) Path r
-ipeRay hl = ipeHalfLine hl & attributes.arrow ?~ normalArrow
+ipeRay hl = ipeHalfLine hl & arrow ?~ normalArrow
 
 -- | Renders the HalfLine in the given box.
 --
@@ -372,7 +372,7 @@ ipeCircle = ipeEllipse . circleToEllipse
 
 -- | Renders a Disk to a Path
 ipeDisk   :: Radical r => IpeOut (Disk (Point 2 r)) Path r
-ipeDisk d = ipeCircle (MkSphere d) & attributes.fill ?~ IpeColor "0.722 0.145 0.137"
+ipeDisk d = ipeCircle (MkSphere d) & fill ?~ IpeColor "0.722 0.145 0.137"
 
 -- | Renders a Bezier curve to a Path
 ipeBezier   :: IpeOut (CubicBezier (Point 2 r)) Path r
@@ -454,8 +454,8 @@ ipeHalfPlaneIn rect' c hl = case hl `intersect` rect' of
     Nothing -> ipeGroup [] -- this should not really happen I guess?
     Just is -> case is of
       ActualPolygon interior -> ipeGroup [ iO (ipeSimplePolygon interior
-                                                 &attributes.fill    ?~ c
-                                                 &attributes.opacity ?~ Named "20%"
+                                                 &fill    ?~ c
+                                                 &opacity ?~ Named "20%"
                                               )
                                          , boundary
                                          ]
@@ -477,8 +477,8 @@ drawAsConstraint         :: forall line r.
                             )
                          => IpeColor r
                          -> IpeOut (HalfPlaneF line) Group r
-drawAsConstraint color h = ipeGroup [ iO $ defIO seg & attributes.pen ?~ IpePen "heavier"
-                                    , iO $ ipeSimplePolygon poly & attributes.fill ?~ color
+drawAsConstraint color h = ipeGroup [ iO $ defIO seg & pen ?~ IpePen "heavier"
+                                    , iO $ ipeSimplePolygon poly & fill ?~ color
                                     ]
   where
     l = h^.boundingHyperPlane

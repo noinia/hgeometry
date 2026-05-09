@@ -115,13 +115,14 @@ import Ipe.Attributes.Types
 _asHalfLine :: (Fractional r, Ord r, Show r)
             => Prism' (IpeObject r) (HalfLine (Point 2 r) :+ IpeAttributes Path r)
 _asHalfLine = prism' (\(hl :+ ats) -> IpePath (ipeHalfLine hl &attributes .~ ats)) objToHalfLine
+    -- FIXME: this overwrites the attributes set by ipeHalfLine that is not entirely ideal
   where
     objToHalfLine = \case
       IpePath (path' :+ ats) -> case path'^?_asClosedLineSegment  of
         Just (ClosedLineSegment s t) -> case (ats^.arrow, ats^.rArrow) of
-            (Just _, Nothing) -> Just $ HalfLine s (t .-. s) :+ ats
-            (Nothing, Just _) -> Just $ HalfLine s (s .-. t) :+ ats
-            _                 -> Nothing
+                                          (Just _, Nothing) -> Just $ HalfLine s (t .-. s) :+ ats
+                                          (Nothing, Just _) -> Just $ HalfLine s (s .-. t) :+ ats
+                                          _                 -> Nothing
         Nothing                      -> Nothing
       _                    -> Nothing
 

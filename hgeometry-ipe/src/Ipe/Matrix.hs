@@ -10,14 +10,13 @@
 --------------------------------------------------------------------------------
 module Ipe.Matrix where
 
-import           Control.Lens hiding (rmap)
-import           HGeometry.Ext
-import  Ipe.Attributes
-import           Ipe.Types
-import           HGeometry.Properties
-import           HGeometry.Transformation
-import           Data.Proxy
-import           Data.Vinyl hiding (Label)
+import Control.Lens hiding (rmap)
+import HGeometry.Ext
+import Ipe.Attributes
+import Ipe.Types
+import HGeometry.Properties
+import HGeometry.Transformation
+import Data.Proxy
 
 --------------------------------------------------------------------------------
 
