@@ -38,9 +38,8 @@ renderChain :: (Foldable1 nonEmpty, Point_ vertex 2 r, Num r)
             => UnboundedConvexRegionF r nonEmpty vertex :+ IpeAttributes Path r
             -> IpeObject' Path r
 renderChain (reg@(Unbounded v pts w) :+ ats) =
-    (poly^.re _asPolyLine) :+     attr SArrow  normalArrow
-                               <> attr SRArrow normalArrow
-                               <> ats
+    (poly^.re _asPolyLine) :+ (ats&arrow  ?~ normalArrow
+                                  &rArrow ?~ normalArrow)
   where
     poly = case extremalVertices (mapChain toNonEmpty reg) of
              Left p              -> f p p

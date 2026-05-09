@@ -12,8 +12,7 @@ module Ipe.Matrix where
 
 import           Control.Lens hiding (rmap)
 import           HGeometry.Ext
-import qualified Ipe.Attributes as AT
-import           Ipe.Attributes hiding (Matrix)
+import  Ipe.Attributes
 import           Ipe.Types
 import           HGeometry.Properties
 import           HGeometry.Transformation
@@ -22,27 +21,19 @@ import           Data.Vinyl hiding (Label)
 
 --------------------------------------------------------------------------------
 
--- | Takes and applies the ipe Matrix attribute of this item.
-applyMatrix'              :: ( IsTransformable (i r)
-                             , AT.Matrix ∈ AttributesOf i
-                             , Dimension (i r) ~ 2, r ~ NumType (i r))
-                          => IpeObject' i r -> IpeObject' i r
-applyMatrix' o@(i :+ ats) = maybe o (\m -> transformBy (Transformation m) i :+ ats') mm
-  where
-    (mm,ats') = takeAttr (Proxy :: Proxy AT.Matrix) ats
+-- | Takes and Applies the matrix to an ipe object if it has one. Also
+-- applies it recursively to any groups.
+applyMatrix :: (Fractional r, Eq r) => IpeObject r -> IpeObject r
+applyMatrix = applyMatrix' . \case
+  IpeGroup gr -> IpeGroup $ gr&core.groupItems.mapped %~ applyMatrix
+  o           -> o
 
--- | Applies the matrix to an ipe object if it has one.
-applyMatrix                  :: (Fractional r, Eq r) => IpeObject r -> IpeObject r
-applyMatrix (IpeGroup i)     = IpeGroup . applyMatrix'
-                             $ i&core.groupItems.traverse %~ applyMatrix
-                             -- note that for a group we first (recursively)
-                             -- apply the matrices, and then apply
-                             -- the matrix of the group to its members.
-applyMatrix (IpeImage i)     = IpeImage     $ applyMatrix' i
-applyMatrix (IpeTextLabel i) = IpeTextLabel $ applyMatrix' i
-applyMatrix (IpeMiniPage i)  = IpeMiniPage  $ applyMatrix' i
-applyMatrix (IpeUse i)       = IpeUse       $ applyMatrix' i
-applyMatrix (IpePath i)      = IpePath      $ applyMatrix' i
+-- | Take and apply the matrix at this particular object. Does *not*
+-- apply it recursively.
+applyMatrix'   :: (Fractional r, Eq r) => IpeObject r -> IpeObject r
+applyMatrix' o = maybe o transform $ o^.matrix
+  where
+    transform m = (transformBy (Transformation m) o)&matrix .~ Nothing
 
 -- | Applies all matrices in the file.
 applyMatrices   :: (Fractional r, Eq r) => IpeFile r -> IpeFile r

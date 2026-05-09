@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.Attributes
@@ -13,282 +15,436 @@
 --
 --------------------------------------------------------------------------------
 module Ipe.Attributes
-  -- ( AttributeUniverse(..)
+  ( CommonAttributes(CommonAttributes), HasCommonAttributes(..)
+  , SymbolAttributesF(SymbolAttributes), SymbolAttributes
+  , HasStroke(..), HasFill(..), HasPen(..), HasSymbolSize(..)
 
-  -- ,
-  -- , module Ipe.Attributes.Types
-  -- )
-  where
+  , PathAttributesF(PathAttributes), PathAttributes
+  , HasDash(..), HasLineCap(..), HasLineJoin(..), HasFillRule(..)
+  , HasArrow(..), HasRArrow(..), HasStrokeOpacity(..), HasOpacity(..)
+  , HasTiling(..), HasGradient(..)
 
-import Control.Lens hiding (rmap, Const)
-import Data.Default
+  , GroupAttributesF(GroupAttributes), GroupAttributes
+  , HasClip(..)
+
+  , TextAttributesF(TextAttributes), TextAttributes
+  , HasTextSize(..), HasTextWidth(..), HasTextHeight(..), HasDepth(..)
+  , HasHAlign(..), HasVAlign(..), HasStyle(..)
+
+  , ImageAttributes
+
+
+  , AttributeNames(..)
+  , mkAttrs
+  , traverseCommon, traverseText, traversePath, traverseSymbol, traverseGroup
+  ) where
+
+import Data.Functor.Apply
+import Data.Coerce
 import Data.Kind (Type)
-import Data.Singletons
-import Data.Singletons.TH
+import Data.Functor.Classes
+import Ipe.Attributes.Types
+import Ipe.Path
+import Control.Lens hiding (elements)
+import Data.Default
 import Data.Text (Text)
-import Data.Vinyl
-import Data.Vinyl.Functor
-import Data.Vinyl.TypeLevel
+import HGeometry.Matrix
+import Ipe.Value
 import Text.Read (lexP, step, parens, prec, (+++)
                 , Lexeme(Ident), readPrec, readListPrec, readListPrecDefault)
+import GHC.Generics (Generic)
+import Ipe.Color
+import Barbies
+import Barbies.Constraints (Dict(..))
+import Ipe.Layer
+import Ipe.Attributes.Types
+
 
 --------------------------------------------------------------------------------
 
--- | The possible Attributes supported in Ipe. To use these
--- attributes, you'll likely need their Singletons's version which is
--- Prefixed by an 'S'. E.g. the 'Fill' attribute is represented by a
--- singleton 'SFill :: Sing Fill'.
-data AttributeUniverse = -- common
-                         Layer | Matrix | Pin | Transformations
-                       -- symbol
-                       | Stroke | Fill | Pen | Size
-                       -- Path
-                       | Dash | LineCap | LineJoin
-                       | FillRule | Arrow | RArrow | StrokeOpacity | Opacity | Tiling | Gradient
-                       -- Text (Label and Minipage)
-                       | Width | Height | Depth | VAlign | HAlign | Style
-                       -- Group
-                       | Clip
-                       -- Extra
---                       | X Text
-                       deriving (Show,Read,Eq)
+type ConversionError = String -- FIXME: remove
 
+class IpeReadText t
+instance IpeReadText r => IpeReadText (Path r)
 
-genSingletons [ ''AttributeUniverse ]
-
--- | IpeObjects may have attributes. Essentially attributes are
--- (key,value) pairs. The key is some name. Which attributes an object
--- can have depends on the type of the object. However, all ipe
--- objects support the Common Attributes
-type CommonAttributes = [ Layer, Matrix, Pin, Transformations ]
-
--- | All attributes applicable to Text (TextLabels and Minipages)
-type TextAttributes = CommonAttributes ++
-                      [Stroke, Size, Width, Height, Depth, VAlign, HAlign, Style, Opacity]
-
--- | All attributes applicable to TextLabels
-type TextLabelAttributes = TextAttributes
--- | All attributes applicable to Minipages
-type MiniPageAttributes  = TextAttributes
--- | All attributes applicable to Images
-type ImageAttributes     = CommonAttributes
-
--- | All attributes applicable to Symbols/Marks
-type SymbolAttributes = CommonAttributes ++ [Stroke, Fill, Pen, Size]
-
--- | All attributes applicable to Paths
-type PathAttributes = CommonAttributes ++
-                      [ Stroke, Fill, Dash, Pen, LineCap, LineJoin
-                      , FillRule, Arrow, RArrow, StrokeOpacity, Opacity, Tiling, Gradient
-                      ]
-
--- | All attributes applicable to Groups
-type GroupAttributes = CommonAttributes ++ '[ 'Clip]
-
---------------------------------------------------------------------------------
--- * A single attribute Attr
-
--- | Attr implements the mapping from labels to types as specified by the
--- (symbol representing) the type family 'f'
-newtype Attr (f :: TyFun u Type -> Type) -- Symbol repr. the Type family mapping
-                                         -- Labels in universe u to concrete types
-             (label :: u) = GAttr { _getAttr :: Maybe (Apply f label) }
-
-
-deriving instance Eq   (Apply f label) => Eq   (Attr f label)
-deriving instance Ord  (Apply f label) => Ord  (Attr f label)
-
-makeLenses ''Attr
-
--- | Constructor for constructing an Attr given an actual value.
-pattern Attr   :: Apply f label -> Attr f label
-pattern Attr x = GAttr (Just x)
-
--- | An Attribute that is not set
-pattern NoAttr :: Attr f label
-pattern NoAttr = GAttr Nothing
-{-# COMPLETE NoAttr, Attr #-}
-
--- | Traverse an attribute.
-traverseAttr   :: Applicative h => (Apply f label -> h (Apply g label))
-               -> Attr f label -> h (Attr g label)
-traverseAttr f = \case
-  Attr x -> Attr <$> f x
-  NoAttr -> pure NoAttr
-
--- | Traverse for the situation where the type is not actually parameterized.
-pureAttr :: (Applicative h, Apply f a ~ Apply g a) => Attr f a -> h (Attr g a)
-pureAttr = pure . \case
-    Attr a -> Attr a
-    NoAttr -> NoAttr
-
-
-instance Show (Apply f label) => Show (Attr f label) where
-  showsPrec d NoAttr   = showParen (d > app_prec) $ showString "NoAttr"
-    where app_prec = 10
-  showsPrec d (Attr a) = showParen (d > up_prec) $
-                           showString "Attr " . showsPrec (up_prec+1) a
-    where up_prec  = 5
-
-instance Read (Apply f label) => Read (Attr f label) where
-  readPrec = parens $ (prec app_prec $ do
-                                         Ident "NoAttr" <- lexP
-                                         pure NoAttr)
-                  +++ (prec up_prec $ do
-                                         Ident "Attr" <- lexP
-                                         a <- step readPrec
-                                         pure $ Attr a)
-    where
-      app_prec = 10
-      up_prec = 5
-  readListPrec = readListPrecDefault
-
-
-
--- | Give pref. to the *RIGHT*
-instance Semigroup (Attr f l) where
-  _ <> b@(Attr _) = b
-  a <> _          = a
-
-instance Monoid (Attr f l) where
-  mempty  = NoAttr
-
---------------------------------------------------------------------------------
--- * Attributes
-
--- | A collection of Attributes.
-newtype Attributes (f :: TyFun u Type -> Type) (ats :: [u]) = Attrs (Rec (Attr f) ats)
-
--- | Get a vinyl Record with Attrs
-unAttrs :: Lens (Attributes f ats) (Attributes f' ats') (Rec (Attr f) ats) (Rec (Attr f') ats')
-unAttrs = lens (\(Attrs r) -> r) (const Attrs)
-
-deriving instance ( RMap ats, ReifyConstraint Show (Attr f) ats, RecordToList ats
-                  , RecAll (Attr f) ats Show) => Show (Attributes f ats)
--- deriving instance (RecAll (Attr f) ats Read) => Read (Attributes f ats)
-
-instance ( ReifyConstraint Eq (Attr f) ats, RecordToList ats
-         , RecAll (Attr f) ats Eq)   => Eq   (Attributes f ats) where
-  (Attrs a) == (Attrs b) = and . recordToList
-                         . zipRecsWith (\x (Compose (Dict y)) -> Const $ x == y) a
-                         . (reifyConstraint @Eq) $ b
-
-instance RecApplicative ats => Monoid (Attributes f ats) where
-  mempty        = Attrs $ rpure mempty
-
-instance Semigroup (Attributes f ats) where
-  (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith (<>) as bs
-
-instance RecApplicative ats => Default (Attributes f ats) where
-  def = mempty
-
--- | Traverse implementation for Attrs
-traverseAttrs               :: Applicative h
-                            => (forall label. Attr f label -> h (Attr g label))
-                            -> Attributes f ats -> h (Attributes g ats)
-traverseAttrs f (Attrs ats) = Attrs <$> rtraverse f ats
-
--- | Zip two Recs with the given function.
-zipRecsWith                       :: (forall a. f a -> g a -> h a)
-                                  -> Rec f as -> Rec g as -> Rec h as
-zipRecsWith _ RNil      _         = RNil
-zipRecsWith f (r :& rs) (s :& ss) = f r s :& zipRecsWith f rs ss
-
-
+ipeReadText :: IpeReadText r => Text -> Either ConversionError r
+ipeReadText = undefined
 ----------------------------------------
 
--- | Lens into a specific attribute, if it is set.
-ixAttr   :: forall at ats proxy f. (at ∈ ats)
-         => proxy at -> Lens' (Attributes f ats) (Maybe (Apply f at))
-ixAttr _ = unAttrs.(rlens @at).getAttr
+-- instance Read r => Read (Matrix n m r) where
+--   readPrec = undefined  -- parens $ (prec app_prec $ do
+--              --                             Ident "NoAttr" <- lexP
+--              --                             pure NoAttr)
+--              --      +++ (prec up_prec $ do
+--              --                             Ident "Attr" <- lexP
+--              --                             a <- step readPrec
+--              --                             pure $ Attr a)
+--     where
+--       app_prec = 10
+--       up_prec = 5
+--   readListPrec = readListPrecDefault
 
--- | Prism into a particular attribute.
-_Attr   :: forall at ats proxy f. (at ∈ ats, RecApplicative ats)
-         => proxy at -> Prism' (Attributes f ats) (Apply f at)
-_Attr a = prism' setA getA
-  where
-    setA x = setAttr a x mempty
-    getA = lookupAttr a
-
--- | Looks up a particular attribute.
-lookupAttr   :: (at ∈ ats) => proxy at -> Attributes f ats -> Maybe (Apply f at)
-lookupAttr p = view (ixAttr p)
-
--- | Sets a particular attribute
-setAttr               :: forall proxy at ats f. (at ∈ ats)
-                      => proxy at -> Apply f at -> Attributes f ats -> Attributes f ats
-setAttr _ a (Attrs r) = Attrs $ rput (Attr a :: Attr f at) r
-
-
--- | gets and removes the attribute from Attributes
-takeAttr       :: forall proxy at ats f. (at ∈ ats)
-               => proxy at -> Attributes f ats -> ( Maybe (Apply f at)
-                                                  , Attributes f ats )
-takeAttr p ats = (lookupAttr p ats, ats&ixAttr p .~ Nothing)
-
--- | unsets/Removes an attribute
-unSetAttr   :: forall proxy at ats f. (at ∈ ats)
-            => proxy at -> Attributes f ats -> Attributes f ats
-unSetAttr p = snd . takeAttr p
-
--- | Creates a singleton attribute
-attr     :: (at ∈ ats, RecApplicative ats)
-         => proxy at -> Apply f at -> Attributes f ats
-attr p x = x^.re (_Attr p)
 
 
 --------------------------------------------------------------------------------
--- * Attribute names in Ipe
 
+data CommonAttributes r f = CommonAttributes
+  { _layer           :: f LayerName
+  , _matrix          :: f (Matrix 3 3 r)
+  , _pin             :: f PinType
+  , _transformations :: f TransformationTypes
+  } deriving (Generic)
 
--- | For the types representing attribute values we can get the name/key to use
--- when serializing to ipe.
-class IpeAttrName (a :: AttributeUniverse) where
-  attrName :: proxy a -> Text
+instance FunctorB     (CommonAttributes r)
+instance TraversableB (CommonAttributes r)
+instance ApplicativeB (CommonAttributes r)
+instance ConstraintsB (CommonAttributes r)
 
--- CommonAttributeUnivers
-instance IpeAttrName Layer           where attrName _ = "layer"
-instance IpeAttrName Matrix          where attrName _ = "matrix"
-instance IpeAttrName Pin             where attrName _ = "pin"
-instance IpeAttrName Transformations where attrName _ = "transformations"
+deriving instance (Show1 f, Show r) => Show (CommonAttributes r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (CommonAttributes r f)
 
--- IpeSymbolAttributeUniversre
-instance IpeAttrName Stroke       where attrName _ = "stroke"
-instance IpeAttrName Fill         where attrName _ = "fill"
-instance IpeAttrName Pen          where attrName _ = "pen"
-instance IpeAttrName Size         where attrName _ = "size"
+instance (forall a. Default (f a)) => Default (CommonAttributes r f) where
+  def = bpure def
 
--- PathAttributeUniverse
-instance IpeAttrName Dash       where attrName _ = "dash"
-instance IpeAttrName LineCap    where attrName _ = "cap"
-instance IpeAttrName LineJoin   where attrName _ = "join"
-instance IpeAttrName FillRule   where attrName _ = "fillrule"
-instance IpeAttrName Arrow      where attrName _ = "arrow"
-instance IpeAttrName RArrow     where attrName _ = "rarrow"
-instance IpeAttrName StrokeOpacity where attrName _ = "stroke-opacity"
-instance IpeAttrName Opacity    where attrName _ = "opacity"
-instance IpeAttrName Tiling     where attrName _ = "tiling"
-instance IpeAttrName Gradient   where attrName _ = "gradient"
-
--- TextAttibuteUniverse
-instance IpeAttrName Width   where attrName _ = "width"
-instance IpeAttrName Height  where attrName _ = "height"
-instance IpeAttrName Depth   where attrName _ = "depth"
-instance IpeAttrName VAlign  where attrName _ = "valign"
-instance IpeAttrName HAlign  where attrName _ = "halign"
-instance IpeAttrName Style   where attrName _ = "style"
-
--- GroupAttributeUniverse
-instance IpeAttrName Clip     where attrName _ = "clip"
-
--- | Writing Attribute names
-writeAttrNames           :: AllConstrained IpeAttrName rs => Rec f rs -> Rec (Const Text) rs
-writeAttrNames RNil      = RNil
-writeAttrNames (x :& xs) = Const (write'' x) :& writeAttrNames xs
-  where
-    write''   :: forall f s. IpeAttrName s => f s -> Text
-    write'' _ = attrName (Proxy :: Proxy s)
-
---
+instance (forall a. Semigroup (f a)) => Semigroup (CommonAttributes r f) where
+  l <> r = bzipWith (<>) l r
+instance ( (forall a. Monoid (f a))
+         ) => Monoid (CommonAttributes r f) where
+  mempty = bpure mempty
 
 --------------------------------------------------------------------------------
+
+type SymbolAttributes r = SymbolAttributesF r Maybe
+
+data SymbolAttributesF r f = SymbolAttributes
+  { _commonAttrs :: !(CommonAttributes r f)
+  , _stroke      :: f (IpeColor r)
+  , _fill        :: f (IpeColor r)
+  , _pen         :: f (IpeColor r)
+  , _symbolSize  :: f (IpeSize r)
+  } deriving (Generic)
+
+instance FunctorB     (SymbolAttributesF r)
+instance TraversableB (SymbolAttributesF r)
+instance ApplicativeB (SymbolAttributesF r)
+instance ConstraintsB (SymbolAttributesF r)
+
+deriving instance (Show1 f, Show r) => Show (SymbolAttributesF r f)
+-- deriving instance (Read1 f, Read r) => Read (SymbolAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (SymbolAttributesF r f)
+-- deriving instance (Ord1 f, Ord r)   => Ord  (SymbolAttributesF r f)
+
+instance (forall a. Default (f a)) => Default (SymbolAttributesF r f) where
+  def = bpure def
+
+--------------------------------------------------------------------------------
+
+type PathAttributes r = PathAttributesF r Maybe
+
+-- | Path Attributes
+data PathAttributesF r f = PathAttributes
+  { _commonAttrs   :: !(CommonAttributes r f)
+  , _stroke        :: f (IpeColor r)
+  , _fill          :: f (IpeColor r)
+  , _pen           :: f (IpePen r)
+  , _dash          :: f (IpeDash r)
+  , _lineCap       :: f Int
+  , _lineJoin      :: f Int
+  , _fillRule      :: f (IpeArrow r)
+  , _arrow         :: f (IpeArrow r)
+  , _rArrow        :: f (IpeArrow r)
+  , _strokeOpacity :: f (IpeValue r)
+  , _opacity       :: f (IpeValue r)
+  , _tiling        :: f IpeTiling
+  , _gradient      :: f IpeGradient
+  } deriving (Generic)
+
+instance FunctorB     (PathAttributesF r)
+instance TraversableB (PathAttributesF r)
+instance ApplicativeB (PathAttributesF r)
+instance ConstraintsB (PathAttributesF r)
+
+deriving instance (Show1 f, Show r) => Show (PathAttributesF r f)
+-- deriving instance (Read1 f, Read r) => Read (PathAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (PathAttributesF r f)
+-- deriving instance (Ord1 f, Ord r)   => Ord  (PathAttributesF r f)
+
+instance (forall a. Default (f a)) => Default (PathAttributesF r f) where
+  def = bpure def
+
+--------------------------------------------------------------------------------
+
+type TextAttributes r  = TextAttributesF r Maybe
+
+data TextAttributesF r f = TextAttributes
+  { _commonAttrs :: !(CommonAttributes r f)
+  , _stroke      :: f (IpeColor r)
+  , _textSize    :: f (IpeSize r)
+  , _opacity     :: f (IpeValue r)
+  , _textWidth   :: f (TextSizeUnit r)
+  , _textHeight  :: f (TextSizeUnit r)
+  , _depth       :: f (TextSizeUnit r)
+  , _hAlign      :: f HorizontalAlignment
+  , _vAlign      :: f VerticalAlignment
+  , _style       :: f TeXStyle
+  } deriving (Generic)
+
+instance FunctorB     (TextAttributesF r)
+instance TraversableB (TextAttributesF r)
+instance ApplicativeB (TextAttributesF r)
+instance ConstraintsB (TextAttributesF r)
+
+deriving instance (Show1 f, Show r) => Show (TextAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (TextAttributesF r f)
+
+instance (forall a. Default (f a)) => Default (TextAttributesF r f) where
+  def = bpure def
+
+--------------------------------------------------------------------------------
+
+type GroupAttributes r = GroupAttributesF r Maybe
+
+data GroupAttributesF r f = GroupAttributes
+  { _commonAttrs :: !(CommonAttributes r f)
+  , _clip        :: f (Path r)
+  } deriving (Generic)
+
+instance FunctorB     (GroupAttributesF r)
+instance TraversableB (GroupAttributesF r)
+instance ApplicativeB (GroupAttributesF r)
+instance ConstraintsB (GroupAttributesF r)
+
+deriving instance (Show1 f, Show r) => Show (GroupAttributesF r f)
+deriving instance (Eq1 f, Eq r)     => Eq   (GroupAttributesF r f)
+
+instance (forall a. Default (f a)) => Default (GroupAttributesF r f) where
+  def = bpure def
+
+--------------------------------------------------------------------------------
+
+makeClassy ''CommonAttributes
+
+makeFieldsNoPrefix ''SymbolAttributesF
+makeFieldsNoPrefix ''PathAttributesF
+makeFieldsNoPrefix ''TextAttributesF
+makeFieldsNoPrefix ''GroupAttributesF
+
+
+instance HasCommonAttributes (SymbolAttributesF r f) r f where
+  commonAttributes = commonAttrs
+instance HasCommonAttributes (PathAttributesF r f) r f where
+  commonAttributes = commonAttrs
+instance HasCommonAttributes (TextAttributesF r f) r f where
+  commonAttributes = commonAttrs
+instance HasCommonAttributes (GroupAttributesF r f) r f where
+  commonAttributes = commonAttrs
+
+--------------------------------------------------------------------------------
+
+type ImageAttributes r = CommonAttributes r Maybe
+
+-- | Type changing matrix lens
+matrix' :: Lens (CommonAttributes r f) (CommonAttributes s f)
+                (f (Matrix 3 3 r))     (f (Matrix 3 3 s))
+matrix' f (CommonAttributes l m p t) = (\m' -> CommonAttributes l m' p t) <$> f m
+
+--------------------------------------------------------------------------------
+
+-- | Traverse for common attributes
+traverseCommon       :: forall g f r s. (Applicative g, Traversable f)
+                     => (r -> g s) -> CommonAttributes r f -> g (CommonAttributes s f)
+traverseCommon g ats = ats&matrix' %%~ traverse g'
+  where
+    g'   :: Matrix 3 3 r -> g (Matrix 3 3 s)
+    g' m = unwrapApplicative $ m&elements %%~ WrapApplicative . g
+
+traverseSymbol       :: forall g f r s. (Applicative g, Traversable f)
+                     => (r -> g s) -> SymbolAttributesF r f -> g (SymbolAttributesF s f)
+traverseSymbol g (SymbolAttributes common s fi p si) =
+  SymbolAttributes <$> traverseCommon g common
+                   <*> traverse (traverse g) s
+                   <*> traverse (traverse g) fi
+                   <*> traverse (traverse g) p
+                   <*> traverse (traverse g) si
+
+traversePath       :: forall g f r s. (Applicative g, Traversable f)
+                     => (r -> g s) -> PathAttributesF r f -> g (PathAttributesF s f)
+traversePath g (PathAttributes common s f p d lc lj fr a ra so o t gr) =
+  PathAttributes <$> traverseCommon g common
+                 <*> traverse (traverse g) s
+                 <*> traverse (traverse g) f
+                 <*> traverse (traverse g) p
+                 <*> traverse (traverse g) d
+                 <*> pure lc
+                 <*> pure lj
+                 <*> traverse (traverse g) fr
+                 <*> traverse (traverse g) a
+                 <*> traverse (traverse g) ra
+                 <*> traverse (traverse g) so
+                 <*> traverse (traverse g) o
+                 <*> pure t
+                 <*> pure gr
+
+traverseText       :: forall g f r s. (Applicative g, Traversable f)
+                     => (r -> g s) -> TextAttributesF r f -> g (TextAttributesF s f)
+traverseText g (TextAttributes common s sz o w h d ha va st) =
+  TextAttributes <$> traverseCommon g common
+                 <*> traverse (traverse g) s
+                 <*> traverse (traverse g) sz
+                 <*> traverse (traverse g) o
+                 <*> traverse (traverse g) w
+                 <*> traverse (traverse g) h
+                 <*> traverse (traverse g) d
+                 <*> pure ha
+                 <*> pure va
+                 <*> pure st
+
+
+  -- { _commonAttrs :: !(CommonAttributes r f)
+  -- , _stroke      :: f (IpeColor r)
+  -- , _textSize    :: f (IpeSize r)
+  -- , _opacity     :: f (IpeValue r)
+  -- , _textWidth   :: f (TextSizeUnit r)
+  -- , _textHeight  :: f (TextSizeUnit r)
+  -- , _depth       :: f (TextSizeUnit r)
+  -- , _hAlign      :: f HorizontalAlignment
+  -- , _vAlign      :: f VerticalAlignment
+  -- , _style       :: f TeXStyle
+  -- } deriving (Generic)
+
+
+
+
+traverseGroup :: forall g f r s. (Applicative g, Traversable f)
+              => (r -> g s) -> GroupAttributesF r f -> g (GroupAttributesF s f)
+traverseGroup g (GroupAttributes common c) = GroupAttributes <$> traverseCommon g common
+                                                           <*> traverse (traverse g) c
+
+--------------------------------------------------------------------------------
+
+class AttributeNames ats where
+  -- | Construct the attribute names
+  attributeNames :: ats (Const Text)
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (CommonAttributes r) where
+  attributeNames = CommonAttributes
+   { _layer           = Const "layer"
+   , _matrix          = Const "matrix"
+   , _pin             = Const "pin"
+   , _transformations = Const "transformations"
+   }
+
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (SymbolAttributesF r) where
+  attributeNames = SymbolAttributes
+    { _commonAttrs = attributeNames
+    , _stroke      = Const "stroke"
+    , _fill        = Const "fill"
+    , _pen         = Const "pen"
+    , _symbolSize  = Const "size"
+    }
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (GroupAttributesF r) where
+  attributeNames = GroupAttributes
+    { _commonAttrs = attributeNames
+    , _clip        = Const "clip"
+    }
+
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (PathAttributesF r) where
+  attributeNames = PathAttributes
+    { _commonAttrs = attributeNames
+    , _stroke        = Const "stroke"
+    , _fill          = Const "fill"
+    , _pen           = Const "pen"
+    , _dash          = Const "dash"
+    , _lineCap       = Const "linecap"
+    , _lineJoin      = Const "linejoin"
+    , _fillRule      = Const "fillrule"
+    , _arrow         = Const "arrow"
+    , _rArrow        = Const "rarrow"
+    , _strokeOpacity = Const "stroke-opacity"
+    , _opacity       = Const "opacity"
+    , _tiling        = Const "tiling"
+    , _gradient      = Const "gradient"
+    }
+
+--------------------------------------------------------------------------------
+
+instance AttributeNames (TextAttributesF r) where
+  attributeNames = TextAttributes
+    { _commonAttrs = attributeNames
+    , _stroke      = Const "stroke"
+    , _textSize    = Const "size"
+    , _opacity     = Const "opacity"
+    , _textWidth   = Const "width"
+    , _textHeight  = Const "height"
+    , _depth       = Const "depth"
+    , _hAlign      = Const "halign"
+    , _vAlign      = Const "valign"
+    , _style       = Const "style"
+    }
+
+--------------------------------------------------------------------------------
+
+  -- | The type of objects a backend renders
+type family Rendered  backend :: Type
+
+
+-- | An Attribute Assignment
+type Attr backend geom = AttrOf backend geom -> AttrOf backend geom
+
+-- | A class that expresses that something is drawable using a particular backend
+class ( Monoid (Rendered backend)
+      ) => IsDrawable backend geom where
+
+  -- | A GADT that expresses possible attributes for a particular object
+  type AttrOf backend geom :: Type
+
+  -- | Draw some objects
+  draw :: [Attr backend geom] -> geom -> Rendered backend
+
+
+
+-- type data Ipe r
+-- type instance Rendered (Ipe r) = [Ipe.IpeObject r]
+
+
+mkAttrs :: Default at => [at -> at] -> at
+mkAttrs = foldl' (\a f -> f a) def
+
+-- instance IsDrawable (Ipe r) (Path r) where
+--   type AttrOf (Ipe r) (Path r) = PathAttributes r -> PathAttributes r
+--   draw ats g = [ attrs ats
+--                ]
+
+
+
+-- red :: IpeColor Int
+-- red = undefined
+
+
+
+-- draw :: [lenses]
+--      -> Path r -> [IpeObject r]
+-- draw ats g = g :+
+
+
+
+-- foo :: ( HasFill   g (Maybe (IpeColor Int))
+--        , HasStroke g (Maybe (IpeColor Int))
+--        ) => [Attr g]
+-- foo = [ stroke ?~ red
+--       , fill   ?~ green
+--       ]
+
+test :: CommonAttributes Int Maybe
+test = def&layer ?~ "foo"

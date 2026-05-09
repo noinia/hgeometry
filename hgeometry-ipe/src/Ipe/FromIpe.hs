@@ -350,8 +350,8 @@ ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
                    poly            <- reorient rawPoly
                    _               <- fromPoints @(ConvexPolygon _) $ poly^._PolyLineF
                    -- makes sure we are convex.
-                   _            <- lookupAttr SArrow  ats
-                   _            <- lookupAttr SRArrow ats
+                   _            <- ats^.arrow
+                   _            <- ats^.rArrow
                    (a:pts1,b)   <- Lens.unsnoc $ poly^..vertices
                    pts@(p:|_)   <- NonEmpty.nonEmpty pts1
                    let q = pts^.last1

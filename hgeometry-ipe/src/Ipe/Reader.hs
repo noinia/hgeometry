@@ -19,20 +19,21 @@ module Ipe.Reader
     -- * Read classes
   , IpeReadText(..)
   , IpeRead(..)
-  , IpeReadAttr(..)
-
+  -- , IpeReadAttr(..)
+  , IpeReadAttributes(..)
+  , ipeReadAttrsFrom
 
     -- * Some low level implementation functions
   , ipeReadTextWith
   , ipeReadObject
-  , ipeReadAttrs
-  , ipeReadRec
+  -- ,
+  -- , ipeReadRec
 
   , Coordinate(..)
   ) where
 
-import           Control.Applicative ((<|>))
-import           Control.Lens hiding (Const, rmap)
+import           Control.Applicative ((<|>),)
+import           Control.Lens hiding (rmap)
 import           Control.Monad ((<=<))
 import           Data.Bifunctor
 import qualified Data.ByteString as B
@@ -44,13 +45,12 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe, mapMaybe)
 import           Data.Proxy
 import qualified Data.Sequence as Seq
-import           Data.Singletons
+-- import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Traversable as Tr
-import           Data.Vinyl hiding (Label)
-import           Data.Vinyl.Functor
-import           Data.Vinyl.TypeLevel
+-- import           Data.Vinyl hiding (Label)
+-- import           Data.Vinyl.Functor
+-- import           Data.Vinyl.TypeLevel
 import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (ellipseMatrix)
@@ -73,7 +73,7 @@ import qualified System.File.OsPath as File
 import           System.OsPath
 import           Text.XML.Expat.Tree
 import           Ipe.Attributes.Types
-
+import           Barbies
 
 --------------------------------------------------------------------------------
 
@@ -227,6 +227,9 @@ instance Coordinate r => IpeReadText (IpePen r) where
 instance Coordinate r => IpeReadText (IpeSize r) where
   ipeReadText = fmap IpeSize . ipeReadTextWith readCoordinate
 
+-- | Reads as a naimed value by default
+instance IpeReadText (IpeValue r) where
+  ipeReadText = ipeReadTextWith (const $ Left "fail")
 
 instance Coordinate r => IpeReadText [Operation r] where
   ipeReadText = readPathOperations
@@ -301,94 +304,74 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (Path r) where
 --------------------------------------------------------------------------------
 -- Reading attributes
 
--- | Basically IpeReadText for attributes. This class is not really meant to be
--- implemented directly. Just define an IpeReadText instance for the type
--- (Apply f at), then the generic instance below takes care of looking up the
--- name of the attribute, and calling the right ipeReadText value. This class
--- is just so that reifyConstraint in `ipeReadRec` can select the right
--- typeclass when building the rec.
-class IpeReadAttr t where
-  ipeReadAttr  :: Text -> Node Text Text -> Either ConversionError t
+class IpeReadAttributes ats where
+  -- | Given the attributes in their text form, try to parse them
+  ipeReadAttrs :: [(Text,Text)] -> Either ConversionError ats
 
-instance IpeReadText (Apply f at) => IpeReadAttr (Attr f at) where
-  ipeReadAttr n (Element _ ats _) = GAttr <$> Tr.mapM ipeReadText (lookup n ats)
-  ipeReadAttr _ _                 = Left "IpeReadAttr: Element expected, Text found"
+instance ( AllB IpeReadText (CommonAttributes r)
+         ) => IpeReadAttributes (CommonAttributes r Maybe) where
+  ipeReadAttrs textAts = btraverseC @IpeReadText (parseAttr textAts) attributeNames
 
--- | Combination of zipRecWith and traverse
-zipTraverseWith                       :: forall f g h i (rs :: [AttributeUniverse]). Applicative h
-                                      => (forall (x :: AttributeUniverse). f x -> g x -> h (i x))
-                                      -> Rec f rs -> Rec g rs -> h (Rec i rs)
-zipTraverseWith _ RNil      RNil      = pure RNil
-zipTraverseWith f (x :& xs) (y :& ys) = (:&) <$> f x y <*> zipTraverseWith f xs ys
+-- | Parse some text attribute
+parseAttr                      :: [(Text,Text)]
+                               -> IpeReadText value
+                               => Const Text value -> Either ConversionError (Maybe value)
+parseAttr textAts (Const name) = traverse ipeReadText $ lookup name textAts
+  -- case lookup name textAts of
+  --                      Nothing  -> Right Nothing
+  --                      Just txt -> Just <$> ipeReadText txt
 
--- | Reading the Attributes into a Rec (Attr f), all based on the types of f
--- (the type family mapping labels to types), and a list of labels (ats).
-ipeReadRec       :: forall f ats.
-                 ( RecApplicative ats
-                 , ReifyConstraint IpeReadAttr (Attr f) ats
-                 , RecAll (Attr f) ats IpeReadAttr
-                 , AllConstrained IpeAttrName ats
-                 )
-                 => Proxy f -> Proxy ats
-                 -> Node Text Text
-                 -> Either ConversionError (Rec (Attr  f) ats)
-ipeReadRec _ _ x = zipTraverseWith f (writeAttrNames r) r'
+instance ( AllB IpeReadText (SymbolAttributesF r), AllB IpeReadText (CommonAttributes r)
+         , Eq r, Coordinate r
+         ) => IpeReadAttributes (GroupAttributes r) where
+  ipeReadAttrs = ipeReadAttrs'
+
+-- | Implementation of ipeReadAttrs for the various attribue types
+ipeReadAttrs'         :: (AllB IpeReadText b,
+                          HasCommonAttributes (b Maybe) r f,
+                          IpeReadAttributes (CommonAttributes r f), TraversableB b,
+                          ConstraintsB b, AttributeNames b
+                         ) => [(Text, Text)] -> Either ConversionError (b Maybe)
+ipeReadAttrs' textAts = combine' <$> ipeReadAttrs textAts
+                                 <*> btraverseC @IpeReadText (parseAttr textAts) attributeNames
   where
-    r  = rpure (GAttr Nothing)
-    r' = reifyConstraint @IpeReadAttr r
+    combine' common rest = rest&commonAttributes .~ common
 
+instance ( AllB IpeReadText (SymbolAttributesF r), AllB IpeReadText (CommonAttributes r)
+         ) => IpeReadAttributes (SymbolAttributes r) where
+  ipeReadAttrs = ipeReadAttrs'
 
-    f                              :: forall at.
-                                      Const Text at
-                                   -> (Dict IpeReadAttr :. Attr f) at
-                                   -> Either ConversionError (Attr f at)
-    f (Const n) (Compose (Dict _)) = ipeReadAttr n x
+instance ( AllB IpeReadText (SymbolAttributesF r), AllB IpeReadText (CommonAttributes r)
+         , Coordinate r
+         ) => IpeReadAttributes (PathAttributes r) where
+  ipeReadAttrs = ipeReadAttrs'
 
+instance ( AllB IpeReadText (SymbolAttributesF r), AllB IpeReadText (CommonAttributes r)
+         , Coordinate r
+         ) => IpeReadAttributes (TextAttributes r) where
+  ipeReadAttrs = ipeReadAttrs'
 
--- | Reader for records. Given a proxy of some ipe type i, and a proxy of an
--- coordinate type r, read the IpeAttributes for i from the xml node.
-ipeReadAttrs     :: forall proxy proxy' i r f ats.
-                 ( f ~ AttrMapSym1 r, ats ~ AttributesOf i
-                 , ReifyConstraint IpeReadAttr (Attr f) ats
-                 , RecApplicative ats
-                 , RecAll (Attr f) ats IpeReadAttr
-                 , AllConstrained IpeAttrName ats
-                 )
-                 => proxy i -> proxy' r
-                 -> Node Text Text
-                 -> Either ConversionError (IpeAttributes i r)
-ipeReadAttrs _ _ = fmap Attrs . ipeReadRec (Proxy :: Proxy f) (Proxy :: Proxy ats)
-
-
--- testSym :: B.ByteString
--- testSym = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
-
-
-
-
--- readAttrsFromXML :: B.ByteString -> Either
-
--- readSymAttrs :: Either ConversionError (IpeAttributes IpeSymbol Double)
--- readSymAttrs = readXML testSym
---                >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double)
-
-
-
-
+--------------------------------------------------------------------------------
 
 -- | If we can ipeRead an ipe element, and we can ipeReadAttrs its attributes
 -- we can properly read an ipe object using ipeReadObject
-ipeReadObject           :: ( IpeRead (i r)
-                           , f ~ AttrMapSym1 r, ats ~ AttributesOf i
-                           , RecApplicative ats
-                           , ReifyConstraint IpeReadAttr (Attr f) ats
-                           , RecAll (Attr f) ats IpeReadAttr
-                           , AllConstrained IpeAttrName ats
-                           )
-                        => Proxy i -> proxy r -> Node Text Text
-                        -> Either ConversionError (i r :+ IpeAttributes i r)
-ipeReadObject prI prR xml = (:+) <$> ipeRead xml <*> ipeReadAttrs prI prR xml
+ipeReadObject         :: ( IpeRead (i r)
+                         , IpeReadAttributes (IpeAttributes i r)
+                         -- , f ~ AttrMapSym1 r, ats ~ AttributesOf i
+                         -- , RecApplicative ats
+                         -- , ReifyConstraint IpeReadAttr (Attr f) ats
+                         -- , RecAll (Attr f) ats IpeReadAttr
+                         -- , AllConstrained IpeAttrName ats
+                         )
+                      => Proxy i -> proxy r -> Node Text Text
+                      -> Either ConversionError (i r :+ IpeAttributes i r)
+ipeReadObject _ _ xml = (:+) <$> ipeRead xml <*> ipeReadAttrsFrom xml
 
+-- | read the attributes of a given node
+ipeReadAttrsFrom :: IpeReadAttributes ats => Node Text Text -> Either ConversionError ats
+ipeReadAttrsFrom = \case
+  (Element _ ats _) -> ipeReadAttrs ats
+  _                 -> Left "IpeReadAttrs': Element expected, Text found"
 
 --------------------------------------------------------------------------------
 -- | Ipe read instances
