@@ -28,11 +28,8 @@ import           Data.Bitraversable
 import           Control.Lens hiding (views, elements)
 import           Data.Kind
 import           Data.Proxy
-import           Data.Singletons.TH (genDefunSymbols)
 import           Data.Text (Text)
 import           Data.Traversable
-import           Data.Vinyl hiding (Label)
-import           Data.Vinyl.TypeLevel (AllConstrained)
 import           GHC.Generics (Generic)
 import           HGeometry.Box (Rectangle)
 import           HGeometry.Ext
