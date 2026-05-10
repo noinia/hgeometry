@@ -14,19 +14,19 @@
 --
 --------------------------------------------------------------------------------
 module Ipe.Attributes
-  ( CommonAttributes(CommonAttributes), HasCommonAttributes(..)
-  , SymbolAttributesF(SymbolAttributes), SymbolAttributes
+  ( CommonAttributes(..), HasCommonAttributes(..)
+  , SymbolAttributesF(..), SymbolAttributes
   , HasStroke(..), HasFill(..), HasPen(..), HasSymbolSize(..)
 
-  , PathAttributesF(PathAttributes), PathAttributes
+  , PathAttributesF(..), PathAttributes
   , HasDash(..), HasLineCap(..), HasLineJoin(..), HasFillRule(..)
   , HasArrow(..), HasRArrow(..), HasStrokeOpacity(..), HasOpacity(..)
   , HasTiling(..), HasGradient(..)
 
-  , GroupAttributesF(GroupAttributes), GroupAttributes
+  , GroupAttributesF(..), GroupAttributes
   , HasClip(..)
 
-  , TextAttributesF(TextAttributes), TextAttributes
+  , TextAttributesF(..), TextAttributes
   , HasTextSize(..), HasTextWidth(..), HasTextHeight(..), HasDepth(..)
   , HasHAlign(..), HasVAlign(..), HasStyle(..)
 

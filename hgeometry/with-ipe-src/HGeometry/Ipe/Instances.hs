@@ -38,7 +38,7 @@ instance (
 instance (Point_ point 2 r, Fractional r, Ord r, Show r
          ) => HasDefaultIpeOut (Cone r point edge) where
   type DefaultIpeOut (Cone r point edge) = Group
-  defIO c = ipeGroup [ iO $ defIO poly ! attr SFill blue
+  defIO c = ipeGroup [ iO $ defIO poly & fill ?~ blue
                      , iO $ ipeRay hl
                      , iO $ ipeRay hr
                      ]

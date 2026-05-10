@@ -132,30 +132,6 @@ instance IpeWriteText r => IpeWriteText (AbsolutelyApproximateValue tol r) where
   ipeWriteText = ipeWriteText . unwrapAbsolutelyApproximateValue
 
 
-
-
-
--- -- | Functon to write all attributes in a Rec
-
-
--- ipeWriteAttrs           :: ( RecordToList rs, RMap rs
---                            , ReifyConstraint IpeWriteText (Attr f) rs
---                            , AllConstrained IpeAttrName rs
---                            , RecAll (Attr f) rs IpeWriteText
---                            ) => IA.Attributes f rs -> [(Text,Text)]
--- ipeWriteAttrs (Attrs r) = catMaybes . recordToList $ zipRecsWith f (writeAttrNames  r)
---                                                                    (writeAttrValues r)
---   where
---     f (Const n) (Const mv) = Const $ (n,) <$> mv
-
--- -- | Writing the attribute values
--- writeAttrValues :: ( RMap rs, ReifyConstraint IpeWriteText f rs
---                    , RecAll f rs IpeWriteText)
---                 => Rec f rs -> Rec (Const (Maybe Text)) rs
--- writeAttrValues = rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
---                 . reifyConstraint @IpeWriteText
-
-
 instance IpeWriteText Text where
   ipeWriteText = Just
 

@@ -18,10 +18,8 @@ module HGeometry.Miso.OrphanInstances
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Fixed
 import qualified Data.List as List
-import           Data.Singletons (Apply)
 import           HGeometry.Matrix (Matrix)
 import qualified Ipe as Ipe
-import qualified Ipe.Attributes as IA
 import           Ipe.Color (IpeColor(..))
 import           Ipe.Value
 import           Miso.String (ToMisoString(..), FromMisoString(..))
@@ -49,39 +47,33 @@ instance ToMisoString r => ToMisoString (RGB r) where
 --------------------------------------------------------------------------------
 -- * Dealing with attributes
 
-instance ToMisoString (Apply f at) => ToMisoString (IA.Attr f at) where
-  toMisoString att = maybe "" toMisoString $ IA._getAttr att
-
-instance FromMisoString (Apply f at) => FromMisoString (IA.Attr f at) where
-  fromMisoStringEither = fmap IA.Attr . fromMisoStringEither
-
 instance ToMisoString r => ToMisoString (IpeValue r) where
   toMisoString = \case
       Named t  -> toMisoString t
       Valued v -> toMisoString v
 
-instance ToMisoString r => ToMisoString (IA.IpePen r) where
+instance ToMisoString r => ToMisoString (Ipe.IpePen r) where
   toMisoString _ = mempty
 
-instance ToMisoString r => ToMisoString (IA.IpeSize r) where
+instance ToMisoString r => ToMisoString (Ipe.IpeSize r) where
   toMisoString _ = mempty
 
-instance ToMisoString r => ToMisoString (IA.IpeArrow r) where
+instance ToMisoString r => ToMisoString (Ipe.IpeArrow r) where
   toMisoString _ = mempty
 
-instance ToMisoString r => ToMisoString (IA.IpeDash r) where
+instance ToMisoString r => ToMisoString (Ipe.IpeDash r) where
   toMisoString _ = mempty
 
 instance ToMisoString r => ToMisoString (Matrix 3 3 r) where
   toMisoString _ = mempty
 
-instance ToMisoString IA.FillType where
+instance ToMisoString Ipe.FillType where
   toMisoString _ = mempty
 
-instance ToMisoString IA.PinType where
+instance ToMisoString Ipe.PinType where
   toMisoString _ = mempty
 
-instance ToMisoString IA.TransformationTypes where
+instance ToMisoString Ipe.TransformationTypes where
   toMisoString _ = mempty
 
 instance ToMisoString r => ToMisoString (IpeColor r) where
@@ -98,18 +90,18 @@ instance FromMisoString Ipe.LayerName where
   fromMisoStringEither = fmap Ipe.LayerName . fromMisoStringEither
 
 
-instance ToMisoString r => ToMisoString (IA.TextSizeUnit r) where
-  toMisoString (IA.TextSizeUnit x) = toMisoString x
+instance ToMisoString r => ToMisoString (Ipe.TextSizeUnit r) where
+  toMisoString (Ipe.TextSizeUnit x) = toMisoString x
 
-instance ToMisoString IA.VerticalAlignment where
+instance ToMisoString Ipe.VerticalAlignment where
   toMisoString = \case
-    IA.AlignTop      -> "top"
-    IA.AlignVCenter  -> "center"
-    IA.AlignBottom   -> "bottom"
-    IA.AlignBaseline -> "baseline"
+    Ipe.AlignTop      -> "top"
+    Ipe.AlignVCenter  -> "center"
+    Ipe.AlignBottom   -> "bottom"
+    Ipe.AlignBaseline -> "baseline"
 
-instance ToMisoString IA.HorizontalAlignment where
+instance ToMisoString Ipe.HorizontalAlignment where
   toMisoString = \case
-    IA.AlignLeft    -> "left"
-    IA.AlignHCenter -> "center"
-    IA.AlignRight   -> "right"
+    Ipe.AlignLeft    -> "left"
+    Ipe.AlignHCenter -> "center"
+    Ipe.AlignRight   -> "right"
