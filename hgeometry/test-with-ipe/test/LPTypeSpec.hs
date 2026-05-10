@@ -40,10 +40,11 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( (===), property,Discard(..), counterexample
                                  , Arbitrary(..), oneof, suchThat
-                                 , withDiscardRatio, withMaxSuccess
+                                 , withDiscardRatio
                                  )
 import           Test.QuickCheck.Instances ()
 import           Witherable
+
 --------------------------------------------------------------------------------
 
 lpRecomputeBasis :: forall r. (Ord r, Fractional r)
@@ -157,7 +158,7 @@ spec = describe "LPType Spec" $ do
                ib = lpInitialBasis [h1,h2]
            lpRecomputeBasis h3 ib `shouldBe` Just (Infeasible (Vector3 h3 h1 h2))
 
-         prop "feasible means feasible" $ withMaxSuccess 50 $ withDiscardRatio 1000 $
+         prop "feasible means feasible" $ withNumTests 50 $ withDiscardRatio 1000 $
            \gen (halfPlanes :: [HalfPlane R]) ->
              case subExp (mkStdGen gen) linearProgrammingMinY halfPlanes of
                Basis2 v _ _ -> property $ all (v `intersects`) halfPlanes

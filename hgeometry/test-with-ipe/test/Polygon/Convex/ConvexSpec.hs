@@ -38,8 +38,8 @@ spec = do
 _foo = writeIpePage [osp|/tmp/out.ipe|] $ fromContent
                      [ toIO (minkowskiSum polyP polyQ)   & stroke ?~ red
                      , toIO (naiveMinkowski polyP polyQ) & stroke ?~ blue
-                     , iO'' polyP                        & stroke ?~ black
-                     , iO'' polyQ                        & stroke ?~ black
+                     , iO $ defIO polyP                  & stroke ?~ black
+                     , iO $ defIO polyQ                  & stroke ?~ black
                      ]
 
 polyP, polyQ :: ConvexPolygon (Point 2 Rational)
@@ -122,19 +122,18 @@ minkowskiTest i p q = describe "minkowskiTest" $ do
                (ipeContentGolden { name = [osp|minkowski-vs-naive|] <> is
                                  }
                )
-               [ toIO (minkowskiSum p q)   & stroke ?~ red
-               , toIO (naiveMinkowski p q) & stroke ?~ blue
-               , iO'' p                    & stroke ?~ black
-               , iO'' q                    & stroke ?~ black
+               [ iO $ toIO (minkowskiSum p q)   & stroke ?~ red
+               , iO $ toIO (naiveMinkowski p q) & stroke ?~ blue
+               , iO $ defIO p              & stroke ?~ black
+               , iO $ defIO q              & stroke ?~ black
                ]
 
 
 
 toIO    :: (Point_ point 2 r)
         => ConvexPolygon (point :+ extra)
-        -> IpeAttributes Path r
-        -> IpeObject r
-toIO pg = iO'' (convert pg)
+        -> IpeObject' Path r
+toIO pg = defIO $ convert pg
   where
     convert :: (Point_ point 2 r) => ConvexPolygon (point :+ extra) -> ConvexPolygon (Point 2 r)
     convert = over vertices (view (core.asPoint))
@@ -173,7 +172,7 @@ mergeTest inFP = describe "Merging disjoint convex polygons" $ do
       [pg1,pg2] -> let (out,_,_) = Merge.merge pg1 (pg2 :: ConvexPolygon (Point 2 R) :+ _) in
                    goldenWith [osp|data/test-with-ipe/Polygon/Convex|]
                               (ipeContentGolden { name = inFP <> [osp|.out|]})
-                                [ iO'' out & fill ?~ lightgreen
+                                [ iO $ defIO out & fill ?~ lightgreen
                                 , iO' pg1
                                 , iO' pg2
                                 ]

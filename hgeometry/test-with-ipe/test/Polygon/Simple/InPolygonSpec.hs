@@ -7,7 +7,6 @@ import           Control.Monad
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
-import           Data.Proxy
 import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext

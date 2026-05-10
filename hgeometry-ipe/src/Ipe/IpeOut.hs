@@ -204,6 +204,20 @@ instance ( VertexContainer f (Point 2 r)
   type DefaultIpeOut (ConvexPolygonF f (Point 2 r)) = Path
   defIO = defIO . toSimplePolygon
 
+
+instance ( HasDefaultIpeOut g, DefaultIpeOut g ~ Path, NumType g ~ r
+         ) => HasDefaultIpeOut (g :+ PathAttributes r) where
+  type DefaultIpeOut (g :+ PathAttributes r) = Path
+  defIO (g :+ ats) = defIO g & attributes .~ ats
+    -- should we really override all of them?
+
+instance ( HasDefaultIpeOut g, DefaultIpeOut g ~ IpeSymbol, NumType g ~ r
+         ) => HasDefaultIpeOut (g :+ SymbolAttributes r) where
+  type DefaultIpeOut (g :+ SymbolAttributes r) = IpeSymbol
+  defIO (g :+ ats) = defIO g & attributes .~ ats
+    -- should we really override all of them?
+
+
 instance (Num r, Point_ vertex 2 r, Foldable1 nonEmpty
          ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) where
   type DefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) = Path

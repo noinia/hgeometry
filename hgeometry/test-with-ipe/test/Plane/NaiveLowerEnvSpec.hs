@@ -83,7 +83,7 @@ testIpe inFp outFp = do
         out = [ iO' points
               , iO' vd
               , iO $ defIO tri
-              ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+              ] <> [ iO $ defIO v &stroke?~ red  | v <- Set.toAscList vv ]
     -- runIO $ print vd
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
@@ -121,10 +121,10 @@ instance ( Fractional r, Ord r, Point_ point 2 r
         . toList . NEMap.assocs . view _ClippedVoronoiDiagram
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
-                 [ iO $ defIO (site^.asPoint) ! attr SStroke  color
-                                              ! attr SSize    large
-                 , iO $ defIO voronoiRegion   ! attr SFill    color
-                                              ! attr SOpacity (Text.pack "10%")
+                 [ iO $ defIO (site^.asPoint) & stroke   ?~ color
+                                              & textSize ?~ large
+                 , iO $ defIO voronoiRegion   &fill    ?~ color
+                                              &opacity ?~ Text.pack "10%"
                  ]
 
 large :: IpeSize r

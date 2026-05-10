@@ -109,5 +109,5 @@ readInput fp = fmap f <$> readSinglePageFile fp
         -- right = either (const Nothing) Just
         -- solutionOf = right . fromList . map (^.core.symbolPoint) . filter isInSolution
 
-lookupColor           :: i :+ IpeAttributes Path r -> IpeColor r
-lookupColor (_ :+ ats) = fromMaybe (IpeColor $ Named "black") $ lookupAttr SStroke ats
+lookupColor            :: i :+ IpeAttributes Path r -> IpeColor r
+lookupColor (_ :+ ats) = fromMaybe (IpeColor $ Named "black") $ ats^.stroke
