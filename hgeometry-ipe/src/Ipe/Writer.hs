@@ -36,9 +36,6 @@ import           Data.Semigroup.Foldable
 import qualified Data.Sequence as Seq
 import           Data.Text (Text)
 import qualified Data.Text as Text
--- import           Data.Vinyl hiding (Label)
--- import           Data.Vinyl.Functor
--- import           Data.Vinyl.TypeLevel
 import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (ellipseMatrix)

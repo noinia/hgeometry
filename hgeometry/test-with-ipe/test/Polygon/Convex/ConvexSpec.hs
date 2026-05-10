@@ -36,10 +36,10 @@ spec = do
   -- runIO foo
 
 _foo = writeIpePage [osp|/tmp/out.ipe|] $ fromContent
-                     [ toIO (minkowskiSum polyP polyQ)   $ attr SStroke red
-                     , toIO (naiveMinkowski polyP polyQ) $ attr SStroke blue
-                     , iO'' polyP                        $ attr SStroke black
-                     , iO'' polyQ                        $ attr SStroke black
+                     [ toIO (minkowskiSum polyP polyQ)   & stroke ?~ red
+                     , toIO (naiveMinkowski polyP polyQ) & stroke ?~ blue
+                     , iO'' polyP                        & stroke ?~ black
+                     , iO'' polyQ                        & stroke ?~ black
                      ]
 
 polyP, polyQ :: ConvexPolygon (Point 2 Rational)
@@ -122,10 +122,10 @@ minkowskiTest i p q = describe "minkowskiTest" $ do
                (ipeContentGolden { name = [osp|minkowski-vs-naive|] <> is
                                  }
                )
-               [ toIO (minkowskiSum p q)   $ attr SStroke red
-               , toIO (naiveMinkowski p q) $ attr SStroke blue
-               , iO'' p                    $ attr SStroke black
-               , iO'' q                    $ attr SStroke black
+               [ toIO (minkowskiSum p q)   & stroke ?~ red
+               , toIO (naiveMinkowski p q) & stroke ?~ blue
+               , iO'' p                    & stroke ?~ black
+               , iO'' q                    & stroke ?~ black
                ]
 
 
@@ -173,7 +173,7 @@ mergeTest inFP = describe "Merging disjoint convex polygons" $ do
       [pg1,pg2] -> let (out,_,_) = Merge.merge pg1 (pg2 :: ConvexPolygon (Point 2 R) :+ _) in
                    goldenWith [osp|data/test-with-ipe/Polygon/Convex|]
                               (ipeContentGolden { name = inFP <> [osp|.out|]})
-                                [ iO'' out $ attr SFill lightgreen
+                                [ iO'' out & fill ?~ lightgreen
                                 , iO' pg1
                                 , iO' pg2
                                 ]

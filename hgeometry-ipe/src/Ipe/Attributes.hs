@@ -440,6 +440,28 @@ instance HasGradient (g :+ PathAttributes r) (Maybe IpeGradient) where
   gradient = extra.gradient
 
 ----------------------------------------
+-- * Text attributes
+
+instance HasStroke (g :+ TextAttributes r) (Maybe (IpeColor r)) where
+  stroke = extra.stroke
+instance HasTextSize (g :+ TextAttributes r) (Maybe (IpeSize r)) where
+  textSize = extra.textSize
+instance HasOpacity (g :+ TextAttributes r) (Maybe (IpeValue r)) where
+  opacity = extra.opacity
+instance HasTextWidth (g :+ TextAttributes r) (Maybe (TextSizeUnit r)) where
+  textWidth = extra.textWidth
+instance HasTextHeight (g :+ TextAttributes r) (Maybe (TextSizeUnit r)) where
+  textHeight = extra.textHeight
+instance HasDepth (g :+ TextAttributes r) (Maybe (TextSizeUnit r)) where
+  depth = extra.depth
+instance HasHAlign (g :+ TextAttributes r) (Maybe HorizontalAlignment) where
+  hAlign = extra.hAlign
+instance HasVAlign (g :+ TextAttributes r) (Maybe VerticalAlignment) where
+  vAlign = extra.vAlign
+instance HasStyle (g :+ TextAttributes r) (Maybe TeXStyle) where
+  style = extra.style
+
+----------------------------------------
 -- * Symbol attributes
 
 instance HasCommonAttributes (g :+ SymbolAttributesF r f) r f where

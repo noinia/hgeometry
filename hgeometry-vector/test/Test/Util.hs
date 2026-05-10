@@ -12,8 +12,6 @@ import qualified Data.List              as List
 import           Data.Proxy
 import           Data.Ratio
 import qualified Data.Set               as Set
--- import           Data.Singletons        (Apply)
--- import           Data.Vinyl
 import           System.Directory       (getTemporaryDirectory, removeFile)
 import           System.FilePath        (takeExtension)
 import           System.IO              (Handle, hClose, openTempFile)

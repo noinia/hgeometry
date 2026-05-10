@@ -20,4 +20,4 @@ makeClassy ''RenderProps
 
 
 instance Default RenderProps where
-  def = RenderProps (Just $ attr SStroke black) Nothing
+  def = RenderProps (Just $ def&stroke ?~ black) Nothing

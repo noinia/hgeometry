@@ -45,12 +45,8 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe, mapMaybe)
 import           Data.Proxy
 import qualified Data.Sequence as Seq
--- import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as T
--- import           Data.Vinyl hiding (Label)
--- import           Data.Vinyl.Functor
--- import           Data.Vinyl.TypeLevel
 import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (ellipseMatrix)

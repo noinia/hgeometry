@@ -88,8 +88,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
         myPoints polyAts = [s | (s :+ ats) <- syms, belongsToPoly ats polyAts ]
 
         -- We test a point/polygon combination if they have the same color
-        belongsToPoly symAts polyAts =
-            lookupAttr colorP symAts == lookupAttr colorP polyAts
+        belongsToPoly symAts polyAts = symAts^.stroke == polyAts^.stroke
 
         -- A point i inside if it is a disk
         isInsidePt   :: IpeSymbol r -> Bool
@@ -101,7 +100,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
         -- crosses are outside the polygon
         isOutsidePt s = s^.symbolName == "mark/cross(sx)"
 
-        colorP = Proxy :: Proxy Stroke
+
 
 
 
@@ -159,7 +158,7 @@ lineSegmentContainsSpec = describe "containedIn tests" $ do
                      = NonEmpty.fromList $ readAll page
         pure (segs',pgs')
       forM_ polies $ \(poly :+ ats) -> do
-        describe ("containedIn polygon of color" <> show (fromJust $ lookupAttr SStroke ats)) $ do
+        describe ("containedIn polygon of color" <> show (fromJust $ ats^.stroke)) $ do
           let (inSegs,outSegs) = NonEmpty.partition (sameColor ats) segs
             -- ClosedLineSegment (Point2 368 288) (Point2 400 288)
 
@@ -177,7 +176,7 @@ lineSegmentContainsSpec = describe "containedIn tests" $ do
               seg `shouldSatisfy` (not . (`containedIn` poly))
 
   where
-    sameColor ats (_ :+ ats') = lookupAttr SStroke ats == lookupAttr SStroke ats'
+    sameColor ats (_ :+ ats') = ats^.stroke == ats'^.stroke
 
 
 darkOrangePoly :: SimplePolygon (Point 2 R)

@@ -69,8 +69,8 @@ perPage page' = fromContent . foldMap (drawSingle . (^.core)) $ readAll page'
 
 drawSingle    :: SimplePolygon (Point 2 R) -> [IpeObject R]
 drawSingle pg = concat
-  [ [ iO $ defIO (drawVisibilityEdge e pg) ! attr SStroke red
-                                           ! attr SLayer "naive"
+  [ [ iO $ defIO (drawVisibilityEdge e pg) & stroke ?~ red
+                                           & layer  ?~ "naive"
 
     | e <- Naive.visibilityGraph pg
     ]
@@ -79,7 +79,7 @@ drawSingle pg = concat
 
              --   | e <- visibilityGraph pg
              --   ]
-  , [iO $ defIO pg ! attr SLayer "polygon" ]
+  , [iO $ defIO pg & layer ?~ "polygon" ]
   ]
 
 
@@ -126,11 +126,11 @@ perPage' page' = fromContent . concat $
                  ]
 
 drawSingle'      :: Point 2 R -> SimplePolygon (Point 2 R) -> [IpeObject R]
-drawSingle' q pg = [ iO $ defIO visPoly ! attr SStroke blue
-                                        ! attr SFill   lightcyan
-                                        ! attr SLayer "output"
-                   , iO $ defIO q  ! attr SLayer "orig"
-                   , iO $ defIO pg ! attr SLayer "orig"
+drawSingle' q pg = [ iO $ defIO visPoly & stroke ?~ blue
+                                        & fill   ?~ lightcyan
+                                        & layer  ?~ "output"
+                   , iO $ defIO q  & layer ?~ "orig"
+                   , iO $ defIO pg & layer ?~ "orig"
                    ]
   where
     visPoly = (^.asPoint) <$> Naive.visibilityPolygon q pg
@@ -197,7 +197,7 @@ drawSingle' q pg = [ iO $ defIO visPoly ! attr SStroke blue
 renderSliceWith           :: (Fractional r, Eq r, Functor f, Foldable f)
                           => Camera r -> f (Point 3 r) -> [IpeObject r]
 renderSliceWith camera vs = case fromPoints (render <$> vs) of
-    Just (pg :: SimplePolygon (Point 2 r)) -> [iO $ defIO pg ! attr SStroke black]
+    Just (pg :: SimplePolygon (Point 2 r)) -> [iO $ defIO pg & stroke ?~ black]
     Nothing                                -> [] -- error "???"
   where
     render = projectPoint @2 . transformBy (cameraTransform camera)
@@ -229,9 +229,9 @@ visibilityPolygons        :: [(R, SimplePolygon (Point 2 R))]
                           -> ([Ipe.View], [IpeObject R])
 visibilityPolygons pillar = (views',obs)
   where
-    obs = (\(t,vis) -> iO $ defIO vis ! attr SLayer   (mkLayer t)
-                                      ! attr SFill    lightcyan
-                                      ! attr SOpacity "10%"
+    obs = (\(t,vis) -> iO $ defIO vis &layer   ?~ (mkLayer t)
+                                      &fill    ?~ lightcyan
+                                      &opacity ?~ "10%"
           ) <$> pillar
     views' = (\(t,_) -> View [mkLayer t,"alpha"] "alpha") <$> pillar
 
@@ -278,11 +278,11 @@ constructPillar' fp = do page <- readSinglePageFileThrow @R fp
                          print polies
                          print seg
                          let
-                             pillar = [ [iO $ defIO vis ! attr SLayer   "pillar"
-                                                        ! attr SFill    lightcyan
-                                                        ! attr SLayer (mkLayer t)
+                             pillar = [ [iO $ defIO vis & layer ?~ "pillar"
+                                                        & fill  ?~ lightcyan
+                                                        & layer ?~ mkLayer t
                                         , iO $ defIO (interpolate t seg)
-                                                     ! attr SLayer (mkLayer t)
+                                                        & layer ?~ mkLayer t
 
                                         ]
                                       | (t, vis) <- visibilityPillarWith resolution seg poly
@@ -291,8 +291,8 @@ constructPillar' fp = do page <- readSinglePageFileThrow @R fp
                                         $ visibilityPillarWith resolution seg poly
                              out    = concat
                                       [ concat pillar
-                                      , [iO $ defIO poly ! attr SLayer "polygon" ]
-                                      , [iO $ defIO seg  ! attr SLayer "seg" ]
+                                      , [iO $ defIO poly & layer ?~ "polygon" ]
+                                      , [iO $ defIO seg  & layer ?~ "seg" ]
                                       ]
                              page' :: IpePage R
                              page' = fromContent out
@@ -394,7 +394,7 @@ renderPage camera seg inputPolygon = fromContent $
                       <> myScene camera seg inputPolygon
                       <> renderSliceWith camera (viewportInWorld camera)
   where
-    render (triang :+ col) = iO $ defIO triang' ! attr SFill col
+    render (triang :+ col) = iO $ defIO triang' & fill ?~ col
       where
         triang' :: Triangle (Point 2 R')
         triang' = triang&vertices %~ projectPoint . transformBy (cameraTransform camera)

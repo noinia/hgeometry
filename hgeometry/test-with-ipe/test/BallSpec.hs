@@ -28,26 +28,26 @@ spec = describe "ball intersection with line" $ do
          goldenWith [osp|data/test-with-ipe/golden/|]
            (ipeContentGolden { name = [osp|ball|] })
              (concat
-             [ map (\l -> iO'' l $ attr SLayer "lines"
+             [ map (\l -> iO'' l & layer ?~ "lines"
                    ) lines'
-             , map (\hl -> iO'' hl $  attr SLayer "halfLines"
-                                   <> attr SStroke blue
+             , map (\hl -> iO'' hl & layer  ?~ "halfLines"
+                                   & stroke ?~ blue
                    ) halfLines
-             , map (\b -> iO'' b $ attr SLayer "balls"
+             , map (\b -> iO'' b & layer ?~ "balls"
                    ) balls
              , map (\case
                    Line_x_Ball_Point q     -> iO'' (q^.core)
-                                              $ attr SLayer "LineXBall"
+                                              &layer ?~ "LineXBall"
                    Line_x_Ball_Segment seg -> iO'' (view core <$> seg)
-                                              $ attr SPen (IpePen "fat")
-                                              <> attr SLayer "LineXBall"
+                                              & pen ?~   IpePen "fat"
+                                              & layer ?~ "LineXBall"
               ) intersections
              , map (\case
                    Line_x_Ball_Point q     -> iO'' (q^.core)
-                                              $ attr SLayer "HalfLineXBall"
+                                              & layer ?~ "HalfLineXBall"
                    Line_x_Ball_Segment seg -> iO'' (view core <$> seg)
-                                              $ attr SPen (IpePen "fat")
-                                              <> attr SLayer "HalfLineXBall"
+                                              & pen   ?~ IpePen "fat"
+                                              & layer ?~ "HalfLineXBall"
               ) hlIntersections
              ])
 

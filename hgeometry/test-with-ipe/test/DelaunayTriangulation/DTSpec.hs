@@ -1,5 +1,4 @@
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE UnicodeSyntax #-}
 module DelaunayTriangulation.DTSpec where
 
 import           Control.Lens
@@ -10,9 +9,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import           Data.Maybe (fromJust, mapMaybe)
-import           Data.Singletons (Apply)
 import qualified Data.Vector as V
-import           Data.Vinyl
 import           Golden
 import           HGeometry
 import qualified HGeometry.CircularList.Util as CU
@@ -268,9 +265,8 @@ buggyPoints3 = NonEmpty.fromList
 -- -- internalFaces' = V.tail . faces'
 
 
-byStrokeColour :: (Stroke ∈ ats, Ord (Apply f Stroke))
-               => [a :+ Attributes f ats] -> [[a :+ Attributes f ats]]
+byStrokeColour :: [a :+ IpeAttributes f ats] -> [[a :+ IpeAttributes f ats]]
 byStrokeColour = map (map fst) . List.groupBy ((==) `on` snd) . List.sortOn snd
                . map (\x -> (x,lookup' x))
   where
-    lookup' (_ :+ ats) = lookupAttr SStroke ats
+    lookup' (_ :+ ats) = ats^.stroke
