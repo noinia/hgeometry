@@ -1,0 +1,49 @@
+cabal-version:      3.14
+name:               hgeometry-docfigures
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            MIT
+license-file:       LICENSE
+author:             Frank Staals
+maintainer:         frank@fstaals.net
+-- copyright:
+category:           Geometry
+build-type:         Simple
+extra-doc-files:
+    CHANGELOG.md
+    README.md
+
+-- extra-source-files:
+
+common setup
+    default-language: GHC2024
+    ghc-options: -Wall -Widentities
+    ghc-options: -rtsopts -threaded "-with-rtsopts=-N"
+    build-depends:
+        base                >= 4.21.0.0   && < 5.0
+      , hgeometry-combinatorial   >= 1.0.0.0   && < 1.1
+      , hgeometry                 >= 1.0.0.0   && < 1.1
+      , hgeometry-vector          >= 1.0.0.0   && < 1.1
+      , hgeometry-point           >= 1.0.0.0   && < 1.1
+      , hgeometry-kernel          >= 1.0.0.0   && < 1.1
+      , hgeometry-polyLine        >= 1.0.0.0   && < 1.1
+      , hgeometry-spline          >= 1.0.0.0   && < 1.1
+      , hgeometry-polygon         >= 1.0.0.0   && < 1.1
+      , hgeometry-ipe             >= 1.0.0.0   && < 1.1
+      , hgeometry-svg             >= 1.0.0.0   && < 1.1
+      , hgeometry-svg:miso        >= 1.0.0.0   && < 1.1
+      , hgeometry-vector:numtypes
+      , lens                      >= 5.2           && < 6
+      , filepath                  >= 1.4.100       && < 2
+      , miso                      >= 1.9           && < 2
+
+  mixins:
+      hgeometry-vector:numtypes (Rational as R)
+
+executable minkowski
+    import:           setup
+    main-is:          Minkowski.hs
+    -- other-modules:
+    -- other-extensions:
+    hs-source-dirs:   app
