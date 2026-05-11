@@ -133,13 +133,29 @@ common miso-options
 -- * Libraries
 --------------------------------------------------------------------------------
 
-library
+library api
     import: all-setup
-    hs-source-dirs: src
+    visibility: private
+    hs-source-dirs: api
     exposed-modules:
       Debugger.API
 
     other-modules:
+
+library
+    import: all-setup
+    hs-source-dirs: src
+    build-depends:
+          hgeometry-debugger:api
+        , http-client          >= 0.7.19    && < 0.8
+        , servant-client       >= 0.20.3.0  && < 0.21
+        , servant              >= 0.20.3.0  && < 0.21
+    exposed-modules:
+      Debug.Draw
+
+    other-modules:
+
+
 
 --------------------------------------------------------------------------------
 -- * Test Suites
@@ -206,15 +222,15 @@ executable hgeometry-debugger
   ghc-options:    -threaded
   build-depends:
       hgeometry-debugger
+    , hgeometry-debugger:api
     , optparse-applicative >= 0.18      && < 0.19
     , filepath             >= 1.4.100   && < 1.6
     , servant-server       >= 0.20.3.0  && < 0.21
-    , servant-client       >= 0.20.3.0  && < 0.21
     , wai                  >= 3.2       && < 3.3
     , warp                 >= 3.4       && < 3.5
     , async                >= 2.2.6     && < 2.3
-    , http-client          >= 0.7.19    && < 0.8
     , http-media           >= 0.8.1     && < 0.9
+    , http-client
 
 executable viewer
   import:         all-setup, miso-options
@@ -224,6 +240,6 @@ executable viewer
     App
 --    SideBar
   build-depends:
-      hgeometry-debugger
+      hgeometry-debugger:api
     , servant-miso-client    >= 0.2.0.0   && < 0.3
     , prettyprinter          >= 1.7       && < 1.8
