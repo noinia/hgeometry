@@ -262,10 +262,10 @@ test = do
                       testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
                   in
                   [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
-                  , iO $ defIO domain  ! attr SLayer "domain"
-                  , iO $ ipeSimplePolygon testCoverCone ! attr SLayer "result"
-                      ! attr SFill seagreen
-                      ! attr SStroke black
+                  , iO $ defIO domain  &layer ?~  "domain"
+                  , iO $ ipeSimplePolygon testCoverCone &layer  ?~ "result"
+                                                        &fill   ?~ seagreen
+                                                        &stroke ?~ black
                   ] ]
               , [ let leftV  = Vector2 1 (-1)
                       rightV = Vector2 1 2
@@ -279,13 +279,13 @@ test = do
                                ]
                       result = coverClippedCone domain al leftV ar rightV
                   in
-                  [ iO $ defIO answer ! attr SLayer "clippedCone"
-                                      ! attr SFill blue
-                  , iO $ defIO domain  ! attr SLayer "domain"
+                  [ iO $ defIO answer &layer ?~  "clippedCone"
+                                      &fill ?~ blue
+                  , iO $ defIO domain  &layer ?~  "domain"
                   , iO $ ipeSimplePolygon result
-                          ! attr SLayer "result"
-                          ! attr SFill seagreen
-                          ! attr SStroke black
+                          &layer ?~  "result"
+                          &fill ?~ seagreen
+                          &stroke ?~  black
                   ] ]
               , [ let al     :: Point 2 R
                       al     = Point2 1.80000 0.60000
@@ -300,13 +300,13 @@ test = do
                                ]
                       result = coverClippedCone domain al leftV ar rightV
                   in
-                  [ iO $ defIO answer ! attr SLayer "clippedCone"
-                                      ! attr SFill blue
-                  , iO $ defIO domain  ! attr SLayer "domain"
+                  [ iO $ defIO answer &layer ?~  "clippedCone"
+                                      &fill ?~ blue
+                  , iO $ defIO domain  &layer ?~  "domain"
                   , iO $ ipeSimplePolygon result
-                          ! attr SLayer "result"
-                          ! attr SFill seagreen
-                          ! attr SStroke black
+                          &layer ?~  "result"
+                          &fill ?~ seagreen
+                          &stroke ?~  black
                   ] ]
               ]
   where
@@ -363,10 +363,10 @@ runTest (Input domain planes queries) = do
             . ipeFile . NonEmpty.fromList . fmap (fromContent . concat)
             $ [ [ draw env
                 , drawVertices vertices
-                , [iO $ defIO domain  ! attr SLayer "domain"]
+                , [iO $ defIO domain  &layer ?~  "domain"]
                 ]
               , [ drawVertices vertices
-                , [iO $ defIO domain  ! attr SLayer "domain"]
+                , [iO $ defIO domain  &layer ?~  "domain"]
                 , draw env'
                 ]
               ]
@@ -424,7 +424,7 @@ runTest (Input domain planes queries) = do
 
 
 --         draw'' (prism :+ cl) =
---           [ iO $ defIO (projectPrism prism) ! attr SFill color
+--           [ iO $ defIO (projectPrism prism) &fill ?~ color
 --           ]
 --         -- loc :: Vertex' r (plane :+ IpeColor r) -> Point 2 r
 --         -- loc = \case
@@ -451,7 +451,7 @@ runTest (Input domain planes queries) = do
 drawVertices :: (Plane_ plane r, Fractional r, Ord plane, Ord r)
              => Set (EnvVertex r plane)
              -> [IpeObject r]
-drawVertices = foldMap $ \v -> [iO $ defIO (v^.asPoint) ! attr SLayer "vertices"
+drawVertices = foldMap $ \v -> [iO $ defIO (v^.asPoint) &layer ?~  "vertices"
                                ]
 
 draw :: forall plane r.
@@ -459,8 +459,8 @@ draw :: forall plane r.
      => BoundedLowerEnvelope r (plane :+ IpeColor r) -> [IpeObject r]
 draw = ifoldMap draw'
   where
-    draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell ! attr SFill color
-                                                           ! attr SLayer "env"
+    draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell &fill ?~ color
+                                                           &layer ?~  "env"
                               ]
 
 
@@ -494,9 +494,9 @@ drawVD :: forall site r.
        => BoundedVoronoiDiagram r (site :+ IpeColor r) -> [IpeObject r]
 drawVD = ifoldMap draw'
   where
-    draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell ! attr SFill color
-                                                           ! attr SLayer "env"
-                                                           ! attr SOpacity "30%"
+    draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell &fill    ?~ color
+                                                           &layer   ?~  "env"
+                                                           &opacity ?~ "30%"
                               ]
 
 --------------------------------------------------------------------------------
@@ -528,16 +528,16 @@ testIpe inFp outFp = do
         inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
         (points' :: NonEmpty (Point 2 R :+ _))   <- NonEmpty.fromList <$> readAllFrom inFp'
         (domain' :: Triangle (Point 2 R) :+ _):_ <- readAllFrom inFp'
-        pure (points'&mapped.extra %~ fromMaybe blue . lookupAttr SStroke
+        pure (points'&mapped.extra %~ fromMaybe blue . (^.stroke)
              ,domain'^.core)
 
     let vd = voronoiDiagramIn     domain points
         -- vv = bruteForceVerticesIn domain points
-        out = concat [ [iO $ defIO domain ! attr SLayer "domain" ]
+        out = concat [ [iO $ defIO domain &layer ?~  "domain" ]
                      , drawVD vd
-                     , [ iO $ defIO p ! attr SStroke c
-                                      ! attr SLayer "sites"
-                                      ! attr SSize (IpeSize $ Named "normal")
+                     , [ iO $ defIO p &stroke     ?~ c
+                                      &layer      ?~ "sites"
+                                      &symbolSize ?~ IpeSize (Named "normal")
                        | p :+ c <- toList points
                        ]
                      ]
@@ -561,13 +561,13 @@ testVD = writeIpeFile [osp|vd.ipe|]
             . addStyleSheet (createIpeStyle "myColors" myColors)
             . addStyleSheet opacitiesStyle
             . singlePageFromContent $
-              [ iO $ defIO p  ! attr SStroke c
-                              ! attr SLayer "sites"
+              [ iO $ defIO p  &stroke ?~  c
+                              &layer ?~  "sites"
               | p :+ c <- toList myPoints ]
               <>
               drawVD vd
               <>
-              [ iO $ defIO domain  ! attr SLayer "domain" ]
+              [ iO $ defIO domain  &layer ?~  "domain" ]
 
   where
     vd =   voronoiDiagramIn domain myPoints
