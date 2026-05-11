@@ -217,6 +217,13 @@ instance ( HasDefaultIpeOut g, DefaultIpeOut g ~ IpeSymbol, NumType g ~ r
   defIO (g :+ ats) = defIO g & attributes .~ ats
     -- should we really override all of them?
 
+instance ( HasDefaultIpeOut g, DefaultIpeOut g ~ Group, NumType g ~ r
+         ) => HasDefaultIpeOut (g :+ GroupAttributes r) where
+  type DefaultIpeOut (g :+ GroupAttributes r) = Group
+  defIO (g :+ ats) = defIO g & attributes .~ ats
+    -- should we really override all of them?
+
+
 
 instance (Num r, Point_ vertex 2 r, Foldable1 nonEmpty
          ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) where

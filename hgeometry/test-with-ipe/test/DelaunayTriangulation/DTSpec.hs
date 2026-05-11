@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module DelaunayTriangulation.DTSpec where
 
 import           Control.Lens
@@ -265,7 +266,8 @@ buggyPoints3 = NonEmpty.fromList
 -- -- internalFaces' = V.tail . faces'
 
 
-byStrokeColour :: [a :+ IpeAttributes f ats] -> [[a :+ IpeAttributes f ats]]
+byStrokeColour :: Ord ats
+               => [a :+ IpeAttributes IpeSymbol ats] -> [[a :+ IpeAttributes IpeSymbol ats]]
 byStrokeColour = map (map fst) . List.groupBy ((==) `on` snd) . List.sortOn snd
                . map (\x -> (x,lookup' x))
   where

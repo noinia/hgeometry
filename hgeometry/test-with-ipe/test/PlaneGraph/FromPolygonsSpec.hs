@@ -463,7 +463,7 @@ testIpe inFP _outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ 
           )  = fromDisjointSegments segs
 
         segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
-        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra.stroke._Just)
                                                                 (NonEmpty.singleton seg)
                                ) segs
         graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)
@@ -548,7 +548,7 @@ testIpe1 inFP _outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
           )  = fromDisjointSegments segs
 
         segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
-        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra.stroke._Just)
                                                                 (NonEmpty.singleton seg)
                                ) segs
         graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)

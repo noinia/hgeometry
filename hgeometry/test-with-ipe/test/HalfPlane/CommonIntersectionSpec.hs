@@ -110,10 +110,10 @@ ipeClipResult theName uppers lowers =
                       -- , iO $ defIO result  ! attr SStroke purple
                        iO $ ipeGroup [ iO $ drawAsConstraint lightgreen h
                                       | h <- F.toList uppers
-                                      ]  ! attr SLayer "uppers"
+                                      ]  &layer ?~ "uppers"
                       , iO $ ipeGroup [ iO $ drawAsConstraint lightblue h
                                       | h <- F.toList lowers
-                                      ]  ! attr SLayer "lowers"
+                                      ]  & layer ?~ "lowers"
                       ]
     _ -> error "ipeClipresult: absurd?"
 

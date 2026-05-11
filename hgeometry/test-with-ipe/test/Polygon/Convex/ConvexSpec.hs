@@ -36,8 +36,8 @@ spec = do
   -- runIO foo
 
 _foo = writeIpePage [osp|/tmp/out.ipe|] $ fromContent
-                     [ toIO (minkowskiSum polyP polyQ)   & stroke ?~ red
-                     , toIO (naiveMinkowski polyP polyQ) & stroke ?~ blue
+                     [ iO $ toIO (minkowskiSum polyP polyQ)   & stroke ?~ red
+                     , iO $ toIO (naiveMinkowski polyP polyQ) & stroke ?~ blue
                      , iO $ defIO polyP                  & stroke ?~ black
                      , iO $ defIO polyQ                  & stroke ?~ black
                      ]

@@ -70,7 +70,7 @@ myTriangles = -- scaleUniformlyBy 5 <$>
               ) <$> myTriangles'
              )
 
-props c = RenderProps Nothing (Just $ attr SFill c)
+props c = RenderProps Nothing (Just $ def&fill ?~ c)
 
 getColor :: core :+ RenderProps -> RenderProps
 getColor = view extra
@@ -427,7 +427,7 @@ fromMaterial mm = case mRefl of
     Nothing   -> def
     Just refl -> case refl of
       Material.ReflexicityRGB rgb -> let c = IpeColor (Valued $ convert rgb)
-                                     in RenderProps def (Just $ attr SFill c)
+                                     in RenderProps def (Just $ def&fill ?~ c)
       _                           -> error "fromMaterial: not matched"
   where
     mRefl = do m <- mm
@@ -464,8 +464,8 @@ renderToIpe              :: forall set triangle point r.
 renderToIpe camera scene =
     -- replicate k (iO $ defIO (Point2 5 5))
     -- <>
-    [ iO $ ipeGroup (renderGraph (renderSkeleton subdiv))                 ! attr SLayer "skeleton"
-    , iO $ ipeGroup (renderGraph (assignRenderingAttributes getZ subdiv)) ! attr SLayer "render"
+    [ iO $ ipeGroup (renderGraph (renderSkeleton subdiv))                 & layer ?~ "skeleton"
+    , iO $ ipeGroup (renderGraph (assignRenderingAttributes getZ subdiv)) & layer ?~ "render"
     ]
     -- drawGraphWithDarts subdiv
   where

@@ -41,6 +41,7 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( (===), property,Discard(..), counterexample
                                  , Arbitrary(..), oneof, suchThat
                                  , withDiscardRatio
+                                 , withNumTests
                                  )
 import           Test.QuickCheck.Instances ()
 import           Witherable

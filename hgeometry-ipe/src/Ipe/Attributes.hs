@@ -442,6 +442,9 @@ instance HasGradient (g :+ PathAttributes r) (Maybe IpeGradient) where
 ----------------------------------------
 -- * Text attributes
 
+instance HasCommonAttributes (g :+ TextAttributesF r f) r f where
+  commonAttributes = extra.commonAttributes
+
 instance HasStroke (g :+ TextAttributes r) (Maybe (IpeColor r)) where
   stroke = extra.stroke
 instance HasTextSize (g :+ TextAttributes r) (Maybe (IpeSize r)) where
@@ -483,3 +486,5 @@ instance HasCommonAttributes (g :+ GroupAttributesF r f) r f where
   commonAttributes = extra.commonAttributes
 instance HasClip (g :+ GroupAttributes r) (Maybe (Path r)) where
   clip = extra.clip
+
+--------------------------------------------------------------------------------
