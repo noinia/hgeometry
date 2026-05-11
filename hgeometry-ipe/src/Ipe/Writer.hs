@@ -21,7 +21,7 @@ module Ipe.Writer(
   , IpeWriteAttributes(..)
   ) where
 
-import           Control.Lens (view, review, (^.), (^..), toNonEmptyOf, IxValue, foldMapOf, Const(..))
+import           Control.Lens hiding (Reversed)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as C
 import           Data.Colour.SRGB (RGB (..))
@@ -458,8 +458,7 @@ ipeWriteAttrs'     :: ( AllB IpeWriteText b, HasCommonAttributes (b Maybe) r f
                       , IpeWriteAttributes (CommonAttributes r f), TraversableB b
                       , ConstraintsB b, ApplicativeB b, AttributeNames b
                       ) => b Maybe -> [(Text, Text)]
-ipeWriteAttrs' ats = foldMapOf commonAttributes ipeWriteAttrs ats
-                  <> bfoldMap getConst (bzipWithC @IpeWriteText writeAttr attributeNames ats)
+ipeWriteAttrs' ats = bfoldMap getConst (bzipWithC @IpeWriteText writeAttr attributeNames ats)
 
 instance ( AllB IpeWriteText (CommonAttributes r), IpeWriteText r
          ) => IpeWriteAttributes (GroupAttributes r) where
