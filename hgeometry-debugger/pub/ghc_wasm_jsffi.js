@@ -1229,10 +1229,16 @@ else {
 ZC7ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1,$2) => {if ($1 === $2) return 0;
 else if ($1 > $2) return 1;
 else return -1;},
+ZC8ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {return $1.slice(1,$1.length)},
+ZC9ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {if ($1.length === 0) throw new Error ('head: empty string');
+return $1.slice(0).charCodeAt();},
+ZC10ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {return String.fromCharCode($1);},
+ZC12ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {return $1.length},
 ZC14ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {return $1.length === 0},
 ZC15ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1,$2) => ((new TextDecoder('utf-8', {fatal: true})).decode(new Uint8Array(__exports.memory.buffer, $1, $2))),
 ZC35ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1) => {return $1.toLowerCase();},
 ZC41ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1,$2) => {return $1 + String.fromCharCode($2);},
+ZC42ZCmszm1zi9zi0zi0zm9d39196dZCDataziJSStringZC: ($1,$2) => {return String.fromCharCode($1) + $2;},
 ZC0ZCghczminternalZCGHCziInternalziWasmziPrimziExportsZC: ($1,$2) => ($1.reject(new WebAssembly.RuntimeError($2))),
 ZC19ZCghczminternalZCGHCziInternalziWasmziPrimziExportsZC: ($1) => ($1.resolve()),
 ZC20ZCghczminternalZCGHCziInternalziWasmziPrimziExportsZC: ($1) => {$1.throwTo = () => {};},

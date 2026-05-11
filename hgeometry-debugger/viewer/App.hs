@@ -41,6 +41,7 @@ import           Text.Pretty.Simple (defaultOutputOptionsLightBg)
 import           Text.Pretty.Simple.Internal (Annotation (..), layoutStringAbstract)
 import           Prettyprinter.Render.Util.SimpleDocTree (SimpleDocTree (..), treeForm)
 import           Text.Pretty.Simple (OutputOptions(..))
+import           Miso.Html.Parse
 -- import           SideBar
 
 --------------------------------------------------------------------------------
@@ -209,7 +210,8 @@ viewModel model = div_ []
 
     content' = [ circle_ []
                | d <- model^..drawings.folded.folded.filteredBy isVisible.drawing
-               ]
+               ] <>
+               rawSVG "<rect width=\"100%\" height=\"100%\"/>"
 
     -- layers = div_ [ class_ "grid grid-cols-3 gap-4 mb-4" ]
     --               [ left
