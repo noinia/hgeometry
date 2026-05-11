@@ -8,7 +8,6 @@ module PlaneGraph.PolygonOverlaySpec
 
 import Data.Default
 import HGeometry.Unbounded
-import Data.Proxy
 import Data.Maybe
 import Data.Foldable
 import Control.Lens
