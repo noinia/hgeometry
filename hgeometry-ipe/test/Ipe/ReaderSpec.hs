@@ -6,7 +6,6 @@ import           Control.Lens
 import           Control.Monad ((>=>))
 import           Data.ByteString (ByteString)
 import           Data.Maybe
-import           Data.Proxy
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
@@ -36,9 +35,9 @@ spec = do
     describe "IpeReadAttrs" $ do
       it "parses a symbols attributes" $
         (show $ readXML useTxt
-                >>= ipeReadAttrs (Proxy :: Proxy IpeSymbol) (Proxy :: Proxy Double))
+                >>= ipeReadAttrsFrom @(SymbolAttributes Double))
         `shouldBe`
-        "Right (Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named \"black\"), NoAttr, NoAttr, Attr IpeSize (Named \"normal\")})"
+        "Right (SymbolAttributes {_commonAttrs = CommonAttributes {_layer = Nothing, _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _stroke = Just (IpeColor (Named \"black\")), _fill = Nothing, _pen = Nothing, _symbolSize = Just (IpeSize (Named \"normal\"))})"
     describe "IpeRead" $ do
       it "parses a Symbol" $
         fromIpeXML' useTxt

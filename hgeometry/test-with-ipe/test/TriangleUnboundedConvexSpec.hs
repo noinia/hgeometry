@@ -42,14 +42,14 @@ ipeSpec' outFP (chain',tri) =
     (ipeContentGolden { name = outFP })
     [ case tri `intersect` chain' of
         Nothing    -> iO $ ipeLabel ("no intersection" :+ origin)
-                         ! attr SStroke black
+                         & stroke ?~ black
         Just inter -> case inter of
           DegenerateVertex v -> iO $ defIO (v^.asPoint)
-                                   ! attr SStroke red
+                                   & stroke ?~ red
           DegenerateEdge e   -> iO $ defIO ((^.asPoint) <$> e)
-                                   ! attr SStroke red
+                                   & stroke ?~ red
           ActualPolygon poly -> iO $ defIO ((^.asPoint) <$> poly)
-                                   ! attr SFill red
+                                   & fill ?~ red
     , iO' chain'
     , iO' tri
 --     , iO $ defIO ((toBoundedFrom tri chain)&vertices %~ (^.asPoint)  :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R)

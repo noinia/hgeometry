@@ -28,26 +28,26 @@ spec = describe "ball intersection with line" $ do
          goldenWith [osp|data/test-with-ipe/golden/|]
            (ipeContentGolden { name = [osp|ball|] })
              (concat
-             [ map (\l -> iO'' l $ attr SLayer "lines"
+             [ map (\l -> iO $ defIO l & layer ?~ "lines"
                    ) lines'
-             , map (\hl -> iO'' hl $  attr SLayer "halfLines"
-                                   <> attr SStroke blue
+             , map (\hl -> iO $ defIO hl & layer  ?~ "halfLines"
+                                         & stroke ?~ blue
                    ) halfLines
-             , map (\b -> iO'' b $ attr SLayer "balls"
+             , map (\b -> iO $ defIO b & layer ?~ "balls"
                    ) balls
              , map (\case
-                   Line_x_Ball_Point q     -> iO'' (q^.core)
-                                              $ attr SLayer "LineXBall"
-                   Line_x_Ball_Segment seg -> iO'' (view core <$> seg)
-                                              $ attr SPen (IpePen "fat")
-                                              <> attr SLayer "LineXBall"
+                   Line_x_Ball_Point q     -> iO $ defIO (q^.core)
+                                                    &layer ?~ "LineXBall"
+                   Line_x_Ball_Segment seg -> iO $ defIO (view core <$> seg)
+                                                    & pen ?~   IpePen "fat"
+                                                    & layer ?~ "LineXBall"
               ) intersections
              , map (\case
-                   Line_x_Ball_Point q     -> iO'' (q^.core)
-                                              $ attr SLayer "HalfLineXBall"
-                   Line_x_Ball_Segment seg -> iO'' (view core <$> seg)
-                                              $ attr SPen (IpePen "fat")
-                                              <> attr SLayer "HalfLineXBall"
+                   Line_x_Ball_Point q     -> iO $ defIO (q^.core)
+                                                     & layer ?~ "HalfLineXBall"
+                   Line_x_Ball_Segment seg -> iO $ defIO (view core <$> seg)
+                                                     & pen   ?~ IpePen "fat"
+                                                     & layer ?~ "HalfLineXBall"
               ) hlIntersections
              ])
 

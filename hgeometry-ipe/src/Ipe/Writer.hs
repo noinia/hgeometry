@@ -18,10 +18,10 @@ module Ipe.Writer(
   , IpeWrite(..)
   , IpeWriteText(..)
 
-  , ipeWriteAttrs, writeAttrValues
+  , IpeWriteAttributes(..)
   ) where
 
-import           Control.Lens (view, review, (^.), (^..), toNonEmptyOf, IxValue)
+import           Control.Lens hiding (Reversed)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as C
 import           Data.Colour.SRGB (RGB (..))
@@ -34,12 +34,8 @@ import           Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import           Data.Ratio
 import           Data.Semigroup.Foldable
 import qualified Data.Sequence as Seq
-import           Data.Singletons
 import           Data.Text (Text)
 import qualified Data.Text as Text
-import           Data.Vinyl hiding (Label)
-import           Data.Vinyl.Functor
-import           Data.Vinyl.TypeLevel
 import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (ellipseMatrix)
@@ -56,7 +52,6 @@ import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
 import           Ipe.Attributes
-import qualified Ipe.Attributes as IA
 import           Ipe.Color (IpeColor (..))
 import           Ipe.Path
 import           Ipe.Types
@@ -66,6 +61,8 @@ import           System.IO (hPutStrLn, stderr)
 import           System.OsPath
 import           Text.XML.Expat.Format (format)
 import           Text.XML.Expat.Tree
+import           Ipe.Attributes.Types
+import           Barbies
 
 --------------------------------------------------------------------------------
 
@@ -125,33 +122,11 @@ instance IpeWrite t => IpeWrite (NonEmpty t) where
 instance (IpeWrite l, IpeWrite r) => IpeWrite (Either l r) where
   ipeWrite = either ipeWrite ipeWrite
 
-instance IpeWriteText (Apply f at) => IpeWriteText (Attr f at) where
-  ipeWriteText att = _getAttr att >>= ipeWriteText
-
 instance (IpeWriteText l, IpeWriteText r) => IpeWriteText (Either l r) where
   ipeWriteText = either ipeWriteText ipeWriteText
 
 instance IpeWriteText r => IpeWriteText (AbsolutelyApproximateValue tol r) where
   ipeWriteText = ipeWriteText . unwrapAbsolutelyApproximateValue
-
-
--- | Functon to write all attributes in a Rec
-ipeWriteAttrs           :: ( RecordToList rs, RMap rs
-                           , ReifyConstraint IpeWriteText (Attr f) rs
-                           , AllConstrained IpeAttrName rs
-                           , RecAll (Attr f) rs IpeWriteText
-                           ) => IA.Attributes f rs -> [(Text,Text)]
-ipeWriteAttrs (Attrs r) = catMaybes . recordToList $ zipRecsWith f (writeAttrNames  r)
-                                                                   (writeAttrValues r)
-  where
-    f (Const n) (Const mv) = Const $ (n,) <$> mv
-
--- | Writing the attribute values
-writeAttrValues :: ( RMap rs, ReifyConstraint IpeWriteText f rs
-                   , RecAll f rs IpeWriteText)
-                => Rec f rs -> Rec (Const (Maybe Text)) rs
-writeAttrValues = rmap (\(Compose (Dict x)) -> Const $ ipeWriteText x)
-                . reifyConstraint @IpeWriteText
 
 
 instance IpeWriteText Text where
@@ -320,7 +295,7 @@ instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (SimplePolygon point
   ipeWriteText pg = ipeWriteTextPolygonVertices $ toNonEmptyOf (outerBoundary.asPoint) pg
 
 ipeWriteTextPolygonVertices :: IpeWriteText r => NonEmpty (Point 2 r) -> Maybe Text
-ipeWriteTextPolygonVertices = \case 
+ipeWriteTextPolygonVertices = \case
     (p :| rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest ++ [ClosePath]
 
 instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (CubicBezier point) where
@@ -334,7 +309,7 @@ instance IpeWriteText r => IpeWriteText (PathSegment r) where
     Reversed -> ipeWriteTextPolygonVertices . NonEmpty.reverse
               $ toNonEmptyOf (outerBoundary.asPoint) p
   ipeWriteText (EllipseSegment     e) = ipeWriteText $ Ellipse (e^.ellipseMatrix)
-  ipeWriteText (CubicBezierSegment b) = ipeWriteText b 
+  ipeWriteText (CubicBezierSegment b) = ipeWriteText b
   ipeWriteText _                      = error "ipeWriteText: PathSegment, not implemented yet."
 
 instance IpeWriteText r => IpeWrite (Path r) where
@@ -346,13 +321,8 @@ instance IpeWriteText r => IpeWrite (Path r) where
 instance (IpeWriteText r) => IpeWrite (Group r) where
   ipeWrite (Group gs) = ipeWrite gs
 
-
-instance ( AllConstrained IpeAttrName rs
-         , RecordToList rs, RMap rs
-         , ReifyConstraint IpeWriteText (Attr f) rs
-         , RecAll (Attr f) rs IpeWriteText
-         , IpeWrite g
-         ) => IpeWrite (g :+ IA.Attributes f rs) where
+instance ( IpeWrite g, IpeWriteAttributes ats
+         ) => IpeWrite (g :+ ats) where
   ipeWrite (g :+ ats) = ipeWrite g `mAddAtts` ipeWriteAttrs ats
 
 
@@ -461,3 +431,43 @@ instance ( IpeWriteText r
 
 instance IpeWrite () where
   ipeWrite = const Nothing
+
+
+--------------------------------------------------------------------------------
+
+-- "| A class for for writing attributes "
+class IpeWriteAttributes ats where
+  -- | Write the attributes to pairs of texts
+  ipeWriteAttrs :: ats -> [(Text,Text)]
+
+instance ( AllB IpeWriteText (CommonAttributes r)
+         ) => IpeWriteAttributes (CommonAttributes r Maybe) where
+  ipeWriteAttrs = bfoldMap getConst . bzipWithC @IpeWriteText writeAttr attributeNames
+
+writeAttr :: forall a. (IpeWriteText a) => Const Text a -> Maybe a -> Const [(Text,Text)] a
+writeAttr (Const attr) m = Const $ case m >>= ipeWriteText of
+  Nothing  -> []
+  Just val -> [(attr,val)]
+
+instance ( AllB IpeWriteText (CommonAttributes r), IpeWriteText r
+         ) => IpeWriteAttributes (SymbolAttributes r) where
+  ipeWriteAttrs = ipeWriteAttrs'
+
+-- | Implementation of ipeWriteAttrs for the various attribue types
+ipeWriteAttrs'     :: ( AllB IpeWriteText b, HasCommonAttributes (b Maybe) r f
+                      , IpeWriteAttributes (CommonAttributes r f), TraversableB b
+                      , ConstraintsB b, ApplicativeB b, AttributeNames b
+                      ) => b Maybe -> [(Text, Text)]
+ipeWriteAttrs' ats = bfoldMap getConst (bzipWithC @IpeWriteText writeAttr attributeNames ats)
+
+instance ( AllB IpeWriteText (CommonAttributes r), IpeWriteText r
+         ) => IpeWriteAttributes (GroupAttributes r) where
+  ipeWriteAttrs = ipeWriteAttrs'
+
+instance ( AllB IpeWriteText (CommonAttributes r), IpeWriteText r
+         ) => IpeWriteAttributes (PathAttributes r) where
+  ipeWriteAttrs = ipeWriteAttrs'
+
+instance ( AllB IpeWriteText (CommonAttributes r), IpeWriteText r
+         ) => IpeWriteAttributes (TextAttributes r) where
+  ipeWriteAttrs = ipeWriteAttrs'

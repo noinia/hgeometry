@@ -21,8 +21,8 @@ mainWith (Options inFile outFile) = do
       dt   = toPlanarSubdivision (Proxy @DTWorld) . delaunayTriangulation $ pts'
       emst = euclideanMST pts'
       out  = [ iO $ drawPlanarSubdivisionWith drawVtx drawEdge (drawInternalFace dt) drawOuterFace dt
-                  ! attr SLayer "delaunayTriangulation"
-             , iO $ drawTree' emst ! attr SLayer "emst"
+                  &layer ?~ "delaunayTriangulation"
+             , iO $ drawTree' emst & layer ?~ "emst"
              ]
       outputFile = singlePageFromContent out
   outputFile' <- addStyleSheetFrom "../hgeometry-ipe/resources/opacities.isy" outputFile
@@ -34,7 +34,7 @@ data DTWorld
 -- | Draw vertices using their default representation; disk marks. For
 -- the rest we keep their original attributes.
 drawVtx                         :: IpeOut' Maybe (VertexId' s, VertexData r (IpeAttributes IpeSymbol r)) IpeSymbol r
-drawVtx (_vi, VertexData p ats) = Just $ defIO p ! ats
+drawVtx (_vi, VertexData p ats) = Just $ defIO p :+ ats
 
 -- | Draw edges using normal line segments
 drawEdge              :: IpeOut' Maybe (Dart s,      LineSegment 2 v r :+ e)  Path r
@@ -43,12 +43,12 @@ drawEdge (_d, s :+ _) = Just $ defIO s
 -- | Internal faces are filled polygons.
 drawInternalFace                 :: PlanarSubdivision s v e f r
                                  -> IpeOut' Maybe (FaceId' s,   SomePolygon v r :+ f)    Path r
-drawInternalFace s (fi, pg :+ _) = Just $ defIO pg ! attr SFill lightcyan
+drawInternalFace s (fi, pg :+ _) = Just $ defIO pg &fill ?~  lightcyan
 
 --
 drawOuterFace :: (Ord r, Num r) => IpeOut' Maybe (FaceId' s,   MultiPolygon (Maybe v) r :+ f) Path r
-drawOuterFace (_, pg :+ _) = Just $ defIO pg ! attr SOpacity "10%"
-                                             ! attr SFill lightgray
+drawOuterFace (_, pg :+ _) = Just $ defIO pg &opacity ?~ "10%"
+                                             &fill    ?~  lightgray
 ```
 
 See the [hgeometry-examples](https://github.com/noinia/hgeometry/tree/master/hgeometry-examples) package for more examples.

@@ -10,8 +10,6 @@ import qualified Data.List as List
 -- import           Data.Proxy
 -- import           Data.Ratio
 -- import qualified Data.Set as Set
--- import           Data.Singletons (Apply)
--- import           Data.Vinyl
 -- import           HGeometry.Ext
 -- import           Ipe
 -- import           System.Directory (getTemporaryDirectory, removeFile)

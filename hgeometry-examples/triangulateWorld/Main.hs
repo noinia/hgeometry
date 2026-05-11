@@ -85,7 +85,9 @@ mainWith (Options inFile outFile) = do
           -- segs :: [ClosedLineSegment (Point 2 R)]
           -- segs = subdivs^..folded.edgeSegments
 
-          out     = mconcat [ [ iO $ ipePolygon pg ! ats  | (pg :+ ats) <- polies ]
+          out     = mconcat [ [ iO $ ipePolygon pg & attributes .~ ats
+                              | (pg :+ ats) <- polies
+                              ]
                             -- , [ iO' s  | s  <- segs ]
                             , [ iO $ ipePolygon pg | pg <- triangles' ]
                             ]

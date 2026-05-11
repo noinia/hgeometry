@@ -127,18 +127,18 @@ drawGraphWithDarts gr = theVertices <> theEdges <> theFaces
 
 drawVertex     :: ( Point_ vertex 2 r, Show vertex)
                => i -> vertex -> [IpeObject r]
-drawVertex _ v = [ iO $ ipeDiskMark (v^.asPoint) ! attr SLayer "vertex"
-                 , iO $ ipeLabel (tshow v :+ v^.asPoint) ! attr SLayer "vertexLabel"
-                                                         -- ! attr SStroke Ipe.red
+drawVertex _ v = [ iO $ ipeDiskMark (v^.asPoint) & layer ?~ "vertex"
+                 , iO $ ipeLabel (tshow v :+ v^.asPoint) & layer ?~ "vertexLabel"
+                                                         -- &stroke ?~ Ipe.red
                  ]
 
 drawEdge       :: ( PlaneGraph_ planeGraph vertex, ConstructablePoint_ vertex 2 r, IsTransformable vertex
                   , Show (EdgeIx planeGraph), Show (Edge planeGraph)
                   , Fractional r, Real r)
                => planeGraph -> EdgeIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
-drawEdge g d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
-                  , iO $ ipeLabel (tshow d :+ c) ! attr SLayer "edgeLabel"
-                  , iO $ ipeLabel (tshow (g^?!edgeAt d) :+ c) ! attr SLayer "edgeData"
+drawEdge g d s = [ iO $ ipeLineSegment s & layer ?~  "edges"
+                  , iO $ ipeLabel (tshow d :+ c) & layer ?~  "edgeLabel"
+                  , iO $ ipeLabel (tshow (g^?!edgeAt d) :+ c) & layer ?~ "edgeData"
                   ]
   where
     c = interpolate 0.5 s ^. asPoint
@@ -148,10 +148,10 @@ drawDart        :: ( PlaneGraph_ planeGraph vertex, ConstructablePoint_ vertex 2
                    , Show (Dart planeGraph), Fractional r, Real r)
                 => planeGraph -> DartIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
 drawDart gr d s = [ iO $ ipeLineSegment (offset s)
-                         ! attr SArrow normalArrow
-                         ! attr SStroke Ipe.purple
-                         ! attr SLayer "darts"
-                  , iO $ ipeLabel (tshow (gr^?!dartAt d) :+ c) ! attr SLayer "dartLabel"
+                         &arrow  ?~ normalArrow
+                         &stroke ?~ Ipe.purple
+                         &layer  ?~ "darts"
+                  , iO $ ipeLabel (tshow (gr^?!dartAt d) :+ c) &layer ?~ "dartLabel"
                   ]
   where
     c = interpolate 0.5 s ^. asPoint
@@ -173,8 +173,8 @@ offset s = translateBy theOffset s
 drawFace         :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r
                     , Show (Face planeGraph), Ord r, Fractional r)
                  => planeGraph -> FaceIx planeGraph -> PolygonalDomain (vertex :+ VertexIx planeGraph) -> [IpeObject r]
-drawFace gr f pg = [ iO $ ipePolygon pg' ! attr SLayer "face"
-                   , iO $ ipeLabel (tshow (gr^?!faceAt f) :+ c) ! attr SLayer "faceLabel"
+drawFace gr f pg = [ iO $ ipePolygon pg' &layer ?~ "face"
+                   , iO $ ipeLabel (tshow (gr^?!faceAt f) :+ c) &layer ?~ "faceLabel"
                    ]
   where
     pg' :: PolygonalDomain _

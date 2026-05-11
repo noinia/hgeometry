@@ -12,6 +12,7 @@ import           HGeometry.Vector
 import           Ipe.Attributes
 import           Ipe.Path
 import           Ipe.Types
+import           Ipe.Attributes.Types
 
 -------------------------------------------------------------------------------
 
@@ -20,13 +21,14 @@ import           Ipe.Types
 -- >>> import Ipe.Attributes
 -- >>> import Ipe.Color(IpeColor(..))
 -- >>> import qualified HGeometry.PolyLine as PolyLine
+-- >>> import Data.Default
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
 --              . PolyLine.polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
---     testPathAttrs = attr SStroke (IpeColor "red")
+--     testPathAttrs = def & stroke ?~ IpeColor "red"
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}
@@ -37,9 +39,8 @@ renderChain :: (Foldable1 nonEmpty, Point_ vertex 2 r, Num r)
             => UnboundedConvexRegionF r nonEmpty vertex :+ IpeAttributes Path r
             -> IpeObject' Path r
 renderChain (reg@(Unbounded v pts w) :+ ats) =
-    (poly^.re _asPolyLine) :+     attr SArrow  normalArrow
-                               <> attr SRArrow normalArrow
-                               <> ats
+    (poly^.re _asPolyLine) :+ (ats&arrow  ?~ normalArrow
+                                  &rArrow ?~ normalArrow)
   where
     poly = case extremalVertices (mapChain toNonEmpty reg) of
              Left p              -> f p p

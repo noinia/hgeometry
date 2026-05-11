@@ -11,7 +11,6 @@ import           Data.Foldable (toList)
 -- import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
 import           Data.Semigroup
 import qualified Data.Set as Set
 import qualified Data.Vector as V
@@ -41,10 +40,12 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( (===), property,Discard(..), counterexample
                                  , Arbitrary(..), oneof, suchThat
-                                 , withDiscardRatio, withMaxSuccess
+                                 , withDiscardRatio
+                                 , withNumTests
                                  )
 import           Test.QuickCheck.Instances ()
 import           Witherable
+
 --------------------------------------------------------------------------------
 
 lpRecomputeBasis :: forall r. (Ord r, Fractional r)
@@ -158,7 +159,7 @@ spec = describe "LPType Spec" $ do
                ib = lpInitialBasis [h1,h2]
            lpRecomputeBasis h3 ib `shouldBe` Just (Infeasible (Vector3 h3 h1 h2))
 
-         prop "feasible means feasible" $ withMaxSuccess 50 $ withDiscardRatio 1000 $
+         prop "feasible means feasible" $ withNumTests 50 $ withDiscardRatio 1000 $
            \gen (halfPlanes :: [HalfPlane R]) ->
              case subExp (mkStdGen gen) linearProgrammingMinY halfPlanes of
                Basis2 v _ _ -> property $ all (v `intersects`) halfPlanes
@@ -398,7 +399,7 @@ loadInputs inFp = do
         -- take the left halfplane of every halfline
             halfPlanes = over core (toLineEQ . leftHalfPlane . asOrientedLine) <$> rays
             solution   = foldMap (\(h :+ ats) ->
-                                    if lookupAttr SStroke ats == Just red
+                                    if ats^.stroke == Just red
                                     then Set.singleton h else mempty
                                  ) halfPlanes
         pure (halfPlanes, solution)

@@ -7,8 +7,6 @@ import Control.Lens
 import HGeometry.Boundary
 import HGeometry.Intersection
 import HGeometry.Interval
--- import HGeometry.Line
--- import HGeometry.LineSegment
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Triangle
@@ -37,9 +35,9 @@ spec = describe "intersection tests" $ do
             --     `shouldBe` (coRec $ Point2 10 (10 :: Rational))
             --   (hor 11 `intersect` t)
             --     `shouldBe` Nothing
-          -- prop "inTriangle same as inTriangleFrac" $
-          --   \(q :: Point 2 R) (t :: Triangle (Point 2 R)) ->
-          --     (q `inTriangle` t) `shouldBe` (q `inTriangleFrac` t)
+          prop "inTriangle same as inTriangleFrac" $
+            \(q :: Point 2 R) (t :: Triangle (Point 2 R)) ->
+              (q `inTriangle` t) `shouldBe` (q `inTriangleFrac` t)
           prop "onTriangle same as onTriangleFrac" $ \(q :: Point 2 R)
                                                       (t :: Triangle (Point 2 R)) ->
               (q `intersects` t) `shouldBe` (q `onTriangleFrac` t)
@@ -68,11 +66,22 @@ spec = describe "intersection tests" $ do
                        "HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))"
 
 
+          it "manual barrycentric" $
+            let q   = Point2 0 0
+                tri = Triangle (Point2 0 0) (Point2 1 1) (Point2 0 1)
+            in (q `inTriangleFrac` tri) `shouldBe` OnBoundary
+
+          it "open interval intersects" $
+            ((1.0 :: R) `inRange` OpenInterval 0 (1 :: R) ) `shouldBe` False
+          it "open interval intersects" $
+            ((1.0 :: R) `inInterval` OpenInterval 0 (1 :: R) ) `shouldBe` Outside
+
 --------------------------------------------------------------------------------
 
-_inTriangleFrac   :: (Ord r, Fractional r)
+-- | Implementation of InTriangle that uses Fractional
+inTriangleFrac   :: (Ord r, Fractional r, Show r)
                  => Point 2 r -> Triangle (Point 2 r) -> PointLocationResult
-_inTriangleFrac q t
+inTriangleFrac q t
     | all (`inRange` OpenInterval   0 1) [a,b,c] = Inside
     | all (`inRange` ClosedInterval 0 1) [a,b,c] = OnBoundary
     | otherwise                                  = Outside

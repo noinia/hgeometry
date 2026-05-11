@@ -26,7 +26,7 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Box (Corners(..))
 import HGeometry.Box qualified as Box
 import           Miso.CSS (style_, border)
-import           Attr
+import           Data.Default
 
 --------------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ myTriangles = -- scaleUniformlyBy 5 <$>
               ) <$> myTriangles'
              )
 
-props c = RenderProps Nothing (Just $ attr SFill c)
+props c = RenderProps Nothing (Just $ def&fill ?~ c)
 
 getColor :: core :+ RenderProps -> RenderProps
 getColor = view extra
