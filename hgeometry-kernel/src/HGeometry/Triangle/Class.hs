@@ -16,10 +16,12 @@ module HGeometry.Triangle.Class
   , triangleSignedArea2X
   , intersectingHalfPlanes
   , toBarricentric, fromBarricentric
+  , inTriangle
   -- * Re-exports from Hiraffe
   , HasVertices(..), HasVertices'(..)
   ) where
 
+import Data.Foldable1
 import Data.Default
 import HGeometry.Ext
 import Control.Lens
@@ -28,7 +30,8 @@ import HGeometry.Line.PointAndVector
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
-import Hiraffe.Graph.Class(HasVertices(..), HasVertices'(..))
+import Hiraffe.Graph.Class (HasVertices(..), HasVertices'(..))
+import HGeometry.Boundary
 
 --------------------------------------------------------------------------------
 
@@ -153,3 +156,12 @@ fromBarricentric                                   :: ( Triangle_ triangle point
                                                    -> Point d r
 fromBarricentric (Vector3 a b c) (Triangle_ p q r) = let f = view vector in
                                                        Point $ a *^ f p ^+^ b *^ f q ^+^ c *^ f r
+
+
+
+
+-- | Test where the query point lies with respect to the triangle
+inTriangle   :: ( Point_ corner 2 r
+                , Point_ point 2 r, Ord r, Num r, Triangle_ triangle corner)
+             => point -> triangle -> PointLocationResult
+inTriangle q = foldMap1 (q `inHalfSpace`) . intersectingHalfPlanes

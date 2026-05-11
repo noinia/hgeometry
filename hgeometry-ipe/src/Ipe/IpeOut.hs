@@ -16,6 +16,8 @@
 --------------------------------------------------------------------------------
 module Ipe.IpeOut where
 
+import           Ipe.Value
+import           Data.Default
 import           Prelude hiding (sqrt)
 import           Control.Lens hiding (Simple, holes)
 import           Data.Foldable (toList)
@@ -59,6 +61,7 @@ import           Ipe.FromIpe
 import           Ipe.FromIpe.UnboundedConvexChain
 import           Ipe.Path (Orientation(..))
 import           Ipe.Types
+import           Ipe.Attributes.Types
 
 --------------------------------------------------------------------------------
 
@@ -79,46 +82,25 @@ type IpeOut g i r = g -> IpeObject' i r
 type IpeOut' f g i r = g -> f (IpeObject' i r)
 
 
--- | Add attributes to an IpeObject'
-(!)       :: IpeObject' i r -> IpeAttributes i r -> IpeObject' i r
-(!) i ats = i&extra %~ (<> ats)
-
 -- | Render an ipe object
 --
 --
 -- >>> :{
---   iO $ defIO myPolygon ! attr SFill (IpeColor "blue")
---                        ! attr SLayer "alpha"
---                        ! attr SLayer "beta"
+--   iO $ defIO myPolygon & fill  ?~  IpeColor "blue"
+--                        & layer ?~ "alpha"
+--                        & layer ?~ "beta"
 -- :}
--- IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "blue"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+-- IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ PathAttributes {_commonAttrs = CommonAttributes {_layer = Just (LayerName {_layerName = "beta"}), _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _stroke = Nothing, _fill = Just (IpeColor (Named "blue")), _pen = Nothing, _dash = Nothing, _lineCap = Nothing, _lineJoin = Nothing, _fillRule = Nothing, _arrow = Nothing, _rArrow = Nothing, _strokeOpacity = Nothing, _opacity = Nothing, _tiling = Nothing, _gradient = Nothing})
+--
+--
 --
 -- >>> :{
---   iO $ ipeGroup [ iO $ ipePolygon myPolygon ! attr SFill (IpeColor "red")
---                 ] ! attr SLayer "alpha"
+--   iO $ ipeGroup [ iO $ ipePolygon myPolygon & fill ?~ IpeColor "red"
+--                 ] & layer ?~ "alpha"
 -- :}
--- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
---
+-- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ PathAttributes {_commonAttrs = CommonAttributes {_layer = Nothing, _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _stroke = Nothing, _fill = Just (IpeColor (Named "red")), _pen = Nothing, _dash = Nothing, _lineCap = Nothing, _lineJoin = Nothing, _fillRule = Nothing, _arrow = Nothing, _rArrow = Nothing, _strokeOpacity = Nothing, _opacity = Nothing, _tiling = Nothing, _gradient = Nothing})] :+ GroupAttributes {_commonAttrs = CommonAttributes {_layer = Just (LayerName {_layerName = "alpha"}), _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _clip = Nothing})
 iO :: ToObject i => IpeObject' i r -> IpeObject r
 iO = mkIpeObject
-
--- | Render to an ipe object using the defIO IpeOut
---
---
--- >>> :{
---   iO'' myPolygon $  attr SFill (IpeColor "red")
---                  <> attr SLayer "alpha"
---                  <> attr SLayer "beta"
--- :}
--- IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {Attr LayerName {_layerName = "beta"}, NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
---
--- >>> iO'' [ myPolygon , myPolygon ] $ attr SLayer "alpha"
--- IpeGroup (Group [IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr}),IpePath (Path {_pathSegments = fromList [PolygonPath AsIs (SimplePolygon [Point2 0 0,Point2 10 10,Point2 100 200])]} :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})] :+ Attrs {Attr LayerName {_layerName = "alpha"}, NoAttr, NoAttr, NoAttr, NoAttr})
-iO''       :: ( HasDefaultIpeOut g, NumType g ~ r
-             , DefaultIpeOut g ~ i, ToObject i
-             ) => g -> IpeAttributes i r
-           -> IpeObject r
-iO'' g ats = iO $ defIO g ! ats
 
 -- | generate an ipe object without any specific attributes
 iO' :: HasDefaultIpeOut g => g -> IpeObject (NumType g)
@@ -136,10 +118,6 @@ class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
   -- an ipe object of type 'DefaultIpeOut g'
   defIO :: IpeOut g (DefaultIpeOut g) (NumType g)
 
-instance (HasDefaultIpeOut g, a ~ IpeAttributes (DefaultIpeOut g) (NumType g))
-        => HasDefaultIpeOut (g :+ a) where
-  type DefaultIpeOut (g :+ a) = DefaultIpeOut g
-  defIO (g :+ ats) = defIO g ! ats
 
 instance HasDefaultIpeOut a => HasDefaultIpeOut [a] where
   type DefaultIpeOut [a] = Group
@@ -226,10 +204,31 @@ instance ( VertexContainer f (Point 2 r)
   type DefaultIpeOut (ConvexPolygonF f (Point 2 r)) = Path
   defIO = defIO . toSimplePolygon
 
+
+instance ( HasDefaultIpeOut g, DefaultIpeOut g ~ Path, NumType g ~ r
+         ) => HasDefaultIpeOut (g :+ PathAttributes r) where
+  type DefaultIpeOut (g :+ PathAttributes r) = Path
+  defIO (g :+ ats) = defIO g & attributes .~ ats
+    -- should we really override all of them?
+
+instance ( HasDefaultIpeOut g, DefaultIpeOut g ~ IpeSymbol, NumType g ~ r
+         ) => HasDefaultIpeOut (g :+ SymbolAttributes r) where
+  type DefaultIpeOut (g :+ SymbolAttributes r) = IpeSymbol
+  defIO (g :+ ats) = defIO g & attributes .~ ats
+    -- should we really override all of them?
+
+instance ( HasDefaultIpeOut g, DefaultIpeOut g ~ Group, NumType g ~ r
+         ) => HasDefaultIpeOut (g :+ GroupAttributes r) where
+  type DefaultIpeOut (g :+ GroupAttributes r) = Group
+  defIO (g :+ ats) = defIO g & attributes .~ ats
+    -- should we really override all of them?
+
+
+
 instance (Num r, Point_ vertex 2 r, Foldable1 nonEmpty
          ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) where
   type DefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) = Path
-  defIO = renderChain . (:+ mempty)
+  defIO = renderChain . (:+ def)
 
 instance ( HasDefaultIpeOut vertex, HasDefaultIpeOut polygon
          , NumType vertex ~ NumType polygon, Point_ vertex 2 r
@@ -237,7 +236,7 @@ instance ( HasDefaultIpeOut vertex, HasDefaultIpeOut polygon
   type DefaultIpeOut (PossiblyDegenerateSimplePolygon vertex polygon) = Group
   -- use the default renderer for the various options, and then wrap them in a group
   -- (since they will return things of different types)
-  defIO = (:+ mempty) . Group . (:[]) . \case
+  defIO = (:+ def) . Group . (:[]) . \case
     DegenerateVertex v -> iO' v
     DegenerateEdge e   -> iO' $ (^.asPoint) <$> e
     ActualPolygon pg   -> iO' pg
@@ -276,7 +275,7 @@ instance Num r => HasDefaultIpeOut (Rectangle (Point 2 r)) where
 
 instance HasDefaultIpeOut (Group r) where
   type DefaultIpeOut (Group r) = Group
-  defIO = (:+ mempty)
+  defIO = (:+ def)
 
 instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LinePV 2 r)) where
   type DefaultIpeOut (HalfSpaceF (LinePV 2 r)) = Group
@@ -290,7 +289,7 @@ instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LineEQ r
 -- * Point Converters
 
 ipeMark     :: Text -> IpeOut (Point 2 r) IpeSymbol r
-ipeMark n p = Symbol p n :+ mempty
+ipeMark n p = Symbol p n :+ def
 
 ipeDiskMark :: IpeOut (Point 2 r) IpeSymbol r
 ipeDiskMark = ipeMark "mark/disk(sx)"
@@ -335,7 +334,7 @@ ipeHalfLine (HalfLine p v) = ipeHalfLineIn defaultBox $ HalfLine (p^.asPoint) v
 -- pre: the intersection of the box with the line is non-empty
 ipeRay    :: (Ord r, Fractional r, Point_ point 2 r, Show r, Show point)
           => IpeOut (HalfLine point) Path r
-ipeRay hl = ipeHalfLine hl ! attr SArrow normalArrow
+ipeRay hl = ipeHalfLine hl & arrow ?~ normalArrow
 
 -- | Renders the HalfLine in the given box.
 --
@@ -352,16 +351,16 @@ ipeHalfLineIn bBox hl = case hl `intersect` bBox of
 -- | Renders an line segment to a Path
 ipeLineSegment   :: (LineSegment_ lineSegment point, Point_ point 2 r)
                  => IpeOut lineSegment Path r
-ipeLineSegment s = (path . pathSegment $ s) :+ mempty
+ipeLineSegment s = (path . pathSegment $ s) :+ def
 
 -- | Renders a polyline to a Path
 ipePolyLine   :: IpeOut (PolyLine (Point 2 r)) Path r
-ipePolyLine p = (path . PolyLineSegment $ p) :+ mempty
+ipePolyLine p = (path . PolyLineSegment $ p) :+ def
 
 
 -- | Renders an Ellipse to a Path
 ipeEllipse   :: IpeOut (Ellipse r) Path r
-ipeEllipse e = path (EllipseSegment e) :+ mempty
+ipeEllipse e = path (EllipseSegment e) :+ def
 
 -- | Renders a circle to a Path
 ipeCircle :: Radical r => IpeOut (Circle (Point 2 r)) Path r
@@ -369,11 +368,11 @@ ipeCircle = ipeEllipse . circleToEllipse
 
 -- | Renders a Disk to a Path
 ipeDisk   :: Radical r => IpeOut (Disk (Point 2 r)) Path r
-ipeDisk d = ipeCircle (MkSphere d) ! attr SFill (IpeColor "0.722 0.145 0.137")
+ipeDisk d = ipeCircle (MkSphere d) & fill ?~ IpeColor "0.722 0.145 0.137"
 
 -- | Renders a Bezier curve to a Path
 ipeBezier   :: IpeOut (CubicBezier (Point 2 r)) Path r
-ipeBezier b = path (CubicBezierSegment b) :+ mempty
+ipeBezier b = path (CubicBezierSegment b) :+ def
 
 -- | Helper to construct a path from a singleton item
 path :: PathSegment r -> Path r
@@ -388,7 +387,7 @@ pathSegment = PolyLineSegment . fmap (^.asPoint) . lineSegmentToPolyLine
 
 -- | Render as a polygon
 ipePolygon    :: Polygon_ polygon point r => IpeOut polygon Path r
-ipePolygon pg = Path (outer <| inners) :+ mempty
+ipePolygon pg = Path (outer <| inners) :+ def
   where
     outer  = toPolygonPathSegment pg
     inners = toPolygonPathSegment <$> toSequenceOf holes pg
@@ -405,14 +404,14 @@ toPolygonPathSegment = PolygonPath AsIs . uncheckedFromCCWPoints
 -- | Draw a polygon
 ipeSimplePolygon    :: (SimplePolygon_ simplePolygon point r)
                     => IpeOut simplePolygon Path r
-ipeSimplePolygon pg = path (PolygonPath AsIs pg') :+ mempty
+ipeSimplePolygon pg = path (PolygonPath AsIs pg') :+ def
   where
     pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
   -- TODO, maybe write a 'toNonEmptyVectorOf' to avoid copying
 
 -- | Draw a polygon
 ipeSimplePolygon'    :: Foldable1 f => IpeOut (SimplePolygonF f (Point 2 r)) Path r
-ipeSimplePolygon' pg = review' _asSimplePolygon pg :+ mempty
+ipeSimplePolygon' pg = review' _asSimplePolygon pg :+ def
 
 -- | A slightly more general version of review that allows the s and t to differ.
 -- (and in some sense it is less general, since I don't care about monad constraints here)
@@ -450,9 +449,10 @@ ipeHalfPlaneIn            :: (Ord r, Fractional r, Show r)
 ipeHalfPlaneIn rect' c hl = case hl `intersect` rect' of
     Nothing -> ipeGroup [] -- this should not really happen I guess?
     Just is -> case is of
-      ActualPolygon interior -> ipeGroup [ iO $ ipeSimplePolygon interior
-                                              ! attr SFill c
-                                              ! attr SOpacity (Text.pack "20%")
+      ActualPolygon interior -> ipeGroup [ iO (ipeSimplePolygon interior
+                                                 &fill    ?~ c
+                                                 &opacity ?~ Named "20%"
+                                              )
                                          , boundary
                                          ]
       _                      -> ipeGroup [ boundary ]
@@ -473,8 +473,8 @@ drawAsConstraint         :: forall line r.
                             )
                          => IpeColor r
                          -> IpeOut (HalfPlaneF line) Group r
-drawAsConstraint color h = ipeGroup [ iO $ defIO seg ! attr SPen (IpePen "heavier")
-                                    , iO $ ipeSimplePolygon poly ! attr SFill color
+drawAsConstraint color h = ipeGroup [ iO $ defIO seg & pen ?~ IpePen "heavier"
+                                    , iO $ ipeSimplePolygon poly & fill ?~ color
                                     ]
   where
     l = h^.boundingHyperPlane
@@ -518,7 +518,7 @@ constraintDrawingWidth = 100
 -- * Group Converters
 
 ipeGroup    :: Foldable f => IpeOut (f (IpeObject r)) Group r
-ipeGroup xs = Group (toList xs) :+ mempty
+ipeGroup xs = Group (toList xs) :+ def
 
 
 --------------------------------------------------------------------------------
@@ -529,7 +529,7 @@ type InlineLaTeX = Text
 
 -- | Creates an text label
 ipeLabel            :: IpeOut (InlineLaTeX :+ Point 2 r) TextLabel r
-ipeLabel (txt :+ p) = Label txt p :+ mempty
+ipeLabel (txt :+ p) = Label txt p :+ def
 
 
 -- | Annotate an IpeOut with a label
@@ -537,17 +537,23 @@ labelled :: (Show lbl, NumType g ~ r, ToObject i)
          => (g -> Point 2 r) -- ^ where to place the label
          -> IpeOut g i r     -- ^ how to draw the geometric object
          -> IpeOut (g :+ lbl) Group r
-labelled = labelledWith mempty
+labelled = labelledWith def
 
 -- | Annotate an IpeOut with a label
 labelledWith                      :: (Show lbl, NumType g ~ r, ToObject i)
-                                  => IpeAttributes TextLabel r -- ^ attributes for the label
+                                  => [ IpeAttributes TextLabel r -> IpeAttributes TextLabel r ]
+                                     -- ^ attributes for the label
                                   -> (g -> Point 2 r) -- ^ where to place the label
                                   -> IpeOut g i r     -- ^ how to draw the geometric object
                                   -> IpeOut (g :+ lbl) Group r
-labelledWith ats pos f (g :+ lbl) = ipeGroup [ iO $ f g
-                                     , iO $ ipeLabel (toInlineLatex (Text.show lbl) :+ pos g) ! ats
-                                     ]
+labelledWith ats pos f (g :+ lbl) =
+  ipeGroup [ iO $ f g
+           , iO $
+             ipeLabel (toInlineLatex (Text.show lbl) :+ pos g) &attributes %~ apply
+           ]
+  where
+    apply x = foldl' (flip ($)) x ats
+
 
 -- | Convert a text into a valid piece of inline latex
 toInlineLatex :: Text -> InlineLaTeX

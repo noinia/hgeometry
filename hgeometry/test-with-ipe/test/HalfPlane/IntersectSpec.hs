@@ -129,8 +129,8 @@ halfPlaneIntersectionTests inFile theName = describe "HalfPlane x HalfPlane test
   halfPlanes' <- runIO (fmap toHalfPlane <$> (readAllFrom =<< inFile))
   let pages' = [ let res = h1 `intersect` h2
                  in fromContent . concat $
-                    [ [ iO $ defIO res ! attr SLayer "intersection"]
-                    , [ iO $ defIO h   ! attr SLayer "input"
+                    [ [ iO $ defIO res &layer ?~ "intersection"]
+                    , [ iO $ defIO h   &layer ?~ "input"
                       | h <- [h1,h2]
                       ]
                     ]
@@ -193,9 +193,9 @@ testMain = do halfPlanes'' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
 
                                  writeIpeFile outPath' . addStyleSheet opacitiesStyle
                                                        . singlePageFromContent . concat $
-                                   [ [iO $ defIO res ! attr SLayer "intersection"
+                                   [ [iO $ defIO res &layer ?~  "intersection"
                                      ]
-                                   , [ iO $ drawAsConstraint gray h ! attr SLayer "input"
+                                   , [ iO $ drawAsConstraint gray h & layer ?~ "input"
                                      | h <- halfPlanes'
                                      ]
                                    ]
@@ -203,8 +203,8 @@ testMain = do halfPlanes'' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
 
               -- let pages' = [ let res = h1 `intersect` h2
               --                in fromContent . concat $
-              --                     [ [ iO $ defIO res ! attr SLayer "intersection"]
-              --                     , [ iO $ defIO h   ! attr SLayer "input"
+              --                     [ [ iO $ defIO res &layer ?~  "intersection"]
+              --                     , [ iO $ defIO h   &layer ?~  "input"
               --                       | h <- [h1,h2]
               --                       ]
               --                     ]
@@ -228,9 +228,9 @@ myMain = do halfPlanes' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
                 Just res -> do print res
                                outPath' <- outPath
                                writeIpeFile outPath' . singlePageFromContent . concat $
-                                 [ [iO $ defIO res ! attr SLayer "output"
+                                 [ [iO $ defIO res &layer ?~  "output"
                                    ]
-                                 , [ iO $ drawAsConstraint gray h ! attr SLayer "constraint"
+                                 , [ iO $ drawAsConstraint gray h &layer ?~  "constraint"
                                    | h <- halfPlanes'
                                    ]
                                  ]
@@ -663,9 +663,9 @@ drawIntersection = \case
   InSlab _hl            -> ipeGroup [] -- TODO
   BoundedRegion pg      -> ipeGroup [iO $ defIO (pg&vertices %~ view core
                                                   :: ConvexPolygon (Point 2 r)
-                                                ) ! attr SFill blue
-                                                  ! attr SOpacity "10%"
+                                                ) &fill    ?~  blue
+                                                  &opacity ?~ "10%"
                                     ]
-  UnboundedRegion chain -> ipeGroup [iO $ defIO chain ! attr SFill green
-                                                      ! attr SOpacity "10%"
+  UnboundedRegion chain -> ipeGroup [iO $ defIO chain &fill    ?~  green
+                                                      &opacity ?~ "10%"
                                     ]

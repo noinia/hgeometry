@@ -86,7 +86,7 @@ _GeoPositionWithoutCRS = prism' toGeoP fromGeoP
       Just (ZM z m) -> GeoPointXYZM $ PointXYZM x y z m
     fromGeoP = \case
       GeoEmpty                         -> Nothing
-      GeoPointXY p                     -> Just $ p             :+ Nothing
+      GeoPointXY p                     -> Just $ p           :+ Nothing
       GeoPointXYZ (PointXYZ x y z)     -> Just $ PointXY x y :+ Just (Z z)
       GeoPointXYZM (PointXYZM x y z m) -> Just $ PointXY x y :+ Just (ZM z m)
 

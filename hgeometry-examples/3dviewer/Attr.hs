@@ -29,8 +29,6 @@ import           HGeometry.Ext
 import           Data.Constraint.Extras.TH (deriveArgDict)
 import           Data.GADT.Compare.TH (deriveGCompare, deriveGEq)
 import           Data.GADT.Show.TH (deriveGShow)
-import           Data.Vinyl.Notation
-import           Data.Vinyl
 import           Data.Coerce
 
 import           HGeometry.Point

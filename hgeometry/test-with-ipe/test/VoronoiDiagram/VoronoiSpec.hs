@@ -237,7 +237,7 @@ testIpe inFp outFp = do
         vv = voronoiVertices (view core <$> points)
         out = [ iO' points
               , iO' vd
-              ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+              ] <> [ iO $ defIO v &stroke ?~ red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/VoronoiDiagram/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)

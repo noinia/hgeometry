@@ -230,9 +230,6 @@ pattern Interval_ s t <- (startAndEndPoint -> (s,t))
 
 
 -- | Compute where the given query value is with respect to the interval.
---
--- Note that even if the boundary of the interval is open we may
--- return "OnBoundary".
 inInterval       :: forall interval r.
                     ( Ord r
                     , Interval_ interval r
@@ -241,17 +238,18 @@ inInterval       :: forall interval r.
 x `inInterval` i =
     case x `compare` (i^.start) of
       LT -> Outside
-      EQ -> OnBoundary
+      EQ -> case i^.startPoint.to endPointType of
+              Open   -> Outside
+              Closed -> OnBoundary
       GT -> case x `compare` (i^.end) of
               LT -> Inside
-              EQ -> OnBoundary
+              EQ -> case i^.endPoint.to endPointType of
+                Open   -> Outside
+                Closed -> OnBoundary
               GT -> Outside
 
 -- | Test if the point lies inside in,or on the boundary of, the
 -- interval.
---
--- Note that even if the boundary of the interval is open we may
--- return "OnBoundary".
 stabsInterval       :: forall interval r.
                        ( Ord r
                        , Interval_ interval r

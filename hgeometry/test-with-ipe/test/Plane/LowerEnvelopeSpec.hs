@@ -1,6 +1,8 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE NoOverloadedStrings #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
 {- HLINT ignore "Use ++" -}
 module Plane.LowerEnvelopeSpec
@@ -22,7 +24,6 @@ import           Data.Ord (comparing)
 import           Data.Semigroup
 import qualified Data.Set as Set
 import qualified Data.Set.NonEmpty as NESet
-import qualified Data.Text as Text
 import           Golden
 import           HGeometry.Box
 import           HGeometry.Cyclic
@@ -118,9 +119,9 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
         . toList . NEMap.assocs . VD.asMap
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
-                 [ iO $ defIO (site^.asPoint) ! attr SStroke  color
-                 , iO $ defIO voronoiRegion   ! attr SFill    color
-                                              ! attr SOpacity (Text.pack "10%")
+                 [ iO $ defIO (site^.asPoint) &stroke  ?~ color
+                 , iO $ defIO voronoiRegion   &fill    ?~ color
+                                              &opacity ?~ "10%"
                  ]
 
 spec :: Spec
@@ -313,7 +314,7 @@ testIpe inFp outFp = do
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
-              ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+              ] <> [ iO $ defIO v & stroke ?~ red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
@@ -704,8 +705,8 @@ renderToIpe fp mkEnv hs = case connectedLowerEnvelopeWith mkEnv hs of
                                  -- ,
                                  ]
         where
-          defIO' reg = defIO reg ! attr SFill    color
-                                 ! attr SOpacity (Text.pack "10%")
+          defIO' reg = defIO reg &fill    ?~ color
+                                 &opacity ?~ "10%"
           centroid' reg = centerPoint (boundingBox $ toPoly reg)
           toPoly reg = case toConvexPolygonIn rect' reg of
               Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))

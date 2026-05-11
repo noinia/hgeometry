@@ -79,6 +79,7 @@ import           Witherable
 -- >>> :seti -XOverloadedStrings
 -- >>> import Ipe.Attributes
 -- >>> import Ipe.Color(IpeColor(..))
+-- >>> import Data.Default
 -- >>> import qualified Data.List.NonEmpty as NonEmpty
 -- >>> :{
 -- let testPath :: Path Int
@@ -86,7 +87,7 @@ import           Witherable
 --              . PolyLine.polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
---     testPathAttrs = attr SStroke (IpeColor "red")
+--     testPathAttrs = def & stroke ?~ IpeColor "red"
 --     testObject :: IpeObject Int
 --     testObject = IpePath (testPath :+ testPathAttrs)
 -- :}
@@ -249,7 +250,7 @@ pathToPolygon p = case p^..pathSegments.folded._PolygonPath._2 of
 -- object, directly with its attributes here.
 --
 -- >>> testObject ^? _withAttrs _IpePath _asPolyLine
--- Just (PolyLine [Point2 0 0,Point2 10 10,Point2 200 100] :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "red"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
+-- Just (PolyLine [Point2 0 0,Point2 10 10,Point2 200 100] :+ PathAttributes {_commonAttrs = CommonAttributes {_layer = Nothing, _matrix = Nothing, _pin = Nothing, _transformations = Nothing}, _stroke = Just (IpeColor (Named "red")), _fill = Nothing, _pen = Nothing, _dash = Nothing, _lineCap = Nothing, _lineJoin = Nothing, _fillRule = Nothing, _arrow = Nothing, _rArrow = Nothing, _strokeOpacity = Nothing, _opacity = Nothing, _tiling = Nothing, _gradient = Nothing})
 _withAttrs       :: Prism' (IpeObject r) (i r :+ IpeAttributes i r) -> Prism' (i r) g
                  -> Prism' (IpeObject r) (g :+ IpeAttributes i r)
 _withAttrs po pg = prism' g2o o2g
@@ -271,6 +272,27 @@ class HasDefaultFromIpe g where
   type DefaultFromIpe g :: Type -> Type
   defaultFromIpe :: (r ~ NumType g)
                  => Prism' (IpeObject r) (g :+ IpeAttributes (DefaultFromIpe g) r)
+
+
+instance HasDefaultFromIpe (IpeSymbol r) where
+  type DefaultFromIpe (IpeSymbol r) = IpeSymbol
+  defaultFromIpe = _IpeUse
+instance HasDefaultFromIpe (Group r) where
+  type DefaultFromIpe (Group r) = Group
+  defaultFromIpe = _IpeGroup
+instance HasDefaultFromIpe (Path r) where
+  type DefaultFromIpe (Path r) = Path
+  defaultFromIpe = _IpePath
+instance HasDefaultFromIpe (TextLabel r) where
+  type DefaultFromIpe (TextLabel r) = TextLabel
+  defaultFromIpe = _IpeTextLabel
+instance HasDefaultFromIpe (MiniPage r) where
+  type DefaultFromIpe (MiniPage r) = MiniPage
+  defaultFromIpe = _IpeMiniPage
+instance HasDefaultFromIpe (Image r) where
+  type DefaultFromIpe (Image r) = Image
+  defaultFromIpe = _IpeImage
+
 
 instance HasDefaultFromIpe (Point 2 r) where
   type DefaultFromIpe (Point 2 r) = IpeSymbol
@@ -329,8 +351,8 @@ ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
                    poly            <- reorient rawPoly
                    _               <- fromPoints @(ConvexPolygon _) $ poly^._PolyLineF
                    -- makes sure we are convex.
-                   _            <- lookupAttr SArrow  ats
-                   _            <- lookupAttr SRArrow ats
+                   _            <- ats^.arrow
+                   _            <- ats^.rArrow
                    (a:pts1,b)   <- Lens.unsnoc $ poly^..vertices
                    pts@(p:|_)   <- NonEmpty.nonEmpty pts1
                    let q = pts^.last1

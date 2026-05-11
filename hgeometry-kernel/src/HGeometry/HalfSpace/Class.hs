@@ -12,12 +12,16 @@
 module HGeometry.HalfSpace.Class
   ( HalfSpace_(..)
   , HalfPlane_
+  , inHalfSpace
   ) where
 
 import Control.Lens
 import HGeometry.Ext
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Sign
+import HGeometry.Point.Class
+import HGeometry.Boundary
+import HGeometry.HyperPlane.Class
 
 --------------------------------------------------------------------------------
 
@@ -60,3 +64,19 @@ instance HalfSpace_ core d r => HalfSpace_ (core :+ extra) d r where
 
 
 --------------------------------------------------------------------------------
+
+
+-- | Test if a point lies inside a halfspace
+inHalfSpace     :: ( Point_ point d r, Ord r, Num r
+                   , HalfSpace_ halfSpace d r
+                   , HyperPlane_ (BoundingHyperPlane halfSpace d r) d r
+                   )
+                => point -> halfSpace -> PointLocationResult
+inHalfSpace q h = case q `onSideTest` (h^.boundingHyperPlane) of
+                    LT -> case h^.halfSpaceSign of
+                            Negative -> Inside
+                            Positive -> Outside
+                    GT -> case h^.halfSpaceSign of
+                            Negative -> Outside
+                            Positive -> Inside
+                    EQ -> OnBoundary

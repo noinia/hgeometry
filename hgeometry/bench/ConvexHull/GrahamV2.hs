@@ -19,7 +19,9 @@ import qualified Linear.V2 as V2
 newtype MyPoint r = MKPoint (V2.V2 r) deriving (Show,Eq,Ord,Generic)
 -- data MyPoint r = MyPoint !r !r deriving (Show,Eq,Ord,Generic)
 
+pattern MyPoint :: r -> r -> MyPoint r
 pattern MyPoint x y = MKPoint (V2.V2 x y)
+{-# COMPLETE MyPoint #-}
 
 instance NFData r => NFData (MyPoint r)
 
@@ -28,9 +30,10 @@ toP                    :: MyPoint r :+ e -> Boxed.Vector 2 r :+ e
 toP (MyPoint x y :+ e) = Boxed.Vector2 x y :+ e
 
 
-
+fromP               :: Point_ point 2 r => point -> MyPoint r :+ ()
 fromP (Point2_ x y) = MyPoint x y :+ ()
 
+subt :: Num r => MyPoint r -> MyPoint r -> MyPoint r
 (MyPoint x y) `subt` (MyPoint a b) = MyPoint (x-a) (y-b)
 
 
@@ -80,6 +83,7 @@ hull' (a:b:ps) = NonEmpty.fromList $ hull'' [b,a] ps
       | rightTurn (x^.core) (y^.core) (z^.core) = h
       | otherwise                               = cleanMiddle (z:x:rest)
     cleanMiddle _                               = error "cleanMiddle: too few points"
+hull' _        = error "hull': absurd"
 
 rightTurn       :: (Ord r, Num r) => MyPoint r -> MyPoint r -> MyPoint r -> Bool
 rightTurn a b c = ccwP a b c == CW
