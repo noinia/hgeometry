@@ -72,13 +72,13 @@ data Model = Model { _drawings     :: Map LayerName (Seq Item)
 makeLenses ''Model
 
 initialModel :: Model
-initialModel = Model dummy (Just "myLayer")
+initialModel = Model mempty (Just "myLayer")
 
-dummy = Map.fromList [ ("myLayer", Seq.fromList [Item "Item \"bar\" (Drawing \"bar\") True" (Drawing "foodrawing") True])
-                     , ("bar", Seq.fromList [ Item "5" (Drawing "bar") True
-                                            , Item "Just (5,\"True\")" (Drawing "bazz") False
-                                            ])
-                     ]
+-- dummy = Map.fromList [ ("myLayer", Seq.fromList [Item "Item \"bar\" (Drawing \"bar\") True" (Drawing "foodrawing") True])
+--                      , ("bar", Seq.fromList [ Item "5" (Drawing "bar") True
+--                                             , Item "Just (5,\"True\")" (Drawing "bazz") False
+--                                             ])
+--                      ]
 
 instance MimeRender PlainText String where
   type MimeRenderType String = IO JSVal
@@ -90,13 +90,12 @@ instance MimeUnrender PlainText String where
   mimeUnrender Proxy = fmap pure . fromJSValUnchecked
 
 deriving instance ToJSVal Drawing
-instance Miso.JSON.ToJSON Drawing
-instance Miso.JSON.FromJSON Drawing
+
 
 --------------------------------------------------------------------------------
 
 data Action = AcquireData
-            | LoadDrawing String -- this should not really be a string
+            | LoadDrawing Drawings
             | ClearLayer LayerName
             | FetchError (Response MisoString)
             | Clear
@@ -104,11 +103,14 @@ data Action = AcquireData
             | ToggleVisibility (LayerName, Int)
                 -- toggle the visibility of the item indicated by the given location
 
+mkItem       :: (String, Drawing) -> Item
+mkItem (s,d) = Item s d True
+
 updateModel   :: Action -> Effect parent Model Action
 updateModel = \case
   AcquireData      -> withSink $ \sink ->
     clientDrawing (sink . LoadDrawing . body) (sink . FetchError)
-  LoadDrawing str  -> io_ (consoleLog $ ms str)
+  LoadDrawing ds   -> drawings .= fmap (fmap mkItem) ds
   FetchError err   -> io_ $ consoleError $ ms (show $ errorMessage err)
   Clear            -> pure ()
   ClearLayer layer -> pure ()
@@ -208,10 +210,10 @@ viewModel model = div_ []
       --        ]
       -- ]
 
-    content' = [ circle_ []
-               | d <- model^..drawings.folded.folded.filteredBy isVisible.drawing
-               ] <>
-               rawSVG "<rect width=\"100%\" height=\"100%\"/>"
+    content' = concat [ rawSVG d
+                      | Drawing d <- model^..drawings.folded.folded.filteredBy isVisible.drawing
+                      ]
+
 
     -- layers = div_ [ class_ "grid grid-cols-3 gap-4 mb-4" ]
     --               [ left

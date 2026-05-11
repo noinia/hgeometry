@@ -7,7 +7,7 @@ import qualified Data.Sequence as Seq
 import           Data.Sequence (Seq(..))
 import           Control.Monad.State.Class
 import           Data.IORef
-import           Miso (View, ms, text)
+import           Miso (View, ms, text, toMisoString)
 import           Data.ByteString (ByteString, toStrict)
 import           Data.ByteString.Char8 (pack)
 import           Miso.Html.Element (div_)
@@ -29,39 +29,33 @@ import           Servant.Client ( ClientM, runClientM, ClientEnv, mkClientEnv
 import           Control.Concurrent.Async
 import           Network.HTTP.Media ((//), (/:))
 import           Debugger.API
+import           HGeometry.Point
+import           HGeometry.Miso.Svg
 
 --------------------------------------------------------------------------------
 
 
 -- type Svg =
 
-class Draw t where
-  -- | Draw something as svg
-  draw :: t -> View model action
-
-instance Draw Int where
-  draw x = div_ [] [text $ ms x]
-
-
-draw' :: Draw a => a -> Drawing
-draw' = Drawing . decodeUtf8Lenient . toStrict . toHtml . draw
+draw' :: Drawable a => a -> Drawing
+draw' = Drawing . toMisoString . decodeUtf8Lenient . toStrict . toHtml . flip draw []
 
 --------------------------------------------------------------------------------
 -- * Our API
 
 -- | Trace and draw
-traceDrawId         :: (Show a, Draw a) => LayerName -> a -> a
+traceDrawId         :: (Show a, Drawable a) => LayerName -> a -> a
 traceDrawId layer a = traceDraw layer a a
 
 -- | Trace and draw an a on the given layer, while returning a b.
 --
 -- this will add to the current layer
-traceDraw           :: (Show a,Draw a) => LayerName -> a -> b -> b
+traceDraw           :: (Show a, Drawable a) => LayerName -> a -> b -> b
 traceDraw layer a b = unsafePerformIO $ traceDrawIO layer a b
 {-# NOINLINE traceDraw #-}
 
 -- | Implementation of traceDraw
-traceDrawIO           :: (Show a,Draw a) => LayerName -> a -> b -> IO b
+traceDrawIO           :: (Show a,Drawable a) => LayerName -> a -> b -> IO b
 traceDrawIO layer a b = b <$ debugClient (clientDrawLayer (layer,show a, draw' a))
 
 -- | Clears a particular layer
@@ -145,12 +139,11 @@ instance MimeRender HTMLMiso (View model action) where
 
 --------------------------------------------------------------------------------
 
-type State = Map LayerName (Seq (String, Drawing))
 
 -- dummy
 -- serverState = State $ Map.fromList [("dummy",Drawing)]
 
-type StateRef = IORef State
+type StateRef = IORef Drawings
 
 
 type Server' api = ServerT api Handler'
@@ -161,7 +154,7 @@ newtype Handler' a = Handler' {unHandler' :: ReaderT StateRef IO a}
 
 --------------------------------------------------------------------------------
 
-instance MonadState State Handler' where
+instance MonadState Drawings Handler' where
   state f = do ref <- ask
                liftIO $ atomicModifyIORef ref (swap . f)
 
@@ -173,8 +166,8 @@ server =   serveDirectoryWebApp "pub"
       :<|> handleClearLayer
       :<|> handleClear
 
-handleDrawing :: Handler' String
-handleDrawing = gets show
+handleDrawing :: Handler' Drawings
+handleDrawing = get
 
 handleDrawLayer                             :: (LayerName, String, Drawing) -> Handler' ()
 handleDrawLayer (layerName,content,drawing) =
@@ -197,7 +190,7 @@ app stateRef = serve api $ hoistServer api (liftIO . flip runReaderT stateRef . 
 main :: IO ()
 main = runDebugServer defaultPort $ do
   print "woei"
-  debugClient $ clientDrawLayer ("myLayer","my layer content", draw' (5 :: Int))
+  debugClient $ clientDrawLayer ("myLayer","my layer content", draw' (Point2 50 (100 :: Int)))
   x <- read <$> getLine
   print $ fib x
 
@@ -205,4 +198,4 @@ fib :: Int -> Int
 fib = \case
   0 -> 0
   1 -> 1
-  x -> traceDrawId "fib" $ fib (x-1) + fib (x-2)
+  x -> fib (x-1) + fib (x-2)
