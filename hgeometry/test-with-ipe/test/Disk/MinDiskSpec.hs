@@ -47,7 +47,7 @@ testCases fp = describe ("tests from" <> show fp) $
 groupByColor :: [IpeSymbol R :+ _] -> Map.MonoidalMap (Maybe (IpeColor R))
                                                       (Set.NESet (IpeSymbol R))
 groupByColor = foldMap (\(p :+ ats) ->
-                           Map.singleton (lookupAttr SStroke ats) (Set.singleton p))
+                           Map.singleton (ats^.stroke) (Set.singleton p))
 
 
 

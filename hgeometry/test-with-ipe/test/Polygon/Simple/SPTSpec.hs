@@ -126,8 +126,8 @@ spec = describe "shortest path tree tests" $ do
 manualTest = it "manual test" $
     let triang = triangulate myBuggyPoly
         sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' myBuggySource triang ]
-        sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
-        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+        sptEdges' = [ iO $ defIO e & stroke ?~ green | e <- sptEdges ]
+        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) & stroke ?~ gray
                 | (e, Diagonal) <- triang^..edges.withIndex
                 ]
         -- wrong = [ iO $ defIO wr ! attr SStroke red
@@ -139,7 +139,7 @@ manualTest = it "manual test" $
               , iO' myBuggyPoly
               , iO $ ipeGroup diags
               , iO $ ipeGroup sptEdges'
-              , iO $ defIO myIssueSeg ! attr SStroke orange
+              , iO $ defIO myIssueSeg & stroke ?~ orange
               ]
         res = unsafePerformIO $ do
                                   let  outF = [osp|/tmp/manual.ipe|]
@@ -170,15 +170,15 @@ testIpe inFp outFp = describe (show inFp) $ do
           -- orientDualTree (==) $ toTreeRep triang mySource tree
 
         sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' mySource triang ]
-        sptEdges' = [ iO $ defIO e ! attr SStroke green
+        sptEdges' = [ iO $ defIO e & stroke ?~ green
                     | e <- sptEdges
                     ]
 
-        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) &stroke ?~ gray
                 | (e, Diagonal) <- triang^..edges.withIndex
                 ]
 
-        lefts = [ iO $ defIO p ! attr SStroke blue
+        lefts = [ iO $ defIO p & stroke ?~ blue
                 | p <- bifoldMap (\(Vector2 (l :+ _) _) -> [l]) (const []) tree'
                 ]
 
@@ -271,7 +271,7 @@ drawDualTree gr dt = iO . ipeGroup . concat $ [ verts
     verts     = drawRoot : foldMap ((:[]) . iO . drawVertex) dt
     treeEdges = []
 
-    drawRoot     = iO $ drawVertex (dt^.rootVertex) ! attr SStroke red
+    drawRoot     = iO $ drawVertex (dt^.rootVertex) & stroke ?~ red
     drawVertex f = ipeDiskMark $ gr^?!outerBoundaryPolygonAt f.to centroid
 
 

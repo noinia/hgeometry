@@ -1,5 +1,7 @@
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE AllowAmbiguousTypes          #-}
+{-# LANGUAGE QuantifiedConstraints          #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Miso.Svg.Writer
@@ -23,13 +25,8 @@ module HGeometry.Miso.Svg.Writer
   , dSimplePolygon
   ) where
 
-import           Control.Lens hiding (Const,rmap)
+import           Control.Lens
 import qualified Data.Foldable as F
-import           Data.Maybe (catMaybes)
-import           Data.Proxy
-import           Data.Vinyl hiding (Label)
-import           Data.Vinyl.Functor
-import           Data.Vinyl.TypeLevel
 import           HGeometry.Ball
 import           HGeometry.Box
 import           HGeometry.Ext
@@ -42,13 +39,14 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
 import qualified Ipe
-import qualified Ipe.Attributes as IA
+import           Ipe.Attributes
 import           Miso (Attribute, View, text)
 import           Miso.String (MisoString, ToMisoString(..), ms)
 import qualified Miso.String.Util as MisoString
 import           Miso.Svg
 import           Miso.Svg.Property
 import           Miso.Html.Property (width_,height_) -- not sure if this is correct (namespace)!
+import           Barbies
 
 --------------------------------------------------------------------------------
 
@@ -265,12 +263,13 @@ instance ToMisoString r => Drawable (Ipe.IpeObject r) where
     Ipe.IpePath p      -> draw p
 
 instance ( Drawable g
-         , AllConstrained IpeToMisoAttr rs
-         , ReifyConstraint ToMisoString (IA.Attr f) rs
-         , RMap rs, RecordToList rs
-         , RecAll (IA.Attr f) rs ToMisoString
-         ) => Drawable (g :+ IA.Attributes f rs) where
-  draw (i :+ iAts) ats = draw i (svgWriteAttrs iAts <> ats)
+         , ToMisoString r
+         , forall action. SvgWriteAttributes (ats r) action
+         ) => Drawable (g :+ ats r Maybe) where
+  draw (i :+ iAts) ats = draw i (svgWriteAttrs @(ats r) iAts <> ats)
+
+
+
 
 instance ToMisoString r => Drawable (Ipe.Group r) where
   draw (Ipe.Group os) ats = g_ ats (map (flip draw []) os)
@@ -318,81 +317,78 @@ instance ToMisoString r => Drawable (Ipe.PathSegment r) where
 
 --------------------------------------------------------------------------------
 
-type SvgF action = MisoString -> Attribute action
 
--- | Functon to write all attributes in a Rec
-svgWriteAttrs              :: ( AllConstrained IpeToMisoAttr rs
-                              , RMap rs, RecordToList rs
-                              , ReifyConstraint ToMisoString (IA.Attr f) rs
-                              , RecAll (IA.Attr f) rs ToMisoString
-                              )
-                           => IA.Attributes f rs
-                           -> [Attribute action]
-svgWriteAttrs (IA.Attrs r) = map (\(g,x) -> g x) . catMaybes . recordToList
-                             $ IA.zipRecsWith f (writeAttrFunctions r)
-                                                (writeAttrValues r)
-  where
-    f (Const mn) (Const mv) = Const $ (,) <$> mn <*> mv
-
--- | Writing Attribute names
-writeAttrFunctions           :: AllConstrained IpeToMisoAttr rs
-                             => Rec f rs
-                             -> Rec (Const (Maybe (SvgF action))) rs
-writeAttrFunctions RNil      = RNil
-writeAttrFunctions (x :& xs) = Const (write'' x) :& writeAttrFunctions xs
-  where
-    write''   :: forall f s action. IpeToMisoAttr s => f s -> Maybe (SvgF action)
-    write'' _ = attrSvg (Proxy :: Proxy s)
+newtype SvgF action val = SvgF (val -> [Attribute action])
 
 
--- | Writing the attribute values
-writeAttrValues :: ( ReifyConstraint ToMisoString (IA.Attr f) rs, RMap rs
-                   , RecAll (IA.Attr f) rs ToMisoString)
-                => Rec (IA.Attr f) rs -> Rec (Const (Maybe MisoString)) rs
-writeAttrValues = rmap (\(Compose (Dict x)) -> Const $ toMaybeValue x)
-                . reifyConstraint @ToMisoString
 
-toMaybeValue   :: ToMisoString (IA.Attr f at) => IA.Attr f at -> Maybe MisoString
-toMaybeValue a = case a of
-                   IA.NoAttr -> Nothing
-                   IA.Attr _ -> Just $ toMisoString a
+  -- MisoString -> Attribute action
 
--- | For the types representing attribute values we can get the name/key to use
--- when serializing to ipe.
-class IpeToMisoAttr (a :: IA.AttributeUniverse) where
-  attrSvg :: proxy a -> Maybe (SvgF action)
+class SvgWriteAttributes ats action where
+  svgAttrFunctions :: ats (SvgF action)
+  -- | Write the attributes to file
+  svgWriteAttrs :: ats Maybe -> [Attribute action]
+  default svgWriteAttrs :: (ApplicativeB ats, TraversableB ats) => ats Maybe -> [Attribute action]
+  svgWriteAttrs = bfoldMap getConst
+                . bzipWith writeAttr svgAttrFunctions
 
--- CommonAttributeUnivers
-instance IpeToMisoAttr IA.Layer           where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Matrix          where attrSvg _ = Nothing -- TODO
-instance IpeToMisoAttr IA.Pin             where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Transformations where attrSvg _ = Nothing
+singleton :: a -> [a]
+singleton = (:[])
 
--- IpeSymbolAttributeUniversre
-instance IpeToMisoAttr IA.Stroke       where attrSvg _ = Just stroke_
-instance IpeToMisoAttr IA.Fill         where attrSvg _ = Just fill_
-instance IpeToMisoAttr IA.Pen          where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Size         where attrSvg _ = Nothing
+instance SvgWriteAttributes (CommonAttributes r) action where
+  svgAttrFunctions = bpure (SvgF $ const [])
+  svgWriteAttrs = bfoldMap getConst
+                . bzipWith writeAttr svgAttrFunctions
 
--- PathAttributeUniverse
-instance IpeToMisoAttr IA.Dash       where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.LineCap    where attrSvg _ = Just strokeLinecap_
-instance IpeToMisoAttr IA.LineJoin   where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.FillRule   where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Arrow      where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.RArrow     where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.StrokeOpacity where attrSvg _ = Just strokeOpacity_
-instance IpeToMisoAttr IA.Opacity    where attrSvg _ = Just fillOpacity_
-instance IpeToMisoAttr IA.Tiling     where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Gradient   where attrSvg _ = Nothing
+writeAttr :: forall action. (forall a. SvgF action a -> Maybe a -> Const [Attribute action] a)
+writeAttr (SvgF attr) m = Const $ maybe [] attr m
 
--- GroupAttributeUniverse
-instance IpeToMisoAttr IA.Clip     where attrSvg _ = Nothing -- Just clipPath_
 
--- Text attributes
-instance IpeToMisoAttr IA.Width    where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Height   where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Depth    where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.VAlign   where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.HAlign   where attrSvg _ = Nothing
-instance IpeToMisoAttr IA.Style    where attrSvg _ = Nothing
+instance ToMisoString r => SvgWriteAttributes (SymbolAttributesF r) action where
+  svgAttrFunctions = SymbolAttributes
+    { _commonAttrs = svgAttrFunctions
+    , _stroke      = SvgF (singleton . stroke_ . ms)
+    , _fill        = SvgF (singleton . fill_   . ms)
+    , _pen         = SvgF (const []           )
+    , _symbolSize  = SvgF (const []           )
+    }
+  svgWriteAttrs = bfoldMap getConst
+                . bzipWith writeAttr svgAttrFunctions
+
+instance ToMisoString r => SvgWriteAttributes (PathAttributesF r) action where
+  svgAttrFunctions = PathAttributes
+    { _commonAttrs = svgAttrFunctions
+    , _stroke        = SvgF (singleton . stroke_ . ms)
+    , _fill          = SvgF (singleton . fill_ . ms)
+    , _pen           = SvgF (const []                           )
+    , _dash          = SvgF (const []                           )
+    , _lineCap       = SvgF (singleton . strokeLinecap_ . ms)
+    , _lineJoin      = SvgF (const []                           )
+    , _fillRule      = SvgF (const []                           )
+    , _arrow         = SvgF (const []                           )
+    , _rArrow        = SvgF (const []                           )
+    , _strokeOpacity = SvgF (singleton . strokeOpacity_ . ms)
+    , _opacity       = SvgF (singleton . fillOpacity_ . ms)
+    , _tiling        = SvgF (const []                           )
+    , _gradient      = SvgF (const []                           )
+    }
+
+instance SvgWriteAttributes (GroupAttributesF r) action where
+  svgAttrFunctions = GroupAttributes
+    { _commonAttrs = svgAttrFunctions
+    , _clip        = SvgF (const [])
+    }
+
+instance ToMisoString r => SvgWriteAttributes (TextAttributesF r) action where
+  svgAttrFunctions = TextAttributes
+    { _commonAttrs = svgAttrFunctions
+    , _stroke      = SvgF (singleton . stroke_ . ms)
+    , _textSize    = SvgF (const [])
+    , _opacity     = SvgF (singleton . strokeOpacity_ . ms)
+    , _textWidth   = SvgF (const [])
+    , _textHeight  = SvgF (const [])
+    , _depth       = SvgF (const [])
+    , _hAlign      = SvgF (const [])
+    , _vAlign      = SvgF (const [])
+    , _style       = SvgF (const [])
+    }

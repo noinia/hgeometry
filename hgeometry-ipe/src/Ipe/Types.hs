@@ -35,9 +35,7 @@ module Ipe.Types(
   , IpeBitmap
   -- * Attributes
   , IpeAttributes
-  , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, mapIpeAttrs, traverseIpeAttrs
-  , commonAttributes
+  , attributes, commonAttributes
   -- * Layers and Views
   , LayerName(LayerName), layerName
   , View(View), layerNames, activeLayer
@@ -63,7 +61,7 @@ import           Ipe.Content
 import           Ipe.Layer
 import           Ipe.Literal
 import           Text.XML.Expat.Tree (Node)
-
+import           Control.Lens.Extras(is)
 
 --------------------------------------------------------------------------------
 
@@ -166,7 +164,7 @@ emptyPage = fromContent []
 fromContent     :: [IpeObject r] -> IpePage r
 fromContent obs = IpePage layers' [View layers' a] obs
   where
-    layers' = Set.toList . Set.fromList $ a : mapMaybe (^.commonAttributes.ixAttr SLayer) obs
+    layers' = Set.toList . Set.fromList $ a : mapMaybe (^.layer) obs
     a       = "alpha"
 
 -- | Makes sure that the page has at least one layer and at least one
@@ -191,7 +189,7 @@ withDefaults p = case p^.layers of
 -- >>> page^..content.onLayer "myLayer"
 -- []
 onLayer   :: LayerName -> Getting (Endo [IpeObject r]) [IpeObject r] (IpeObject r)
-onLayer n = folded.filtered (\o -> o^?commonAttributes._Attr SLayer == Just n)
+onLayer n = folded.filteredBy (layer._Just.only n)
 
 -- | Gets all objects that are visible in the given view.
 --
@@ -208,7 +206,7 @@ contentInView (fromIntegral -> i) = to inView'
     inView' p = let lrs = Set.fromList . concatMap (^.layerNames) $ p^..views.ix i
                 in p^..content.folded.filtered (inVisibleLayer lrs)
 
-    inVisibleLayer lrs o = maybe False (`Set.member` lrs) $ o^?commonAttributes._Attr SLayer
+    inVisibleLayer lrs o = maybe False (`Set.member` lrs) $ o^.layer
 
 --------------------------------------------------------------------------------
 

@@ -70,8 +70,8 @@ ipeTest inFp = do
   for_ triangles $ \(tri :+ triAts) -> do
     for_ points $ \(p :+ pAts) ->
       it ("inTriangle: " <> show tri <> ", " <> show (p^.symbolPoint)) $
-        inTriangle (p^.symbolPoint) tri `shouldBe` answer (triAts^?_Attr SStroke)
-                                                          (pAts^?_Attr SStroke)
+        inTriangle (p^.symbolPoint) tri `shouldBe` answer (triAts^.stroke)
+                                                          (pAts^.stroke)
                                                           (p^.symbolName)
 
 answer                :: Maybe (IpeColor R) -> Maybe (IpeColor R) -> Text -> PointLocationResult

@@ -6,6 +6,7 @@ module PlaneGraph.PolygonOverlaySpec
   , renderGraph
   ) where
 
+import Data.Default
 import HGeometry.Unbounded
 import Data.Proxy
 import Data.Maybe
@@ -53,7 +54,7 @@ spec = describe "Overlaying Polygons" $ do
       , Triangle (Point2 10 (-5)) (Point2 20 (-5)) (Point2 20 200) :+ props 2 green blue
       ] -- these triangles are indeed in CCW order....
     myPolygons = myTriangles2&mapped.core %~ fromTriangle
-    props z s f = (z, RenderProps (Just $ attr SStroke s) (Just $ attr SFill f))
+    props z s f = (z, RenderProps (Just $ def&stroke ?~ s) (Just $ def&fill ?~ f))
 
 --------------------------------------------------------------------------------
 
@@ -81,14 +82,14 @@ renderGraph gr = theFaces <> theEdges
     theFaces = ifoldMapOf interiorFacePolygons drawFace' gr
     drawFace' fi pg = case attrToR <$> gr^?!faceAt fi of
         Nothing  -> []
-        Just ats -> [ iO $ ipePolygon pg' ! ats ]
+        Just ats -> [ iO $ ipePolygon pg' &attributes .~ ats ]
       where
           pg' :: PolygonalDomain _
           pg' = pg&vertices %~ toPoint
 
     drawEdge' d s = case attrToR <$> gr^?!edgeAt d of
         Nothing  -> []
-        Just ats -> [ iO $ ipeLineSegment s' ! ats ]
+        Just ats -> [ iO $ ipeLineSegment s' &attributes .~ ats ]
       where
         s' :: ClosedLineSegment (Point 2 r)
         s' = s&vertices %~ toPoint
@@ -96,7 +97,12 @@ renderGraph gr = theFaces <> theEdges
     toPoint :: Point_ point 2 r => point -> Point 2 r
     toPoint = view asPoint
 
-    attrToR = mapIpeAttrs (Proxy @Path) realToFrac
+
+    attrToR = mapPath realToFrac -- id -- mapIpeAttrs (Proxy @Path) realToFrac
+
+
+mapPath   :: Traversable f => (r -> s) -> PathAttributesF r f -> PathAttributesF s f
+mapPath f = runIdentity . traversePath (Identity . f)
 
 --------------------------------------------------------------------------------
 

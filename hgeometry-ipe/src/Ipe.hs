@@ -49,9 +49,7 @@ module Ipe(
   , IpeBitmap
   -- ** Attributes
   , IpeAttributes
-  , Attributes', AttributesOf, AttrMap, AttrMapSym1
-  , attributes, mapIpeAttrs, traverseIpeAttrs
-  , commonAttributes
+  , attributes
   -- * Layers and Views
   , LayerName(LayerName), layerName
   , View(View), layerNames, activeLayer
@@ -91,12 +89,12 @@ module Ipe(
   -- , module Ipe.Types
   -- , module Ipe.FromIpe
   , module Ipe.Attributes
+  , module Ipe.Attributes.Types
   , module Ipe.Value
   , IpeColor(..), named
   ) where
 
 import Control.Lens hiding (views)
-import Data.Maybe (isJust)
 import HGeometry.Ext
 import HGeometry.HalfLine
 import HGeometry.LineSegment
@@ -109,25 +107,24 @@ import Ipe.Reader
 import Ipe.Types
 import Ipe.Value
 import Ipe.Writer
+import Ipe.Attributes.Types
 
 --------------------------------------------------------------------------------
 
 -- | Try to parse an Line segment with an arrow head as a HalfLine
 _asHalfLine :: (Fractional r, Ord r, Show r)
             => Prism' (IpeObject r) (HalfLine (Point 2 r) :+ IpeAttributes Path r)
-_asHalfLine = prism' (\(hl :+ ats) -> IpePath (ipeHalfLine hl ! ats)) objToHalfLine
+_asHalfLine = prism' (\(hl :+ ats) -> IpePath (ipeHalfLine hl &attributes .~ ats)) objToHalfLine
+    -- FIXME: this overwrites the attributes set by ipeHalfLine that is not entirely ideal
   where
     objToHalfLine = \case
       IpePath (path' :+ ats) -> case path'^?_asClosedLineSegment  of
-        Just (ClosedLineSegment s t) -> case (hasAttr SArrow ats, hasAttr SRArrow ats) of
-                                          (True,False) -> Just $ HalfLine s (t .-. s) :+ ats
-                                          (False,True) -> Just $ HalfLine s (s .-. t) :+ ats
-                                          _            -> Nothing
+        Just (ClosedLineSegment s t) -> case (ats^.arrow, ats^.rArrow) of
+                                          (Just _, Nothing) -> Just $ HalfLine s (t .-. s) :+ ats
+                                          (Nothing, Just _) -> Just $ HalfLine s (s .-. t) :+ ats
+                                          _                 -> Nothing
         Nothing                      -> Nothing
       _                    -> Nothing
-
-    hasAttr a = isJust . lookupAttr a
-
 
 instance (Fractional r, Ord r, Show r) => HasDefaultFromIpe (HalfLine (Point 2 r)) where
   type DefaultFromIpe (HalfLine (Point 2 r)) = Path

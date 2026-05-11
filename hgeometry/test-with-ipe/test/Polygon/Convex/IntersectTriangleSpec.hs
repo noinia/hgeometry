@@ -83,8 +83,8 @@ renderComponent :: forall vertex f r.
                 -> IpeObject r
 renderComponent = \case
     DegenerateVertex v -> iO $ defIO (v^.asPoint)
-                             ! attr SStroke red
+                             & stroke ?~ red
     DegenerateEdge e   -> iO $ defIO (view asPoint <$> e)
-                             ! attr SStroke red
+                             & stroke ?~ red
     ActualPolygon poly -> iO $ ipeSimplePolygon poly
-                             ! attr SFill red
+                             & fill ?~ red
