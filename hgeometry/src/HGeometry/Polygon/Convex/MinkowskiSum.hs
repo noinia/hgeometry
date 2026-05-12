@@ -31,8 +31,11 @@ import           HGeometry.Polygon.Simple.Class
 -- and \(m\) vertices respectively.
 --
 -- Note: it takes te position of te second polyon as is; you may want to translate it to
--- te oriin first.
-  --
+-- te origin first.
+--
+-- The minkowski-sum of the blue and green input polygons is shown in red.
+-- ![example](doc-figures/minkowskiSum.svg)
+--
 -- running time: \(O(n+m)\).
 minkowskiSum     :: ( Ord r, Num r
                     , ConvexPolygon_ convexPolygon  point r
