@@ -27,6 +27,7 @@ import           HGeometry.Box (Corners(..))
 import HGeometry.Box qualified as Box
 import           Miso.CSS (style_, border)
 import           Data.Default
+import           HGeometry.Graphics.Render
 
 --------------------------------------------------------------------------------
 
@@ -149,7 +150,10 @@ viewModel model = div_ [ ]
                                 canvasBody
                        ]
   where
-    canvasBody = []
+    canvasBody = [ draw t2 [ fill_ "green"
+                           ]
+                 | t2 :+ t <- renderTriangles (model^.camera) (model^..triangles)
+                 ]
 
 
 --------------------------------------------------------------------------------
