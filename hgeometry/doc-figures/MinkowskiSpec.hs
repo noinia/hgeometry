@@ -12,7 +12,6 @@ import System.OsPath
 import Miso.Svg.Property
 import HGeometry
 import HGeometry.Polygon
-import Miso.String (ToMisoString(..))
 import Golden
 import Test.Hspec
 import Test.Hspec.WithTempFile
@@ -20,7 +19,7 @@ import Test.Hspec.WithTempFile
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = goldenWith [osp|data/doc-figures/|]
+spec = goldenWith [osp|docs/doc-figures/|]
          (svgFileGolden { name = [osp|minkowskiSum|] })
            (staticCanvas_ canvas []
                [ draw (minkowskiSum basePolygon offsetPolygon) [fill_ "red", stroke_ "black"]
