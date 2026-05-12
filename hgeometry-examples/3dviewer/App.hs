@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE UndecidableInstances #-}
 module App(main) where
 
 
@@ -12,6 +13,7 @@ import           HGeometry
 import           HGeometry.Ext
 import           Miso.Html hiding (style_)
 import           HGeometry.Kernel
+import qualified Miso.String as Miso
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Miso.Svg
 import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates)
@@ -28,15 +30,18 @@ import HGeometry.Box qualified as Box
 import           Miso.CSS (style_, border)
 import           Data.Default
 import           HGeometry.Graphics.Render
+import           Miso.Svg.Property
+import           Miso.Svg.Element(polygon_)
+
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
-data Model = Model { _triangeles :: NonEmpty (Triangle (Point 3 R) :+ RenderProps)
-                   , _camera     :: Camera Double
-                   , _canvas     :: Canvas Double
+data Model = Model { _triangles :: NonEmpty (Triangle (Point 3 R) :+ RenderProps)
+                   , _camera    :: Camera Double
+                   , _canvas    :: Canvas Double
                    }
              deriving stock (Eq)
 
@@ -150,10 +155,26 @@ viewModel model = div_ [ ]
                                 canvasBody
                        ]
   where
-    canvasBody = [ draw t2 [ fill_ "green"
-                           ]
-                 | t2 :+ t <- renderTriangles (model^.camera) (model^..triangles)
+    canvasBody = [ draw (uniformScaleBy 10_000 $ toTriangle2 t2)
+                     [ fill_   (ms $ t^?!extra.faceAttrs._Just.fill._Just)
+                     ]
+                 | t2 :+ t <- renderTriangles (model^.camera) (model^..triangles.folded)
                  ]
 
+uniformScaleBy s = transformBy (uniformScaling s)
 
 --------------------------------------------------------------------------------
+
+instance (Miso.ToMisoString r, Point_ point 2 r) => Drawable (Triangle point) where
+  draw t = withAts polygon_
+             [ points_
+               $ Miso.unwords (foldMap (\(Point2_ x y) ->
+                                           [toMisoString x <> "," <> toMisoString y]) t
+                              )
+             ]
+
+instance Miso.ToMisoString r => Drawable (ProjectedTriangle r) where
+  draw = draw . toTriangle2
+
+instance Miso.ToMisoString R where
+  toMisoString = toMisoString . realToFrac @_ @Double
