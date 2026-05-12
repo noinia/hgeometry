@@ -1,10 +1,11 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Golden where
 
-import qualified Paths_hgeometry as Paths
 import           System.OsPath
 import           Test.Hspec.WithTempFile
 import           Miso
+import           Miso.String
 import           Miso.Html.Render
 import           HGeometry.Miso.Svg.StaticCanvas
 import           HGeometry.Miso.Svg
