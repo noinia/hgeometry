@@ -33,13 +33,13 @@ common setup
       , hgeometry-ipe             >= 1.0.0.0   && < 1.1
       , hgeometry-svg             >= 1.0.0.0   && < 1.1
       , hgeometry-svg:miso        >= 1.0.0.0   && < 1.1
+      , hgeometry-vector
       , hgeometry-vector:numtypes
       , lens                      >= 5.2           && < 6
       , filepath                  >= 1.4.100       && < 2
-      , miso                      >= 1.9           && < 2
 
-  mixins:
-      hgeometry-vector:numtypes (Rational as R)
+    mixins:
+      hgeometry-vector:numtypes (IntervalReal as R)
 
 executable minkowski
     import:           setup

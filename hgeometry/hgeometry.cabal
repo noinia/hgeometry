@@ -557,6 +557,27 @@ test-suite with-ipe-hspec-rational
 --   mixins:
 --       hgeometry-vector:numtypes (IntervalReal as R)
 
+test-suite doc-figures
+  import:           all-setup, hgeometry-setup
+  type:             exitcode-stdio-1.0
+  build-tool-depends: hspec-discover:hspec-discover
+  main-is:          Main.hs
+  hs-source-dirs:   doc-figures
+  build-depends:
+      , hgeometry
+      , hgeometry-svg             >= 1.0.0.0   && < 1.1
+      , hgeometry-vector:numtypes
+      , hspec
+      , hspec-with-tempfile
+      , miso                      >= 1.9           && < 2
+  mixins:
+      hgeometry-vector:numtypes (IntervalReal as R)
+  other-modules:
+    Spec
+    Golden
+    MinkowskiSpec
+
+
 --------------------------------------------------------------------------------
 -- * Benchmarks
 --------------------------------------------------------------------------------
