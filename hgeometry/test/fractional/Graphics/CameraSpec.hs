@@ -4,18 +4,20 @@ import Control.Lens
 import HGeometry.Graphics.Camera
 import HGeometry.Point
 import HGeometry.Transformation
-import HGeometry.Triangle
+import HGeometry.Box
+import HGeometry.Triangle (Triangle(..))
 import HGeometry.Vector
+import HGeometry.Instances ()
 import Test.Hspec
 import Test.Hspec.QuickCheck
-import R
+import Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "camera properties" $ do
          prop "viewToWorld consistent with viewportInWorld" $
-           \(cam :: Camera R) ->
+           \(cam :: Camera Double) ->
              (viewToWorld cam <$> corners (viewportScreen cam))
              ===
              viewportInWorld cam
@@ -57,7 +59,7 @@ testToWorld c = map (transformBy t) [u, v, n, Vector3 80 20 40]
     u = (c^.rawViewUp) `cross` n
     v = n `cross` u
     n = (-1) *^ c^.rawCameraNormal -- we need the normal from the scene *into* the camera
-    t = worldToView c
+    t = worldToViewT c
 
 
 testRotate   :: Camera Double -> [Vector 3 Double]
