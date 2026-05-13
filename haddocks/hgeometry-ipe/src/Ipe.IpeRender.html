@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679387772"><span id="local-6989586621679387773"><span id="local-6989586621679387774"><span id="local-6989586621679387775"><span id="local-6989586621679387776"><span id="local-6989586621679387777"></span></span></span></span></span></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679387777"><span id="local-6989586621679387778"><span id="local-6989586621679387779"><span id="local-6989586621679387780"><span id="local-6989586621679387781"><span id="local-6989586621679387782"></span></span></span></span></span></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
 </span><span id="line-3"></span><span class="hs-comment">-- Module      :  Ipe.IpeRender</span><span>
 </span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
@@ -27,52 +27,52 @@
 </span><span id="line-27"></span><span>                                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/filepath-1.5.4.0-e69b/src/System.OsPath.Types.html#OsPath"><span class="hs-identifier hs-type">OsPath</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ output file path</span></span><span>
 </span><span id="line-28"></span><span>                                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-29"></span><span id="ipeRenderWith"><span class="annot"><span class="annottext">ipeRenderWith :: Options -&gt; FileType -&gt; OsPath -&gt; OsPath -&gt; IO ()
-</span><a href="Ipe.IpeRender.html#ipeRenderWith"><span class="hs-identifier hs-var hs-var">ipeRenderWith</span></a></span></span><span> </span><span id="local-6989586621679387801"><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679387801"><span class="hs-identifier hs-var">options</span></a></span></span><span> </span><span id="local-6989586621679387802"><span class="annot"><span class="annottext">FileType
-</span><a href="#local-6989586621679387802"><span class="hs-identifier hs-var">fType</span></a></span></span><span> </span><span id="local-6989586621679387803"><span class="annot"><span class="annottext">OsPath
-</span><a href="#local-6989586621679387803"><span class="hs-identifier hs-var">inFp</span></a></span></span><span> </span><span id="local-6989586621679387804"><span class="annot"><span class="annottext">OsPath
-</span><a href="#local-6989586621679387804"><span class="hs-identifier hs-var">outFp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Ipe.IpeRender.html#ipeRenderWith"><span class="hs-identifier hs-var hs-var">ipeRenderWith</span></a></span></span><span> </span><span id="local-6989586621679387806"><span class="annot"><span class="annottext">Options
+</span><a href="#local-6989586621679387806"><span class="hs-identifier hs-var">options</span></a></span></span><span> </span><span id="local-6989586621679387807"><span class="annot"><span class="annottext">FileType
+</span><a href="#local-6989586621679387807"><span class="hs-identifier hs-var">fType</span></a></span></span><span> </span><span id="local-6989586621679387808"><span class="annot"><span class="annottext">OsPath
+</span><a href="#local-6989586621679387808"><span class="hs-identifier hs-var">inFp</span></a></span></span><span> </span><span id="local-6989586621679387809"><span class="annot"><span class="annottext">OsPath
+</span><a href="#local-6989586621679387809"><span class="hs-identifier hs-var">outFp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-30"></span><span>    </span><span class="hs-keyword">do</span><span>
-</span><span id="line-31"></span><span>      </span><span id="local-6989586621679387805"><span class="annot"><a href="#local-6989586621679387805"><span class="hs-identifier hs-var">inFp'</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">OsPath -&gt; IO String
+</span><span id="line-31"></span><span>      </span><span id="local-6989586621679387810"><span class="annot"><a href="#local-6989586621679387810"><span class="hs-identifier hs-var">inFp'</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">OsPath -&gt; IO String
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/filepath-1.5.4.0-e69b/src/System.OsPath.html#decodeFS"><span class="hs-identifier hs-var">decodeFS</span></a></span><span> </span><span class="annot"><span class="annottext">OsPath
-</span><a href="#local-6989586621679387803"><span class="hs-identifier hs-var">inFp</span></a></span><span>
-</span><span id="line-32"></span><span>      </span><span id="local-6989586621679387807"><span class="annot"><a href="#local-6989586621679387807"><span class="hs-identifier hs-var">outFp'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/filepath-1.5.4.0-e69b/src/System.OsPath.html#decodeFS"><span class="hs-identifier hs-type">decodeFS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387804"><span class="hs-identifier hs-type">outFp</span></a></span><span>
-</span><span id="line-33"></span><span>      </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/typed-process-0.2.13.0-6f71ad979338cc553944cdd2a08e5308d2767ed930db2e1b002547784fa14f21/share/doc/html/src/System.Process.Typed.html#withProcessWait"><span class="hs-identifier hs-type">Process.withProcessWait</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/typed-process-0.2.13.0-6f71ad979338cc553944cdd2a08e5308d2767ed930db2e1b002547784fa14f21/share/doc/html/src/System.Process.Typed.Internal.html#proc"><span class="hs-identifier hs-type">Process.proc</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;iperender&quot;</span></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-type">$</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387810"><span class="hs-identifier hs-type">args</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387805"><span class="hs-identifier hs-type">inFp'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387807"><span class="hs-identifier hs-type">outFp'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-type">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679387811"><span class="annot"><span class="annottext">Process () () ()
-</span><a href="#local-6989586621679387811"><span class="hs-identifier hs-var">_iperenderProc</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679387808"><span class="hs-identifier hs-var">inFp</span></a></span><span>
+</span><span id="line-32"></span><span>      </span><span id="local-6989586621679387812"><span class="annot"><a href="#local-6989586621679387812"><span class="hs-identifier hs-var">outFp'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/filepath-1.5.4.0-e69b/src/System.OsPath.html#decodeFS"><span class="hs-identifier hs-type">decodeFS</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387809"><span class="hs-identifier hs-type">outFp</span></a></span><span>
+</span><span id="line-33"></span><span>      </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/typed-process-0.2.13.0-6f71ad979338cc553944cdd2a08e5308d2767ed930db2e1b002547784fa14f21/share/doc/html/src/System.Process.Typed.html#withProcessWait"><span class="hs-identifier hs-type">Process.withProcessWait</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/typed-process-0.2.13.0-6f71ad979338cc553944cdd2a08e5308d2767ed930db2e1b002547784fa14f21/share/doc/html/src/System.Process.Typed.Internal.html#proc"><span class="hs-identifier hs-type">Process.proc</span></a></span><span> </span><span class="annot"><span class="hs-string">&quot;iperender&quot;</span></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-type">$</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387815"><span class="hs-identifier hs-type">args</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387810"><span class="hs-identifier hs-type">inFp'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387812"><span class="hs-identifier hs-type">outFp'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-type">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679387816"><span class="annot"><span class="annottext">Process () () ()
+</span><a href="#local-6989586621679387816"><span class="hs-identifier hs-var">_iperenderProc</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-34"></span><span>        </span><span class="annot"><span class="annottext">() -&gt; IO ()
 forall a. a -&gt; IO a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-36"></span><span>    </span><span id="local-6989586621679387810"><span class="annot"><span class="annottext">args :: String -&gt; String -&gt; [String]
-</span><a href="#local-6989586621679387810"><span class="hs-identifier hs-var hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679387812"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679387812"><span class="hs-identifier hs-var">inFp'</span></a></span></span><span> </span><span id="local-6989586621679387813"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679387813"><span class="hs-identifier hs-var">outFp'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-36"></span><span>    </span><span id="local-6989586621679387815"><span class="annot"><span class="annottext">args :: String -&gt; String -&gt; [String]
+</span><a href="#local-6989586621679387815"><span class="hs-identifier hs-var hs-var">args</span></a></span></span><span> </span><span id="local-6989586621679387817"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679387817"><span class="hs-identifier hs-var">inFp'</span></a></span></span><span> </span><span id="local-6989586621679387818"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679387818"><span class="hs-identifier hs-var">outFp'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-37"></span><span>           </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">FileType -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#show"><span class="hs-identifier hs-var">show</span></a></span><span> </span><span class="annot"><span class="annottext">FileType
-</span><a href="#local-6989586621679387802"><span class="hs-identifier hs-var">fType</span></a></span><span>
+</span><a href="#local-6989586621679387807"><span class="hs-identifier hs-var">fType</span></a></span><span>
 </span><span id="line-38"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-page&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#show"><span class="hs-identifier hs-var">show</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Int
 </span><a href="Ipe.IpeRender.html#pageNumber"><span class="hs-identifier hs-var">pageNumber</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679387801"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679387806"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-39"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-view&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#show"><span class="hs-identifier hs-var">show</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Int
 </span><a href="Ipe.IpeRender.html#viewNumber"><span class="hs-identifier hs-var">viewNumber</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679387801"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679387806"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-40"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;-resolution&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; String
 forall a. Show a =&gt; a -&gt; String
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#show"><span class="hs-identifier hs-var">show</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Options -&gt; Int
 </span><a href="Ipe.IpeRender.html#resolution"><span class="hs-identifier hs-var">resolution</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679387801"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679387806"><span class="hs-identifier hs-var">options</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-41"></span><span>           </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; [String] -&gt; [String]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span>
@@ -82,7 +82,7 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Background
 </span><a href="Ipe.IpeRender.html#transparent"><span class="hs-identifier hs-var">transparent</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679387801"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679387806"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; [String] -&gt; [String]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span>
 </span><span id="line-43"></span><span>           </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
@@ -91,13 +91,13 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#%3D%3D"><span class="hs-operator hs-var">==</span></a></span><span> </span><span class="annot"><span class="annottext">Options -&gt; Crop
 </span><a href="Ipe.IpeRender.html#crop"><span class="hs-identifier hs-var">crop</span></a></span><span> </span><span class="annot"><span class="annottext">Options
-</span><a href="#local-6989586621679387801"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; [String] -&gt; [String]
+</span><a href="#local-6989586621679387806"><span class="hs-identifier hs-var">options</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; [String] -&gt; [String]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span>
 </span><span id="line-44"></span><span>           </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679387812"><span class="hs-identifier hs-var">inFp'</span></a></span><span>
+</span><a href="#local-6989586621679387817"><span class="hs-identifier hs-var">inFp'</span></a></span><span>
 </span><span id="line-45"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679387813"><span class="hs-identifier hs-var">outFp'</span></a></span><span>
+</span><a href="#local-6989586621679387818"><span class="hs-identifier hs-var">outFp'</span></a></span><span>
 </span><span id="line-46"></span><span>           </span><span class="hs-special">]</span><span>
 </span><span id="line-47"></span><span>
 </span><span id="line-48"></span><span class="hs-comment">-- | Call 'iperender' with the default options.</span><span>
@@ -113,7 +113,7 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span class="annot"><span class="hs-comment">-- | Output filetypes supported by iperender</span></span><span>
 </span><span id="line-57"></span><span class="hs-keyword">data</span><span> </span><span id="FileType"><span class="annot"><a href="Ipe.IpeRender.html#FileType"><span class="hs-identifier hs-var">FileType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PNG"><span class="annot"><a href="Ipe.IpeRender.html#PNG"><span class="hs-identifier hs-var">PNG</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="EPS"><span class="annot"><a href="Ipe.IpeRender.html#EPS"><span class="hs-identifier hs-var">EPS</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="PDF"><span class="annot"><a href="Ipe.IpeRender.html#PDF"><span class="hs-identifier hs-var">PDF</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="SVG"><span class="annot"><a href="Ipe.IpeRender.html#SVG"><span class="hs-identifier hs-var">SVG</span></a></span></span><span>
-</span><span id="line-58"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387829"><span id="local-6989586621679387834"><span class="annot"><span class="annottext">FileType -&gt; FileType -&gt; Bool
+</span><span id="line-58"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387834"><span id="local-6989586621679387839"><span class="annot"><span class="annottext">FileType -&gt; FileType -&gt; Bool
 (FileType -&gt; FileType -&gt; Bool)
 -&gt; (FileType -&gt; FileType -&gt; Bool) -&gt; Eq FileType
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -121,7 +121,7 @@ $c== :: FileType -&gt; FileType -&gt; Bool
 == :: FileType -&gt; FileType -&gt; Bool
 $c/= :: FileType -&gt; FileType -&gt; Bool
 /= :: FileType -&gt; FileType -&gt; Bool
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387841"><span id="local-6989586621679387845"><span id="local-6989586621679387849"><span id="local-6989586621679387853"><span id="local-6989586621679387856"><span id="local-6989586621679387859"><span id="local-6989586621679387862"><span class="annot"><span class="annottext">Eq FileType
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387846"><span id="local-6989586621679387850"><span id="local-6989586621679387854"><span id="local-6989586621679387858"><span id="local-6989586621679387861"><span id="local-6989586621679387864"><span id="local-6989586621679387867"><span class="annot"><span class="annottext">Eq FileType
 Eq FileType =&gt;
 (FileType -&gt; FileType -&gt; Ordering)
 -&gt; (FileType -&gt; FileType -&gt; Bool)
@@ -158,7 +158,7 @@ $cmax :: FileType -&gt; FileType -&gt; FileType
 max :: FileType -&gt; FileType -&gt; FileType
 $cmin :: FileType -&gt; FileType -&gt; FileType
 min :: FileType -&gt; FileType -&gt; FileType
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387870"><span id="local-6989586621679387877"><span id="local-6989586621679387882"><span id="local-6989586621679387887"><span id="local-6989586621679387890"><span id="local-6989586621679387895"><span id="local-6989586621679387902"><span id="local-6989586621679387906"><span class="annot"><span class="annottext">Int -&gt; FileType
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387875"><span id="local-6989586621679387882"><span id="local-6989586621679387887"><span id="local-6989586621679387892"><span id="local-6989586621679387895"><span id="local-6989586621679387900"><span id="local-6989586621679387907"><span id="local-6989586621679387911"><span class="annot"><span class="annottext">Int -&gt; FileType
 FileType -&gt; Int
 FileType -&gt; [FileType]
 FileType -&gt; FileType
@@ -201,8 +201,8 @@ $cenumFromThenTo :: FileType -&gt; FileType -&gt; FileType -&gt; [FileType]
 enumFromThenTo :: FileType -&gt; FileType -&gt; FileType -&gt; [FileType]
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Enum.html#Enum"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></a></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387914"><span id="local-6989586621679387918"><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-type">Show</span></a></span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#FileType"><span class="hs-identifier hs-type">FileType</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-61"></span><span>  </span><span id="local-6989586621679387921"><span class="annot"><span class="annottext">show :: FileType -&gt; String
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387919"><span id="local-6989586621679387923"><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-type">Show</span></a></span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#FileType"><span class="hs-identifier hs-type">FileType</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679387926"><span class="annot"><span class="annottext">show :: FileType -&gt; String
 </span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#show"><span class="hs-identifier hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
 </span><span id="line-62"></span><span>    </span><span class="annot"><span class="annottext">FileType
 </span><a href="Ipe.IpeRender.html#PNG"><span class="hs-identifier hs-var">PNG</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
@@ -228,7 +228,7 @@ enumFromThenTo :: FileType -&gt; FileType -&gt; FileType -&gt; [FileType]
 </span><a href="Ipe.IpeRender.html#transparent"><span class="hs-identifier hs-var hs-var">transparent</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#Background"><span class="hs-identifier hs-type">Background</span></a></span><span>
 </span><span id="line-72"></span><span>                       </span><span class="hs-special">,</span><span> </span><span id="crop"><span class="annot"><span class="annottext">Options -&gt; Crop
 </span><a href="Ipe.IpeRender.html#crop"><span class="hs-identifier hs-var hs-var">crop</span></a></span></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.IpeRender.html#Crop"><span class="hs-identifier hs-type">Crop</span></a></span><span>
-</span><span id="line-73"></span><span>                       </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387924"><span id="local-6989586621679387934"><span id="local-6989586621679387938"><span class="annot"><span class="annottext">Int -&gt; Options -&gt; String -&gt; String
+</span><span id="line-73"></span><span>                       </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387929"><span id="local-6989586621679387939"><span id="local-6989586621679387943"><span class="annot"><span class="annottext">Int -&gt; Options -&gt; String -&gt; String
 [Options] -&gt; String -&gt; String
 Options -&gt; String
 (Int -&gt; Options -&gt; String -&gt; String)
@@ -244,7 +244,7 @@ $cshow :: Options -&gt; String
 show :: Options -&gt; String
 $cshowList :: [Options] -&gt; String -&gt; String
 showList :: [Options] -&gt; String -&gt; String
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387942"><span id="local-6989586621679387949"><span class="annot"><span class="annottext">Options -&gt; Options -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387947"><span id="local-6989586621679387954"><span class="annot"><span class="annottext">Options -&gt; Options -&gt; Bool
 (Options -&gt; Options -&gt; Bool)
 -&gt; (Options -&gt; Options -&gt; Bool) -&gt; Eq Options
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -252,7 +252,7 @@ $c== :: Options -&gt; Options -&gt; Bool
 == :: Options -&gt; Options -&gt; Bool
 $c/= :: Options -&gt; Options -&gt; Bool
 /= :: Options -&gt; Options -&gt; Bool
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387955"><span id="local-6989586621679387964"><span id="local-6989586621679387971"><span id="local-6989586621679387975"><span id="local-6989586621679387978"><span id="local-6989586621679387981"><span id="local-6989586621679387984"><span class="annot"><span class="annottext">Eq Options
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387960"><span id="local-6989586621679387969"><span id="local-6989586621679387976"><span id="local-6989586621679387980"><span id="local-6989586621679387983"><span id="local-6989586621679387986"><span id="local-6989586621679387989"><span class="annot"><span class="annottext">Eq Options
 Eq Options =&gt;
 (Options -&gt; Options -&gt; Ordering)
 -&gt; (Options -&gt; Options -&gt; Bool)
@@ -305,7 +305,7 @@ min :: Options -&gt; Options -&gt; Options
 </span><span id="line-79"></span><span class="hs-comment">-- | Whether or not to render a transparent background in output png</span><span>
 </span><span id="line-80"></span><span class="hs-comment">-- images.</span><span>
 </span><span id="line-81"></span><span class="hs-keyword">data</span><span> </span><span id="Background"><span class="annot"><a href="Ipe.IpeRender.html#Background"><span class="hs-identifier hs-var">Background</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="OpaqueBackground"><span class="annot"><a href="Ipe.IpeRender.html#OpaqueBackground"><span class="hs-identifier hs-var">OpaqueBackground</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="TransparentBackground"><span class="annot"><a href="Ipe.IpeRender.html#TransparentBackground"><span class="hs-identifier hs-var">TransparentBackground</span></a></span></span><span>
-</span><span id="line-82"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387989"><span id="local-6989586621679387991"><span id="local-6989586621679387994"><span class="annot"><span class="annottext">Int -&gt; Background -&gt; String -&gt; String
+</span><span id="line-82"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387994"><span id="local-6989586621679387996"><span id="local-6989586621679387999"><span class="annot"><span class="annottext">Int -&gt; Background -&gt; String -&gt; String
 [Background] -&gt; String -&gt; String
 Background -&gt; String
 (Int -&gt; Background -&gt; String -&gt; String)
@@ -321,7 +321,7 @@ $cshow :: Background -&gt; String
 show :: Background -&gt; String
 $cshowList :: [Background] -&gt; String -&gt; String
 showList :: [Background] -&gt; String -&gt; String
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387997"><span id="local-6989586621679388001"><span id="local-6989586621679388004"><span id="local-6989586621679388009"><span class="annot"><span class="annottext">ReadPrec [Background]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388002"><span id="local-6989586621679388006"><span id="local-6989586621679388009"><span id="local-6989586621679388014"><span class="annot"><span class="annottext">ReadPrec [Background]
 ReadPrec Background
 Int -&gt; ReadS Background
 ReadS [Background]
@@ -341,7 +341,7 @@ $creadPrec :: ReadPrec Background
 readPrec :: ReadPrec Background
 $creadListPrec :: ReadPrec [Background]
 readListPrec :: ReadPrec [Background]
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388016"><span id="local-6989586621679388020"><span class="annot"><span class="annottext">Background -&gt; Background -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388021"><span id="local-6989586621679388025"><span class="annot"><span class="annottext">Background -&gt; Background -&gt; Bool
 (Background -&gt; Background -&gt; Bool)
 -&gt; (Background -&gt; Background -&gt; Bool) -&gt; Eq Background
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -349,7 +349,7 @@ $c== :: Background -&gt; Background -&gt; Bool
 == :: Background -&gt; Background -&gt; Bool
 $c/= :: Background -&gt; Background -&gt; Bool
 /= :: Background -&gt; Background -&gt; Bool
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388025"><span id="local-6989586621679388027"><span id="local-6989586621679388029"><span id="local-6989586621679388032"><span id="local-6989586621679388035"><span id="local-6989586621679388038"><span id="local-6989586621679388041"><span class="annot"><span class="annottext">Eq Background
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388030"><span id="local-6989586621679388032"><span id="local-6989586621679388034"><span id="local-6989586621679388037"><span id="local-6989586621679388040"><span id="local-6989586621679388043"><span id="local-6989586621679388046"><span class="annot"><span class="annottext">Eq Background
 Eq Background =&gt;
 (Background -&gt; Background -&gt; Ordering)
 -&gt; (Background -&gt; Background -&gt; Bool)
@@ -386,7 +386,7 @@ $cmax :: Background -&gt; Background -&gt; Background
 max :: Background -&gt; Background -&gt; Background
 $cmin :: Background -&gt; Background -&gt; Background
 min :: Background -&gt; Background -&gt; Background
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388044"><span id="local-6989586621679388049"><span id="local-6989586621679388054"><span id="local-6989586621679388058"><span id="local-6989586621679388061"><span id="local-6989586621679388065"><span id="local-6989586621679388071"><span id="local-6989586621679388075"><span class="annot"><span class="annottext">Int -&gt; Background
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388049"><span id="local-6989586621679388054"><span id="local-6989586621679388059"><span id="local-6989586621679388063"><span id="local-6989586621679388066"><span id="local-6989586621679388070"><span id="local-6989586621679388076"><span id="local-6989586621679388080"><span class="annot"><span class="annottext">Int -&gt; Background
 Background -&gt; Int
 Background -&gt; [Background]
 Background -&gt; Background
@@ -431,7 +431,7 @@ enumFromThenTo :: Background -&gt; Background -&gt; Background -&gt; [Background
 </span><span id="line-83"></span><span>
 </span><span id="line-84"></span><span class="annot"><span class="hs-comment">-- | Whether or not to crop the output image.</span></span><span>
 </span><span id="line-85"></span><span class="hs-keyword">data</span><span> </span><span id="Crop"><span class="annot"><a href="Ipe.IpeRender.html#Crop"><span class="hs-identifier hs-var">Crop</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="NoCrop"><span class="annot"><a href="Ipe.IpeRender.html#NoCrop"><span class="hs-identifier hs-var">NoCrop</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Crop"><span class="annot"><a href="Ipe.IpeRender.html#Crop"><span class="hs-identifier hs-var">Crop</span></a></span></span><span>
-</span><span id="line-86"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679388078"><span id="local-6989586621679388080"><span id="local-6989586621679388083"><span class="annot"><span class="annottext">Int -&gt; Crop -&gt; String -&gt; String
+</span><span id="line-86"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679388083"><span id="local-6989586621679388085"><span id="local-6989586621679388088"><span class="annot"><span class="annottext">Int -&gt; Crop -&gt; String -&gt; String
 [Crop] -&gt; String -&gt; String
 Crop -&gt; String
 (Int -&gt; Crop -&gt; String -&gt; String)
@@ -445,7 +445,7 @@ $cshow :: Crop -&gt; String
 show :: Crop -&gt; String
 $cshowList :: [Crop] -&gt; String -&gt; String
 showList :: [Crop] -&gt; String -&gt; String
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388086"><span id="local-6989586621679388090"><span id="local-6989586621679388093"><span id="local-6989586621679388097"><span class="annot"><span class="annottext">ReadPrec [Crop]
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388091"><span id="local-6989586621679388095"><span id="local-6989586621679388098"><span id="local-6989586621679388102"><span class="annot"><span class="annottext">ReadPrec [Crop]
 ReadPrec Crop
 Int -&gt; ReadS Crop
 ReadS [Crop]
@@ -462,14 +462,14 @@ $creadPrec :: ReadPrec Crop
 readPrec :: ReadPrec Crop
 $creadListPrec :: ReadPrec [Crop]
 readListPrec :: ReadPrec [Crop]
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388100"><span id="local-6989586621679388104"><span class="annot"><span class="annottext">Crop -&gt; Crop -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388105"><span id="local-6989586621679388109"><span class="annot"><span class="annottext">Crop -&gt; Crop -&gt; Bool
 (Crop -&gt; Crop -&gt; Bool) -&gt; (Crop -&gt; Crop -&gt; Bool) -&gt; Eq Crop
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c== :: Crop -&gt; Crop -&gt; Bool
 == :: Crop -&gt; Crop -&gt; Bool
 $c/= :: Crop -&gt; Crop -&gt; Bool
 /= :: Crop -&gt; Crop -&gt; Bool
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388109"><span id="local-6989586621679388111"><span id="local-6989586621679388113"><span id="local-6989586621679388116"><span id="local-6989586621679388119"><span id="local-6989586621679388122"><span id="local-6989586621679388125"><span class="annot"><span class="annottext">Eq Crop
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388114"><span id="local-6989586621679388116"><span id="local-6989586621679388118"><span id="local-6989586621679388121"><span id="local-6989586621679388124"><span id="local-6989586621679388127"><span id="local-6989586621679388130"><span class="annot"><span class="annottext">Eq Crop
 Eq Crop =&gt;
 (Crop -&gt; Crop -&gt; Ordering)
 -&gt; (Crop -&gt; Crop -&gt; Bool)
@@ -506,7 +506,7 @@ $cmax :: Crop -&gt; Crop -&gt; Crop
 max :: Crop -&gt; Crop -&gt; Crop
 $cmin :: Crop -&gt; Crop -&gt; Crop
 min :: Crop -&gt; Crop -&gt; Crop
-</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388128"><span id="local-6989586621679388133"><span id="local-6989586621679388138"><span id="local-6989586621679388142"><span id="local-6989586621679388145"><span id="local-6989586621679388149"><span id="local-6989586621679388155"><span id="local-6989586621679388159"><span class="annot"><span class="annottext">Int -&gt; Crop
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Ord"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></a></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679388133"><span id="local-6989586621679388138"><span id="local-6989586621679388143"><span id="local-6989586621679388147"><span id="local-6989586621679388150"><span id="local-6989586621679388154"><span id="local-6989586621679388160"><span id="local-6989586621679388164"><span class="annot"><span class="annottext">Int -&gt; Crop
 Crop -&gt; Int
 Crop -&gt; [Crop]
 Crop -&gt; Crop

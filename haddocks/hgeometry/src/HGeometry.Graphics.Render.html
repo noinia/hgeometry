@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Graphics.Render</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Description :  Data type to represent a camera and some functions for working with it.</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Some functions that help rendering 3D objects</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html"><span class="hs-identifier">HGeometry.Graphics.Render</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier">ProjectedTriangle</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier">ProjectedTriangle</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#triangle3"><span class="hs-identifier">triangle3</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#toTriangle2"><span class="hs-identifier">toTriangle2</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#renderTriangles"><span class="hs-identifier">renderTriangles</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-bc42e243617da9ea109382164d821100d6808a0a02dc0312fc3e7dd84b075632/share/doc/html/src/Data.Functor.Apply.html"><span class="hs-identifier">Data.Functor.Apply</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Traversable.html"><span class="hs-identifier">Data.Traversable</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/base-4.21.0.0-ae91/src/Data.Coerce.html"><span class="hs-identifier">Data.Coerce</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-f44779c5b8e6253a04e6a6e933e63c2d6eb8e3b82353574921183dc486469ffa/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Camera.html"><span class="hs-identifier">HGeometry.Graphics.Camera</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Triangle.html"><span class="hs-identifier">HGeometry.Triangle</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html"><span class="hs-identifier">HGeometry.Properties</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Transformation.html"><span class="hs-identifier">HGeometry.Transformation</span></a></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- | Render a scene; i..e a set of triangles</span><span>
+</span><span id="line-32"></span><span class="hs-comment">--</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- this intermediately uses doubles to apply the camera transform</span><span>
+</span><span id="line-34"></span><span class="annot"><a href="HGeometry.Graphics.Render.html#renderTriangles"><span class="hs-identifier hs-type">renderTriangles</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679463512"><span class="annot"><a href="#local-6989586621679463512"><span class="hs-identifier hs-type">triangle</span></a></span></span><span> </span><span id="local-6989586621679463513"><span class="annot"><a href="#local-6989586621679463513"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679463515"><span class="annot"><a href="#local-6989586621679463515"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679463511"><span class="annot"><a href="#local-6989586621679463511"><span class="hs-identifier hs-type">set</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-35"></span><span>                          </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#Functor"><span class="hs-identifier hs-type">Functor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463511"><span class="hs-identifier hs-type">set</span></a></span><span>
+</span><span id="line-36"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Triangle.Class.html#Triangle_"><span class="hs-identifier hs-type">Triangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463512"><span class="hs-identifier hs-type">triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463513"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463513"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679463515"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-37"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Real"><span class="hs-identifier hs-type">Real</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463515"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#Fractional"><span class="hs-identifier hs-type">Fractional</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463515"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-38"></span><span>                          </span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Camera.html#Camera"><span class="hs-identifier hs-type">Camera</span></a></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Double"><span class="hs-identifier hs-type">Double</span></a></span><span>
+</span><span id="line-40"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679463511"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463512"><span class="hs-identifier hs-type">triangle</span></a></span><span>
+</span><span id="line-41"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679463511"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463515"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463512"><span class="hs-identifier hs-type">triangle</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span id="renderTriangles"><span class="annot"><span class="annottext">renderTriangles :: forall triangle point r (set :: * -&gt; *).
+(Functor set, Triangle_ triangle point, Point_ point 3 r, Real r,
+ Fractional r) =&gt;
+Camera Double
+-&gt; set triangle -&gt; set (ProjectedTriangle r :+ triangle)
+</span><a href="HGeometry.Graphics.Render.html#renderTriangles"><span class="hs-identifier hs-var hs-var">renderTriangles</span></a></span></span><span> </span><span id="local-6989586621679463926"><span class="annot"><span class="annottext">Camera Double
+</span><a href="#local-6989586621679463926"><span class="hs-identifier hs-var">camera</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(triangle -&gt; ProjectedTriangle r :+ triangle)
+-&gt; set triangle -&gt; set (ProjectedTriangle r :+ triangle)
+forall a b. (a -&gt; b) -&gt; set a -&gt; set b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#fmap"><span class="hs-identifier hs-var">fmap</span></a></span><span> </span><span class="annot"><span class="annottext">((triangle -&gt; ProjectedTriangle r :+ triangle)
+ -&gt; set triangle -&gt; set (ProjectedTriangle r :+ triangle))
+-&gt; (triangle -&gt; ProjectedTriangle r :+ triangle)
+-&gt; set triangle
+-&gt; set (ProjectedTriangle r :+ triangle)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679463927"><span class="annot"><span class="annottext">orig :: triangle
+</span><a href="#local-6989586621679463927"><span class="hs-identifier hs-var">orig</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Triangle.Class.html#Triangle_"><span class="hs-identifier hs-type">Triangle_</span></a></span><span> </span><span id="local-6989586621679463929"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463929"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679463930"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463930"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679463931"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463931"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-43"></span><span>                         </span><span class="annot"><span class="annottext">Triangle (Point 3 r) -&gt; ProjectedTriangle r
+forall r. Triangle (Point 3 r) -&gt; ProjectedTriangle r
+</span><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-var">ProjectedTriangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 3 r -&gt; Point 3 r -&gt; Triangle (Point 3 r)
+forall point. point -&gt; point -&gt; point -&gt; Triangle point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Point 3 r
+</span><a href="#local-6989586621679463933"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463929"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Point 3 r
+</span><a href="#local-6989586621679463933"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463930"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Point 3 r
+</span><a href="#local-6989586621679463933"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463931"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ProjectedTriangle r -&gt; triangle -&gt; ProjectedTriangle r :+ triangle
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">triangle
+</span><a href="#local-6989586621679463927"><span class="hs-identifier hs-var">orig</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679463933"><span class="annot"><span class="annottext">f :: point -&gt; Point 3 r
+</span><a href="#local-6989586621679463933"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 Double -&gt; Point 3 r
+</span><a href="#local-6989586621679463935"><span class="hs-identifier hs-var">f2</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 3 Double -&gt; Point 3 r)
+-&gt; (point -&gt; Point 3 Double) -&gt; point -&gt; Point 3 r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Transformation
+  (Dimension (Point 3 Double)) (NumType (Point 3 Double))
+-&gt; Point 3 Double -&gt; Point 3 Double
+forall g.
+IsTransformable g =&gt;
+Transformation (Dimension g) (NumType g) -&gt; g -&gt; g
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Transformation.Internal.html#transformBy"><span class="hs-identifier hs-var">transformBy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Camera Double -&gt; Transformation 3 Double
+forall r. Fractional r =&gt; Camera r -&gt; Transformation 3 r
+</span><a href="HGeometry.Graphics.Camera.html#cameraTransform"><span class="hs-identifier hs-var">cameraTransform</span></a></span><span> </span><span class="annot"><span class="annottext">Camera Double
+</span><a href="#local-6989586621679463926"><span class="hs-identifier hs-var">camera</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Point 3 Double -&gt; Point 3 Double)
+-&gt; (point -&gt; Point 3 Double) -&gt; point -&gt; Point 3 Double
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; Point 3 Double
+</span><a href="#local-6989586621679463939"><span class="hs-identifier hs-var">f3</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>    </span><span class="annot"><a href="#local-6989586621679463935"><span class="hs-identifier hs-type">f2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Double"><span class="hs-identifier hs-type">Double</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679463515"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679463935"><span class="annot"><span class="annottext">f2 :: Point 3 Double -&gt; Point 3 r
+</span><a href="#local-6989586621679463935"><span class="hs-identifier hs-var hs-var">f2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter (Point 3 Double) (Point 3 r) Double r
+-&gt; (Double -&gt; r) -&gt; Point 3 Double -&gt; Point 3 r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-f44779c5b8e6253a04e6a6e933e63c2d6eb8e3b82353574921183dc486469ffa/share/doc/html/src/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter (Point 3 Double) (Point 3 r) Double r
+(NumType (Point 3 Double) -&gt; Identity (NumType (Point 3 r)))
+-&gt; Point 3 Double -&gt; Identity (Point 3 r)
+forall point point'.
+HasCoordinates point point' =&gt;
+IndexedTraversal1 Int point point' (NumType point) (NumType point')
+IndexedTraversal1
+  Int
+  (Point 3 Double)
+  (Point 3 r)
+  (NumType (Point 3 Double))
+  (NumType (Point 3 r))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#coordinates"><span class="hs-identifier hs-var">coordinates</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; r
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#realToFrac"><span class="hs-identifier hs-var">realToFrac</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><a href="#local-6989586621679463939"><span class="hs-identifier hs-type">f3</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679463513"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Types.html#Double"><span class="hs-identifier hs-type">Double</span></a></span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679463939"><span class="annot"><span class="annottext">f3 :: point -&gt; Point 3 Double
+</span><a href="#local-6989586621679463939"><span class="hs-identifier hs-var hs-var">f3</span></a></span></span><span> </span><span id="local-6989586621679463942"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463942"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter (Point 3 r) (Point 3 Double) r Double
+-&gt; (r -&gt; Double) -&gt; Point 3 r -&gt; Point 3 Double
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-f44779c5b8e6253a04e6a6e933e63c2d6eb8e3b82353574921183dc486469ffa/share/doc/html/src/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter (Point 3 r) (Point 3 Double) r Double
+(NumType (Point 3 r) -&gt; Identity (NumType (Point 3 Double)))
+-&gt; Point 3 r -&gt; Identity (Point 3 Double)
+forall point point'.
+HasCoordinates point point' =&gt;
+IndexedTraversal1 Int point point' (NumType point) (NumType point')
+IndexedTraversal1
+  Int
+  (Point 3 r)
+  (Point 3 Double)
+  (NumType (Point 3 r))
+  (NumType (Point 3 Double))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#coordinates"><span class="hs-identifier hs-var">coordinates</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Real.html#realToFrac"><span class="hs-identifier hs-var">realToFrac</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679463942"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 3 r) point (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-f44779c5b8e6253a04e6a6e933e63c2d6eb8e3b82353574921183dc486469ffa/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 3 r) point (Point 3 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 3 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-comment">-- TODO: clean up</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- | Represent the projection of a 3D triangle in 2D space.  i.e. this</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- triangle acts as a triangle in R^2, but also has the information</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- from where it came from.</span><span>
+</span><span id="line-58"></span><span class="hs-keyword">newtype</span><span> </span><span id="ProjectedTriangle"><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-var">ProjectedTriangle</span></a></span></span><span> </span><span id="local-6989586621679463596"><span class="annot"><a href="#local-6989586621679463596"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ProjectedTriangle"><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-var">ProjectedTriangle</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_triangle3"><span class="annot"><span class="annottext">forall r. ProjectedTriangle r -&gt; Triangle (Point 3 r)
+</span><a href="HGeometry.Graphics.Render.html#_triangle3"><span class="hs-identifier hs-var hs-var">_triangle3</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679463596"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679463948"><span id="local-6989586621679463955"><span id="local-6989586621679463959"><span class="annot"><span class="annottext">Int -&gt; ProjectedTriangle r -&gt; ShowS
+[ProjectedTriangle r] -&gt; ShowS
+ProjectedTriangle r -&gt; String
+(Int -&gt; ProjectedTriangle r -&gt; ShowS)
+-&gt; (ProjectedTriangle r -&gt; String)
+-&gt; ([ProjectedTriangle r] -&gt; ShowS)
+-&gt; Show (ProjectedTriangle r)
+forall r. Show r =&gt; Int -&gt; ProjectedTriangle r -&gt; ShowS
+forall r. Show r =&gt; [ProjectedTriangle r] -&gt; ShowS
+forall r. Show r =&gt; ProjectedTriangle r -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall r. Show r =&gt; Int -&gt; ProjectedTriangle r -&gt; ShowS
+showsPrec :: Int -&gt; ProjectedTriangle r -&gt; ShowS
+$cshow :: forall r. Show r =&gt; ProjectedTriangle r -&gt; String
+show :: ProjectedTriangle r -&gt; String
+$cshowList :: forall r. Show r =&gt; [ProjectedTriangle r] -&gt; ShowS
+showList :: [ProjectedTriangle r] -&gt; ShowS
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679463994"><span id="local-6989586621679463999"><span class="annot"><span class="annottext">ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool
+(ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool)
+-&gt; (ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool)
+-&gt; Eq (ProjectedTriangle r)
+forall r.
+Eq r =&gt;
+ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall r.
+Eq r =&gt;
+ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool
+== :: ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool
+$c/= :: forall r.
+Eq r =&gt;
+ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool
+/= :: ProjectedTriangle r -&gt; ProjectedTriangle r -&gt; Bool
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679464009"><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#Functor"><span class="hs-identifier hs-type">Functor</span></a></span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679464015"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; ProjectedTriangle a -&gt; ProjectedTriangle b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#fmap"><span class="hs-identifier hs-var hs-var hs-var">fmap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; ProjectedTriangle a -&gt; ProjectedTriangle b
+forall (t :: * -&gt; *) a b. Traversable t =&gt; (a -&gt; b) -&gt; t a -&gt; t b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Traversable.html#fmapDefault"><span class="hs-identifier hs-var">fmapDefault</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679464018"><span id="local-6989586621679464025"><span id="local-6989586621679464030"><span id="local-6989586621679464033"><span id="local-6989586621679464036"><span id="local-6989586621679464039"><span id="local-6989586621679464042"><span id="local-6989586621679464045"><span id="local-6989586621679464048"><span id="local-6989586621679464051"><span id="local-6989586621679464054"><span id="local-6989586621679464057"><span id="local-6989586621679464062"><span id="local-6989586621679464067"><span id="local-6989586621679464072"><span id="local-6989586621679464077"><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Foldable.html#Foldable"><span class="hs-identifier hs-type">Foldable</span></a></span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679464085"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ProjectedTriangle a -&gt; m
+</span><a href="#local-6989586621679464085"><span class="hs-identifier hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; ProjectedTriangle a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Traversable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Traversable.html#foldMapDefault"><span class="hs-identifier hs-var">foldMapDefault</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679464094"><span id="local-6989586621679464099"><span id="local-6989586621679464104"><span class="annot"><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Traversable.html#Traversable"><span class="hs-identifier hs-type">Traversable</span></a></span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679464129"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ProjectedTriangle a -&gt; f (ProjectedTriangle b)
+</span><a href="#local-6989586621679464129"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679464131"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679464131"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span><span> </span><span id="local-6989586621679464132"><span class="annot"><span class="annottext">Triangle (Point 3 a)
+</span><a href="#local-6989586621679464132"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">Triangle (Point 3 b) -&gt; ProjectedTriangle b
+forall r. Triangle (Point 3 r) -&gt; ProjectedTriangle r
+</span><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-var">ProjectedTriangle</span></a></span><span> </span><span class="annot"><span class="annottext">(Triangle (Point 3 b) -&gt; ProjectedTriangle b)
+-&gt; f (Triangle (Point 3 b)) -&gt; f (ProjectedTriangle b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">WrappedApplicative f (Triangle (Point 3 b))
+-&gt; f (Triangle (Point 3 b))
+forall (f :: * -&gt; *) a. WrappedApplicative f a -&gt; f a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-bc42e243617da9ea109382164d821100d6808a0a02dc0312fc3e7dd84b075632/share/doc/html/src/Data.Functor.Bind.Class.html#unwrapApplicative"><span class="hs-identifier hs-var">unwrapApplicative</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Triangle (Point 3 a)
+</span><a href="#local-6989586621679464132"><span class="hs-identifier hs-var">t</span></a></span><span class="annot"><span class="annottext">Triangle (Point 3 a)
+-&gt; (Triangle (Point 3 a)
+    -&gt; WrappedApplicative f (Triangle (Point 3 b)))
+-&gt; WrappedApplicative f (Triangle (Point 3 b))
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Data.Function.html#%26"><span class="hs-operator hs-var">&amp;</span></a></span><span class="annot"><span class="annottext">(Vertex (Triangle (Point 3 a))
+ -&gt; WrappedApplicative f (Vertex (Triangle (Point 3 b))))
+-&gt; Triangle (Point 3 a)
+-&gt; WrappedApplicative f (Triangle (Point 3 b))
+(Point 3 a -&gt; WrappedApplicative f (Point 3 b))
+-&gt; Triangle (Point 3 a)
+-&gt; WrappedApplicative f (Triangle (Point 3 b))
+forall graph graph'.
+HasVertices graph graph' =&gt;
+IndexedTraversal1
+  (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+IndexedTraversal1
+  (VertexIx (Triangle (Point 3 a)))
+  (Triangle (Point 3 a))
+  (Triangle (Point 3 b))
+  (Vertex (Triangle (Point 3 a)))
+  (Vertex (Triangle (Point 3 b)))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span class="annot"><span class="annottext">((Point 3 a -&gt; WrappedApplicative f (Point 3 b))
+ -&gt; Triangle (Point 3 a)
+ -&gt; WrappedApplicative f (Triangle (Point 3 b)))
+-&gt; ((a -&gt; WrappedApplicative f b)
+    -&gt; Point 3 a -&gt; WrappedApplicative f (Point 3 b))
+-&gt; (a -&gt; WrappedApplicative f b)
+-&gt; Triangle (Point 3 a)
+-&gt; WrappedApplicative f (Triangle (Point 3 b))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span class="annot"><span class="annottext">(a -&gt; WrappedApplicative f b)
+-&gt; Point 3 a -&gt; WrappedApplicative f (Point 3 b)
+(NumType (Point 3 a) -&gt; WrappedApplicative f (NumType (Point 3 b)))
+-&gt; Point 3 a -&gt; WrappedApplicative f (Point 3 b)
+forall point point'.
+HasCoordinates point point' =&gt;
+IndexedTraversal1 Int point point' (NumType point) (NumType point')
+IndexedTraversal1
+  Int
+  (Point 3 a)
+  (Point 3 b)
+  (NumType (Point 3 a))
+  (NumType (Point 3 b))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Class.html#coordinates"><span class="hs-identifier hs-var">coordinates</span></a></span><span> </span><span class="annot"><span class="annottext">((a -&gt; WrappedApplicative f b)
+ -&gt; Triangle (Point 3 a)
+ -&gt; WrappedApplicative f (Triangle (Point 3 b)))
+-&gt; (a -&gt; WrappedApplicative f b)
+-&gt; Triangle (Point 3 a)
+-&gt; WrappedApplicative f (Triangle (Point 3 b))
+forall {k} (f :: k -&gt; *) s (t :: k) a (b :: k).
+LensLike f s t a b -&gt; LensLike f s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-f44779c5b8e6253a04e6a6e933e63c2d6eb8e3b82353574921183dc486469ffa/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator hs-var">%%~</span></a></span><span> </span><span class="annot"><span class="annottext">f b -&gt; WrappedApplicative f b
+forall (f :: * -&gt; *) a. f a -&gt; WrappedApplicative f a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/semigroupoids-6.0.2-bc42e243617da9ea109382164d821100d6808a0a02dc0312fc3e7dd84b075632/share/doc/html/src/Data.Functor.Bind.Class.html#WrapApplicative"><span class="hs-identifier hs-var">WrapApplicative</span></a></span><span> </span><span class="annot"><span class="annottext">(f b -&gt; WrappedApplicative f b)
+-&gt; (a -&gt; f b) -&gt; a -&gt; WrappedApplicative f b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679464131"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="annot"><span class="hs-comment">-- | Access the 3D triagnle</span></span><span>
+</span><span id="line-72"></span><span id="local-6989586621679463718"><span class="annot"><a href="HGeometry.Graphics.Render.html#triangle3"><span class="hs-identifier hs-type">triangle3</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-f44779c5b8e6253a04e6a6e933e63c2d6eb8e3b82353574921183dc486469ffa/share/doc/html/src/Control.Lens.Type.html#Iso%27"><span class="hs-identifier hs-type">Iso'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463718"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679463718"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-73"></span><span id="triangle3"><span class="annot"><span class="annottext">triangle3 :: forall r (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
+(Profunctor p, Functor f) =&gt;
+p (Triangle (Point 3 r)) (f (Triangle (Point 3 r)))
+-&gt; p (ProjectedTriangle r) (f (ProjectedTriangle r))
+</span><a href="HGeometry.Graphics.Render.html#triangle3"><span class="hs-identifier hs-var hs-var">triangle3</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p (Triangle (Point 3 r)) (f (Triangle (Point 3 r)))
+-&gt; p (ProjectedTriangle r) (f (ProjectedTriangle r))
+forall s t a b. (Coercible s a, Coercible t b) =&gt; Iso s t a b
+Iso
+  (ProjectedTriangle r)
+  (ProjectedTriangle r)
+  (Triangle (Point 3 r))
+  (Triangle (Point 3 r))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.12.2-9b33/lens-5.3.6-f44779c5b8e6253a04e6a6e933e63c2d6eb8e3b82353574921183dc486469ffa/share/doc/html/src/Control.Lens.Iso.html#coerced"><span class="hs-identifier hs-var">coerced</span></a></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span>   </span><span id="local-6989586621679464147"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679464147"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679464147"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-vector-1.0.0.0/doc/html/hgeometry-vector/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span id="local-6989586621679464148"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679464148"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="annot"><span class="hs-comment">-- | Renders a Projected Triangle as a 2D Triangle</span></span><span>
+</span><span id="line-79"></span><span id="local-6989586621679463727"><span class="annot"><a href="HGeometry.Graphics.Render.html#toTriangle2"><span class="hs-identifier hs-type">toTriangle2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Graphics.Render.html#ProjectedTriangle"><span class="hs-identifier hs-type">ProjectedTriangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679463727"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-kernel-1.0.0.0/doc/html/hgeometry-kernel/src/HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.Type.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679463727"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-80"></span><span id="toTriangle2"><span class="annot"><span class="annottext">toTriangle2 :: forall r. ProjectedTriangle r -&gt; Triangle (Point 2 r)
+</span><a href="HGeometry.Graphics.Render.html#toTriangle2"><span class="hs-identifier hs-var hs-var">toTriangle2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 3 r -&gt; Point 2 r)
+-&gt; Triangle (Point 3 r) -&gt; Triangle (Point 2 r)
+forall a b. (a -&gt; b) -&gt; Triangle a -&gt; Triangle b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#fmap"><span class="hs-identifier hs-var">fmap</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 2 r
+forall (i :: Nat) point (d :: Nat) r.
+(Point_ point d r, i &lt;= d, Has_ Vector_ i r) =&gt;
+point -&gt; Point i r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.12.2/hgeometry-point-1.0.0.0/doc/html/hgeometry-point/src/HGeometry.Point.html#projectPoint"><span class="hs-identifier hs-var">projectPoint</span></a></span><span> </span><span class="annot"><span class="annottext">(Triangle (Point 3 r) -&gt; Triangle (Point 2 r))
+-&gt; (ProjectedTriangle r -&gt; Triangle (Point 3 r))
+-&gt; ProjectedTriangle r
+-&gt; Triangle (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-internal-9.1202.0-1465/src/GHC.Internal.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">ProjectedTriangle r -&gt; Triangle (Point 3 r)
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><a href="file:///usr/local/.ghcup/ghc/9.12.2/lib/ghc-9.12.2/lib/../../../share/doc/ghc-9.12.2/html/libraries/ghc-prim-0.13.0-e168/src/GHC.Prim.html#coerce"><span class="hs-identifier hs-var">coerce</span></a></span><span>
+</span><span id="line-81"></span></pre></body></html>
