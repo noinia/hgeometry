@@ -13,3 +13,16 @@ module HGeometry.Instances
   ) where
 
 import HGeometry.Kernel.Instances ()
+import HGeometry.Graphics.Camera
+import Test.QuickCheck
+import HGeometry.Vector
+
+instance (Arbitrary r, Ord r, Num r) => Arbitrary (Camera r) where
+  arbitrary = do p <- arbitrary
+                 n <- arbitrary
+                 u <- arbitrary
+                 Positive fd <- arbitrary
+                 Positive near <- arbitrary
+                 far           <- arbitrary `suchThat` (> near)
+                 vp            <- arbitrary `suchThat` (> zero)
+                 pure $ Camera p n u fd near far vp

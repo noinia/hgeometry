@@ -15,7 +15,6 @@ import Codec.Wavefront.Element qualified as Element
 import Codec.Wavefront.Material.Type qualified as Material
 import Control.Lens
 import Control.Monad
-import Data.Coerce
 import Data.Default
 import Data.Foldable1
 import Data.Functor.Apply as Apply
@@ -42,6 +41,7 @@ import Test.Hspec.WithTempFile
 import HGeometry.PlaneGraph.Connected.PolygonOverlay
 import PlaneGraph.PolygonOverlaySpec (assignRenderingAttributes, renderGraph)
 import R
+import HGeometry.Graphics.Render
 
 --------------------------------------------------------------------------------
 
@@ -409,7 +409,7 @@ instance Default (Triangle (Point 3 Float)) where
   def = undefined
 instance Default (Triangle (Point 3 Double)) where
   def = undefined
-instance Default ProjectedTriangle where
+instance Default (ProjectedTriangle r) where
   def = undefined -- this is nonense
 instance Default Material.Material where
   def = Material.defaultMaterial "default"
@@ -469,13 +469,14 @@ renderToIpe camera scene =
     ]
     -- drawGraphWithDarts subdiv
   where
-    triangles' = render camera scene
+    triangles' = over (core.mapped) realToFrac
+              <$> renderTriangles camera scene
     subdiv    = polygonOverlay $ triangles'&mapped %~ \(pt :+ orig) ->
                                    let poly = fromTriangle $ toTriangle2 pt
                                    in poly :+ (pt, orig)
 
     -- | Compute the z-coordinate at the given location. We render the closest triangle
-    getZ         :: Point 2 R -> triangle2d :+ (ProjectedTriangle, triangle) -> R
+    getZ         :: Point 2 R -> triangle2d :+ (ProjectedTriangle R, triangle) -> R
     getZ q poly = case supportingPlane (poly^.extra._1.triangle3) of
       Nothing -> error "getZ: unhandled degeneracy; we hit the side of the triangle"
       Just h  -> evalAt q h
@@ -489,47 +490,8 @@ supportingPlane t = asNonVerticalHyperPlane @(HyperPlane 3 r) $ hyperPlaneThroug
 
 
 
--- | Represent the projection of a 3D triangle in 2D space.  i.e. this
--- triangle acts as a triangle in R^2, but also has the information
--- from where it came from.
-newtype ProjectedTriangle = ProjectedTriangle {_triangle3 :: Triangle (Point 3 R) }
-  deriving stock (Show,Eq)
-
--- | Access the 3D triagnle
-triangle3 :: Iso' ProjectedTriangle (Triangle (Point 3 R))
-triangle3 = coerced
-
-type instance NumType   ProjectedTriangle = R
-type instance Dimension ProjectedTriangle = 2
-
--- | Renders a Projected Triangle as a 2D Triangle
-toTriangle2 :: ProjectedTriangle -> Triangle (Point 2 R)
-toTriangle2 = fmap projectPoint . coerce
 
 
-
--- | Render a scene; i..e a set of triangles
---
--- this intermediately uses doubles to apply the camera transform
-render        :: forall triangle point r set.
-                 ( Functor set
-                 , Triangle_ triangle point, Point_ point 3 r
-                 , Real r, Fractional r
-                 )
-              => Camera Double
-              -> set triangle
-              -> set (ProjectedTriangle :+ triangle)
-render camera = fmap $ \orig@(Triangle_ a b c) ->
-                         ProjectedTriangle (Triangle (f a) (f b) (f c)) :+ orig
-  where
-    f = f2 . transformBy (cameraTransform camera) . f3
-
-    f2 :: Point 3 Double -> Point 3 R
-    f2 = over coordinates realToFrac
-
-    f3   :: point -> Point 3 Double
-    f3 p = over coordinates realToFrac (p^.asPoint)
-    -- TODO: clean up
 
 
 -- next thing to do is somehow make it so that 'render' actually computes
