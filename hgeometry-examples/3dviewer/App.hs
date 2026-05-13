@@ -3,7 +3,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module App(main) where
 
-
+import           HGeometry.Number.Radical
+import           Miso.Subscription.Keyboard
 import           Control.Lens
 import           Miso hiding (view)
 import           Control.Lens hiding (view, element)
@@ -13,6 +14,7 @@ import           HGeometry
 import           HGeometry.Ext
 import           Miso.Html hiding (style_)
 import           HGeometry.Kernel
+import           HGeometry.Box
 import qualified Miso.String as Miso
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Miso.Svg
@@ -31,17 +33,18 @@ import           Miso.CSS (style_, border)
 import           Data.Default
 import           HGeometry.Graphics.Render
 import           Miso.Svg.Property
-import           Miso.Svg.Element(polygon_)
-
+import           Miso.Svg.Element (polygon_)
+import           Miso.Subscription.Mouse
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
-data Model = Model { _triangles :: NonEmpty (Triangle (Point 3 R) :+ RenderProps)
-                   , _camera    :: Camera Double
-                   , _canvas    :: Canvas Double
+data Model = Model { _triangles   :: NonEmpty (Triangle (Point 3 R) :+ RenderProps)
+                   , _camera      :: Camera Double
+                   , _canvas      :: Canvas Double
+                   , _startRotate :: !(Maybe (Point 2 Double, Vector 3 Double))
                    }
              deriving stock (Eq)
 
@@ -120,18 +123,29 @@ asTrianglePairAbove rect h = Vector2 (Triangle tl br tr :+ h)
 
 
 initialModel :: Model
-initialModel = Model myTriangles blenderCamera (blankCanvas 1024  576)
+initialModel = Model myTriangles blenderCamera (blankCanvas 1024  576) Nothing
 
 --------------------------------------------------------------------------------
 
-data Action = CanvasAction Canvas.InternalCanvasAction
+data Action = CanvasAction !Canvas.InternalCanvasAction
+            | MoveCamera !(Vector 3 Double)
+            | WASDAction !Arrows
+            | ArrowAction !Arrows
+            | StartRotate
+            | StopRotate
+            | MouseAction !PointerEvent
             deriving (Show,Eq)
 
 --------------------------------------------------------------------------------
 
 main :: IO ()
 main = startApp (Canvas.withCanvasEvents defaultEvents) $
-         Miso.component initialModel updateModel viewModel
+         (Miso.component initialModel updateModel viewModel)
+           { subs = [ wasdSub   WASDAction
+                    , arrowsSub ArrowAction
+                    , mouseSub MouseAction
+                    ]
+           }
 
 wrap       :: (model -> action -> Effect parent model action') -> action
            -> Effect parent model action'
@@ -143,6 +157,27 @@ wrap f act = get >>= flip f act
 updateModel :: Action -> Effect parent Model Action
 updateModel = \case
   CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
+  MoveCamera v     -> camera.cameraPosition %= (.+^ v)
+  WASDAction arr   -> do let v = (/10.0) . fromIntegral <$> Vector3 (arrowX arr) (arrowY arr) 0
+                         updateModel $ MoveCamera v
+  ArrowAction arr  -> do let v = (/10.0) . fromIntegral <$> Vector3 (arrowX arr) 0 (arrowY arr)
+                         updateModel $ MoveCamera v
+  StartRotate      -> do p <- use (canvas.mouseCoordinates)
+                         v <- use (camera.rawCameraNormal)
+                         startRotate .= ((,v) <$> p)
+  StopRotate       -> startRotate .= Nothing
+  MouseAction evt  -> use startRotate >>= \case
+                        Nothing     -> pure ()
+                        Just (s,v)  -> use (canvas.mouseCoordinates) >>= \case
+                          Nothing -> pure ()
+                          Just p  -> do s' <- uses camera (flip viewToWorld s)
+                                        p' <- uses camera (flip viewToWorld p)
+                                        camera.rawCameraNormal .=
+                                            v ^+^ ( (p' .-. s') ^/ (0.5 * scalingFactor))
+
+
+scalingFactor :: Num r => r
+scalingFactor = 10_000
 
 --------------------------------------------------------------------------------
 
@@ -150,12 +185,14 @@ viewModel       :: Model -> View Model Action
 viewModel model = div_ [ ]
                        [ either CanvasAction id <$>
                          Canvas.svgCanvas_ (model^.canvas)
-                                [ style_ [border "1px solid black"]
+                                [ style_ [border "1px solid blue"]
+                                , onPointerDown (const StartRotate)
+                                , onPointerUp   (const StopRotate)
                                 ]
                                 canvasBody
                        ]
   where
-    canvasBody = [ draw (uniformScaleBy 10_000 $ toTriangle2 t2)
+    canvasBody = [ draw (uniformScaleBy scalingFactor $ toTriangle2 t2)
                      [ fill_   (ms $ t^?!extra.faceAttrs._Just.fill._Just)
                      ]
                  | t2 :+ t <- renderTriangles (model^.camera) (model^..triangles.folded)

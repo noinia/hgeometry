@@ -7,12 +7,18 @@ import HGeometry.Transformation
 import HGeometry.Triangle
 import HGeometry.Vector
 import Test.Hspec
+import Test.Hspec.QuickCheck
+import R
 
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = pure ()
-
+spec = describe "camera properties" $ do
+         prop "viewToWorld consistent with viewportInWorld" $
+           \(cam :: Camera R) ->
+             (viewToWorld cam <$> corners (viewportScreen cam))
+             ===
+             viewportInWorld cam
 
 myCamera :: Camera Rational
 myCamera = Camera (Point3 50 0 50)
