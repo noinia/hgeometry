@@ -36,14 +36,13 @@ module Ipe.Attributes
   , AttributeNames(..)
   , mkAttrs, applyAttrs
   , traverseCommon, traverseText, traversePath, traverseSymbol, traverseGroup
+
+  , module Ipe.Attributes.Types
   ) where
 
 import HGeometry.Ext
 import Data.Functor.Apply
-import Data.Coerce
-import Data.Kind (Type)
 import Data.Functor.Classes
-import Ipe.Attributes.Types
 import Ipe.Path
 import Control.Lens hiding (elements)
 import Data.Default
@@ -53,10 +52,8 @@ import Ipe.Value
 import GHC.Generics (Generic)
 import Ipe.Color
 import Barbies
-import Barbies.Constraints (Dict(..))
 import Ipe.Layer
 import Ipe.Attributes.Types
-
 
 --------------------------------------------------------------------------------
 
@@ -147,7 +144,7 @@ data PathAttributesF r f = PathAttributes
   , _pen           :: f (IpePen r)
   , _dash          :: f (IpeDash r)
   , _lineCap       :: f Int
-  , _lineJoin      :: f Int
+  , _lineJoin      :: f LineJoin
   , _fillRule      :: f FillType
   , _arrow         :: f (IpeArrow r)
   , _rArrow        :: f (IpeArrow r)
@@ -422,7 +419,7 @@ instance HasDash (g :+ PathAttributes r) (Maybe (IpeDash r)) where
   dash = extra.dash
 instance HasLineCap (g :+ PathAttributes r) (Maybe Int) where
   lineCap = extra.lineCap
-instance HasLineJoin (g :+ PathAttributes r) (Maybe Int) where
+instance HasLineJoin (g :+ PathAttributes r) (Maybe LineJoin) where
   lineJoin = extra.lineJoin
 instance HasFillRule (g :+ PathAttributes r) (Maybe FillType) where
   fillRule = extra.fillRule

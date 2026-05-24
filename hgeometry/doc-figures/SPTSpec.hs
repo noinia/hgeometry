@@ -19,7 +19,7 @@ import           HGeometry.Miso.Svg.StaticCanvas
 import qualified HGeometry.Miso.Svg as Svg
 import           HGeometry.Miso.OrphanInstances ()
 import           System.OsPath
-import           Miso.Svg.Property
+-- import           Miso.Svg.Property
 import           Miso.String (ToMisoString(..))
 import           HGeometry
 import           HGeometry.Polygon
@@ -36,7 +36,7 @@ import           Data.Default
 import           Ipe.Attributes
 import           Ipe.Draw
 import           Ipe.Color
-import           Ipe (IpePen(..), IpeValue(..))
+import           Ipe (IpeValue(..))
 import           Miso (View)
 --------------------------------------------------------------------------------
 
@@ -45,8 +45,8 @@ spec = goldenWith [osp|docs/doc-figures/|]
          (svgFileGolden { name = [osp|shortestPathTree|] })
            (staticCanvas_ canvas [] $ mconcat
                [ draw @(Svg _ _)
-                      [ stroke ?~ gray
-                      , pen    ?~ IpePen (Valued 7)
+                      [ stroke   ?~ gray
+                      , pen      ?~ IpePen (Valued 7)
                       ] myPolygon
                , draw @(Svg _ _)
                       [ stroke ?~ black
@@ -89,7 +89,7 @@ myPolygon = fromJust $ fromPoints
             , Point2 144 32
             , Point2 160 80
             , Point2 192 80
-            , Point2 144 0
+            , Point2 144 6
             , Point2 48 96
             , Point2 112 112
             , Point2 96 144

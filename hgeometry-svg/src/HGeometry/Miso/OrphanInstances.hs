@@ -74,6 +74,15 @@ instance ToMisoString Ipe.FillType where
 instance ToMisoString Ipe.PinType where
   toMisoString _ = mempty
 
+instance ToMisoString Ipe.LineJoin where
+  toMisoString = \case
+    Ipe.Miter  -> "miter"
+    Ipe.Round  -> "round"
+    Ipe.Bevel  -> "bevel"
+    -- arcs and MiterClip are not supported at the moment
+    -- Arcs  -> "arcs"
+    -- MiterClip -> "miter-clip"
+
 instance ToMisoString Ipe.TransformationTypes where
   toMisoString _ = mempty
 
