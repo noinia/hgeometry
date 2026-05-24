@@ -68,8 +68,9 @@ import           Ipe.Value
 import qualified System.File.OsPath as File
 import           System.OsPath
 import           Text.XML.Expat.Tree
-import           Ipe.Attributes.Types
 import           Barbies
+import           Data.Finite
+import           Data.Finitary
 
 --------------------------------------------------------------------------------
 
@@ -166,6 +167,14 @@ instance IpeReadText FillType where
   ipeReadText "wind"   = Right Wind
   ipeReadText "eofill" = Right EOFill
   ipeReadText _        = Left "invalid FillType"
+
+
+-- | Try to convert an Int into an Finitary value
+toMaybeFinite :: forall a. Finitary a => Int -> Maybe a
+toMaybeFinite = fmap fromFinite . packFinite @(Cardinality a) . fromIntegral
+
+instance IpeReadText LineJoin where
+  ipeReadText t = ipeReadText @Int t >>= maybe (Left "invalid LineJoin") Right . toMaybeFinite
 
 instance Coordinate r => IpeReadText (IpeArrow r) where
   ipeReadText t = case T.split (== '/') t of

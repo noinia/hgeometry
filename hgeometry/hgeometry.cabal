@@ -121,6 +121,7 @@ common all-setup
       , ViewPatterns
       , FunctionalDependencies
       , PartialTypeSignatures
+      , TypeData
 
 common hgeometry-setup
     build-depends:
@@ -574,12 +575,16 @@ test-suite doc-figures
       , hspec
       , hspec-with-tempfile
       , miso                      >= 1.9           && < 2
+
+      , hgeometry-ipe
+
   mixins:
       hgeometry-vector:numtypes (IntervalReal as R)
   other-modules:
     Spec
     Golden
     MinkowskiSpec
+    SPTSpec
 
 
 --------------------------------------------------------------------------------

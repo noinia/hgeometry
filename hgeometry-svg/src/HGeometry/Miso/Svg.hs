@@ -23,6 +23,9 @@ module HGeometry.Miso.Svg
   , dDisk
   , dPolyLine
   , dSimplePolygon
+
+
+  , SvgWriteAttributes(..)
   ) where
 
 import Data.ByteString.Lazy qualified as ByteString

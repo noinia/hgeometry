@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE DeriveAnyClass #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.IpeToIpe
@@ -21,6 +22,8 @@ import           System.Directory.OsPath (getTemporaryDirectory, removeFile)
 import           System.OsPath
 import qualified System.Process.Typed as Process
 import           System.Random
+import           GHC.Generics (Generic)
+import           Data.Finitary
 
 --------------------------------------------------------------------------------
 
@@ -73,7 +76,8 @@ writeIpeFileAsPdf fp f = do num    <- randomIO @Int
 
 
 data FileType = PDF | XML
-  deriving (Eq,Enum)
+  deriving (Eq,Generic)
+  deriving anyclass (Finitary)
 
 instance Show FileType where
   show = \case
@@ -81,16 +85,19 @@ instance Show FileType where
     XML -> "xml"
 
 data Export = RetainIpeInfo | Export
-  deriving (Show,Eq,Enum)
+  deriving (Show,Eq,Generic)
+  deriving anyclass (Finitary)
 
 type PageNumber = Int
 type ViewNumber = Int
 
 data MarkedView = All | OnlyMarkedViews
-  deriving (Show,Eq,Enum)
+  deriving (Show,Eq,Generic)
+  deriving anyclass (Finitary)
 
 data NoZip = NoZip | Zip
-  deriving (Show,Eq,Enum)
+  deriving (Show,Eq,Generic)
+  deriving anyclass (Finitary)
 
 data PageRange = EntireFile
                | PageRange (ClosedInterval PageNumber)

@@ -21,6 +21,7 @@ module Ipe.Writer(
   , IpeWriteAttributes(..)
   ) where
 
+import           GHC.TypeLits (KnownNat)
 import           Control.Lens hiding (Reversed)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as C
@@ -61,8 +62,9 @@ import           System.IO (hPutStrLn, stderr)
 import           System.OsPath
 import           Text.XML.Expat.Format (format)
 import           Text.XML.Expat.Tree
-import           Ipe.Attributes.Types
 import           Barbies
+import           Data.Finitary
+import           Data.Finite
 
 --------------------------------------------------------------------------------
 
@@ -249,6 +251,12 @@ instance IpeWriteText VerticalAlignment where
     AlignBottom   -> Just "bottom"
     AlignBaseline -> Just "baseline"
 
+instance KnownNat n => IpeWriteText (Finite n) where
+  ipeWriteText = ipeWriteText . fromIntegral
+
+instance IpeWriteText LineJoin where
+  ipeWriteText = ipeWriteText . toFinite
+
 --------------------------------------------------------------------------------
 instance IpeWriteText r => IpeWrite (IpeSymbol r) where
   ipeWrite (Symbol p n) = f <$> ipeWriteText p
@@ -386,6 +394,9 @@ instance (IpeWriteText r)  => IpeWrite (IpePage r) where
                                   , map ipeWrite vs
                                   , map ipeWrite objs
                                   ]
+
+
+
 
 
 instance IpeWrite IpeStyle where
