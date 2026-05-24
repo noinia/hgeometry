@@ -57,15 +57,6 @@ import Ipe.Attributes.Types
 
 --------------------------------------------------------------------------------
 
-type ConversionError = String -- FIXME: remove
-
-class IpeReadText t
-instance IpeReadText r => IpeReadText (Path r)
-
-ipeReadText :: IpeReadText r => Text -> Either ConversionError r
-ipeReadText = undefined
-----------------------------------------
-
 -- instance Read r => Read (Matrix n m r) where
 --   readPrec = undefined  -- parens $ (prec app_prec $ do
 --              --                             Ident "NoAttr" <- lexP
