@@ -103,9 +103,6 @@ computeShortestPaths' s poly = case dualTreeFrom s poly of
                  RootThree _ a b c -> compute s a <> compute s b <> compute s c
       where
         triang = (\u -> u :+ Left s) <$> poly^..outerBoundaryVerticesOf (tr^.rootVertex).asIndexedExt
-        -- compute' = compute (=.=) s
-        -- (=.=) = (==) `on` (view extra)
-
 
 --------------------------------------------------------------------------------
 
@@ -300,7 +297,7 @@ compute   :: forall source vertex r.
              )
           => source
           -> (Vector 2 vertex , BinaryTrie (Vector 2 vertex) vertex)
-          -> [(vertex :+ Either source vertex)]
+          -> [vertex :+ Either source vertex]
 compute s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) poly
   where
 
@@ -313,7 +310,7 @@ compute s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) poly
             -- ^ current cusp
             -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
             -- ^ the edge, and the
-            -> [(vertex :+ f vertex)]
+            -> [vertex :+ f vertex]
     go left = worker
       where
         right  = pure
