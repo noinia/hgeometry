@@ -12,11 +12,8 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Polygon.Triangulation
 import           HGeometry.Polygon.Simple.ShortestPath.Tree
 import           HGeometry.Miso.Svg.StaticCanvas
-import qualified HGeometry.Miso.Svg as Svg
 import           HGeometry.Miso.OrphanInstances ()
 import           System.OsPath
--- import           Miso.Svg.Property
-import           Miso.String (ToMisoString(..))
 import           HGeometry
 import           HGeometry.Polygon
 import           Golden
@@ -24,11 +21,10 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Data.Maybe (fromJust)
 import           Control.Lens
-import           Data.Kind (Type)
 import           HGeometry.Miso.Svg.Draw
-
-
-
+import           Ipe.Color
+import           Ipe (IpeValue(..))
+import           Ipe.Attributes
 --------------------------------------------------------------------------------
 
 spec :: Spec

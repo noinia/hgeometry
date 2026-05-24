@@ -17,17 +17,23 @@
 module HGeometry.Miso.Svg.Draw
   ( Svg
   , SVG
+  , module Ipe.Draw
   ) where
 
+import           Control.Lens
+import           Data.Kind (Type)
 import           HGeometry.PolyLine
+import           HGeometry.Point
 import           HGeometry.LineSegment
 import           Data.Default
 import           Ipe.Attributes
 import           Ipe.Draw
-import           Ipe.Color
-import           Ipe (IpeValue(..))
 import           Miso (View)
 import           Data.Void
+import           HGeometry.Polygon
+import           HGeometry.Properties
+import qualified HGeometry.Miso.Svg as Svg
+import           Miso.String (ToMisoString(..))
 
 --------------------------------------------------------------------------------
 
