@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.IpeRender
@@ -15,6 +16,8 @@ module Ipe.IpeRender where
 
 import           System.OsPath
 import qualified System.Process.Typed as Process
+import           Data.Finitary
+import           GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -55,7 +58,8 @@ ipeRender = ipeRenderWith defaultOptions
 
 -- | Output filetypes supported by iperender
 data FileType = PNG | EPS | PDF | SVG
-  deriving (Eq,Ord,Enum)
+  deriving (Eq,Ord,Generic)
+  deriving anyclass (Finitary)
 
 instance Show FileType where
   show = \case
@@ -79,8 +83,10 @@ defaultOptions = Options 1 1 72 TransparentBackground Crop
 -- | Whether or not to render a transparent background in output png
 -- images.
 data Background = OpaqueBackground | TransparentBackground
-  deriving (Show,Read,Eq,Ord,Enum)
+  deriving (Show,Read,Eq,Ord,Generic)
+  deriving anyclass (Finitary)
 
 -- | Whether or not to crop the output image.
 data Crop = NoCrop | Crop
-  deriving (Show,Read,Eq,Ord,Enum)
+  deriving (Show,Read,Eq,Ord,Generic)
+  deriving anyclass (Finitary)
