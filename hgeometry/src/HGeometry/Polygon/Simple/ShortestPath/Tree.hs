@@ -54,6 +54,12 @@ import           Hiraffe.PlanarGraph.Connected
 -- type Parent source s vertex = Either source (vertex :+ vertexId s)
 
 -- | Labels each vertex ith its parent.
+--
+-- The the shortest path tree (in green) of a source point s (in blue)
+-- in a triangulated simple polygon.
+-- ![example](doc-figures/shortestPathTree.svg)
+--
+-- \(O(n)\), where \(n\) is the number of vertices
 labelWithShortestPaths        :: ( Point_ source 2 r
                                  , Point_ vertex 2 r
                                  , Num r, Ord r

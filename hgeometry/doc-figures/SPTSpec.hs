@@ -38,26 +38,43 @@ import           Ipe.Draw
 import           Ipe.Color
 import           Ipe (IpeValue(..))
 import           Miso (View)
+import           Data.Void
+
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = goldenWith [osp|docs/doc-figures/|]
          (svgFileGolden { name = [osp|shortestPathTree|] })
            (staticCanvas_ canvas [] $ mconcat
-               [ draw @(Svg _ _)
+               [ draw @SVG
                       [ stroke   ?~ gray
                       , pen      ?~ IpePen (Valued 7)
                       ] myPolygon
-               , draw @(Svg _ _)
+               , draw @SVG
                       [ stroke ?~ black
                       , fill ?~ white
                       , pen    ?~ IpePen (Valued 2)
                       ] myPolygon
-               , draw @(Svg () ())
+               , mconcat
+                 [ draw @SVG [ stroke ?~ lightgray ] seg
+                 | (e, Diagonal) <- triangulated^..edges.withIndex
+                 , seg <- triangulated^..edgeSegmentAt e
+                 ]
+               , mconcat
+                 [ draw @SVG [ stroke ?~ green
+                             -- , arrow ?~ normalArrow
+                             ] (sptEdge v parent)
+                 | (v :+ parent) <- triangulated^..vertices
+                 ]
+               , draw @SVG
                       [fill ?~ blue] source
                ]
            )
 
+sptEdge   :: Point 2 R -> Either (Point 2 R) (VertexId S) -> ClosedLineSegment (Point 2 R)
+sptEdge v = \case
+  Left s       -> ClosedLineSegment v s
+  Right parent -> ClosedLineSegment v (triangulated^?!vertexAt parent.core)
 
 type data S
 triangulated :: CPlaneGraph S (Point 2 R :+ Either (Point 2 R) (VertexId S))
@@ -112,6 +129,10 @@ canvas = staticCanvas 600 400
 
 -- | The Svg backend; which renders to Svg using Miso
 type data Svg (model :: Type) (action :: Type)
+
+-- | Static Svg
+type SVG = Svg () Void
+
 
 type instance Rendered (Svg model action) = [View model action]
 
