@@ -17,7 +17,7 @@ module HGeometry.Polygon.Simple.DualTree
 
 import           Control.Lens hiding ((:<), (<|))
 import           Data.Bifoldable
-import           Data.Maybe (mapMaybe)
+import           Data.Maybe (mapMaybe, fromMaybe)
 import qualified HGeometry.Boundary as Boundary
 import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Point
@@ -108,6 +108,45 @@ dualTreeFrom source poly = do
                                _                        -> True
     (root',_) <- findOf (outerBoundaryPolygons.withIndex) inTriangle' poly
     dualTreeFromTriangle root' poly
+
+
+{-
+
+The following is some work in progress for computing the dual tree starting at a vertex (and thus) generalizing the shortest path tree functions to also start from a vertex.
+
+-- | Computes the dual tree of the polygon, starting with a triangle
+-- containing the source vertex.
+--
+-- pre: the plane graph is an actual triangulated polygon.
+dualTreeFromVertex             :: ( Point_ point 2 r
+                                  , Ord r, Num r
+                                  )
+                               => VertexIx (CPlaneGraph s point PolygonEdgeType f)
+                               -> CPlaneGraph s point PolygonEdgeType  f
+                               --  ^ the triangulated polygon
+                               -> DualTree (FaceIx (CPlaneGraph s point PolygonEdgeType f))
+                                     (DartIx (CPlaneGraph s point PolygonEdgeType f))
+                                     (FaceIx (CPlaneGraph s point PolygonEdgeType f)
+                                     , ( VertexIx (CPlaneGraph s point PolygonEdgeType f)
+                                       , point
+                                       )
+                                     )
+dualTreeFromVertex source poly = fromMaybe (error "dualTreeFromVertex. absurd. no incident triangle found") $ do
+  let isTriangle' (f,_) = poly^?!outerFacePolygon
+
+        numVertices f == 3
+  (root',_) <- findOf (incidentFacesOf source.withIndex) isTriangle' poly
+  dualTreeFromTriangle root' poly
+  -- this should be safe since the vertex is guarnateed to appear in some triangle of the polygon.
+
+
+-- | An indexed fold over the faces incident to a given vertex.
+incidentFacesOf   :: PlanarGraph planarGraph
+                  => VertexIx planarGraph
+                  -> IndexedFold planarGraph (FaceIx planarGraph) (Face planarGraph)
+incidentFacesOf v = incidentEdgesOf v
+
+-}
 
 -- | Construct the dual tree from a given triangle
 dualTreeFromTriangle            :: forall triangulatedPolygon vertex.
