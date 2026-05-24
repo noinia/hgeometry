@@ -19,6 +19,9 @@ build-type:         Simple
 extra-doc-files:
     README.md
     changelog.txt
+    docs/**/*.svg
+
+
 -- extra-source-files:
 data-dir: data
 data-files:
@@ -118,6 +121,7 @@ common all-setup
       , ViewPatterns
       , FunctionalDependencies
       , PartialTypeSignatures
+      , TypeData
 
 common hgeometry-setup
     build-depends:
@@ -140,7 +144,7 @@ common all-quickcheck-setup
          -fno-warn-orphans
     build-depends:
         hspec                           >= 2.9     && < 3
-      , QuickCheck                      >= 2.10    && < 3
+      , QuickCheck                      >= 2.18    && < 3
       , quickcheck-instances            >= 0.3     && < 1
       , approximate-equality            >= 1.1.0.2 && < 1.2
 
@@ -207,6 +211,7 @@ library
         HGeometry.Disk.Smallest.Naive
 
         HGeometry.Graphics.Camera
+        HGeometry.Graphics.Render
 
         HGeometry.LPType
         HGeometry.LPType.LinearProgramming
@@ -568,6 +573,31 @@ test-suite with-ipe-hspec-rational
 --   hs-source-dirs:   test-with-ipe/test
 --   mixins:
 --       hgeometry-vector:numtypes (IntervalReal as R)
+
+test-suite doc-figures
+  import:           all-setup, hgeometry-setup
+  type:             exitcode-stdio-1.0
+  build-tool-depends: hspec-discover:hspec-discover
+  main-is:          Main.hs
+  hs-source-dirs:   doc-figures
+  build-depends:
+      , hgeometry
+      , hgeometry-svg             >= 1.0.0.0   && < 1.1
+      , hgeometry-vector:numtypes
+      , hspec
+      , hspec-with-tempfile
+      , miso                      >= 1.9           && < 2
+
+      , hgeometry-ipe
+
+  mixins:
+      hgeometry-vector:numtypes (IntervalReal as R)
+  other-modules:
+    Spec
+    Golden
+    MinkowskiSpec
+    SPTSpec
+
 
 --------------------------------------------------------------------------------
 -- * Benchmarks

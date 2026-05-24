@@ -23,6 +23,8 @@ module HGeometry.Miso.Svg.Writer
   , dDisk
   , dPolyLine
   , dSimplePolygon
+
+  , SvgWriteAttributes(..)
   ) where
 
 import           Control.Lens
@@ -152,12 +154,16 @@ dRectangle   :: ( Rectangle_ rectangle point, Point_ point 2 r, ToMisoString r, 
              => rectangle -> [Attribute action] -> View model action
 dRectangle b = let Point2 x y  = over coordinates ms $ b^.minPoint.asPoint
                    Vector2 w h = ms <$> b^.to size
-               in withAts rect_ [ x_ x, y_ y, width_ w, height_ h, fill_ "none"]
+               in withAts rect_ [ x_ x, y_ y, width_ w, height_ h, fill_ "none"
+                                 , strokeLinejoin_ "round"
+                                ]
 
 -- | Draw a simple polygon
 dSimplePolygon    :: (SimplePolygon_ simplePolygon point r, ToMisoString r)
                   => simplePolygon -> [Attribute action] -> View model action
-dSimplePolygon pg = withAts polygon_ [points_ $ toPointsString $ pg^..vertices ]
+dSimplePolygon pg = withAts polygon_ [ points_ $ toPointsString $ pg^..vertices
+                                     , strokeLinejoin_ "round"
+                                     ]
 
 
   -- \case
@@ -182,6 +188,7 @@ dPolyLine    :: (PolyLine_ polyLine point, Point_ point 2 r, ToMisoString r)
              => polyLine -> [Attribute action] -> View model action
 dPolyLine pl = withAts polyline_ [ points_ . toPointsString $ pl^..vertices
                                  , fill_ "none"
+                                 , strokeLinejoin_ "round"
                                  ]
 
 -- | Draw a line segment
@@ -360,13 +367,13 @@ instance ToMisoString r => SvgWriteAttributes (PathAttributesF r) action where
     { _commonAttrs = svgAttrFunctions
     , _stroke        = SvgF (singleton . stroke_ . ms)
     , _fill          = SvgF (singleton . fill_ . ms)
-    , _pen           = SvgF (const []                           )
+    , _pen           = SvgF (singleton . strokeWidth_ . ms)
     , _dash          = SvgF (const []                           )
     , _lineCap       = SvgF (singleton . strokeLinecap_ . ms)
-    , _lineJoin      = SvgF (const []                           )
+    , _lineJoin      = SvgF (singleton . strokeLinejoin_ . ms   )
     , _fillRule      = SvgF (const []                           )
-    , _arrow         = SvgF (const []                           )
-    , _rArrow        = SvgF (const []                           )
+    , _arrow         = SvgF (singleton . markerEnd_ . ms )
+    , _rArrow        = SvgF (singleton . markerStart_ . ms)
     , _strokeOpacity = SvgF (singleton . strokeOpacity_ . ms)
     , _opacity       = SvgF (singleton . fillOpacity_ . ms)
     , _tiling        = SvgF (const []                           )

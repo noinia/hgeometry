@@ -54,6 +54,12 @@ import           Hiraffe.PlanarGraph.Connected
 -- type Parent source s vertex = Either source (vertex :+ vertexId s)
 
 -- | Labels each vertex ith its parent.
+--
+-- The the shortest path tree (in green) of a source point s (in blue)
+-- in a triangulated simple polygon.
+-- ![example](doc-figures/shortestPathTree.svg)
+--
+-- \(O(n)\), where \(n\) is the number of vertices
 labelWithShortestPaths        :: ( Point_ source 2 r
                                  , Point_ vertex 2 r
                                  , Num r, Ord r
@@ -97,9 +103,6 @@ computeShortestPaths' s poly = case dualTreeFrom s poly of
                  RootThree _ a b c -> compute s a <> compute s b <> compute s c
       where
         triang = (\u -> u :+ Left s) <$> poly^..outerBoundaryVerticesOf (tr^.rootVertex).asIndexedExt
-        -- compute' = compute (=.=) s
-        -- (=.=) = (==) `on` (view extra)
-
 
 --------------------------------------------------------------------------------
 
@@ -294,7 +297,7 @@ compute   :: forall source vertex r.
              )
           => source
           -> (Vector 2 vertex , BinaryTrie (Vector 2 vertex) vertex)
-          -> [(vertex :+ Either source vertex)]
+          -> [vertex :+ Either source vertex]
 compute s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) poly
   where
 
@@ -307,7 +310,7 @@ compute s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) poly
             -- ^ current cusp
             -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
             -- ^ the edge, and the
-            -> [(vertex :+ f vertex)]
+            -> [vertex :+ f vertex]
     go left = worker
       where
         right  = pure
