@@ -23,6 +23,8 @@ module HGeometry.Miso.Svg.Writer
   , dDisk
   , dPolyLine
   , dSimplePolygon
+
+  , SvgWriteAttributes(..)
   ) where
 
 import           Control.Lens
@@ -360,7 +362,7 @@ instance ToMisoString r => SvgWriteAttributes (PathAttributesF r) action where
     { _commonAttrs = svgAttrFunctions
     , _stroke        = SvgF (singleton . stroke_ . ms)
     , _fill          = SvgF (singleton . fill_ . ms)
-    , _pen           = SvgF (const []                           )
+    , _pen           = SvgF (singleton . strokeWidth_ . ms)
     , _dash          = SvgF (const []                           )
     , _lineCap       = SvgF (singleton . strokeLinecap_ . ms)
     , _lineJoin      = SvgF (const []                           )

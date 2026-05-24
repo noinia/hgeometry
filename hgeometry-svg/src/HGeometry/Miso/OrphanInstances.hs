@@ -53,7 +53,8 @@ instance ToMisoString r => ToMisoString (IpeValue r) where
       Valued v -> toMisoString v
 
 instance ToMisoString r => ToMisoString (Ipe.IpePen r) where
-  toMisoString _ = mempty
+  toMisoString (Ipe.IpePen v) = toMisoString v
+    -- TODO: only length or percentages are supposed to be supported.
 
 instance ToMisoString r => ToMisoString (Ipe.IpeSize r) where
   toMisoString _ = mempty
