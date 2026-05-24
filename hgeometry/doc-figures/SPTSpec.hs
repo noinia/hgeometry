@@ -5,41 +5,35 @@ module SPTSpec
   ( spec
   ) where
 
-import           HGeometry.Ext
-import           Hiraffe.PlanarGraph.Connected
-import           R
-import           HGeometry.PlaneGraph
-import           HGeometry.Polygon.Triangulation
-import           HGeometry.Polygon.Simple.ShortestPath.Tree
-import           HGeometry.Miso.Svg.StaticCanvas
-import           HGeometry.Miso.OrphanInstances ()
-import           System.OsPath
-import           HGeometry
-import           HGeometry.Polygon
-import           Golden
-import           Test.Hspec
-import           Test.Hspec.WithTempFile
-import           Data.Maybe (fromJust)
-import           Control.Lens
-import           HGeometry.Miso.Svg.Draw
-import           Ipe.Color
-import           Ipe (IpeValue(..))
-import           Ipe.Attributes
+import HGeometry.Ext
+import Hiraffe.PlanarGraph.Connected
+import R
+import HGeometry.PlaneGraph
+import HGeometry.Polygon.Triangulation
+import HGeometry.Polygon.Simple.ShortestPath.Tree
+import HGeometry.Miso.Svg.StaticCanvas
+import HGeometry.Miso.OrphanInstances ()
+import System.OsPath
+import HGeometry
+import HGeometry.Polygon
+import Golden
+import Test.Hspec
+import Test.Hspec.WithTempFile
+import Data.Maybe (fromJust)
+import Control.Lens
+import HGeometry.Miso.Svg.Draw
+import Ipe.Color
+import Ipe (IpeValue(..))
+import Ipe.Attributes
+import Miso.String (ToMisoString(..))
+
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = goldenWith [osp|docs/doc-figures/|]
          (svgFileGolden { name = [osp|shortestPathTree|] })
            (staticCanvas_ canvas [] $ mconcat
-               [ draw @SVG
-                      [ stroke   ?~ gray
-                      , pen      ?~ IpePen (Valued 7)
-                      ] myPolygon
-               , draw @SVG
-                      [ stroke ?~ black
-                      , fill ?~ white
-                      , pen    ?~ IpePen (Valued 2)
-                      ] myPolygon
+               [ doubleBorderedPolygon myPolygon
                , mconcat
                  [ draw @SVG [ stroke ?~ lightgray ] seg
                  | (e, Diagonal) <- triangulated^..edges.withIndex
@@ -56,12 +50,32 @@ spec = goldenWith [osp|docs/doc-figures/|]
                ]
            )
 
+-- | Draws the polygon using a nice double border
+doubleBorderedPolygon      :: (Point_ vertex 2 r, ToMisoString r, Num r)
+                           => SimplePolygon vertex
+                           -> Rendered SVG
+doubleBorderedPolygon poly = mconcat
+    [ draw @SVG [ stroke   ?~ gray
+                , pen      ?~ IpePen (Valued 7)
+                ] poly
+    , draw @SVG [ stroke ?~ black
+                , fill ?~ white
+                , pen    ?~ IpePen (Valued 2)
+                ] poly
+    ]
+
+-- | Draws an spt edge
 sptEdge   :: Point 2 R -> Either (Point 2 R) (VertexId S) -> ClosedLineSegment (Point 2 R)
 sptEdge v = \case
   Left s       -> ClosedLineSegment v s
   Right parent -> ClosedLineSegment v (triangulated^?!vertexAt parent.core)
 
+--------------------------------------------------------------------------------
+
+
 type data S
+
+-- | The triangulated polygon whose vertices are annotated with shortest paths
 triangulated :: CPlaneGraph S (Point 2 R :+ Either (Point 2 R) (VertexId S))
                               PolygonEdgeType PolygonFaceData
 triangulated = labelWithShortestPaths source $ triangulate myPolygon
