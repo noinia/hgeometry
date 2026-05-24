@@ -28,7 +28,7 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Data.Maybe (fromJust)
 import           Control.Lens
-
+import           Data.Kind (Type)
 
 import           HGeometry.PolyLine
 import           HGeometry.LineSegment
@@ -44,11 +44,11 @@ spec :: Spec
 spec = goldenWith [osp|docs/doc-figures/|]
          (svgFileGolden { name = [osp|shortestPathTree|] })
            (staticCanvas_ canvas [] $ mconcat
-               [ draw @(Svg () ())
+               [ draw @(Svg _ _)
                       [ stroke ?~ gray
                       , pen    ?~ IpePen (Valued 7)
                       ] myPolygon
-               , draw @(Svg () ())
+               , draw @(Svg _ _)
                       [ stroke ?~ black
                       , fill ?~ white
                       , pen    ?~ IpePen (Valued 2)
@@ -57,13 +57,9 @@ spec = goldenWith [osp|docs/doc-figures/|]
                       [fill ?~ blue] source
                ]
            )
--- prettyPolygon =
-
-
 
 
 type data S
-
 triangulated :: CPlaneGraph S (Point 2 R :+ Either (Point 2 R) (VertexId S))
                               PolygonEdgeType PolygonFaceData
 triangulated = labelWithShortestPaths source $ triangulate myPolygon
@@ -114,20 +110,20 @@ canvas = staticCanvas 600 400
 
 --------------------------------------------------------------------------------
 
-type data Svg model action
+-- | The Svg backend; which renders to Svg using Miso
+type data Svg (model :: Type) (action :: Type)
 
 type instance Rendered (Svg model action) = [View model action]
 
 instance ( Point_ vertex 2 (NumType vertex)
-         , Rendered (Svg model action) ~ [View model action]  -- why do I need this as a constraint?
          , ToMisoString (NumType vertex)
          , SimplePolygon_ (SimplePolygonF f vertex) vertex (NumType vertex)
          ) => IsDrawable (Svg model action) (SimplePolygonF f vertex) where
   type AttrOf (Svg model action) (SimplePolygonF f vertex) = PathAttributes (NumType vertex)
-  draw ats poly = [ Svg.dSimplePolygon poly (Svg.svgWriteAttrs $ apply ats) ]
+  draw ats poly = [ Svg.dSimplePolygon poly (Svg.svgWriteAttrs $ apply ats)
+                  ]
 
 instance ( Point_ vertex 2 (NumType vertex)
-         , Rendered (Svg model action) ~ [View model action]  -- why do I need this as a constraint?
          , ToMisoString (NumType vertex)
          , PolyLine_ (PolyLineF f vertex) vertex
          ) => IsDrawable (Svg model action) (PolyLineF f vertex) where
@@ -136,7 +132,6 @@ instance ( Point_ vertex 2 (NumType vertex)
 
 
 instance ( Point_ vertex 2 (NumType vertex)
-         , Rendered (Svg model action) ~ [View model action]  -- why do I need this as a constraint?
          , ToMisoString (NumType vertex)
          , EndPoint_ (endPoint vertex), IxValue (endPoint vertex) ~ vertex
          ) => IsDrawable (Svg model action) (LineSegment endPoint vertex) where
@@ -144,10 +139,7 @@ instance ( Point_ vertex 2 (NumType vertex)
   draw ats seg = [ Svg.dLineSegment seg (Svg.svgWriteAttrs $ apply ats) ]
 
 
-
-
-instance ( Rendered (Svg model action) ~ [View model action]  -- why do I need this as a constraint?
-         , ToMisoString r
+instance ( ToMisoString r
          ) => IsDrawable (Svg model action) (Point 2 r) where
   type AttrOf (Svg model action) (Point 2 r) = SymbolAttributes r
   draw ats p = [ Svg.dPoint p (Svg.svgWriteAttrs $ apply ats)]
