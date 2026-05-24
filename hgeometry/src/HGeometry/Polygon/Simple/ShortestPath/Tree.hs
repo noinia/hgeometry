@@ -57,7 +57,7 @@ import           Hiraffe.PlanarGraph.Connected
 --
 -- The the shortest path tree (in green) of a source point s (in blue)
 -- in a triangulated simple polygon.
--- ![example](doc-figures/shortestPathTree.svg)
+-- ![example](docs/doc-figures/shortestPathTree.svg)
 --
 -- \(O(n)\), where \(n\) is the number of vertices
 labelWithShortestPaths        :: ( Point_ source 2 r

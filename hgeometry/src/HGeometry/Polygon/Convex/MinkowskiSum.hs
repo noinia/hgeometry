@@ -34,7 +34,7 @@ import           HGeometry.Polygon.Simple.Class
 -- te origin first.
 --
 -- The minkowski-sum of the blue and green input polygons is shown in red.
--- ![example](doc-figures/minkowskiSum.svg)
+-- ![example](docs/doc-figures/minkowskiSum.svg)
 --
 -- running time: \(O(n+m)\).
 minkowskiSum     :: ( Ord r, Num r
