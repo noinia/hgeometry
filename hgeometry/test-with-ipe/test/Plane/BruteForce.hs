@@ -373,6 +373,7 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
     Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
                                                (LinePV ar rightV)
 
+    -- left boundary vector; pointing into the cone from the apex
     left'' = negated leftV
 
     l' = maximumBy (cmpInDirection2 left'') domain'
@@ -386,7 +387,8 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
 
     -- the corners of the domain that are in the cone, and still on the wrong side of the
     -- halfplane defined by l and r
-    mp = List.sortBy (ccwCmpAroundWith rightV ar)
+    mp = makeConvex
+       . List.sortBy (ccwCmpAroundWith rightV ar)
        $ filter (\q -> all (q `intersects`) [h1,h2,h]) (toList domain')
 
     -- we are overestimating the length of the vector from q to a and using that
@@ -402,7 +404,15 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
       -- observe that the length of v is at least the length of v'. So we will compute
       -- a vector b whose (squared) length is at least the (squared) length of v.
 
+    -- if we make a CCW right turn we need to keep b; otherwise
+    makeConvex xs = case xs of
+      [a,b,c] | ccw a b c /= CCW -> [a,c]
+      _                          -> xs
+
+
 --------------------------------------------------------------------------------
+
+
 
 -- | Try to find the unbounded edge (where the predicate somehow can
 -- test whether the pair of subsequent vertices define an edge).

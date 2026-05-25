@@ -29,6 +29,7 @@ import Ipe.Types
 import Ipe.FromIpe
 import Ipe.Attributes
 import HGeometry.Polygon
+import Data.List.NonEmpty (NonEmpty)
 
 --------------------------------------------------------------------------------
 
@@ -49,6 +50,15 @@ class ( Monoid (Rendered backend)
   -- | Draw some objects
   draw :: [Attr backend geom] -> geom -> Rendered backend
 
+instance ( IsDrawable backend a
+         ) => IsDrawable backend (NonEmpty a) where
+  type AttrOf backend (NonEmpty a) = AttrOf backend a
+  draw ats = foldMap (draw @backend ats)
+
+instance ( IsDrawable backend a
+         ) => IsDrawable backend [a] where
+  type AttrOf backend [a] = AttrOf backend a
+  draw ats = foldMap (draw @backend ats)
 
 --------------------------------------------------------------------------------
 -- * Ipe Backend utils

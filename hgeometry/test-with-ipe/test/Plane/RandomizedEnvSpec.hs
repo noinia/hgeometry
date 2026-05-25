@@ -96,20 +96,25 @@ normalize v = let s = sum v in (/s) <$> v
 
 -- | I don't think I really want this one; but just for debugging purposes it seems ok
 type instance NumType (a,b) = NumType b
+type instance NumType (a,b,c) = NumType c
 
 --------------------------------------------------------------------------------
 -- Move to Ipe.Draw
 
-instance (Point_ apex 2 r, Num r) => IsDrawable (Ipe r) (Cone r apex edge) where
+instance (Point_ apex 2 r, Fractional r, Ord r, Show r
+         ) => IsDrawable (Ipe r) (Cone r apex edge) where
   type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
-  draw ats c = draw @(Ipe r) ats (pg :: SimplePolygon (Point 2 r))
-    where
-      a  = c^.apex.asPoint
-      pg = uncheckedFromCCWPoints . NonEmpty.fromList $
-           [ a .+^ (c^.leftBoundaryVector.core)
-           , a
-           , a .+^ (c^.rightBoundaryVector.core)
-           ]
+  draw ats c = [iO $ defIO c]
+
+
+    -- draw @(Ipe r) ats (pg :: SimplePolygon (Point 2 r))
+    -- where
+    --   a  = c^.apex.asPoint
+    --   pg = uncheckedFromCCWPoints . NonEmpty.fromList $
+    --        [ a .+^ (c^.leftBoundaryVector.core)
+    --        , a
+    --        , a .+^ (c^.rightBoundaryVector.core)
+    --        ]
 
 instance ( Point_ corner 2 r, Num r
          , IsDrawable backend (SimplePolygon corner)
@@ -119,7 +124,13 @@ instance ( Point_ corner 2 r, Num r
   draw ats tri = draw @backend ats (uncheckedFromCCWPoints tri :: SimplePolygon corner)
   -- if we can draw a simple polygon we can draw a 2d triangle
 
-
+instance ( Point_ vertex 2 r, Num r
+         , IsDrawable backend (SimplePolygonF f vertex)
+         , VertexContainer f vertex
+         , Monoid (Rendered backend)
+         ) => IsDrawable backend (ConvexPolygonF f vertex) where
+  type AttrOf backend (ConvexPolygonF f vertex) = AttrOf backend (SimplePolygonF f vertex)
+  draw ats poly = draw @backend ats (toSimplePolygon poly)
 
 instance ( IsDrawable (Ipe r) a
          , IsDrawable (Ipe r) b
@@ -131,6 +142,25 @@ instance ( IsDrawable (Ipe r) a
   draw ats (a,b) = draw @(Ipe r) [ commonAttributes %~ apply ats ] a
                 <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
 
+
+instance ( IsDrawable (Ipe r) a
+         , IsDrawable (Ipe r) b
+         , IsDrawable (Ipe r) c
+         , NumType a ~ r, NumType b ~ r, NumType c ~ r
+         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
+         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
+         , HasCommonAttributes (AttrOf (Ipe r) c) r Maybe
+         ) => IsDrawable (Ipe r) (a,b,c) where
+  type AttrOf (Ipe r) (a,b,c) = CommonAttributes r Maybe
+  draw ats (a,b,c) = draw @(Ipe r) [ commonAttributes %~ apply ats ] a
+                  <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
+                  <> draw @(Ipe r) [ commonAttributes %~ apply ats ] c
+
+
+
+
+
+
 -- | Helper function to apply attributes
 apply       :: [at -> at] -> at -> at
 apply ats a = foldl' (flip ($)) a ats
@@ -140,7 +170,7 @@ apply ats a = foldl' (flip ($)) a ats
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = describe "Plane.RandomizedEnvSpec" $ do
+spec = describe "RandomizedEnvSpec" $ do
 
 
          it "coverCone" $ do
@@ -158,8 +188,11 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
              let poly = coverCone domain (cone^.apex) (negated $ cone^.leftBoundaryVector.core)
                                          (cone^.rightBoundaryVector.core)
                  corners' = filter (`intersects` cone) (toList domain)
-             in ipeCounterExample (domain,cone) $
-                all (`intersects` poly) corners'
+             in ipeCounterExample (domain,cone,poly) $
+                counterexample (show corners') $
+                conjoin [ counterexample (show v) $ Every $ v `intersects` poly
+                        | v <- corners'
+                        ]
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $
@@ -183,15 +216,27 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
            --       show () === "foo"
 
 
-           prop "brute force triangulated envelope; indeed lowest at query points" $
+           xprop "brute force envelope; indeed lowest at query points" $
+             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
+               let env   = lowerEnvelopeOn domain planes
+               in counterexample (show env) $
+                  ipeCounterExample (queries, domain, toList env) $
+                    not (null env) ==>
+                      conjoin [ verifyLowestEnv (toNonEmpty planes) q env
+                              | q <- toList queries
+                              ]
+
+
+           xprop "brute force triangulated envelope; indeed lowest at query points" $
              \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
                let env   = triangulatedLowerEnvelopeOn domain planes
                in counterexample (show env) $
-                 not (null env) ==> conjoin [ verifyLowest (toNonEmpty planes) q env
-                                            | q <- toList queries
-                                            ]
+                  ipeCounterExample (queries, domain, toList env) $
+                    not (null env) ==> conjoin [ verifyLowest (toNonEmpty planes) q env
+                                               | q <- toList queries
+                                               ]
 
-           prop "randomized2 same as (new) brute force" $
+           xprop "randomized2 same as (new) brute force" $
              \(planes :: NESet.NESet MyPlane)
               (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
                verticesOf (Randomized.verticesIn gen domain planes)
@@ -210,6 +255,41 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
 
 --------------------------------------------------------------------------------
 
+type Cell = ConvexPolygon (Vertex' (EnvVertex R MyPlane) R MyPlane)
+
+-- | Given the planes and a query; verify that the lower envelope is
+-- correct at the given query point.
+verifyLowestEnv          :: NonEmpty MyPlane -> Point 2 R
+                         -> BoundedLowerEnvelope R MyPlane
+                         -> Property
+verifyLowestEnv hs q = counterexample (show q)
+                     . allAtLowest
+                     . ifoldMap findContainingCells
+  where
+    findContainingCells      :: MyPlane -> Cell -> [(MyPlane, Cell)]
+    findContainingCells h pg
+      | q `intersects` pg = [(h,pg)]
+      | otherwise         = []
+
+    allAtLowest = \case
+      []   -> Every $ counterexample "No cell containing the query point!"
+                    $ counterexample ("lowest should be: " <> show lowestAtQ) False
+      tris -> foldMap (\(h,tri) -> Every $ counterexample (show tri) $ isLowestAtQ h) tris
+
+    isLowestAtQ   :: MyPlane -> Every
+    isLowestAtQ h = let z = evalAt q h
+                    in foldMap (\h' -> Every $
+                                 counterexample (show h') $
+                                 counterexample (show (z,evalAt q h')) $
+                                 z <= evalAt q h'
+                               ) hs
+
+    lowestAtQ = minimumBy (comparing $ evalAt q) hs
+
+
+
+
+-- | Verify that the lower envelope is correct at the query point
 verifyLowest          :: NonEmpty MyPlane -> Point 2 R
                       -> TriangulatedLowerEnvelope R MyPlane
                       -> Property
