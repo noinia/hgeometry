@@ -1,5 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Plane.RandomizedEnvSpec
   where
 
@@ -49,6 +50,10 @@ import           Data.Text (Text)
 import           Debug.Pretty.Simple
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 -- import           Debug.Trace
+
+
+import           Ipe.Draw
+import qualified Data.ByteString.Lazy.Char8 as B
 --------------------------------------------------------------------------------
 
 -- newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
@@ -91,6 +96,61 @@ normalize v = let s = sum v in (/s) <$> v
 
 --------------------------------------------------------------------------------
 
+-- | Draw the value to an ipe selection
+ipeCounterExample   :: forall prop a r.
+                       ( Testable prop
+                       , IsDrawable (Ipe r) a, NumType a ~ r
+                       , IpeWriteText r
+                       )
+                    => a -> prop -> Property
+ipeCounterExample x = case toIpeSelectionXML (draw @(Ipe r) [] x) of
+                        Nothing -> property
+                        Just b  -> counterexample (B.unpack b)
+
+
+type instance NumType (a,b) = NumType b
+
+instance (Point_ apex 2 r, Num r) => IsDrawable (Ipe r) (Cone r apex edge) where
+  type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
+  draw ats c = draw @(Ipe r) ats (pg :: SimplePolygon (Point 2 r))
+    where
+      a  = c^.apex.asPoint
+      pg = uncheckedFromCCWPoints . NonEmpty.fromList $
+           [ a .+^ (c^.leftBoundaryVector.core)
+           , a
+           , a .+^ (c^.rightBoundaryVector.core)
+           ]
+
+instance ( Point_ corner 2 r, Num r
+         , IsDrawable backend (SimplePolygon corner)
+         , Monoid (Rendered backend)
+         ) => IsDrawable backend (Triangle corner) where
+  type AttrOf backend (Triangle corner) = AttrOf backend (SimplePolygon corner)
+  draw ats tri = draw @backend ats (uncheckedFromCCWPoints tri :: SimplePolygon corner)
+
+instance ( Point_ vertex 2 r, VertexContainer f vertex, Num r
+         ) => IsDrawable (Ipe r) (SimplePolygonF f vertex) where
+  type AttrOf (Ipe r) (SimplePolygonF f vertex) = PathAttributes r
+  draw ats pg = draw @(Ipe r) ats (review _asSimplePolygon pg')
+    where
+      pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
+
+
+instance ( IsDrawable (Ipe r) a
+         , IsDrawable (Ipe r) b
+         , NumType a ~ r, NumType b ~ r
+         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
+         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
+         ) => IsDrawable (Ipe r) (a,b) where
+  type AttrOf (Ipe r) (a,b) = CommonAttributes r Maybe
+  draw ats (a,b) = draw @(Ipe r) [ commonAttributes %~ apply ats ] a
+                <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
+
+-- | Helper function to apply attributes
+apply       :: [at -> at] -> at -> at
+apply ats a = foldl' (flip ($)) a ats
+
+
 spec :: Spec
 spec = describe "Plane.RandomizedEnvSpec" $ do
 
@@ -110,7 +170,8 @@ spec = describe "Plane.RandomizedEnvSpec" $ do
              let poly = coverCone domain (cone^.apex) (negated $ cone^.leftBoundaryVector.core)
                                          (cone^.rightBoundaryVector.core)
                  corners' = filter (`intersects` cone) (toList domain)
-             in all (`intersects` poly) corners'
+             in ipeCounterExample (domain,cone) $
+                all (`intersects` poly) corners'
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $
@@ -361,13 +422,13 @@ runTest (Input domain planes queries) = do
           writeIpeFile [osp|env.ipe|]
             . addStyleSheet (createIpeStyle "myColors" myColors)
             . ipeFile . NonEmpty.fromList . fmap (fromContent . concat)
-            $ [ [ draw env
+            $ [ [ drawEnv env
                 , drawVertices vertices
                 , [iO $ defIO domain  &layer ?~  "domain"]
                 ]
               , [ drawVertices vertices
                 , [iO $ defIO domain  &layer ?~  "domain"]
-                , draw env'
+                , drawEnv env'
                 ]
               ]
 
@@ -379,9 +440,9 @@ runTest (Input domain planes queries) = do
     env = lowerEnvelopeOn domain planes
     vertices = bruteForceVertices planes
 
-    subPlanes = NonEmpty.fromList [planes `ix` 0, planes `ix` 2, planes `ix` 3]
+    subPlanes = NonEmpty.fromList [planes `ix'` 0, planes `ix'` 2, planes `ix'` 3]
     env' = lowerEnvelopeOn domain subPlanes
-    ix xs i = toList xs List.!! i
+    ix' xs i = toList xs List.!! i
 
     -- greenPlane = planes `ix` 0
     -- orangePlane = planes `ix` 3
@@ -454,10 +515,10 @@ drawVertices :: (Plane_ plane r, Fractional r, Ord plane, Ord r)
 drawVertices = foldMap $ \v -> [iO $ defIO (v^.asPoint) &layer ?~  "vertices"
                                ]
 
-draw :: forall plane r.
-        (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r)
-     => BoundedLowerEnvelope r (plane :+ IpeColor r) -> [IpeObject r]
-draw = ifoldMap draw'
+drawEnv :: forall plane r.
+           (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r)
+        => BoundedLowerEnvelope r (plane :+ IpeColor r) -> [IpeObject r]
+drawEnv = ifoldMap draw'
   where
     draw' (h :+ color) cell = [ iO $ ipeSimplePolygon cell &fill ?~ color
                                                            &layer ?~  "env"
@@ -577,3 +638,10 @@ testVD = writeIpeFile [osp|vd.ipe|]
 -- voronoiSpec = describe "Voronoi diagrams again" $ do
 --                 prop "closest pair shares edge" $
 --                   \(sites :: NESet.NESet MyPoint) ->
+
+
+
+
+
+-- Triangle (Point2 (-15) 80) (Point2 0 0) (Point2 0 41.88235~)
+-- Cone {_apex = Point2 42.775 22.01408~, _leftBoundaryVector = Vector2 0.66666~ (-80.73418~) :+ (), _rightBoundaryVector = Vector2 (-41.79311~) 46.16666~ :+ ()}

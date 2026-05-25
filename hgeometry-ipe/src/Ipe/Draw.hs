@@ -14,6 +14,9 @@ module Ipe.Draw
   ( Rendered
   , Attr
   , IsDrawable(..)
+
+  -- * The Ipe backend
+  , Ipe
   ) where
 
 import Data.Default
@@ -47,10 +50,10 @@ class ( Monoid (Rendered backend)
 
 --------------------------------------------------------------------------------
 
+-- | The Ipe backend
 type data Ipe (r :: Type)
 
 type instance Rendered (Ipe r) = [IpeObject r]
-
 
 instance IsDrawable (Ipe r) (IpeObject r) where
   type AttrOf (Ipe r) (IpeObject r) = CommonAttributes r Maybe
