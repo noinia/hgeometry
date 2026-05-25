@@ -63,6 +63,7 @@ instance Show CCW where
 -- | Given three points p q and r determine the orientation when going from p to r via q.
 --
 -- Be wary of numerical instability:
+--
 -- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Double))
 -- CCW
 --
