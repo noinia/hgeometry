@@ -33,7 +33,9 @@ import           Data.Void
 import           HGeometry.Polygon
 import           HGeometry.Properties
 import qualified HGeometry.Miso.Svg as Svg
-import           Miso.String (ToMisoString(..))
+import           Miso.String (ToMisoString(..), ms)
+import           Miso.Svg
+import           Miso.Svg.Property
 
 --------------------------------------------------------------------------------
 
@@ -74,7 +76,10 @@ instance ( Point_ vertex 2 (NumType vertex)
 instance ( ToMisoString r
          ) => IsDrawable (Svg model action) (Point 2 r) where
   type AttrOf (Svg model action) (Point 2 r) = SymbolAttributes r
-  draw ats p = [ Svg.dPoint p (Svg.svgWriteAttrs $ apply ats)]
+  draw ats p = [ ellipse_ ([ cx_ (ms $ p^.xCoord), cy_ (ms $ p^.yCoord)
+                           , rx_ "2", ry_ "2"
+                           ] <> Svg.svgWriteAttrs (apply ats))
+               ]
 
 -- | Helper function to apply attributes
 apply :: Default at => [at -> at] -> at

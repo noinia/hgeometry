@@ -60,7 +60,18 @@ instance Show CCW where
     CoLinear -> "CoLinear"
 
 
--- | Given three points p q and r determine the orientation when going from p to r via q.
+-- | Given three points p q and r determine the orientation when going
+-- from p to r via q. Some examples are given below; for p (in purple) and q (blue) the
+-- points r that are:
+--
+-- - CCW are shown in red,
+-- - CoLinear are in black, and
+-- - the points CW are shown in green
+--
+-- ![example](docs/doc-figures/ccw.svg)
+--
+-- >>> ccw (Point2 5 5) (Point2 20 20) (Point2 20 (30 :: Rational))
+-- CCW
 --
 -- Be wary of numerical instability:
 --

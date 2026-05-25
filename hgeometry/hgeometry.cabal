@@ -338,8 +338,6 @@ library
 
 
 
-    -- other-extensions:
-
 --------------------------------------------------------------------------------
 -- * HGeometry-quickcheck
 
@@ -592,12 +590,16 @@ test-suite doc-figures
 
   mixins:
       hgeometry-vector:numtypes (IntervalReal as R)
+  default-extensions:
+    QuasiQuotes
   other-modules:
     Spec
     Golden
     MinkowskiSpec
     SPTSpec
     CCWSpec
+
+
 
 --------------------------------------------------------------------------------
 -- * Benchmarks
