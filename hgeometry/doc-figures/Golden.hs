@@ -7,7 +7,6 @@ import           Test.Hspec.WithTempFile
 import           Miso
 import           Miso.String
 import           Miso.Html.Render
-import           HGeometry.Miso.Svg.StaticCanvas
 import           HGeometry.Miso.Svg
 import           R
 import qualified Data.ByteString.Lazy as ByteString
