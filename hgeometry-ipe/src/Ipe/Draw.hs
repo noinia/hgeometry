@@ -26,7 +26,9 @@ import HGeometry.Point
 import Control.Lens
 import Data.Kind (Type)
 import Ipe.Types
+import Ipe.FromIpe
 import Ipe.Attributes
+import HGeometry.Polygon
 
 --------------------------------------------------------------------------------
 
@@ -49,6 +51,7 @@ class ( Monoid (Rendered backend)
 
 
 --------------------------------------------------------------------------------
+-- * Ipe Backend utils
 
 -- | The Ipe backend
 type data Ipe (r :: Type)
@@ -67,6 +70,12 @@ instance IsDrawable (Ipe r) (IpeSymbol r) where
   type AttrOf (Ipe r) (IpeSymbol r) = SymbolAttributes r
   draw ats p = [ IpeUse (p :+ mkAttrs ats) ]
 
+instance ( Point_ vertex 2 r, VertexContainer f vertex, Num r
+         ) => IsDrawable (Ipe r) (SimplePolygonF f vertex) where
+  type AttrOf (Ipe r) (SimplePolygonF f vertex) = PathAttributes r
+  draw ats pg = draw @(Ipe r) ats (review _asSimplePolygon pg')
+    where
+      pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
 
 --------------------------------------------------------------------------------
 

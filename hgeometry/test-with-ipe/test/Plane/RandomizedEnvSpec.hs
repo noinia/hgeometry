@@ -50,10 +50,8 @@ import           Data.Text (Text)
 import           Debug.Pretty.Simple
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 -- import           Debug.Trace
-
-
 import           Ipe.Draw
-import qualified Data.ByteString.Lazy.Char8 as B
+import           Test.Util
 --------------------------------------------------------------------------------
 
 -- newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
@@ -96,19 +94,11 @@ normalize v = let s = sum v in (/s) <$> v
 
 --------------------------------------------------------------------------------
 
--- | Draw the value to an ipe selection
-ipeCounterExample   :: forall prop a r.
-                       ( Testable prop
-                       , IsDrawable (Ipe r) a, NumType a ~ r
-                       , IpeWriteText r
-                       )
-                    => a -> prop -> Property
-ipeCounterExample x = case toIpeSelectionXML (draw @(Ipe r) [] x) of
-                        Nothing -> property
-                        Just b  -> counterexample (B.unpack b)
-
-
+-- | I don't think I really want this one; but just for debugging purposes it seems ok
 type instance NumType (a,b) = NumType b
+
+--------------------------------------------------------------------------------
+-- Move to Ipe.Draw
 
 instance (Point_ apex 2 r, Num r) => IsDrawable (Ipe r) (Cone r apex edge) where
   type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
@@ -127,13 +117,8 @@ instance ( Point_ corner 2 r, Num r
          ) => IsDrawable backend (Triangle corner) where
   type AttrOf backend (Triangle corner) = AttrOf backend (SimplePolygon corner)
   draw ats tri = draw @backend ats (uncheckedFromCCWPoints tri :: SimplePolygon corner)
+  -- if we can draw a simple polygon we can draw a 2d triangle
 
-instance ( Point_ vertex 2 r, VertexContainer f vertex, Num r
-         ) => IsDrawable (Ipe r) (SimplePolygonF f vertex) where
-  type AttrOf (Ipe r) (SimplePolygonF f vertex) = PathAttributes r
-  draw ats pg = draw @(Ipe r) ats (review _asSimplePolygon pg')
-    where
-      pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
 
 
 instance ( IsDrawable (Ipe r) a
@@ -150,6 +135,9 @@ instance ( IsDrawable (Ipe r) a
 apply       :: [at -> at] -> at -> at
 apply ats a = foldl' (flip ($)) a ats
 
+
+
+--------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "Plane.RandomizedEnvSpec" $ do
