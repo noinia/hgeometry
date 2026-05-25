@@ -132,7 +132,7 @@ common hgeometry-setup
 
 common doctest
     build-depends:
-      , doctest                    >= 0.8      && < 1
+      , doctest                    >= 0.8      && < 0.25
 
 common all-quickcheck-setup
     ghc-options:
@@ -479,6 +479,11 @@ test-suite doctest
     type:             exitcode-stdio-1.0
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    -- build-depends:
+    --    pretty-simple           >= 4.1.0       && < 4.2
+    -- other-modules:
+    --     Plane.Debug
+
 
 common with-ipe-hspec-fractional
   build-tool-depends: hspec-discover:hspec-discover
@@ -645,6 +650,9 @@ benchmark lowerEnv
   other-modules:
     Plane.BruteForce
     Plane.Sample
+    Plane.Debug
+  build-depends:
+    pretty-simple
 
 
 benchmark batchPointLocation
