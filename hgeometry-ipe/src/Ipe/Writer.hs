@@ -252,7 +252,7 @@ instance IpeWriteText VerticalAlignment where
     AlignBaseline -> Just "baseline"
 
 instance KnownNat n => IpeWriteText (Finite n) where
-  ipeWriteText = ipeWriteText . fromIntegral
+  ipeWriteText = ipeWriteText @Integer . fromIntegral
 
 instance IpeWriteText LineJoin where
   ipeWriteText = ipeWriteText . toFinite

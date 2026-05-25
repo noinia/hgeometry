@@ -155,8 +155,8 @@ spec = describe "lower envelope tests" $ do
          prop "original means definer" $
            \(Positive r') planes -> let r = max r' 3 in
              originalMeansDefiner r planes
-         prop "original vertices are original" $ do
-           \(Positive r') tri planes -> let r = max r' 3 in
+         prop "original vertices are original" $
+           \(Positive r') tri planes -> let r = max r' 3 :: Int in
              allOriginal' 3 tri planes
 
          prop "bug" $ do
