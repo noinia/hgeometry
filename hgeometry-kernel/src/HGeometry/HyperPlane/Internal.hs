@@ -166,7 +166,7 @@ pointOn h = case uncons $ hyperPlaneEquation h of
 
 -- | Compare points with respect to the direction given by the
 -- vector, i.e. by taking planes whose normal is the given vector.
-
+--
 -- >>> cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 (0 :: Int))
 -- LT
 -- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (0 :: Int))
@@ -186,12 +186,7 @@ cmpInDirection       :: forall point d r.
                         , Has_ Vector_ (1+d) r, d <= d+1
                         )
                      => Vector d r -> point -> point -> Ordering
-cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n
-  where
-    fromPointAndNormal' q' n' = HyperPlane $ cons a0 n'
-      where
-        a0 = negate $ (q'^.vector) `dot` n'
-
+cmpInDirection n p q = p `onSideTest` fromPointAndNormal @(HyperPlane d r) q n
 
 -- TODO: not sure how to do this exactly het
 -- {-# RULES
