@@ -185,11 +185,12 @@ windowDeltas :: Vector 2 Int
 windowDeltas = Vector2 50 200
 
 
-wrap       :: (model -> action -> Effect p model action') -> action -> Effect p model action'
+wrap       :: (model -> action -> Effect parent props model action') -> action
+           -> Effect parent props model action'
 wrap f act = get >>= flip f act
 
 
-updateModel   :: Model -> Action -> Effect parent Model Action
+updateModel   :: Model -> Action -> Effect parent props Model Action
 updateModel m = \case
     CanvasAction ca     -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
       -- m&canvas %%~ flip
@@ -266,8 +267,8 @@ insertPoly p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel  :: Model -> View Model Action
-viewModel m =
+viewModel     :: props -> Model -> View Model Action
+viewModel _ m =
     div_ [ style_ [ CSS.display       "flex"
                   , CSS.flexDirection "column"
                   ]

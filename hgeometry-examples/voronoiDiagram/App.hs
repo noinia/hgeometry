@@ -101,7 +101,7 @@ data Action = CanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel :: Action -> Effect parent Model Action
+updateModel :: Action -> Effect parent props Model Action
 updateModel = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
@@ -202,8 +202,8 @@ closerHalfPlane p q b
 --     any  (corners rect)
 
 
-viewModel       :: Model -> View Model Action
-viewModel m = div_ [ ]
+viewModel     :: props -> Model -> View Model Action
+viewModel _ m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick AddPoint
@@ -318,8 +318,8 @@ textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                    ] <> ats
                                   ) [text t]
 
-wrap       :: (model -> action -> Effect parent model action') -> action
-           -> Effect parent model action'
+wrap       :: (model -> action -> Effect parent props model action') -> action
+           -> Effect parent props model action'
 wrap f act = get >>= flip f act
 
 

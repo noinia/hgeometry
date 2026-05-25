@@ -30,12 +30,12 @@ newtype ZoomAction = ZoomAction ZoomDirection deriving (Show,Eq)
 update      :: ( Fractional r, Ord r
                , HasZoomLevel canvas r
                )
-            => ZoomAction -> Effect parent canvas action
+            => ZoomAction -> Effect parent props canvas action
 update za = zoom zoomLevel $ updateZoom' za
   -- note: the zoom is the lens version of zoom
 
 updateZoom' :: (Fractional r, Ord r)
-            => ZoomAction -> Effect parent r action
+            => ZoomAction -> Effect parent props r action
 updateZoom' = \case
     ZoomAction dir  -> modify $ applyZoom dir
 

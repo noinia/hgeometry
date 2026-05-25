@@ -57,12 +57,12 @@ myTriangles :: NonEmpty (Triangle (Point 3 R) :+ RenderProps)
 myTriangles = -- scaleUniformlyBy 5 <$>
             NonEmpty.fromList $
         [ -- ground plane
-          Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props blue
-        , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ props blue
+          Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props' blue
+        , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ props' blue
 
         -- left side
-        , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ props green
-        , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ props green
+        , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ props' green
+        , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ props' green
 
         -- front plane
         -- , Triangle origin (Point3 1 0 0) (Point3 1 0 1) :+ red
@@ -70,15 +70,15 @@ myTriangles = -- scaleUniformlyBy 5 <$>
 
 
         -- back plane
-        , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ props orange
-        , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ props orange
+        , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ props' orange
+        , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ props' orange
         ]
         <> ((\tri -> tri&extra %~ getColor
                          &vertices.coordinates %~ realToFrac
               ) <$> myTriangles'
              )
 
-props c = RenderProps Nothing (Just $ def&fill ?~ c)
+props' c = RenderProps Nothing (Just $ def&fill ?~ c)
 
 getColor :: core :+ RenderProps -> RenderProps
 getColor = view extra
@@ -88,8 +88,8 @@ myTriangles' = asTrianglesAbove domain planes
 
 planes :: NonEmpty (Plane R :+ RenderProps)
 planes = NonEmpty.fromList
-           [ Plane 0 0 (0.5)   :+ props red
-           -- , Plane 0 (-0.25) 1 :+ props gray
+           [ Plane 0 0 (0.5)   :+ props' red
+           -- , Plane 0 (-0.25) 1 :+ props' gray
            ]
 
 
@@ -147,14 +147,14 @@ main = startApp (Canvas.withCanvasEvents defaultEvents) $
                     ]
            }
 
-wrap       :: (model -> action -> Effect parent model action') -> action
-           -> Effect parent model action'
+wrap       :: (model -> action -> Effect parent props model action') -> action
+           -> Effect parent props model action'
 wrap f act = get >>= flip f act
 
 
 --------------------------------------------------------------------------------
 
-updateModel :: Action -> Effect parent Model Action
+updateModel :: Action -> Effect parent props Model Action
 updateModel = \case
   CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
   MoveCamera v     -> camera.cameraPosition %= (.+^ v)
@@ -181,16 +181,16 @@ scalingFactor = 10_000
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Model Action
-viewModel model = div_ [ ]
-                       [ either CanvasAction id <$>
-                         Canvas.svgCanvas_ (model^.canvas)
-                                [ style_ [border "1px solid blue"]
-                                , onPointerDown (const StartRotate)
-                                , onPointerUp   (const StopRotate)
-                                ]
-                                canvasBody
-                       ]
+viewModel         :: props -> Model -> View Model Action
+viewModel _ model = div_ [ ]
+                         [ either CanvasAction id <$>
+                           Canvas.svgCanvas_ (model^.canvas)
+                                  [ style_ [border "1px solid blue"]
+                                  , onPointerDown (const StartRotate)
+                                  , onPointerUp   (const StopRotate)
+                                  ]
+                                  canvasBody
+                         ]
   where
     canvasBody = [ draw (uniformScaleBy scalingFactor $ toTriangle2 t2)
                      [ fill_   (ms $ t^?!extra.faceAttrs._Just.fill._Just)

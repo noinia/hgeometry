@@ -55,7 +55,7 @@ data Action = CanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect parent Model Action
+updateModel   :: Model -> Action -> Effect parent props Model Action
 updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
@@ -80,8 +80,8 @@ insertSegment s m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Model Action
-viewModel m = div_ [ ]
+viewModel     :: props -> Model -> View Model Action
+viewModel _ m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick AddPoint
@@ -121,8 +121,8 @@ main :: IO ()
 main = startApp (Canvas.withCanvasEvents defaultEvents) $
          component initialModel (wrap updateModel) viewModel
 
-wrap       :: (model -> action -> Effect parent model action') -> action
-           -> Effect parent model action'
+wrap       :: (model -> action -> Effect parent props model action') -> action
+           -> Effect parent props model action'
 wrap f act = get >>= flip f act
 
 textAt                    :: ToMisoString r

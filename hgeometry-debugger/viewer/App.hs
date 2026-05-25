@@ -106,7 +106,7 @@ data Action = AcquireData
 mkItem       :: (String, Drawing) -> Item
 mkItem (s,d) = Item s d True
 
-updateModel   :: Action -> Effect parent Model Action
+updateModel   :: Action -> Effect parent props Model Action
 updateModel = \case
   AcquireData      -> withSink $ \sink ->
     clientDrawing (sink . LoadDrawing . body) (sink . FetchError)

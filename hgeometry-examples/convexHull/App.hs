@@ -52,7 +52,7 @@ data Action = CanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect parent Model Action
+updateModel   :: Model -> Action -> Effect parent props Model Action
 updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
@@ -79,8 +79,8 @@ insertPoint p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Model Action
-viewModel m = div_ [ ]
+viewModel     :: props -> Model -> View Model Action
+viewModel _ m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick AddPoint
@@ -125,5 +125,6 @@ textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                   ) [text t]
 
 
-wrap       :: (model -> action -> Effect p model action') -> action -> Effect p model action'
+wrap       :: (model -> action -> Effect p props model action') -> action
+           -> Effect p props model action'
 wrap f act = get >>= flip f act
