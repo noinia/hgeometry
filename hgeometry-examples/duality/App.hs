@@ -76,7 +76,7 @@ data Action = PrimalCanvasAction Canvas.InternalCanvasAction
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect parent Model Action
+updateModel   :: Model -> Action -> Effect parent props Model Action
 updateModel m = \case
     PrimalCanvasAction ca -> zoom primalCanvas $ wrap Canvas.handleInternalCanvasAction ca
     DualCanvasAction ca   -> zoom dualCanvas   $ wrap Canvas.handleInternalCanvasAction ca
@@ -100,8 +100,8 @@ insert p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel       :: Model -> View Model Action
-viewModel m = div_ [ ]
+viewModel     :: props -> Model -> View Model Action
+viewModel _ m = div_ [ ]
                    [ either PrimalCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.primalCanvas)
                                        [ onClick PrimalClick
@@ -157,6 +157,6 @@ main :: IO ()
 main = startApp (Canvas.withCanvasEvents defaultEvents) $
          Miso.component initialModel (wrap updateModel) viewModel
 
-wrap       :: (model -> action -> Effect parent model action') -> action
-           -> Effect parent model action'
+wrap       :: (model -> action -> Effect parent props model action') -> action
+           -> Effect parent props model action'
 wrap f act = get >>= flip f act

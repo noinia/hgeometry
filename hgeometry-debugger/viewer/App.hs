@@ -106,7 +106,7 @@ data Action = AcquireData
 mkItem       :: (String, Drawing) -> Item
 mkItem (s,d) = Item s d True
 
-updateModel   :: Action -> Effect parent Model Action
+updateModel   :: Action -> Effect parent props Model Action
 updateModel = \case
   AcquireData      -> withSink $ \sink ->
     clientDrawing (sink . LoadDrawing . body) (sink . FetchError)
@@ -133,8 +133,8 @@ baseUrl :: MisoString
 baseUrl = toMisoString $ "http://" <> defaultHost <> ":" <> show defaultPort
 --------------------------------------------------------------------------------0
 
-viewModel       :: Model -> View Model Action
-viewModel model = div_ []
+viewModel         :: props -> Model -> View Model Action
+viewModel _ model = div_ []
     [ svg_ [ width_  "1024px"
              , height_ "700px"
              ,   style_ [border "1px solid black"]

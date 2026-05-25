@@ -109,7 +109,7 @@ offset' = bimap floor floor . offset -- changed this from client;
 
 -- | Handles InternalCanvas Actions
 handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction
-                                  -> Effect parent (Canvas r) action
+                                  -> Effect parent props (Canvas r) action
 handleInternalCanvasAction canvas = put . \case
   PointerEnter pe  -> canvas&mousePosition ?~ uncurry Point2 (offset' pe)
   PointerMove  pe  -> canvas&mousePosition ?~ uncurry Point2 (offset' pe)

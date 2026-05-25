@@ -10,13 +10,11 @@
 --------------------------------------------------------------------------------
 module Ipe.Matrix where
 
-import Control.Lens hiding (rmap)
+import Control.Lens hiding (rmap, transform)
 import HGeometry.Ext
 import Ipe.Attributes
 import Ipe.Types
-import HGeometry.Properties
 import HGeometry.Transformation
-import Data.Proxy
 
 --------------------------------------------------------------------------------
 

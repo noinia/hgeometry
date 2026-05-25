@@ -93,7 +93,7 @@ data CanvasAction = MouseMove (Int,Int)
                   deriving (Show,Eq)
 
 
-update   :: (Fractional r, Ord r) => ICanvas r -> CanvasAction -> Effect action (ICanvas r)
+update   :: (Fractional r, Ord r) => ICanvas r -> CanvasAction -> Effect parent props (ICanvas r) action
 update m = \case
     MouseMove p             -> noEff $ m&mousePosition .~ Just p
                                         &canvas.center %~ applyPan (m^.panStatus) p
@@ -110,7 +110,7 @@ update m = \case
 newtype ZoomAction = ZoomAction ZoomDirection deriving (Show,Eq)
 
 updateZoom      :: (Fractional r, Ord r)
-                => ICanvas r -> ZoomAction -> Effect action (ICanvas r)
+                => ICanvas r -> ZoomAction -> Effect parent props  (ICanvas r) action
 updateZoom m za = m&canvas.zoomLevel %%~ flip updateZoom' za
 
 updateZoom'   :: (Fractional r, Ord r)
@@ -134,7 +134,7 @@ data PanAction = StartPan
                | StopPan
                deriving (Show,Eq)
 
-updatePan      :: Num r => ICanvas r -> PanAction -> Effect action (ICanvas r)
+updatePan      :: Num r => ICanvas r -> PanAction -> Effect parent props (ICanvas r) action
 updatePan m pa = m&panStatus %%~ \_ -> updatePan' (m^.mousePosition) (m^.canvas.center) pa
 
 updatePan'        :: Num r

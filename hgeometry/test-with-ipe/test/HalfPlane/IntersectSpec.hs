@@ -1,6 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
+{- HLINT ignore "Use <=<" -}
 {- HLINT ignore "Use ++" -}
 module HalfPlane.IntersectSpec
   ( commonIntersection
@@ -8,6 +9,7 @@ module HalfPlane.IntersectSpec
   , spec
   ) where
 
+import           Data.Foldable
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import qualified Data.Text as Text
@@ -47,14 +49,13 @@ import           HalfPlane.CommonIntersectionSpec ()
 import           HGeometry.Polygon
 import           HGeometry.Cone
 import           Test.Hspec
-import           Ipe.Color (gray)
 import           HGeometry.Cone.Intersection
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck (counterexample, (===), suchThat, discard, Arbitrary(..))
 import           HGeometry.Slab (Slab(..))
--- import HalfPlane.Intersection
 import           HGeometry.Ipe.Instances ()
 import           Debug.Trace
+
 --------------------------------------------------------------------------------
 
 type HalfPlane r = HalfSpaceF (LinePV 2 r)
@@ -182,7 +183,7 @@ testMain = do halfPlanes'' <- fmap toHalfPlane <$> (readAllFrom =<< inFile)
               --     halfPlanes' = [ HalfSpace Negative (LinePV (Point2 0 3) (Vector2 0 (-2.33334)))
               --                   , HalfSpace Positive (LinePV (Point2 0 (-1.33334)) (Vector2 2.33333 0.33333))
               --                   ]
-              traverse print halfPlanes'
+              traverse_ print halfPlanes'
               case NonEmpty.nonEmpty halfPlanes' of
                 Nothing         -> print "error; no halfplanes"
                 Just halfPlanes -> case commonIntersection halfPlanes of
@@ -429,7 +430,7 @@ commonIntersection = (toCommonIntersection =<<)
 
 -- | Helper data type
 data Helper a b = Helper { previous   :: !b
-                         , getBuilder :: (Builder.Builder a)
+                         , getBuilder :: Builder.Builder a
                          }
 
 -- | Drop redundant constraints.

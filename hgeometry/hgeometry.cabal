@@ -132,7 +132,7 @@ common hgeometry-setup
 
 common doctest
     build-depends:
-      , doctest                    >= 0.8      && < 1
+      , doctest                    >= 0.8      && < 0.25
 
 common all-quickcheck-setup
     ghc-options:
@@ -299,6 +299,10 @@ library
         HGeometry.VerticalRayShooting
         HGeometry.VerticalRayShooting.PersistentSweep
 
+
+        HGeometry.Plane.LowerEnvelope.Connected.Primitives
+        -- FIXME
+
     reexported-modules:
         HGeometry.LineSegment.Intersection.Naive
       , HGeometry.LineSegment.Intersection.BentleyOttmann
@@ -323,7 +327,6 @@ library
         HGeometry.Plane.LowerEnvelope.Clipped.Type
 
         HGeometry.Plane.LowerEnvelope.Connected.Type
-        HGeometry.Plane.LowerEnvelope.Connected.Primitives
         HGeometry.Plane.LowerEnvelope.Connected.VertexForm
         HGeometry.Plane.LowerEnvelope.Connected.Region
         HGeometry.Plane.LowerEnvelope.Connected.Regions
@@ -334,8 +337,6 @@ library
         -- HGeometry.Plane.LowerEnvelope.EpsApproximation
 
 
-
-    -- other-extensions:
 
 --------------------------------------------------------------------------------
 -- * HGeometry-quickcheck
@@ -478,6 +479,11 @@ test-suite doctest
     type:             exitcode-stdio-1.0
     main-is:          doctests.hs
     build-tool-depends:  doctest-driver-gen:doctest-driver-gen
+    -- build-depends:
+    --    pretty-simple           >= 4.1.0       && < 4.2
+    -- other-modules:
+    --     Plane.Debug
+
 
 common with-ipe-hspec-fractional
   build-tool-depends: hspec-discover:hspec-discover
@@ -500,6 +506,13 @@ common with-ipe-hspec-fractional
       Plane.RenderEnvelopeSpec
       Plane.RenderProps
           -- TODO: move these ones
+
+      Plane.Randomized2
+      Plane.RandomizedEnvSpec
+      Plane.Sample
+      Plane.BruteForce
+
+      Plane.Debug
 
       HalfPlane.IntersectSpec
       HalfPlane.Intersection
@@ -543,6 +556,8 @@ common with-ipe-hspec-fractional
       , hgeometry-vector:numtypes
       , wavefront              >= 0.7.1.5 && < 0.8
       , exceptions             >= 0.10.9  && < 0.11
+      , pretty-simple          >= 4.1.4   && < 4.2
+
 
 test-suite with-ipe-hspec-rational
   import:           all-setup, ipe-setup, all-quickcheck-setup,
@@ -580,11 +595,15 @@ test-suite doc-figures
 
   mixins:
       hgeometry-vector:numtypes (IntervalReal as R)
+  default-extensions:
+    QuasiQuotes
   other-modules:
     Spec
     Golden
     MinkowskiSpec
     SPTSpec
+    CCWSpec
+
 
 
 --------------------------------------------------------------------------------
@@ -618,7 +637,7 @@ benchmark benchmarks
 
 benchmark lowerEnv
   import:         all-setup, hgeometry-setup, bench-setup
-  hs-source-dirs: bench
+  hs-source-dirs: bench test-with-ipe/test
   main-is:        LowerEnvBench.hs
   type:           exitcode-stdio-1.0
   -- ghc-options:
@@ -626,7 +645,15 @@ benchmark lowerEnv
   --   -fprof-late-inline
   --   -fprof-auto
   --   -rtsopts "-with-rtsopts=-p"
+  mixins:
+      hgeometry-vector:numtypes (IntervalReal as R)
   other-modules:
+    Plane.BruteForce
+    Plane.Sample
+    Plane.Debug
+  build-depends:
+    pretty-simple
+
 
 benchmark batchPointLocation
   import:         all-setup, hgeometry-setup, bench-setup

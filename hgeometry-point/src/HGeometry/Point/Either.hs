@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Point.Either
@@ -12,6 +13,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Point.Either
   ( OriginalOrExtra(..)
+  , _Original, _Extra
   , OriginalOrCanonical
   ) where
 
@@ -29,6 +31,8 @@ import Control.DeepSeq
 data OriginalOrExtra orig extra = Original orig
                                 | Extra    extra
                                 deriving stock (Show,Eq,Functor,Generic)
+
+makePrisms ''OriginalOrExtra
 
 instance (NFData orig, NFData extra) => NFData (OriginalOrExtra orig extra)
 

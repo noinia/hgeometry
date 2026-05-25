@@ -2,21 +2,21 @@ module HalfPlane.Intersection
   (
   ) where -- TODO: rename to HGeometry.Slab.Intersection
 
-import           HGeometry.Slab
-import           Control.Lens
-import           HGeometry.Point
-import           HGeometry.Point.Either
-import           HGeometry.Line
-import           HGeometry.Box
-import           HGeometry.Polygon
-import           HGeometry.Vector
-import           HGeometry.Vector
+-- import           HGeometry.Slab
+-- import           Control.Lens
+-- import           HGeometry.Point
+-- import           HGeometry.Point.Either
+-- import           HGeometry.Line
+-- import           HGeometry.Box
+-- import           HGeometry.Polygon
+-- import           HGeometry.Vector
+-- import           HGeometry.Vector
 import           Prelude hiding (sqrt)
-import           HGeometry.Ext
-import           HGeometry.Number.Radical
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Cyclic
+-- import           HGeometry.Ext
+-- import           HGeometry.Number.Radical
+-- import           Data.List.NonEmpty (NonEmpty(..))
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import           HGeometry.Cyclic
 
 --------------------------------------------------------------------------------
 -- attempt to intersect a slab with a rectangle

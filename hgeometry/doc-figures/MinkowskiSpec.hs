@@ -1,4 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-incomplete-uni-patterns #-}
 module MinkowskiSpec(spec) where

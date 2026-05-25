@@ -116,7 +116,7 @@ class IpeWrite t where
 instance IpeWrite t => IpeWrite [t] where
   ipeWrite gs = case mapMaybe ipeWrite gs of
                   [] -> Nothing
-                  ns -> (Just $ Element "group" [] ns)
+                  ns -> Just $ Element "group" [] ns
 
 instance IpeWrite t => IpeWrite (NonEmpty t) where
   ipeWrite = ipeWrite . F.toList

@@ -17,7 +17,7 @@ module HGeometry.Polygon.Simple.DualTree
 
 import           Control.Lens hiding ((:<), (<|))
 import           Data.Bifoldable
-import           Data.Maybe (mapMaybe, fromMaybe)
+import           Data.Maybe (mapMaybe)
 import qualified HGeometry.Boundary as Boundary
 import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Point

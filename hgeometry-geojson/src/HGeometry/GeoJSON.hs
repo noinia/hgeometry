@@ -9,22 +9,14 @@ module HGeometry.GeoJSON
   ) where
 
 import           Control.Lens
-import           Data.Bifunctor
 import           Data.Coerce
-import qualified Data.Foldable as F
-import           Data.Foldable1
-import           Data.Functor.Apply (Apply, (<.*>), MaybeApply(..))
 import           Data.Geospatial
 import           Data.LinearRing
-import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
-import           Data.Semigroup.Traversable
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
-import           GHC.Generics (Generic)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
-import           HGeometry.Foldable.Util
 import           HGeometry.Point.Class
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
@@ -103,8 +95,8 @@ _GeoPositionWithoutCRS = prism' toGeoP fromGeoP
 _GeoPositionWithoutCRS' :: Iso' GeoPositionWithoutCRS (PointXY :+ Maybe RestGeoPosition)
 _GeoPositionWithoutCRS' = iso (^?!_GeoPositionWithoutCRS)
                               (^?!re _GeoPositionWithoutCRS)
-  where
-    err = error "_GeoPositionWithoutCRS'"
+  -- where
+  --   err = error "_GeoPositionWithoutCRS'"
 
 --------------------------------------------------------------------------------
 -- * Polygon
@@ -118,9 +110,9 @@ instance Rewrapped GeoPolygon GeoPolygon
 
 ----------------------------------------
 
-type SimpleGeoPolygon point = SimplePolygonF (Cyclic ViewL1) point
+-- type SimpleGeoPolygon point = SimplePolygonF (Cyclic ViewL1) point
 
-type SimpleGeoPolygon' = SimpleGeoPolygon GeoPositionWithoutCRS'
+-- type SimpleGeoPolygon' = SimpleGeoPolygon GeoPositionWithoutCRS'
 
 -- | pre: the sequence has at leat 3 elements
 _RingViewL1 :: (Eq b, Show b)

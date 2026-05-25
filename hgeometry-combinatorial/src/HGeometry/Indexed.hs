@@ -19,6 +19,8 @@ module HGeometry.Indexed
 
 import Control.Lens(Lens, Field1, lens, _1)
 import Control.Monad.State.Strict
+import Control.DeepSeq
+import GHC.Generics(Generic)
 
 --------------------------------------------------------------------------------
 
@@ -34,7 +36,9 @@ class HasIndex a where
 --
 -- The indices are assumed to be unique, so comparisons are just based on indices
 data WithIndex a = WithIndex {-# UNPACK #-} !Index a
-               deriving (Show)
+               deriving (Show, Generic)
+
+instance NFData a => NFData (WithIndex a)
 
 -- | Lens to manipulate the value of the 'WithIndex'
 theValue :: Lens (WithIndex a) (WithIndex b) a b

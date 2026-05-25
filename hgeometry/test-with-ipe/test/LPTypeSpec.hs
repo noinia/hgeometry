@@ -1,5 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UndecidableInstances #-}
+{- HLINT ignore "Use record patterns" -}
 module LPTypeSpec
   ( spec
   , render
@@ -140,7 +141,7 @@ spec = describe "LPType Spec" $ do
 
          it "initialBasis" $ do
            case exampleLP of
-             (h1:h2:_) -> lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h1 h2)
+             (h1:h2:_) -> lpInitialBasis exampleLP `shouldBe` Basis2 (Point2 2.5 2.5) h1 h2
              _         -> fail "error"
 
          it "lp extend basis" $ do
@@ -150,7 +151,7 @@ spec = describe "LPType Spec" $ do
              _          -> fail "error"
 
          it "subExp" $
-           fst (subExpWith (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` (Val 2.5)
+           fst (subExpWith (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` Val 2.5
 
          it "manual infeasible" $ do
            let h1 = HalfSpace Positive (LineEQ 0.29166 38.66671) :: HalfSpaceF (LineEQ R)
@@ -265,7 +266,7 @@ bug = describe "bug" $ do
 
         it "initial basis" $
           ib `shouldSatisfy` (\case
-             Basis2 _ a b -> a == cs !! 0 && b == cs !! 1
+             Basis2 _ a b -> a == head cs && b == cs !! 1
              _            -> False)
 
         -- prop "extend 2" $

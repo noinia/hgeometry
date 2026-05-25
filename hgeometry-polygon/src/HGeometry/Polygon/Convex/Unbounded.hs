@@ -141,17 +141,6 @@ unboundedBoundingHalfplanes region@(Unbounded v _ w) =
       Three (leftHalfPlane $ LinePV p v        )
             (leftHalfPlane $ LinePV q w        )
             (leftHalfPlane $ LinePV p (q .-. p))
-{-
-data Cone r apex = Cone { _apex                   :: apex
-                        , _leftBoundingDirection  :: Vector 2 r
-                        , _rightBoundingDirection :: Vector 2 r
-                        }
-                 deriving (Show,Eq)
-makeLenses ''Cone
-
-type instance Dimension (Cone r apex) = 2
-type instance NumType   (Cone r apex) = r
--}
 
 --------------------------------------------------------------------------------
 

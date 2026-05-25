@@ -14,6 +14,9 @@ module Ipe.Draw
   ( Rendered
   , Attr
   , IsDrawable(..)
+
+  -- * The Ipe backend
+  , Ipe
   ) where
 
 import Data.Default
@@ -23,7 +26,10 @@ import HGeometry.Point
 import Control.Lens
 import Data.Kind (Type)
 import Ipe.Types
+import Ipe.FromIpe
 import Ipe.Attributes
+import HGeometry.Polygon
+import Data.List.NonEmpty (NonEmpty)
 
 --------------------------------------------------------------------------------
 
@@ -44,13 +50,23 @@ class ( Monoid (Rendered backend)
   -- | Draw some objects
   draw :: [Attr backend geom] -> geom -> Rendered backend
 
+instance ( IsDrawable backend a
+         ) => IsDrawable backend (NonEmpty a) where
+  type AttrOf backend (NonEmpty a) = AttrOf backend a
+  draw ats = foldMap (draw @backend ats)
+
+instance ( IsDrawable backend a
+         ) => IsDrawable backend [a] where
+  type AttrOf backend [a] = AttrOf backend a
+  draw ats = foldMap (draw @backend ats)
 
 --------------------------------------------------------------------------------
+-- * Ipe Backend utils
 
+-- | The Ipe backend
 type data Ipe (r :: Type)
 
 type instance Rendered (Ipe r) = [IpeObject r]
-
 
 instance IsDrawable (Ipe r) (IpeObject r) where
   type AttrOf (Ipe r) (IpeObject r) = CommonAttributes r Maybe
@@ -64,6 +80,12 @@ instance IsDrawable (Ipe r) (IpeSymbol r) where
   type AttrOf (Ipe r) (IpeSymbol r) = SymbolAttributes r
   draw ats p = [ IpeUse (p :+ mkAttrs ats) ]
 
+instance ( Point_ vertex 2 r, VertexContainer f vertex, Num r
+         ) => IsDrawable (Ipe r) (SimplePolygonF f vertex) where
+  type AttrOf (Ipe r) (SimplePolygonF f vertex) = PathAttributes r
+  draw ats pg = draw @(Ipe r) ats (review _asSimplePolygon pg')
+    where
+      pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
 
 --------------------------------------------------------------------------------
 

@@ -31,6 +31,8 @@ import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
 import Prelude hiding (head, last)
+-- import HGeometry.Indexed
+import HGeometry.ByIndex
 
 --------------------------------------------------------------------------------
 
@@ -399,3 +401,26 @@ instance (NonVerticalHyperPlane_  hyperPlane d r)
 last :: forall vector d r. (Vector_ vector d r, 1 <= d, KnownNat (d-1)
                            ) => IndexedLens' Int vector r
 last = component @(d-1)
+
+
+
+instance HyperPlane_ hyperPlane d r => HyperPlane_ (ByIndex i hyperPlane) d r where
+  evalHyperPlaneEquation h = evalHyperPlaneEquation (h^.theValue)
+  {-# INLINE evalHyperPlaneEquation #-}
+  hyperPlaneEquation = hyperPlaneEquation . view theValue
+  {-# INLINE hyperPlaneEquation #-}
+  normalVector = normalVector . view theValue
+  {-# INLINE normalVector #-}
+  onHyperPlane q = onHyperPlane q . view theValue
+  {-# INLINE onHyperPlane #-}
+  onSideTest q = onSideTest q . view theValue
+  {-# INLINE onSideTest #-}
+
+instance NonVerticalHyperPlane_ hyperPlane d r
+      => NonVerticalHyperPlane_ (ByIndex i hyperPlane) d r  where
+  evalAt p = evalAt p . view theValue
+  {-# INLINE evalAt #-}
+  hyperPlaneCoefficients = theValue.hyperPlaneCoefficients
+  {-# INLINE hyperPlaneCoefficients #-}
+  verticalSideTest q = verticalSideTest q . view theValue
+  {-# INLINE verticalSideTest #-}

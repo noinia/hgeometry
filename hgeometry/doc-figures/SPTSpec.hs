@@ -1,5 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE UndecidableInstances #-}
 module SPTSpec
   ( spec
