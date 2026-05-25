@@ -1,4 +1,9 @@
-module Test.Util where
+module Test.Util
+  ( difference, diffBy
+  , NaiveSet(..)
+
+  , ipeCounterExample
+  ) where
 
 -- import           Control.Exception.Base (bracket)
 -- import           Control.Monad (when)
@@ -10,15 +15,17 @@ import qualified Data.List as List
 -- import           Data.Proxy
 -- import           Data.Ratio
 -- import qualified Data.Set as Set
--- import           Data.Singletons (Apply)
--- import           Data.Vinyl
 -- import           HGeometry.Ext
 -- import           Ipe
 -- import           System.Directory (getTemporaryDirectory, removeFile)
 -- import           System.FilePath (takeExtension)
 -- import           System.IO (Handle, hClose, openTempFile)
 -- import           Test.Hspec
--- import           Test.QuickCheck
+import           Test.QuickCheck
+import qualified Data.ByteString.Lazy.Char8 as B
+import           Ipe.Draw
+import           Ipe
+import           HGeometry.Properties
 
 --------------------------------------------------------------------------------
 
@@ -39,8 +46,19 @@ instance Eq a => Eq (NaiveSet a) where
   (NaiveSet xs) == (NaiveSet ys) = List.null $ difference xs ys
 
 
+--------------------------------------------------------------------------------
+-- * QuickCheck Utils
 
-
+-- | Utility to attach a drawing in the form of an ipeselection to a QuickCheck test
+ipeCounterExample   :: forall prop a r.
+                       ( Testable prop
+                       , IsDrawable (Ipe r) a, NumType a ~ r
+                       , IpeWriteText r
+                       )
+                    => a -> prop -> Property
+ipeCounterExample x = case toIpeSelectionXML (draw @(Ipe r) [] x) of
+                        Nothing -> property
+                        Just b  -> counterexample (B.unpack b)
 
 -- --------------------------------------------------------------------------------
 

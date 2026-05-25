@@ -9,10 +9,10 @@ import qualified ConvexHull.GrahamV2 as GrahamV2
 import qualified ConvexHull.GrahamInt as GrahamInt
 import qualified ConvexHull.GrahamFastest as GrahamFastest
   -- hand written implementation for Int, this should be the fastest possible somehow.
-import           Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Vector.Unboxed as UV
-import           HGeometry.Foldable.Sort
+-- import           Data.List.NonEmpty (NonEmpty (..))
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import qualified Data.Vector.Unboxed as UV
+-- import           HGeometry.Foldable.Sort
 import           HGeometry.Point
 import           System.Random
 import           Test.Tasty.Bench

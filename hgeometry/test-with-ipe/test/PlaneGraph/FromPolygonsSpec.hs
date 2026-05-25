@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -Wno-unused-binds #-}
 module PlaneGraph.FromPolygonsSpec where
 
 import           Control.Lens hiding (holes)
@@ -9,13 +10,10 @@ import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.List as List
-import           Data.Map.NonEmpty (NEMap)
-import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import qualified Data.Vector.NonEmpty as NonEmptyV
-import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
@@ -27,39 +25,20 @@ import           R
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon hiding (holes)
-import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.PlanarGraph
 import           Hiraffe.PlanarGraph.Component
 import qualified Hiraffe.PlanarGraph.Dart as Dart
 import           Ipe
-import           PlaneGraph.RenderSpec
 import           System.OsPath
 import           Test.Hspec
-import           Test.Hspec.QuickCheck
-import           Test.Hspec.WithTempFile
-import           Test.QuickCheck
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
-import qualified Hiraffe.AdjacencyListRep.Map as MapRep
 import qualified Data.Vector.Mutable as MV
 import           Control.Monad.ST
-import Data.Functor.Bind.Class
 
-
-import           Debug.Trace
---------------------------------------------------------------------------------
-
--- TODO:: this should probably go into Semigroups?
-
-instance Apply (ST s) where
-  (<.>) = (<*>)
-  (<.) = (<*)
-  (.>) = (*>)
 
 --------------------------------------------------------------------------------
-
-
 
 -- | Given a set of line segments that may intersect only in endpoints, construct
 -- the planeGraph these segments represent.
@@ -361,7 +340,7 @@ goVertices            :: (VertexId (Wrap s) -> v -> v')
 goVertices raw offSet = imapAccumLOf vertices f mempty
   where
     f vi res x = let vi' = shiftR vi in (res <> raw' vi x, vi')
-    shiftR i = coerce $ (coerce i) + offSet
+    shiftR i = coerce $ coerce i + offSet
     raw' a b = Builder.singleton $ raw a b
 
 -- | Computes for each ddart the global dart
@@ -373,7 +352,7 @@ goDarts raw offSet = imapAccumLOf darts f mempty
   where
     f d res x = let d' = shiftR d
                 in (res <> raw' d x, d')
-    shiftR (Dart.Dart a dir) = Dart.Dart (coerce $ (coerce a) + offSet) dir
+    shiftR (Dart.Dart a dir) = Dart.Dart (coerce $ coerce a + offSet) dir
     raw' a b = Builder.singleton $ raw a b
 
 
@@ -476,7 +455,7 @@ readInput      :: OsPath -> IO (NonEmpty (ClosedLineSegment (Point 2 R) :+ IpeAt
 readInput inFP = NonEmpty.fromList <$>
                  readAllFrom ([osp|data/test-with-ipe/PlaneGraph|] </> inFP)
 
-testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ do
+testIpe inFP _outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ do
     segs <- runIO $ readInput inFP
     let (gr :: PlaneGraph () (NonEmpty (Point 2 R))
                              (ClosedLineSegment (Point 2 R) :+ _)
@@ -484,7 +463,7 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
           )  = fromDisjointSegments segs
 
         segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
-        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra.stroke._Just)
                                                                 (NonEmpty.singleton seg)
                                ) segs
         graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)
@@ -507,8 +486,8 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
     xit "fromDisjointSegments" $ do
       show gr `shouldBe` ""
     it "fromDisjointComponents" $ do
-      show grr `shouldSatisfy` (startsWith
-        "PlaneGraph (PlanarGraph {_components = [CPlanarGraph embedding = Permutation {_orbits = [[Dart (Arc 3) -1,Dart (Arc 4) +1,Dart (Arc 0) +1],[Dart (Arc 3) +1,Dart (Arc 6) -1,Dart (Arc 2) -1],[Dart (Arc 0) -1,Dart (Arc 1) +1,Dart (Arc 5) +1],[Dart (Arc 1) -1,Dart (Arc 4) -1,Dart (Arc 2) +1],[Dart (Arc 6) +1,Dart (Arc 7) -1],[Dart (Arc 5) -1,Dart (Arc 7) +1]],")
+      show grr `shouldSatisfy` startsWith
+        "PlaneGraph (PlanarGraph {_components = [CPlanarGraph embedding = Permutation {_orbits = [[Dart (Arc 3) -1,Dart (Arc 4) +1,Dart (Arc 0) +1],[Dart (Arc 3) +1,Dart (Arc 6) -1,Dart (Arc 2) -1],[Dart (Arc 0) -1,Dart (Arc 1) +1,Dart (Arc 5) +1],[Dart (Arc 1) -1,Dart (Arc 4) -1,Dart (Arc 2) +1],[Dart (Arc 6) +1,Dart (Arc 7) -1],[Dart (Arc 5) -1,Dart (Arc 7) +1]],"
 
 
       -- goldenWith [osp|data/test-with-ipe/PlaneGraph/|]
@@ -523,7 +502,20 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
 
     describe "all edges ok" $ do
       for_ (grr^..darts.withIndex) $ \(d, x) ->
-        it ("dart " <> show (d, x)) $  --  grr^.headOf d)) $
+        it ("dart " <> show (d, x)) $  --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $
+          --  grr^.headOf d)) $  --  grr^.headOf d)) $
+          --  grr^.headOf d)) $
           show (grr^.headOf d) `shouldSatisfy` (/= "") -- somewhat silly test
    -- The head of Dart 5 is undefined for some reason?
 
@@ -547,7 +539,7 @@ startsWith pref s = pref `List.isPrefixOf` s
 
 --------------------------------------------------------------------------------
 
-testIpe1 inFP outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
+testIpe1 inFP _outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
     segs <- runIO $ readInput inFP
 
     let (gr :: PlaneGraph () (NonEmpty (Point 2 R))
@@ -556,7 +548,7 @@ testIpe1 inFP outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
           )  = fromDisjointSegments segs
 
         segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
-        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra.stroke._Just)
                                                                 (NonEmpty.singleton seg)
                                ) segs
         graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)

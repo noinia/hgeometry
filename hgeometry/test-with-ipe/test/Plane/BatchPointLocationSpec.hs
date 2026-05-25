@@ -45,7 +45,7 @@ spec = describe "Plane.BatchedPointlocation" $ do
                  queryPoints' = (iO . defIO) <$> queryPoints
                  answers      = Line.groupQueries queryPoints myLines
                  lr pts       = (iO . defIO) <$> pts
-                 answers'     = [ iO $ ipeGroup (lr group) ! attr SLayer (LayerName (Text.show i))
+                 answers'     = [ iO $ ipeGroup (lr group) &layer ?~ LayerName (Text.show i)
                                 | (i, group) <- zip [0..] (toList answers)
                                 ]
                  subdiv = Line.buildPointLocationStructure queryPoints myLines
@@ -54,9 +54,9 @@ spec = describe "Plane.BatchedPointlocation" $ do
                  gr = (subdiv^.Line.subdivision) & faces %@~ \i _ -> show i
                  faces' = ifoldMapOf interiorFacePolygons (drawFace gr) gr
                  content' = transformBy t $
-                   [ iO $ ipeGroup myLines'     ! attr SLayer "lines"
-                   , iO $ ipeGroup queryPoints' ! attr SLayer "queries"
-                   , iO $ ipeGroup (renderGraph (renderSubdiv subdiv)) ! attr SLayer "subdiv"
+                   [ iO $ ipeGroup myLines'     &layer ?~ "lines"
+                   , iO $ ipeGroup queryPoints' &layer ?~ "queries"
+                   , iO $ ipeGroup (renderGraph (renderSubdiv subdiv)) &layer ?~ "subdiv"
                    ] <> faces' <> answers'
                  t    = uniformScaling 10
              in addStyleSheet opacitiesStyle $ singlePageFromContent content'
@@ -92,7 +92,7 @@ debug name (Input theQueryPoints thePlanes) = describe "debug" $ do
                  queryPoints' = (iO . defIO) <$> theQueryPoints2D
                  answers      = Line.groupQueries theQueryPoints2D lines
                  lr pts       = (iO . defIO) <$> pts
-                 answers'     = [ iO $ ipeGroup (lr group) ! attr SLayer (LayerName (Text.show i))
+                 answers'     = [ iO $ ipeGroup (lr group) &layer ?~ LayerName (Text.show i)
                                 | (i, group) <- zip [0..] (toList answers)
                                 ]
                  subdiv = Line.buildPointLocationStructure theQueryPoints2D lines
@@ -101,9 +101,9 @@ debug name (Input theQueryPoints thePlanes) = describe "debug" $ do
                  gr = (subdiv^.Line.subdivision) & faces %@~ \i _ -> show i
                  faces' = ifoldMapOf interiorFacePolygons (drawFace gr) gr
                  content' = transformBy t $
-                   [ iO $ ipeGroup myLines'     ! attr SLayer "lines"
-                   , iO $ ipeGroup queryPoints' ! attr SLayer "queries"
-                   , iO $ ipeGroup (renderGraph (renderSubdiv subdiv)) ! attr SLayer "subdiv"
+                   [ iO $ ipeGroup myLines'     &layer ?~ "lines"
+                   , iO $ ipeGroup queryPoints' &layer ?~ "queries"
+                   , iO $ ipeGroup (renderGraph (renderSubdiv subdiv)) &layer ?~ "subdiv"
                    ] <> faces' <> answers'
                  t    = uniformScaling 10
              in addStyleSheet opacitiesStyle $ singlePageFromContent content'

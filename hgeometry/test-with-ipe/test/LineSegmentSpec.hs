@@ -3,7 +3,6 @@ module LineSegmentSpec where
 
 import Control.Lens
 import Control.Monad ((>=>))
-import Data.Vinyl
 import HGeometry.Box
 import HGeometry.Boundary
 import HGeometry.Ext
@@ -107,22 +106,22 @@ ipeIntersectionTests fp = do (segs,boxes) <- runIO $ (,) <$> readAllFrom fp <*> 
       (seg `intersects` (Boundary rect')) `shouldBe` (sameColor segAts rectAts && notOrange segAts )
 
 sameColor           :: IpeAttributes Path R -> IpeAttributes Path R -> Bool
-sameColor atsA atsB = atsA^?_Attr SStroke == atsB^?_Attr SStroke
+sameColor atsA atsB = atsA^.stroke == atsB^.stroke
 
 notOrange     :: IpeAttributes Path R -> Bool
-notOrange ats = ats^?_Attr SStroke /= Just orange
+notOrange ats = ats^.stroke /= Just orange
 
 
 -- | interpret an andpoint that has an arrow as an open endpoint.
 arrowAsOpen    :: forall r. LineSegment AnEndPoint (Point 2 r) :+ IpeAttributes Path r
                -> LineSegment AnEndPoint (Point 2 r) :+ IpeAttributes Path r
 arrowAsOpen ((LineSegment_ p q) :+ ats) =
-    LineSegment (f SRArrow p) (f SArrow q) :+ ats
+    LineSegment (f rArrow p) (f arrow q) :+ ats
   where
-    f   :: at ∈ AttributesOf Path => proxy at -> Point 2 r -> AnEndPoint (Point 2 r)
-    f x = case ats^?_Attr x of
-            Just _  -> AnOpenE
-            Nothing -> AnClosedE
+    f     :: Lens' _ (Maybe _) -> Point 2 r -> AnEndPoint (Point 2 r)
+    f atr = case ats^.atr of
+              Just _  -> AnOpenE
+              Nothing -> AnClosedE
 
 
 seg1 :: LineSegment AnEndPoint (Point 2 R)

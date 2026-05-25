@@ -12,14 +12,10 @@ import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           R
-import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
+import           HGeometry
+import           HGeometry.Polygon
 import qualified HGeometry.Polygon.Convex.Merge as Merge
 import           HGeometry.Polygon.Convex.MinkowskiSum
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Transformation
-import           HGeometry.Vector
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
@@ -40,10 +36,10 @@ spec = do
   -- runIO foo
 
 _foo = writeIpePage [osp|/tmp/out.ipe|] $ fromContent
-                     [ toIO (minkowskiSum polyP polyQ)   $ attr SStroke red
-                     , toIO (naiveMinkowski polyP polyQ) $ attr SStroke blue
-                     , iO'' polyP                        $ attr SStroke black
-                     , iO'' polyQ                        $ attr SStroke black
+                     [ iO $ toIO (minkowskiSum polyP polyQ)   & stroke ?~ red
+                     , iO $ toIO (naiveMinkowski polyP polyQ) & stroke ?~ blue
+                     , iO $ defIO polyP                  & stroke ?~ black
+                     , iO $ defIO polyQ                  & stroke ?~ black
                      ]
 
 polyP, polyQ :: ConvexPolygon (Point 2 Rational)
@@ -126,19 +122,18 @@ minkowskiTest i p q = describe "minkowskiTest" $ do
                (ipeContentGolden { name = [osp|minkowski-vs-naive|] <> is
                                  }
                )
-               [ toIO (minkowskiSum p q)   $ attr SStroke red
-               , toIO (naiveMinkowski p q) $ attr SStroke blue
-               , iO'' p                    $ attr SStroke black
-               , iO'' q                    $ attr SStroke black
+               [ iO $ toIO (minkowskiSum p q)   & stroke ?~ red
+               , iO $ toIO (naiveMinkowski p q) & stroke ?~ blue
+               , iO $ defIO p              & stroke ?~ black
+               , iO $ defIO q              & stroke ?~ black
                ]
 
 
 
 toIO    :: (Point_ point 2 r)
         => ConvexPolygon (point :+ extra)
-        -> IpeAttributes Path r
-        -> IpeObject r
-toIO pg = iO'' (convert pg)
+        -> IpeObject' Path r
+toIO pg = defIO $ convert pg
   where
     convert :: (Point_ point 2 r) => ConvexPolygon (point :+ extra) -> ConvexPolygon (Point 2 r)
     convert = over vertices (view (core.asPoint))
@@ -177,7 +172,7 @@ mergeTest inFP = describe "Merging disjoint convex polygons" $ do
       [pg1,pg2] -> let (out,_,_) = Merge.merge pg1 (pg2 :: ConvexPolygon (Point 2 R) :+ _) in
                    goldenWith [osp|data/test-with-ipe/Polygon/Convex|]
                               (ipeContentGolden { name = inFP <> [osp|.out|]})
-                                [ iO'' out $ attr SFill lightgreen
+                                [ iO $ defIO out & fill ?~ lightgreen
                                 , iO' pg1
                                 , iO' pg2
                                 ]

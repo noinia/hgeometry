@@ -7,84 +7,46 @@ module Plane.RenderEnvelopeSpec
 
 import Data.Colour.SRGB (RGB(..))
 import HGeometry.HyperPlane
-import HGeometry.Unbounded
-import Data.Proxy
 import Data.Maybe
 import Data.Foldable
 import Wavefront qualified
 import Wavefront (elValue, elMtl)
 import Codec.Wavefront.Element qualified as Element
 import Codec.Wavefront.Material.Type qualified as Material
-import HGeometry.ByIndex
 import Control.Lens
 import Control.Monad
-import Data.Coerce
 import Data.Default
 import Data.Foldable1
-import Data.Foldable1.WithIndex
 import Data.Functor.Apply as Apply
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
-import Data.Map qualified as Map
-import Data.Map.Monoidal qualified as MonoidalMap
-import Data.Map.NonEmpty qualified as NEMap
-import Data.Ord (comparing)
-import Data.Semialign
-import Data.Sequence qualified as Seq
-import Data.Set qualified as Set
-import Data.Set.NonEmpty (NESet)
-import Data.Set.NonEmpty qualified as NESet
 import Golden
-import HGeometry.Box (Box(..), Rectangle, Corners(..))
+import HGeometry.Box (Corners(..))
 import HGeometry.Box qualified as Box
 import HGeometry.Ext
-import HGeometry.Foldable.Util
 import HGeometry.Graphics.Camera
-import HGeometry.HyperPlane.NonVertical
 import HGeometry.Instances ()
-import HGeometry.Intersection
-import HGeometry.LineSegment
-import HGeometry.LineSegment.Intersection.BentleyOttmann
-import HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
-import HGeometry.Map.NonEmpty.Monoidal qualified as MonoidalNEMap
-import HGeometry.Number.Real.Rational
-import HGeometry.Number.Radical
-import HGeometry.Plane.LowerEnvelope
-import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
 import HGeometry.PlaneGraph
-import HGeometry.Point
+import HGeometry
 import HGeometry.Polygon
 import HGeometry.Polygon.Convex.Instances ()
-import HGeometry.Polygon.Simple
-import HGeometry.Polygon.WithHoles
-import HGeometry.Properties
-import HGeometry.Sequence.NonEmpty (ViewL1(..), asViewL1, singletonL1)
-import HGeometry.Transformation
 import HGeometry.Triangle
-import HGeometry.Interval.Class
-import HGeometry.Vector
-import HGeometry.VoronoiDiagram
-import HGeometry.VoronoiDiagram qualified as VD
-import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
-import Hiraffe.PlanarGraph.Connected
-import Ipe
+import Ipe hiding (pages)
 import Ipe.Color
 import Plane.RenderProps
-import PlaneGraph.RenderSpec
 import Prelude hiding (zipWith)
 import System.OsPath
 import Test.Hspec
-import Test.Hspec.QuickCheck
 import Test.Hspec.WithTempFile
 import HGeometry.PlaneGraph.Connected.PolygonOverlay
 import PlaneGraph.PolygonOverlaySpec (assignRenderingAttributes, renderGraph)
-import Debug.Trace
+import R
+import HGeometry.Graphics.Render
+
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
-
-triangles :: NonEmpty (Triangle (Point 3 Double) :+ RenderProps)
-triangles = -- scaleUniformlyBy 5 <$>
+myTriangles :: NonEmpty (Triangle (Point 3 Double) :+ RenderProps)
+myTriangles = -- scaleUniformlyBy 5 <$>
             NonEmpty.fromList $
         [ -- ground plane
           Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ props blue
@@ -105,16 +67,16 @@ triangles = -- scaleUniformlyBy 5 <$>
         ]
         <> ((\tri -> tri&extra %~ getColor
                          &vertices.coordinates %~ realToFrac
-              ) <$> myTriangles
+              ) <$> myTriangles'
              )
 
-props c = RenderProps Nothing (Just $ attr SFill c)
+props c = RenderProps Nothing (Just $ def&fill ?~ c)
 
 getColor :: core :+ RenderProps -> RenderProps
 getColor = view extra
 
-myTriangles :: [Triangle (Point 3 R) :+ (Plane R :+ RenderProps)]
-myTriangles = asTrianglesAbove domain planes
+myTriangles' :: [Triangle (Point 3 R) :+ (Plane R :+ RenderProps)]
+myTriangles' = asTrianglesAbove domain planes
 
 planes :: NonEmpty (Plane R :+ RenderProps)
 planes = NonEmpty.fromList
@@ -218,7 +180,7 @@ spec =
                                       -- fail on CI. So for now, allow the test to fail.
                                     }
         )
-        ( let content' = let tris = renderToIpe myCamera triangles
+        ( let content' = let tris = renderToIpe myCamera myTriangles
                              t    = uniformScaling 1000
                                    --- fitToBoxTransform screenBox  tris -- TODO
                          in transformBy t tris
@@ -447,7 +409,7 @@ instance Default (Triangle (Point 3 Float)) where
   def = undefined
 instance Default (Triangle (Point 3 Double)) where
   def = undefined
-instance Default ProjectedTriangle where
+instance Default (ProjectedTriangle r) where
   def = undefined -- this is nonense
 instance Default Material.Material where
   def = Material.defaultMaterial "default"
@@ -465,7 +427,7 @@ fromMaterial mm = case mRefl of
     Nothing   -> def
     Just refl -> case refl of
       Material.ReflexicityRGB rgb -> let c = IpeColor (Valued $ convert rgb)
-                                     in RenderProps def (Just $ attr SFill c)
+                                     in RenderProps def (Just $ def&fill ?~ c)
       _                           -> error "fromMaterial: not matched"
   where
     mRefl = do m <- mm
@@ -502,18 +464,19 @@ renderToIpe              :: forall set triangle point r.
 renderToIpe camera scene =
     -- replicate k (iO $ defIO (Point2 5 5))
     -- <>
-    [ iO $ ipeGroup (renderGraph (renderSkeleton subdiv))                 ! attr SLayer "skeleton"
-    , iO $ ipeGroup (renderGraph (assignRenderingAttributes getZ subdiv)) ! attr SLayer "render"
+    [ iO $ ipeGroup (renderGraph (renderSkeleton subdiv))                 & layer ?~ "skeleton"
+    , iO $ ipeGroup (renderGraph (assignRenderingAttributes getZ subdiv)) & layer ?~ "render"
     ]
     -- drawGraphWithDarts subdiv
   where
-    triangles' = render camera scene
+    triangles' = over (core.mapped) realToFrac
+              <$> renderTriangles camera scene
     subdiv    = polygonOverlay $ triangles'&mapped %~ \(pt :+ orig) ->
                                    let poly = fromTriangle $ toTriangle2 pt
                                    in poly :+ (pt, orig)
 
     -- | Compute the z-coordinate at the given location. We render the closest triangle
-    getZ         :: Point 2 R -> triangle2d :+ (ProjectedTriangle, triangle) -> R
+    getZ         :: Point 2 R -> triangle2d :+ (ProjectedTriangle R, triangle) -> R
     getZ q poly = case supportingPlane (poly^.extra._1.triangle3) of
       Nothing -> error "getZ: unhandled degeneracy; we hit the side of the triangle"
       Just h  -> evalAt q h
@@ -527,47 +490,8 @@ supportingPlane t = asNonVerticalHyperPlane @(HyperPlane 3 r) $ hyperPlaneThroug
 
 
 
--- | Represent the projection of a 3D triangle in 2D space.  i.e. this
--- triangle acts as a triangle in R^2, but also has the information
--- from where it came from.
-newtype ProjectedTriangle = ProjectedTriangle {_triangle3 :: Triangle (Point 3 R) }
-  deriving stock (Show,Eq)
-
--- | Access the 3D triagnle
-triangle3 :: Iso' ProjectedTriangle (Triangle (Point 3 R))
-triangle3 = coerced
-
-type instance NumType   ProjectedTriangle = R
-type instance Dimension ProjectedTriangle = 2
-
--- | Renders a Projected Triangle as a 2D Triangle
-toTriangle2 :: ProjectedTriangle -> Triangle (Point 2 R)
-toTriangle2 = fmap projectPoint . coerce
 
 
-
--- | Render a scene; i..e a set of triangles
---
--- this intermediately uses doubles to apply the camera transform
-render        :: forall triangle point r set.
-                 ( Functor set
-                 , Triangle_ triangle point, Point_ point 3 r
-                 , Real r, Fractional r
-                 )
-              => Camera Double
-              -> set triangle
-              -> set (ProjectedTriangle :+ triangle)
-render camera = fmap $ \orig@(Triangle_ a b c) ->
-                         ProjectedTriangle (Triangle (f a) (f b) (f c)) :+ orig
-  where
-    f = f2 . transformBy (cameraTransform camera) . f3
-
-    f2 :: Point 3 Double -> Point 3 R
-    f2 = over coordinates realToFrac
-
-    f3   :: point -> Point 3 Double
-    f3 p = over coordinates realToFrac (p^.asPoint)
-    -- TODO: clean up
 
 
 -- next thing to do is somehow make it so that 'render' actually computes

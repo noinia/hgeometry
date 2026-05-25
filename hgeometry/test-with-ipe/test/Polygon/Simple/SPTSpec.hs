@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module Polygon.Simple.SPTSpec(spec) where
 
 import           Control.Lens
@@ -125,20 +126,20 @@ spec = describe "shortest path tree tests" $ do
 manualTest = it "manual test" $
     let triang = triangulate myBuggyPoly
         sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' myBuggySource triang ]
-        sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
-        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+        sptEdges' = [ iO $ defIO e & stroke ?~ green | e <- sptEdges ]
+        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) & stroke ?~ gray
                 | (e, Diagonal) <- triang^..edges.withIndex
                 ]
-        wrong = [ iO $ defIO wr ! attr SStroke red
-                                ! attr SPen (IpePen (Named "fat"))
-                | wr <- res'
-                ]
+        -- wrong = [ iO $ defIO wr ! attr SStroke red
+        --                         ! attr SPen (IpePen (Named "fat"))
+        --         | wr <- res'
+        --         ]
 
         out = [ iO' myBuggySource
               , iO' myBuggyPoly
               , iO $ ipeGroup diags
               , iO $ ipeGroup sptEdges'
-              , iO $ defIO myIssueSeg ! attr SStroke orange
+              , iO $ defIO myIssueSeg & stroke ?~ orange
               ]
         res = unsafePerformIO $ do
                                   let  outF = [osp|/tmp/manual.ipe|]
@@ -156,29 +157,28 @@ testIpe inFp outFp = describe (show inFp) $ do
     (sources, poly) <-  runIO $ do
         inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/ShortestPath/|] <> inFp)
         Right page <- readSinglePageFile inFp'
-        let (pts :: NonEmpty (Point 2 R :+ _))            = NonEmpty.fromList $ readAll page
-            ((pg :: SimplePolygon (Point 2 R) :+ _) : _)  = readAll page
+        let (pts :: NonEmpty (Point 2 R :+ _))             = NonEmpty.fromList $ readAll page
+            ((pg :: SimplePolygon (Point 2 R) :+ _) :| _)  = NonEmpty.fromList $ readAll page
         pure (pts,pg)
 
     let triang    = triangulate (poly^.core)
         (mySource :+ _)  = NonEmpty.head sources
-
-        Just tree  = dualTreeFrom mySource triang
+        tree  = fromJust $ dualTreeFrom mySource triang
         tree' = bimap (\d -> let ((ri,li),(r,l)) = triang^.endPointsOf d.withIndex
                              in Vector2 (l :+ li) (r :+ ri))
                       (\(_,(i,v)) -> v :+ i) tree
           -- orientDualTree (==) $ toTreeRep triang mySource tree
 
         sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' mySource triang ]
-        sptEdges' = [ iO $ defIO e ! attr SStroke green
+        sptEdges' = [ iO $ defIO e & stroke ?~ green
                     | e <- sptEdges
                     ]
 
-        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) &stroke ?~ gray
                 | (e, Diagonal) <- triang^..edges.withIndex
                 ]
 
-        lefts = [ iO $ defIO p ! attr SStroke blue
+        lefts = [ iO $ defIO p & stroke ?~ blue
                 | p <- bifoldMap (\(Vector2 (l :+ _) _) -> [l]) (const []) tree'
                 ]
 
@@ -271,7 +271,7 @@ drawDualTree gr dt = iO . ipeGroup . concat $ [ verts
     verts     = drawRoot : foldMap ((:[]) . iO . drawVertex) dt
     treeEdges = []
 
-    drawRoot     = iO $ drawVertex (dt^.rootVertex) ! attr SStroke red
+    drawRoot     = iO $ drawVertex (dt^.rootVertex) & stroke ?~ red
     drawVertex f = ipeDiskMark $ gr^?!outerBoundaryPolygonAt f.to centroid
 
 

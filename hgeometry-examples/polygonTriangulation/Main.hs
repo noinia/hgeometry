@@ -52,7 +52,7 @@ data Action = Id
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect Action Model
+updateModel   :: Model -> Action -> Effect parent props Model Action
 updateModel m = \case
     Id               -> noEff m
     CanvasAction ca  -> m&canvas %%~ flip Canvas.handleInternalCanvasAction ca

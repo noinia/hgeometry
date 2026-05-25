@@ -1,0 +1,72 @@
+-- with-compiler:  wasm32-wasi-ghc
+-- with-hc-pkg: wasm32-wasi-ghc-pkg
+-- wasm32-wasi-ghc-pkg
+tests: False
+benchmarks: False
+-- multi-repl: True
+packages:
+  hgeometry-combinatorial
+  hgeometry-vector
+  hgeometry-point
+  hgeometry-kernel
+  hgeometry-polyLine
+  hgeometry-spline
+  hgeometry-lineSegmentIntersection
+  hgeometry-polygon
+  hgeometry-ipe
+  hgeometry-svg
+  hgeometry-geojson
+  hgeometry
+  hgeometry-debugger
+  hgeometry-examples
+  ../haskell-floating-point/rounded-hw
+
+allow-newer:
+    all:QuickCheck
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hiraffe
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hspec-with-tempfile
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/miso-bulma
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/wavefront
+
+-- for the approximate  equality that supports typelits
+source-repository-package
+    type: git
+    location: https://github.com/noinia/approximate-equality
+    tag: 02fc43ca97dd66940dc3d4ac61ecda7888ec252e
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hs-geojson
+
+source-repository-package
+  type: git
+  location: https://github.com/haskell-miso/miso-tagsoup
+  tag: master
+
+source-repository-package
+  type: git
+  location: https://github.com/haskell-miso/miso-aeson
+  tag: master
+
+source-repository-package
+  type: git
+  location: https://github.com/haskell-miso/servant-miso-client
+  tag: master
+
+package hexpat
+    flags: +bundle
+
+package rounded-hw
+    flags: +pure-hs

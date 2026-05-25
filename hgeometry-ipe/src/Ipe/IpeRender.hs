@@ -1,0 +1,92 @@
+{-# LANGUAGE DeriveAnyClass #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Ipe.IpeRender
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Use 'iperender' to generate png, pdf, or svg files.
+--
+-- Note that all functions in this module require that 'iperender' is
+-- installed (it is bundled with ipe) and available on the path.
+
+--------------------------------------------------------------------------------
+module Ipe.IpeRender where
+
+import           System.OsPath
+import qualified System.Process.Typed as Process
+import           Data.Finitary
+import           GHC.Generics (Generic)
+
+--------------------------------------------------------------------------------
+
+-- | Call 'iperender' to produce an image of the specified type.
+--
+-- note that pdf files produces with iperender cannot be opened with ipe.
+ipeRenderWith                          :: Options -- ^ the options to use
+                                       -> FileType -- ^ output file type
+                                       -> OsPath -- ^ input file path
+                                       -> OsPath -- ^ output file path
+                                       -> IO ()
+ipeRenderWith options fType inFp outFp =
+    do
+      inFp'  <- decodeFS inFp
+      outFp' <- decodeFS outFp
+      Process.withProcessWait (Process.proc "iperender" $ args inFp' outFp') $ \_iperenderProc ->
+        pure ()
+  where
+    args inFp' outFp' =
+           [ "-" <> show fType
+           , "-page", show (pageNumber options)
+           , "-view", show (viewNumber options)
+           , "-resolution", show (resolution options)
+           ] <>
+           [ "-transparent" | TransparentBackground == transparent options ] <>
+           [ "-nocrop"      | NoCrop == crop options ] <>
+           [ inFp'
+           , outFp'
+           ]
+
+-- | Call 'iperender' with the default options.
+--
+-- note that pdf files produces with iperender cannot be opened with ipe.
+ipeRender :: FileType -> OsPath -> OsPath -> IO ()
+ipeRender = ipeRenderWith defaultOptions
+
+--------------------------------------------------------------------------------
+
+-- | Output filetypes supported by iperender
+data FileType = PNG | EPS | PDF | SVG
+  deriving (Eq,Ord,Generic)
+  deriving anyclass (Finitary)
+
+instance Show FileType where
+  show = \case
+    PNG -> "png"
+    EPS -> "eps"
+    PDF -> "pdf"
+    SVG -> "svg"
+
+-- | Options for iperender
+data Options = Options { pageNumber  :: Int
+                       , viewNumber  :: Int
+                       , resolution  :: Int
+                       , transparent :: Background
+                       , crop        :: Crop
+                       } deriving (Show,Eq,Ord)
+
+-- | The default options in Ipe
+defaultOptions :: Options
+defaultOptions = Options 1 1 72 TransparentBackground Crop
+
+-- | Whether or not to render a transparent background in output png
+-- images.
+data Background = OpaqueBackground | TransparentBackground
+  deriving (Show,Read,Eq,Ord,Generic)
+  deriving anyclass (Finitary)
+
+-- | Whether or not to crop the output image.
+data Crop = NoCrop | Crop
+  deriving (Show,Read,Eq,Ord,Generic)
+  deriving anyclass (Finitary)

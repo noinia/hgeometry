@@ -9,9 +9,7 @@ import           Data.Foldable (for_)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust, maybeToList)
-import qualified Data.Text as Text
 import           Golden
-import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
@@ -125,10 +123,10 @@ renderComponent :: forall vertex f r.
                 => HalfPlaneConvexPolygonIntersection f r vertex -> IpeObject r
 renderComponent = \case
     DegenerateVertex v -> iO $ defIO (v^.asPoint)
-                             ! attr SStroke red
+                             & stroke ?~ red
     DegenerateEdge e   -> iO $ defIO (view asPoint <$> e)
-                             ! attr SStroke red
+                             & stroke ?~ red
     ActualPolygon poly -> iO $ ipeSimplePolygon poly
-                             ! attr SFill red
+                             & fill ?~ red
 
 --------------------------------------------------------------------------------

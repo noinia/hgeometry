@@ -1,0 +1,68 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Boundary
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--------------------------------------------------------------------------------
+module HGeometry.Boundary
+  ( Boundary(..)
+  , _Boundary
+  , PointLocationResult(..)
+  , PointLocationResultWith(..)
+  , asPointLocationResult
+  ) where
+
+import Control.Lens (iso,Iso)
+import HGeometry.Properties
+-- import HGeometry.Transformation.Internal
+
+--------------------------------------------------------------------------------
+
+-- | The boundary of a geometric object.
+newtype Boundary g = Boundary g
+                   deriving (Show,Eq,Ord,Read --,IsTransformable
+                            ,Functor,Foldable,Traversable)
+
+type instance NumType (Boundary g)   = NumType g
+type instance Dimension (Boundary g) = Dimension g
+
+-- | Iso for converting between things with a boundary and without its boundary
+_Boundary :: Iso g h (Boundary g) (Boundary h)
+_Boundary = iso Boundary (\(Boundary b) -> b)
+
+--------------------------------------------------------------------------------
+
+-- | Result of a query that asks if something is Inside a g, *on* the boundary
+-- of the g, or outside.
+data PointLocationResult = Inside
+                         | OnBoundary
+                         | Outside
+                         deriving (Show,Read,Eq)
+
+instance Semigroup PointLocationResult where
+  -- ^ The semigroup instance essentially interrsects the various results
+  Inside     <> x = x
+  Outside    <> _ = Outside
+  OnBoundary <> x = case x of
+                      Outside    -> Outside
+                      Inside     -> OnBoundary
+                      OnBoundary -> OnBoundary
+
+--------------------------------------------------------------------------------
+
+-- | Result of a query that asks if something is Inside a g, *on* the
+-- boundary of the g, or outside. This type allows us to provide some
+-- sort of proof for the claim.
+data PointLocationResultWith edge = StrictlyInside
+                                  | OnBoundaryEdge !edge
+                                  | StrictlyOutside
+                                  deriving (Show,Read,Eq,Functor)
+
+
+-- | Forget on which edge the point was.
+asPointLocationResult :: PointLocationResultWith edge -> PointLocationResult
+asPointLocationResult = \case
+  StrictlyInside   -> Inside
+  OnBoundaryEdge _ -> OnBoundary
+  StrictlyOutside  -> Outside

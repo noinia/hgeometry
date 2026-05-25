@@ -59,7 +59,6 @@ import HGeometry.Triangle
 import HGeometry.Vector
 import HGeometry.Polygon.Convex.Unbounded
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 

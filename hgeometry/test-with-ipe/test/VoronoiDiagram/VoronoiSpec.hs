@@ -37,7 +37,7 @@ spec = describe "Voronoi diagram tests" $ do
     -- prop "voronoi vertex is center disk" $ \c ->
     --   voronoiVertices inputs
     it "vertices of a trivial voronoi diagram" $
-      voronoiVertices inputs `shouldBe` (Set.fromList [Point2 5 5])
+      voronoiVertices inputs `shouldBe` Set.fromList [Point2 5 5]
     -- it "a trivial voronoi diagram" $
     --   voronoiDiagram inputs `shouldBe` trivialVD
 
@@ -128,6 +128,7 @@ degenerateTests = describe "degnereate inputs" $ do
     let v     = Point3 15 15 (-200)
         fromCCWList' = fromCCWList . NonEmpty.fromList
         nonVerticalHyperPlane [a,b,c] = Plane a b c
+        nonVerticalHyperPlane _       = error "absurd"
         defs1 = fromCCWList'
                 [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
                 , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0
@@ -232,11 +233,11 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = voronoiDiagram $ (view core) <$> points
-        vv = voronoiVertices $ (view core) <$> points
+    let vd = voronoiDiagram  (view core <$> points)
+        vv = voronoiVertices (view core <$> points)
         out = [ iO' points
               , iO' vd
-              ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+              ] <> [ iO $ defIO v &stroke ?~ red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/VoronoiDiagram/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)

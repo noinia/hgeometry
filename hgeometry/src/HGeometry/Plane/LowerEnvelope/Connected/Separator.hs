@@ -19,7 +19,6 @@ import           Data.Kind (Type)
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           Data.Ord (comparing)
 import           Data.Set (Set)
@@ -70,7 +69,7 @@ viewMaximumBy cmp (x0:|xs) = foldr (\x (m,rest) -> case x `cmp` m of
 -- 3) the vertex sets of A and B have weight at most 2/3 the total weight
 planarSeparator    :: Ord k => PlaneGraph' k v e -> Separator k
 planarSeparator gr = case viewMaximumBy (comparing snd) trees of
-    ((tr,m),rest)
+    ((tr,m),_rest)
       | m <= twoThirds -> groupComponents
       | otherwise      -> planarSeparator' tr m -- we should also add the remaining vertices
   where
@@ -84,7 +83,7 @@ planarSeparator gr = case viewMaximumBy (comparing snd) trees of
     planarSeparator' tr _ = case List.break (\lvl -> accumSize lvl < half) lvls of
         (_,    [])          -> ([], Vector2 (F.toList tr) [])
                                  -- somehow we have too little weight;
-        (pref, (l1 : suff)) -> planarSeparatorTree gr tr'
+        (pref, l1 : suff) -> planarSeparatorTree gr tr'
           where
             k      = accumSize l1
             p  lvl = levelSize lvl + 2*(levelIndex l1  - levelIndex lvl)    <= 2 * sqrt' k
@@ -108,9 +107,10 @@ planarSeparator gr = case viewMaximumBy (comparing snd) trees of
 
 
 -- | contracts the plane graph so that we get a spanning tree of diameter at most sqrt(n).
-contract :: PlaneGraph' k v e -> Tree k -> (PlaneGraph' k v e, Tree k)
-contract = undefined
+_contract :: PlaneGraph' k v e -> Tree k -> (PlaneGraph' k v e, Tree k)
+_contract = undefined
 
+trim        :: p1 -> p2 -> c -> c
 trim _ _ tr = tr
 -- TODO:
 
@@ -216,7 +216,7 @@ splitTree' (v,w) = fmap SplitTree . go
           (NotFound, _)                     -> NotFound
           (Single (middle, (x,path)),after) -> Single (x, PathNode u middle after <| path)
           (Both (before, both'), after)     -> Both $ case both' of
-                Here  (lp,middle,rp)  -> Leaf $ (NodeSplit u before lp middle rp after)
+                Here  (lp,middle,rp)  -> Leaf (NodeSplit u before lp middle rp after)
                 There path            -> PathNode u before after <| path
 
     process ch@(Node u chs) = \case
@@ -266,7 +266,7 @@ splitLeaf            :: Ord k
                      -> (k,k) -> SplitTree k (Tree k) -> SplitTree k (EndPoint k)
 splitLeaf gr (v',w') = fmap $ \(Node u chs) -> split u chs (if u == v' then w' else v')
   where
-    split v chs w = case List.break (hasEdge v) chs of
+    split v chs _ = case List.break (hasEdge v) chs of
                       (before, _:after) -> (v, before, after)
                       _                 -> error "splitLeaf: absurd. edge not found!?"
     hasEdge v w = isJust $ gr^?edgeAt (v, root w)
@@ -303,7 +303,7 @@ fromSplit = \case
               inside  = middle <> insideU
               outside = beforeV <> afterW <> afterU
           _                   -> error "fromSplit. Rootsplit (v,w) not found"
-  NodeSplit u before lp middle rp after -> (u : lSep <> rSep, Vector2 inside outside)
+  NodeSplit u before lp _ rp after -> (u : lSep <> rSep, Vector2 inside outside)
     where
     (lSep, Vector2 lInside lOutside) = fromPath After  lp
     (rSep, Vector2 rInside rOutside) = fromPath Before rp
@@ -325,6 +325,7 @@ fromPath sel = go
                                      in case sel of
           Before -> (u : sep, Vector2 (before <> inside) (after  <> outside))
           After  -> (u : sep, Vector2 (after  <> inside) (before <> outside))
+
 
 class IsWeight w where
   data Weighted w :: Type -> Type

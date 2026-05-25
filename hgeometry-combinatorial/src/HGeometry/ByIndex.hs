@@ -13,11 +13,15 @@
 --------------------------------------------------------------------------------
 module HGeometry.ByIndex
   ( ByIndex(ByIndex), theIndex, theValue
+  , labelWithIndex
   ) where
 
 
 import Control.Lens
 import Data.Foldable1
+import Control.DeepSeq
+import GHC.Generics(Generic)
+import Control.Monad.State.Strict
 
 --------------------------------------------------------------------------------
 
@@ -29,9 +33,11 @@ import Data.Foldable1
 data ByIndex ix a = ByIndex { _theIndex :: !ix
                             , _theValue :: !a
                             }
-  deriving stock (Functor,Foldable,Traversable)
+  deriving stock (Functor,Foldable,Traversable,Generic,Show)
 
 makeLenses ''ByIndex
+
+instance (NFData i, NFData a) => NFData (ByIndex i a)
 
 instance Eq ix => Eq (ByIndex ix a) where
   x == y = _theIndex x == _theIndex y
@@ -44,3 +50,25 @@ instance Foldable1 (ByIndex ix) where
 
 instance Traversable1 (ByIndex ix) where
   traverse1 f (ByIndex i x) = ByIndex i <$> f x
+
+
+-- | Label each element with its index.
+labelWithIndex :: (Traversable t) => t a -> t (ByIndex Int a)
+labelWithIndex = labelWith ByIndex
+
+-- | Label each element with its index using the given labelling
+-- function.
+labelWith   :: Traversable t => (Int -> a -> b) -> t a -> t b
+labelWith f = fst . labelWith' f
+
+-- | Label each element with its index using the given labelling
+-- function. Returns the new collection as well as its size.
+labelWith'           :: forall t a b. Traversable t
+                     => (Int -> a -> b) -> t a
+                     -> (t b, Int)
+labelWith' withIndex' = flip runState 0 . traverse lbl
+  where
+    lbl   :: a -> State Int b
+    lbl x = do i <- get
+               put $ i+1
+               pure (withIndex' i x)

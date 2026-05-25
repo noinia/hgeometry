@@ -12,19 +12,15 @@ import Data.Foldable1
 import Data.List qualified as List
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
-import Test.Tasty.Bench
+-- import Test.Tasty.Bench
 import HGeometry.Plane.BatchPointLocation
 import Data.Map.NonEmpty qualified as NEMap
 import Data.Set qualified as Set
 import HGeometry.Line.BatchPointLocation qualified as Line
 import Data.Time
 import Prelude hiding (lines)
--- import Data.Fixed
-
 import HGeometry.Plane
 import HGeometry.Combinatorial.Util
-import Ipe
-import System.OsPath
 import R
 
 --------------------------------------------------------------------------------
@@ -100,7 +96,7 @@ runExperiment r n = do
     let lines = mapMaybe (\(Two h1 h2) -> projectedIntersectionLine h1 h2) $ uniquePairs planes
         ds    = Line.pointLocationStructureIn (Rect (-1) (-1) 128 128) lines
         -- res = Line.groupQueries (projectPoint @2 <$> queries) lines
-    ds `seq` (pure ())
+    ds `deepseq` (pure ())
     -- print ds
     -- print res
     -- print "========="
@@ -131,7 +127,7 @@ timed x = do
 main :: IO ()
 main = do
   setStdGen $ mkStdGen 12453
-  traverse_ (\r -> runExperiment r (r^5)) [10] -- [10, 15, 20]
+  traverse_ (\r -> runExperiment r (r^5)) [5,10,15,20] -- [10, 15, 20]
 
 
 {-

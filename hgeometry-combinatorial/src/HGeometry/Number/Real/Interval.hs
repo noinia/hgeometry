@@ -81,6 +81,10 @@ instance (Fractional r, Ord r) => Fractional (IntervalReal r) where
 instance Real r => Real (IntervalReal r) where
   toRational (IR _ x) = toRational x
 
+instance RealFrac r => RealFrac (IntervalReal r)  where
+  properFraction (IR i x) = let (n, x') = properFraction x
+                            in (n, IR (i - fromIntegral n) x')
+  -- somehow this is not a great instance. But I'm not quite sure what to do better at this point
 
 -- instance Uniform r => Uniform (IntervalReal r) where
 

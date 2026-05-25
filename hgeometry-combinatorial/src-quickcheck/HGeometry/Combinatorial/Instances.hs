@@ -54,7 +54,7 @@ instance (Arbitrary a, Num a, Eq a) => Arbitrary (GRatio a) where
                      ]
 
 instance KnownNat p => Arbitrary (RealNumber p) where
-  arbitrary = fromFixed <$> arbitrary
+  arbitrary = arbitrarySizedFractional
   shrink (RealNumber r) = RealNumber <$> shrink r
 
 instance Arbitrary Sign.Sign where
@@ -62,7 +62,7 @@ instance Arbitrary Sign.Sign where
 
 
 instance (Arbitrary r, Real r, Fractional r) => Arbitrary (IntervalReal r) where
-  arbitrary = realToFrac <$> arbitrary
+  arbitrary = realToFrac <$> arbitrary @r
   shrink x  = realToFrac <$> shrink (exactValue x)
 
 --------------------------------------------------------------------------------

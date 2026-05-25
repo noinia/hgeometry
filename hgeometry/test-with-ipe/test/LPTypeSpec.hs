@@ -1,5 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UndecidableInstances #-}
+{- HLINT ignore "Use record patterns" -}
 module LPTypeSpec
   ( spec
   , render
@@ -11,7 +12,6 @@ import           Data.Foldable (toList)
 -- import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
 import           Data.Semigroup
 import qualified Data.Set as Set
 import qualified Data.Vector as V
@@ -41,10 +41,12 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( (===), property,Discard(..), counterexample
                                  , Arbitrary(..), oneof, suchThat
-                                 , withDiscardRatio, withMaxSuccess
+                                 , withDiscardRatio
+                                 , withNumTests
                                  )
 import           Test.QuickCheck.Instances ()
 import           Witherable
+
 --------------------------------------------------------------------------------
 
 lpRecomputeBasis :: forall r. (Ord r, Fractional r)
@@ -139,7 +141,7 @@ spec = describe "LPType Spec" $ do
 
          it "initialBasis" $ do
            case exampleLP of
-             (h1:h2:_) -> lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h1 h2)
+             (h1:h2:_) -> lpInitialBasis exampleLP `shouldBe` Basis2 (Point2 2.5 2.5) h1 h2
              _         -> fail "error"
 
          it "lp extend basis" $ do
@@ -149,7 +151,7 @@ spec = describe "LPType Spec" $ do
              _          -> fail "error"
 
          it "subExp" $
-           fst (subExpWith (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` (Val 2.5)
+           fst (subExpWith (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` Val 2.5
 
          it "manual infeasible" $ do
            let h1 = HalfSpace Positive (LineEQ 0.29166 38.66671) :: HalfSpaceF (LineEQ R)
@@ -158,7 +160,7 @@ spec = describe "LPType Spec" $ do
                ib = lpInitialBasis [h1,h2]
            lpRecomputeBasis h3 ib `shouldBe` Just (Infeasible (Vector3 h3 h1 h2))
 
-         prop "feasible means feasible" $ withMaxSuccess 50 $ withDiscardRatio 1000 $
+         prop "feasible means feasible" $ withNumTests 50 $ withDiscardRatio 1000 $
            \gen (halfPlanes :: [HalfPlane R]) ->
              case subExp (mkStdGen gen) linearProgrammingMinY halfPlanes of
                Basis2 v _ _ -> property $ all (v `intersects`) halfPlanes
@@ -264,7 +266,7 @@ bug = describe "bug" $ do
 
         it "initial basis" $
           ib `shouldSatisfy` (\case
-             Basis2 _ a b -> a == cs !! 0 && b == cs !! 1
+             Basis2 _ a b -> a == head cs && b == cs !! 1
              _            -> False)
 
         -- prop "extend 2" $
@@ -398,7 +400,7 @@ loadInputs inFp = do
         -- take the left halfplane of every halfline
             halfPlanes = over core (toLineEQ . leftHalfPlane . asOrientedLine) <$> rays
             solution   = foldMap (\(h :+ ats) ->
-                                    if lookupAttr SStroke ats == Just red
+                                    if ats^.stroke == Just red
                                     then Set.singleton h else mempty
                                  ) halfPlanes
         pure (halfPlanes, solution)
@@ -408,7 +410,9 @@ toLineEQ (HalfSpace _ l)
     | l^.direction.xComponent > 0 = HalfSpace Positive l' -- sign was already positive
     | otherwise                   = HalfSpace Negative l'
   where
-    l' = fromJust . toLinearFunction $ l
+    l' = case toLinearFunction l of
+           NonVertical l''       -> l''
+           VerticalLineThrough _ -> error "toLineEQ absurd?"
 
 
     -- goldenWith [osp|data/test-with-ipe/golden/|]

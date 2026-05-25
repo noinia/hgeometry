@@ -34,28 +34,42 @@ source-repository head
 --     build-depends:
 --         aeson                   >= 2.1
 
+common options
+  if arch(wasm32)
+    ghc-options:
+      -no-hs-main
+      -optl-mexec-model=reactor
+      "-optl-Wl,--export=hs_start"
+    cpp-options:
+      -DWASM
+
+  if arch(javascript)
+     ld-options:
+       -sEXPORTED_RUNTIME_METHODS=HEAP8
+
 common setup
     ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
                 -fspecialise-aggressively -fexpose-all-unfoldings
 
     build-depends:
-        base                      >= 4.16.1.0  &&  < 5
-      , hgeometry-combinatorial   >= 1.0.0.0
-      , hgeometry                 >= 1.0.0.0
-      , hgeometry:vector
-      , hgeometry:point
-      , hgeometry:kernel
-      , hgeometry:polyLine
-      , hgeometry:spline
-      , hgeometry:polygon
-      , hgeometry:ipe
-      , hgeometry:svg
-      , hgeometry:miso
-      , hgeometry:geojson
+        base                      >= 4.16.1.0  && < 5
+      , hgeometry-combinatorial   >= 1.0.0.0   && < 1.1
+      , hgeometry                 >= 1.0.0.0   && < 1.1
+      , hgeometry-vector          >= 1.0.0.0   && < 1.1
+      , hgeometry-point           >= 1.0.0.0   && < 1.1
+      , hgeometry-kernel          >= 1.0.0.0   && < 1.1
+      , hgeometry-polyLine        >= 1.0.0.0   && < 1.1
+      , hgeometry-spline          >= 1.0.0.0   && < 1.1
+      , hgeometry-polygon         >= 1.0.0.0   && < 1.1
+      , hgeometry-ipe             >= 1.0.0.0   && < 1.1
+      , hgeometry-svg             >= 1.0.0.0   && < 1.1
+      , hgeometry-svg:miso        >= 1.0.0.0   && < 1.1
+      , hgeometry-geojson         >= 1.0.0.0   && < 1.1
       , hgeometry:quickcheck
       , hiraffe                   >= 0.1
       , containers                >= 0.6
       , nonempty-containers       >= 0.3.4.5
+      , nonempty-vector           >= 0.2.4
       , vector                    >= 0.13
       , enummapset                >= 0.7.2.0
       , lens                      >= 5.2
@@ -84,13 +98,9 @@ common setup
       , QuickCheck                >= 2.15.0
       , semialign                 >= 1.3.1
 
-      -- , dependent-map             >= 0.4
-      -- , dependent-sum             >= 0.7.1
-      -- , some                      >= 1.0.1
-      -- , constraints-extras        >= 0.4
 
-      , ghc-typelits-natnormalise >= 0.7.7
-      , ghc-typelits-knownnat     >= 0.7.6
+      -- , ghc-typelits-natnormalise >= 0.7.7
+      -- , ghc-typelits-knownnat     >= 0.7.6
 
 
     default-language: GHC2021
@@ -114,9 +124,7 @@ common setup
 
 common miso-setup
   build-depends:
-        miso
-      , jsaddle                   >= 0.9.9.0       && < 0.10
-      , jsaddle-warp              >= 0.9.9.0       && < 0.10
+        miso                   >= 1.9.0.0    && < 2.0
 
 common quickcheck-setup
     ghc-options:
@@ -136,7 +144,7 @@ common quickcheck-setup
 --------------------------------------------------------------------------------
 -- * BAPC 2012 Gunslinger
 
-executable hgeometry-bapc2012-gunslinger
+executable bapc2012-gunslinger
   import:         setup
   hs-source-dirs: bapc2012
   main-is:        Gunslinger.hs
@@ -144,7 +152,7 @@ executable hgeometry-bapc2012-gunslinger
 --------------------------------------------------------------------------------
 -- * BAPC 2014 Armybase
 
-executable hgeometry-bapc2014-armybase
+executable bapc2014-armybase
   import:         setup
   hs-source-dirs: bapc2014
   main-is:        Armybase.lhs
@@ -152,59 +160,70 @@ executable hgeometry-bapc2014-armybase
 --------------------------------------------------------------------------------
 -- * ConvexHull
 
-executable hgeometry-convexHull
-  import:         setup, miso-setup
+executable convexHull
+  import:         setup, miso-setup, options
   hs-source-dirs: convexHull
   main-is:        Main.hs
+  Other-modules:
+    App
 
 --------------------------------------------------------------------------------
 -- * LineSegment Intersect
 
-executable hgeometry-lineSegmentIntersection
-  import:         setup, miso-setup
+executable lineSegmentIntersection
+  import:         setup, miso-setup, options
   hs-source-dirs: lineSegmentIntersection
   main-is:        Main.hs
+  Other-modules:
+    App
 
 --------------------------------------------------------------------------------
 -- * Duality
 
-executable hgeometry-duality
-  import:         setup, miso-setup
+executable duality
+  import:         setup, miso-setup, options
   hs-source-dirs: duality
   main-is:        Main.hs
+  Other-modules:
+    App
 
 
 --------------------------------------------------------------------------------
 -- * Voronoi Diagram
 
-executable hgeometry-voronoi
-  import:         setup, miso-setup
+executable voronoi
+  import:         setup, miso-setup, options
   hs-source-dirs: voronoiDiagram
   main-is:        Main.hs
+  Other-modules:
+    App
 
 --------------------------------------------------------------------------------
 -- * Polygon Triangulation
 
--- executable hgeometry-polygonTriangulation
---   import:         setup, miso-setup
+-- executable polygonTriangulation
+--   import:         setup, miso-setup, options
 --   hs-source-dirs: polygonTriangulation
 --   main-is:        Main.hs
 
 --------------------------------------------------------------------------------
 -- * Polyline Drawing
 
-executable hgeometry-polyLineDrawing
-  import:         setup, miso-setup
+executable polyLineDrawing
+  import:         setup, miso-setup, options
   hs-source-dirs: polyLineDrawing
   main-is:        Main.hs
+  Other-modules:
+    App
+
   -- other-modules:
   --      Miso.Event.Extra
 
 --------------------------------------------------------------------------------
 -- * GeoJSON example
 
-executable hgeometry-geojson
-  import:         setup, miso-setup
+executable geojson
+  import:         setup
   hs-source-dirs: geojson
   main-is:        Main.hs
   other-modules:
@@ -214,8 +233,8 @@ executable hgeometry-geojson
 --------------------------------------------------------------------------------
 -- * Polygon Sampler example
 
-executable hgeometry-sampler
-  import:         setup, miso-setup
+executable sampler
+  import:         setup
   hs-source-dirs: sampler
   main-is:        Main.hs
   other-modules:
@@ -225,8 +244,12 @@ executable hgeometry-sampler
 --------------------------------------------------------------------------------
 -- * Raytracer example
 
-executable hgeometry-raytracer
-  import:         setup, miso-setup
+
+executable raytracer
+  import:         setup
+  if arch(wasm32)
+     buildable: False
+
   build-depends:
           JuicyPixels               >= 3.3.9   && < 4
         , terminal-progress-bar     >= 0.4.2   && < 0.5
@@ -239,19 +262,20 @@ executable hgeometry-raytracer
           Types
           Settings
           Paths_hgeometry_examples
-  --      Miso.Event.Extra
+
 
 
 
 --------------------------------------------------------------------------------
 -- * Polyline Drawing
 
--- executable hgeometry-skia
---   import:         setup, miso-setup
+-- executable skia
+--   import:         setup, miso-setup, options
 --   hs-source-dirs: skia
 --   main-is:        Main.hs
 --   other-modules:
---         Options
+--         App
+--         -- Options
 --         SkiaCanvas
 --         SkiaCanvas.Core
 --         SkiaCanvas.Render
@@ -281,11 +305,11 @@ executable hgeometry-raytracer
 --         Base
 --         GeometryStore
 --         GeometryStore.Helper
--- this needs updating to miso 1.9
+
 
 --------------------------------------------------------------------------------
-executable hgeometry-draw
-  import:         setup, miso-setup
+executable draw
+  import:         setup
   hs-source-dirs: draw
   main-is:        Main.hs
   -- other-modules:
@@ -294,7 +318,7 @@ executable hgeometry-draw
 --------------------------------------------------------------------------------
 -- * Triangulate World
 
-executable hgeometry-triangulateWorld
+executable triangulateWorld
   import:         setup
   hs-source-dirs: triangulateWorld
   main-is:        Main.hs
@@ -305,8 +329,8 @@ executable hgeometry-triangulateWorld
 --------------------------------------------------------------------------------
 
 -- Renders a 3D model of the lower envelope of a set of planes
-executable hgeometry-lowerEnv
-  import:         setup, miso-setup
+executable lowerEnv
+  import:         setup
   hs-source-dirs: lowerEnv
   main-is:        Main.hs
   build-depends:
@@ -318,9 +342,17 @@ executable hgeometry-lowerEnv
 --------------------------------------------------------------------------------
 
 -- Renders a 3D model of the lower envelope of a set of planes
-executable hgeometry-3dviewer
-  import:         setup, miso-setup
+executable 3dviewer
+  import:         setup, miso-setup, options
   hs-source-dirs: 3dviewer
   main-is:        Main.hs
-  -- build-depends:
-  --    hgeometry:
+  Other-modules:
+    App
+    RenderProps
+
+  build-depends:
+        dependent-map             >= 0.4.0.1    && < 0.5
+      , dependent-sum             >= 0.7.1      && < 0.8
+      , some                      >= 1.0.1      && < 1.1
+      , constraints-extras        >= 0.4        && < 0.5
+      , dependent-sum-template    >= 0.2.0.2    && < 0.3

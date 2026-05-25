@@ -1,0 +1,197 @@
+{-# LANGUAGE UndecidableInstances #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.HyperPlane.Internal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Canonical implementation for Hyperplanes as a vector of coefficients.
+--
+--------------------------------------------------------------------------------
+module HGeometry.HyperPlane.Internal
+  ( HyperPlane(..,HyperPlane2, HyperPlane3)
+  , MkHyperPlaneConstraints
+  , cmpInDirection
+  , pointOn
+  ) where
+
+import           Control.Lens hiding (cons, uncons)
+import qualified Data.Foldable as F
+import           Data.Functor.Classes
+import           Data.Type.Ord
+import           GHC.TypeNats
+import           HGeometry.HyperPlane.Class
+import           HGeometry.Point
+import           HGeometry.Properties
+import           HGeometry.Vector
+import           Text.Read (Read (..), readListPrecDefault)
+
+--------------------------------------------------------------------------------
+
+-- 2 dimensional hyperplane representing the line: 2 + 1*x + (-1)* y = 0,
+-- in other words, the line y = 1*x + 2
+
+-- $setup
+-- >>> import HGeometry.Line.LineEQ
+-- >>> let myHyperPlane2 = HyperPlane $ Vector3 2 1 (-1)
+-- >>> let myLine        = LineEQ 1 2                          :: LineEQ Double
+
+-- | A Hyperplane h in d-dimensions, described by a vector of
+-- coefficients (a_0,..,a_d).
+--
+-- a \point \( (p_1,..,p_d) \) lies on \(h) iff:
+-- \( a_0  + \sum_i=1^d a_i*p_i = 0 \)
+newtype HyperPlane d r = HyperPlane (Vector (d+1) r)
+
+-- | Construct a Hyperplane, i.e. a line in R^2
+--
+-- HyperPlane2 c a b represents the line ax + by + c = 0
+pattern HyperPlane2       :: r -> r -> r -> HyperPlane 2 r
+pattern HyperPlane2 c a b = HyperPlane (Vector3 c a b)
+{-# COMPLETE HyperPlane2 #-}
+
+-- | Construct a plane in R^3
+--
+-- HyperPlane3 d a b c represnest the plane ax + by + cz + d = 0
+pattern HyperPlane3         :: r -> r -> r -> r -> HyperPlane 3 r
+pattern HyperPlane3 d a b c = HyperPlane (Vector4 d a b c)
+{-# COMPLETE HyperPlane3 #-}
+
+type instance NumType   (HyperPlane d r) = r
+type instance Dimension (HyperPlane d r) = d
+
+
+deriving newtype instance Eq (Vector (d+1) r) => Eq (HyperPlane d r)
+
+instance (Show r, Foldable (Vector (d+1))) => Show (HyperPlane d r) where
+  showsPrec k (HyperPlane v) = showParen (k > app_prec) $
+                               showString "HyperPlane " .
+                               showsPrec 11 (F.toList v)
+    where
+      app_prec = 10
+
+instance ( Read r, Has_ Vector_ (d+1) r) => Read (HyperPlane d r) where
+  readPrec = readData $ readUnaryWith parseVec "HyperPlane" HyperPlane
+    where
+      parseVec = do lst <- readPrec
+                    case vectorFromList @(Vector (d+1) r) lst of
+                      Just v -> pure v
+                      _      -> fail "HyperPlane.read expected d+1 reals"
+  readListPrec = readListPrecDefault
+
+--------------------------------------------------------------------------------
+
+-- | Constraints on d needed to be able to construct hyperplanes; pretty much all of
+-- these are satisfied by default, it is just that the typechecker does not realize that.
+type MkHyperPlaneConstraints d r =
+  ( d < d+1, KnownNat d
+  , Has_ Metric_ d r, Has_ Metric_ (d+1) r
+  , Has_ Vector_ d r, Has_ Vector_ (d+1) r
+  , Has_ Vector_ (1+d) r
+  , d <= d+1
+  )
+
+instance ( MkHyperPlaneConstraints d r
+         ) => HyperPlane_ (HyperPlane d r) d r where
+  -- >>> hyperPlaneEquation myHyperPlane2
+  -- Vector3 2 1 (-1)
+  hyperPlaneEquation (HyperPlane v) = v
+
+instance ( MkHyperPlaneConstraints d r
+         ) => ConstructableHyperPlane_ (HyperPlane d r) d r where
+  hyperPlaneFromEquation = HyperPlane
+
+instance ( Eq r
+         ) => HyperPlaneFromPoints (HyperPlane 2 r) where
+  --
+  --
+  hyperPlaneThrough (Vector2 (Point2_ px py) (Point2_ qx qy))
+    | px /= qx  = let a = qy - py
+                      b = px - qx
+                      c = (qx-px)*py - px*(qy-py)
+                  in HyperPlane $ Vector3 c a b
+    | otherwise = HyperPlane $ Vector3 px (-1) 0
+
+instance (Num r) => HyperPlaneFromPoints (HyperPlane 3 r) where
+  hyperPlaneThrough (Vector3 p q r) = let u = q .-. p
+                                          v = r .-. p
+                                      in fromPointAndNormal p (u `cross` v)
+
+
+instance ( MkHyperPlaneConstraints d r, Eq r, Fractional r
+         , Has_ Additive_ d r
+         , FoldableWithIndex Int (Vector d)
+         , Has_ Vector_ (d+1) r, d <= d +1, 0 <= (d+1)-1 -- these are silly :(
+         ) => HasPickInteriorPoint (HyperPlane d r) d r where
+  pointInteriorTo = pointOn
+
+-- | Produce a point that lies on the hyperplane. No gurantees are given about which point
+--
+-- >>> pointOn myLine
+-- Point2 (-2.0) 0.0
+pointOn   :: forall hyperPlane d r.
+             ( HyperPlane_ hyperPlane d r, Eq r, Fractional r, Has_ Additive_ d r
+             , FoldableWithIndex Int (Vector d)
+             , Has_ Vector_ (d+1) r, d <= d +1, 0 <= (d+1)-1 -- these are silly :(
+             )
+          => hyperPlane -> Point d r
+pointOn h = case uncons $ hyperPlaneEquation h of
+              (0, _)  -> origin
+              (a0, a) -> case ifind (const (/= 0)) (a :: Vector d r) of
+                           Nothing     -> error "pointOn: Invalid hyperplane"
+                           Just (i,ai) ->
+                             (origin :: Point d r)&vector.component' i .~ (negate a0 / ai)
+  -- We are trying to find a point p so that a0 + sum_{i=1}^d ai*pi = 0,
+  -- in other words, so that
+  --
+  --    sum_{i=1}^d ai*pi = -a0                          (1)
+  --
+  -- so if a0 is actually zero, we can simply choose all the pi's in Eq 1 to be zero anyway.
+  -- if a0 is not zero, then there must be at least one ai that is non-zero; otherwise
+  -- we would have the equation 0 = <notzero>. Hence, we find this ai. We then rewrite Eq (1)
+  -- to: ai*pi + sum_{j /= i} aj*pj = -a0. Hence, we pick all the pj's to be zero, and
+  -- set pi to -a0/ai.
+
+
+
+
+--  hyperPlaneTrough pts = fromPointAndNormal p0 n
+--    where
+--      p0 = pts^.component @0
+--      -- (p0, pts') = uncons pts
+--      -- vecs = (.-. p0) <$> pts'
+--      n = error "hyperPlaneTrhough: undefined!"
+
+
+-- | Compare points with respect to the direction given by the
+-- vector, i.e. by taking planes whose normal is the given vector.
+--
+-- >>> cmpInDirection (Vector2 1 0) (Point2 5 0) (Point2 10 (0 :: Int))
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (0 :: Int))
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 5 0) (Point2 10 (10 :: Int))
+-- LT
+-- >>> cmpInDirection (Vector2 1 1) (Point2 15 15) (Point2 10 (10 :: Int))
+-- GT
+-- >>> cmpInDirection (Vector2 1 0) (Point2 15 15) (Point2 15 (10 :: Int))
+-- EQ
+cmpInDirection       :: forall point d r.
+                        ( Ord r, Num r
+                        , Has_ Metric_ (d+1) r
+                        , Has_ Metric_ d r
+                        , Point_ point d r
+                        , d < d+1--, 0 < d
+                        , Has_ Vector_ (1+d) r, d <= d+1
+                        )
+                     => Vector d r -> point -> point -> Ordering
+cmpInDirection n p q = p `onSideTest` fromPointAndNormal @(HyperPlane d r) q n
+
+-- TODO: not sure how to do this exactly het
+-- {-# RULES
+--   "cmpInDirection/cmpInDirection2
+--      forall (u :: Vector 2 r)
+--             (p :: point)
+--             (q :: point). cmpInDirection u p q = cmpInDirection2 u p q
+--   #-}

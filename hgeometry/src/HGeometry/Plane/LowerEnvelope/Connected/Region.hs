@@ -6,6 +6,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Region
   , ClippedBoundedRegion
   ) where
 
+import Data.Foldable1
 import HGeometry.Small.OneOrTwo
 import Control.Lens hiding (Prism)
 import Data.Bifoldable
@@ -99,6 +100,13 @@ deriving instance ( Show r, Show vertex, Point_ vertex 2 r
 
 deriving instance (Eq r, Eq vertex, Eq (bounded vertex), Eq1 unbounded
                   ) => Eq (RegionF bounded unbounded r vertex)
+
+instance ( Foldable1 bounded
+         , Foldable1 unbounded
+         ) => Foldable1 (RegionF bounded unbounded r) where
+  foldMap1 f = \case
+    BoundedRegion reg   -> foldMap1 f reg
+    UnboundedRegion reg -> foldMap1 f reg
 
 
 --------------------------------------------------------------------------------

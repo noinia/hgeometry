@@ -14,9 +14,12 @@ module HGeometry.Graphics.Camera
 
   , cameraNormal, viewUp
 
+  , viewportScreen
+
   , blenderCamera, blenderCameraAt
 
-  , cameraTransform, worldToView
+  , cameraTransform, worldToViewT
+  , viewToWorld
 
   , toViewportTransform, perspectiveProjection, rotateCoordSystem
   , flipAxes
@@ -182,23 +185,43 @@ viewUp :: (Radical r, Fractional r) => Lens' (Camera r) (Vector 3 r)
 viewUp = lens _rawViewUp (\c n -> c { _rawViewUp = signorm n})
 
 
+--------------------------------------------------------------------------------
+-- * Convenience functions
 
-
+-- | Gets the rectangle representing the screen (in screen coordinates).
+viewportScreen     :: Num r => Camera r -> Rectangle (Point 2 r)
+viewportScreen cam = Rectangle origin (Point $ cam^.viewportDimensions)
 
 
 --------------------------------------------------------------------------------
 -- * Camera Transformation functions
 
-
 -- | Full transformation that renders the figure
 cameraTransform   :: Fractional r => Camera r -> Transformation 3 r
 cameraTransform c =  toViewportTransform c
                  |.| perspectiveProjection c
-                 |.| worldToView c
+                 |.| worldToViewT c
 
--- | Translates world coordinates into view coordinates
-worldToView   :: Fractional r => Camera r -> Transformation 3 r
-worldToView c = rotateCoordSystem c |.| translation ((-1) *^ c^.cameraPosition.vector)
+-- | Transforms world coordinates into view coordinates
+worldToViewT   :: Fractional r => Camera r -> Transformation 3 r
+worldToViewT c = rotateCoordSystem c |.| translation ((-1) *^ c^.cameraPosition.vector)
+
+
+
+-- | Given the camera, and a point in screen space, compute the point
+-- in the world corresponding to it.
+viewToWorld       :: (Radical r, Fractional r) => Camera r -> Point 2 r -> Point 3 r
+viewToWorld cam q = (c .+^ (xOffset         ^+^ yOffset))
+  where
+    -- | center of the screen in world coordinates.
+    c = (cam^.cameraPosition) .+^ (cam^.focalDepth *^ cam^.cameraNormal)
+    -- | The center of the screen in screen coordinates
+    c' = Point ((/2) <$> cam^.viewportDimensions)
+    -- | relative vector from the center of the screen to q in screen space
+    Vector2 w h = q .-. c'
+    -- | the amount by which we thus displace the points
+    yOffset = h *^ (cam^.viewUp)
+    xOffset = w *^ cross (cam^.viewUp) (cam^.cameraNormal)
 
 -- | Transformation into viewport coordinates
 toViewportTransform   :: Fractional r => Camera r -> Transformation 3 r
