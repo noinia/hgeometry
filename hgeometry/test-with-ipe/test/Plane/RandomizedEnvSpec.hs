@@ -101,36 +101,12 @@ type instance NumType (a,b,c) = NumType c
 --------------------------------------------------------------------------------
 -- Move to Ipe.Draw
 
+--------------------------------------------------------------------------------
+
 instance (Point_ apex 2 r, Fractional r, Ord r, Show r
          ) => IsDrawable (Ipe r) (Cone r apex edge) where
   type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
   draw ats c = [iO $ defIO c]
-
-
-    -- draw @(Ipe r) ats (pg :: SimplePolygon (Point 2 r))
-    -- where
-    --   a  = c^.apex.asPoint
-    --   pg = uncheckedFromCCWPoints . NonEmpty.fromList $
-    --        [ a .+^ (c^.leftBoundaryVector.core)
-    --        , a
-    --        , a .+^ (c^.rightBoundaryVector.core)
-    --        ]
-
-instance ( Point_ corner 2 r, Num r
-         , IsDrawable backend (SimplePolygon corner)
-         , Monoid (Rendered backend)
-         ) => IsDrawable backend (Triangle corner) where
-  type AttrOf backend (Triangle corner) = AttrOf backend (SimplePolygon corner)
-  draw ats tri = draw @backend ats (uncheckedFromCCWPoints tri :: SimplePolygon corner)
-  -- if we can draw a simple polygon we can draw a 2d triangle
-
-instance ( Point_ vertex 2 r, Num r
-         , IsDrawable backend (SimplePolygonF f vertex)
-         , VertexContainer f vertex
-         , Monoid (Rendered backend)
-         ) => IsDrawable backend (ConvexPolygonF f vertex) where
-  type AttrOf backend (ConvexPolygonF f vertex) = AttrOf backend (SimplePolygonF f vertex)
-  draw ats poly = draw @backend ats (toSimplePolygon poly)
 
 instance ( IsDrawable (Ipe r) a
          , IsDrawable (Ipe r) b
