@@ -182,7 +182,6 @@ spec = describe "RandomizedEnvSpec" $ do
                [Extra (Point2 371 3),Extra (Point2 146 148),Original (Point2 1 3)])
 
 
-
          prop "cone cover contains corners comain" $
            \(domain :: Triangle (Point 2 R)) (cone :: Cone R (Point 2 R) ()) ->
              let poly = coverCone domain (cone^.apex) (negated $ cone^.leftBoundaryVector.core)
@@ -200,8 +199,6 @@ spec = describe "RandomizedEnvSpec" $ do
                verticesOf (bruteForceVertices planes)
                ===
                Map.keys (Original.computeVertexForm planes)
-
-
 
            -- prop "prisms are interiorly disjoint" $
            --   \(planes :: NESet.NESet MyPlane) ->
