@@ -35,6 +35,7 @@ module Plane.BruteForce
   , findRotateTo
   ) where
 
+import           HGeometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (Prism, Prism')
 import           Prelude hiding (filter)
 import           Data.Set (Set)
@@ -43,7 +44,7 @@ import           Data.Foldable1
 import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
 import           Data.Foldable.WithIndex
-import           Data.Foldable(Foldable(..))
+import           Data.Foldable (Foldable(..))
 import           Data.Maybe (fromMaybe, maybeToList)
 import           Plane.Sample
 import           HGeometry.Kernel
@@ -66,15 +67,15 @@ import           GHC.Generics (Generic)
 import           Data.Functor.WithIndex
 import           Witherable
 import           HGeometry.Cyclic (Cyclic)
-import Control.Applicative
+import           Control.Applicative
 
 
-import Plane.Debug
-import HGeometry.Polygon
-import HGeometry.Point.Either
-import Data.Bifunctor
-import HGeometry.Cone
-import Data.Ord
+import           Plane.Debug
+import           HGeometry.Polygon
+import           HGeometry.Point.Either
+import           Data.Bifunctor
+import           HGeometry.Cone
+import           Data.Ord
 
 
 
@@ -356,10 +357,10 @@ coverCone :: forall apex corner r. (Point_ apex 2 r, Point_ corner 2 r, Ord r, F
           -> ConvexPolygon (OriginalOrExtra apex (Point 2 r))
 coverCone domain a leftV rightV =
   let a' = a^.asPoint
-  in uncheckedFromCCWPoints $
+  in convexHull $
      (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
 
--- | computes the vertices of the clipped cone cover.
+-- | computes candidate vertices of the clipped cone cover.
 coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                                          , Show r
                                                          , Point_ corner 2 r
@@ -387,8 +388,7 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
 
     -- the corners of the domain that are in the cone, and still on the wrong side of the
     -- halfplane defined by l and r
-    mp = makeConvex
-       . List.sortBy (ccwCmpAroundWith rightV ar)
+    mp = List.sortBy (ccwCmpAroundWith rightV ar)
        $ filter (\q -> all (q `intersects`) [h1,h2,h]) (toList domain')
 
     -- we are overestimating the length of the vector from q to a and using that
@@ -404,10 +404,6 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
       -- observe that the length of v is at least the length of v'. So we will compute
       -- a vector b whose (squared) length is at least the (squared) length of v.
 
-    -- if we make a CCW right turn we need to keep b; otherwise
-    makeConvex xs = case xs of
-      [a,b,c] | ccw a b c /= CCW -> [a,c]
-      _                          -> xs
 
 
 --------------------------------------------------------------------------------
