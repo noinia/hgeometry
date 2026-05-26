@@ -60,6 +60,13 @@ ipeCounterExample x = case toIpeSelectionXML (draw @(Ipe r) [] x) of
                         Nothing -> property
                         Just b  -> counterexample (B.unpack b)
 
+-- | Adds the item as an ipe-selection xml to the output (so that we
+-- can easily copy paste it into ipe).
+withIpeSelection   :: (IpeWrite t, Testable prop) => [t] -> prop -> Property
+withIpeSelection g = counterexample (maybe err show $ toIpeSelectionXML g)
+  where
+    err = "error showing as ipe !?"
+
 -- --------------------------------------------------------------------------------
 
 -- qcReadShow1 :: forall s. (Arbitrary1 s, Read1 s, Eq1 s, Show1 s) => Proxy s -> Property

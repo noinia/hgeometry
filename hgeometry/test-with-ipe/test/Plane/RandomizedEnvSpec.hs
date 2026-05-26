@@ -71,6 +71,9 @@ import           Test.Util
 instance Arbitrary StdGen where
   arbitrary = mkStdGen <$> arbitrary
 
+instance Arbitrary (IpeColor R) where
+  arbitrary = Test.QuickCheck.elements basicNamedColors
+
 ----------------------------------------
 
 data Queries = Queries (Triangle (Point 2 R)) (NonEmpty (Point 2 R))
@@ -97,6 +100,7 @@ normalize v = let s = sum v in (/s) <$> v
 -- | I don't think I really want this one; but just for debugging purposes it seems ok
 type instance NumType (a,b) = NumType b
 type instance NumType (a,b,c) = NumType c
+type instance NumType (a,b,c,d) = NumType d
 
 --------------------------------------------------------------------------------
 -- Move to Ipe.Draw
@@ -132,15 +136,52 @@ instance ( IsDrawable (Ipe r) a
                   <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
                   <> draw @(Ipe r) [ commonAttributes %~ apply ats ] c
 
-
-
-
+instance ( IsDrawable (Ipe r) a
+         , IsDrawable (Ipe r) b
+         , IsDrawable (Ipe r) c
+         , IsDrawable (Ipe r) d
+         , NumType a ~ r, NumType b ~ r, NumType c ~ r, NumType c ~ r
+         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
+         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
+         , HasCommonAttributes (AttrOf (Ipe r) c) r Maybe
+         , HasCommonAttributes (AttrOf (Ipe r) d) r Maybe
+         ) => IsDrawable (Ipe r) (a,b,c,d) where
+  type AttrOf (Ipe r) (a,b,c,d) = CommonAttributes r Maybe
+  draw ats (a,b,c,d) = mconcat
+      [ draw @(Ipe r) [ commonAttributes %~ apply ats ] a
+      , draw @(Ipe r) [ commonAttributes %~ apply ats ] b
+      , draw @(Ipe r) [ commonAttributes %~ apply ats ] c
+      , draw @(Ipe r) [ commonAttributes %~ apply ats ] d
+      ]
 
 
 -- | Helper function to apply attributes
 apply       :: [at -> at] -> at -> at
 apply ats a = foldl' (flip ($)) a ats
 
+
+--------------------------------------------------------------------------------
+
+type instance NumType (NESet.NESet a) = NumType a
+type instance NumType (MonoidalMap.MonoidalMap k a) = NumType a
+
+----------------------------------------
+
+
+instance IsDrawable backend g => IsDrawable backend (NESet.NESet g) where
+  type AttrOf backend (NESet.NESet g) = AttrOf backend g
+  draw ats = foldMap (draw @backend ats)
+
+instance IsDrawable backend g => IsDrawable backend (MonoidalMap.MonoidalMap k g) where
+  -- ^ Draws the values; not the keys
+  type AttrOf backend (MonoidalMap.MonoidalMap k g) = AttrOf backend g
+  draw ats = foldMap (draw @backend ats)
+
+
+
+instance IsDrawable (Ipe R) MyPoint where
+  type AttrOf (Ipe R) MyPoint = AttrOf (Ipe R) (Point 2 R)
+  draw ats (p :+ c) = draw @(Ipe R) ((stroke ?~ c) : ats) p
 
 
 --------------------------------------------------------------------------------
@@ -189,7 +230,7 @@ spec = describe "RandomizedEnvSpec" $ do
            --       show () === "foo"
 
 
-           xprop "brute force envelope; indeed lowest at query points" $
+           prop "brute force envelope; indeed lowest at query points" $
              \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
                let env   = lowerEnvelopeOn domain planes
                in counterexample (show env) $
@@ -198,6 +239,32 @@ spec = describe "RandomizedEnvSpec" $ do
                       conjoin [ verifyLowestEnv (toNonEmpty planes) q env
                               | q <- toList queries
                               ]
+
+           prop "brute force vornoi diagram; sites contained in voronoi regions" $
+             \(sites :: NESet.NESet MyPoint) (Queries domain _) ->
+               let vd = voronoiDiagramIn domain (toNonEmpty sites)
+               in not (null vd) ==>
+                    ipeCounterExample (domain, sites, vd) $
+                    counterexample (show vd) $
+                    conjoin [ s `intersects` domain ==>
+                              s `intersects` cell
+                            | (s,cell) <- MonoidalMap.assocs vd
+                            ]
+
+
+           prop "brute force vornoi diagram; covers all points" $
+             \(sites :: NESet.NESet MyPoint) (Queries domain queries) ->
+               let vd = voronoiDiagramIn domain (toNonEmpty sites)
+                   verifyClosest sites q vd =
+                     let ss  = closestAt q vd
+                         ss' = closestAt' q sites
+                     in ss === ss'
+               in not (null vd) ==>
+                    ipeCounterExample (queries, domain, sites, vd) $
+                    counterexample (show vd) $
+                    conjoin [ verifyClosest sites q vd
+                            | q <- toList queries
+                            ]
 
 
            xprop "brute force triangulated envelope; indeed lowest at query points" $
@@ -587,6 +654,29 @@ voronoiDiagramIn domain = MonoidalMap.mapKeys (^.extra)
                         . fmap (\p -> pointToPlane p :+ p)
   -- TODO: figure out if mapping monotonically is safe...
 
+
+-- | Given a site and a voronoi diagram, find the set of sites that
+-- are closest at the query point i.e. find the set of cells that
+-- contain the query point.
+--
+-- (this uses a very naive O(n) time implementation)
+closestAt      :: ( Point_ queryPoint 2 r
+                  , Point_ site 2 r, Ord r, Fractional r, Ord site
+                  , Show site, Show r
+                  , HasIntersectionWith queryPoint (ConvexPolygon (OriginalOrExtra (EnvVertex r site) (Point 2 r :+ r)))
+                  ) => queryPoint -> BoundedVoronoiDiagram r site -> Set.Set site
+closestAt q = MonoidalMap.keysSet
+            . MonoidalMap.filter (\cell -> q `intersects` cell)
+
+-- | Naive closest at implementation
+closestAt'   :: ( Point_ queryPoint 2 r
+                , Point_ site 2 r, Ord r, Fractional r, Ord site
+                , Show site, Show r, Foldable set
+                ) => queryPoint -> set site -> Set.Set site
+closestAt' q = maybe mempty fst
+             . MonoidalMap.minView
+             . foldMap (\s -> MonoidalMap.singleton (squaredEuclideanDist q s) (Set.singleton s)
+                       )
 
 --------------------------------------------------------------------------------
 

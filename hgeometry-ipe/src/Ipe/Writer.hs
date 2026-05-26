@@ -79,15 +79,14 @@ writeIpePage fp = writeIpeFile fp . singlePageFile
 
 -- | Convert the input to ipeXml, and prints it to standard out in such a way
 -- that the copied text can be pasted into ipe as a geometry object.
-printAsIpeSelection :: IpeWrite t => t -> IO ()
+printAsIpeSelection :: IpeWrite t => [t] -> IO ()
 printAsIpeSelection = C.putStrLn . fromMaybe "" . toIpeSelectionXML
 
 -- | Convert input into an ipe selection.
-toIpeSelectionXML :: IpeWrite t => t -> Maybe B.ByteString
-toIpeSelectionXML = fmap (format . ipeSelection) . ipeWrite
-  where
-    ipeSelection x = Element "ipeselection" [] [x]
-
+toIpeSelectionXML   :: IpeWrite t => [t] -> Maybe B.ByteString
+toIpeSelectionXML xs = case mapMaybe ipeWrite xs of
+                         []  -> Nothing
+                         chs -> Just $ format $ Element "ipeselection" [] chs
 
 -- | Convert to Ipe xml
 toIpeXML :: IpeWrite t => t -> Maybe B.ByteString
