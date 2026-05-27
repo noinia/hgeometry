@@ -189,6 +189,43 @@ instance IsDrawable (Ipe R) MyPoint where
 
 --------------------------------------------------------------------------------
 
+
+
+--------------------------------------------------------------------------------
+-- * Move to Kernel test HalfLine Intersection
+
+testT :: Triangle (Point 2 R)
+testT =  Triangle (Point2 1 0) (Point2 1 1) (Point2 0 0)
+
+testC :: Cone R (Point 2 R) ()
+testC = Cone (Point2 1 0) (Vector2 1 1 :+ ()) (Vector2 0 (-1) :+ ())
+
+
+testX = coneTriangleBoundaryIntersections testC testT
+-- testY = case (
+--               -- (rightBoundary testC ^.core)
+--              `intersect`
+--               () of
+
+--           -- _                                             -> True
+  -- FIXME: This is a bug; the halfline should not intersect the segment as a segment.
+
+bug :: Spec
+bug = describe "halfine x line segment should not intersect" $ do
+        let hl  = HalfLine (Point2 1 (0 :: R)) (Vector2 0 (-1))
+            seg = ClosedLineSegment (Point2 1 (0 :: R)) (Point2 1 1)
+        it "intersect" $
+          (case hl `intersect` seg of
+                Just (HalfLine_x_LineSegment_LineSegment seg) -> False
+                Just _                                        -> True
+                Nothing                                       -> False
+          ) `shouldBe` True
+        it "intersects" $
+          (hl `intersects` seg) `shouldBe` True
+
+--------------------------------------------------------------------------------
+
+
 -- | Computes the intersection points of the boundary of a cone with
 -- the boundary of a triangle.
 --
@@ -206,7 +243,7 @@ coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
       flip foldMap sides $ \side -> case HalfLine (o^.asPoint) v `intersect` side of
         Nothing                                       -> []
         Just (HalfLine_x_LineSegment_Point p)         -> [p]
-        Just (HalfLine_x_LineSegment_LineSegment seg) -> [seg^.start,seg^.end]
+        Just (HalfLine_x_LineSegment_LineSegment seg) -> pTraceShow "???" [seg^.start,seg^.end]
 
     sides = [ ClosedLineSegment a b
             , ClosedLineSegment b c
