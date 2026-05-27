@@ -305,17 +305,6 @@ spec = describe "RandomizedEnvSpec" $ do
 
            --       show () === "foo"
 
-
-           xprop "brute force envelope; indeed lowest at query points" $
-             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
-               let env   = lowerEnvelopeOn domain planes
-               in counterexample (show env) $
-                  ipeCounterExample (queries, domain, toList env) $
-                    not (null env) ==>
-                      conjoin [ verifyLowestEnv (toNonEmpty planes) q env
-                              | q <- toList queries
-                              ]
-
            prop "brute force vornoi diagram; sites contained in voronoi regions" $
              \(sites' :: NESet.NESet (Point 2 R)) (Queries domain _) ->
                let sites = assignColors sites'
@@ -332,6 +321,16 @@ spec = describe "RandomizedEnvSpec" $ do
                             | (s,cell) <- MonoidalMap.assocs vd
                             ]
 
+         modifyMaxSize (const 20) $ do
+           prop "brute force envelope; indeed lowest at query points" $
+             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
+               let env   = lowerEnvelopeOn domain planes
+               in counterexample (show env) $
+                  ipeCounterExample (queries, domain, toList env) $
+                    not (null env) ==>
+                      conjoin [ verifyLowestEnv (toNonEmpty planes) q env
+                              | q <- toList queries
+                              ]
 
            prop "brute force vornoi diagram; covers all points" $
              \(sites' :: NESet.NESet (Point 2 R)) (Queries domain queries) ->
