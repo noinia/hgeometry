@@ -4,6 +4,7 @@
 module Plane.RandomizedEnvSpec
   where
 
+import           HGeometry.LineSegment
 import           HGeometry.HalfLine
 import           Data.Maybe
 import           Golden
@@ -253,7 +254,7 @@ coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
 
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
-
+         bug
 
          it "coverCone" $ do
            let testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
@@ -284,9 +285,6 @@ spec = describe "RandomizedEnvSpec" $ do
                 conjoin [ counterexample (show v) $ Every $ v `intersects` poly
                         | v <- intersections
                         ]
-
-
-
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $

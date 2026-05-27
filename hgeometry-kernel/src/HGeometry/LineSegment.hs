@@ -24,6 +24,7 @@ module HGeometry.LineSegment
   , LineSegmentLineSegmentIntersection(..)
   , HalfLineLineSegmentIntersection(..)
   , ClosedSegmentHalfSpaceIntersection(..)
+  , compareColinearInterval
   ) where
 
 import HGeometry.LineSegment.Class

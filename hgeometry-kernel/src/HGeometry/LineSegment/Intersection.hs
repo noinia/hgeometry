@@ -388,23 +388,19 @@ instance ( Ord r, Num r, Point_ point 2 r
                       -- this essentially constructs the supporting line of the segment
                       -- but anchors it at hl^.start. Since the three points are colinear
                       -- this still means the segment lies on this line.
-                   in case compareColinearInterval l seg of
-                        Before   -> (seg^.end.asPoint) `intersects` hl
-                        OnStart  -> isClosed (seg^.startPoint)
-                                      || (seg^.end.asPoint) `intersects` hl
+                   in case compareColinearInterval l seg' of
+                        Before   -> (seg'^.end.asPoint) `intersects` hl
+                        OnStart  -> isClosed (seg'^.startPoint)
+                                      || (seg'^.end.asPoint) `intersects` hl
                         Interior -> True
-                        OnEnd    -> isClosed (seg^.endPoint)
-                                      || (seg^.start.asPoint) `intersects` hl
-                        After    -> (seg^.start.asPoint) `intersects` hl
-
-      -- the thing below is what holds for closed seg
-      --   (seg^.start.asPoint) `intersects` hl
-      --               || (seg^.end.asPoint) `intersects` hl
-      --               || (hl^.start.asPoint) `intersects` seg
-
+                        OnEnd    -> isClosed (seg'^.endPoint)
+                                      || (seg'^.start.asPoint) `intersects` hl
+                        After    -> (seg'^.start.asPoint) `intersects` hl
       _        -> supportingLine hl `intersects` seg && supportingLine seg `intersects` hl
     where
       isClosed = (== Closed) . endPointType
+
+      seg' = orientToInterval hl seg
   {-# INLINE intersects #-}
 
 type instance Intersection (HalfLine point) (LineSegment endPoint point)
@@ -429,21 +425,45 @@ instance ( Ord r, Fractional r, Point_ point 2 r
       Line_x_LineSegment_Point q
         | q `onSide` perpendicularTo m /= RightSide -> Just $ HalfLine_x_LineSegment_Point q
         | otherwise                                 -> Nothing
-      Line_x_LineSegment_LineSegment _              -> case compareColinearInterval m seg of
+      Line_x_LineSegment_LineSegment _              -> case compareColinearInterval m seg' of
         Before   -> Just $ HalfLine_x_LineSegment_LineSegment seg
         OnStart  -> Just $ HalfLine_x_LineSegment_LineSegment seg
-        Interior -> Just $ HalfLine_x_LineSegment_LineSegment $ seg&start .~ (hl^.start)
+        Interior -> Just $ HalfLine_x_LineSegment_LineSegment $ seg'&start .~ (hl^.start)
         OnEnd
-          | isClosed (seg^.endPoint) -> Just $ HalfLine_x_LineSegment_Point (seg^.end.asPoint)
-          | otherwise                -> Nothing
-        After                        -> Nothing -- no intersection
+          | isClosed (seg'^.endPoint) -> Just $ HalfLine_x_LineSegment_Point (seg'^.end.asPoint)
+          | otherwise                 -> Nothing
+        After                         -> Nothing -- no intersection
     where
       m = supportingLine hl
       isClosed = (== Closed) . endPointType
+      seg' = orientToInterval hl seg
+
+-- | Given a halfline or oriented line; orient the line segment (that is suposedly)
+-- colinear with the oriented line, so that the start appears before the end
+-- when looking along the oriented line.
+orientToInterval        :: ( HasSupportingLine halfLine, IxValue (endPoint point) ~ point
+                           , EndPoint_ (endPoint point)
+                           , Dimension halfLine ~ 2, NumType halfLine ~ r
+                           , Point_ point 2 r, Num r, Ord r)
+                        => halfLine -> LineSegment endPoint point -> LineSegment endPoint point
+orientToInterval hl seg = case (seg^.end) `onSide`  m' of
+    LeftSide  -> seg  -- the vector of the supportingLine is pointing
+                      -- into the left halfplane of m'. Hence, if the
+                      -- endpoint lies left of this line the endpoint
+                      -- of the seg indeed lies further along m than
+                      -- the start point
+    _         -> seg&startPoint .~ seg^.endPoint
+                     &endPoint  .~ seg^.startPoint -- otherwise; flip the segment.
+  where
+    m' = perpendicularTo (supportingLine hl)
+{-# INLINE orientToInterval #-}
 
 -- | Given a line l, and a line segment seg that lies on l. Returns where the anchorPoint
 -- of the line is with respect to the line segment (which we can interpret as some
 -- interval along l).
+--
+-- pre: the start point of the line segment appears before the end point of the line segment
+-- in the direction of the line.
 compareColinearInterval                    :: ( Ord r, Num r
                                               , Point_ point 2 r
                                               , IxValue (endPoint point) ~ point
@@ -463,6 +483,13 @@ compareColinearInterval l@(LinePV p _) seg = case p `onSide` mStart of
     mStart = m&anchorPoint .~ seg^.start.asPoint
     mEnd   = m&anchorPoint .~ seg^.end.asPoint
     -- the left side is the side in which the vector v points.
+
+
+
+
+
+
+
 
 type instance NumType   (HalfLineLineSegmentIntersection point edge) = NumType point
 type instance Dimension (HalfLineLineSegmentIntersection point edge) = Dimension point
