@@ -253,6 +253,7 @@ fromVertices domain = imap computeCell . foldMap collect
     -- extend to cover the domain
     computeCell :: plane -> NonEmpty vertex -> ConvexPolygon (Vertex' vertex r plane)
     computeCell h (sortAroundBoundary -> vs'@(v0:|rest')) =
+        -- traceShowWith ("computeCell",h, vs',"->", ) $
         uncheckedFromCCWPoints $ (extra' <$> extras) <<> (Original <$> originals)
       where
         -- | The vertices in sorted order around some arbitrary first vertex.
@@ -293,12 +294,9 @@ fromVertices domain = imap computeCell . foldMap collect
                          w           = Vector2 y (-x)
                          f           = evalAt (u .+^ w)
                      in f h < f h'
-            -- w should be a vector pointing into the right halfplane
-            -- of the edge uuv
+            -- w should be a vector pointing into the right halfplane of the edge uuv
            -- if uv is a CCW edge; then h should be cheaper just left of the
            -- edge. Conversely, it should be more expensive on the right side of the edge
-
-                        -- test if really lies left of the vector from v to u.
 
         -- | Given two vertices u and v, compute the plane other than
         -- h that they have in common (if any)
@@ -345,6 +343,7 @@ coverClippedCone domain al leftV ar rightV =
   in uncheckedFromCCWPoints $
      (Extra <$> coverCone' domain al' leftV ar' rightV) <>
      (Original <$> al :| [ar])
+--FIXME: maybe this should also be convexHull? since it seems we cannot guarntee any ordering?
 
 -- | Given the domain, and a cone; given by its apex, its left vector,
 -- and its right vector (both given so that the cone is to the left of
@@ -359,6 +358,10 @@ coverCone domain a leftV rightV =
   let a' = a^.asPoint
   in convexHull $
      (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
+  -- we need the convex hull; since the point r that we pick on the right boundary of the
+  -- cone may be much further away than the extremal point in direction r. Hence,
+  -- we may actually make an (incorrect) right turn at r itself. Taking the convex hull
+  -- will make sure we then skip r in this case.
 
 -- | computes candidate vertices of the clipped cone cover.
 coverCone'                           :: forall corner r. ( Ord r, Fractional r
@@ -389,13 +392,13 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
     -- the corners of the domain that are in the cone, and still on the wrong side of the
     -- halfplane defined by l and r
     mp = List.sortBy (ccwCmpAroundWith rightV ar)
-       $ filter (\q -> all (q `intersects`) [h1,h2,h]) (toList domain')
+       . filter (\q -> all (q `intersects`) [h1,h2,h]) $ toList domain'
+
 
     -- we are overestimating the length of the vector from q to a and using that
     projectOnto          :: Point 2 r -> Vector 2 r -> Point 2 r -> Point 2 r
     projectOnto a base q = let vLen = quadrance $ q .-. a
-                               bLen = quadrance base
-                               b    = (vLen / bLen) *^ base
+                               b    = vLen  *^ base
                            in a .+^ b
       -- consider the vector v from q to a, and let v' be its projection onto base.
       -- we want to compute some point that lies on the base, and is "further away"
