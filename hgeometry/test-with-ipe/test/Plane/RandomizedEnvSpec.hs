@@ -244,7 +244,7 @@ coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
       flip foldMap sides $ \side -> case HalfLine (o^.asPoint) v `intersect` side of
         Nothing                                       -> []
         Just (HalfLine_x_LineSegment_Point p)         -> [p]
-        Just (HalfLine_x_LineSegment_LineSegment seg) -> pTraceShow "???" [seg^.start,seg^.end]
+        Just (HalfLine_x_LineSegment_LineSegment seg) -> [seg^.start,seg^.end]
 
     sides = [ ClosedLineSegment a b
             , ClosedLineSegment b c
@@ -316,51 +316,24 @@ spec = describe "RandomizedEnvSpec" $ do
                               | q <- toList queries
                               ]
 
-           xprop "brute force vornoi diagram; sites contained in voronoi regions" $
+           prop "brute force vornoi diagram; sites contained in voronoi regions" $
              \(sites' :: NESet.NESet (Point 2 R)) (Queries domain _) ->
                let sites = assignColors sites'
                    vd    = voronoiDiagramIn domain (toNonEmpty sites)
+                   p `implies` q = not p || q
+                   -- we sdhould not use the ==> in the interior;
+                   -- i.e. we don't necessarily want only point sets
+                   -- that all are inside the domain.
                in not (null vd) ==>
                     ipeCounterExample (domain, sites, vd) $
                     counterexample (show vd) $
-                    conjoin [ s `intersects` domain ==>
-                              s `intersects` cell
+                    conjoin [ (s `intersects` domain) `implies`
+                              (s `intersects` cell)
                             | (s,cell) <- MonoidalMap.assocs vd
                             ]
 
 
---           prop "debug" $
---              let sites = NESet.fromList $
-
--- fromList ((Point2 (-41.5) 23 :+ IpeColor (Named "gold")) :| [Point2 (-25.92308~) (-10.82353~) :+ IpeColor (Named "lightcyan"),Point2 (-13.95919~) (-21.71429~) :+ IpeColor (Named "black"),Point2 44.18518~ 22.60416~ :+ IpeColor (Named "gold")])
---          Queries (Triangle (Point2 (-0.65854~) 47) (Point2 16.21621~ (-16.33334~)) (Point2 2.07317~ 17.96))
-
-
---                ((Point2 (-41.5) 23 :+ IpeColor (Named "blue")) :|
---                [Point2 (-25.92308~) (-10.82353~) :+ IpeColor (Named "lightcyan")
---                ,Point2 (-13.95919~) (-21.71429~) :+ IpeColor (Named "black")
---                ,Point2 44.18518~ 22.60416~ :+ IpeColor (Named "gold")]
---                )
---                 domain = Triangle (Point2 (-0.65854~) 47) (Point2 16.21621~ (-16.33334~)) (Point2 2.07317~ 17.96)
-
--- (sites :: NESet.NESet MyPoint) (Queries domain queries) ->
---                let vd = voronoiDiagramIn domain (toNonEmpty sites)
---                    verifyClosest sites q vd =
---                      let ss  = closestAt q vd
---                          ss' = closestAt' q sites
---                      in ss === ss'
---                in not (null vd) ==>
---                     ipeCounterExample (queries, domain, sites, vd) $
---                     counterexample (show vd) $
---                     conjoin [ verifyClosest sites q vd
---                             | q <- toList queries
---                             ]
-
-
-
-
-
-           xprop "brute force vornoi diagram; covers all points" $
+           prop "brute force vornoi diagram; covers all points" $
              \(sites' :: NESet.NESet (Point 2 R)) (Queries domain queries) ->
                let sites = assignColors sites'
                    vd = voronoiDiagramIn domain (toNonEmpty sites)
@@ -376,7 +349,7 @@ spec = describe "RandomizedEnvSpec" $ do
                             ]
 
 
-           xprop "brute force triangulated envelope; indeed lowest at query points" $
+           prop "brute force triangulated envelope; indeed lowest at query points" $
              \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
                let env   = triangulatedLowerEnvelopeOn domain planes
                in counterexample (show env) $
