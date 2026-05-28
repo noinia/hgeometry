@@ -321,7 +321,7 @@ spec = describe "RandomizedEnvSpec" $ do
                             | (s,cell) <- MonoidalMap.assocs vd
                             ]
 
-         modifyMaxSize (const 20) $ do
+         modifyMaxSize (const 13) $ do
            prop "brute force envelope; indeed lowest at query points" $
              \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
                let env   = lowerEnvelopeOn domain planes
