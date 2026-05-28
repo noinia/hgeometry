@@ -35,7 +35,6 @@ module Plane.BruteForce
   , findRotateTo
   ) where
 
-import           HGeometry.ConvexHull.GrahamScan
 import           Control.Lens hiding (Prism, Prism')
 import           Prelude hiding (filter)
 import           Data.Set (Set)
@@ -253,7 +252,7 @@ fromVertices domain = imap computeCell . foldMap collect
     -- extend to cover the domain
     computeCell :: plane -> NonEmpty vertex -> ConvexPolygon (Vertex' vertex r plane)
     computeCell h (sortAroundBoundary -> vs'@(v0:|rest')) =
-        -- traceShowWith ("computeCell",h, vs',"->", ) $
+        -- traceShowWith ("computeCell",h, ";;;", extras, ";;;;", vs',"->", ) $
         uncheckedFromCCWPoints $ (extra' <$> extras) <<> (Original <$> originals)
       where
         -- | The vertices in sorted order around some arbitrary first vertex.
@@ -343,7 +342,6 @@ coverClippedCone domain al leftV ar rightV =
   in uncheckedFromCCWPoints $
      (Extra <$> coverCone' domain al' leftV ar' rightV) <>
      (Original <$> al :| [ar])
---FIXME: maybe this should also be convexHull? since it seems we cannot guarntee any ordering?
 
 -- | Given the domain, and a cone; given by its apex, its left vector,
 -- and its right vector (both given so that the cone is to the left of
@@ -356,14 +354,11 @@ coverCone :: forall apex corner r. (Point_ apex 2 r, Point_ corner 2 r, Ord r, F
           -> ConvexPolygon (OriginalOrExtra apex (Point 2 r))
 coverCone domain a leftV rightV =
   let a' = a^.asPoint
-  in convexHull $
+  in uncheckedFromCCWPoints $
      (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
-  -- we need the convex hull; since the point r that we pick on the right boundary of the
-  -- cone may be much further away than the extremal point in direction r. Hence,
-  -- we may actually make an (incorrect) right turn at r itself. Taking the convex hull
-  -- will make sure we then skip r in this case.
 
 -- | computes candidate vertices of the clipped cone cover.
+-- reports the points in CCW order; starting from the point r on the right cone boundary.
 coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                                          , Show r
                                                          , Point_ corner 2 r
@@ -371,7 +366,7 @@ coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                      => Triangle corner
                                      -> Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
                                      -> NonEmpty (Point 2 r)
-coverCone' domain al leftV ar rightV = r :| mp <> [l]
+coverCone' domain al leftV ar rightV = hull $ r :| mp <> [l]
   where
     domain' = fmap (^.asPoint) domain
     Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
@@ -407,7 +402,24 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
       -- observe that the length of v is at least the length of v'. So we will compute
       -- a vector b whose (squared) length is at least the (squared) length of v.
 
+-- | make sure we only make CCW turns.
+--
+-- Note that this is essentially the implementation also used in grahamscan (but swtiching)
+-- right turn for left turn.
+hull           :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
+hull (a:|b:ps) = NonEmpty.fromList . reverse $ hull'' [b,a] ps
+  where
+    hull'' h []      = h
+    hull'' h (p:ps') = hull'' (cleanMiddle (p:h)) ps'
 
+    cleanMiddle h@[_,_] = h
+    cleanMiddle h@(z:y:x:rest)
+      | leftTurn x y z = h
+      | otherwise       = cleanMiddle (z:x:rest)
+    cleanMiddle _       = error "cleanMiddle: too few points"
+    leftTurn a' b' c' = ccw a' b' c' == CCW
+
+hull _ = error "hull requires a list with at least two elements."
 
 --------------------------------------------------------------------------------
 

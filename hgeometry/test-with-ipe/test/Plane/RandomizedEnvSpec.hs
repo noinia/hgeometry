@@ -255,6 +255,7 @@ coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
          bug
+         testBug
 
          it "coverCone" $ do
            let testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
@@ -867,3 +868,27 @@ assignColors = snd . mapAccumLStrictlyMonotonic f (cycle basicNamedColors)
 -- | mapAccumL; assuming the function is stritly monotonic; thus producing no duplicates.
 mapAccumLStrictlyMonotonic      :: (s -> a -> (s, b)) -> s -> NESet.NESet a -> (s, NESet.NESet b)
 mapAccumLStrictlyMonotonic f s0 = fmap NESet.fromDistinctAscList . mapAccumL f s0 . NESet.toList
+
+
+bugI :: NonEmpty (Point 2 R)
+bugI = Point2 0 0 :| [Point2 1 0,Point2 1 2]
+bugDomain ::Triangle (Point 2 R)
+bugDomain = Triangle (Point2 2 3) (Point2 (-1.5) 1.66666) (Point2 (-1.5) (-3))
+
+bugX = voronoiDiagramIn bugDomain bugI
+testBug = prop "brute force vornoi diagram; covers all points" $
+          let sites' = NESet.fromList bugI
+              domain = bugDomain
+              sites = assignColors sites'
+              queries = [Point2 0 2]
+              vd = voronoiDiagramIn domain (toNonEmpty sites)
+              verifyClosest sites q vd =
+                     let ss  = closestAt q vd
+                         ss' = closestAt' q sites
+                     in ss === ss'
+          in not (null vd) ==>
+                    ipeCounterExample (queries, domain, sites, vd) $
+                    counterexample (show vd) $
+                    conjoin [ verifyClosest sites q vd
+                            | q <- toList queries
+                            ]
