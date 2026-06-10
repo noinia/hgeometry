@@ -366,7 +366,7 @@ coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                      => Triangle corner
                                      -> Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
                                      -> NonEmpty (Point 2 r)
-coverCone' domain al leftV ar rightV = hull $ r :| mp <> [l]
+coverCone' domain al leftV ar rightV = hull ar $ r :| mp <> [l]
   where
     domain' = fmap (^.asPoint) domain
     Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
@@ -393,7 +393,7 @@ coverCone' domain al leftV ar rightV = hull $ r :| mp <> [l]
     -- we are overestimating the length of the vector from q to a and using that
     projectOnto          :: Point 2 r -> Vector 2 r -> Point 2 r -> Point 2 r
     projectOnto a base q = let vLen = quadrance $ q .-. a
-                               b    = vLen  *^ base
+                               b    = max 1 vLen  *^ base
                            in a .+^ b
       -- consider the vector v from q to a, and let v' be its projection onto base.
       -- we want to compute some point that lies on the base, and is "further away"
@@ -402,12 +402,18 @@ coverCone' domain al leftV ar rightV = hull $ r :| mp <> [l]
       -- observe that the length of v is at least the length of v'. So we will compute
       -- a vector b whose (squared) length is at least the (squared) length of v.
 
--- | make sure we only make CCW turns.
+-- | make sure we only make CCW turns in our chain.
 --
--- Note that this is essentially the implementation also used in grahamscan (but swtiching)
+-- Note that this is very similar the implementation also used in grahamscan (but swtiching)
 -- right turn for left turn.
-hull           :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
-hull (a:|b:ps) = NonEmpty.fromList . reverse $ hull'' [b,a] ps
+hull           :: (Ord r, Num r, Point_ point 2 r
+                  , Show point, Show r
+                  )
+               => point -- the apex of the coner; we do this
+               -- so that we also trim colinear points that are on the initial rightward ray
+               -> NonEmpty point -> NonEmpty point
+hull a (b:|ps) = NonEmpty.fromList . drop 1 . reverse $ hull'' [b,a] ps
+                 -- the drop 1 removes the dummy a; so this is safe.
   where
     hull'' h []      = h
     hull'' h (p:ps') = hull'' (cleanMiddle (p:h)) ps'
@@ -419,7 +425,7 @@ hull (a:|b:ps) = NonEmpty.fromList . reverse $ hull'' [b,a] ps
     cleanMiddle _       = error "cleanMiddle: too few points"
     leftTurn a' b' c' = ccw a' b' c' == CCW
 
-hull _ = error "hull requires a list with at least two elements."
+hull _ _ = error "hull requires a list with at least two elements."
 
 --------------------------------------------------------------------------------
 

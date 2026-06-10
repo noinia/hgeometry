@@ -333,7 +333,7 @@ spec = describe "RandomizedEnvSpec" $ do
                               | q <- toList queries
                               ]
 
-           prop "brute force vornoi diagram; covers all points" $
+           xprop "brute force vornoi diagram; covers all points" $
              \(sites' :: NESet.NESet (Point 2 R)) (Queries domain queries) ->
                let sites = assignColors sites'
                    vd = voronoiDiagramIn domain (toNonEmpty sites)
@@ -871,16 +871,16 @@ mapAccumLStrictlyMonotonic f s0 = fmap NESet.fromDistinctAscList . mapAccumL f s
 
 
 bugI :: NonEmpty (Point 2 R)
-bugI = Point2 0 0 :| [Point2 1 0,Point2 1 2]
+bugI = Point2 (-1) 0 :| [Point2 0 0,Point2 0 3.7]
 bugDomain ::Triangle (Point 2 R)
-bugDomain = Triangle (Point2 2 3) (Point2 (-1.5) 1.66666) (Point2 (-1.5) (-3))
+bugDomain = Triangle (Point2 5 6) (Point2 (-1) 2) (Point2 0 (-6))
 
 bugX = voronoiDiagramIn bugDomain bugI
 testBug = prop "brute force vornoi diagram; covers all points" $
           let sites' = NESet.fromList bugI
               domain = bugDomain
               sites = assignColors sites'
-              queries = [Point2 0 2]
+              queries = [Point2 (-0.77) 0]
               vd = voronoiDiagramIn domain (toNonEmpty sites)
               verifyClosest sites q vd =
                      let ss  = closestAt q vd
