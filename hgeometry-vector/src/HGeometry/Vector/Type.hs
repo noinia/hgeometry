@@ -26,7 +26,7 @@ import           Data.Proxy
 import           Data.Semigroup.Foldable
 import           Data.These
 import qualified Data.Vector as Array
--- import           Data.YAML
+import           Data.Distributive
 import           Data.Zip
 import           GHC.Generics (Generic)
 import           GHC.TypeNats
@@ -93,6 +93,9 @@ instance TraversableWithIndex Int (Vector 1)
 instance FoldableWithIndex    Int (Vector 1)
 instance FunctorWithIndex     Int (Vector 1)
 
+instance Distributive (Vector 1) where
+  collect f = coerce . collect @Linear.V1 (coerce . f)
+
 instance Ixed (Vector 1 r) where
   ix i f v@(Vector1 x) = case i of
                            0 -> Vector1 <$> f x
@@ -145,6 +148,9 @@ instance Traversable1 (Vector 2) where
 instance TraversableWithIndex Int (Vector 2)
 instance FoldableWithIndex    Int (Vector 2)
 instance FunctorWithIndex     Int (Vector 2)
+
+instance Distributive (Vector 2) where
+  collect f = coerce . collect @Linear.V2 (coerce . f)
 
 instance Ixed (Vector 2 r) where
   ix i f v@(Vector2 x y) = case i of
@@ -204,6 +210,9 @@ instance Traversable1 (Vector 3) where
 instance TraversableWithIndex Int (Vector 3)
 instance FoldableWithIndex    Int (Vector 3)
 instance FunctorWithIndex     Int (Vector 3)
+
+instance Distributive (Vector 3) where
+  collect f = coerce . collect @Linear.V3 (coerce . f)
 
 instance Ixed (Vector 3 r) where
   ix i f v@(Vector3 x y z) = case i of
@@ -272,6 +281,9 @@ instance Traversable1 (Vector 4) where
 instance TraversableWithIndex Int (Vector 4)
 instance FoldableWithIndex    Int (Vector 4)
 instance FunctorWithIndex     Int (Vector 4)
+
+instance Distributive (Vector 4) where
+  collect f = coerce . collect @Linear.V4 (coerce . f)
 
 instance Ixed (Vector 4 r) where
   ix i f v@(Vector4 x y z w) = case i of

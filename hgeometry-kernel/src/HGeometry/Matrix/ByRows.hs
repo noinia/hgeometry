@@ -20,6 +20,7 @@ import HGeometry.Matrix.Class
 import HGeometry.Vector
 import HGeometry.Properties
 import GHC.Generics (Generic)
+import Data.Distributive
 
 --------------------------------------------------------------------------------
 -- * Matrices
@@ -27,10 +28,6 @@ import GHC.Generics (Generic)
 -- | A matrix of n rows, each of m columns, storing values of type r.
 newtype Matrix n m r = Matrix (Vector n (Vector m r))
                      deriving (Generic)
-
--- transpose :: Matrix n m r -> Matrix m n r
--- transpose = undefined
-
 
 type instance NumType (Matrix n m r) = r
 type instance Index   (Matrix n m r) = (Int,Int)
@@ -93,6 +90,9 @@ instance ( Has_ Vector_ n (Vector m r)
       mkRow i = generate (\j -> f (i,j))
 
   rows = _MatrixVector
+
+instance Distributive (Vector n) => Transposable (Matrix n m r) (Matrix m n r) n m r where
+  transpose (Matrix rows) = Matrix $ distribute rows
 
 -- test :: Matrix 2 2 Int
 -- test = identityMatrix
