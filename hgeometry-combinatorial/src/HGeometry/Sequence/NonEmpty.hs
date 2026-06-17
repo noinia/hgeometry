@@ -39,7 +39,7 @@ import Data.List.NonEmpty qualified as NonEmpty
 import Data.Semigroup.Traversable
 import Data.Sequence (Seq(..))
 import Data.Sequence qualified as Sequence
-import GHC.Exts (IsList(..))
+import GHC.IsList (IsList(..))
 import GHC.Generics
 import HGeometry.Foldable.Util (HasFromFoldable1(..))
 
