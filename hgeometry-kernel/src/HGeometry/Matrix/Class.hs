@@ -24,8 +24,6 @@ import           Data.Proxy
 import           GHC.TypeNats
 import           HGeometry.Properties
 import           HGeometry.Vector
-import           Data.Distributive
--- import           HGeometry.Vector.List (ListVector(..))
 import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
@@ -153,9 +151,12 @@ class ( r ~ NumType matrix
       dotWithV u = sumOf components $ liftI2 (*) u (v^._Vector)
   {-# INLINE (!*) #-}
 
-  -- | Multiply a vector and a matrix.
-  (*!)   :: Vector n r -> matrix -> Vector m r
-  v *! m = let Vector1 r = Vector1 v !*! m in r
+  -- | Multiply a row-vector and a matrix.
+  (*!)   :: (Num r, Has_ Vector_ m r, Has_ Additive_ n r) => Vector n r -> matrix -> Vector m r
+  v *! m = generate $ \k -> v `dot'` col k
+    where
+      col k = fromMaybe (error "absurd: *! out of bounds") $ column k m
+      dot' u vw = sumOf components $ liftI2 (*) u vw
 
   -- | Multiply a scalar and a matrix
   (*!!)   :: Num r => r -> matrix -> matrix

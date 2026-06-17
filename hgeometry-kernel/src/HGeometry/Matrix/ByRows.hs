@@ -91,8 +91,11 @@ instance ( Has_ Vector_ n (Vector m r)
 
   rows = _MatrixVector
 
-instance Distributive (Vector n) => Transposable (Matrix n m r) (Matrix m n r) n m r where
-  transpose (Matrix rows) = Matrix $ distribute rows
+instance ( Distributive (Vector m), Functor (Vector n)
+         , Matrix_ (Matrix n m r) n m r
+         , Matrix_ (Matrix m n r) m n r
+         ) => Transposable (Matrix n m r) (Matrix m n r) n m r where
+  transpose (Matrix rows') = Matrix $ distribute rows'
 
 -- test :: Matrix 2 2 Int
 -- test = identityMatrix
