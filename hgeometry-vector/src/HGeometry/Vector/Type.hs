@@ -94,7 +94,8 @@ instance FoldableWithIndex    Int (Vector 1)
 instance FunctorWithIndex     Int (Vector 1)
 
 instance Distributive (Vector 1) where
-  collect f = coerce . collect @Linear.V1 (coerce . f)
+  collect   :: forall f a b. Functor f => (a -> Vector 1 b) -> f a -> Vector 1 (f b)
+  collect f = coerce . collect (coerce f :: a -> Linear.V1 b)
 
 instance Ixed (Vector 1 r) where
   ix i f v@(Vector1 x) = case i of
@@ -150,7 +151,8 @@ instance FoldableWithIndex    Int (Vector 2)
 instance FunctorWithIndex     Int (Vector 2)
 
 instance Distributive (Vector 2) where
-  collect f = coerce . collect @Linear.V2 (coerce . f)
+  collect   :: forall f a b. Functor f => (a -> Vector 2 b) -> f a -> Vector 2 (f b)
+  collect f = coerce . collect (coerce f :: a -> Linear.V2 b)
 
 instance Ixed (Vector 2 r) where
   ix i f v@(Vector2 x y) = case i of
@@ -212,7 +214,8 @@ instance FoldableWithIndex    Int (Vector 3)
 instance FunctorWithIndex     Int (Vector 3)
 
 instance Distributive (Vector 3) where
-  collect f = coerce . collect @Linear.V3 (coerce . f)
+  collect   :: forall f a b. Functor f => (a -> Vector 3 b) -> f a -> Vector 3 (f b)
+  collect f = coerce . collect (coerce f :: a -> Linear.V3 b)
 
 instance Ixed (Vector 3 r) where
   ix i f v@(Vector3 x y z) = case i of
@@ -283,7 +286,8 @@ instance FoldableWithIndex    Int (Vector 4)
 instance FunctorWithIndex     Int (Vector 4)
 
 instance Distributive (Vector 4) where
-  collect f = coerce . collect @Linear.V4 (coerce . f)
+  collect   :: forall f a b. Functor f => (a -> Vector 4 b) -> f a -> Vector 4 (f b)
+  collect f = coerce . collect (coerce f :: a -> Linear.V4 b)
 
 instance Ixed (Vector 4 r) where
   ix i f v@(Vector4 x y z w) = case i of
