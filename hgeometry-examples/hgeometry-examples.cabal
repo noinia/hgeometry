@@ -352,3 +352,15 @@ executable 3dviewer
       , some                      >= 1.0.1      && < 1.1
       , constraints-extras        >= 0.4        && < 0.5
       , dependent-sum-template    >= 0.2.0.2    && < 0.3
+
+--------------------------------------------------------------------------------
+
+-- Renders a sketchy drawing
+executable handy
+  import:         setup
+  hs-source-dirs: handy
+  main-is:        Main.hs
+  build-depends:
+     distributive
+  other-modules:
+    CatmulRomSpline

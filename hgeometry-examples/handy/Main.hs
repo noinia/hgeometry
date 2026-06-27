@@ -4,7 +4,7 @@
 module Main
   (main) where
 
-import Data.List.NonEmpty(NonEmpty(..))
+import Data.List.NonEmpty (NonEmpty(..))
 import Control.Monad.IO.Class
 import Data.Default
 import Control.DeepSeq (NFData)
@@ -34,6 +34,8 @@ import System.Random
 import System.Random.Stateful
 import HGeometry.LineSegment
 import Ipe.Draw
+import Prelude hiding (sqrt)
+import HGeometry.Number.Radical
 
 import Data.Sequence as Seq
 import Debug.Trace
@@ -60,8 +62,9 @@ instance ( IpeWriteText r, Point_ point 2 r, IpeWriteText r
 
 data HandyConfig r = HandyConfig { _roughness :: !r
                                     -- ^ Scaling for random
-                                    -- perturbations.  determines the
-                                    -- radius in which vertices may be
+                                    -- perturbations.  Determines the
+                                    -- radius (in output points) in
+                                    -- which vertices may be
                                     -- perturbed.
                                  , _bowing :: !r
                                  -- ^ Scaling of the 'bowing' of lines at their midpoint.
@@ -121,11 +124,13 @@ catmulRom a b c d = Vector3 (CatmulRomSegment a a b c)
 
 -- THis should produce a CatmulRomSpline; so that we produce one Path rather than 3
 
-instance ( Point_ point 2 r, Fractional r
+instance ( Point_ point 2 r, Fractional r, Radical r
          , Monoid (m (Rendered backend))
          , Monoid (Rendered backend)
          , StatefulGen gen m
          , Ord r, UniformRange r
+
+         , IsDrawable backend (Point 2 r), Show r
 
          , IsDrawable backend (CatmulRomSegment (Point 2 r))
            -- we are leaking a bit of info this way; not sure what to do about that though.
@@ -133,11 +138,9 @@ instance ( Point_ point 2 r, Fractional r
   type AttrOf (Handy backend r gen m) (ClosedLineSegment point) =
     AttrOf backend (CatmulRomSegment (Point 2 r))
 
-  -- draw                  :: [ AttrOf backend (CatmulRomSegment (Point 2 r))]
-  --                         -> ClosedLineSegment point
-  --   HandyConfig r -> gen -> m (Rendered backend)
-
-
+  draw                    :: [ Attr backend (CatmulRomSegment (Point 2 r)) ]
+                          -> ClosedLineSegment point
+                          -> HandyConfig r -> gen -> m (Rendered backend)
   draw ats seg config gen = drawSingle <> drawSingle
     where
       -- | We draw a CatmulRom spline with four actual vertices:
@@ -150,23 +153,25 @@ instance ( Point_ point 2 r, Fractional r
                       q      <- perturb $ seg^.end.asPoint
                       m      <- (\b' -> pt (1/2) .+^ (b' *^ w))
                                 <$> uniformRM (negate b, b) gen
-                      o      <- (\offset -> pt (3/4) .+^ offset)
+                      o      <- (\offset -> pt (3/4) .+^ toVec offset)
                                 <$> uniformRM (negated dims, dims) gen
+
                       pure $ foldMap (draw @backend ats) $ catmulRom p m o q
 
-      pt t = Point $ lerp t (seg^.start.vector) (seg^.end.vector)
+      pt t = Point $ lerp t (seg^.end.vector) (seg^.start.vector)
+
+      toVec (Vector2 dx dy) = (dx *^ v) ^+^ (dy *^ signorm w)
 
       -- max amount by which we may offset the midpoint
-      b = let b' = config^.bowing in len * (b'*b')
+      b = config^.bowing
 
       v@(Vector2 x y) = (seg^.end) .-. (seg^.start)
       w               = Vector2 (-y) x -- vector perpendicular to the segment
 
-      len = quadrance v -- length of the input line segment
-
-      -- (half) the dimensions of the box in which we pick the offset
-      -- for the third pt.
-      dims   = Vector2 (r*r) (len / 200) -- FIXME:??
+      -- in handy; they pick the o point in a box of width (length
+      -- seg)/10 and height r.  we the offset in a box of half that
+      -- size.
+      dims   = Vector2 (1/20) r
       r = config^.roughness
 
       -- function to perturb one of the endpoints
