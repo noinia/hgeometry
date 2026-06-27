@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module Ipe.Path(
     Path(Path), pathSegments
+  , singletonPath
   , PathSegment(..)
 
   , _PolyLineSegment
@@ -114,6 +115,10 @@ newtype Path r = Path { _pathSegments :: Seq.Seq (PathSegment r) }
 -- | Lens/Iso to access the sequcne of segments of the path
 pathSegments :: Iso (Path r) (Path r') (Seq.Seq (PathSegment r)) (Seq.Seq (PathSegment r'))
 pathSegments = coerced
+
+-- | Construct a Path from a single path segment
+singletonPath :: PathSegment r -> Path r
+singletonPath = Path . Seq.singleton
 
 type instance NumType   (Path r) = r
 type instance Dimension (Path r) = 2

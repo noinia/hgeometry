@@ -1,7 +1,12 @@
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeData #-}
 module Main
   (main) where
 
-
+import Data.List.NonEmpty(NonEmpty(..))
+import Control.Monad.IO.Class
+import Data.Default
 import Control.DeepSeq (NFData)
 import Control.Lens
 -- import qualified Data.Foldable as F
@@ -20,87 +25,191 @@ import HGeometry.BezierSpline
 import HGeometry.Vector.NonEmpty.Util ()
 import Hiraffe.Graph
 import Data.Kind (Type)
--- import GHC.TypeLits
-
+import Data.Coerce
 import Data.Distributive
--- import Ipe
+import Ipe
 import HGeometry.Number.Real.Rational
+import CatmulRomSpline
+import System.Random
+import System.Random.Stateful
+import HGeometry.LineSegment
+import Ipe.Draw
 
+import Data.Sequence as Seq
+import Debug.Trace
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
+type R = Double -- RealNumber 5
 
 
--- | A CatmulRom spline.
-type CatmulRomSplineF            :: (Type -> Type) -> Type -> Type
-newtype CatmulRomSplineF f point = CatmulRomSpline (f point)
-  deriving stock (Generic,Show)
-  deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)
-
--- | By default we store simple poylline as non-empty vectors.
-type CatmulRomSpline = CatmulRomSplineF NonEmptyVector
-
-
-type instance Dimension (CatmulRomSplineF f point) = 2
-type instance NumType   (CatmulRomSplineF f point) = NumType point
-
--- | A single catmul rom spline segment
-type CatmulRomSegment = CatmulRomSplineF (Vector 4)
-
--- | The CatmulRomSegment a p q b represents the segment between p and q
-pattern CatmulRomSegment         :: point -> point -> point -> point -> CatmulRomSegment point
-pattern CatmulRomSegment a b c d = CatmulRomSpline (Vector4 a b c d)
-{-# COMPLETE CatmulRomSegment #-}
 
 --------------------------------------------------------------------------------
-
-coordinateWise   :: (Vector n r -> Vector m s) -> Vector n point -> Vector m (Point d s)
-coordinateWise f vPts = fmap f . distribute . fmap (view vector) $ vPts
-  where
-    vmVecs =
-      -- distribute == transpose'
-
-
-
-
-
--- transpose' :: Vector n (Vector m r) -> Vector m (Vector n r)
--- transpose' = distribute
-
-
-
-
-
--- | Convert a CatmulRom spline segment in a Cubic Bezier spline segment
-toCubicBezier :: forall point r. (Point_ point 2 r, Fractional r)
-              => CatmulRomSegment point
-              -> CubicBezier (Point 2 r)
-toCubicBezier (CatmulRomSpline controlPoints) = BezierSpline $ m !* controlPoints
-  where
-    m :: Matrix 4 4 r
-    m = (1/6) *!! matrixFromRows (Vector4 (Vector4 0    6 0 0)
-                                          (Vector4 (-1) 6 1 0)
-                                          (Vector4 0    1 6 (-1))
-                                          (Vector4 0    0 6 0)
-                                 )
-  -- see https://en.wikipedia.org/wiki/Catmull%E2%80%93Rom_spline#Converting_to_B%C3%A9zier_curve
-
--- | Given a value t in the range [0,1], evaluate the catmul rom spline
-evalAt :: (Point_ point 2 r, Fractional r) => r -> CatmulRomSegment point -> Point 2 r
-evalAt t (CatmulRomSpline controlPoints) = Point2 (f xPoints) (f yPoints)
-  where
-    f w = let Vector1 x = (1/2 *^ v) *! m !* w in x
-    v = let s = t*t in Vector4 (s*t) s t 1
-    m = matrixFromRows $ Vector4 (Vector4 (-1) 3    (-3) 1)
-                                 (Vector4 2    (-5) 4    (-1))
-                                 (Vector4 (-1) 0    1    0)
-                                 (Vector4 0    2    0    0)
-    xPoints = (^.xCoord) <$> controlPoints
-    yPoints = (^.yCoord) <$> controlPoints
-
 
 spline :: CatmulRomSegment (Point 2 R)
 spline = CatmulRomSegment (Point2 (-1) 1) (Point2 0 0) (Point2 10 0) (Point2 11 1)
 
--- main = printAsIpeSelection [toCubicBezier spline]
-main = print $ toCubicBezier spline
+
+
+--------------------------------------------------------------------------------
+
+instance ( IpeWriteText r, Point_ point 2 r, IpeWriteText r
+         ) => IpeWrite (CubicBezier point) where
+  ipeWrite = ipeWrite . Path . Seq.singleton . CubicBezierSegment . fmap (view asPoint)
+
+
+
+data HandyConfig r = HandyConfig { _roughness :: !r
+                                    -- ^ Scaling for random
+                                    -- perturbations.  determines the
+                                    -- radius in which vertices may be
+                                    -- perturbed.
+                                 , _bowing :: !r
+                                 -- ^ Scaling of the 'bowing' of lines at their midpoint.
+
+                                 -- , _hachureAngle :: {-#UNPACK #-}!Float
+                                 --   -- ^ Angle of diagonal hachuring
+                                 --   --
+                                 --   -- (CCW with respect to the
+                                 --   -- positive x-axis)
+
+                                 --   -- TODO: Figure out in what parameter to specify this
+                                 -- , _anglePerturbation :: {-#UNPACK #-}!Float
+                                 --  -- ^ Random perturbation in hachure angle per object drawn.
+                                 -- , _fillWeight
+                                 --   -- ^ Hachure filling characteristics.
+                                 -- , _fillGap :: !r
+                                 --   -- ^ gap between hachures
+                                 }
+                   deriving (Show,Read,Eq,Ord)
+
+makeLenses ''HandyConfig
+
+instance Fractional r => Default (HandyConfig r) where
+  def = HandyConfig { _roughness = 5
+                    , _bowing    = (1/200)
+                    }
+
+type data Handy (backend :: Type) (r :: Type) (gen :: Type) (m :: Type -> Type)
+
+type instance Rendered (Handy backend r gen m) =
+  HandyConfig r -> gen -> m (Rendered backend)
+
+  -- Handy backend r
+
+-- -- | Runs a handy render using the default config in the IO monad.
+-- runHandy           :: (MonadIO m, Num r
+
+--                       ) => Handy backend r -> m (Rendered backend)
+-- runHandy (Handy h) = fst . h def <$> getStdGen
+
+
+-- instance Semigroup (Rendered backend) => Semigroup (Handy backend r) where
+--   (Handy f) <> (Handy g) = Handy $ \config gen -> let (out1, gen')  = f config gen
+--                                                       (out2, gen'') = g config gen'
+--                                                   in (out1 <> out2, gen'')
+-- instance Monoid (Rendered backend) => Monoid (Handy backend r) where
+--   mempty = Handy $ \_config gen -> (mempty, gen)
+
+
+
+-- | Given points a, b, c, d, produce three catmul rom spline segments that together
+-- draw a spline from a to d.
+catmulRom         :: point -> point -> point -> point -> Vector 3 (CatmulRomSegment point)
+catmulRom a b c d = Vector3 (CatmulRomSegment a a b c)
+                            (CatmulRomSegment a b c d)
+                            (CatmulRomSegment b c d d)
+
+-- THis should produce a CatmulRomSpline; so that we produce one Path rather than 3
+
+instance ( Point_ point 2 r, Fractional r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+           -- we are leaking a bit of info this way; not sure what to do about that though.
+         ) => IsDrawable (Handy backend r gen m) (ClosedLineSegment point) where
+  type AttrOf (Handy backend r gen m) (ClosedLineSegment point) =
+    AttrOf backend (CatmulRomSegment (Point 2 r))
+
+  -- draw                  :: [ AttrOf backend (CatmulRomSegment (Point 2 r))]
+  --                         -> ClosedLineSegment point
+  --   HandyConfig r -> gen -> m (Rendered backend)
+
+
+  draw ats seg config gen = drawSingle <> drawSingle
+    where
+      -- | We draw a CatmulRom spline with four actual vertices:
+      --
+      -- the start and endpoint are slightly perturbed enpoints of the segment
+      -- we add a midpoint that has been slihgly vertically offset w.r.t the segment
+      -- and a third vertex at roughly (3/4)th of the segment that also has been offset.
+      drawSingle :: m (Rendered backend)
+      drawSingle = do p      <- perturb $ seg^.start.asPoint
+                      q      <- perturb $ seg^.end.asPoint
+                      m      <- (\b' -> pt (1/2) .+^ (b' *^ w))
+                                <$> uniformRM (negate b, b) gen
+                      o      <- (\offset -> pt (3/4) .+^ offset)
+                                <$> uniformRM (negated dims, dims) gen
+                      pure $ foldMap (draw @backend ats) $ catmulRom p m o q
+
+      pt t = Point $ lerp t (seg^.start.vector) (seg^.end.vector)
+
+      -- max amount by which we may offset the midpoint
+      b = let b' = config^.bowing in len * (b'*b')
+
+      v@(Vector2 x y) = (seg^.end) .-. (seg^.start)
+      w               = Vector2 (-y) x -- vector perpendicular to the segment
+
+      len = quadrance v -- length of the input line segment
+
+      -- (half) the dimensions of the box in which we pick the offset
+      -- for the third pt.
+      dims   = Vector2 (r*r) (len / 200) -- FIXME:??
+      r = config^.roughness
+
+      -- function to perturb one of the endpoints
+      perturb p = (p .+^) <$> uniformIn gen r
+
+
+
+-- | Given a positive radius r, generates a vector uniformly at random
+-- in the ball of radius r
+uniformIn        :: ( Ord r, Num r, UniformRange r
+                    , Ord (Vector d r)
+                    , StatefulGen gen m, Applicative (Vector d), Has_ Metric_ d r
+                    )
+                 => gen -> r -> m (Vector d r)
+uniformIn gen r = go
+  where
+    ub = pure r
+    lb = negated ub
+    go = do v <- uniformRM (lb, ub) gen
+            if quadrance v <= r*r then pure v else go
+
+
+
+      -- v <- generateA $ const (uniformRM (0, r))
+
+
+--------------------------------------------------------------------------------0
+
+main :: IO ()
+main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
+          --                        (Vector4 (Point3 1 2 3 :: Point 3 R)
+          --                                 (Point3 4 5 6 :: Point 3 R)
+          --                                 (Point3 7 8 9 :: Point 3 R)
+          --                                 (Point3 1 2 3 :: Point 3 R)
+          --                        )
+          -- printAsIpeSelection [toCubicBezier spline]
+          -- (v :: Vector 2 Int) <- uniformIn globalStdGen 10
+
+          -- printAsIpeSelection $ foldMap (draw @(Ipe R) [])
+          --                     $ catmulRom origin (Point2 50 5) (Point2 75 5) (Point2 100 0)
+
+          let handyCfg = def
+              seg :: ClosedLineSegment (Point 2 R)
+              seg = ClosedLineSegment (Point2 0 0) (Point2 100 10)
+          res <- draw @(Handy (Ipe R) R (AtomicGenM StdGen) IO) [] seg handyCfg globalStdGen
+          printAsIpeSelection (res :: [IpeObject R])

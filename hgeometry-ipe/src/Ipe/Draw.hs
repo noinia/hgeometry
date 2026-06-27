@@ -29,6 +29,10 @@ import Ipe.FromIpe
 import Ipe.IpeOut
 import Ipe.Attributes
 import HGeometry.Polygon
+import HGeometry.Vector
+import HGeometry.PolyLine
+import HGeometry.BezierSpline
+import HGeometry.LineSegment
 import HGeometry.Triangle
 import Data.List.NonEmpty (NonEmpty)
 
@@ -104,6 +108,27 @@ instance ( Point_ vertex 2 r, VertexContainer f vertex, Num r
     where
       pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
 
+
+instance (Point_ point 2 r, Fractional r
+         ) => IsDrawable (Ipe r) (ClosedLineSegment point) where
+  type AttrOf (Ipe r) (ClosedLineSegment point) = PathAttributes r
+  draw ats (ClosedLineSegment s t) = draw @(Ipe r) @(PolyLine point) ats
+                                   $ polyLineFromPoints (Vector2 s t)
+
+instance ( Point_ point 2 r, Fractional r
+         -- , HasPoints (PolyLineF f point) (PolyLineF (Point 2 r)) point (Point 2 r)
+         ) => IsDrawable (Ipe r) (PolyLine point) where
+  type AttrOf (Ipe r) (PolyLine point) = PathAttributes r
+  draw ats poly = draw @(Ipe r) ats thePath
+    where
+      thePath = singletonPath . PolyLineSegment $ poly&allPoints %~ (^.asPoint)
+
+instance (Point_ point 2 r, Fractional r
+         ) => IsDrawable (Ipe r) (CubicBezier point) where
+  type AttrOf (Ipe r) (CubicBezier point) = PathAttributes r
+  draw ats bez = draw @(Ipe r) ats thePath
+    where
+      thePath = singletonPath . CubicBezierSegment $ bez&allPoints %~ (^.asPoint)
 
 --------------------------------------------------------------------------------
 

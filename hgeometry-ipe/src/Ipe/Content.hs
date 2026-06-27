@@ -8,6 +8,7 @@ module Ipe.Content(
   , IpeSymbol(Symbol), symbolPoint, symbolName
 
   , Path(Path), pathSegments
+  , singletonPath
   , PathSegment(..)
 
   , Group(Group), groupItems
