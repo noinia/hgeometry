@@ -104,8 +104,6 @@ hatching dir poly = snd $ foldl' handle (mempty, []) events
     handle (status, output) = \case
       v :+ Delete seg -> (Set.deleteAllBy (cmpAt v) seg status, output)
       v :+ Insert seg -> (Set.insertBy    (cmpAt v) seg status, output)
-        -- FIXME: I think insert fails if we insert something at the same vertex
-        -- location; i..e this should still add the segment somehow.
       p :+ Hatch      -> (status, hatch p status <> output)
 
     hatch p status = evens $ zipWith ClosedLineSegment xs (drop 1 xs)
