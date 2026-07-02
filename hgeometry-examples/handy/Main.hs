@@ -19,6 +19,8 @@ import HGeometry.Box
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Transformation
+import HGeometry.Polygon
+import HGeometry.Polygon.WithHoles
 import HGeometry.Vector
 import HGeometry.Matrix
 import HGeometry.BezierSpline
@@ -36,13 +38,19 @@ import HGeometry.LineSegment
 import Ipe.Draw
 import Prelude hiding (sqrt)
 import HGeometry.Number.Radical
-
+import HGeometry.PlaneGraph.Class
+import Hatching
 import Data.Sequence as Seq
 import Debug.Trace
+import Ipe.Color
+import Hiraffe.PlanarGraph.Dart (Direction(..), rev)
+import Data.Functor.Contravariant
+import Data.Functor.Apply (WrappedApplicative(..))
+
 --------------------------------------------------------------------------------
 
-type R = Double -- RealNumber 5
-
+-- type R = Double -- RealNumber 5
+type R = RealNumber 5
 
 
 --------------------------------------------------------------------------------
@@ -130,8 +138,6 @@ instance ( Point_ point 2 r, Fractional r, Radical r
          , StatefulGen gen m
          , Ord r, UniformRange r
 
-         , IsDrawable backend (Point 2 r), Show r
-
          , IsDrawable backend (CatmulRomSegment (Point 2 r))
            -- we are leaking a bit of info this way; not sure what to do about that though.
          ) => IsDrawable (Handy backend r gen m) (ClosedLineSegment point) where
@@ -178,6 +184,38 @@ instance ( Point_ point 2 r, Fractional r, Radical r
       perturb p = (p .+^) <$> uniformIn gen r
 
 
+instance ( Point_ point 2 r, Fractional r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , VertexContainer f point
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+           -- we are leaking a bit of info this way; not sure what to do about that though.
+         ) => IsDrawable (Handy backend r gen m) (SimplePolygonF f point) where
+  type AttrOf (Handy backend r gen m) (SimplePolygonF f point) =
+    AttrOf backend (CatmulRomSegment (Point 2 r))
+
+  draw ats = foldMapOf outerBoundaryEdgeSegments (draw @(Handy backend r gen m) ats)
+
+instance ( Point_ point 2 r, Fractional r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , VertexContainer f point
+         , HoleContainer h f point
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+           -- we are leaking a bit of info this way; not sure what to do about that though.
+         ) => IsDrawable (Handy backend r gen m) (PolygonalDomainF h f point) where
+  type AttrOf (Handy backend r gen m) (PolygonalDomainF h f point) =
+    AttrOf backend (CatmulRomSegment (Point 2 r))
+
+  draw ats poly = foldMapOf outerBoundaryEdgeSegments draw' poly
+               <> foldMapOf (theHoles.folded.outerBoundaryEdgeSegments) draw' poly
+    where
+      draw' = draw @(Handy backend r gen m) ats
+
 
 -- | Given a positive radius r, generates a vector uniformly at random
 -- in the ball of radius r
@@ -213,8 +251,92 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
           -- printAsIpeSelection $ foldMap (draw @(Ipe R) [])
           --                     $ catmulRom origin (Point2 50 5) (Point2 75 5) (Point2 100 0)
 
-          let handyCfg = def
+          let handyCfg = def :: HandyConfig R
               seg :: ClosedLineSegment (Point 2 R)
               seg = ClosedLineSegment (Point2 0 0) (Point2 100 10)
-          res <- draw @(Handy (Ipe R) R (AtomicGenM StdGen) IO) [] seg handyCfg globalStdGen
+
+              poly :: SimplePolygon (Point 2 R)
+              Just poly = fromPoints
+                [ Point2 32 112
+                , Point2 160 304
+                , Point2 192 176
+                , Point2 320 240
+                , Point2 336 64
+                , Point2 160 32
+                , Point2 224 112
+                , Point2 96 64
+                , Point2 48 80
+                ]
+              h = hatching (Vector2 1 (-1)) poly
+              res = concat
+                    [ draw @(Ipe R) [] poly
+                    , draw @(Ipe R) [stroke ?~ blue] h
+                    ]
+          -- print h
+          -- res <- draw @(Handy (Ipe R) R (AtomicGenM StdGen) IO) [] poly handyCfg globalStdGen
           printAsIpeSelection (res :: [IpeObject R])
+
+          -- mapM_ print $ poly^..outgoingDartsOf 3.withIndex
+          -- traverseOf_ (darts.withIndex) print poly
+
+
+data PolygonDart = PolygonDart {-#UNPACK#-}!Direction {-#UNPACK#-}!Int
+  deriving (Show,Eq,Ord)
+
+
+instance VertexContainer f vertex => HasDarts' (SimplePolygonF f vertex) where
+  -- | Positive darts are oriented "forward" along the boundary of the polygon (so CCW)
+  -- negative darts are oriented backward (so CW).
+  type DartIx (SimplePolygonF f vertex) = PolygonDart
+  type Dart   (SimplePolygonF f vertex) = ()
+    -- for now edges don't store additional data.
+  dartAt u = \pUnitFUnit poly -> poly <$ indexed pUnitFUnit u ()
+  numDarts = (2*) . numVertices
+
+instance VertexContainer f vertex
+         => HasDarts (SimplePolygonF f vertex) (SimplePolygonF f vertex) where
+  darts = conjoined trav (itrav.indexed)
+    where
+      trav        :: Applicative g
+                  => (() -> g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      trav f poly = let f' = WrapApplicative . f in
+                    unwrapApplicative $
+                      poly <$ (vertices' (\x -> x <$ f' () <* f' ()) poly)
+
+      itrav        :: Applicative g
+                   => (DartIx (SimplePolygonF f vertex) -> () -> g ())
+                   -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      itrav f poly = let f' i = WrapApplicative . f i in
+                     unwrapApplicative $
+                       poly <$ vertices' (Indexed $ \v x ->
+                                           x <$ f' (PolygonDart Negative v) ()
+                                             <* f' (PolygonDart Positive v) ()
+                                         ) poly
+
+      vertices' :: IndexedTraversal1' (VertexIx (SimplePolygonF f vertex))
+                                      (SimplePolygonF f vertex) vertex
+      vertices' = vertices
+
+instance VertexContainer f vertex => DiGraph_ (SimplePolygonF f vertex) where
+  endPoints poly (PolygonDart d i) = case d of
+      Negative -> ((i+n-1) `mod` n, (i+n)   `mod` n)
+      Positive -> ((i+n) `mod` n,   (i+n+1) `mod` n)
+    where
+      n = numVertices poly
+
+  outgoingDartsOf u = conjoined f ixf
+    where
+      f        :: (Contravariant g, Applicative g)
+               => (() -> g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      f g poly = poly <$ g () <* g ()
+
+      ixf         :: (Indexable PolygonDart p, Contravariant g, Applicative g)
+                  => p () (g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      ixf pg poly = poly <$ indexed pg (PolygonDart Negative u) ()
+                         <* indexed pg (PolygonDart Positive u) ()
+
+  twinDartOf (PolygonDart d i) = to . const . Just $ PolygonDart (rev d) i
+
+instance VertexContainer f vertex => BidirGraph_ (SimplePolygonF f vertex) where
+  twinOf (PolygonDart d i) = to . const $ PolygonDart (rev d) i
+  getPositiveDart _ e = PolygonDart Positive e
