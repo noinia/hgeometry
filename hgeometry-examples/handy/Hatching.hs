@@ -44,9 +44,6 @@ hatching          :: forall polygon vertex r.
                      ( BidirGraph_ polygon
                      , Polygon_ polygon vertex r
                      , HasEdges polygon polygon
-
-                     , Show r
-
                      , Ord r, Fractional r)
                   => Vector 2 r
                      -- ^ direction perpendicular to the hatchings;
