@@ -20,7 +20,6 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified HGeometry.Set.Util as Set
 import qualified Data.Set as Set
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 
@@ -63,14 +62,16 @@ hatching dir poly = snd $ foldl' handle (mempty, []) events
     cmp = cmpInDirection2 dir
     cmpEvent (p :+ ep) (q :+ eq) = cmp p q <> compare ep eq
 
-    cmpAt p segA segB = cmpInDirection2 perpDir (f segA) (f segB)
+    cmpAt p' segA segB = cmpInDirection2 perpDir (f p' segA)           (f p' segB)
+                      <> cmpInDirection2 perpDir (f (p' .+^ dir) segA) (f (p' .+^ dir) segB)
+       -- if segA and segB intersect exactly at the same point v on the line through p'
+       -- also compute their intersection a bit further along the order; and use that
+       -- to determine their ordering.
       where
-        f seg = case LinePV p perpDir `intersect` supportingLine seg of
-                  Just (Line_x_Line_Point q) -> q
-                  Just _                     -> seg^.start
-                  _                          -> error "absurd: no intersection point"
-      -- TODO: Properly order them iif both f segA and fSegB are the same
-      -- i.e. then we should consider
+        f p seg = case LinePV p perpDir `intersect` supportingLine seg of
+                    Just (Line_x_Line_Point q) -> q
+                    Just _                     -> seg^.start
+                    _                          -> error "absurd: no intersection point"
 
     toEvents e = let e'@(LineSegment_ s t) = orient e
                  in [ s :+ Insert e',  t :+ Delete e' ]
@@ -87,8 +88,7 @@ hatching dir poly = snd $ foldl' handle (mempty, []) events
 
     -- | All our events
     events :: NonEmpty (Event r)
-    events = traceShowId $
-      case NonEmpty.nonEmpty hatchEvents of
+    events = case NonEmpty.nonEmpty hatchEvents of
                Just evts -> mergeSortedBy cmpEvent vertexEvents evts
                Nothing   -> vertexEvents
 
@@ -108,10 +108,7 @@ hatching dir poly = snd $ foldl' handle (mempty, []) events
         -- location; i..e this should still add the segment somehow.
       p :+ Hatch      -> (status, hatch p status <> output)
 
-    hatch p status
-      | traceShow ("hatch",p,status) False = undefined
-      | otherwise = traceShowWith ("h",p,"->",) $
-          evens $ zipWith ClosedLineSegment xs (drop 1 xs)
+    hatch p status = evens $ zipWith ClosedLineSegment xs (drop 1 xs)
       where
         xs = mapMaybe intersectionPoint $ Set.toAscList status
 

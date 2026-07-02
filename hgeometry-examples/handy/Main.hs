@@ -267,7 +267,7 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                 , Point2 96 64
                 , Point2 48 80
                 ]
-              h = hatching (Vector2 1 (-1)) poly
+              h = hatching (Vector2 1 (-10)) poly
               res = concat
                     [ draw @(Ipe R) [] poly
                     , draw @(Ipe R) [stroke ?~ blue] h
