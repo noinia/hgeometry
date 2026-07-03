@@ -18,6 +18,7 @@ module HGeometry.Polygon.Simple.Type
   , toCyclic
   , VertexContainer
   , _SimplePolygonF
+  , PolygonDart(..)
   ) where
 
 import           Control.DeepSeq (NFData)
@@ -29,7 +30,7 @@ import           Data.Functor.Apply (WrappedApplicative(..))
 import           Data.Functor.Classes
 import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import           GHC.Generics
+import           GHC.Generics (Generic)
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
@@ -38,6 +39,7 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.Graph.Class
+import           Hiraffe.PlanarGraph.Dart (Direction(..), rev)
 
 --------------------------------------------------------------------------------
 
@@ -110,6 +112,50 @@ instance ( VertexContainer f point
   vertexAt i = _SimplePolygonF . iix i
   numVertices = F.length . view _SimplePolygonF
 
+
+----------------------------------------
+
+-- | Dart type that we can use for simple polygons
+data PolygonDart = PolygonDart {-#UNPACK#-}!Direction {-#UNPACK#-}!Int
+  deriving (Show,Eq,Ord,Generic)
+
+instance NFData PolygonDart
+
+instance VertexContainer f vertex => HasDarts' (SimplePolygonF f vertex) where
+  -- | Positive darts are oriented "forward" along the boundary of the polygon (so CCW)
+  -- negative darts are oriented backward (so CW).
+  type DartIx (SimplePolygonF f vertex) = PolygonDart
+  type Dart   (SimplePolygonF f vertex) = ()
+    -- for now edges don't store additional data.
+  dartAt u = \pUnitFUnit poly -> poly <$ indexed pUnitFUnit u ()
+  numDarts = (2*) . numVertices
+
+instance VertexContainer f vertex
+         => HasDarts (SimplePolygonF f vertex) (SimplePolygonF f vertex) where
+  darts = conjoined trav (itrav.indexed)
+    where
+      trav        :: Applicative g
+                  => (() -> g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      trav f poly = let f' = WrapApplicative . f in
+                    unwrapApplicative $
+                      poly <$ (vertices' (\x -> x <$ f' () <* f' ()) poly)
+
+      itrav        :: Applicative g
+                   => (DartIx (SimplePolygonF f vertex) -> () -> g ())
+                   -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      itrav f poly = let f' i = WrapApplicative . f i in
+                     unwrapApplicative $
+                       poly <$ vertices' (Indexed $ \v x ->
+                                           x <$ f' (PolygonDart Negative v) ()
+                                             <* f' (PolygonDart Positive v) ()
+                                         ) poly
+
+      vertices' :: IndexedTraversal1' (VertexIx (SimplePolygonF f vertex))
+                                      (SimplePolygonF f vertex) vertex
+      vertices' = vertices
+
+----------------------------------------
+
 instance VertexContainer f vertex => HasEdges' (SimplePolygonF f vertex) where
   type Edge   (SimplePolygonF f vertex) = ()
   type EdgeIx (SimplePolygonF f vertex) = VertexIx (SimplePolygonF f vertex)
@@ -135,6 +181,32 @@ instance VertexContainer f vertex
       vertices' :: IndexedTraversal1' (VertexIx (SimplePolygonF f vertex))
                                       (SimplePolygonF f vertex) vertex
       vertices' = vertices
+
+----------------------------------------
+
+instance VertexContainer f vertex => DiGraph_ (SimplePolygonF f vertex) where
+  endPoints poly (PolygonDart d i) = case d of
+      Negative -> ((i+n-1) `mod` n, (i+n)   `mod` n)
+      Positive -> ((i+n) `mod` n,   (i+n+1) `mod` n)
+    where
+      n = numVertices poly
+
+  outgoingDartsOf u = conjoined f ixf
+    where
+      f        :: (Contravariant g, Applicative g)
+               => (() -> g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      f g poly = poly <$ g () <* g ()
+
+      ixf         :: (Indexable PolygonDart p, Contravariant g, Applicative g)
+                  => p () (g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      ixf pg poly = poly <$ indexed pg (PolygonDart Negative u) ()
+                         <* indexed pg (PolygonDart Positive u) ()
+
+  twinDartOf (PolygonDart d i) = to . const . Just $ PolygonDart (rev d) i
+
+instance VertexContainer f vertex => BidirGraph_ (SimplePolygonF f vertex) where
+  twinOf (PolygonDart d i) = to . const $ PolygonDart (rev d) i
+  getPositiveDart _ e = PolygonDart Positive e
 
 --------------------------------------------------------------------------------
 

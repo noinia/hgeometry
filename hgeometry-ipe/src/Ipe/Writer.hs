@@ -442,6 +442,9 @@ instance ( IpeWriteText r
 instance IpeWrite () where
   ipeWrite = const Nothing
 
+instance ( IpeWriteText r, Point_ point 2 r, IpeWriteText r
+         ) => IpeWrite (CubicBezier point) where
+  ipeWrite = ipeWrite . Path . Seq.singleton . CubicBezierSegment . fmap (view asPoint)
 
 --------------------------------------------------------------------------------
 
