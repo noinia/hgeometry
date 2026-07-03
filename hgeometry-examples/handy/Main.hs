@@ -9,9 +9,7 @@ import Control.Monad.IO.Class
 import Data.Default
 import Control.DeepSeq (NFData)
 import Control.Lens
--- import qualified Data.Foldable as F
 import Data.Functor.Classes
--- import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup.Foldable
 import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import GHC.Generics (Generic)
@@ -39,18 +37,20 @@ import Ipe.Draw
 import Prelude hiding (sqrt)
 import HGeometry.Number.Radical
 import HGeometry.PlaneGraph.Class
-import Hatching
+import Hachuring
 import Data.Sequence as Seq
 import Debug.Trace
 import Ipe.Color
 import Hiraffe.PlanarGraph.Dart (Direction(..), rev)
 import Data.Functor.Contravariant
 import Data.Functor.Apply (WrappedApplicative(..))
+import HGeometry.Foldable.Util
+import Ipe.Color
 
 --------------------------------------------------------------------------------
 
--- type R = Double -- RealNumber 5
-type R = RealNumber 5
+type R = Double -- RealNumber 5
+-- type R = RealNumber 5
 
 
 --------------------------------------------------------------------------------
@@ -77,6 +77,13 @@ data HandyConfig r = HandyConfig { _roughness :: !r
                                  , _bowing :: !r
                                  -- ^ Scaling of the 'bowing' of lines at their midpoint.
 
+                                 , _hachureVector :: {-#UNPACK#-}!(Vector 2 r)
+                                 -- ^ Vector describing the
+                                 -- orientation in which we compute
+                                 -- hachures. The hachures itself are
+                                 -- perpendicular to this vector, and
+                                 -- are separated by this vector
+
                                  -- , _hachureAngle :: {-#UNPACK #-}!Float
                                  --   -- ^ Angle of diagonal hachuring
                                  --   --
@@ -96,8 +103,9 @@ data HandyConfig r = HandyConfig { _roughness :: !r
 makeLenses ''HandyConfig
 
 instance Fractional r => Default (HandyConfig r) where
-  def = HandyConfig { _roughness = 5
-                    , _bowing    = (1/200)
+  def = HandyConfig { _roughness     = 5
+                    , _bowing        = (1/200)
+                    , _hachureVector = Vector2 5 (-5)
                     }
 
 type data Handy (backend :: Type) (r :: Type) (gen :: Type) (m :: Type -> Type)
@@ -191,12 +199,36 @@ instance ( Point_ point 2 r, Fractional r, Radical r
          , Ord r, UniformRange r
          , VertexContainer f point
          , IsDrawable backend (CatmulRomSegment (Point 2 r))
+         , Default (AttrOf backend (CatmulRomSegment (Point 2 r)))
+         , HasFill   (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe color)
+         , HasStroke (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe color)
+         -- , AttrOf backend (CatmulRomSegment (Point 2 r)) ~ Maybe at
+         , HasFromFoldable1 f
            -- we are leaking a bit of info this way; not sure what to do about that though.
          ) => IsDrawable (Handy backend r gen m) (SimplePolygonF f point) where
   type AttrOf (Handy backend r gen m) (SimplePolygonF f point) =
     AttrOf backend (CatmulRomSegment (Point 2 r))
 
-  draw ats = foldMapOf outerBoundaryEdgeSegments (draw @(Handy backend r gen m) ats)
+  draw ats poly config = fill' <> stroke'
+    where
+      stroke' = foldMapOf outerBoundaryEdgeSegments
+                          (\s -> draw @(Handy backend r gen m) (ats <> [fill .~ Nothing])
+                                      s config
+                          ) poly
+      -- reset the fill attribute and draw
+      fill' = case (applyAttrs ats def)^.fill of
+        Nothing -> mempty
+        Just fc -> let fillAts  = ats <> [ stroke ?~ fc
+                                         , fill   .~ Nothing
+                                         ]
+                       v        = config^.hachureVector
+                       hachures = hachuring v poly
+                   in foldMap (\h -> draw @(Handy backend r gen m) fillAts h config) hachures
+
+
+-- applyAttrs       :: [at -> at] -> at -> at
+-- applyAttrs ats z = foldl' (flip ($)) z ats
+
 
 instance ( Point_ point 2 r, Fractional r, Radical r
          , Monoid (m (Rendered backend))
@@ -267,13 +299,16 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                 , Point2 96 64
                 , Point2 48 80
                 ]
-              h = hatching (Vector2 1 (-10)) poly
+              h = hachuring (Vector2 1 (-10)) poly
               res = concat
                     [ draw @(Ipe R) [] poly
                     , draw @(Ipe R) [stroke ?~ blue] h
                     ]
           -- print h
-          -- res <- draw @(Handy (Ipe R) R (AtomicGenM StdGen) IO) [] poly handyCfg globalStdGen
+          res <- draw @(Handy (Ipe R) R (AtomicGenM StdGen) IO)
+                      [ stroke ?~ black
+                      , fill   ?~ blue
+                      ] poly handyCfg globalStdGen
           printAsIpeSelection (res :: [IpeObject R])
 
           -- mapM_ print $ poly^..outgoingDartsOf 3.withIndex

@@ -1,5 +1,5 @@
-module Hatching
-  ( hatching
+module Hachuring
+  ( hachuring
 
   ) where
 
@@ -25,7 +25,7 @@ import qualified Data.Set as Set
 
 data EventKind r = Delete (ClosedLineSegment (Point 2 r))
                  | Insert (ClosedLineSegment (Point 2 r))
-                 | Hatch
+                 | Hachure
                  deriving (Show,Eq,Ord)
                  -- The order of the constructors is on purpose!
 
@@ -33,27 +33,32 @@ type Event r = Point 2 r :+ EventKind r
 
 type CurrentEdge r = ClosedLineSegment (Point 2 r)
 
--- | Given a vector v and a polygon, computes hatchings for the
+-- | Given a vector v and a polygon, computes hachurings for the
 -- polygon in the direction given by v. In particular: we produce line
 -- segments that are *perpendicular* to v, and so that any consecutive
--- hatchings are s and s+v. All line segments/hatchings produced
+-- hachurings are s and s+v. All line segments/hachurings produced
 -- intersect the input polygon.
 --
 -- \(O(n\log n + k)\), where k is the output size.
-hatching          :: forall polygon vertex r.
+hachuring          :: forall polygon vertex r.
                      ( BidirGraph_ polygon
                      , Polygon_ polygon vertex r
                      , HasEdges polygon polygon
                      , Ord r, Fractional r)
                   => Vector 2 r
-                     -- ^ direction perpendicular to the hatchings;
+                     -- ^ direction perpendicular to the hachurings;
                       -- i.e. the output line segments will be
                       -- perpendicular to this vector (and separated by this vector)
                   -> polygon -> [ClosedLineSegment (Point 2 r)]
-hatching dir poly = snd $ foldl' handle (mempty, []) events
+hachuring dir poly = snd $ foldl' handle (mempty, []) events
   where
+    -- We use a simple sweep line; i.e. we sweep a line perpendicular to dir "downward"
+    -- over the polygon, while maintaining the edges intersected by the polygon.
+    -- at vertices we delete and insert the appropriate edges. At hachure events
+    -- we essentially compute the parts of the sweep line in the polygon and report those
+    -- line segments as hachurings.
 
-    -- | vector perpendicular to the hatching direction
+    -- | vector perpendicular to the hachuring direction
     perpDir = view direction . perpendicularTo $ LinePV v0 dir
 
     cmp = cmpInDirection2 dir
@@ -85,12 +90,12 @@ hatching dir poly = snd $ foldl' handle (mempty, []) events
 
     -- | All our events
     events :: NonEmpty (Event r)
-    events = case NonEmpty.nonEmpty hatchEvents of
+    events = case NonEmpty.nonEmpty hachureEvents of
                Just evts -> mergeSortedBy cmpEvent vertexEvents evts
                Nothing   -> vertexEvents
 
-    -- | Produce the hatch events
-    hatchEvents = fmap (:+ Hatch)
+    -- | Produce the hachure events
+    hachureEvents = fmap (:+ Hachure)
                 . takeWhile (\q -> cmp q lastVtx == LT)
                 . drop 1 -- drop v0 itself
                 $ iterate (.+^ dir) v0
@@ -101,9 +106,9 @@ hatching dir poly = snd $ foldl' handle (mempty, []) events
     handle (status, output) = \case
       v :+ Delete seg -> (Set.deleteAllBy (cmpAt v) seg status, output)
       v :+ Insert seg -> (Set.insertBy    (cmpAt v) seg status, output)
-      p :+ Hatch      -> (status, hatch p status <> output)
+      p :+ Hachure    -> (status, hachure p status <> output)
 
-    hatch p status = evens $ zipWith ClosedLineSegment xs (drop 1 xs)
+    hachure p status = evens $ zipWith ClosedLineSegment xs (drop 1 xs)
       where
         xs = mapMaybe intersectionPoint $ Set.toAscList status
 
