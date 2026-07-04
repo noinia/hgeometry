@@ -55,7 +55,9 @@ instance (Arbitrary a, Num a, Eq a) => Arbitrary (GRatio a) where
 
 instance KnownNat p => Arbitrary (RealNumber p) where
   arbitrary = arbitrarySizedFractional
-  shrink (RealNumber r) = RealNumber <$> shrink r
+  shrink (RealNumber r) = RealNumber <$> shrinkDecimal r
+  -- we use shrinkDecimal rather than srhink or shrinkRealFrac (the default for Rational)
+  -- so that we actually get fewer digits
 
 instance Arbitrary Sign.Sign where
   arbitrary = (\b -> if b then Sign.Positive else Sign.Negative) <$> arbitrary
@@ -103,3 +105,4 @@ instance Arbitrary a => Arbitrary (BinaryTree a) where
 -- * Orphan instance
 instance (Arbitrary a, Ord a) => Arbitrary (NESet.NESet a) where
   arbitrary = NESet.fromList <$> arbitrary
+  shrink s = NESet.fromList <$> shrink (NESet.toList s)

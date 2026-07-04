@@ -12,9 +12,9 @@ module Ipe.Layer(
   LayerName(LayerName), layerName
   ) where
 
-import           Control.Lens
-import           Data.Text (Text)
-import           GHC.Exts
+import Control.Lens
+import Data.Text (Text)
+import Data.String (IsString(..))
 
 --------------------------------------------------------------------------------
 

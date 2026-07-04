@@ -40,6 +40,7 @@ module Ipe(
   , ToObject(..)
   -- ** Specific Ipe-Objects
   , Path(Path), pathSegments
+  , singletonPath
   , PathSegment(..)
   , IpeSymbol(Symbol), symbolPoint, symbolName
   , Group(Group), groupItems

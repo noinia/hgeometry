@@ -22,7 +22,7 @@ spec = goldenWith [osp|docs/doc-figures/|]
          (svgFileGolden { name = [osp|ccw|] })
            (staticCanvas_ canvas [] $ mconcat
                [ draw @SVG [ stroke ?~ lightgray
-                           ] (ClosedLineSegment origin (Point2 80 80))
+                           ] (ClosedLineSegment origin (Point2 80 (80 :: R)))
                , draw @SVG [ fill ?~ purple ] p
                , draw @SVG [ fill ?~ blue   ] q
                , mconcat [draw @SVG [ fill ?~ red ] rCCw     | rCCw   <- rCCws]

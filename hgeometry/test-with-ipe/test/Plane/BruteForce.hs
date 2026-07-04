@@ -43,7 +43,7 @@ import           Data.Foldable1
 import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
 import           Data.Foldable.WithIndex
-import           Data.Foldable(Foldable(..))
+import           Data.Foldable (Foldable(..))
 import           Data.Maybe (fromMaybe, maybeToList)
 import           Plane.Sample
 import           HGeometry.Kernel
@@ -66,15 +66,15 @@ import           GHC.Generics (Generic)
 import           Data.Functor.WithIndex
 import           Witherable
 import           HGeometry.Cyclic (Cyclic)
-import Control.Applicative
+import           Control.Applicative
 
 
-import Plane.Debug
-import HGeometry.Polygon
-import HGeometry.Point.Either
-import Data.Bifunctor
-import HGeometry.Cone
-import Data.Ord
+import           Plane.Debug
+import           HGeometry.Polygon
+import           HGeometry.Point.Either
+import           Data.Bifunctor
+import           HGeometry.Cone
+import           Data.Ord
 
 
 
@@ -252,6 +252,7 @@ fromVertices domain = imap computeCell . foldMap collect
     -- extend to cover the domain
     computeCell :: plane -> NonEmpty vertex -> ConvexPolygon (Vertex' vertex r plane)
     computeCell h (sortAroundBoundary -> vs'@(v0:|rest')) =
+        -- traceShowWith ("computeCell",h, ";;;", extras, ";;;;", vs',"->", ) $
         uncheckedFromCCWPoints $ (extra' <$> extras) <<> (Original <$> originals)
       where
         -- | The vertices in sorted order around some arbitrary first vertex.
@@ -292,12 +293,9 @@ fromVertices domain = imap computeCell . foldMap collect
                          w           = Vector2 y (-x)
                          f           = evalAt (u .+^ w)
                      in f h < f h'
-            -- w should be a vector pointing into the right halfplane
-            -- of the edge uuv
+            -- w should be a vector pointing into the right halfplane of the edge uuv
            -- if uv is a CCW edge; then h should be cheaper just left of the
            -- edge. Conversely, it should be more expensive on the right side of the edge
-
-                        -- test if really lies left of the vector from v to u.
 
         -- | Given two vertices u and v, compute the plane other than
         -- h that they have in common (if any)
@@ -359,7 +357,8 @@ coverCone domain a leftV rightV =
   in uncheckedFromCCWPoints $
      (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
 
--- | computes the vertices of the clipped cone cover.
+-- | computes candidate vertices of the clipped cone cover.
+-- reports the points in CCW order; starting from the point r on the right cone boundary.
 coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                                          , Show r
                                                          , Point_ corner 2 r
@@ -367,7 +366,7 @@ coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                      => Triangle corner
                                      -> Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
                                      -> NonEmpty (Point 2 r)
-coverCone' domain al leftV ar rightV = r :| mp <> [l]
+coverCone' domain al leftV ar rightV = hull ar $ r :| mp <> [l]
   where
     domain' = fmap (^.asPoint) domain
     Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
@@ -387,15 +386,14 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
 
     -- the corners of the domain that are in the cone, and still on the wrong side of the
     -- halfplane defined by l and r
-    mp = makeConvex
-       . List.sortBy (ccwCmpAroundWith rightV ar)
-       $ filter (\q -> all (q `intersects`) [h1,h2,h]) (toList domain')
+    mp = List.sortBy (ccwCmpAroundWith rightV ar)
+       . filter (\q -> all (q `intersects`) [h1,h2,h]) $ toList domain'
+
 
     -- we are overestimating the length of the vector from q to a and using that
     projectOnto          :: Point 2 r -> Vector 2 r -> Point 2 r -> Point 2 r
     projectOnto a base q = let vLen = quadrance $ q .-. a
-                               bLen = quadrance base
-                               b    = (vLen / bLen) *^ base
+                               b    = max 1 vLen  *^ base
                            in a .+^ b
       -- consider the vector v from q to a, and let v' be its projection onto base.
       -- we want to compute some point that lies on the base, and is "further away"
@@ -404,11 +402,30 @@ coverCone' domain al leftV ar rightV = r :| mp <> [l]
       -- observe that the length of v is at least the length of v'. So we will compute
       -- a vector b whose (squared) length is at least the (squared) length of v.
 
-    -- if we make a CCW right turn we need to keep b; otherwise
-    makeConvex xs = case xs of
-      [a,b,c] | ccw a b c /= CCW -> [a,c]
-      _                          -> xs
+-- | make sure we only make CCW turns in our chain.
+--
+-- Note that this is very similar the implementation also used in grahamscan (but swtiching)
+-- right turn for left turn.
+hull           :: (Ord r, Num r, Point_ point 2 r
+                  , Show point, Show r
+                  )
+               => point -- the apex of the coner; we do this
+               -- so that we also trim colinear points that are on the initial rightward ray
+               -> NonEmpty point -> NonEmpty point
+hull a (b:|ps) = NonEmpty.fromList . drop 1 . reverse $ hull'' [b,a] ps
+                 -- the drop 1 removes the dummy a; so this is safe.
+  where
+    hull'' h []      = h
+    hull'' h (p:ps') = hull'' (cleanMiddle (p:h)) ps'
 
+    cleanMiddle h@[_,_] = h
+    cleanMiddle h@(z:y:x:rest)
+      | leftTurn x y z = h
+      | otherwise       = cleanMiddle (z:x:rest)
+    cleanMiddle _       = error "cleanMiddle: too few points"
+    leftTurn a' b' c' = ccw a' b' c' == CCW
+
+hull _ _ = error "hull requires a list with at least two elements."
 
 --------------------------------------------------------------------------------
 

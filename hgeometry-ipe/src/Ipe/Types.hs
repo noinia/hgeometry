@@ -27,7 +27,7 @@ module Ipe.Types(
   , ipeObject'
   , ToObject(..)
   -- ** Specific Ipe-Objects
-  , Path(Path), pathSegments
+  , Path(Path), pathSegments, singletonPath
   , PathSegment(..)
   , IpeSymbol(Symbol), symbolPoint, symbolName
   , Group(Group), groupItems

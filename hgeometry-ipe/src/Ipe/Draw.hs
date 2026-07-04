@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.Draw
@@ -19,16 +20,20 @@ module Ipe.Draw
   , Ipe
   ) where
 
-import Data.Default
-import Data.Text (Text)
 import HGeometry.Ext
 import HGeometry.Point
 import Control.Lens
 import Data.Kind (Type)
 import Ipe.Types
 import Ipe.FromIpe
+import Ipe.IpeOut
 import Ipe.Attributes
 import HGeometry.Polygon
+import HGeometry.Vector
+import HGeometry.PolyLine
+import HGeometry.BezierSpline
+import HGeometry.LineSegment
+import HGeometry.Triangle
 import Data.List.NonEmpty (NonEmpty)
 
 --------------------------------------------------------------------------------
@@ -60,6 +65,22 @@ instance ( IsDrawable backend a
   type AttrOf backend [a] = AttrOf backend a
   draw ats = foldMap (draw @backend ats)
 
+instance ( Point_ vertex 2 r, Num r
+         , IsDrawable backend (SimplePolygonF f vertex)
+         , VertexContainer f vertex
+         , Monoid (Rendered backend)
+         ) => IsDrawable backend (ConvexPolygonF f vertex) where
+  type AttrOf backend (ConvexPolygonF f vertex) = AttrOf backend (SimplePolygonF f vertex)
+  draw ats poly = draw @backend ats (toSimplePolygon poly)
+
+instance ( Point_ corner 2 r, Num r
+         , IsDrawable backend (SimplePolygon corner)
+         , Monoid (Rendered backend)
+         ) => IsDrawable backend (Triangle corner) where
+  type AttrOf backend (Triangle corner) = AttrOf backend (SimplePolygon corner)
+  draw ats tri = draw @backend ats (uncheckedFromCCWPoints tri :: SimplePolygon corner)
+  -- if we can draw a simple polygon we can draw a 2d triangle
+
 --------------------------------------------------------------------------------
 -- * Ipe Backend utils
 
@@ -87,16 +108,38 @@ instance ( Point_ vertex 2 r, VertexContainer f vertex, Num r
     where
       pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
 
+
+instance (Point_ point 2 r, Fractional r
+         ) => IsDrawable (Ipe r) (ClosedLineSegment point) where
+  type AttrOf (Ipe r) (ClosedLineSegment point) = PathAttributes r
+  draw ats (ClosedLineSegment s t) = draw @(Ipe r) @(PolyLine point) ats
+                                   $ polyLineFromPoints (Vector2 s t)
+
+instance ( Point_ point 2 r, Fractional r
+         -- , HasPoints (PolyLineF f point) (PolyLineF (Point 2 r)) point (Point 2 r)
+         ) => IsDrawable (Ipe r) (PolyLine point) where
+  type AttrOf (Ipe r) (PolyLine point) = PathAttributes r
+  draw ats poly = draw @(Ipe r) ats thePath
+    where
+      thePath = singletonPath . PolyLineSegment $ poly&allPoints %~ (^.asPoint)
+
+instance (Point_ point 2 r, Fractional r
+         ) => IsDrawable (Ipe r) (CubicBezier point) where
+  type AttrOf (Ipe r) (CubicBezier point) = PathAttributes r
+  draw ats bez = draw @(Ipe r) ats thePath
+    where
+      thePath = singletonPath . CubicBezierSegment $ bez&allPoints %~ (^.asPoint)
+
 --------------------------------------------------------------------------------
 
 instance IsDrawable (Ipe r) (Point 2 r) where
   type AttrOf (Ipe r) (Point 2 r) = SymbolAttributes r
   draw ats p = [ IpeUse $ ipeDiskMark p & attributes %~ applyAttrs ats ]
 
--- | Create an ipe mark
-ipeMark     :: Text -> Point 2 r -> IpeSymbol r :+ SymbolAttributes r
-ipeMark n p = Symbol p n :+ def
+-- -- | Create an ipe mark
+-- ipeMark     :: Text -> Point 2 r -> IpeSymbol r :+ SymbolAttributes r
+-- ipeMark n p = Symbol p n :+ def
 
--- | Creates a disk ipe mark
-ipeDiskMark :: Point 2 r -> IpeSymbol r :+ SymbolAttributes r
-ipeDiskMark = ipeMark "mark/disk(sx)"
+-- -- | Creates a disk ipe mark
+-- ipeDiskMark :: Point 2 r -> IpeSymbol r :+ SymbolAttributes r
+-- ipeDiskMark = ipeMark "mark/disk(sx)"

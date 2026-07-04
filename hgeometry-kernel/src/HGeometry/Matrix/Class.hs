@@ -13,6 +13,7 @@ module HGeometry.Matrix.Class
   , HasElements(..)
   , HasDeterminant(..)
   , Invertible(..)
+  , Transposable(..)
   ) where
 
 import           Control.Lens hiding (cons,snoc,uncons,unsnoc,elements)
@@ -23,7 +24,6 @@ import           Data.Proxy
 import           GHC.TypeNats
 import           HGeometry.Properties
 import           HGeometry.Vector
--- import           HGeometry.Vector.List (ListVector(..))
 import           Prelude hiding (zipWith)
 
 --------------------------------------------------------------------------------
@@ -107,6 +107,7 @@ class ( r ~ NumType matrix
                     -- , OptVector_ m r
                     ) => rowVector -> matrix
 
+
   -- | Matrix multiplication
   --
   -- >>> let m1  = matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))
@@ -150,6 +151,13 @@ class ( r ~ NumType matrix
       dotWithV u = sumOf components $ liftI2 (*) u (v^._Vector)
   {-# INLINE (!*) #-}
 
+  -- | Multiply a row-vector and a matrix.
+  (*!)   :: (Num r, Has_ Vector_ m r, Has_ Additive_ n r) => Vector n r -> matrix -> Vector m r
+  v *! m = generate $ \k -> v `dot'` col k
+    where
+      col k = fromMaybe (error "absurd: *! out of bounds") $ column k m
+      dot' u vw = sumOf components $ liftI2 (*) u vw
+
   -- | Multiply a scalar and a matrix
   (*!!)   :: Num r => r -> matrix -> matrix
   s *!! m = m&elements *~ s
@@ -189,12 +197,21 @@ class ( r ~ NumType matrix
 
 infixl 7 !*!
 infixl 7 !*
+infixl 7 *!
 infixl 7 *!!
 infixl 7 !!*
 
--- class Matrix_ matrix n m r => ConstructableMatrix_ matrix n m r where
---   fromList
-
+-- | Matrices that can be transposed.
+class ( Matrix_ matrix  n m r
+      , Matrix_ matrix' m n r
+      ) => Transposable matrix matrix' n m r | matrix  -> n
+                                             , matrix  -> m
+                                             , matrix  -> r
+                                             , matrix' -> n
+                                             , matrix' -> m
+                                             , matrix' -> r where
+  -- | Transpose a matrix
+  transpose :: matrix -> matrix'
 
 --------------------------------------------------------------------------------
 -- * Determinants

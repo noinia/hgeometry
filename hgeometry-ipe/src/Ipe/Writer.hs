@@ -79,15 +79,14 @@ writeIpePage fp = writeIpeFile fp . singlePageFile
 
 -- | Convert the input to ipeXml, and prints it to standard out in such a way
 -- that the copied text can be pasted into ipe as a geometry object.
-printAsIpeSelection :: IpeWrite t => t -> IO ()
+printAsIpeSelection :: IpeWrite t => [t] -> IO ()
 printAsIpeSelection = C.putStrLn . fromMaybe "" . toIpeSelectionXML
 
 -- | Convert input into an ipe selection.
-toIpeSelectionXML :: IpeWrite t => t -> Maybe B.ByteString
-toIpeSelectionXML = fmap (format . ipeSelection) . ipeWrite
-  where
-    ipeSelection x = Element "ipeselection" [] [x]
-
+toIpeSelectionXML   :: IpeWrite t => [t] -> Maybe B.ByteString
+toIpeSelectionXML xs = case mapMaybe ipeWrite xs of
+                         []  -> Nothing
+                         chs -> Just $ format $ Element "ipeselection" [] chs
 
 -- | Convert to Ipe xml
 toIpeXML :: IpeWrite t => t -> Maybe B.ByteString
@@ -252,7 +251,7 @@ instance IpeWriteText VerticalAlignment where
     AlignBaseline -> Just "baseline"
 
 instance KnownNat n => IpeWriteText (Finite n) where
-  ipeWriteText = ipeWriteText . fromIntegral
+  ipeWriteText = ipeWriteText @Integer . fromIntegral
 
 instance IpeWriteText LineJoin where
   ipeWriteText = ipeWriteText . toFinite
@@ -443,6 +442,9 @@ instance ( IpeWriteText r
 instance IpeWrite () where
   ipeWrite = const Nothing
 
+instance ( IpeWriteText r, Point_ point 2 r, IpeWriteText r
+         ) => IpeWrite (CubicBezier point) where
+  ipeWrite = ipeWrite . Path . Seq.singleton . CubicBezierSegment . fmap (view asPoint)
 
 --------------------------------------------------------------------------------
 

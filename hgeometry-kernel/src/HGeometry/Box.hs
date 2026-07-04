@@ -42,7 +42,6 @@ import HGeometry.Line.General
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
-import HGeometry.LineSegment.Intersection
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Transformation

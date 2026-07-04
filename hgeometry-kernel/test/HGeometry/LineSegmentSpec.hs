@@ -167,12 +167,21 @@ spec =
           seg = ClosedLineSegment (Point2 0 (-1)) (Point2 0 1) :: ClosedLineSegment (Point 2 R)
       in hl `intersects` seg
 
+    prop "manual halfLine x segment intersect 2 intersect " $
+      let hl  = HalfLine (Point2 0 0) (Vector2 1 0)            :: HalfLine (Point 2 R)
+          seg = ClosedLineSegment (Point2 0 (-1)) (Point2 0 1) :: ClosedLineSegment (Point 2 R)
+      in isJust (hl `intersect` seg)
+
     prop "manual halfLine x open segment intersect" $
       let hl  = HalfLine (Point2 0 0) (Vector2 1 1)           :: HalfLine (Point 2 R)
           seg = OpenLineSegment (Point2 0 0) (Point2 1 (-1))  :: OpenLineSegment (Point 2 R)
        in counterexample (show $ hl `intersect` seg) $
            counterexample (show $ hl `intersects` seg) $
             isNothing (hl `intersect` seg) && not (hl `intersects` seg )
+
+myHl1  = HalfLine (Point2 0 0) (Vector2 1 1)             :: HalfLine (Point 2 R)
+mySeg1 = ClosedLineSegment (Point2 0 0) (Point2 1 (-1))  :: ClosedLineSegment (Point 2 R)
+
 
 --------------------------------------------------------------------------------
 -- * Make sure our 2d specialized instance ist he same as the generic one.
