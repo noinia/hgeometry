@@ -383,24 +383,32 @@ instance ( LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint
 instance ( Ord r, Num r, Point_ point 2 r
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
          ) => HasIntersectionWith (HalfLine point) (LineSegment endPoint point) where
-  hl `intersects` seg = case ccw (seg^.start) (seg^.end) (hl^.start) of
-      CoLinear -> let l = LinePV (hl^.start.asPoint) ((seg^.end) .-. (seg^.start))
-                      -- this essentially constructs the supporting line of the segment
-                      -- but anchors it at hl^.start. Since the three points are colinear
-                      -- this still means the segment lies on this line.
-                   in case compareColinearInterval l seg' of
-                        Before   -> (seg'^.end.asPoint) `intersects` hl
-                        OnStart  -> isClosed (seg'^.startPoint)
-                                      || (seg'^.end.asPoint) `intersects` hl
-                        Interior -> True
-                        OnEnd    -> isClosed (seg'^.endPoint)
-                                      || (seg'^.start.asPoint) `intersects` hl
-                        After    -> (seg'^.start.asPoint) `intersects` hl
-      _        -> supportingLine hl `intersects` seg && supportingLine seg `intersects` hl
+  hl `intersects` seg
+      | sameSupportingLine = colinearIntersection
+      | otherwise          = supportingLineHl  `intersects` seg &&
+                             supportingLineSeg `intersects` hl
     where
+      supportingLineHl   = supportingLine hl
+      supportingLineSeg  = supportingLine seg
+      sameSupportingLine = supportingLineHl == supportingLineSeg
+
       isClosed = (== Closed) . endPointType
 
-      seg' = orientToInterval hl seg
+      -- the two supportinglines are actually the same line.
+      colinearIntersection = case compareColinearInterval l seg' of
+          Before   -> (seg'^.end.asPoint) `intersects` hl
+          OnStart  -> isClosed (seg'^.startPoint)
+                        || (seg'^.end.asPoint) `intersects` hl
+          Interior -> True
+          OnEnd    -> isClosed (seg'^.endPoint)
+                        || (seg'^.start.asPoint) `intersects` hl
+          After    -> (seg'^.start.asPoint) `intersects` hl
+        where
+          -- this essentially constructs the supporting line of the
+          -- segment but anchors it at hl^.start. Since the three points
+          -- are colinear this still means the segment lies on this line.
+          l = LinePV (hl^.start.asPoint) ((seg^.end) .-. (seg^.start))
+          seg' = orientToInterval hl seg
   {-# INLINE intersects #-}
 
 type instance Intersection (HalfLine point) (LineSegment endPoint point)
