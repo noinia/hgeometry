@@ -34,6 +34,7 @@ import Data.Kind (Type)
 
 --------------------------------------------------------------------------------
 
+-- | Settings/parameters to configure the Handy Sketchy renderer with.
 data HandyConfig r = HandyConfig { _roughness :: !r
                                     -- ^ Scaling for random
                                     -- perturbations.  Determines the
