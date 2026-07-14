@@ -27,6 +27,7 @@ import HGeometry.Properties
 import Control.Lens
 import Data.Bitraversable
 import Data.Bifoldable
+import HGeometry.Number.Radical
 
 --------------------------------------------------------------------------------
 
@@ -66,10 +67,14 @@ rightBoundary   :: ( Dimension point ~ 2, NumType point ~ r)
 rightBoundary c = (c^.rightBoundaryVector)&core %~ HalfLine (c^.apex)
 
 
--- | Get the bisector of the cone
-coneBisector   :: (Point_ point 2 r, Num r) => Cone r point edge -> HalfLine point
+-- | Get the angular bisector of the cone.
+coneBisector   :: (Point_ point 2 r, Radical r) => Cone r point edge -> HalfLine point
 coneBisector c = HalfLine (c^.apex)
-                         ((c^.leftBoundaryVector.core) ^+^ (c^.rightBoundaryVector.core))
+                          ((norm r *^ l) ^+^ (norm l *^ r))
+  where
+    l = c^.leftBoundaryVector.core
+    r = c^.rightBoundaryVector.core
+
 
 -- | Get the two halfplanes so that the cone is the intersection of the two halfplanes.
 -- the first halfplane is the plane right of the left boundary, whereas the
