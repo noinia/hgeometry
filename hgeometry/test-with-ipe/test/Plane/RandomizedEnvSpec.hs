@@ -4,6 +4,11 @@
 module Plane.RandomizedEnvSpec
   where
 
+import           GHC.Generics(Generic)
+import           Control.Monad
+import           HGeometry.Polygon.Simple.Sample
+import           Prelude hiding (zipWith)
+import           Data.Zip
 import           HGeometry.LineSegment
 import           HGeometry.HalfLine
 import           Data.Maybe
@@ -55,7 +60,7 @@ import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import           Ipe.Draw
 import           Test.Util
 import           Data.Traversable
-
+import           System.Random.Stateful
 --------------------------------------------------------------------------------
 
 -- newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
@@ -114,7 +119,7 @@ type instance NumType (a,b,c,d) = NumType d
 instance (Point_ apex 2 r, Fractional r, Ord r, Show r
          ) => IsDrawable (Ipe r) (Cone r apex edge) where
   type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
-  draw ats c = [iO $ defIO c]
+  draw _ats c = [iO $ defIO c]
 
 instance ( IsDrawable (Ipe r) a
          , IsDrawable (Ipe r) b
@@ -158,6 +163,11 @@ instance ( IsDrawable (Ipe r) a
       , draw @(Ipe r) [ commonAttributes %~ apply ats ] d
       ]
 
+
+instance (Point_ point 2 r, Fractional r, Ord r, Show r, Show point
+         ) => IsDrawable (Ipe r) (HalfLine point) where
+  type AttrOf (Ipe r) (HalfLine point) = PathAttributes r
+  draw _ats hl = [iO $ defIO hl]
 
 -- | Helper function to apply attributes
 apply       :: [at -> at] -> at -> at
@@ -252,40 +262,134 @@ coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
             ]
 
 
+
+arbitraryPointsInTriangle   :: Triangle (Point 2 R) -> Gen [Point 2 R]
+arbitraryPointsInTriangle t = do seed <- arbitrary
+                                 n    <- arbitrary
+                                 let gen = mkStdGen seed
+                                     t'  :: Triangle (Point 2 Double)
+                                     t'  = t&vertices.coordinates %~ realToFrac
+
+                                     sample g = over coordinates realToFrac
+                                             <$> sampleFromTriangle t' g
+                                 pure $ runStateGen_ gen $ replicateM n . sample
+
+
+arbitraryPointInIntersection domain cone =
+  filter (`intersects` cone) <$>  arbitraryPointsInTriangle domain
+
+--------------------------------------------------------------------------------
+
+data ClippedCone apex = ClippedCone { _leftBoundary'  :: HalfLine apex
+                                    , _rightBoundary' :: HalfLine apex
+                                    }
+
+deriving instance Show (HalfLine apex) => Show (ClippedCone apex)
+deriving instance Eq   (HalfLine apex) => Eq   (ClippedCone apex)
+
+instance ( Arbitrary apex, Point_ apex 2 r, Num r, Ord r, Arbitrary r
+         ) => Arbitrary (ClippedCone apex) where
+  arbitrary = do (cone :: Cone r apex ()) <- arbitrary
+                 lambdas                  <- arbitrary `suchThat` (all (> 0))
+                 pure $ fromConeAndShifts cone lambdas
+
+fromConeAndShifts cone lambdas = ClippedCone leftRay rightRay
+  where
+    shift lambda v = HalfLine ((cone^.apex) .+^ (lambda *^ v)) v
+    Vector2 leftRay rightRay = zipWith shift lambdas
+                             $ Vector2 (cone^.leftBoundaryVector.core)
+                                       (cone^.rightBoundaryVector.core)
+
+
+
+
+instance ( Point_ point 2 r, Num r, Ord r
+         ) => Point 2 r `HasIntersectionWith` ClippedCone point where
+  q `intersects` (ClippedCone (HalfLine al vl) (HalfLine ar vr)) =
+    all (q `intersects`) [ rightHalfPlane (LinePV (al^.asPoint) vl) -- right of the left boundary
+                         , leftHalfPlane  (LinePV (ar^.asPoint) vr) -- left of the right boundary
+                         , leftHalfPlane  (LinePV (al^.asPoint) (ar .-. al))
+                         ]
+  {-# INLINE intersects #-}
+
+--------------------------------------------------------------------------------
+
+data ConeInput' cone = ConeInput { _domain  :: Triangle (Point 2 R)
+                                 , _cone     :: cone
+                                 , _pointsIn :: [Point 2 R]
+                                 } deriving (Show,Eq,Functor,Generic)
+type ConeInput = ConeInput' (Cone R (Point 2 R) ())
+
+type ClippedConeInput = ConeInput' (ClippedCone (Point 2 R))
+
+
+-- type instance Intersection (Point 2 r) (Cone r point edge) = Maybe (Point 2 r)
+-- instance ( Point_ point 2 r, Num r, Ord r
+--          ) => Point 2 r `IsIntersectableWith` Cone r point edge where
+--   q `intersect` cone
+--     | q `intersects` cone = Just q
+--     | otherwise           = Nothing
+--   {-# INLINE intersect #-}
+
+
+instance ( Arbitrary cone
+         , Point 2 R `HasIntersectionWith` cone
+         ) => Arbitrary (ConeInput' cone) where
+  arbitrary = do domain <- arbitrary
+                 cone   <- arbitrary
+                 pts    <- resize 300 $ arbitraryPointInIntersection domain cone
+                 pure $ ConeInput domain cone pts
+  shrink = genericShrink
+
+coneCovers = describe "Cone Covers" $ do
+    prop "cone cover contains domain" $
+      \(ConeInput domain (cone :: Cone R (Point 2 R) ()) pts) ->
+        let corners'      = filter (`intersects` cone) (toList domain)
+            intersections = coneTriangleBoundaryIntersections cone domain
+        in ipeCounterExample (domain,cone,corners',intersections) $
+           case coverCone domain cone of
+             Nothing
+               | null pts  -> discard -- don't test with empty pts
+               | otherwise -> counterexample (show pts) $ property False
+             Just poly -> counterexample (show
+                                           (poly
+                                           )
+                                         ) $
+                          ipeCounterExample ( poly
+                                            ) $
+                          conjoin [ counterexample (show v) $ Every $ v `intersects` poly
+                                  | v <- intersections ++ corners' ++ pts
+                                  ]
+
+    prop "clipped cone cover contains domain" $
+      \(ConeInput domain (clippedCone :: ClippedCone (Point 2 R)) pts) ->
+        let (ClippedCone leftRay rightRay) = clippedCone
+            corners'      = filter (`intersects` clippedCone) (toList domain)
+            -- intersections = filter (`intersects` clippedCone) $
+            --                 coneTriangleBoundaryIntersections (definingCone cone) domain
+         in ipeCounterExample (domain,corners') $
+            case coverClippedCone domain leftRay rightRay of
+              Nothing
+                | null pts  -> discard -- don't test with empty clipped cones
+                | otherwise -> counterexample (show pts) $ property False
+              Just poly -> counterexample (show
+                                            (poly, leftRay, rightRay)
+                                          ) $
+                           ipeCounterExample ( poly
+                                             , leftRay
+                                             , rightRay
+                                             ) $
+                           conjoin [ counterexample (show v) $ Every $ v `intersects` poly
+                                   | v <- corners' ++ pts
+                                   ]
+
+
+
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
          bug
          testBug
-
-         it "coverCone" $ do
-           let testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
-               domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
-
-           testCoverCone `shouldBe`
-             uncheckedFromCCWPoints (NonEmpty.fromList
-               [Extra (Point2 371 3),Extra (Point2 291 293),Original (Point2 1 3)])
-
-         prop "cone cover contains corners comain" $
-           \(domain :: Triangle (Point 2 R)) (cone :: Cone R (Point 2 R) ()) ->
-             let poly = coverCone domain (cone^.apex) (negated $ cone^.leftBoundaryVector.core)
-                                         (cone^.rightBoundaryVector.core)
-                 corners' = filter (`intersects` cone) (toList domain)
-             in ipeCounterExample (domain,cone,poly) $
-                counterexample (show corners') $
-                conjoin [ counterexample (show v) $ Every $ v `intersects` poly
-                        | v <- corners'
-                        ]
-
-         prop "cone cover contains domain" $
-           \(domain :: Triangle (Point 2 R)) (cone :: Cone R (Point 2 R) ()) ->
-             let poly = coverCone domain (cone^.apex) (negated $ cone^.leftBoundaryVector.core)
-                                         (cone^.rightBoundaryVector.core)
-                 intersections = coneTriangleBoundaryIntersections cone domain
-             in ipeCounterExample (domain,cone,poly) $
-                counterexample (show intersections) $
-                conjoin [ counterexample (show v) $ Every $ v `intersects` poly
-                        | v <- intersections
-                        ]
+         coneCovers
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $
@@ -503,96 +607,96 @@ data Input plane = Input (Triangle (Point 2 R))
 
 -- domain = Triangle (Point2 100 100) (Point2 110 100) (Point2 100 110)
 
-test :: IO ()
-test = do
-          writeIpeFile [osp|tri.ipe|]
-            . addStyleSheet (createIpeStyle "myColors" myColors)
-            . addStyleSheet opacitiesStyle
-            . ipeFile . NonEmpty.fromList . fmap (fromContent . concat) $
-              [ [ let testCoverCone :: ConvexPolygon (OriginalOrExtra (Point 2 R) (Point 2 R))
-                      testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
-                  in
-                  [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
-                  , iO $ defIO domain  &layer ?~  "domain"
-                  , iO $ ipeSimplePolygon testCoverCone &layer  ?~ "result"
-                                                        &fill   ?~ seagreen
-                                                        &stroke ?~ black
-                  ] ]
-              , [ let leftV  = Vector2 1 (-1)
-                      rightV = Vector2 1 2
-                      al     = Point2 5 3
-                      ar     = Point2 8 (3 :: R)
-                      answer :: ConvexPolygon (Point 2 R)
-                      answer = uncheckedFromCCWPoints $ NonEmpty.fromList
-                               [ al .-^ (20 *^ leftV)
-                               , al, ar
-                               , ar .+^ (20 *^ rightV)
-                               ]
-                      result = coverClippedCone domain al leftV ar rightV
-                  in
-                  [ iO $ defIO answer &layer ?~  "clippedCone"
-                                      &fill ?~ blue
-                  , iO $ defIO domain  &layer ?~  "domain"
-                  , iO $ ipeSimplePolygon result
-                          &layer ?~  "result"
-                          &fill ?~ seagreen
-                          &stroke ?~  black
-                  ] ]
-              , [ let al     :: Point 2 R
-                      al     = Point2 1.80000 0.60000
-                      leftV  = Vector2 1 0.33333
-                      ar     = Point2 0.79091 1.60909
-                      rightV = Vector2 (-1) (-2.66666)
-                      answer :: ConvexPolygon (Point 2 R)
-                      answer = uncheckedFromCCWPoints $ NonEmpty.fromList
-                               [ al .-^ (20 *^ leftV)
-                               , al, ar
-                               , ar .+^ (20 *^ rightV)
-                               ]
-                      result = coverClippedCone domain al leftV ar rightV
-                  in
-                  [ iO $ defIO answer &layer ?~  "clippedCone"
-                                      &fill ?~ blue
-                  , iO $ defIO domain  &layer ?~  "domain"
-                  , iO $ ipeSimplePolygon result
-                          &layer ?~  "result"
-                          &fill ?~ seagreen
-                          &stroke ?~  black
-                  ] ]
-              ]
-  where
-    domain :: Triangle (Point 2 R)
-    domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
+-- test :: IO ()
+-- test = do
+--           writeIpeFile [osp|tri.ipe|]
+--             . addStyleSheet (createIpeStyle "myColors" myColors)
+--             . addStyleSheet opacitiesStyle
+--             . ipeFile . NonEmpty.fromList . fmap (fromContent . concat) $
+--               [ [ let testCoverCone :: ConvexPolygon (OriginalOrExtra (Point 2 R) (Point 2 R))
+--                       testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
+--                   in
+--                   [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
+--                   , iO $ defIO domain  &layer ?~  "domain"
+--                   , iO $ ipeSimplePolygon testCoverCone &layer  ?~ "result"
+--                                                         &fill   ?~ seagreen
+--                                                         &stroke ?~ black
+--                   ] ]
+--               , [ let leftV  = Vector2 1 (-1)
+--                       rightV = Vector2 1 2
+--                       al     = Point2 5 3
+--                       ar     = Point2 8 (3 :: R)
+--                       answer :: ConvexPolygon (Point 2 R)
+--                       answer = uncheckedFromCCWPoints $ NonEmpty.fromList
+--                                [ al .-^ (20 *^ leftV)
+--                                , al, ar
+--                                , ar .+^ (20 *^ rightV)
+--                                ]
+--                       result = coverClippedCone domain al leftV ar rightV
+--                   in
+--                   [ iO $ defIO answer &layer ?~  "clippedCone"
+--                                       &fill ?~ blue
+--                   , iO $ defIO domain  &layer ?~  "domain"
+--                   , iO $ ipeSimplePolygon result
+--                           &layer ?~  "result"
+--                           &fill ?~ seagreen
+--                           &stroke ?~  black
+--                   ] ]
+--               , [ let al     :: Point 2 R
+--                       al     = Point2 1.80000 0.60000
+--                       leftV  = Vector2 1 0.33333
+--                       ar     = Point2 0.79091 1.60909
+--                       rightV = Vector2 (-1) (-2.66666)
+--                       answer :: ConvexPolygon (Point 2 R)
+--                       answer = uncheckedFromCCWPoints $ NonEmpty.fromList
+--                                [ al .-^ (20 *^ leftV)
+--                                , al, ar
+--                                , ar .+^ (20 *^ rightV)
+--                                ]
+--                       result = coverClippedCone domain al leftV ar rightV
+--                   in
+--                   [ iO $ defIO answer &layer ?~  "clippedCone"
+--                                       &fill ?~ blue
+--                   , iO $ defIO domain  &layer ?~  "domain"
+--                   , iO $ ipeSimplePolygon result
+--                           &layer ?~  "result"
+--                           &fill ?~ seagreen
+--                           &stroke ?~  black
+--                   ] ]
+--               ]
+--   where
+--     domain :: Triangle (Point 2 R)
+--     domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
 
 
 
 
-test2 = runTest $ Input domain planes []
-  where
-    domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
+-- test2 = runTest $ Input domain planes []
+--   where
+--     domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
 
-    planes :: NESet.NESet (MyPlane :+ IpeColor R)
-    planes = NESet.fromList
-           . NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
-            -- [ Plane 0    1    0
-            -- , Plane 0    (-1) 0
-            -- , Plane 1    0    2
-            -- , Plane (-1) (1/100)    2
-            -- ]
-             -- [ Plane (-1) 3 1
-             -- , Plane 1.66666 1.66666 (-3)
-             -- , Plane 2.66666 (-1) 0.5
-             -- , Plane 0 0 1
-             -- , Plane (-2) 2 2
-             -- ]
+--     planes :: NESet.NESet (MyPlane :+ IpeColor R)
+--     planes = NESet.fromList
+--            . NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
+--             -- [ Plane 0    1    0
+--             -- , Plane 0    (-1) 0
+--             -- , Plane 1    0    2
+--             -- , Plane (-1) (1/100)    2
+--             -- ]
+--              -- [ Plane (-1) 3 1
+--              -- , Plane 1.66666 1.66666 (-3)
+--              -- , Plane 2.66666 (-1) 0.5
+--              -- , Plane 0 0 1
+--              -- , Plane (-2) 2 2
+--              -- ]
 
-             -- [ Plane (-15.9) (-2.83334) (-4.16667)
-             -- , Plane (-14.5) 17.57894 (-5.21053)
-             -- ,Plane (-14.23530) 17.6 2.1
-             -- ,Plane (-5) (-11.6) (-16)
-             -- ,Plane 11 (-7.26667) (-7.23077)]
+--              -- [ Plane (-15.9) (-2.83334) (-4.16667)
+--              -- , Plane (-14.5) 17.57894 (-5.21053)
+--              -- ,Plane (-14.23530) 17.6 2.1
+--              -- ,Plane (-5) (-11.6) (-16)
+--              -- ,Plane 11 (-7.26667) (-7.23077)]
 
-             [Plane (-17.10527) 14 15.77777, Plane (-4.3) (-12.93334) 0.28571,Plane (-2.42858) (-3.57143) (-9.92858),Plane (-0.27273) (-21.44445) 8.8,Plane 0.625 (-0.875) (-17.18182),Plane 1.2 0.28571 4.4,Plane 1.73333 (-10.9) 18,Plane 5.28571 4.85714 14,Plane 7.75 (-10.11112) (-16.14286),Plane 8.85714 7.25 (-13.3125),Plane 9.07142 3.5 21.44444,Plane 12.66666 (-5.52942) 17.77272,Plane 17.85714 10.8 (-5),Plane 18.4375 (-9.5) (-6.47620),Plane 20.1 9 14,Plane 21.29411 13.38461 3]
+--              [Plane (-17.10527) 14 15.77777, Plane (-4.3) (-12.93334) 0.28571,Plane (-2.42858) (-3.57143) (-9.92858),Plane (-0.27273) (-21.44445) 8.8,Plane 0.625 (-0.875) (-17.18182),Plane 1.2 0.28571 4.4,Plane 1.73333 (-10.9) 18,Plane 5.28571 4.85714 14,Plane 7.75 (-10.11112) (-16.14286),Plane 8.85714 7.25 (-13.3125),Plane 9.07142 3.5 21.44444,Plane 12.66666 (-5.52942) 17.77272,Plane 17.85714 10.8 (-5),Plane 18.4375 (-9.5) (-6.47620),Plane 20.1 9 14,Plane 21.29411 13.38461 3]
 
 
 
@@ -892,3 +996,86 @@ testBug = prop "brute force vornoi diagram; covers all points" $
                     conjoin [ verifyClosest sites q vd
                             | q <- toList queries
                             ]
+
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Given a triangle D and a clipped cone C; given by it's left bounding ray bl and
+-- its right boundring ray br. Compute a convex region R that contains \(C \cap D\).
+--
+-- The convex region R will be a quadrilateral contain the starting
+-- point of the two rays and two points v_l and v_r on the rays.
+--
+-- pre: the starting points of the two rays are disjoint
+--
+-- note: this will return Nothing iff \(C \cap D\) is empty.
+coverClippedCone                         :: forall apex corner r.
+                                            ( Point_ apex 2 r, Point_ corner 2 r
+                                            , Ord r, Fractional r
+                                            , Show r
+                                                  )
+                                     => Triangle corner
+                                     -> HalfLine apex
+                                     -> HalfLine apex
+                                     -> Maybe (ConvexPolygon (OriginalOrExtra apex (Point 2 r)))
+coverClippedCone domain (HalfLine al vl) (HalfLine ar vr) = do
+    -- let w be the direction perpendicular to the segment al,ar (and pointing into the cone)
+    --
+    -- our region will be a trapezoid with corners al, ar, vr, vl
+    -- where the segment vl,vr is parallel to al,ar, and passes through
+    -- the furthest point q in the direction w.
+    let v'@(Vector2 x y) = ar .-. al
+        w = Vector2 (-y) x -- the direction pointing into the cone
+
+    q <- maximumByOf folded (cmpInDirection2 w) domain
+
+    let m = LinePV (q^.asPoint) v' -- the line through the furthest point
+        -- helper to compute the vertices on the rays
+        f a v = LinePV (a^.asPoint) v `intersect` m >>= \case
+          Line_x_Line_Point p -> Just (Extra p)
+          _                   -> Nothing -- this should not really happen
+    l <- f al vl
+    r <- f ar vr
+    pure $ uncheckedFromCCWPoints $ Original al :| [Original ar, r, l]
+
+-- | Given a triangle D and a cone C; Compute a convex region R that contains \(C \cap D\).
+--
+-- The convex region R will be a quadrilateral contain the apex, two
+-- points v_l and v_r on the rays, and the intersection of the lines perpendicular to
+-- the rays.
+--
+-- note: this will return Nothing iff \(C \cap D\) is empty.
+coverCone          :: forall apex corner r e.
+                      ( Point_ apex 2 r, Point_ corner 2 r
+                      , Ord r, Fractional r
+                      , Show r
+                      )
+                   => Triangle corner
+                   -> Cone r apex e
+                   -> Maybe (ConvexPolygon (OriginalOrExtra apex (Point 2 r)))
+coverCone domain c = do
+    -- we compute the maximum point q_l in direction of the left bounding ray l; and take
+    -- the line m_l through this point perpendicular to the ray. This line intersects
+    -- the ray in some defining point v_l. We do the same for the right boundary ray r.
+    -- these two lines intersect in a point w. We add v_l, w, and v_r as additional vertices.
+
+    -- all points in \(C \cap D\) will be left of m_l, and left of m_r; hence contained
+    -- the output region
+    let a = c^.apex
+        basePt v@(Vector2 x y) = do q <- maximumByOf folded (cmpInDirection2 v) domain
+                                    let m = LinePV (q^.asPoint) (Vector2 (-y) x)
+                                        -- the direction of this line is perpendicular to v
+                                    (,m) <$> intersectionPoint (LinePV (a^.asPoint) v) m
+
+        -- compute the intersection point of two lines; assuming it exists
+        intersectionPoint l m = l `intersect` m >>= \case
+          Line_x_Line_Point p -> Just (Extra p)
+          _                   -> Nothing -- this should not really happen
+
+    (vl,ml) <- basePt (c^.leftBoundaryVector.core)
+    (vr,mr) <- basePt (c^.rightBoundaryVector.core)
+    w       <- intersectionPoint ml mr
+
+    pure $ uncheckedFromCCWPoints $ Original a :| [vr, w, vl]

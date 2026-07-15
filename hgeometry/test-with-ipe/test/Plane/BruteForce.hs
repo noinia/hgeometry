@@ -29,8 +29,8 @@ module Plane.BruteForce
 
   -- , allZippers
 
-  , coverCone
-  , coverClippedCone
+  -- , coverCone
+  -- , coverClippedCone
   , findUnbounded
   , findRotateTo
   ) where
@@ -227,8 +227,14 @@ xs <<> ys = case NonEmpty.nonEmpty xs of
               Nothing  -> ys
               Just xs' -> xs' <> ys
 
--- | Given a bounded region and a set of vertices, compute the bounded lower envelope
--- from them.
+-- | Given a bounded region D and the set of vertices of the lower
+-- envelope, compute the bounded lower envelope from them. I.e. computes a set of
+-- plane,convex-region pairs (h,R_h) so that:
+--
+-- - h is the lowest plane above R_h,
+-- - the union of the R_h's cover D,
+-- - on the domain D, the R_h regions are pairwise disjoint.
+--
 --
 -- O(n\log n).
 fromVertices        :: forall plane vertex corner r.
@@ -239,6 +245,10 @@ fromVertices        :: forall plane vertex corner r.
                     => Triangle corner -> Set vertex
                     -> BoundedLowerEnvelope' vertex r plane
 fromVertices domain = imap computeCell . foldMap collect
+                      -- FIXME: the interseection of a cell with the domain may be empty
+
+
+
   where
     -- | For each plane h; collects the vertices that appear on the region corresponding to h
     collect   :: vertex -> MonoidalMap plane (NonEmpty vertex)
@@ -357,8 +367,13 @@ coverCone domain a leftV rightV =
   in uncheckedFromCCWPoints $
      (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
 
--- | computes candidate vertices of the clipped cone cover.
--- reports the points in CCW order; starting from the point r on the right cone boundary.
+-- | Given a triangle D and a (possibly clipped) cone C; given it's left bounding ray l and
+-- its right boundring ray r. Compute a convex polygon R that contains \(C \cap D\).
+--
+-- This function reports the sequence of vertices v_l,w_1,..,w_k,v_r
+-- so that
+
+-- do we have the guarnatee that C cap D is non-empty?
 coverCone'                           :: forall corner r. ( Ord r, Fractional r
                                                          , Show r
                                                          , Point_ corner 2 r
