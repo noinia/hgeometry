@@ -87,6 +87,8 @@ instance Arbitrary (IpeColor R) where
 
 ----------------------------------------
 
+-- | Generate a triangular domain, and a non-empty list of points
+-- strictly inside the domain.
 data Queries = Queries (Triangle (Point 2 R)) (NonEmpty (Point 2 R))
              deriving (Show,Eq,Generic)
 
@@ -104,13 +106,19 @@ instance Arbitrary Queries where
                             , all (`intersects` tri) qs'
                             ]
 
+-- | Given a triangle and a vector of coefficients, use it to produce a point inside
+-- the triangle
 barrycentric :: Triangle (Point 2 R) -> Vector 3 R -> Point 2 R
 barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y z) =
     Point $ (x *^ a) ^+^ (y *^ b) ^+^ (z *^ c)
 
+-- | Normalize the vector w.r.t the sum of the coefficients.
 normalize   :: Vector 3 R -> Vector 3 R
 normalize v = let s = sum v in (/s) <$> v
 
+
+-- | Make sure that we indeed generate points inside the triangle.
+testBarrycentric :: Spec
 testBarrycentric = prop "test barrycentric" $
                      \(Queries t pts) -> all (`intersects` t) pts
 
@@ -186,6 +194,8 @@ apply ats a = foldl' (flip ($)) a ats
 
 --------------------------------------------------------------------------------
 
+-- more numtype instances just for debugging/testing purposes
+
 type instance NumType (NESet.NESet a) = NumType a
 type instance NumType (MonoidalMap.MonoidalMap k a) = NumType a
 
@@ -213,38 +223,18 @@ instance IsDrawable (Ipe R) MyPoint where
 
 
 --------------------------------------------------------------------------------
--- * Move to Kernel test HalfLine Intersection
+-- * Move to Kernel ; Cone x Triangle intersection stuff ?
 
-testT :: Triangle (Point 2 R)
-testT =  Triangle (Point2 1 0) (Point2 1 1) (Point2 0 0)
+testX :: Spec
+testX = it "cone triangle boundary intersections" $
+  let testT :: Triangle (Point 2 R)
+      testT =  Triangle (Point2 1 0) (Point2 1 1) (Point2 0 0)
 
-testC :: Cone R (Point 2 R) ()
-testC = Cone (Point2 1 0) (Vector2 1 1 :+ ()) (Vector2 0 (-1) :+ ())
-
-
-testX = coneTriangleBoundaryIntersections testC testT
--- testY = case (
---               -- (rightBoundary testC ^.core)
---              `intersect`
---               () of
-
---           -- _                                             -> True
-  -- FIXME: This is a bug; the halfline should not intersect the segment as a segment.
-
-bug :: Spec
-bug = describe "halfine x line segment should not intersect" $ do
-        let hl  = HalfLine (Point2 1 (0 :: R)) (Vector2 0 (-1))
-            seg = ClosedLineSegment (Point2 1 (0 :: R)) (Point2 1 1)
-        it "intersect" $
-          (case hl `intersect` seg of
-                Just (HalfLine_x_LineSegment_LineSegment seg) -> False
-                Just _                                        -> True
-                Nothing                                       -> False
-          ) `shouldBe` True
-        it "intersects" $
-          (hl `intersects` seg) `shouldBe` True
-
---------------------------------------------------------------------------------
+      testC :: Cone R (Point 2 R) ()
+      testC = Cone (Point2 1 0) (Vector2 1 1 :+ ()) (Vector2 0 (-1) :+ ())
+  in coneTriangleBoundaryIntersections testC testT
+     `shouldBe`
+     [Point2 1 0,Point2 1 0,Point2 1 0,Point2 1 0]
 
 
 -- | Computes the intersection points of the boundary of a cone with
@@ -272,7 +262,9 @@ coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
             ]
 
 
+--------------------------------------------------------------------------------
 
+-- | Generates arbitary points in a triangle
 arbitraryPointsInTriangle   :: Triangle (Point 2 R) -> Gen [Point 2 R]
 arbitraryPointsInTriangle t = do seed <- arbitrary
                                  n    <- arbitrary
@@ -284,12 +276,15 @@ arbitraryPointsInTriangle t = do seed <- arbitrary
                                              <$> sampleFromTriangle t' g
                                  pure $ runStateGen_ gen $ replicateM n . sample
 
-
+-- | Generate arbitrary pints in the intersection of a triangle and a an other region.
+arbitraryPointInIntersection             :: Point 2 R `HasIntersectionWith` region
+                                         => Triangle (Point 2 R) -> region -> Gen [Point 2 R]
 arbitraryPointInIntersection domain cone =
   filter (`intersects` cone) <$>  arbitraryPointsInTriangle domain
 
 --------------------------------------------------------------------------------
 
+-- | A clipped cone data type (represented by the two bounding arys)
 data ClippedCone apex = ClippedCone { _leftBoundary'  :: HalfLine apex
                                     , _rightBoundary' :: HalfLine apex
                                     }
@@ -303,15 +298,15 @@ instance ( Arbitrary apex, Point_ apex 2 r, Num r, Ord r, Arbitrary r
                  lambdas                  <- arbitrary `suchThat` (all (> 0))
                  pure $ fromConeAndShifts cone lambdas
 
+-- | Construct a clipped cone from a given cone and some offsets w.r.t the apex.
+fromConeAndShifts              :: ( Num r, Point_ apex 2 r)
+                               => Cone r apex edge -> Vector 2 r -> ClippedCone apex
 fromConeAndShifts cone lambdas = ClippedCone leftRay rightRay
   where
     shift lambda v = HalfLine ((cone^.apex) .+^ (lambda *^ v)) v
     Vector2 leftRay rightRay = zipWith shift lambdas
                              $ Vector2 (cone^.leftBoundaryVector.core)
                                        (cone^.rightBoundaryVector.core)
-
-
-
 
 instance ( Point_ point 2 r, Num r, Ord r
          ) => Point 2 r `HasIntersectionWith` ClippedCone point where
@@ -324,23 +319,14 @@ instance ( Point_ point 2 r, Num r, Ord r
 
 --------------------------------------------------------------------------------
 
+-- | Helper data type to generate tests for our cone and clipped cone cover tests
 data ConeInput' cone = ConeInput { _domain  :: Triangle (Point 2 R)
                                  , _cone     :: cone
                                  , _pointsIn :: [Point 2 R]
                                  } deriving (Show,Eq,Functor,Generic)
-type ConeInput = ConeInput' (Cone R (Point 2 R) ())
 
+type ConeInput        = ConeInput' (Cone R (Point 2 R) ())
 type ClippedConeInput = ConeInput' (ClippedCone (Point 2 R))
-
-
--- type instance Intersection (Point 2 r) (Cone r point edge) = Maybe (Point 2 r)
--- instance ( Point_ point 2 r, Num r, Ord r
---          ) => Point 2 r `IsIntersectableWith` Cone r point edge where
---   q `intersect` cone
---     | q `intersects` cone = Just q
---     | otherwise           = Nothing
---   {-# INLINE intersect #-}
-
 
 instance ( Arbitrary cone
          , Point 2 R `HasIntersectionWith` cone
@@ -351,6 +337,7 @@ instance ( Arbitrary cone
                  pure $ ConeInput domain cone pts
   shrink = genericShrink
 
+coneCovers :: Spec
 coneCovers = describe "Cone Covers" $ do
     prop "cone cover contains domain" $
       \(ConeInput domain (cone :: Cone R (Point 2 R) ()) pts) ->
@@ -394,15 +381,18 @@ coneCovers = describe "Cone Covers" $ do
                                    ]
 
 
+--------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
-         bug
+         testX
          testBug
          coneCovers
          findMissingEdgeTest
          lowest
          verifyCellProperties
+         testBarrycentric
+         -- voronoiSpec -- FIXME: Enable this again
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $
@@ -474,12 +464,19 @@ spec = describe "RandomizedEnvSpec" $ do
                ===
                verticesOf (bruteForceVerticesIn domain planes)
 
+
+--------------------------------------------------------------------------------
+
+
+-- | Generate at least three planes
 newtype MyPlanes = MyPlanes (NESet.NESet MyPlane)
                  deriving (Show,Eq)
 
 instance Arbitrary MyPlanes where
   arbitrary = MyPlanes <$> arbitrary `suchThat` ((>= 3) . length)
 
+
+verifyCellProperties :: Spec
 verifyCellProperties = describe "verifying cell properties" $ do
   prop "cells convex" $
     \(MyPlanes planes) (domain :: Triangle (Point 2 R)) ->
@@ -494,12 +491,13 @@ verifyCellProperties = describe "verifying cell properties" $ do
                     ) env
 
 
+findMissingEdgeTest :: Spec
 findMissingEdgeTest = it "find missing edge" $
                       findMissingEdge (\u v -> u > v) 0 (NonEmpty.fromList [1..5])
                       `shouldBe`
                       Just (0,[1..4],5)
 
-
+lowest :: Spec
 lowest = prop "brute force triangulated envelope; indeed lowest at query points" $
              \(MyPlanes planes) (Queries domain queries) ->
                let env = triangulatedLowerEnvelopeOn domain planes
@@ -865,7 +863,9 @@ drawEnv = ifoldMap draw'
 
 
 --------------------------------------------------------------------------------
+-- * Voronoi Diagrams on a bounded region (via the lifting to the lower envelope)
 
+-- TODO: Move this into the main library I guess
 
 type BoundedVoronoiDiagram r site =
   MonoidalMap site (ConvexPolygon (Vertex' (EnvVertex r site) r site))

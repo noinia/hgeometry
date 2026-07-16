@@ -367,6 +367,8 @@ fromVertices domain = imapMaybe computeCell . foldMap collect
 coverUnbounded :: forall vertex sequence corner r.
                     ( Point_ vertex 2 r, Point_ corner 2 r
                     , Ord r, Fractional r
+
+                    , Show vertex, Show r
                     )
                  => Triangle corner
                  -> HalfLine vertex -> [vertex] -> HalfLine vertex
@@ -391,7 +393,9 @@ coverUnbounded domain (HalfLine al vl) intermediate (HalfLine ar vr) = do
     r <- f ar vr
 
     let origs  = Original <$> al :| intermediate ++ [ar]
-    pure $ uncheckedFromCCWPoints $ origs <> (r :| [l])
+
+    let res = uncheckedFromCCWPoints $ origs <> (r :| [l])
+    pure $ traceShowWith ("coverUnbounded", verifyConvex res,) res
 
 
 -- | Given a triangle D and a clipped cone C; given by it's left bounding ray bl and
@@ -406,6 +410,8 @@ coverUnbounded domain (HalfLine al vl) intermediate (HalfLine ar vr) = do
 coverClippedCone                   :: forall apex corner r.
                                       ( Point_ apex 2 r, Point_ corner 2 r
                                       , Ord r, Fractional r
+
+                                      , Show apex, Show r -- TODO: remove
                                       )
                                    => Triangle corner
                                    -> HalfLine apex -> HalfLine apex
