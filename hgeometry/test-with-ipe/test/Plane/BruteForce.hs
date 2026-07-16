@@ -29,12 +29,15 @@ module Plane.BruteForce
 
   -- , allZippers
 
-  -- , coverCone
-  -- , coverClippedCone
-  , findUnbounded
-  , findRotateTo
+  , coverCone
+  , coverClippedCone
+
+  , findMissingEdge
+  -- , findRotateTo
   ) where
 
+import           Data.Foldable
+import           HGeometry.HalfLine
 import           Control.Lens hiding (Prism, Prism')
 import           Prelude hiding (filter)
 import           Data.Set (Set)
@@ -227,14 +230,20 @@ xs <<> ys = case NonEmpty.nonEmpty xs of
               Nothing  -> ys
               Just xs' -> xs' <> ys
 
--- | Given a bounded region D and the set of vertices of the lower
--- envelope, compute the bounded lower envelope from them. I.e. computes a set of
--- plane,convex-region pairs (h,R_h) so that:
+-- | Given a bounded region D, and (a superset of) the set V of all
+-- vertices of all faces of the lower envelope that intersect
+-- D. Compute/construct the bounded lower envelope from
+-- V. I.e. computes a set of plane,convex-region pairs (h,R_h) so
+-- that:
 --
 -- - h is the lowest plane above R_h,
 -- - the union of the R_h's cover D,
 -- - on the domain D, the R_h regions are pairwise disjoint.
 --
+--
+-- (In case the vertices also define faces disjoint from D; these may
+-- also still be included. In particular, the current implementation
+-- may include bounded faces that are disjoint from D.)
 --
 -- O(n\log n).
 fromVertices        :: forall plane vertex corner r.
@@ -244,11 +253,7 @@ fromVertices        :: forall plane vertex corner r.
                        )
                     => Triangle corner -> Set vertex
                     -> BoundedLowerEnvelope' vertex r plane
-fromVertices domain = imap computeCell . foldMap collect
-                      -- FIXME: the interseection of a cell with the domain may be empty
-
-
-
+fromVertices domain = imapMaybe computeCell . foldMap collect
   where
     -- | For each plane h; collects the vertices that appear on the region corresponding to h
     collect   :: vertex -> MonoidalMap plane (NonEmpty vertex)
@@ -260,30 +265,49 @@ fromVertices domain = imap computeCell . foldMap collect
 
     -- | For a plane; compute the vertices in CCW order around the its boundary, and
     -- extend to cover the domain
-    computeCell :: plane -> NonEmpty vertex -> ConvexPolygon (Vertex' vertex r plane)
-    computeCell h (sortAroundBoundary -> vs'@(v0:|rest')) =
-        -- traceShowWith ("computeCell",h, ";;;", extras, ";;;;", vs',"->", ) $
-        uncheckedFromCCWPoints $ (extra' <$> extras) <<> (Original <$> originals)
+    computeCell :: plane -> NonEmpty vertex -> Maybe (ConvexPolygon (Vertex' vertex r plane))
+    computeCell h (sortAroundBoundary -> vs'@(v0:|rest')) = evalAtExtras $
+        case NonEmpty.nonEmpty rest' of
+          Nothing   -> let f                       = evalAt (v0 .+^ w1)
+                           Vector2 (h1,w1) (h2,w2) = boundingPlanes v0
+                           (left,right)            = if f h < f h2
+                                                     then (negated w2 :+ h2, w1 :+ h1)
+                                                     else (negated w1 :+ h1, w2 :+ h2)
+                             -- if v0 + w1 lies on the h-side of the intersection-line of
+                             -- h and h2; then apparently w1 is the right vector, and thus
+                             -- w2 is the (incoming) left boundary vector. (Which we negate
+                             -- since to construct the cone we need an outgoing vector).
+                             --
+                             -- otherwise, w1 is the incoming left
+                             -- boundary ray in reverse direction. and we negate it appropriately.
+                       in coverCone domain (Cone v0 left right)
+          Just rest -> case findMissingEdge isMissingEdge v0 rest of
+            Nothing                     -> Just $ uncheckedFromCCWPoints (Original <$> vs')
+              -- no missing edge, so we have a bounded convex polygon
+            Just (al, intermediate, ar) ->
+                let -- the left vector should be pointing away from al. so we compute
+                    -- the vectors corresponding to the two defining halfplanes.
+                    -- these vectors are so that h is cheaper to the left of the vectors.
+                    -- so, we evaluate h2 at ar+w1. If at this point, h2 is cheaper than
+                    -- h. this means that negated w1 is the left bounding vector of our ray.
+                    -- otherwise. negated w2 is our (incoming) left bounding vector here.
+                    vl = negated $ let Vector2 (_h1,w1) (h2,w2) = boundingPlanes al
+                                       f = evalAt (al .+^ w1)
+                                   in if f h2 < f h then w1 else w2
+
+                    -- for the right bounding vector this similar: if at
+                    -- ar+w1 h2 is cheaper than h; vector w1 must be the
+                    -- incoming vector at ar (as h is cheaper on the
+                    -- left of this vector), (and thus w2 must be the
+                    -- outgoing vector). Otherwise, w1 is indeed the outgoing vector.
+                    vr = let Vector2 (_h1,w1) (h2,w2) = boundingPlanes ar
+                             f = evalAt (ar .+^ w1)
+                         in if f h2 < f h then w2 else w1
+                in coverUnbounded domain (HalfLine al vl) intermediate (HalfLine ar vr)
+
       where
-        -- | The vertices in sorted order around some arbitrary first vertex.
-        (originals, extras) = case NonEmpty.nonEmpty rest' of
-          Nothing   -> let a                      = v0^.asPoint
-                           f                      = evalAt (v0 .+^w2)
-                           Vector2 (h1,w1) (_,w2) = boundingPlanes v0
-                           (w1',w2')              = if f h < f h1 then (w1,w2) else (w2,w1)
-                       in (vs', coverCone'' a w1' a w2')
-          Just rest -> case findUnbounded isUnboundedEdge v0 rest of
-            Nothing        -> (vs', [])
-            Just vs@(u:|_) -> (vs, extraVertices u $ NonEmpty.last vs)
-
-        extra' p = Extra $ p :+ evalAt p h
-
-        -- | Computes extra vertices required to cover the (clipped) cone with apices al and ar.
-        -- al is the vector pointing into al. ar is the vector pointing away from ar.
-        -- both vectors have h to their left.
-        coverCone''             :: Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
-                                -> [Point 2 r]
-        coverCone'' al wl ar wr = toList $ coverCone' domain al wl ar wr
+        -- | for the Extra vertices, evaluate their height value
+        evalAtExtras = over (_Just.vertices._Extra) (\q -> q :+ evalAt q h)
 
         -- | Given a vertex, compute the two planes that together with h define this vertex.
         -- (as well as for both planes) the direction vector so that h is to the left
@@ -293,11 +317,18 @@ fromVertices domain = imap computeCell . foldMap collect
                         <$> otherPlanes h (definingPlanes v)
         err = error "absurd: fromVertices. planes don't intersect !?"
 
+
+
+
+
+        -- extra' p = Extra $ p :+ evalAt p h
+
+
         -- | Given two neighbouring vertices u and v test if v is
         -- really a CCW neighbor of u; i.e. if uv is an edge of the
         -- polygon, or not. This function returns True if uv is *not* an edge.
-        isUnboundedEdge     :: vertex -> vertex -> Bool
-        isUnboundedEdge u v = case otherPlane u v of
+        isMissingEdge     :: vertex -> vertex -> Bool
+        isMissingEdge u v = case otherPlane u v of
           Nothing -> True
           Just h' -> let Vector2 x y = v .-. u
                          w           = Vector2 y (-x)
@@ -317,153 +348,139 @@ fromVertices domain = imap computeCell . foldMap collect
                            xs    -> traceStack (show ("multiple",h,u,v,xs)) $
                              error "otherPlane: Multiple planes intersecting in a line?"
 
-        -- | Computes the additional vertices (when we are in the unbounded case)
-        --
-        -- u is the first vertex of the chain and v is the last vertex of the chain.
-        extraVertices     :: vertex -> vertex -> [Point 2 r]
-        extraVertices u v = coverCone'' (u^.asPoint) (dir u (>)) (v^.asPoint) (dir v (<))
-          where
-            dir z cmp = let Vector2 (_h1,w1) (h2,w2) = boundingPlanes z
-                            f = evalAt (z .+^ w1)
-                        in if f h `cmp` f h2 then w1 else w2
-            -- for the left vector, the vector should be incoming at u
-            -- so at u + w1 h should be more expensive than h2.
-            -- ( and equally expensive as h1)
-            -- for the right vector, the vector should be outgoing at u
-            -- so at u + w1 h should be cheaper then h2.
-
-
-
 
 --------------------------------------------------------------------------------
 
--- | cover the clipped cone.
-coverClippedCone                         :: forall apex corner r.
-                                            ( Point_ apex 2 r, Point_ corner 2 r
-                                            , Ord r, Fractional r
-                                            , Show r
-                                                  )
-                                     => Triangle corner
-                                     -> apex -> Vector 2 r -> apex -> Vector 2 r
-                                     -> ConvexPolygon (OriginalOrExtra apex (Point 2 r))
-coverClippedCone domain al leftV ar rightV =
-  let al' = al^.asPoint
-      ar' = ar^.asPoint
-  in uncheckedFromCCWPoints $
-     (Extra <$> coverCone' domain al' leftV ar' rightV) <>
-     (Original <$> al :| [ar])
 
--- | Given the domain, and a cone; given by its apex, its left vector,
--- and its right vector (both given so that the cone is to the left of
--- the vectors).  compute a convex polygon of contant complexity that
--- covers the cone
-coverCone :: forall apex corner r. (Point_ apex 2 r, Point_ corner 2 r, Ord r, Fractional r
-             , Show apex, Show r
-             )
-          => Triangle corner -> apex -> Vector 2 r -> Vector 2 r
-          -> ConvexPolygon (OriginalOrExtra apex (Point 2 r))
-coverCone domain a leftV rightV =
-  let a' = a^.asPoint
-  in uncheckedFromCCWPoints $
-     (Extra <$> coverCone' domain a' leftV a' rightV) <> NonEmpty.singleton (Original a)
-
--- | Given a triangle D and a (possibly clipped) cone C; given it's left bounding ray l and
--- its right boundring ray r. Compute a convex polygon R that contains \(C \cap D\).
+-- | Given a triangle D and an convex unbounded region C; given by its
+-- left bounding ray bl, its intermediate vertices (in left to right
+-- order), and its right bounding ray br. Compute a convex region R
+-- that contains \(C \cap D\).
 --
--- This function reports the sequence of vertices v_l,w_1,..,w_k,v_r
--- so that
-
--- do we have the guarnatee that C cap D is non-empty?
-coverCone'                           :: forall corner r. ( Ord r, Fractional r
-                                                         , Show r
-                                                         , Point_ corner 2 r
-                                                         )
-                                     => Triangle corner
-                                     -> Point 2 r -> Vector 2 r -> Point 2 r -> Vector 2 r
-                                     -> NonEmpty (Point 2 r)
-coverCone' domain al leftV ar rightV = hull ar $ r :| mp <> [l]
-  where
-    domain' = fmap (^.asPoint) domain
-    Vector2 h1 h2  = leftHalfPlane <$> Vector2 (LinePV al leftV)
-                                               (LinePV ar rightV)
-
-    -- left boundary vector; pointing into the cone from the apex
-    left'' = negated leftV
-
-    l' = maximumBy (cmpInDirection2 left'') domain'
-    r' = maximumBy (cmpInDirection2 rightV) domain'
-
-    l = projectOnto al left'' l'
-    r = projectOnto ar rightV r'
-
-    -- the halfplane not containing v
-    h = leftHalfPlane $ LinePV l (r .-. l)
-
-    -- the corners of the domain that are in the cone, and still on the wrong side of the
-    -- halfplane defined by l and r
-    mp = List.sortBy (ccwCmpAroundWith rightV ar)
-       . filter (\q -> all (q `intersects`) [h1,h2,h]) $ toList domain'
-
-
-    -- we are overestimating the length of the vector from q to a and using that
-    projectOnto          :: Point 2 r -> Vector 2 r -> Point 2 r -> Point 2 r
-    projectOnto a base q = let vLen = quadrance $ q .-. a
-                               b    = max 1 vLen  *^ base
-                           in a .+^ b
-      -- consider the vector v from q to a, and let v' be its projection onto base.
-      -- we want to compute some point that lies on the base, and is "further away"
-      -- than v'.
-      --
-      -- observe that the length of v is at least the length of v'. So we will compute
-      -- a vector b whose (squared) length is at least the (squared) length of v.
-
--- | make sure we only make CCW turns in our chain.
+-- The convex region R will be a convex region contain the vertices
+-- and two points v_l and v_r on the bounding rays.
 --
--- Note that this is very similar the implementation also used in grahamscan (but swtiching)
--- right turn for left turn.
-hull           :: (Ord r, Num r, Point_ point 2 r
-                  , Show point, Show r
-                  )
-               => point -- the apex of the coner; we do this
-               -- so that we also trim colinear points that are on the initial rightward ray
-               -> NonEmpty point -> NonEmpty point
-hull a (b:|ps) = NonEmpty.fromList . drop 1 . reverse $ hull'' [b,a] ps
-                 -- the drop 1 removes the dummy a; so this is safe.
-  where
-    hull'' h []      = h
-    hull'' h (p:ps') = hull'' (cleanMiddle (p:h)) ps'
+-- pre: the starting points of the two rays are disjoint
+--      the intermediate vertices do not contain the starting points of the rays
+--
+-- note: this will return Nothing iff \(C \cap D\) is empty.
+coverUnbounded :: forall vertex sequence corner r.
+                    ( Point_ vertex 2 r, Point_ corner 2 r
+                    , Ord r, Fractional r
+                    )
+                 => Triangle corner
+                 -> HalfLine vertex -> [vertex] -> HalfLine vertex
+                 -> Maybe (ConvexPolygon (OriginalOrExtra vertex (Point 2 r)))
+coverUnbounded domain (HalfLine al vl) intermediate (HalfLine ar vr) = do
+    -- let w be the direction perpendicular to the segment al,ar (and pointing into the cone)
+    --
+    -- our region will be a trapezoid with corners al, ar, vr, vl
+    -- where the segment vl,vr is parallel to al,ar, and passes through
+    -- the furthest point q in the direction w.
+    let v'@(Vector2 x y) = ar .-. al
+        w = Vector2 (-y) x -- the direction pointing into the cone
 
-    cleanMiddle h@[_,_] = h
-    cleanMiddle h@(z:y:x:rest)
-      | leftTurn x y z = h
-      | otherwise       = cleanMiddle (z:x:rest)
-    cleanMiddle _       = error "cleanMiddle: too few points"
-    leftTurn a' b' c' = ccw a' b' c' == CCW
+    q <- maximumByOf folded (cmpInDirection2 w) domain
 
-hull _ _ = error "hull requires a list with at least two elements."
+    let m = LinePV (q^.asPoint) v' -- the line through the furthest point
+        -- helper to compute the vertices on the rays
+        f a v = LinePV (a^.asPoint) v `intersect` m >>= \case
+          Line_x_Line_Point p -> Just (Extra p)
+          _                   -> Nothing -- this should not really happen
+    l <- f al vl
+    r <- f ar vr
+
+    let origs  = Original <$> al :| intermediate ++ [ar]
+    pure $ uncheckedFromCCWPoints $ origs <> (r :| [l])
+
+
+-- | Given a triangle D and a clipped cone C; given by it's left bounding ray bl and
+-- its right boundring ray br. Compute a convex region R that contains \(C \cap D\).
+--
+-- The convex region R will be a quadrilateral contain the starting
+-- point of the two rays and two points v_l and v_r on the rays.
+--
+-- pre: the starting points of the two rays are disjoint
+--
+-- note: this will return Nothing iff \(C \cap D\) is empty.
+coverClippedCone                   :: forall apex corner r.
+                                      ( Point_ apex 2 r, Point_ corner 2 r
+                                      , Ord r, Fractional r
+                                      )
+                                   => Triangle corner
+                                   -> HalfLine apex -> HalfLine apex
+                                   -> Maybe (ConvexPolygon (OriginalOrExtra apex (Point 2 r)))
+coverClippedCone domain left right = coverUnbounded domain left [] right
+
+
+-- | Given a triangle D and a cone C; Compute a convex region R that contains \(C \cap D\).
+--
+-- The convex region R will be a quadrilateral contain the apex, two
+-- points v_l and v_r on the rays, and the intersection of the lines perpendicular to
+-- the rays.
+--
+-- note: this will return Nothing iff \(C \cap D\) is empty.
+coverCone          :: forall apex corner r e.
+                      ( Point_ apex 2 r, Point_ corner 2 r
+                      , Ord r, Fractional r
+                      )
+                   => Triangle corner
+                   -> Cone r apex e
+                   -> Maybe (ConvexPolygon (OriginalOrExtra apex (Point 2 r)))
+coverCone domain c = do
+    -- we compute the maximum point q_l in direction of the left bounding ray l; and take
+    -- the line m_l through this point perpendicular to the ray. This line intersects
+    -- the ray in some defining point v_l. We do the same for the right boundary ray r.
+    -- these two lines intersect in a point w. We add v_l, w, and v_r as additional vertices.
+
+    -- all points in \(C \cap D\) will be left of m_l, and left of m_r; hence contained
+    -- the output region
+    let a = c^.apex
+        basePt v@(Vector2 x y) = do q <- maximumByOf folded (cmpInDirection2 v) domain
+                                    let m = LinePV (q^.asPoint) (Vector2 (-y) x)
+                                        -- the direction of this line is perpendicular to v
+                                    (,m) <$> intersectionPoint (LinePV (a^.asPoint) v) m
+
+        -- compute the intersection point of two lines; assuming it exists
+        intersectionPoint l m = l `intersect` m >>= \case
+          Line_x_Line_Point p -> Just (Extra p)
+          _                   -> Nothing -- this should not really happen
+
+    (vl,ml) <- basePt (c^.leftBoundaryVector.core)
+    (vr,mr) <- basePt (c^.rightBoundaryVector.core)
+    w       <- intersectionPoint ml mr
+
+    pure $ uncheckedFromCCWPoints $ Original a :| [vr, w, vl]
 
 --------------------------------------------------------------------------------
 
 
 
--- | Try to find the unbounded edge (where the predicate somehow can
+-- | Try to find the missing edge (where the predicate somehow can
 -- test whether the pair of subsequent vertices define an edge).
-findUnbounded          :: (vertex -> vertex -> Bool)
-                       -> vertex -> NonEmpty vertex
-                       -> Maybe (NonEmpty vertex)
-findUnbounded p v0 vs' = let vs = v0 NonEmpty.<| vs'
-                         in fmap (fmap fst)
-                          . findRotateTo snd
-                          $ NonEmpty.zipWith (\u v -> (v, p u v)) vs (vs' <> vs)
+--
+-- This function actually returns a triple (v0, [v_1,..,v_k], v_k+1)
+-- of the vertices in sequence along the boundary v0,v_1,..,v_k,v_k+1,
+-- so that the "unbounded edge" is the edge between v_k+1 and v_0
+findMissingEdge          :: (vertex -> vertex -> Bool)
+                         -> vertex -> NonEmpty vertex
+                         -> Maybe (vertex, [vertex], vertex)
+findMissingEdge p v0 vs' = fmap fst . find snd $
+    NonEmpty.zipWith (\u (v :| intermediates) -> ((v, take k intermediates, u), p u v)) vs rests
+  where
+    vs    = v0 NonEmpty.<| vs'
+    rests = NonEmpty.tails1 $ vs' <> vs
+    k     = length vs' - 1
 
 
 
+{-
 -- | rotate so that we start with an element that satisfies the predicate.
 findRotateTo   :: (a -> Bool) -> NonEmpty a -> Maybe (NonEmpty a)
 findRotateTo p = fmap f . traverse NonEmpty.nonEmpty . NonEmpty.break p
   where
     f (pref, v0 :| suff) = v0 :| suff <> pref
-
+-}
 
 
 
@@ -604,3 +621,10 @@ allZippers :: [a] -> [Zipper a]
 allZippers = \case
   []     -> []
   (x:xs) -> Zipper [] x xs : [ Zipper (x:pref) y rest | Zipper pref y rest <- allZippers xs ]
+
+--------------------------------------------------------------------------------
+
+
+-- TODO: this should go into MonoidalMap I guess
+instance Ord k => FilterableWithIndex k (MonoidalMap k)
+instance Ord k => WitherableWithIndex k (MonoidalMap k)
