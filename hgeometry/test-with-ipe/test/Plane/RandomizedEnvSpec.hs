@@ -4,7 +4,8 @@
 module Plane.RandomizedEnvSpec
   where
 
-import           GHC.Generics(Generic)
+import           HGeometry.Polygon.Convex.Internal (verifyConvex)
+import           GHC.Generics (Generic)
 import           Control.Monad
 import           HGeometry.Polygon.Simple.Sample
 import           Prelude hiding (zipWith)
@@ -56,11 +57,12 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           Data.Text (Text)
 import           Debug.Pretty.Simple
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
--- import           Debug.Trace
+import           Debug.Trace
 import           Ipe.Draw
 import           Test.Util
 import           Data.Traversable
 import           System.Random.Stateful
+
 --------------------------------------------------------------------------------
 
 -- newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
@@ -86,7 +88,7 @@ instance Arbitrary (IpeColor R) where
 ----------------------------------------
 
 data Queries = Queries (Triangle (Point 2 R)) (NonEmpty (Point 2 R))
-             deriving (Show,Eq)
+             deriving (Show,Eq,Generic)
 
 instance Arbitrary Queries where
   arbitrary = do domain   <- arbitrary
@@ -95,7 +97,12 @@ instance Arbitrary Queries where
                                arbitrary `suchThat` all (> 0)
                  let queries = barrycentric domain <$> queries'
                  pure $ Queries domain queries
-  shrink (Queries tri qs) = [ Queries tri qs' | qs' <- shrink qs ]
+  -- shrink = const []
+  -- shrink = genericShrink
+  shrink (Queries tri qs) = [ Queries tri qs'
+                            | qs' <- shrink qs
+                            , all (`intersects` tri) qs'
+                            ]
 
 barrycentric :: Triangle (Point 2 R) -> Vector 3 R -> Point 2 R
 barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y z) =
@@ -103,6 +110,9 @@ barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y 
 
 normalize   :: Vector 3 R -> Vector 3 R
 normalize v = let s = sum v in (/s) <$> v
+
+testBarrycentric = prop "test barrycentric" $
+                     \(Queries t pts) -> all (`intersects` t) pts
 
 --------------------------------------------------------------------------------
 
@@ -390,6 +400,9 @@ spec = describe "RandomizedEnvSpec" $ do
          bug
          testBug
          coneCovers
+         findMissingEdgeTest
+         lowest
+         verifyCellProperties
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $
@@ -453,21 +466,49 @@ spec = describe "RandomizedEnvSpec" $ do
                             ]
 
 
-           prop "brute force triangulated envelope; indeed lowest at query points" $
-             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
-               let env   = triangulatedLowerEnvelopeOn domain planes
-               in counterexample (show env) $
-                  ipeCounterExample (queries, domain, toList env) $
-                    not (null env) ==> conjoin [ verifyLowest (toNonEmpty planes) q env
-                                               | q <- toList queries
-                                               ]
-
+           lowest
            xprop "randomized2 same as (new) brute force" $
              \(planes :: NESet.NESet MyPlane)
               (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
                verticesOf (Randomized.verticesIn gen domain planes)
                ===
                verticesOf (bruteForceVerticesIn domain planes)
+
+newtype MyPlanes = MyPlanes (NESet.NESet MyPlane)
+                 deriving (Show,Eq)
+
+instance Arbitrary MyPlanes where
+  arbitrary = MyPlanes <$> arbitrary `suchThat` ((>= 3) . length)
+
+verifyCellProperties = describe "verifying cell properties" $ do
+  prop "cells convex" $
+    \(MyPlanes planes) (domain :: Triangle (Point 2 R)) ->
+      let env = lowerEnvelopeOn domain planes
+      in not (null env) ==>
+           ipeCounterExample env $
+           ifoldMap (\h cell -> Every $
+                                counterexample (show (h,cell)) $
+                                ipeCounterExample (cell, domain) $
+                                verifyConvex cell
+
+                    ) env
+
+
+findMissingEdgeTest = it "find missing edge" $
+                      findMissingEdge (\u v -> u > v) 0 (NonEmpty.fromList [1..5])
+                      `shouldBe`
+                      Just (0,[1..4],5)
+
+
+lowest = prop "brute force triangulated envelope; indeed lowest at query points" $
+             \(MyPlanes planes) (Queries domain queries) ->
+               let env = triangulatedLowerEnvelopeOn domain planes
+               in if null env then trace ("discarding empty envelope " <> show planes) discard
+                              else counterexample (show env) $
+                  ipeCounterExample (queries, domain, toList env) $
+                    not (null env) ==> conjoin [ verifyLowest (toNonEmpty planes) q env
+                                               | q <- toList queries
+                                               ]
 
 
 {-
@@ -511,6 +552,8 @@ verifyLowestEnv hs q = counterexample (show q)
                                ) hs
 
     lowestAtQ = minimumBy (comparing $ evalAt q) hs
+
+
 
 
 
@@ -1001,81 +1044,3 @@ testBug = prop "brute force vornoi diagram; covers all points" $
 
 
 --------------------------------------------------------------------------------
-
--- | Given a triangle D and a clipped cone C; given by it's left bounding ray bl and
--- its right boundring ray br. Compute a convex region R that contains \(C \cap D\).
---
--- The convex region R will be a quadrilateral contain the starting
--- point of the two rays and two points v_l and v_r on the rays.
---
--- pre: the starting points of the two rays are disjoint
---
--- note: this will return Nothing iff \(C \cap D\) is empty.
-coverClippedCone                         :: forall apex corner r.
-                                            ( Point_ apex 2 r, Point_ corner 2 r
-                                            , Ord r, Fractional r
-                                            , Show r
-                                                  )
-                                     => Triangle corner
-                                     -> HalfLine apex
-                                     -> HalfLine apex
-                                     -> Maybe (ConvexPolygon (OriginalOrExtra apex (Point 2 r)))
-coverClippedCone domain (HalfLine al vl) (HalfLine ar vr) = do
-    -- let w be the direction perpendicular to the segment al,ar (and pointing into the cone)
-    --
-    -- our region will be a trapezoid with corners al, ar, vr, vl
-    -- where the segment vl,vr is parallel to al,ar, and passes through
-    -- the furthest point q in the direction w.
-    let v'@(Vector2 x y) = ar .-. al
-        w = Vector2 (-y) x -- the direction pointing into the cone
-
-    q <- maximumByOf folded (cmpInDirection2 w) domain
-
-    let m = LinePV (q^.asPoint) v' -- the line through the furthest point
-        -- helper to compute the vertices on the rays
-        f a v = LinePV (a^.asPoint) v `intersect` m >>= \case
-          Line_x_Line_Point p -> Just (Extra p)
-          _                   -> Nothing -- this should not really happen
-    l <- f al vl
-    r <- f ar vr
-    pure $ uncheckedFromCCWPoints $ Original al :| [Original ar, r, l]
-
--- | Given a triangle D and a cone C; Compute a convex region R that contains \(C \cap D\).
---
--- The convex region R will be a quadrilateral contain the apex, two
--- points v_l and v_r on the rays, and the intersection of the lines perpendicular to
--- the rays.
---
--- note: this will return Nothing iff \(C \cap D\) is empty.
-coverCone          :: forall apex corner r e.
-                      ( Point_ apex 2 r, Point_ corner 2 r
-                      , Ord r, Fractional r
-                      , Show r
-                      )
-                   => Triangle corner
-                   -> Cone r apex e
-                   -> Maybe (ConvexPolygon (OriginalOrExtra apex (Point 2 r)))
-coverCone domain c = do
-    -- we compute the maximum point q_l in direction of the left bounding ray l; and take
-    -- the line m_l through this point perpendicular to the ray. This line intersects
-    -- the ray in some defining point v_l. We do the same for the right boundary ray r.
-    -- these two lines intersect in a point w. We add v_l, w, and v_r as additional vertices.
-
-    -- all points in \(C \cap D\) will be left of m_l, and left of m_r; hence contained
-    -- the output region
-    let a = c^.apex
-        basePt v@(Vector2 x y) = do q <- maximumByOf folded (cmpInDirection2 v) domain
-                                    let m = LinePV (q^.asPoint) (Vector2 (-y) x)
-                                        -- the direction of this line is perpendicular to v
-                                    (,m) <$> intersectionPoint (LinePV (a^.asPoint) v) m
-
-        -- compute the intersection point of two lines; assuming it exists
-        intersectionPoint l m = l `intersect` m >>= \case
-          Line_x_Line_Point p -> Just (Extra p)
-          _                   -> Nothing -- this should not really happen
-
-    (vl,ml) <- basePt (c^.leftBoundaryVector.core)
-    (vr,mr) <- basePt (c^.rightBoundaryVector.core)
-    w       <- intersectionPoint ml mr
-
-    pure $ uncheckedFromCCWPoints $ Original a :| [vr, w, vl]
