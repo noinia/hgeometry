@@ -1044,3 +1044,50 @@ testBug = prop "brute force vornoi diagram; covers all points" $
 
 
 --------------------------------------------------------------------------------
+
+--match "/verifying cell properties/cells convex/" --seed 295573538
+main = hspec verifyCellProperties
+
+bug = prop "bug" $
+  let domain :: Triangle (Point 2 R)
+      domain = Triangle (Point2 0 0) (Point2 1 (-1)) (Point2 0 1)
+
+      cone :: Cone R (Point 2 R) (Plane R)
+      cone = Cone                       ( Point2 ( -0.51219 ) 1.09293 )
+                   (Vector2 ( -1 ) 5.0625 :+ Plane 2.75 ( -1.33334 ) 3)
+                   (Vector2 1 ( -0.97298 ) :+ Plane 2 3.5 ( -2.66667 ))
+        -- Cone { _apex = -- EnvVertex ( Plane ( -4 ) ( -2.66667~ ) 1 )
+        --                     --           ( Plane 2 3.5 ( -2.66667~ ) )
+        --                     --           ( Plane 2.75 ( -1.33334~ ) 3 ) []
+        --               ( Point2 ( -0.51219 ) 1.09293 )
+        --               -- 0.13424~
+        --           , _leftBoundaryVector = Vector2 ( -1 ) 5.0625 :+ Plane 2.75 ( -1.33334 ) 3
+        --           , _rightBoundaryVector = Vector2 1 ( -0.97298 ) :+ Plane 2 3.5 ( -2.66667 )
+        --           }
+      Just res = coverCone domain cone
+  in ipeCounterExample (domain,cone,res) (verifyConvex res)
+
+bug2 = prop "bug2" $
+  let domain :: Triangle (Point 2 R)
+      domain = Triangle (Point2 0 0) (Point2 0 (-1)) (Point2 (-1) 1)
+
+      cone :: Cone R (Point 2 R) ()
+      cone = Cone ( Point2 ( -2.23530 ) ( -5.29412 ) )
+                  (Vector2 1 ( -3 ) :+ ())
+                  (Vector2 ( -1 ) ( -1.25 ) :+ ())
+
+      Just res = coverCone domain cone
+  in ipeCounterExample (domain,cone,res) (verifyConvex res)
+
+-- coverCone", Cone
+--     { _apex = EnvVertex
+--         ( Plane ( -2 ) ( -1.33334~ ) ( -1 ) )
+--         ( Plane ( -1 ) ( -1 ) 3 )
+--         ( Plane 1.5 ( -3 ) ( -2 ) ) []
+--         ( Point2 ( -2.23530~ ) ( -5.29412~ ) ) 10.52941~, _leftBoundaryVector = Vector2 1
+--         ( -3 ) :+ Plane
+--         ( -2 )
+--         ( -1.33334~ )
+--         ( -1 ), _rightBoundaryVector = Vector2 ( -1 ) ( -1.25 ) :+ Plane 1.5
+--         ( -3 )
+--         ( -2 )

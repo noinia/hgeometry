@@ -304,6 +304,10 @@ fromVertices domain = imapMaybe computeCell . foldMap collect
                              f = evalAt (ar .+^ w1)
                          in if f h2 < f h then w2 else w1
                 in coverUnbounded domain (HalfLine al vl) intermediate (HalfLine ar vr)
+                -- FIXME: this isnot quite right; if this returns nothing we should
+                -- just return the bounded part of the domain; i.e.
+                -- everything in between al,<intermediate>,ar.
+
 
       where
         -- | for the Extra vertices, evaluate their height value
@@ -382,9 +386,15 @@ coverUnbounded domain (HalfLine al vl) intermediate (HalfLine ar vr) = do
     let v'@(Vector2 x y) = ar .-. al
         w = Vector2 (-y) x -- the direction pointing into the cone
 
-    q <- maximumByOf folded (cmpInDirection2 w) domain
+        pts = (al^.asPoint) .+^ w :| domain^..folded.asPoint
+              -- make sure we have at least some points in the direction w
+        -- FIXME: I've included this for similar reason as in coverCone
+        -- but that does not work quite yet, make sure that we really need it here
 
-    let m = LinePV (q^.asPoint) v' -- the line through the furthest point
+
+    q <- maximumByOf folded (cmpInDirection2 w) pts
+
+    let m = LinePV q v' -- the line through the furthest point
         -- helper to compute the vertices on the rays
         f a v = LinePV (a^.asPoint) v `intersect` m >>= \case
           Line_x_Line_Point p -> Just (Extra p)
@@ -396,6 +406,9 @@ coverUnbounded domain (HalfLine al vl) intermediate (HalfLine ar vr) = do
 
     let res = uncheckedFromCCWPoints $ origs <> (r :| [l])
     pure $ traceShowWith ("coverUnbounded", verifyConvex res,) res
+
+    -- I don't think our implementation ever fails now; i.e. so we may as well promise
+    -- to return a convex polygon?
 
 
 -- | Given a triangle D and a clipped cone C; given by it's left bounding ray bl and
@@ -429,6 +442,8 @@ coverClippedCone domain left right = coverUnbounded domain left [] right
 coverCone          :: forall apex corner r e.
                       ( Point_ apex 2 r, Point_ corner 2 r
                       , Ord r, Fractional r
+
+                      , Show e, Show apex, Show r -- FIXME: remove
                       )
                    => Triangle corner
                    -> Cone r apex e
@@ -441,9 +456,21 @@ coverCone domain c = do
 
     -- all points in \(C \cap D\) will be left of m_l, and left of m_r; hence contained
     -- the output region
-    let a = c^.apex
-        basePt v@(Vector2 x y) = do q <- maximumByOf folded (cmpInDirection2 v) domain
-                                    let m = LinePV (q^.asPoint) (Vector2 (-y) x)
+    let a   = c^.apex
+
+        extraPt = (a^.asPoint) .+^ (c^.leftBoundaryVector.core ^+^ c^.rightBoundaryVector.core)
+        -- we include an extra point that lies strictly inside the
+        -- cone for our computing the furthest point calculation. By
+        -- including the above point (which lies strictly inside the
+        -- cone), we make sure that the lines perpendicular to q_l and
+        -- q_r actualy intersect strictly inside the cone, and we thus
+        -- produce a convex polygon
+
+        -- FIXME: ok, this still does not really work.
+
+        basePt v@(Vector2 x y) = do let pts = extraPt :| domain^..folded.asPoint
+                                    q <- maximumByOf folded (cmpInDirection2 v) pts
+                                    let m = LinePV q (Vector2 (-y) x)
                                         -- the direction of this line is perpendicular to v
                                     (,m) <$> intersectionPoint (LinePV (a^.asPoint) v) m
 
@@ -456,7 +483,17 @@ coverCone domain c = do
     (vr,mr) <- basePt (c^.rightBoundaryVector.core)
     w       <- intersectionPoint ml mr
 
-    pure $ uncheckedFromCCWPoints $ Original a :| [vr, w, vl]
+
+    let res = uncheckedFromCCWPoints $ Original a :| [vr, w, vl]
+        debug r = if verifyConvex r then "coverConeOK"
+                  else show ("coverCone"
+                            , c
+                            , "->", r
+                            )
+
+    pure $ traceWith debug res
+
+    -- pure $ uncheckedFromCCWPoints $ Original a :| [vr, w, vl]
 
 --------------------------------------------------------------------------------
 
