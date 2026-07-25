@@ -20,7 +20,7 @@ spec = do
       let l = VerticalLineThrough 5
       asGeneralLine l `shouldBe` l
     it "hyperPlaneEq vertical line" $
-      hyperPlaneEquation (VerticalLineThrough 5) `shouldBe` (Vector3 1 0 (-5))
+      hyperPlaneEquation (VerticalLineThrough 5) `shouldBe` Vector3 (-5) 1 0
 
 
 asGeneralLine :: HyperPlane_ hyperPlane 2 R => hyperPlane -> VerticalOrLineEQ R

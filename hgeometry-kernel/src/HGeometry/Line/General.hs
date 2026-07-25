@@ -54,14 +54,13 @@ instance HasOnLine (VerticalOrLineEQ r) 2 where
 
 instance HyperPlane_ (VerticalOrLineEQ r) 2 r where
   hyperPlaneEquation = \case
-    VerticalLineThrough x -> Vector3 1 0 (-x)
+    VerticalLineThrough x -> Vector3 (-x) 1 0
     NonVertical l         -> hyperPlaneEquation l
   onHyperPlane = onLine
 
-  -- FIXME: remove this implementation; just use the default
-  onSideTest q = \case
-    VerticalLineThrough x -> (q^.xCoord) `compare` x
-    NonVertical l         -> onSideTest q l
+  -- onSideTest q = \case
+  --   VerticalLineThrough x -> (q^.xCoord) `compare` x
+  --   NonVertical l         -> onSideTest q l
 
 instance Num r => HasPickInteriorPoint (VerticalOrLineEQ r) 2 r where
   pointInteriorTo = \case
@@ -71,9 +70,8 @@ instance Num r => HasPickInteriorPoint (VerticalOrLineEQ r) 2 r where
 instance (Fractional r, Eq r) => ConstructableHyperPlane_ (VerticalOrLineEQ r) 2 r where
   type HyperPlaneFromEquationConstraint (VerticalOrLineEQ r) 2 r = ()
   hyperPlaneFromEquation v@(Vector3 a b c)
-    | b == 0    = VerticalLineThrough ((-c)/a)
+    | c == 0    = VerticalLineThrough ((-a)/b)
     | otherwise = NonVertical $ hyperPlaneFromEquation v
-
 
   fromPointAndNormal p (Vector2 vx vy) = fromPointAndVec p $ Vector2 vy (-vx)
     -- rotate the normal vector 90 degrees clockwise
