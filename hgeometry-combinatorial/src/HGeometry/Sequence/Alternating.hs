@@ -17,7 +17,6 @@ module HGeometry.Sequence.Alternating
   , withNeighbours
   , mergeAlternating
   , insertBreakPoints
-  , reverse
 
   , consElemWith, unconsAlt
   , snocElemWith, unsnocAlt
@@ -35,13 +34,16 @@ import Data.Foldable1 hiding (last)
 import Data.Functor.Apply ((<.*>))
 import Data.List qualified as List
 import Data.List.NonEmpty (NonEmpty(..))
-import Data.List.NonEmpty qualified as NonEmpty
 import Data.Semigroup.Traversable
 import GHC.Generics (Generic)
 import HGeometry.Foldable.Util
-import Prelude hiding (reverse)
+import Prelude hiding (zipWith)
+import Data.Zip
 
 --------------------------------------------------------------------------------
+
+-- $setup
+-- >>> import Data.List.NonEmpty qualified as NonEmpty
 
 -- | A (non-empty) alternating sequence of @a@\'s and @sep@'s.
 data Alternating f sep a = Alternating a (f (sep, a))
@@ -138,17 +140,18 @@ insertBreakPoints ts a@(Alternating a0 _) =
   Alternating a0 $ mergeAlternating (\_ _ a' -> a') (Alternating undefined (map (,()) ts)) a
 
 
--- | Reverses an alternating list.
---
--- >>> reverse $ Alternating "a" [(3, "c"), (5, "e"), (7, "g")]
--- Alternating "g" [(7,"e"),(5,"c"),(3,"a")]
-reverse                      :: Alternating [] b a -> Alternating [] b a
-reverse p@(Alternating s xs) = case NonEmpty.nonEmpty xs of
-    Nothing               -> p
-    Just xs1@((e1,_):|tl) -> let ys    = (e1, s) : List.zipWith (\(_, v) (e, _) -> (e, v)) xs tl
-                                 (_,t) = NonEmpty.last xs1
-                             in Alternating t (List.reverse ys)
-
+instance ( Reversing (f (sep,a)), Zip f
+         , Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+         , Snoc (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+         ) => Reversing (Alternating f sep a) where
+  reversing alt@(Alternating s xs) = case xs^?_Snoc of
+    Nothing            -> alt
+    Just (xs1,(sep,t)) -> case xs1^?_Cons of
+      Nothing          -> Alternating t (xs1 |> (sep,s))
+      Just ((e1,_),_) -> case xs^?_Cons._2 of
+                           Nothing -> error "absurd"
+                           Just tl -> let ys= (e1,s) <| zipWith (\(_, v) (e, _) -> (e, v)) xs tl
+                                      in Alternating t (reversing ys)
 
 --------------------------------------------------------------------------------
 
