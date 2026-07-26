@@ -58,11 +58,9 @@ boundedCommonIntersection    :: forall set halfPlane r.
                                 , HasIntersectionWith (Point 2 r) halfPlane
                                 , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                      (BoundingHyperPlane halfPlane 2 r)
-
-                                , Show r, Show halfPlane -- FIXME
                                 )
                               => set halfPlane
-                              -> Maybe (ConvexPolygonF ViewL1 (Point 2 r :+ halfPlane))
+                              -> Maybe (ConvexPolygon (Point 2 r :+ halfPlane))
 boundedCommonIntersection hs0 = case bimap extremes boundaries $ partitionHalfPlanes hs0 of
     This _verticals              -> Nothing
       -- by the precondition, if we only have vertical halfplanes they cannot form a bounded
@@ -102,13 +100,12 @@ sweep :: forall halfPlane r.
                             , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                   (BoundingHyperPlane halfPlane 2 r)
 
-                            , Show r, Show halfPlane
                             )
       => Chain Seq r halfPlane
       -- ^ the lower boundary ; i.e. bounds the convex region from below
       -> Chain Seq r halfPlane
       -- ^ the upper boundary; i.e. bounds the region from above
-      -> Maybe (ConvexPolygonF ViewL1 (Point 2 r :+ halfPlane))
+      -> Maybe (ConvexPolygon (Point 2 r :+ halfPlane))
 sweep lower upper =
     do (l,lower',upper')           <- findLeftmostIntersection lower upper
        (outputLower,outputUpper,r) <- findRightmostIntersection lower' upper'

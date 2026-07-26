@@ -84,7 +84,7 @@ foo = traverse_ (\h -> print (h, classifyHalfPlane h)) halfplanes
 halfplanes =
   toNonEmpty (intersectingHalfPlanes myTriangle) <> myHalfPlanes
 
-test :: Maybe (ConvexPolygonF ViewL1 (Point 2 R :+ HalfPlane))
+test :: Maybe (ConvexPolygon (Point 2 R :+ HalfPlane))
 test = boundedCommonIntersection $
        toNonEmpty (intersectingHalfPlanes myTriangle) <> myHalfPlanes
 

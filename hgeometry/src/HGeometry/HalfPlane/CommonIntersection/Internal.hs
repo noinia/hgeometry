@@ -96,9 +96,6 @@ extremes = bimap leftMostPlane rightMostPlane
 -- Both boundaries are given in left-to-right order.
 boundaries :: ( HalfPlane_ halfPlane r
               , Ord r, Fractional r
-
-
-              , Show r, Show halfPlane
               ) => NonVerticals halfPlane r -> These2 (Chain Seq r (LineEQ r :+ halfPlane))
 boundaries = bimap upperBoundary lowerBoundary
   where

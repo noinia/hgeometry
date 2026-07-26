@@ -8,9 +8,9 @@ module HGeometry.HalfPlane.CommonIntersection
   -- , lowerBoundary
   -- , LowerBoundary(..)
 
-  -- , boundaries
-  -- , extremes
-  -- , clipUpperByLower
+  , boundaries
+  , extremes
+  , clipUpperByLower
 
   , partitionHalfPlanes
   , classifyHalfPlane
