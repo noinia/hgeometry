@@ -89,10 +89,11 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
   outerBoundaryEdges :: IndexedFold1 (VertexIx polygon,VertexIx polygon) polygon
                                      (Vertex polygon, Vertex polygon)
   default outerBoundaryEdges
-    :: Enum (VertexIx polygon)
+    :: VertexIx polygon ~ Int
     => IndexedFold1 (VertexIx polygon,VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
   outerBoundaryEdges = ifolding1 $
-    \pg -> ( \(i,u) -> let (j,v) = pg ^.outerBoundaryVertexAt (succ i).withIndex
+    \pg -> let succ' i = succ i `mod` numVertices pg in
+           ( \(i,u) -> let (j,v) = pg ^.outerBoundaryVertexAt (succ' i).withIndex
                        in ((i,j) , (u,v))
            ) <$> itoNonEmptyOf outerBoundary pg
     -- \pg -> fmap ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
