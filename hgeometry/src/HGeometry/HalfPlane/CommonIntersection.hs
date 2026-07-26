@@ -8,8 +8,12 @@ module HGeometry.HalfPlane.CommonIntersection
   -- , lowerBoundary
   -- , LowerBoundary(..)
 
-  , boundaries
-  , clipUpperByLower
+  -- , boundaries
+  -- , extremes
+  -- , clipUpperByLower
+
+  , partitionHalfPlanes
+  , classifyHalfPlane
   ) where
 
 
@@ -37,6 +41,7 @@ import HGeometry.Sequence.Alternating
 import HGeometry.Vector
 import HGeometry.Slab
 import HGeometry.Properties
+import HGeometry.HalfPlane.CommonIntersection.Internal
 
 --------------------------------------------------------------------------------
 
@@ -79,12 +84,13 @@ commonIntersection     :: forall f halfPlane r.
                           , HalfPlane_ halfPlane r
                           , Fractional r, Ord r
                           , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
+                          , HasIntersectionWith (Point 2 r) halfPlane
 
                           , Show halfPlane, Show r
                           )
                        => f halfPlane -> Maybe (CommonIntersection halfPlane r)
-commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs0 of
-    -- we only have vertical halfpalnes planes
+commonIntersection hs0 = case bimap extremes boundaries $ partitionHalfPlanes hs0 of
+    -- we only have vertical halfplanes planes
     This verticals               -> case verticals of
             Negatives (_ :+ l)            -> Just . UnboundedRegion $
                                              Chain (Alternating l mempty)
@@ -176,6 +182,13 @@ clipAndPushBy inters = \case
 
 
 
+-- | Given an x-coordiante, a bounding line (and its hyperplane), evaluate the value of
+-- the line.
+intersectVertical               :: Num r => r -> LineEQ r :+ extra -> extra' -> Point 2 r
+intersectVertical x (l' :+ _) _ = Point2 x (evalAt' x l')
+
+--------------------------------------------------------------------------------
+
 
 data LeftIntersection halfPlane r =
     LowerAboveUpper
@@ -246,67 +259,6 @@ firstIntersection (Chain lower) (Chain upper) = case unconsAlt lower of
                               LT -> Lower p (Chain lower')
                               EQ -> Simultaneous p q (Chain lower') (Chain upper')
                               GT -> Upper q (Chain upper')
-
-
-
-
--- | A these where both values just have the same type.  in particular, we will use This:
--- for Negative signs halfplanes, and That for Positive signed half planes.
-type These2 a = These a a
--- Some pattern synonyms so that the rest is easier to read
-pattern Negatives :: a -> These a b
-pattern Negatives x = This x
-pattern Positives :: b -> These a b
-pattern Positives x = That x
-pattern BothSigns :: a -> b -> These a b
-pattern BothSigns x y = These x y
-{-# COMPLETE Negatives, Positives, BothSigns #-}
-
--- | Vertical halfplanes
-type Verticals halfPlane r    = These2 (NonEmpty (r        :+ halfPlane))
--- | Non-vertical halfplanes
-type NonVerticals halfPlane r = These2 (NonEmpty (LineEQ r :+ halfPlane))
-
--- | Classify the halfplanes by their bounding lines into Vertical/NonVertical,
--- and then on their Sign
-partitionhalfPlanes     :: forall f halfPlane r.
-                           ( Foldable1 f
-                           , HalfPlane_ halfPlane r, Ord r, Fractional r
-                           , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
-                           ) => f halfPlane
-                        -> These (Verticals halfPlane r) (NonVerticals halfPlane r)
-partitionhalfPlanes = bimap partition' partition'
-                    . partitionEithersNE . fmap classifyHalfPlane
-                    . toNonEmpty
-  where
-    -- partition the halfplanes by their sign.
-    partition' :: NonEmpty (core :+ halfPlane) -> These2 (NonEmpty (core :+ halfPlane))
-    partition' = partitionEithersNE . fmap classifyBySign
-
-    classifyBySign h = case h^.extra.halfSpaceSign of
-                         Negative -> Left  h
-                         Positive -> Right h
-
--- | From all the vertical halfplanes with negative sign we compute the leftmost one,
--- and from the positive halfplanes we compute the rightmost one.
-extremes :: Ord r => Verticals halfPlane r -> These2 (r :+ halfPlane)
-extremes = bimap leftMostPlane rightMostPlane
-  where
-    rightMostPlane = maximumBy (comparing (^.core))
-    leftMostPlane  = minimumBy (comparing (^.core))
-
--- | Computes the upper boundary of the halfplanes that have negative sign, and the upper
--- boundary of the halfplanes that have negative sign
-boundaries :: ( HalfPlane_ halfPlane r
-              , Ord r, Fractional r
-
-
-              , Show r, Show halfPlane
-              ) => NonVerticals halfPlane r -> These2 (Chain Seq r (LineEQ r :+ halfPlane))
-boundaries = bimap upperBoundary lowerBoundary
-  where
-    upperBoundary hs = let LowerEnvelope alt = lowerEnvelope hs in Chain alt
-    lowerBoundary hs = let LowerEnvelope alt = upperEnvelope hs in Chain alt
 
 --------------------------------------------------------------------------------
 
@@ -444,51 +396,11 @@ boundaries = bimap upperBoundary lowerBoundary
 --------------------------------------------------------------------------------
 
 
--- | We use the same type as the lower envelope
-type UpperEnvelopeF = LowerEnvelopeF
-
--- | To compute the upper envelope we simply flip the plane, and compute the lower
--- envelope instead.
---
--- \(O(n\log n)\)
-upperEnvelope :: forall g f line r.
-                    ( NonVerticalHyperPlane_ line 2 r
-                    , Fractional r, Ord r
-                    , Foldable1 f, Functor f
-                    , IsIntersectableWith line line
-                    , Intersection line line ~ Maybe (LineLineIntersection line)
-                    , HasFromFoldable g, Functor g
-                    )
-                 => f line -> UpperEnvelopeF g (Point 2 r) line
-upperEnvelope = bimap (over yCoord negate) flipY . lowerEnvelope . fmap flipY
-  where
-    flipY :: line -> line
-    flipY = over (hyperPlaneCoefficients.traverse) negate
-
 --------------------------------------------------------------------------------
 
--- | Given an x-coordiante, a bounding line (and its hyperplane), evaluate the value of
--- the line.
-intersectVertical               :: Num r => r -> LineEQ r :+ extra -> extra' -> Point 2 r
-intersectVertical x (l' :+ _) _ = Point2 x (evalAt' x l')
 
 
--- | Classify the halfplane as either having a vertical bounding line or a general
--- non-vertical line.
-classifyHalfPlane   :: ( HalfPlane_ halfPlane r
-                       , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
-                       , Fractional r, Eq r
-                       )
-                    => halfPlane
-                    -> Either (r :+ halfPlane) (LineEQ r :+ halfPlane)
-classifyHalfPlane h = case h^.boundingHyperPlane.to asGeneralLine of
-  VerticalLineThrough x -> Left  (x :+ h)
-  NonVertical l         -> Right (l :+ h)
 
--- | Convert to a general line.
-asGeneralLine :: (HyperPlane_ hyperPlane 2 r, Fractional r, Eq r)
-              => hyperPlane -> VerticalOrLineEQ r
-asGeneralLine = hyperPlaneFromEquation . hyperPlaneEquation
 
 --------------------------------------------------------------------------------
 
