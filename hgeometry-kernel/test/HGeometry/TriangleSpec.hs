@@ -7,6 +7,7 @@ import Control.Lens
 import HGeometry.Boundary
 import HGeometry.Intersection
 import HGeometry.Interval
+import HGeometry.Line
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Triangle
@@ -14,7 +15,7 @@ import HGeometry.Vector
 import HGeometry.Kernel.Instances()
 import Test.Hspec
 import Test.Hspec.QuickCheck
--- import Test.QuickCheck
+import Test.QuickCheck
 import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -43,7 +44,7 @@ spec = describe "intersection tests" $ do
               (q `intersects` t) `shouldBe` (q `onTriangleFrac` t)
           -- TODO: this test probably does not produce many onBoundaries
           prop "vertices on triangle" $ \(t :: Triangle (Point 2 R)) ->
-              allOf vertices (\v -> v `intersects` t) t
+              allOf vertices (`intersects` t) t
 
           it "manual intersect " $
             let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
@@ -53,18 +54,23 @@ spec = describe "intersection tests" $ do
                ) `shouldBe` (True,True,True)
           it "manual intersect halfspaces" $
             let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
-                Vector3 a b c = intersectingHalfPlanes t
+                Vector3 a b c = intersectingHalfPlanes @(LinePV 2 Int) t
             in ( Point2 (-1) 0 `intersects` a
                , Point2 (-1) 0 `intersects` b
                , Point2 (-1) 0 `intersects` c
                ) `shouldBe` (True,True,True)
           it "intersecting halfspaces" $
             let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
-            in (show <$> intersectingHalfPlanes t) `shouldBe`
+            in (show <$> intersectingHalfPlanes @(LinePV 2 Int) t) `shouldBe`
                Vector3 "HalfSpace Positive (LinePV (Point2 0 0) (Vector2 (-1) 0))"
                        "HalfSpace Positive (LinePV (Point2 (-1) 0) (Vector2 1 (-1)))"
                        "HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))"
 
+          prop "intersection halfplanes (VerticalOrLineEQ)" $
+            \(t :: Triangle (Point 2 R)) (q :: Point 2 R) ->
+              let hs = intersectingHalfPlanes @(VerticalOrLineEQ R) t
+              in counterexample (show hs) $
+                 q `intersects` t === all (q `intersects`) hs
 
           it "manual barrycentric" $
             let q   = Point2 0 0

@@ -26,6 +26,7 @@ import Data.Default
 import HGeometry.Ext
 import Control.Lens
 import HGeometry.HalfSpace
+import HGeometry.Line.Class
 import HGeometry.Line.PointAndVector
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
@@ -111,16 +112,28 @@ toCounterClockwiseTriangle t@(Triangle_ a b c)
 -- HalfSpace Positive (LinePV (Point2 0 0) (Vector2 (-1) 0))
 -- HalfSpace Positive (LinePV (Point2 (-1) 0) (Vector2 1 (-1)))
 -- HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))
-intersectingHalfPlanes :: ( Triangle_ triangle point
+intersectingHalfPlanes :: forall line triangle point r.
+                          ( Triangle_ triangle point
                           , Point_ point 2 r
+                          , Line2_ line r
                           , Num r, Ord r
+                          , HasSupportingLine line
                           )
                        => triangle
-                       -> Vector 3 (HalfSpaceF (LinePV 2 r))
+                       -> Vector 3 (HalfPlaneF line)
 intersectingHalfPlanes (toCounterClockwiseTriangle -> Triangle_ u v w) =
     Vector3 (leftPlane u v) (leftPlane v w) (leftPlane w u)
   where
-    leftPlane p q = leftHalfPlane $ LinePV (p^.asPoint) (q .-. p)
+    leftPlane p q = convertBoundingLineOf . leftHalfPlane $ lineThrough p q
+
+
+-- instance HasPickInteriorPoint (HalfSpaceF)
+
+-- pickPointIn   :: HalfSpace_ halfSpace d r => halfSpace -> Point d r
+-- pickPointIn h =
+
+-- class EquvalentHalfPlane hyperPlane where
+
 
 
 -- | Given a point q and a triangle, q inside the triangle, get the baricentric
@@ -161,7 +174,8 @@ fromBarricentric (Vector3 a b c) (Triangle_ p q r) = let f = view vector in
 
 
 -- | Test where the query point lies with respect to the triangle
-inTriangle   :: ( Point_ corner 2 r
+inTriangle   :: forall point triangle corner r.
+                ( Point_ corner 2 r
                 , Point_ point 2 r, Ord r, Num r, Triangle_ triangle corner)
              => point -> triangle -> PointLocationResult
-inTriangle q = foldMap1 (q `inHalfSpace`) . intersectingHalfPlanes
+inTriangle q = foldMap1 (q `inHalfSpace`) . intersectingHalfPlanes @(LinePV 2 r)

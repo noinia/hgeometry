@@ -58,6 +58,9 @@ boundedCommonIntersection    :: forall set halfPlane r.
                                 , HasIntersectionWith (Point 2 r) halfPlane
                                 , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                      (BoundingHyperPlane halfPlane 2 r)
+
+
+                                , Show r, Show halfPlane -- FIXME: remove
                                 )
                               => set halfPlane
                               -> Maybe (ConvexPolygon (Point 2 r :+ halfPlane))
@@ -71,9 +74,9 @@ boundedCommonIntersection hs0 = case bimap extremes boundaries $ partitionHalfPl
 
     These verticals nonVerticals -> case nonVerticals of
       These upper lower -> case verticals of
-        Positives l   -> sweep (clipPushLeft l lower) ((^.extra) <$> upper)
-        Negatives r   -> sweep ((^.extra) <$> lower)  (clipPushRight upper r)
-        BothSigns l r -> sweep (clipPushLeft l lower) (clipPushRight upper r)
+        Leftwards r    -> sweep ((^.extra) <$> lower)  (clipPushRight upper r)
+        Rightwards l   -> sweep (clipPushLeft l lower) ((^.extra) <$> upper)
+        LeftAndRights r l -> sweep (clipPushLeft l lower) (clipPushRight upper r)
       _                 -> Nothing
                          -- the non-verticals define an unbounded region;
                          -- so by the precondition that must mean the verticals must

@@ -250,7 +250,11 @@ instance ( Ord r
 
 -- | Types for which we can compute a supporting line, i.e. a line
 -- that contains the thing of type t.
+--
+-- if the geometric type t itself is an oriented line, the output line
+-- should have the same orientation as the input line.
 class HasSupportingLine t where
+  -- | Compute the supporintg line of the given geometric object.
   supportingLine :: t -> LinePV (Dimension t) (NumType t)
 
 instance HasSupportingLine t => HasSupportingLine (t :+ extra) where
@@ -414,19 +418,27 @@ cmpSlope :: forall r. (Num r, Ord r
 
 --------------------------------------------------------------------------------
 
--- | Given the oriented line, computes the halfspace left of the line.
-leftHalfPlane   :: (Num r, Ord r) => LinePV 2 r -> HalfSpaceF (LinePV 2 r)
+-- | Given the (oriented) line, computes the halfspace left of the line.
+--
+--
+leftHalfPlane   :: (Num r, Ord r, HasSupportingLine line, HyperPlane_ line 2 r)
+                => line -> HalfPlaneF line
 leftHalfPlane l = HalfSpace sign l
   where
-    sign = let (LinePV p v) = perpendicularTo l
+    sign = let (LinePV p v) = perpendicularTo (supportingLine l)
            in case onSideTest (p .+^ v) l of
                 LT -> Positive
                 _  -> Negative
 
--- | Given the oriented line, computes the halfspace right of the line.
-rightHalfPlane   :: (Num r, Ord r) => LinePV 2 r -> HalfSpaceF (LinePV 2 r)
-rightHalfPlane l = let HalfSpace s _ = leftHalfPlane l
-                   in HalfSpace (flipSign s) l
+
+-- | Given the (oriented) line, computes the halfspace right of the line.
+rightHalfPlane   :: (Num r, Ord r, HasSupportingLine line, HyperPlane_ line 2 r)
+                 => line -> HalfPlaneF line
+rightHalfPlane l = leftHalfPlane l & halfSpaceSign %~ flipSign
+
+
+
+
 
 {-
 -- | Lines are transformable, via line segments

@@ -25,7 +25,6 @@ module HGeometry.Polygon.Simple
   , module HGeometry.Polygon.Simple.Class
   ) where
 
-import HGeometry.Ext
 import Control.Lens
 import Data.Foldable qualified as F
 import Data.Foldable1
@@ -248,6 +247,6 @@ hasNoSelfIntersections vs = let vs' = (\p -> (p^.asPoint)&coordinates %~ toRatio
 --------------------------------------------------------------------------------
 -- * Instances involving Ext
 
-instance HasIntersectionWith geom (SimplePolygonF f vertex)
-         => HasIntersectionWith geom (SimplePolygonF f vertex :+ extra) where
-  q `intersects` (pg :+ _) = q `intersects` pg
+-- instance {-# OVERLAPPABLE #-} HasIntersectionWith geom (SimplePolygonF f vertex)
+--          => HasIntersectionWith geom (SimplePolygonF f vertex :+ extra) where
+--   q `intersects` (pg :+ _) = q `intersects` pg

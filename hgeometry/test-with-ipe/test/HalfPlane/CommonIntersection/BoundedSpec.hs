@@ -43,6 +43,7 @@ import           Data.Coerce
 
 import           R
 
+import           Test.Util
 import           Debug.Trace
 import           Data.Foldable
 import           Test.QuickCheck hiding (Negative)
@@ -141,6 +142,60 @@ spec = describe "Bounded common intersection spec" $ do
             case boundedCommonIntersection (toNonEmpty (intersectingHalfPlanes t) <> hs) of
               Nothing   -> property True -- this test may be less useful than ideal
               Just poly -> counterexample (show poly) $ verifyConvex poly
+
+
+theBug = prop "theBug " $ do
+           let t  :: Triangle (Point 2 R)
+               t  = Triangle (Point2 0 2) (Point2 1 0) (Point2 0 0.5)
+               hs = NonEmpty.fromList
+                    [ leftHalfPlane (LinePV (Point2 0.5 0) (Vector2 0 1))
+                    , rightHalfPlane $ lineThrough (Point2 (-5.99353) 3.33474)
+                                                   (Point2 4.9484 0.377459)
+
+                    ]
+           -- case boundedCommonIntersection (toNonEmpty (intersectingHalfPlanes @(LinePV 2 R) t)) of
+           --    Nothing   -> property False
+           --    Just poly -> ipeCounterExample poly $
+           --                 ipeCounterExample (toNonEmpty (intersectingHalfPlanes  @(LinePV 2 R)  t)) $
+           --                 property False
+           case boundedCommonIntersection (toNonEmpty (intersectingHalfPlanes t) <> hs) of
+              Nothing   -> property False
+              Just poly -> ipeCounterExample poly $
+                           ipeCounterExample (toNonEmpty (intersectingHalfPlanes t) <> hs) $
+                           property True
+
+
+
+blah = do
+    print $ partitionHalfPlanes allHs
+    writeIpeFile [osp|/tmp/out.ipe|] . addStyleSheet opacitiesStyle . singlePageFromContent
+                    . mconcat   $
+                    [ draw @(Ipe R) [fill ?~ gray] hs
+                    , draw @(Ipe R) [fill ?~ blue] t
+                    , draw @(Ipe R) [ fill ?~ red
+                                    , stroke ?~ green
+                                    ] inters
+                    , draw @(Ipe R) [ fill ?~ orange
+                                    , stroke ?~ green
+                                    ] tri
+                    ]
+  where
+    allHs = toNonEmpty (intersectingHalfPlanes t) <> hs
+    Just inters = boundedCommonIntersection allHs
+    Just tri    = boundedCommonIntersection (toNonEmpty (intersectingHalfPlanes @(VerticalOrLineEQ R) t))
+    t  :: Triangle (Point 2 R)
+    t  = Triangle (Point2 0 2) (Point2 1 0) (Point2 0 0.5)
+    hs = NonEmpty.fromList
+         [ leftHalfPlane (LinePV (Point2 0.5 0) (Vector2 0 1))
+         , rightHalfPlane $ lineThrough (Point2 (-5.99353) 3.33474)
+                                        (Point2 4.9484 0.377459)
+
+         ]
+
+blah2 = let h :: HalfPlaneF (LinePV 2 R)
+            h = HalfSpace Negative ( LinePV ( Point2 0 2 ) ( Vector2 0 ( -1.5 ) ) )
+        in prop "h should be a right hsalfplane" $
+             Point2 10 0 `intersects` h
 
 
 -- floep =

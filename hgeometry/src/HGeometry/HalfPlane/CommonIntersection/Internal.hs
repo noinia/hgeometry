@@ -43,6 +43,15 @@ pattern BothSigns x y = These x y
 {-# COMPLETE Negatives, Positives, BothSigns #-}
 
 
+pattern Leftwards :: a -> These a b
+pattern Leftwards x = This x
+pattern Rightwards :: b -> These a b
+pattern Rightwards x = That x
+pattern LeftAndRights :: a -> b -> These a b
+pattern LeftAndRights x y = These x y
+{-# COMPLETE Leftwards, Rightwards, LeftAndRights #-}
+
+
 --------------------------------------------------------------------------------
 
 -- | Vertical halfplanes; the left halfplanes (i.e. unbounded towards

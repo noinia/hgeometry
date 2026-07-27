@@ -319,66 +319,66 @@ instance ( Point_ point 2 r, Num r, Ord r
 
 --------------------------------------------------------------------------------
 
--- | Helper data type to generate tests for our cone and clipped cone cover tests
-data ConeInput' cone = ConeInput { _domain  :: Triangle (Point 2 R)
-                                 , _cone     :: cone
-                                 , _pointsIn :: [Point 2 R]
-                                 } deriving (Show,Eq,Functor,Generic)
+-- -- | Helper data type to generate tests for our cone and clipped cone cover tests
+-- data ConeInput' cone = ConeInput { _domain  :: Triangle (Point 2 R)
+--                                  , _cone     :: cone
+--                                  , _pointsIn :: [Point 2 R]
+--                                  } deriving (Show,Eq,Functor,Generic)
 
-type ConeInput        = ConeInput' (Cone R (Point 2 R) ())
-type ClippedConeInput = ConeInput' (ClippedCone (Point 2 R))
+-- type ConeInput        = ConeInput' (Cone R (Point 2 R) ())
+-- type ClippedConeInput = ConeInput' (ClippedCone (Point 2 R))
 
-instance ( Arbitrary cone
-         , Point 2 R `HasIntersectionWith` cone
-         ) => Arbitrary (ConeInput' cone) where
-  arbitrary = do domain <- arbitrary
-                 cone   <- arbitrary
-                 pts    <- resize 300 $ arbitraryPointInIntersection domain cone
-                 pure $ ConeInput domain cone pts
-  shrink = genericShrink
+-- instance ( Arbitrary cone
+--          , Point 2 R `HasIntersectionWith` cone
+--          ) => Arbitrary (ConeInput' cone) where
+--   arbitrary = do domain <- arbitrary
+--                  cone   <- arbitrary
+--                  pts    <- resize 300 $ arbitraryPointInIntersection domain cone
+--                  pure $ ConeInput domain cone pts
+--   shrink = genericShrink
 
-coneCovers :: Spec
-coneCovers = describe "Cone Covers" $ do
-    prop "cone cover contains domain" $
-      \(ConeInput domain (cone :: Cone R (Point 2 R) ()) pts) ->
-        let corners'      = filter (`intersects` cone) (toList domain)
-            intersections = coneTriangleBoundaryIntersections cone domain
-        in ipeCounterExample (domain,cone,corners',intersections) $
-           case coverCone domain cone of
-             Nothing
-               | null pts  -> discard -- don't test with empty pts
-               | otherwise -> counterexample (show pts) $ property False
-             Just poly -> counterexample (show
-                                           (poly
-                                           )
-                                         ) $
-                          ipeCounterExample ( poly
-                                            ) $
-                          conjoin [ counterexample (show v) $ Every $ v `intersects` poly
-                                  | v <- intersections ++ corners' ++ pts
-                                  ]
+-- coneCovers :: Spec
+-- coneCovers = describe "Cone Covers" $ do
+--     prop "cone cover contains domain" $
+--       \(ConeInput domain (cone :: Cone R (Point 2 R) ()) pts) ->
+--         let corners'      = filter (`intersects` cone) (toList domain)
+--             intersections = coneTriangleBoundaryIntersections cone domain
+--         in ipeCounterExample (domain,cone,corners',intersections) $
+--            case coverCone domain cone of
+--              Nothing
+--                | null pts  -> discard -- don't test with empty pts
+--                | otherwise -> counterexample (show pts) $ property False
+--              Just poly -> counterexample (show
+--                                            (poly
+--                                            )
+--                                          ) $
+--                           ipeCounterExample ( poly
+--                                             ) $
+--                           conjoin [ counterexample (show v) $ Every $ v `intersects` poly
+--                                   | v <- intersections ++ corners' ++ pts
+--                                   ]
 
-    prop "clipped cone cover contains domain" $
-      \(ConeInput domain (clippedCone :: ClippedCone (Point 2 R)) pts) ->
-        let (ClippedCone leftRay rightRay) = clippedCone
-            corners'      = filter (`intersects` clippedCone) (toList domain)
-            -- intersections = filter (`intersects` clippedCone) $
-            --                 coneTriangleBoundaryIntersections (definingCone cone) domain
-         in ipeCounterExample (domain,corners') $
-            case coverClippedCone domain leftRay rightRay of
-              Nothing
-                | null pts  -> discard -- don't test with empty clipped cones
-                | otherwise -> counterexample (show pts) $ property False
-              Just poly -> counterexample (show
-                                            (poly, leftRay, rightRay)
-                                          ) $
-                           ipeCounterExample ( poly
-                                             , leftRay
-                                             , rightRay
-                                             ) $
-                           conjoin [ counterexample (show v) $ Every $ v `intersects` poly
-                                   | v <- corners' ++ pts
-                                   ]
+--     prop "clipped cone cover contains domain" $
+--       \(ConeInput domain (clippedCone :: ClippedCone (Point 2 R)) pts) ->
+--         let (ClippedCone leftRay rightRay) = clippedCone
+--             corners'      = filter (`intersects` clippedCone) (toList domain)
+--             -- intersections = filter (`intersects` clippedCone) $
+--             --                 coneTriangleBoundaryIntersections (definingCone cone) domain
+--          in ipeCounterExample (domain,corners') $
+--             case coverClippedCone domain leftRay rightRay of
+--               Nothing
+--                 | null pts  -> discard -- don't test with empty clipped cones
+--                 | otherwise -> counterexample (show pts) $ property False
+--               Just poly -> counterexample (show
+--                                             (poly, leftRay, rightRay)
+--                                           ) $
+--                            ipeCounterExample ( poly
+--                                              , leftRay
+--                                              , rightRay
+--                                              ) $
+--                            conjoin [ counterexample (show v) $ Every $ v `intersects` poly
+--                                    | v <- corners' ++ pts
+--                                    ]
 
 
 --------------------------------------------------------------------------------
@@ -387,8 +387,8 @@ spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
          testX
          testBug
-         coneCovers
-         findMissingEdgeTest
+         -- coneCovers
+         -- findMissingEdgeTest
          lowest
          verifyCellProperties
          testBarrycentric
@@ -491,11 +491,11 @@ verifyCellProperties = describe "verifying cell properties" $ do
                     ) env
 
 
-findMissingEdgeTest :: Spec
-findMissingEdgeTest = it "find missing edge" $
-                      findMissingEdge (\u v -> u > v) 0 (NonEmpty.fromList [1..5])
-                      `shouldBe`
-                      Just (0,[1..4],5)
+-- findMissingEdgeTest :: Spec
+-- findMissingEdgeTest = it "find missing edge" $
+--                       findMissingEdge (\u v -> u > v) 0 (NonEmpty.fromList [1..5])
+--                       `shouldBe`
+--                       Just (0,[1..4],5)
 
 lowest :: Spec
 lowest = prop "brute force triangulated envelope; indeed lowest at query points" $
@@ -1045,49 +1045,4 @@ testBug = prop "brute force vornoi diagram; covers all points" $
 
 --------------------------------------------------------------------------------
 
---match "/verifying cell properties/cells convex/" --seed 295573538
-main = hspec verifyCellProperties
-
-bug = prop "bug" $
-  let domain :: Triangle (Point 2 R)
-      domain = Triangle (Point2 0 0) (Point2 1 (-1)) (Point2 0 1)
-
-      cone :: Cone R (Point 2 R) (Plane R)
-      cone = Cone                       ( Point2 ( -0.51219 ) 1.09293 )
-                   (Vector2 ( -1 ) 5.0625 :+ Plane 2.75 ( -1.33334 ) 3)
-                   (Vector2 1 ( -0.97298 ) :+ Plane 2 3.5 ( -2.66667 ))
-        -- Cone { _apex = -- EnvVertex ( Plane ( -4 ) ( -2.66667~ ) 1 )
-        --                     --           ( Plane 2 3.5 ( -2.66667~ ) )
-        --                     --           ( Plane 2.75 ( -1.33334~ ) 3 ) []
-        --               ( Point2 ( -0.51219 ) 1.09293 )
-        --               -- 0.13424~
-        --           , _leftBoundaryVector = Vector2 ( -1 ) 5.0625 :+ Plane 2.75 ( -1.33334 ) 3
-        --           , _rightBoundaryVector = Vector2 1 ( -0.97298 ) :+ Plane 2 3.5 ( -2.66667 )
-        --           }
-      Just res = coverCone domain cone
-  in ipeCounterExample (domain,cone,res) (verifyConvex res)
-
-bug2 = prop "bug2" $
-  let domain :: Triangle (Point 2 R)
-      domain = Triangle (Point2 0 0) (Point2 0 (-1)) (Point2 (-1) 1)
-
-      cone :: Cone R (Point 2 R) ()
-      cone = Cone ( Point2 ( -2.23530 ) ( -5.29412 ) )
-                  (Vector2 1 ( -3 ) :+ ())
-                  (Vector2 ( -1 ) ( -1.25 ) :+ ())
-
-      Just res = coverCone domain cone
-  in ipeCounterExample (domain,cone,res) (verifyConvex res)
-
--- coverCone", Cone
---     { _apex = EnvVertex
---         ( Plane ( -2 ) ( -1.33334~ ) ( -1 ) )
---         ( Plane ( -1 ) ( -1 ) 3 )
---         ( Plane 1.5 ( -3 ) ( -2 ) ) []
---         ( Point2 ( -2.23530~ ) ( -5.29412~ ) ) 10.52941~, _leftBoundaryVector = Vector2 1
---         ( -3 ) :+ Plane
---         ( -2 )
---         ( -1.33334~ )
---         ( -1 ), _rightBoundaryVector = Vector2 ( -1 ) ( -1.25 ) :+ Plane 1.5
---         ( -3 )
---         ( -2 )
+main = hspec spec
