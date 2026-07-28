@@ -4,7 +4,9 @@
 module HalfPlane.CommonIntersection.BoundedSpec
   where
 
-
+import           GHC.Generics (Generic)
+import           Test.Util
+import           HGeometry.Sign
 import           HGeometry.Box (Rectangle, LineBoxIntersection(..))
 import           Data.Bifunctor (first)
 import           HGeometry.Foldable.Sort
@@ -40,10 +42,8 @@ import           Prelude hiding (zipWith)
 import           Data.Zip
 import           Test.Hspec.QuickCheck
 import           Data.Coerce
-
+import qualified Data.Set.NonEmpty as NESet
 import           R
-
-import           Test.Util
 import           Debug.Trace
 import           Data.Foldable
 import           Test.QuickCheck hiding (Negative, Positive)
@@ -83,7 +83,57 @@ spec = describe "Bounded Halfspace intersection tests" $ do
              case boundedCommonIntersection (toNonEmpty (intersectingHalfPlanes t) <> hs) of
                Nothing   -> property True -- this test may be less useful than ideal
                Just poly -> counterexample (show poly) $ verifyConvex poly
+         voronoiCell
 
+
+--------------------------------------------------------------------------------
+
+voronoiCell :: Spec
+voronoiCell = prop "bounded voronoi cell" $
+                \(PointInTriangle t s) (rest :: NESet.NESet (Point 2 R)) ->
+                  let input = assignColors rest
+                      hs    = NESet.map (\(t' :+ color) ->
+                                            closerHalfPlane s t' :+ Just color) input
+                      triHs = (:+ Nothing) <$> intersectingHalfPlanes t
+                      allHs = foldr NESet.insert hs triHs
+                  in case boundedCommonIntersection allHs of
+                       Nothing    -> ipeCounterExample (t, allHs, s :+ orange @R
+                                                       , input) $ property False
+                       Just _cell -> property True
+
+
+-- | closerHalfPlane s t is the halfplane closer to s than to t.
+closerHalfPlane     :: (Point_ point 2 r, Ord r, Fractional r)
+                    => point -> point -> HalfSpaceF (VerticalOrLineEQ r)
+closerHalfPlane s t = half&halfSpaceSign %~ \sign ->
+                        if (dist q s < dist q t) then sign else flipSign sign
+  where
+    l    = let LinePV p v = bisector s t in fromPointAndVec p v
+    half = HalfSpace Positive l
+    q    = pointInteriorTo half
+    dist = squaredEuclideanDist
+
+----------------------------------------
+
+voronoiBug :: Spec
+voronoiBug = prop "bounded voronoi cell" $
+               let
+                 t :: Triangle (Point 2 R)
+                 t = Triangle (Point2 14.63157 16.3) (Point2 (-0.83334) (-12.70371)) (Point2 7.1 (-8.52632))
+                 s = Point2 7.78184 2.73599
+
+                 rest :: NESet.NESet (Point 2 R)
+                 rest = NESet.fromList (Point2 13 (-24) :| [])
+
+                 input = assignColors rest
+                 hs    = NESet.map (\(t' :+ color) ->
+                                       closerHalfPlane s t' :+ Just color) input
+                 triHs = (:+ Nothing) <$> intersectingHalfPlanes t
+                 allHs = foldr NESet.insert hs triHs
+               in case boundedCommonIntersection allHs of
+                       Nothing    -> ipeCounterExample (t, allHs, s :+ orange @R
+                                                       , input) $ property False
+                       Just _cell -> property True
 
 --------------------------------------------------------------------------------
 
@@ -119,45 +169,6 @@ mainx = writeIpeFile [osp|/tmp/out.ipe|] . addStyleSheet opacitiesStyle . single
                     ]
   where
     Just inters = test
-
-instance ( Ord r, Fractional r
-         , IsDrawable (Ipe r) line, AttrOf (Ipe r) line ~ PathAttributes r
-         , HalfSpaceF line `IsIntersectableWith` Rectangle (Point 2 r)
-         ) => IsDrawable (Ipe r) (HalfSpaceF line) where
-  type AttrOf (Ipe r) (HalfSpaceF line) = PathAttributes r
-  draw ats h = case h `intersect` defaultBox of
-      Nothing -> []
-      Just is -> case is of
-        ActualPolygon interior -> mconcat [ draw @(Ipe r)
-                                                 (ats <>
-                                                   [ opacity ?~ Named "20%"
-                                                   , stroke  .~ Nothing
-                                                   ]
-                                                 ) interior
-                                          , boundary
-                                          ]
-        _                      -> boundary
-    where
-      boundary = draw @(Ipe r) (ats <> [fill .~ Nothing]) (h^.boundingHyperPlane)
-
-instance ( Ord r, Fractional r
-         ) => IsDrawable (Ipe r) (LinePV 2 r) where
-  type AttrOf (Ipe r) (LinePV 2 r) = PathAttributes r
-  draw ats l = case l `intersect` defaultBox of
-                 Nothing -> []
-                 Just is -> case is of
-                   Line_x_Box_LineSegment seg -> draw @(Ipe r) ats seg
-                   _                          -> [] -- don't draw singleton points
-
-instance ( Ord r, Fractional r
-         ) => IsDrawable (Ipe r) (VerticalOrLineEQ r) where
-  type AttrOf (Ipe r) (VerticalOrLineEQ r) = PathAttributes r
-  draw ats = draw @(Ipe r) ats . convert
-    where
-      convert = \case
-        VerticalLineThrough x -> LinePV (Point2 x 0) (Vector2 0 1)
-        NonVertical l         -> fromLineEQ l
-
 
 
 theBug = prop "theBug " $ do
@@ -214,7 +225,60 @@ blah2 = let h :: HalfPlaneF (LinePV 2 R)
              Point2 10 0 `intersects` h
 
 
+
+
+
 bug = do
+    print $ boundedCommonIntersection (triHs <> hs)
+    writeIpeFile [osp|/tmp/out.ipe|] . addStyleSheet opacitiesStyle . singlePageFromContent
+                    . mconcat   $
+                    [ draw @(Ipe R) [fill ?~ gray] (view core <$> hs)
+                    , draw @(Ipe R) [fill ?~ orange
+                                    , layer ?~ "triHs"
+                                    ] (view core <$> triHs)
+                    , draw @(Ipe R) [fill ?~ blue
+                                    , layer ?~ "theTriangle"
+                                    ] t
+                    -- , draw @(Ipe R) [ fill ?~ red
+                    --                 , stroke ?~ green
+                    --                 ] inters
+                    -- , draw @(Ipe R) [ fill ?~ orange
+                    --                 , stroke ?~ green
+                    --                 ] tri
+                    ]
+
+  where
+    t  = Triangle (Point2 7.75 (-4.5)) (Point2 (-8.85715) 9) (Point2 7.4 (-4.42858))
+    -- Just inters = boundedCommonIntersection (triHs <> hs)
+
+    triHs =
+
+      NonEmpty.fromList
+      [ HalfSpace Negative ( NonVertical ( LineEQ ( -0.81291 ) 1.79999 ) ) :+ Nothing
+      , HalfSpace Positive ( NonVertical ( LineEQ ( -0.82602 ) 1.68389 ) ) :+ Nothing
+      , HalfSpace Positive ( NonVertical ( LineEQ ( -0.20406 ) ( -2.91856 ) ) ) :+ Nothing
+      ]
+
+
+    hs :: NonEmpty (HalfPlaneF (VerticalOrLineEQ R) :+ Maybe String)
+    hs = NonEmpty.fromList
+      [ HalfSpace Positive( NonVertical ( LineEQ ( -0.5 ) 1.25 ) ) :+ Just "black"
+        -- ( Plane 0 0 0 :+ ( Point2 0 0 :+ IpeColor ( Named "black" ) ) )
+      , HalfSpace Positive  ( NonVertical ( LineEQ ( -1 ) 2 ) ) :+ Just "white"
+      ]
+                 -- ( Plane 0 ( -2 ) 1 :+ ( Point2 0 1 :+ IpeColor ( Named "white" ) ) ) ] )
+
+
+
+
+
+
+
+
+
+
+
+oldBug = do
     print $ boundedCommonIntersection (triHs <> hs)
     writeIpeFile [osp|/tmp/out.ipe|] . addStyleSheet opacitiesStyle . singlePageFromContent
                     . mconcat   $
@@ -239,19 +303,10 @@ bug = do
 
     triHs = NonEmpty.fromList
       [HalfSpace Negative ( NonVertical ( LineEQ 0.66666 2.66666 ) ) :+ Nothing
-            , HalfSpace Positive ( NonVertical ( LineEQ ( -8 ) ( -6 ) ) ) :+ Nothing
-            , HalfSpace Positive ( NonVertical ( LineEQ 2.4 ( -6 ) ) ) :+ Nothing]
+      , HalfSpace Positive ( NonVertical ( LineEQ ( -8 ) ( -6 ) ) ) :+ Nothing
+      , HalfSpace Positive ( NonVertical ( LineEQ 2.4 ( -6 ) ) ) :+ Nothing]
 
     hs :: NonEmpty (HalfPlaneF (VerticalOrLineEQ R) :+ Maybe String)
-    -- hs = NonEmpty.fromList $
-    --         [
-    --           HalfSpace Negative ( NonVertical ( LineEQ 0.66666 2.66666 ) ) :+ Nothing
-    --         , HalfSpace Positive ( NonVertical ( LineEQ ( -8 ) ( -6 ) ) ) :+ Nothing
-    --         , HalfSpace Positive ( NonVertical ( LineEQ 2.4 ( -6 ) ) ) :+ Nothing
-    --         , HalfSpace Negative ( VerticalLineThrough ( -0.5 ) ) :+ Just "white"
-    --         , HalfSpace Negative ( NonVertical ( LineEQ ( -0.27028 ) 1.71486 ) ) :+ Just "red"
-    --         ]
-
     hs = NonEmpty.fromList
       [
         HalfSpace Positive ( VerticalLineThrough ( -0.5 ) ) :+ Just "white"
@@ -259,6 +314,13 @@ bug = do
       -- , HalfSpace Negative ( NonVertical ( LineEQ ( -0.27028 ) 1.71486 ) ) :+ Just "red"
         -- ( Plane 0 ( -7.4 ) 13.69 :+ ( Point2 0 3.7 :+ IpeColor ( Named "red" ) ) )
       ]
+
+
+
+
+
+
+
 
 
 

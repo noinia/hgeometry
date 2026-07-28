@@ -65,19 +65,6 @@ import           System.Random.Stateful
 
 --------------------------------------------------------------------------------
 
--- newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
---                           deriving (Show,Eq)
-
--- instance Arbtirary (InputPlanes MyPlane) where
---   arbitrary = do coeffs <-
-
-
-    -- arbitrary >>= go (mempty,mempty,mempty)
-    -- where
-    --   go   :: (Set r, Set r, Set r) -> Int -> Gen (InputPlanes plane)
-    --   go n =
-
-
 
 instance Arbitrary StdGen where
   arbitrary = mkStdGen <$> arbitrary
@@ -86,6 +73,7 @@ instance Arbitrary (IpeColor R) where
   arbitrary = Test.QuickCheck.elements basicNamedColors
 
 ----------------------------------------
+
 
 -- | Generate a triangular domain, and a non-empty list of points
 -- strictly inside the domain.
@@ -102,19 +90,11 @@ instance Arbitrary Queries where
   -- shrink = const []
   -- shrink = genericShrink
   shrink (Queries tri qs) = [ Queries tri qs'
-                            | qs' <- shrink qs
-                            , all (`intersects` tri) qs'
+                            | qs' <- shrinkSt (`intersects` tri) qs
                             ]
+    where
+      shrinkSt p = mapMaybe (NonEmpty.nonEmpty . NonEmpty.filter p) . shrink
 
--- | Given a triangle and a vector of coefficients, use it to produce a point inside
--- the triangle
-barrycentric :: Triangle (Point 2 R) -> Vector 3 R -> Point 2 R
-barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y z) =
-    Point $ (x *^ a) ^+^ (y *^ b) ^+^ (z *^ c)
-
--- | Normalize the vector w.r.t the sum of the coefficients.
-normalize   :: Vector 3 R -> Vector 3 R
-normalize v = let s = sum v in (/s) <$> v
 
 
 -- | Make sure that we indeed generate points inside the triangle.
@@ -124,10 +104,6 @@ testBarrycentric = prop "test barrycentric" $
 
 --------------------------------------------------------------------------------
 
--- | I don't think I really want this one; but just for debugging purposes it seems ok
-type instance NumType (a,b) = NumType b
-type instance NumType (a,b,c) = NumType c
-type instance NumType (a,b,c,d) = NumType d
 
 --------------------------------------------------------------------------------
 -- Move to Ipe.Draw
@@ -139,83 +115,16 @@ instance (Point_ apex 2 r, Fractional r, Ord r, Show r
   type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
   draw _ats c = [iO $ defIO c]
 
-instance ( IsDrawable (Ipe r) a
-         , IsDrawable (Ipe r) b
-         , NumType a ~ r, NumType b ~ r
-         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
-         ) => IsDrawable (Ipe r) (a,b) where
-  type AttrOf (Ipe r) (a,b) = CommonAttributes r Maybe
-  draw ats (a,b) = draw @(Ipe r) [ commonAttributes %~ apply ats ] a
-                <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
-
-
-instance ( IsDrawable (Ipe r) a
-         , IsDrawable (Ipe r) b
-         , IsDrawable (Ipe r) c
-         , NumType a ~ r, NumType b ~ r, NumType c ~ r
-         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) c) r Maybe
-         ) => IsDrawable (Ipe r) (a,b,c) where
-  type AttrOf (Ipe r) (a,b,c) = CommonAttributes r Maybe
-  draw ats (a,b,c) = draw @(Ipe r) [ commonAttributes %~ apply ats ] a
-                  <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
-                  <> draw @(Ipe r) [ commonAttributes %~ apply ats ] c
-
-instance ( IsDrawable (Ipe r) a
-         , IsDrawable (Ipe r) b
-         , IsDrawable (Ipe r) c
-         , IsDrawable (Ipe r) d
-         , NumType a ~ r, NumType b ~ r, NumType c ~ r, NumType c ~ r
-         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) c) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) d) r Maybe
-         ) => IsDrawable (Ipe r) (a,b,c,d) where
-  type AttrOf (Ipe r) (a,b,c,d) = CommonAttributes r Maybe
-  draw ats (a,b,c,d) = mconcat
-      [ draw @(Ipe r) [ commonAttributes %~ apply ats ] a
-      , draw @(Ipe r) [ commonAttributes %~ apply ats ] b
-      , draw @(Ipe r) [ commonAttributes %~ apply ats ] c
-      , draw @(Ipe r) [ commonAttributes %~ apply ats ] d
-      ]
-
 
 instance (Point_ point 2 r, Fractional r, Ord r, Show r, Show point
          ) => IsDrawable (Ipe r) (HalfLine point) where
   type AttrOf (Ipe r) (HalfLine point) = PathAttributes r
   draw _ats hl = [iO $ defIO hl]
 
--- | Helper function to apply attributes
-apply       :: [at -> at] -> at -> at
-apply ats a = foldl' (flip ($)) a ats
 
 
 --------------------------------------------------------------------------------
 
--- more numtype instances just for debugging/testing purposes
-
-type instance NumType (NESet.NESet a) = NumType a
-type instance NumType (MonoidalMap.MonoidalMap k a) = NumType a
-
-----------------------------------------
-
-
-instance IsDrawable backend g => IsDrawable backend (NESet.NESet g) where
-  type AttrOf backend (NESet.NESet g) = AttrOf backend g
-  draw ats = foldMap (draw @backend ats)
-
-instance IsDrawable backend g => IsDrawable backend (MonoidalMap.MonoidalMap k g) where
-  -- ^ Draws the values; not the keys
-  type AttrOf backend (MonoidalMap.MonoidalMap k g) = AttrOf backend g
-  draw ats = foldMap (draw @backend ats)
-
-
-
-instance IsDrawable (Ipe R) MyPoint where
-  type AttrOf (Ipe R) MyPoint = AttrOf (Ipe R) (Point 2 R)
-  draw ats (p :+ c) = draw @(Ipe R) ((stroke ?~ c) : ats) p
 
 
 --------------------------------------------------------------------------------
@@ -386,10 +295,10 @@ instance ( Point_ point 2 r, Num r, Ord r
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
          testX
-         testBug
+         -- testBug
          -- coneCovers
          -- findMissingEdgeTest
-         lowest
+
          verifyCellProperties
          testBarrycentric
          -- voronoiSpec -- FIXME: Enable this again
@@ -413,8 +322,9 @@ spec = describe "RandomizedEnvSpec" $ do
 
            --       show () === "foo"
 
-           prop "brute force vornoi diagram; sites contained in voronoi regions" $
-             \(sites' :: NESet.NESet (Point 2 R)) (Queries domain _) ->
+         voronoiClosest
+         prop "brute force voronoi diagram; sites contained in voronoi regions" $
+             \(Input3 sites' :: Input3 (Point 2 R)) (Queries domain _) ->
                let sites = assignColors sites'
                    vd    = voronoiDiagramIn domain (toNonEmpty sites)
                    p `implies` q = not p || q
@@ -431,7 +341,7 @@ spec = describe "RandomizedEnvSpec" $ do
 
          modifyMaxSize (const 13) $ do
            prop "brute force envelope; indeed lowest at query points" $
-             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
+             \(Input3 planes :: Input3 MyPlane) (Queries domain queries) ->
                let env   = lowerEnvelopeOn domain planes
                in counterexample (show env) $
                   ipeCounterExample (queries, domain, toList env) $
@@ -440,30 +350,15 @@ spec = describe "RandomizedEnvSpec" $ do
                               | q <- toList queries
                               ]
 
-           xprop "brute force voronoi diagram; covers all points" $
-             \(sites' :: NESet.NESet (Point 2 R)) (Queries domain queries) ->
-               let sites = assignColors sites'
-                   vd = voronoiDiagramIn domain (toNonEmpty sites)
-                   verifyClosest sites q vd =
-                     let ss  = closestAt q vd
-                         ss' = closestAt' q sites
-                     in ss === ss'
-               in not (null vd) ==>
-                    ipeCounterExample (queries, domain, sites, vd) $
-                    counterexample (show vd) $
-                    conjoin [ verifyClosest sites q vd
-                            | q <- toList queries
-                            ]
 
-
-           lowest
            xprop "randomized2 same as (new) brute force" $
-             \(planes :: NESet.NESet MyPlane)
+             \(Input3 planes :: Input3 MyPlane)
               (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
                verticesOf (Randomized.verticesIn gen domain planes)
                ===
                verticesOf (bruteForceVerticesIn domain planes)
 
+         lowest
 
 --------------------------------------------------------------------------------
 
@@ -496,6 +391,22 @@ verifyCellProperties = describe "verifying cell properties" $ do
 --                       findMissingEdge (\u v -> u > v) 0 (NonEmpty.fromList [1..5])
 --                       `shouldBe`
 --                       Just (0,[1..4],5)
+
+voronoiClosest = prop "brute force voronoi diagram; covers all points" $
+             \(Input3 sites' :: Input3 (Point 2 R)) (Queries domain queries) ->
+               let sites = assignColors sites'
+                   vd = voronoiDiagramIn domain (toNonEmpty sites)
+                   verifyClosest sites q vd =
+                     let ss  = closestAt q vd
+                         ss' = closestAt' q sites
+                     in ss === ss'
+               in not (null vd) ==>
+                    ipeCounterExample (queries, domain, sites, vd) $
+                    counterexample (show vd) $
+                    conjoin [ verifyClosest sites q vd
+                            | q <- toList queries
+                            ]
+
 
 lowest :: Spec
 lowest = prop "brute force triangulated envelope; indeed lowest at query points" $
@@ -641,10 +552,10 @@ mkCone a incoming outgoing = Cone a (negated incoming :+ ()) (outgoing :+ ())
 -- * Debugging things
 
 
-data Input plane = Input (Triangle (Point 2 R))
-                         (NESet.NESet plane)
-                         [Point 2 R] -- possible queries
-                 deriving (Show,Read)
+data Input' plane = Input' (Triangle (Point 2 R))
+                          (NESet.NESet plane)
+                          [Point 2 R] -- possible queries
+                  deriving (Show,Read)
 
 -- domain = Triangle (Point2 100 100) (Point2 110 100) (Point2 100 110)
 
@@ -745,7 +656,7 @@ data Input plane = Input (Triangle (Point 2 R))
 
 
 
-runTest (Input domain planes queries) = do
+runTest (Input' domain planes queries) = do
   print $ isInGeneralPosition planes
 {-
           traverse_  print planes
@@ -1005,29 +916,23 @@ testVD = writeIpeFile [osp|vd.ipe|]
 -- Triangle (Point2 (-15) 80) (Point2 0 0) (Point2 0 41.88235~)
 -- Cone {_apex = Point2 42.775 22.01408~, _leftBoundaryVector = Vector2 0.66666~ (-80.73418~) :+ (), _rightBoundaryVector = Vector2 (-41.79311~) 46.16666~ :+ ()}
 
-assignColors :: NESet.NESet (Point 2 R) -> NESet.NESet MyPoint
-assignColors = snd . mapAccumLStrictlyMonotonic f (cycle basicNamedColors)
-  where
-    f cs p = case cs of
-      (c:colors') -> (colors', p :+ c)
-      _           -> error "absurd"
-
--- | mapAccumL; assuming the function is stritly monotonic; thus producing no duplicates.
-mapAccumLStrictlyMonotonic      :: (s -> a -> (s, b)) -> s -> NESet.NESet a -> (s, NESet.NESet b)
-mapAccumLStrictlyMonotonic f s0 = fmap NESet.fromDistinctAscList . mapAccumL f s0 . NESet.toList
 
 
 bugI :: NonEmpty (Point 2 R)
-bugI = Point2 (-1) 0 :| [Point2 0 0,Point2 0 3.7]
+bugI = (Point2 0 0 :| [Point2 0 1,Point2 1 2])
+
 bugDomain ::Triangle (Point 2 R)
-bugDomain = Triangle (Point2 5 6) (Point2 (-1) 2) (Point2 0 (-6))
+bugDomain = Triangle (Point2 7.75 (-4.5)) (Point2 (-8.85715) 9) (Point2 7.4 (-4.42858))
 
 bugX = voronoiDiagramIn bugDomain bugI
-testBug = prop "brute force vornoi diagram; covers all points" $
+
+
+
+testBug = prop "testbug; brute force voronoi diagram; covers all points" $
           let sites' = NESet.fromList bugI
               domain = bugDomain
               sites = assignColors sites'
-              queries = [Point2 (-0.77) 0]-- this point is not actualy inside the triangle?
+              queries = [Point2 1.5 0.5]
               vd = voronoiDiagramIn domain (toNonEmpty sites)
               verifyClosest sites q vd =
                      let ss  = closestAt q vd
@@ -1039,6 +944,24 @@ testBug = prop "brute force vornoi diagram; covers all points" $
                     conjoin [ verifyClosest sites q vd
                             | q <- toList queries
                             ]
+
+testBug1 = prop "testbug; brute force voronoi diagram; covers all points" $
+          let sites' = NESet.fromList bugI
+              domain = bugDomain
+              sites = assignColors sites'
+              queries = [Point2 1.5 0.5]
+              vd = voronoiDiagramIn domain (toNonEmpty sites)
+              verifyClosest sites q vd =
+                     let ss  = closestAt q vd
+                         ss' = closestAt' q sites
+                     in ss === ss'
+          in not (null vd) ==>
+                    ipeCounterExample (queries, domain, sites, vd) $
+                    counterexample (show vd) $
+                    conjoin [ verifyClosest sites q vd
+                            | q <- toList queries
+                            ]
+
 
 
 -- bug2 = prop "brute force vornoi diagram; covers all points" $
@@ -1060,4 +983,4 @@ testBug = prop "brute force vornoi diagram; covers all points" $
 
 --------------------------------------------------------------------------------
 
-main = hspec spec
+main = hspec voronoiClosest
