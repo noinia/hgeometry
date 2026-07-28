@@ -64,7 +64,7 @@ verticesIn               :: forall gen set plane corner r.
                             , Foldable1 set, Ord plane
                             , Point_ corner 2 r
 
-                            , Show r, Show plane
+                            , Show r, Show plane, Show corner
                             )
                          => gen
                          -> Triangle corner

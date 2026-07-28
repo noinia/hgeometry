@@ -46,7 +46,7 @@ import           R
 import           Test.Util
 import           Debug.Trace
 import           Data.Foldable
-import           Test.QuickCheck hiding (Negative)
+import           Test.QuickCheck hiding (Negative, Positive)
 import           Ipe.Color
 import           Ipe
 import           Ipe.Draw
@@ -57,6 +57,9 @@ import           Test.Hspec
 --------------------------------------------------------------------------------
 
 type HalfPlane = HalfPlaneF (LinePV 2 R)
+
+
+
 
 myTriangle :: Triangle (Point 2 R)
 myTriangle = Triangle (Point2 0 0) (Point2 1010 0) (Point2 0 1010)
@@ -70,6 +73,20 @@ myHalfPlanes = NonEmpty.fromList
                , rightHalfPlane $ LinePV (Point2 0 1000) (Vector2 1000 (-1))
                , rightHalfPlane $ LinePV (Point2 0 900) (Vector2 1 20)
                ]
+
+
+spec :: Spec
+spec = describe "Bounded Halfspace intersection tests" $ do
+         drawHalfspaceCorrect
+         prop "is convex polygon" $
+           \(t :: Triangle (Point 2 R)) (hs :: NonEmpty HalfPlane) ->
+             case boundedCommonIntersection (toNonEmpty (intersectingHalfPlanes t) <> hs) of
+               Nothing   -> property True -- this test may be less useful than ideal
+               Just poly -> counterexample (show poly) $ verifyConvex poly
+
+
+--------------------------------------------------------------------------------
+
 
 
 -- blah = case partitionHalfPlanes halfplanes of
@@ -89,8 +106,6 @@ test :: Maybe (ConvexPolygon (Point 2 R :+ HalfPlane))
 test = boundedCommonIntersection $
        toNonEmpty (intersectingHalfPlanes myTriangle) <> myHalfPlanes
 
--- spec = describe "bounded tests" $ do
---          prop ""
 
 
 
@@ -126,7 +141,6 @@ instance ( Ord r, Fractional r
       boundary = draw @(Ipe r) (ats <> [fill .~ Nothing]) (h^.boundingHyperPlane)
 
 instance ( Ord r, Fractional r
-         -- , HalfSpaceF line `IsIntersectableWith` Rectangle (Point 2 r)
          ) => IsDrawable (Ipe r) (LinePV 2 r) where
   type AttrOf (Ipe r) (LinePV 2 r) = PathAttributes r
   draw ats l = case l `intersect` defaultBox of
@@ -135,13 +149,15 @@ instance ( Ord r, Fractional r
                    Line_x_Box_LineSegment seg -> draw @(Ipe r) ats seg
                    _                          -> [] -- don't draw singleton points
 
-spec :: Spec
-spec = describe "Bounded common intersection spec" $ do
-        prop "is convex polygon" $
-          \(t :: Triangle (Point 2 R)) (hs :: NonEmpty HalfPlane) ->
-            case boundedCommonIntersection (toNonEmpty (intersectingHalfPlanes t) <> hs) of
-              Nothing   -> property True -- this test may be less useful than ideal
-              Just poly -> counterexample (show poly) $ verifyConvex poly
+instance ( Ord r, Fractional r
+         ) => IsDrawable (Ipe r) (VerticalOrLineEQ r) where
+  type AttrOf (Ipe r) (VerticalOrLineEQ r) = PathAttributes r
+  draw ats = draw @(Ipe r) ats . convert
+    where
+      convert = \case
+        VerticalLineThrough x -> LinePV (Point2 x 0) (Vector2 0 1)
+        NonVertical l         -> fromLineEQ l
+
 
 
 theBug = prop "theBug " $ do
@@ -198,6 +214,54 @@ blah2 = let h :: HalfPlaneF (LinePV 2 R)
              Point2 10 0 `intersects` h
 
 
+bug = do
+    print $ boundedCommonIntersection (triHs <> hs)
+    writeIpeFile [osp|/tmp/out.ipe|] . addStyleSheet opacitiesStyle . singlePageFromContent
+                    . mconcat   $
+                    [ draw @(Ipe R) [fill ?~ gray] (view core <$> hs)
+                    , draw @(Ipe R) [fill ?~ orange
+                                    , layer ?~ "triHs"
+                                    ] (view core <$> triHs)
+                    , draw @(Ipe R) [fill ?~ blue
+                                    , layer ?~ "theTriangle"
+                                    ] t
+                    , draw @(Ipe R) [ fill ?~ red
+                                    , stroke ?~ green
+                                    ] inters
+                    -- , draw @(Ipe R) [ fill ?~ orange
+                    --                 , stroke ?~ green
+                    --                 ] tri
+                    ]
+
+  where
+    t  = Triangle ( Point2 5 6 ) ( Point2 ( -1 ) 2 ) ( Point2 0 ( -6 ) )
+    Just inters = boundedCommonIntersection (triHs <> hs)
+
+    triHs = NonEmpty.fromList
+      [HalfSpace Negative ( NonVertical ( LineEQ 0.66666 2.66666 ) ) :+ Nothing
+            , HalfSpace Positive ( NonVertical ( LineEQ ( -8 ) ( -6 ) ) ) :+ Nothing
+            , HalfSpace Positive ( NonVertical ( LineEQ 2.4 ( -6 ) ) ) :+ Nothing]
+
+    hs :: NonEmpty (HalfPlaneF (VerticalOrLineEQ R) :+ Maybe String)
+    -- hs = NonEmpty.fromList $
+    --         [
+    --           HalfSpace Negative ( NonVertical ( LineEQ 0.66666 2.66666 ) ) :+ Nothing
+    --         , HalfSpace Positive ( NonVertical ( LineEQ ( -8 ) ( -6 ) ) ) :+ Nothing
+    --         , HalfSpace Positive ( NonVertical ( LineEQ 2.4 ( -6 ) ) ) :+ Nothing
+    --         , HalfSpace Negative ( VerticalLineThrough ( -0.5 ) ) :+ Just "white"
+    --         , HalfSpace Negative ( NonVertical ( LineEQ ( -0.27028 ) 1.71486 ) ) :+ Just "red"
+    --         ]
+
+    hs = NonEmpty.fromList
+      [
+        HalfSpace Positive ( VerticalLineThrough ( -0.5 ) ) :+ Just "white"
+        -- ( Plane 0 0 0 :+ ( Point2 0 0 :+ IpeColor ( Named "white" ) ) )
+      -- , HalfSpace Negative ( NonVertical ( LineEQ ( -0.27028 ) 1.71486 ) ) :+ Just "red"
+        -- ( Plane 0 ( -7.4 ) 13.69 :+ ( Point2 0 3.7 :+ IpeColor ( Named "red" ) ) )
+      ]
+
+
+
 -- floep =
 
           -- it "thebug" $ do
@@ -211,3 +275,40 @@ blah2 = let h :: HalfPlaneF (LinePV 2 R)
           --            ,Point2 1 (-2)  :+  HalfSpace Positive (LinePV (Point2 0 0) (Vector2 0 (-1)))
           --            ,Point2 1 (-1)  :+  HalfSpace Positive (LinePV (Point2 0 0) (Vector2 0 (-1)))
           --            ]) -- TODO; fix
+
+
+
+
+
+--             , Plane 2 0 1 :+ ( Point2 ( -1 ) 0 :+ IpeColor ( Named "black" ) )
+
+--             , EnvVertex
+--     ( Plane 2 0 1 :+ ( Point2 ( -1 ) 0 :+ IpeColor ( Named "black" ) ) )
+--     ( Plane 0 0 0 :+ ( Point2 0 0 :+ IpeColor ( Named "white" ) ) )
+--     ( Plane 0 ( -7.4 ) 13.69 :+ ( Point2 0 3.7 :+ IpeColor ( Named "red" ) ) ) []
+--     ( Point2 ( -0.5 ) 1.85 ) 0 :| [] )
+
+
+-- ( "halfPlanes"
+
+--   , Plane 2 0 1 :+ ( Point2 ( -1 ) 0 :+ IpeColor ( Named "black" ) ), "-> ",
+
+
+drawHalfspaceCorrect :: Spec
+drawHalfspaceCorrect = describe "drawing halfspaces is correct" $ do
+    prop "draw halfspace correct (LinePV 2 R)" $ do
+      \(h :: HalfPlaneF (LinePV 2 R)) -> case h `intersect` defaultBox of
+        Nothing -> discard
+        Just is -> case is of
+          ActualPolygon interior -> let q = pointInteriorTo interior
+                                    in ipeCounterExample interior $ q `intersects` h
+          _                      -> discard
+
+    prop "draw halfspace correct (VerticalLineEQ R)" $ do
+      \(h :: HalfPlaneF (VerticalOrLineEQ R)) -> case h `intersect` defaultBox of
+        Nothing -> discard
+        Just is -> case is of
+          ActualPolygon interior -> let q = pointInteriorTo interior
+                                    in counterexample (show q) $
+                                       ipeCounterExample (interior) $ q `intersects` h
+          _                      -> discard

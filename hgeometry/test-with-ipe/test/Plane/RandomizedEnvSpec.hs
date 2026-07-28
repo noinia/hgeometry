@@ -440,7 +440,7 @@ spec = describe "RandomizedEnvSpec" $ do
                               | q <- toList queries
                               ]
 
-           xprop "brute force vornoi diagram; covers all points" $
+           xprop "brute force voronoi diagram; covers all points" $
              \(sites' :: NESet.NESet (Point 2 R)) (Queries domain queries) ->
                let sites = assignColors sites'
                    vd = voronoiDiagramIn domain (toNonEmpty sites)
@@ -1027,7 +1027,7 @@ testBug = prop "brute force vornoi diagram; covers all points" $
           let sites' = NESet.fromList bugI
               domain = bugDomain
               sites = assignColors sites'
-              queries = [Point2 (-0.77) 0]
+              queries = [Point2 (-0.77) 0]-- this point is not actualy inside the triangle?
               vd = voronoiDiagramIn domain (toNonEmpty sites)
               verifyClosest sites q vd =
                      let ss  = closestAt q vd
@@ -1041,7 +1041,22 @@ testBug = prop "brute force vornoi diagram; covers all points" $
                             ]
 
 
-
+-- bug2 = prop "brute force vornoi diagram; covers all points" $
+--           let sites' = NESet.fromList bugI
+--               domain = bugDomain
+--               sites = assignColors sites'
+--               queries = [Point2 (-0.77) 0]
+--               vd = voronoiDiagramIn domain (toNonEmpty sites)
+--               verifyClosest sites q vd =
+--                      let ss  = closestAt q vd
+--                          ss' = closestAt' q sites
+--                      in ss === ss'
+--           in not (null vd) ==>
+--                     ipeCounterExample (queries, domain, sites, vd) $
+--                     counterexample (show vd) $
+--                     conjoin [ verifyClosest sites q vd
+--                             | q <- toList queries
+--                             ]
 
 --------------------------------------------------------------------------------
 

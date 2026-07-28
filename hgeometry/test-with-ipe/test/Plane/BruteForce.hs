@@ -37,6 +37,7 @@ module Plane.BruteForce
   -- , findRotateTo
   ) where
 
+import           HGeometry.Sign
 import           HGeometry.Intersection
 import           HGeometry.Boundary
 import           Data.Foldable
@@ -280,18 +281,21 @@ computeCellIn             :: forall plane vertex corner r.
                                    , EnvVertex_ vertex r plane, Point_ corner 2 r
                                    -- , HasIntersectionWith (Point 2 r) (HalfPlane r plane)
 
-                                   , Show plane, Show r, Show vertex
+                                   , Show plane, Show r, Show vertex, Show corner
 
                                    )
                           => Triangle corner
                           -> plane
                           -> NonEmpty vertex -> Maybe (ConvexPolygon (Vertex' vertex r plane))
-computeCellIn domain h vs = fmap mkVertex <$> boundedCommonIntersection halfPlanes
+computeCellIn domain h vs
+  | traceShow ("computeCellIn",domain,h,vs) False = undefined
+  | otherwise = fmap mkVertex <$> traceShowWith ("res",) (boundedCommonIntersection halfPlanes)
   where
     -- | For each relevant other plane h', define the halfplane where h is cheaper than h'
     -- (and include the boundary of the trianlge)
     halfPlanes :: NonEmpty (HalfPlane r plane)
-    halfPlanes = toNonEmpty ((:+ Nothing) <$> intersectingHalfPlanes domain)
+    halfPlanes = traceShowWith ("halfPlanes",h,"-> ", ) $
+                 toNonEmpty ((:+ Nothing) <$> intersectingHalfPlanes domain)
               <> foldMap1 (NonEmpty.fromList . mapMaybe' asHalfPlane . planesOf) vs
                  -- note that each vertex has at least three defining
                  -- planes, one of which is h itself. So each plane
@@ -311,12 +315,12 @@ computeCellIn domain h vs = fmap mkVertex <$> boundedCommonIntersection halfPlan
     -- | given an other plane h', produce the halfplane where h is cheaper, and tag it with h'
     asHalfPlane    :: plane -> Maybe (HalfPlane r plane)
     asHalfPlane h' = intersectionLine h h' <&> \l ->
-      let q = case l of
-                VerticalLineThrough x    -> Point2 (x-1) 0
-                NonVertical (LineEQ _ b) -> Point2 0 (b+1)
-          s = if evalAt q h < evalAt q h' then Positive else Negative
-            -- note: we picked q so that it lies on the side on which h is suppoed to be cheaper
-      in HalfSpace s l :+ Just h'
+      let half  = HalfSpace Positive l
+          q     = pointInteriorTo half
+          half' = half&halfSpaceSign %~ \s ->
+                    if (evalAt q h < evalAt q h') then s else flipSign s
+          half'' = traceShowWith ("asHalfplane",h,h',q,q `intersects` half',"->",) half'
+      in half'' :+ Just h'
 
     -- | look up the vertex associated with this particular location. (Or create an Extra)
     -- vertex if no such point exists.
@@ -342,7 +346,7 @@ fromVertices        :: forall plane vertex corner r.
                        ( Plane_ plane r, Ord plane, Ord r, Fractional r
                        , EnvVertex_ vertex r plane, Point_ corner 2 r
                        -- , HasIntersectionWith (Point 2 r) (HalfPlane r plane)
-                       , Show plane, Show r, Show vertex
+                       , Show plane, Show r, Show vertex, Show corner
                        )
                     => Triangle corner -> Set vertex
                     -> BoundedLowerEnvelope' vertex r plane

@@ -35,6 +35,7 @@ import           Data.Zip
 import           Data.Coerce
 import           Data.Foldable
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Given a (non)-empty set of n halfplanes with the guarantee that if
@@ -64,7 +65,7 @@ boundedCommonIntersection    :: forall set halfPlane r.
                                 )
                               => set halfPlane
                               -> Maybe (ConvexPolygon (Point 2 r :+ halfPlane))
-boundedCommonIntersection hs0 = case bimap extremes boundaries $ partitionHalfPlanes hs0 of
+boundedCommonIntersection hs0 = case traceShowWith ("X",) $ bimap extremes boundaries $ partitionHalfPlanes hs0 of
     This _verticals              -> Nothing
       -- by the precondition, if we only have vertical halfplanes they cannot form a bounded
       -- region, so then they must intersect in an empty region.
@@ -72,9 +73,9 @@ boundedCommonIntersection hs0 = case bimap extremes boundaries $ partitionHalfPl
       BothSigns upper lower -> sweep ((^.extra) <$> lower) ((^.extra) <$> upper)
       _                     -> error "precondition failed; only non-verticals"
 
-    These verticals nonVerticals -> case nonVerticals of
+    These verticals nonVerticals -> traceShowWith ("here",verticals,"->",) $ case nonVerticals of
       These upper lower -> case verticals of
-        Leftwards r    -> sweep ((^.extra) <$> lower)  (clipPushRight upper r)
+        Leftwards r    -> sweep ((^.extra) <$> lower)  (traceShowWith ("r",r,) $ clipPushRight upper r)
         Rightwards l   -> sweep (clipPushLeft l lower) ((^.extra) <$> upper)
         LeftAndRights r l -> sweep (clipPushLeft l lower) (clipPushRight upper r)
       _                 -> Nothing
@@ -103,19 +104,24 @@ sweep :: forall halfPlane r.
                             , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                   (BoundingHyperPlane halfPlane 2 r)
 
+                            , Show halfPlane, Show r
+
                             )
       => Chain Seq r halfPlane
       -- ^ the lower boundary ; i.e. bounds the convex region from below
       -> Chain Seq r halfPlane
       -- ^ the upper boundary; i.e. bounds the region from above
       -> Maybe (ConvexPolygon (Point 2 r :+ halfPlane))
-sweep lower upper =
-    do (l,lower',upper')           <- findLeftmostIntersection lower upper
-       (outputLower,outputUpper,r) <- findRightmostIntersection lower' upper'
+sweep lower upper | traceShow ("sweep",lower,upper) False = undefined
+                  | otherwise
+  =
+
+    do (l,lower',upper')           <- traceShowWith ("left",) $ findLeftmostIntersection lower upper
+       (outputLower,outputUpper,r) <- traceShowWith ("right",) $ findRightmostIntersection lower' upper'
        let vs = consSep l (coerce outputLower) <> consSep r (reversing . coerce $ outputUpper)
 
        -- pure . uncheckedFromCCWPoints . removeRepeated . fmap (uncurry (:+)) $ vs
-       fromPoints (uncurry (:+) <$> vs)
+       fromPoints (uncurry (:+) <$> (traceShowWith ("vs",) vs))
 
        -- TODO: currently, the fromPoints still converts to an Vector, we are guaranteed
        -- to produce the points in CCW order. So I think we need to check only that the
@@ -230,12 +236,12 @@ findRightmostIntersection lower upper = case (unsnocChain lower, unsnocChain upp
       | otherwise             -> Nothing
 
     (Right (l,(w,h')), Right (u',(v,h)))
-      | w <= v    -> if w `intersects` h
+      | w >= v    -> if w `intersects` h
                      then reportIntersection h' h
                           -- in general, it could be that v is not contained in h',
                           -- yet the bounding lines intersect. However, in that case their
                           -- common intersection is unbounded (i.e. as h' and h) diverge
-                          -- towards the "top left".
+                          -- towards the "top right".
                      else findRightmostIntersection l upper -- drop h'
       | otherwise -> if v `intersects` h'
                      then reportIntersection h' h
