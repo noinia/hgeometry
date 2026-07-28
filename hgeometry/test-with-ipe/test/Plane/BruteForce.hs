@@ -319,8 +319,7 @@ computeCellIn domain h vs
           q     = pointInteriorTo half
           half' = half&halfSpaceSign %~ \s ->
                     if (evalAt q h < evalAt q h') then s else flipSign s
-          half'' = traceShowWith ("asHalfplane",h,h',q,q `intersects` half',"->",) half'
-      in half'' :+ Just h'
+      in half' :+ Just h'
 
     -- | look up the vertex associated with this particular location. (Or create an Extra)
     -- vertex if no such point exists.

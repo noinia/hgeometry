@@ -166,9 +166,9 @@ findLeftmostIntersection lower upper = case (unconsChain lower, unconsChain uppe
       | otherwise           -> findLeftmostIntersection lower u' -- drop h; continue
 
     -- symmetric to the above
-    (Right ((h',w),_), Left u)
+    (Right ((h',w),l), Left u)
       | w `intersects` u      -> reportIntersection h' u
-      | otherwise             -> Nothing
+      | otherwise             -> findLeftmostIntersection l upper
 
     (Right ((h',w),l), Right ((h,v),u'))
       | w <= v    -> if w `intersects` h
@@ -231,9 +231,9 @@ findRightmostIntersection lower upper = case (unsnocChain lower, unsnocChain upp
       | otherwise           -> findRightmostIntersection lower u' -- drop h; continue
 
     -- symmetric to the above
-    (Right (_,(w,h')), Left u)
+    (Right (l,(w,h')), Left u)
       | w `intersects` u      -> reportIntersection h' u
-      | otherwise             -> Nothing
+      | otherwise             -> findRightmostIntersection l upper
 
     (Right (l,(w,h')), Right (u',(v,h)))
       | w >= v    -> if w `intersects` h
