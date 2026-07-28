@@ -301,7 +301,7 @@ spec = describe "RandomizedEnvSpec" $ do
 
          verifyCellProperties
          testBarrycentric
-         -- voronoiSpec -- FIXME: Enable this again
+         voronoiSpec
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $
@@ -847,10 +847,17 @@ voronoiSpec = describe "Vornoi specs" $ do
                         [osp|simple1_out|]
                 testIpe [osp|foo.ipe|]
                         [osp|foo_out|]
-                testIpe [osp|colinear.ipe|]
-                        [osp|colinear_out|]
-                testIpe [osp|pair.ipe|]
-                        [osp|pair_out|]
+
+
+                -- the pair testcase does not satisfy the precondition;
+                -- i.e. there are planes contributing to voronoi cells inside T
+                -- but we are not given its halfplanes
+                -- testIpe [osp|colinear.ipe|]
+                --         [osp|colinear_out|]
+                -- testIpe [osp|pair.ipe|]
+                --         [osp|pair_out|]
+
+
                 -- testIpe [osp|buggy.ipe|]
                 --         [osp|buggy_out|]
 

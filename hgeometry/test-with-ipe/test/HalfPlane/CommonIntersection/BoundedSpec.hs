@@ -4,22 +4,16 @@
 module HalfPlane.CommonIntersection.BoundedSpec
   where
 
-import           GHC.Generics (Generic)
 import           Test.Util
 import           HGeometry.Sign
-import           HGeometry.Box (Rectangle, LineBoxIntersection(..))
-import           Data.Bifunctor (first)
-import           HGeometry.Foldable.Sort
 import           HGeometry.HalfSpace
 import           HGeometry.Point
 import           HGeometry.Triangle
 import           HGeometry.Vector
 import           HGeometry.Ext
 import           HGeometry.Line
-import           HGeometry.HyperPlane
 import           HGeometry.Polygon
 import           HGeometry.Intersection
-import           HGeometry.HalfPlane.CommonIntersection.Chain as Chain
 import           HGeometry.HalfPlane.CommonIntersection.Bounded
 import           HGeometry.HalfPlane.CommonIntersection( partitionHalfPlanes
                                                        , classifyHalfPlane
@@ -28,13 +22,11 @@ import           Control.Lens
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           Prelude hiding (zipWith)
 import           Test.Hspec.QuickCheck
 import qualified Data.Set.NonEmpty as NESet
 import           R
-import           Debug.Trace
 import           Data.Foldable
 import           Test.QuickCheck hiding (Negative, Positive)
 import           Ipe.Color
