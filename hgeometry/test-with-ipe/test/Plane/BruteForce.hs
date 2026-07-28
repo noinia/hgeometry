@@ -15,26 +15,6 @@ module Plane.BruteForce
 
 
   , computeCellIn
-  -- , computeDomain
-
-
-
-  -- , Vertex(..), location, location2
-
-
-  -- , bruteForceTriangulatedEnvelope
-  -- , bruteForceTriangulatedEnvelopeIn
-  -- , TriangulatedLowerEnvelope
-  -- , Prism
-  -- , Vertex'(..)
-
-  -- , allZippers
-
-  -- , coverCone
-  -- , coverClippedCone
-
-  -- , findMissingEdge
-  -- , findRotateTo
   ) where
 
 import           HGeometry.Sign
@@ -182,9 +162,7 @@ type TriangulatedLowerEnvelope' v r plane =
 triangulatedLowerEnvelopeOn        :: forall set plane r.
                                       ( Plane_ plane r, Ord plane, Ord r, Fractional r
                                       , Foldable1 set
-                                      -- , HasIntersectionWith (Point 2 r) (HalfPlane r plane)
-
-                       , Show plane, Show r
+                                      -- , Show plane, Show r
                                       )
                                    => Triangle (Point 2 r)
                                    -> set plane
@@ -210,9 +188,7 @@ triangulate poly = case toNonEmptyOf vertices poly of
 --
 lowerEnvelopeOn        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                           , Foldable1 set
-                          -- , HasIntersectionWith (Point 2 r) (HalfPlane r plane)
-
-                       , Show plane, Show r
+                          -- , Show plane, Show r
                            )
                         => Triangle (Point 2 r) -> set plane -> BoundedLowerEnvelope r plane
 lowerEnvelopeOn domain = fromVertices domain . bruteForceVertices
@@ -279,23 +255,17 @@ mapMaybe' f = mapMaybe f . NonEmpty.toList
 computeCellIn             :: forall plane vertex corner r.
                                    ( Plane_ plane r, Ord plane, Ord r, Fractional r
                                    , EnvVertex_ vertex r plane, Point_ corner 2 r
-                                   -- , HasIntersectionWith (Point 2 r) (HalfPlane r plane)
-
-                                   , Show plane, Show r, Show vertex, Show corner
-
+                                   -- , Show plane, Show r, Show vertex, Show corner
                                    )
                           => Triangle corner
                           -> plane
                           -> NonEmpty vertex -> Maybe (ConvexPolygon (Vertex' vertex r plane))
-computeCellIn domain h vs
-  | traceShow ("computeCellIn",domain,h,vs) False = undefined
-  | otherwise = fmap mkVertex <$> traceShowWith ("res",) (boundedCommonIntersection halfPlanes)
+computeCellIn domain h vs = fmap mkVertex <$> boundedCommonIntersection halfPlanes
   where
     -- | For each relevant other plane h', define the halfplane where h is cheaper than h'
     -- (and include the boundary of the trianlge)
     halfPlanes :: NonEmpty (HalfPlane r plane)
-    halfPlanes = traceShowWith ("halfPlanes",h,"-> ", ) $
-                 toNonEmpty ((:+ Nothing) <$> intersectingHalfPlanes domain)
+    halfPlanes = toNonEmpty ((:+ Nothing) <$> intersectingHalfPlanes domain)
               <> foldMap1 (NonEmpty.fromList . mapMaybe' asHalfPlane . planesOf) vs
                  -- note that each vertex has at least three defining
                  -- planes, one of which is h itself. So each plane
@@ -344,8 +314,7 @@ computeCellIn domain h vs
 fromVertices        :: forall plane vertex corner r.
                        ( Plane_ plane r, Ord plane, Ord r, Fractional r
                        , EnvVertex_ vertex r plane, Point_ corner 2 r
-                       -- , HasIntersectionWith (Point 2 r) (HalfPlane r plane)
-                       , Show plane, Show r, Show vertex, Show corner
+                       -- , Show plane, Show r, Show vertex, Show corner
                        )
                     => Triangle corner -> Set vertex
                     -> BoundedLowerEnvelope' vertex r plane
