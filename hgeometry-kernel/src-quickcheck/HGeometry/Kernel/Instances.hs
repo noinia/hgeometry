@@ -158,13 +158,17 @@ instance ( Arbitrary point
                             , b' /= a', c' /= a', c' /= b', ccw a' b' c' /= CoLinear
                             ]
 
-instance Arbitrary r => Arbitrary (LineEQ r) where
+instance (Arbitrary r, Num r, Eq r) => Arbitrary (LineEQ r) where
   arbitrary = LineEQ <$> arbitrary <*> arbitrary
+  shrink = genericShrink
 
-instance Arbitrary r => Arbitrary (VerticalOrLineEQ r) where
+instance (Arbitrary r, Num r, Eq r) => Arbitrary (VerticalOrLineEQ r) where
   arbitrary = frequency [ (5,  VerticalLineThrough <$> arbitrary)
                         , (95, NonVertical <$> arbitrary)
                         ]
+  shrink = \case
+    VerticalLineThrough x -> VerticalLineThrough <$> shrink x
+    NonVertical l         -> NonVertical         <$> shrink l
 
 
 instance ( Arbitrary r
@@ -220,6 +224,7 @@ instance (Arbitrary r, Has_ Additive_ d r
 
 instance Arbitrary boundingHyperPlane => Arbitrary (HalfSpaceF boundingHyperPlane) where
   arbitrary = HalfSpace <$> arbitrary <*> arbitrary
+  shrink (HalfSpace s l) = [HalfSpace s l' | l' <- shrink l]
 
 
 instance (Arbitrary r, Arbitrary point, Arbitrary edge, Num r, Ord r, Point_ point 2 r

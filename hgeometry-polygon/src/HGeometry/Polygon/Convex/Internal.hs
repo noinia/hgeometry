@@ -669,8 +669,8 @@ instance ( Point_ corner 2 r, Fractional r, Ord r
 consistentHalfSpace                 :: Num r
                                     => HalfSpaceF (VerticalOrLineEQ r) -> HalfSpaceF (LinePV 2 r)
 consistentHalfSpace (HalfSpace s l) = case l of
-    VerticalLineThrough _ -> HalfSpace (flipSign s) (supportingLine l)
-    NonVertical _         -> HalfSpace s            (supportingLine l)
+    VerticalLineThrough _ -> HalfSpace s (supportingLine l)
+    NonVertical _         -> HalfSpace s (supportingLine l)
 
 --------------------------------------------------------------------------------
 -- * Halfspace x Triangle Intersection
@@ -698,3 +698,13 @@ instance ( Point_ corner 2 r, Fractional r, Ord r
       toConvexPolygon :: Triangle corner -> ConvexPolygon (Point 2 r)
       toConvexPolygon = uncheckedFromCCWPoints . fmap (^.asPoint) . view (Triangle.corners)
                       . toCounterClockwiseTriangle
+
+
+--------------------------------------------------------------------------------
+
+instance ( VertexContainer f vertex, Point_ vertex 2 r
+         , Ord r, Fractional r
+         ) => HasPickInteriorPoint (ConvexPolygonF f vertex) 2 r where
+  pointInteriorTo poly = case poly^..vertices of
+                           (u:v:w:_) -> pointInteriorTo $ Triangle u v w
+                           _         -> error "pointInteriorTo for convex polygon; absurd"
