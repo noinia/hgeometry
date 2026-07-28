@@ -834,7 +834,7 @@ drawVD = ifoldMap draw'
 --------------------------------------------------------------------------------
 
 voronoiSpec :: Spec
-voronoiSpec = describe "Vornoi specs" $ do
+voronoiSpec = describe "Voronoi specs" $ do
                 testIpe [osp|trivial.ipe|]
                         [osp|trivial_out|]
                 testIpe [osp|simplest.ipe|]
