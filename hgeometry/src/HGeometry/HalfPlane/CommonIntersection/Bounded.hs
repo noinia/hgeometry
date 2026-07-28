@@ -5,35 +5,28 @@ module HGeometry.HalfPlane.CommonIntersection.Bounded
   ( boundedCommonIntersection
   ) where
 
-import           HGeometry.HalfPlane.CommonIntersection.Internal
-import           HGeometry.Box (Rectangle, LineBoxIntersection(..))
-import           HGeometry.Foldable.Sort
-import           HGeometry.HalfSpace
-import           HGeometry.Point
-import           HGeometry.Triangle
-import           HGeometry.Vector
-import           HGeometry.Ext
-import           HGeometry.Line
-import           HGeometry.HyperPlane
-import           HGeometry.Intersection
-import           HGeometry.Polygon hiding (extremes)
-import           HGeometry.HalfPlane.CommonIntersection.Chain as Chain
-import           Control.Lens
-import           Control.Monad ((=<<),(<=<))
-import           Data.Foldable1
-import qualified Data.Vector.NonEmpty as NonEmptyVector
-import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Seq
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.List.NonEmpty (NonEmpty(..))
-import           HGeometry.Sequence.NonEmpty
-import           Data.These
-import           HGeometry.Sequence.Alternating
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
-import           Prelude hiding (zipWith)
-import           Data.Zip
-import           Data.Coerce
-import           Data.Foldable
+import HGeometry.HalfPlane.CommonIntersection.Internal
+import HGeometry.Box (Rectangle, LineBoxIntersection(..))
+import HGeometry.Foldable.Sort
+import HGeometry.HalfSpace
+import HGeometry.Point
+import HGeometry.Triangle
+import HGeometry.Vector
+import HGeometry.Ext
+import HGeometry.Line
+import HGeometry.HyperPlane
+import HGeometry.Intersection
+import HGeometry.Polygon hiding (extremes)
+import HGeometry.HalfPlane.CommonIntersection.Chain as Chain
+import Control.Lens
+import Data.Foldable1
+import Data.Sequence (Seq(..))
+import HGeometry.Sequence.NonEmpty
+import Data.These
+import HGeometry.Sequence.Alternating
+import Prelude hiding (zipWith)
+import Data.Coerce
+
 
 --------------------------------------------------------------------------------
 

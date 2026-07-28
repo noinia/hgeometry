@@ -22,26 +22,16 @@ import           HGeometry.Intersection
 import           HGeometry.HalfPlane.CommonIntersection.Chain as Chain
 import           HGeometry.HalfPlane.CommonIntersection.Bounded
 import           HGeometry.HalfPlane.CommonIntersection( partitionHalfPlanes
-                                                       -- , boundaries
-                                                       -- , extremes
                                                        , classifyHalfPlane
                                                        )
 import           Control.Lens
-import           Control.Monad ((=<<),(<=<))
 import           Data.Foldable1
-import qualified Data.Vector.NonEmpty as NonEmptyVector
-import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Seq
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Sequence.NonEmpty
-import           Data.These
-import           HGeometry.Sequence.Alternating
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           Prelude hiding (zipWith)
-import           Data.Zip
 import           Test.Hspec.QuickCheck
-import           Data.Coerce
 import qualified Data.Set.NonEmpty as NESet
 import           R
 import           Debug.Trace
@@ -57,8 +47,6 @@ import           Test.Hspec
 --------------------------------------------------------------------------------
 
 type HalfPlane = HalfPlaneF (LinePV 2 R)
-
-
 
 
 myTriangle :: Triangle (Point 2 R)
@@ -84,10 +72,14 @@ spec = describe "Bounded Halfspace intersection tests" $ do
                Nothing   -> property True -- this test may be less useful than ideal
                Just poly -> counterexample (show poly) $ verifyConvex poly
          voronoiCell
-
+         voronoiBug
 
 --------------------------------------------------------------------------------
 
+-- | Given a triangle T, a point site s inside the triangle, and a bunch of other points
+--  compute the voronoi cell of s restricted to T.
+--
+-- this tests makes sure that we produce a (non-empty) convex polygon in this case.
 voronoiCell :: Spec
 voronoiCell = prop "bounded voronoi cell" $
                 \(PointInTriangle t s) (rest :: NESet.NESet (Point 2 R)) ->
@@ -115,6 +107,7 @@ closerHalfPlane s t = half&halfSpaceSign %~ \sign ->
 
 ----------------------------------------
 
+-- for debugging purposes
 voronoiBug :: Spec
 voronoiBug = prop "bounded voronoi cell" $
                let
@@ -138,12 +131,6 @@ voronoiBug = prop "bounded voronoi cell" $
 --------------------------------------------------------------------------------
 
 
-
--- blah = case partitionHalfPlanes halfplanes of
---          These _ nonverts -> case boundaries nonverts of
---            These upper lower -> upper
---          x -> error $ "blah" <> show x
-
 testz = partitionHalfPlanes $ halfplanes
 
 
@@ -155,8 +142,6 @@ halfplanes =
 test :: Maybe (ConvexPolygon (Point 2 R :+ HalfPlane))
 test = boundedCommonIntersection $
        toNonEmpty (intersectingHalfPlanes myTriangle) <> myHalfPlanes
-
-
 
 
 mainx = writeIpeFile [osp|/tmp/out.ipe|] . addStyleSheet opacitiesStyle . singlePageFromContent
