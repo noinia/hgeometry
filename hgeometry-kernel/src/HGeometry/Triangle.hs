@@ -161,7 +161,8 @@ instance ( Point_ point d r
 instance ( Point_ point 2 r
          , Num r, Ord r
          ) => HasIntersectionWith (Point 2 r) (Triangle point) where
-  q `intersects` t = allOf components (q `intersects`) $ intersectingHalfPlanes t
+  q `intersects` t = allOf components (q `intersects`) $
+                     intersectingHalfPlanes @(LinePV 2 r) t
 
 
 --------------------------------------------------------------------------------

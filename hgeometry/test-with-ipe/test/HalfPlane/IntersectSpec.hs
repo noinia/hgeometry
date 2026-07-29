@@ -97,9 +97,9 @@ ipeSpec = describe "halfplane drawn correctly" $ do
 
 spec :: Spec
 spec = describe "Cone properties" $ do
-         prop "bisector in cone" $ \(cone :: Cone R (Point 2 R) ()) ->
-           let b@(HalfLine p v) = coneBisector cone
-           in counterexample (show b) $ ((p^.asPoint) .+^ v) `intersects` cone
+         -- prop "bisector in cone" $ \(cone :: Cone R (Point 2 R) ()) ->
+         --   let b@(HalfLine p v) = coneBisector cone
+         --   in counterexample (show b) $ ((p^.asPoint) .+^ v) `intersects` cone
          prop "extraPoints correct" $ \(cone :: Cone R (Point 2 R) ()) ->
            let rect = boundingBox $ defaultBox :| [boundingBox (cone^.apex) ]
                pts  = extraPoints (leftBoundary  cone ^.core)

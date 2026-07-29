@@ -59,6 +59,10 @@ spec = describe "halfspace Tests" $ do
          --       l = LinePV origin (Vector2 (1 % 1) (1 % 1 :: Rational))
          --   ((horizontalLine @Rational $ 5 % 1) `intersects` h) `shouldBe` True
          --   (l `intersects` h) `shouldBe` True
+
+         prop "left halfplane is left of vertical line"  $ do
+           (Point2 1 0) `intersects` leftHalfPlane (VerticalLineThrough 4)
+
          describe "rightHalfPlane correct" $ do
            it "vertical" $
              (origin :: Point 2 R)

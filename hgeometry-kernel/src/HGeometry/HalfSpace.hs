@@ -15,6 +15,7 @@ module HGeometry.HalfSpace
   , module HGeometry.HalfSpace.Intersection
   , leftBoundingVector
   , rightBoundingVector
+  , convertBoundingLineOf
   ) where
 
 import HGeometry.HalfSpace.Class
@@ -22,7 +23,10 @@ import HGeometry.HalfSpace.Type
 import HGeometry.HalfSpace.Intersection
 import HGeometry.Point
 import HGeometry.Vector
+import HGeometry.Line.PointAndVector
+import HGeometry.Line.Class
 import HGeometry.Intersection
+import HGeometry.Sign
 import Control.Lens
 
 --------------------------------------------------------------------------------
@@ -54,3 +58,15 @@ rightBoundingVector   :: ( HalfPlane_ halfPlane r
                          )
                       => Point 2 r -> halfPlane -> Vector 2 r
 rightBoundingVector p = negated . leftBoundingVector p
+
+
+--------------------------------------------------------------------------------
+-- * Specific functions for 2D Halfspaces, aka HalfPlanes
+
+-- | Convert a halfplane bounded by an oriented line a halfplane
+-- bounded by some more general line type.
+convertBoundingLineOf   :: (Line2_ line r, Ord r, Num r) => HalfPlaneF (LinePV 2 r) -> HalfPlaneF line
+convertBoundingLineOf h =
+  let h' = h&boundingHyperPlaneLens %~ \(LinePV p v) -> fromPointAndVec p v
+  in h'&halfSpaceSign %~ \s -> if pointInteriorTo h `intersects` h'
+                               then s else flipSign s

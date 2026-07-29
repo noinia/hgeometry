@@ -10,7 +10,6 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           R
-import           HGeometry.Sign
 
 --------------------------------------------------------------------------------
 
@@ -25,12 +24,15 @@ spec = do it "Pick point in polygon test"  $
               let h' = HalfSpace s (supportingLine l)
               in counterexample (show h') $ q `intersects` h === q `intersects` h'
 
+
+
           prop "halfspace switching VerticalOrLineEQ -> linePV is consistent" $
             \(h@(HalfSpace s l) :: HalfSpaceF (VerticalOrLineEQ R)) (q :: Point 2 R) ->
-              let s' = case l of
-                         VerticalLineThrough _ -> flipSign s
-                         NonVertical _         -> s
-                  h' = HalfSpace s' (supportingLine l)
+              let -- s' = case l of
+                  --        VerticalLineThrough _ -> flipSign s
+                  --        NonVertical _         -> s
+                  -- not sure whey I thought we should flip the sign here?
+                  h' = HalfSpace s (supportingLine l)
               in counterexample (show h') $ q `intersects` h === q `intersects` h'
 
           prop "pick point inside halfplane correct (LinePV)" $
@@ -44,8 +46,8 @@ spec = do it "Pick point in polygon test"  $
               pointInteriorTo h `intersects` h
 
 
-data TestCase r = TestCase { _polygon :: SimplePolygon (Point 2 r) }
-                  deriving (Show)
+newtype TestCase r = TestCase { _polygon :: SimplePolygon (Point 2 r) }
+                   deriving (Show)
 
 toSpec                  :: TestCase R -> Expectation
 toSpec (TestCase  poly) = ((centroid poly :: Point 2 R)

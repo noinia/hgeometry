@@ -52,6 +52,19 @@ class HasIntersectionWith g h => IsIntersectableWith g h where
 
 -- type instance Intersection (geomA :+ extra) (geomB :+ extra) = Intersection geomA geomB
 
+
+instance HasIntersectionWith (Point d r) geomB
+         => HasIntersectionWith (Point d r) (geomB :+ extra) where
+  q `intersects` gb = q `intersects` (gb^.core)
+
+type instance Intersection (Point d r) (geom :+ extra) = Intersection (Point d r) geom
+
+instance IsIntersectableWith (Point d r) geomB
+         => IsIntersectableWith (Point d r) (geomB :+ extra) where
+  q `intersect` gb = q `intersect` (gb^.core)
+
+
+
 instance HasIntersectionWith geomA geomB
          => HasIntersectionWith (geomA :+ extra) (geomB :+ extra) where
   ga `intersects` gb = (ga^.core) `intersects` (gb^.core)

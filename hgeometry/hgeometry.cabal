@@ -65,7 +65,7 @@ common all-setup
       -- , hgeometry-ipe             >= 1             && < 1.1
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
-      , nonempty-containers       >= 0.3.4.5       && < 0.4
+      , nonempty-containers       >= 0.3.6         && < 0.4
       , monoidal-containers       >= 0.6.6         && < 0.8
       , fingertree                >= 0.1.5         && < 0.2
       , dlist                     >= 0.7           && < 1.1
@@ -259,6 +259,7 @@ library
         HGeometry.IntervalTree
 
         HGeometry.HalfPlane.CommonIntersection
+        HGeometry.HalfPlane.CommonIntersection.Bounded
         HGeometry.HalfPlane.CommonIntersection.Chain
 
         HGeometry.Polygon.Triangulation
@@ -308,6 +309,8 @@ library
     other-modules:
 
         HGeometry.DelaunayTriangulation.Types
+
+        HGeometry.HalfPlane.CommonIntersection.Internal
 
         HGeometry.Polygon.Visibility.NaiveVisibilityPolygon
 
@@ -534,6 +537,7 @@ common with-ipe-hspec-fractional
       PlaneGraph.PolygonOverlaySpec
 
 
+      HalfPlane.CommonIntersection.BoundedSpec
 
       HalfPlane.CommonIntersectionSpec
       Line.LowerEnvelopeSpec

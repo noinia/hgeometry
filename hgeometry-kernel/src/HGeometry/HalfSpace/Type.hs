@@ -165,6 +165,3 @@ instance ( HasPickInteriorPoint hyperPlane d r
             Positive -> id
             Negative -> negated
       -- the normalVector of l should point towards the positive halfspace of l
-
-
---------------------------------------------------------------------------------

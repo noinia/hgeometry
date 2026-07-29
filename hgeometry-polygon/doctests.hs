@@ -31,6 +31,7 @@
 
                 -optF -package=hgeometry-combinatorial
                 -optF -package=hiraffe
-                -optF -package=hgeometry
+                -optF -package=hgeometry-lineSegmentIntersection
+                -optF -package=hgeometry-polygon
 
 #-}

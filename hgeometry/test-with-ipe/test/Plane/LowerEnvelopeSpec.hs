@@ -250,14 +250,6 @@ withConflictListTest planes (Positive r) = iall correctConflictLists $
 
 
 
-instance FoldableWithIndex k (NEMap.NEMap k) where
-  ifoldMap = NEMap.foldMapWithKey
-
-
--- verifyAllTriangles ::
-
-
-
 -- | verify that withExtraConflictListTest is correct
 withExtraConflictListTest              :: Int -> NESet.NESet MyPlane -> Triangle (Point 2 R)
                                        -> Every

@@ -46,7 +46,7 @@ instance Arbitrary PointInPoly where
   arbitrary = do (poly :: SimplePolygon (Point 2 Double)) <- arbitrary
                  seed <- arbitrary
                  let pureGen = mkStdGen seed
-                     s       = runStateGen_ pureGen $ samplePolygon poly
+                     s       = runStateGen_ pureGen $ sampleFromPolygon poly
                      doubleToR = realToFrac :: Double -> R
                  pure $ PointInPoly (poly&vertices %~ over coordinates doubleToR)
                                     (s&coordinates %~ doubleToR)

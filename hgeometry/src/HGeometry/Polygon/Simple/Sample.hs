@@ -9,8 +9,9 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Simple.Sample
-  ( samplePolygon
-  , samplePolygons
+  ( sampleFromPolygon
+  , sampleFromPolygons
+  , sampleFromTriangle
 
   , Sampler
   , samplePoint
@@ -64,7 +65,7 @@ sample (Sampler total m) g = (maybe err snd . flip Map.lookupLE m) <$> uniformRM
 --------------------------------------------------------------------------------
 
 
--- | Build a triangle sampler; i.e. samples a triagnle from the polygons
+-- | Build a triangle sampler; i.e. samples a triangle from the polygons
 -- with probability proportional to its area.
 --
 -- \(O(N\log N)\), where \(N\) is the total size of all polygons.
@@ -76,31 +77,32 @@ triangleSampler = buildSampler . fmap (\tri -> (triangleSignedArea2X tri, tri))
 -- | Sample a point
 samplePoint           :: (Point_ point 2 r, StatefulGen g m, Real r, Ord r, UniformRange r)
                       => Sampler r (Triangle point) -> g -> m (Point 2 Double)
-samplePoint sampler g = sample sampler g >>= flip sampleTriangle g
+samplePoint sampler g = sample sampler g >>= flip sampleFromTriangle g
 
 -- | Unfiormly samples a point from a set of polygons. You may want to build a
 -- pointSampler if the goal is to sample multiple points.
 --
 -- \(O(N\log N)\), where \(N\) is the total size of all polygons.
-samplePolygons       :: ( SimplePolygon_ polygon point r, StatefulGen g m
-                        , Foldable1 nonEmpty, Real r, Ord r, UniformRange r
-                        )
-                     => nonEmpty polygon -> g -> m (Point 2 Double)
-samplePolygons pgs g = flip samplePoint g $ triangleSampler pgs
+sampleFromPolygons       :: ( SimplePolygon_ polygon point r, StatefulGen g m
+                            , Foldable1 nonEmpty, Real r, Ord r, UniformRange r
+                            )
+                          => nonEmpty polygon -> g -> m (Point 2 Double)
+sampleFromPolygons pgs g = flip samplePoint g $ triangleSampler pgs
 
 -- | Uniformly samples a point in a polygon.
 --
 -- \(O(n\log n)\)
-samplePolygon   :: ( SimplePolygon_ polygon point r, Ord r, Real r, UniformRange r
-                   , StatefulGen g m)
-                => polygon -> g -> m (Point 2 Double)
-samplePolygon p = samplePolygons $ p NonEmpty.:| []
+sampleFromPolygon   :: ( SimplePolygon_ polygon point r, Ord r, Real r, UniformRange r
+                       , StatefulGen g m)
+                    => polygon -> g -> m (Point 2 Double)
+sampleFromPolygon p = sampleFromPolygons $ p NonEmpty.:| []
 
--- | Uniformly samples a triangle in \(O(1)\) time.
-sampleTriangle                                       :: ( Point_ point 2 r, Real r
-                                                       , StatefulGen g m)
-                                                     => Triangle point -> g -> m (Point 2 Double)
-sampleTriangle (fmap doubleP -> Triangle v1 v2 v3) g =
+-- | Uniformly samples from a triangle in \(O(1)\) time.
+sampleFromTriangle                                       :: ( Point_ point 2 r, Real r
+                                                            , StatefulGen g m)
+                                                         => Triangle point -> g
+                                                         -> m (Point 2 Double)
+sampleFromTriangle (fmap doubleP -> Triangle v1 v2 v3) g =
     f <$> uniformRM (0, 1) g <*> uniformRM (0, 1) g
   where
     f       :: Double -> Double -> Point 2 Double

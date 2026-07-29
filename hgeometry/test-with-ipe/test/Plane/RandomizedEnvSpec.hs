@@ -4,6 +4,12 @@
 module Plane.RandomizedEnvSpec
   where
 
+import           HGeometry.Polygon.Convex.Internal (verifyConvex)
+import           GHC.Generics (Generic)
+import           Control.Monad
+import           HGeometry.Polygon.Simple.Sample
+import           Prelude hiding (zipWith)
+import           Data.Zip
 import           HGeometry.LineSegment
 import           HGeometry.HalfLine
 import           Data.Maybe
@@ -51,25 +57,13 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           Data.Text (Text)
 import           Debug.Pretty.Simple
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
--- import           Debug.Trace
+import           Debug.Trace
 import           Ipe.Draw
 import           Test.Util
 import           Data.Traversable
+import           System.Random.Stateful
 
 --------------------------------------------------------------------------------
-
--- newtype InputPlanes plane = InputPlanes (NESet.NESet plane)
---                           deriving (Show,Eq)
-
--- instance Arbtirary (InputPlanes MyPlane) where
---   arbitrary = do coeffs <-
-
-
-    -- arbitrary >>= go (mempty,mempty,mempty)
-    -- where
-    --   go   :: (Set r, Set r, Set r) -> Int -> Gen (InputPlanes plane)
-    --   go n =
-
 
 
 instance Arbitrary StdGen where
@@ -80,8 +74,11 @@ instance Arbitrary (IpeColor R) where
 
 ----------------------------------------
 
+
+-- | Generate a triangular domain, and a non-empty list of points
+-- strictly inside the domain.
 data Queries = Queries (Triangle (Point 2 R)) (NonEmpty (Point 2 R))
-             deriving (Show,Eq)
+             deriving (Show,Eq,Generic)
 
 instance Arbitrary Queries where
   arbitrary = do domain   <- arbitrary
@@ -90,21 +87,23 @@ instance Arbitrary Queries where
                                arbitrary `suchThat` all (> 0)
                  let queries = barrycentric domain <$> queries'
                  pure $ Queries domain queries
-  shrink (Queries tri qs) = [ Queries tri qs' | qs' <- shrink qs ]
+  -- shrink = const []
+  -- shrink = genericShrink
+  shrink (Queries tri qs) = [ Queries tri qs'
+                            | qs' <- shrinkSt (`intersects` tri) qs
+                            ]
+    where
+      shrinkSt p = mapMaybe (NonEmpty.nonEmpty . NonEmpty.filter p) . shrink
 
-barrycentric :: Triangle (Point 2 R) -> Vector 3 R -> Point 2 R
-barrycentric (Triangle (Point a) (Point b) (Point c)) (normalize -> Vector3 x y z) =
-    Point $ (x *^ a) ^+^ (y *^ b) ^+^ (z *^ c)
 
-normalize   :: Vector 3 R -> Vector 3 R
-normalize v = let s = sum v in (/s) <$> v
+
+-- | Make sure that we indeed generate points inside the triangle.
+testBarrycentric :: Spec
+testBarrycentric = prop "test barrycentric" $
+                     \(Queries t pts) -> all (`intersects` t) pts
 
 --------------------------------------------------------------------------------
 
--- | I don't think I really want this one; but just for debugging purposes it seems ok
-type instance NumType (a,b) = NumType b
-type instance NumType (a,b,c) = NumType c
-type instance NumType (a,b,c,d) = NumType d
 
 --------------------------------------------------------------------------------
 -- Move to Ipe.Draw
@@ -114,78 +113,18 @@ type instance NumType (a,b,c,d) = NumType d
 instance (Point_ apex 2 r, Fractional r, Ord r, Show r
          ) => IsDrawable (Ipe r) (Cone r apex edge) where
   type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
-  draw ats c = [iO $ defIO c]
-
-instance ( IsDrawable (Ipe r) a
-         , IsDrawable (Ipe r) b
-         , NumType a ~ r, NumType b ~ r
-         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
-         ) => IsDrawable (Ipe r) (a,b) where
-  type AttrOf (Ipe r) (a,b) = CommonAttributes r Maybe
-  draw ats (a,b) = draw @(Ipe r) [ commonAttributes %~ apply ats ] a
-                <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
+  draw _ats c = [iO $ defIO c]
 
 
-instance ( IsDrawable (Ipe r) a
-         , IsDrawable (Ipe r) b
-         , IsDrawable (Ipe r) c
-         , NumType a ~ r, NumType b ~ r, NumType c ~ r
-         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) c) r Maybe
-         ) => IsDrawable (Ipe r) (a,b,c) where
-  type AttrOf (Ipe r) (a,b,c) = CommonAttributes r Maybe
-  draw ats (a,b,c) = draw @(Ipe r) [ commonAttributes %~ apply ats ] a
-                  <> draw @(Ipe r) [ commonAttributes %~ apply ats ] b
-                  <> draw @(Ipe r) [ commonAttributes %~ apply ats ] c
+instance (Point_ point 2 r, Fractional r, Ord r, Show r, Show point
+         ) => IsDrawable (Ipe r) (HalfLine point) where
+  type AttrOf (Ipe r) (HalfLine point) = PathAttributes r
+  draw _ats hl = [iO $ defIO hl]
 
-instance ( IsDrawable (Ipe r) a
-         , IsDrawable (Ipe r) b
-         , IsDrawable (Ipe r) c
-         , IsDrawable (Ipe r) d
-         , NumType a ~ r, NumType b ~ r, NumType c ~ r, NumType c ~ r
-         , HasCommonAttributes (AttrOf (Ipe r) a) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) b) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) c) r Maybe
-         , HasCommonAttributes (AttrOf (Ipe r) d) r Maybe
-         ) => IsDrawable (Ipe r) (a,b,c,d) where
-  type AttrOf (Ipe r) (a,b,c,d) = CommonAttributes r Maybe
-  draw ats (a,b,c,d) = mconcat
-      [ draw @(Ipe r) [ commonAttributes %~ apply ats ] a
-      , draw @(Ipe r) [ commonAttributes %~ apply ats ] b
-      , draw @(Ipe r) [ commonAttributes %~ apply ats ] c
-      , draw @(Ipe r) [ commonAttributes %~ apply ats ] d
-      ]
-
-
--- | Helper function to apply attributes
-apply       :: [at -> at] -> at -> at
-apply ats a = foldl' (flip ($)) a ats
 
 
 --------------------------------------------------------------------------------
 
-type instance NumType (NESet.NESet a) = NumType a
-type instance NumType (MonoidalMap.MonoidalMap k a) = NumType a
-
-----------------------------------------
-
-
-instance IsDrawable backend g => IsDrawable backend (NESet.NESet g) where
-  type AttrOf backend (NESet.NESet g) = AttrOf backend g
-  draw ats = foldMap (draw @backend ats)
-
-instance IsDrawable backend g => IsDrawable backend (MonoidalMap.MonoidalMap k g) where
-  -- ^ Draws the values; not the keys
-  type AttrOf backend (MonoidalMap.MonoidalMap k g) = AttrOf backend g
-  draw ats = foldMap (draw @backend ats)
-
-
-
-instance IsDrawable (Ipe R) MyPoint where
-  type AttrOf (Ipe R) MyPoint = AttrOf (Ipe R) (Point 2 R)
-  draw ats (p :+ c) = draw @(Ipe R) ((stroke ?~ c) : ats) p
 
 
 --------------------------------------------------------------------------------
@@ -193,38 +132,18 @@ instance IsDrawable (Ipe R) MyPoint where
 
 
 --------------------------------------------------------------------------------
--- * Move to Kernel test HalfLine Intersection
+-- * Move to Kernel ; Cone x Triangle intersection stuff ?
 
-testT :: Triangle (Point 2 R)
-testT =  Triangle (Point2 1 0) (Point2 1 1) (Point2 0 0)
+testX :: Spec
+testX = it "cone triangle boundary intersections" $
+  let testT :: Triangle (Point 2 R)
+      testT =  Triangle (Point2 1 0) (Point2 1 1) (Point2 0 0)
 
-testC :: Cone R (Point 2 R) ()
-testC = Cone (Point2 1 0) (Vector2 1 1 :+ ()) (Vector2 0 (-1) :+ ())
-
-
-testX = coneTriangleBoundaryIntersections testC testT
--- testY = case (
---               -- (rightBoundary testC ^.core)
---              `intersect`
---               () of
-
---           -- _                                             -> True
-  -- FIXME: This is a bug; the halfline should not intersect the segment as a segment.
-
-bug :: Spec
-bug = describe "halfine x line segment should not intersect" $ do
-        let hl  = HalfLine (Point2 1 (0 :: R)) (Vector2 0 (-1))
-            seg = ClosedLineSegment (Point2 1 (0 :: R)) (Point2 1 1)
-        it "intersect" $
-          (case hl `intersect` seg of
-                Just (HalfLine_x_LineSegment_LineSegment seg) -> False
-                Just _                                        -> True
-                Nothing                                       -> False
-          ) `shouldBe` True
-        it "intersects" $
-          (hl `intersects` seg) `shouldBe` True
-
---------------------------------------------------------------------------------
+      testC :: Cone R (Point 2 R) ()
+      testC = Cone (Point2 1 0) (Vector2 1 1 :+ ()) (Vector2 0 (-1) :+ ())
+  in coneTriangleBoundaryIntersections testC testT
+     `shouldBe`
+     [Point2 1 0,Point2 1 0,Point2 1 0,Point2 1 0]
 
 
 -- | Computes the intersection points of the boundary of a cone with
@@ -252,40 +171,137 @@ coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
             ]
 
 
+--------------------------------------------------------------------------------
+
+-- | Generates arbitary points in a triangle
+arbitraryPointsInTriangle   :: Triangle (Point 2 R) -> Gen [Point 2 R]
+arbitraryPointsInTriangle t = do seed <- arbitrary
+                                 n    <- arbitrary
+                                 let gen = mkStdGen seed
+                                     t'  :: Triangle (Point 2 Double)
+                                     t'  = t&vertices.coordinates %~ realToFrac
+
+                                     sample g = over coordinates realToFrac
+                                             <$> sampleFromTriangle t' g
+                                 pure $ runStateGen_ gen $ replicateM n . sample
+
+-- | Generate arbitrary pints in the intersection of a triangle and a an other region.
+arbitraryPointInIntersection             :: Point 2 R `HasIntersectionWith` region
+                                         => Triangle (Point 2 R) -> region -> Gen [Point 2 R]
+arbitraryPointInIntersection domain cone =
+  filter (`intersects` cone) <$>  arbitraryPointsInTriangle domain
+
+--------------------------------------------------------------------------------
+
+-- | A clipped cone data type (represented by the two bounding arys)
+data ClippedCone apex = ClippedCone { _leftBoundary'  :: HalfLine apex
+                                    , _rightBoundary' :: HalfLine apex
+                                    }
+
+deriving instance Show (HalfLine apex) => Show (ClippedCone apex)
+deriving instance Eq   (HalfLine apex) => Eq   (ClippedCone apex)
+
+instance ( Arbitrary apex, Point_ apex 2 r, Num r, Ord r, Arbitrary r
+         ) => Arbitrary (ClippedCone apex) where
+  arbitrary = do (cone :: Cone r apex ()) <- arbitrary
+                 lambdas                  <- arbitrary `suchThat` (all (> 0))
+                 pure $ fromConeAndShifts cone lambdas
+
+-- | Construct a clipped cone from a given cone and some offsets w.r.t the apex.
+fromConeAndShifts              :: ( Num r, Point_ apex 2 r)
+                               => Cone r apex edge -> Vector 2 r -> ClippedCone apex
+fromConeAndShifts cone lambdas = ClippedCone leftRay rightRay
+  where
+    shift lambda v = HalfLine ((cone^.apex) .+^ (lambda *^ v)) v
+    Vector2 leftRay rightRay = zipWith shift lambdas
+                             $ Vector2 (cone^.leftBoundaryVector.core)
+                                       (cone^.rightBoundaryVector.core)
+
+instance ( Point_ point 2 r, Num r, Ord r
+         ) => Point 2 r `HasIntersectionWith` ClippedCone point where
+  q `intersects` (ClippedCone (HalfLine al vl) (HalfLine ar vr)) =
+    all (q `intersects`) [ rightHalfPlane (LinePV (al^.asPoint) vl) -- right of the left boundary
+                         , leftHalfPlane  (LinePV (ar^.asPoint) vr) -- left of the right boundary
+                         , leftHalfPlane  (LinePV (al^.asPoint) (ar .-. al))
+                         ]
+  {-# INLINE intersects #-}
+
+--------------------------------------------------------------------------------
+
+-- -- | Helper data type to generate tests for our cone and clipped cone cover tests
+-- data ConeInput' cone = ConeInput { _domain  :: Triangle (Point 2 R)
+--                                  , _cone     :: cone
+--                                  , _pointsIn :: [Point 2 R]
+--                                  } deriving (Show,Eq,Functor,Generic)
+
+-- type ConeInput        = ConeInput' (Cone R (Point 2 R) ())
+-- type ClippedConeInput = ConeInput' (ClippedCone (Point 2 R))
+
+-- instance ( Arbitrary cone
+--          , Point 2 R `HasIntersectionWith` cone
+--          ) => Arbitrary (ConeInput' cone) where
+--   arbitrary = do domain <- arbitrary
+--                  cone   <- arbitrary
+--                  pts    <- resize 300 $ arbitraryPointInIntersection domain cone
+--                  pure $ ConeInput domain cone pts
+--   shrink = genericShrink
+
+-- coneCovers :: Spec
+-- coneCovers = describe "Cone Covers" $ do
+--     prop "cone cover contains domain" $
+--       \(ConeInput domain (cone :: Cone R (Point 2 R) ()) pts) ->
+--         let corners'      = filter (`intersects` cone) (toList domain)
+--             intersections = coneTriangleBoundaryIntersections cone domain
+--         in ipeCounterExample (domain,cone,corners',intersections) $
+--            case coverCone domain cone of
+--              Nothing
+--                | null pts  -> discard -- don't test with empty pts
+--                | otherwise -> counterexample (show pts) $ property False
+--              Just poly -> counterexample (show
+--                                            (poly
+--                                            )
+--                                          ) $
+--                           ipeCounterExample ( poly
+--                                             ) $
+--                           conjoin [ counterexample (show v) $ Every $ v `intersects` poly
+--                                   | v <- intersections ++ corners' ++ pts
+--                                   ]
+
+--     prop "clipped cone cover contains domain" $
+--       \(ConeInput domain (clippedCone :: ClippedCone (Point 2 R)) pts) ->
+--         let (ClippedCone leftRay rightRay) = clippedCone
+--             corners'      = filter (`intersects` clippedCone) (toList domain)
+--             -- intersections = filter (`intersects` clippedCone) $
+--             --                 coneTriangleBoundaryIntersections (definingCone cone) domain
+--          in ipeCounterExample (domain,corners') $
+--             case coverClippedCone domain leftRay rightRay of
+--               Nothing
+--                 | null pts  -> discard -- don't test with empty clipped cones
+--                 | otherwise -> counterexample (show pts) $ property False
+--               Just poly -> counterexample (show
+--                                             (poly, leftRay, rightRay)
+--                                           ) $
+--                            ipeCounterExample ( poly
+--                                              , leftRay
+--                                              , rightRay
+--                                              ) $
+--                            conjoin [ counterexample (show v) $ Every $ v `intersects` poly
+--                                    | v <- corners' ++ pts
+--                                    ]
+
+
+--------------------------------------------------------------------------------
+
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
-         bug
-         testBug
+         testX
+         -- testBug
+         -- coneCovers
+         -- findMissingEdgeTest
 
-         it "coverCone" $ do
-           let testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
-               domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
-
-           testCoverCone `shouldBe`
-             uncheckedFromCCWPoints (NonEmpty.fromList
-               [Extra (Point2 371 3),Extra (Point2 291 293),Original (Point2 1 3)])
-
-         prop "cone cover contains corners comain" $
-           \(domain :: Triangle (Point 2 R)) (cone :: Cone R (Point 2 R) ()) ->
-             let poly = coverCone domain (cone^.apex) (negated $ cone^.leftBoundaryVector.core)
-                                         (cone^.rightBoundaryVector.core)
-                 corners' = filter (`intersects` cone) (toList domain)
-             in ipeCounterExample (domain,cone,poly) $
-                counterexample (show corners') $
-                conjoin [ counterexample (show v) $ Every $ v `intersects` poly
-                        | v <- corners'
-                        ]
-
-         prop "cone cover contains domain" $
-           \(domain :: Triangle (Point 2 R)) (cone :: Cone R (Point 2 R) ()) ->
-             let poly = coverCone domain (cone^.apex) (negated $ cone^.leftBoundaryVector.core)
-                                         (cone^.rightBoundaryVector.core)
-                 intersections = coneTriangleBoundaryIntersections cone domain
-             in ipeCounterExample (domain,cone,poly) $
-                counterexample (show intersections) $
-                conjoin [ counterexample (show v) $ Every $ v `intersects` poly
-                        | v <- intersections
-                        ]
+         verifyCellProperties
+         testBarrycentric
+         voronoiSpec
 
          modifyMaxSize (const 60) $ do
            prop "new brute force same as original" $
@@ -306,8 +322,9 @@ spec = describe "RandomizedEnvSpec" $ do
 
            --       show () === "foo"
 
-           prop "brute force vornoi diagram; sites contained in voronoi regions" $
-             \(sites' :: NESet.NESet (Point 2 R)) (Queries domain _) ->
+         voronoiClosest
+         prop "brute force voronoi diagram; sites contained in voronoi regions" $
+             \(Input3 sites' :: Input3 (Point 2 R)) (Queries domain _) ->
                let sites = assignColors sites'
                    vd    = voronoiDiagramIn domain (toNonEmpty sites)
                    p `implies` q = not p || q
@@ -324,7 +341,7 @@ spec = describe "RandomizedEnvSpec" $ do
 
          modifyMaxSize (const 13) $ do
            prop "brute force envelope; indeed lowest at query points" $
-             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
+             \(Input3 planes :: Input3 MyPlane) (Queries domain queries) ->
                let env   = lowerEnvelopeOn domain planes
                in counterexample (show env) $
                   ipeCounterExample (queries, domain, toList env) $
@@ -333,8 +350,50 @@ spec = describe "RandomizedEnvSpec" $ do
                               | q <- toList queries
                               ]
 
-           xprop "brute force vornoi diagram; covers all points" $
-             \(sites' :: NESet.NESet (Point 2 R)) (Queries domain queries) ->
+
+           xprop "randomized2 same as (new) brute force" $
+             \(Input3 planes :: Input3 MyPlane)
+              (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
+               verticesOf (Randomized.verticesIn gen domain planes)
+               ===
+               verticesOf (bruteForceVerticesIn domain planes)
+
+         lowest
+
+--------------------------------------------------------------------------------
+
+
+-- | Generate at least three planes
+newtype MyPlanes = MyPlanes (NESet.NESet MyPlane)
+                 deriving (Show,Eq)
+
+instance Arbitrary MyPlanes where
+  arbitrary = MyPlanes <$> arbitrary `suchThat` ((>= 3) . length)
+
+
+verifyCellProperties :: Spec
+verifyCellProperties = describe "verifying cell properties" $ do
+  prop "cells convex" $
+    \(MyPlanes planes) (domain :: Triangle (Point 2 R)) ->
+      let env = lowerEnvelopeOn domain planes
+      in not (null env) ==>
+           ipeCounterExample env $
+           ifoldMap (\h cell -> Every $
+                                counterexample (show (h,cell)) $
+                                ipeCounterExample (cell, domain) $
+                                verifyConvex cell
+
+                    ) env
+
+
+-- findMissingEdgeTest :: Spec
+-- findMissingEdgeTest = it "find missing edge" $
+--                       findMissingEdge (\u v -> u > v) 0 (NonEmpty.fromList [1..5])
+--                       `shouldBe`
+--                       Just (0,[1..4],5)
+
+voronoiClosest = prop "brute force voronoi diagram; covers all points" $
+             \(Input3 sites' :: Input3 (Point 2 R)) (Queries domain queries) ->
                let sites = assignColors sites'
                    vd = voronoiDiagramIn domain (toNonEmpty sites)
                    verifyClosest sites q vd =
@@ -349,21 +408,16 @@ spec = describe "RandomizedEnvSpec" $ do
                             ]
 
 
-           prop "brute force triangulated envelope; indeed lowest at query points" $
-             \(planes :: NESet.NESet MyPlane) (Queries domain queries) ->
-               let env   = triangulatedLowerEnvelopeOn domain planes
-               in counterexample (show env) $
+lowest :: Spec
+lowest = prop "brute force triangulated envelope; indeed lowest at query points" $
+             \(MyPlanes planes) (Queries domain queries) ->
+               let env = triangulatedLowerEnvelopeOn domain planes
+               in if null env then trace ("discarding empty envelope " <> show planes) discard
+                              else counterexample (show env) $
                   ipeCounterExample (queries, domain, toList env) $
                     not (null env) ==> conjoin [ verifyLowest (toNonEmpty planes) q env
                                                | q <- toList queries
                                                ]
-
-           xprop "randomized2 same as (new) brute force" $
-             \(planes :: NESet.NESet MyPlane)
-              (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
-               verticesOf (Randomized.verticesIn gen domain planes)
-               ===
-               verticesOf (bruteForceVerticesIn domain planes)
 
 
 {-
@@ -407,6 +461,8 @@ verifyLowestEnv hs q = counterexample (show q)
                                ) hs
 
     lowestAtQ = minimumBy (comparing $ evalAt q) hs
+
+
 
 
 
@@ -496,111 +552,111 @@ mkCone a incoming outgoing = Cone a (negated incoming :+ ()) (outgoing :+ ())
 -- * Debugging things
 
 
-data Input plane = Input (Triangle (Point 2 R))
-                         (NESet.NESet plane)
-                         [Point 2 R] -- possible queries
-                 deriving (Show,Read)
+data Input' plane = Input' (Triangle (Point 2 R))
+                          (NESet.NESet plane)
+                          [Point 2 R] -- possible queries
+                  deriving (Show,Read)
 
 -- domain = Triangle (Point2 100 100) (Point2 110 100) (Point2 100 110)
 
-test :: IO ()
-test = do
-          writeIpeFile [osp|tri.ipe|]
-            . addStyleSheet (createIpeStyle "myColors" myColors)
-            . addStyleSheet opacitiesStyle
-            . ipeFile . NonEmpty.fromList . fmap (fromContent . concat) $
-              [ [ let testCoverCone :: ConvexPolygon (OriginalOrExtra (Point 2 R) (Point 2 R))
-                      testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
-                  in
-                  [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
-                  , iO $ defIO domain  &layer ?~  "domain"
-                  , iO $ ipeSimplePolygon testCoverCone &layer  ?~ "result"
-                                                        &fill   ?~ seagreen
-                                                        &stroke ?~ black
-                  ] ]
-              , [ let leftV  = Vector2 1 (-1)
-                      rightV = Vector2 1 2
-                      al     = Point2 5 3
-                      ar     = Point2 8 (3 :: R)
-                      answer :: ConvexPolygon (Point 2 R)
-                      answer = uncheckedFromCCWPoints $ NonEmpty.fromList
-                               [ al .-^ (20 *^ leftV)
-                               , al, ar
-                               , ar .+^ (20 *^ rightV)
-                               ]
-                      result = coverClippedCone domain al leftV ar rightV
-                  in
-                  [ iO $ defIO answer &layer ?~  "clippedCone"
-                                      &fill ?~ blue
-                  , iO $ defIO domain  &layer ?~  "domain"
-                  , iO $ ipeSimplePolygon result
-                          &layer ?~  "result"
-                          &fill ?~ seagreen
-                          &stroke ?~  black
-                  ] ]
-              , [ let al     :: Point 2 R
-                      al     = Point2 1.80000 0.60000
-                      leftV  = Vector2 1 0.33333
-                      ar     = Point2 0.79091 1.60909
-                      rightV = Vector2 (-1) (-2.66666)
-                      answer :: ConvexPolygon (Point 2 R)
-                      answer = uncheckedFromCCWPoints $ NonEmpty.fromList
-                               [ al .-^ (20 *^ leftV)
-                               , al, ar
-                               , ar .+^ (20 *^ rightV)
-                               ]
-                      result = coverClippedCone domain al leftV ar rightV
-                  in
-                  [ iO $ defIO answer &layer ?~  "clippedCone"
-                                      &fill ?~ blue
-                  , iO $ defIO domain  &layer ?~  "domain"
-                  , iO $ ipeSimplePolygon result
-                          &layer ?~  "result"
-                          &fill ?~ seagreen
-                          &stroke ?~  black
-                  ] ]
-              ]
-  where
-    domain :: Triangle (Point 2 R)
-    domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
+-- test :: IO ()
+-- test = do
+--           writeIpeFile [osp|tri.ipe|]
+--             . addStyleSheet (createIpeStyle "myColors" myColors)
+--             . addStyleSheet opacitiesStyle
+--             . ipeFile . NonEmpty.fromList . fmap (fromContent . concat) $
+--               [ [ let testCoverCone :: ConvexPolygon (OriginalOrExtra (Point 2 R) (Point 2 R))
+--                       testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
+--                   in
+--                   [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
+--                   , iO $ defIO domain  &layer ?~  "domain"
+--                   , iO $ ipeSimplePolygon testCoverCone &layer  ?~ "result"
+--                                                         &fill   ?~ seagreen
+--                                                         &stroke ?~ black
+--                   ] ]
+--               , [ let leftV  = Vector2 1 (-1)
+--                       rightV = Vector2 1 2
+--                       al     = Point2 5 3
+--                       ar     = Point2 8 (3 :: R)
+--                       answer :: ConvexPolygon (Point 2 R)
+--                       answer = uncheckedFromCCWPoints $ NonEmpty.fromList
+--                                [ al .-^ (20 *^ leftV)
+--                                , al, ar
+--                                , ar .+^ (20 *^ rightV)
+--                                ]
+--                       result = coverClippedCone domain al leftV ar rightV
+--                   in
+--                   [ iO $ defIO answer &layer ?~  "clippedCone"
+--                                       &fill ?~ blue
+--                   , iO $ defIO domain  &layer ?~  "domain"
+--                   , iO $ ipeSimplePolygon result
+--                           &layer ?~  "result"
+--                           &fill ?~ seagreen
+--                           &stroke ?~  black
+--                   ] ]
+--               , [ let al     :: Point 2 R
+--                       al     = Point2 1.80000 0.60000
+--                       leftV  = Vector2 1 0.33333
+--                       ar     = Point2 0.79091 1.60909
+--                       rightV = Vector2 (-1) (-2.66666)
+--                       answer :: ConvexPolygon (Point 2 R)
+--                       answer = uncheckedFromCCWPoints $ NonEmpty.fromList
+--                                [ al .-^ (20 *^ leftV)
+--                                , al, ar
+--                                , ar .+^ (20 *^ rightV)
+--                                ]
+--                       result = coverClippedCone domain al leftV ar rightV
+--                   in
+--                   [ iO $ defIO answer &layer ?~  "clippedCone"
+--                                       &fill ?~ blue
+--                   , iO $ defIO domain  &layer ?~  "domain"
+--                   , iO $ ipeSimplePolygon result
+--                           &layer ?~  "result"
+--                           &fill ?~ seagreen
+--                           &stroke ?~  black
+--                   ] ]
+--               ]
+--   where
+--     domain :: Triangle (Point 2 R)
+--     domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
 
 
 
 
-test2 = runTest $ Input domain planes []
-  where
-    domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
+-- test2 = runTest $ Input domain planes []
+--   where
+--     domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
 
-    planes :: NESet.NESet (MyPlane :+ IpeColor R)
-    planes = NESet.fromList
-           . NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
-            -- [ Plane 0    1    0
-            -- , Plane 0    (-1) 0
-            -- , Plane 1    0    2
-            -- , Plane (-1) (1/100)    2
-            -- ]
-             -- [ Plane (-1) 3 1
-             -- , Plane 1.66666 1.66666 (-3)
-             -- , Plane 2.66666 (-1) 0.5
-             -- , Plane 0 0 1
-             -- , Plane (-2) 2 2
-             -- ]
+--     planes :: NESet.NESet (MyPlane :+ IpeColor R)
+--     planes = NESet.fromList
+--            . NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
+--             -- [ Plane 0    1    0
+--             -- , Plane 0    (-1) 0
+--             -- , Plane 1    0    2
+--             -- , Plane (-1) (1/100)    2
+--             -- ]
+--              -- [ Plane (-1) 3 1
+--              -- , Plane 1.66666 1.66666 (-3)
+--              -- , Plane 2.66666 (-1) 0.5
+--              -- , Plane 0 0 1
+--              -- , Plane (-2) 2 2
+--              -- ]
 
-             -- [ Plane (-15.9) (-2.83334) (-4.16667)
-             -- , Plane (-14.5) 17.57894 (-5.21053)
-             -- ,Plane (-14.23530) 17.6 2.1
-             -- ,Plane (-5) (-11.6) (-16)
-             -- ,Plane 11 (-7.26667) (-7.23077)]
+--              -- [ Plane (-15.9) (-2.83334) (-4.16667)
+--              -- , Plane (-14.5) 17.57894 (-5.21053)
+--              -- ,Plane (-14.23530) 17.6 2.1
+--              -- ,Plane (-5) (-11.6) (-16)
+--              -- ,Plane 11 (-7.26667) (-7.23077)]
 
-             [Plane (-17.10527) 14 15.77777, Plane (-4.3) (-12.93334) 0.28571,Plane (-2.42858) (-3.57143) (-9.92858),Plane (-0.27273) (-21.44445) 8.8,Plane 0.625 (-0.875) (-17.18182),Plane 1.2 0.28571 4.4,Plane 1.73333 (-10.9) 18,Plane 5.28571 4.85714 14,Plane 7.75 (-10.11112) (-16.14286),Plane 8.85714 7.25 (-13.3125),Plane 9.07142 3.5 21.44444,Plane 12.66666 (-5.52942) 17.77272,Plane 17.85714 10.8 (-5),Plane 18.4375 (-9.5) (-6.47620),Plane 20.1 9 14,Plane 21.29411 13.38461 3]
-
-
+--              [Plane (-17.10527) 14 15.77777, Plane (-4.3) (-12.93334) 0.28571,Plane (-2.42858) (-3.57143) (-9.92858),Plane (-0.27273) (-21.44445) 8.8,Plane 0.625 (-0.875) (-17.18182),Plane 1.2 0.28571 4.4,Plane 1.73333 (-10.9) 18,Plane 5.28571 4.85714 14,Plane 7.75 (-10.11112) (-16.14286),Plane 8.85714 7.25 (-13.3125),Plane 9.07142 3.5 21.44444,Plane 12.66666 (-5.52942) 17.77272,Plane 17.85714 10.8 (-5),Plane 18.4375 (-9.5) (-6.47620),Plane 20.1 9 14,Plane 21.29411 13.38461 3]
 
 
 
 
 
-runTest (Input domain planes queries) = do
+
+
+runTest (Input' domain planes queries) = do
   print $ isInGeneralPosition planes
 {-
           traverse_  print planes
@@ -718,7 +774,9 @@ drawEnv = ifoldMap draw'
 
 
 --------------------------------------------------------------------------------
+-- * Voronoi Diagrams on a bounded region (via the lifting to the lower envelope)
 
+-- TODO: Move this into the main library I guess
 
 type BoundedVoronoiDiagram r site =
   MonoidalMap site (ConvexPolygon (Vertex' (EnvVertex r site) r site))
@@ -776,7 +834,7 @@ drawVD = ifoldMap draw'
 --------------------------------------------------------------------------------
 
 voronoiSpec :: Spec
-voronoiSpec = describe "Vornoi specs" $ do
+voronoiSpec = describe "Voronoi specs" $ do
                 testIpe [osp|trivial.ipe|]
                         [osp|trivial_out|]
                 testIpe [osp|simplest.ipe|]
@@ -789,10 +847,17 @@ voronoiSpec = describe "Vornoi specs" $ do
                         [osp|simple1_out|]
                 testIpe [osp|foo.ipe|]
                         [osp|foo_out|]
-                testIpe [osp|colinear.ipe|]
-                        [osp|colinear_out|]
-                testIpe [osp|pair.ipe|]
-                        [osp|pair_out|]
+
+
+                -- the pair testcase does not satisfy the precondition;
+                -- i.e. there are planes contributing to voronoi cells inside T
+                -- but we are not given its halfplanes
+                -- testIpe [osp|colinear.ipe|]
+                --         [osp|colinear_out|]
+                -- testIpe [osp|pair.ipe|]
+                --         [osp|pair_out|]
+
+
                 -- testIpe [osp|buggy.ipe|]
                 --         [osp|buggy_out|]
 
@@ -858,29 +923,23 @@ testVD = writeIpeFile [osp|vd.ipe|]
 -- Triangle (Point2 (-15) 80) (Point2 0 0) (Point2 0 41.88235~)
 -- Cone {_apex = Point2 42.775 22.01408~, _leftBoundaryVector = Vector2 0.66666~ (-80.73418~) :+ (), _rightBoundaryVector = Vector2 (-41.79311~) 46.16666~ :+ ()}
 
-assignColors :: NESet.NESet (Point 2 R) -> NESet.NESet MyPoint
-assignColors = snd . mapAccumLStrictlyMonotonic f (cycle basicNamedColors)
-  where
-    f cs p = case cs of
-      (c:colors') -> (colors', p :+ c)
-      _           -> error "absurd"
-
--- | mapAccumL; assuming the function is stritly monotonic; thus producing no duplicates.
-mapAccumLStrictlyMonotonic      :: (s -> a -> (s, b)) -> s -> NESet.NESet a -> (s, NESet.NESet b)
-mapAccumLStrictlyMonotonic f s0 = fmap NESet.fromDistinctAscList . mapAccumL f s0 . NESet.toList
 
 
 bugI :: NonEmpty (Point 2 R)
-bugI = Point2 (-1) 0 :| [Point2 0 0,Point2 0 3.7]
+bugI = (Point2 0 0 :| [Point2 0 1,Point2 1 2])
+
 bugDomain ::Triangle (Point 2 R)
-bugDomain = Triangle (Point2 5 6) (Point2 (-1) 2) (Point2 0 (-6))
+bugDomain = Triangle (Point2 7.75 (-4.5)) (Point2 (-8.85715) 9) (Point2 7.4 (-4.42858))
 
 bugX = voronoiDiagramIn bugDomain bugI
-testBug = prop "brute force vornoi diagram; covers all points" $
+
+
+
+testBug = prop "testbug; brute force voronoi diagram; covers all points" $
           let sites' = NESet.fromList bugI
               domain = bugDomain
               sites = assignColors sites'
-              queries = [Point2 (-0.77) 0]
+              queries = [Point2 1.5 0.5]
               vd = voronoiDiagramIn domain (toNonEmpty sites)
               verifyClosest sites q vd =
                      let ss  = closestAt q vd
@@ -892,3 +951,43 @@ testBug = prop "brute force vornoi diagram; covers all points" $
                     conjoin [ verifyClosest sites q vd
                             | q <- toList queries
                             ]
+
+testBug1 = prop "testbug; brute force voronoi diagram; covers all points" $
+          let sites' = NESet.fromList bugI
+              domain = bugDomain
+              sites = assignColors sites'
+              queries = [Point2 1.5 0.5]
+              vd = voronoiDiagramIn domain (toNonEmpty sites)
+              verifyClosest sites q vd =
+                     let ss  = closestAt q vd
+                         ss' = closestAt' q sites
+                     in ss === ss'
+          in not (null vd) ==>
+                    ipeCounterExample (queries, domain, sites, vd) $
+                    counterexample (show vd) $
+                    conjoin [ verifyClosest sites q vd
+                            | q <- toList queries
+                            ]
+
+
+
+-- bug2 = prop "brute force vornoi diagram; covers all points" $
+--           let sites' = NESet.fromList bugI
+--               domain = bugDomain
+--               sites = assignColors sites'
+--               queries = [Point2 (-0.77) 0]
+--               vd = voronoiDiagramIn domain (toNonEmpty sites)
+--               verifyClosest sites q vd =
+--                      let ss  = closestAt q vd
+--                          ss' = closestAt' q sites
+--                      in ss === ss'
+--           in not (null vd) ==>
+--                     ipeCounterExample (queries, domain, sites, vd) $
+--                     counterexample (show vd) $
+--                     conjoin [ verifyClosest sites q vd
+--                             | q <- toList queries
+--                             ]
+
+--------------------------------------------------------------------------------
+
+main = hspec voronoiClosest

@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
-module HalfPlane.CommonIntersectionSpec(spec) where
+module HalfPlane.CommonIntersectionSpec where
 
 import           Data.Bifoldable
 import           Control.Lens hiding (below)
@@ -215,10 +215,10 @@ above :: LineEQ r -> HalfPlane r
 above = HalfSpace Positive . NonVertical
 
 leftOf :: r -> HalfPlane r
-leftOf = HalfSpace Negative . VerticalLineThrough
+leftOf = HalfSpace Positive . VerticalLineThrough
 
 rightOf :: r -> HalfPlane r
-rightOf = HalfSpace Positive . VerticalLineThrough
+rightOf = HalfSpace Negative . VerticalLineThrough
 
 
 

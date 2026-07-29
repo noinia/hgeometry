@@ -10,9 +10,12 @@ module HGeometry.HalfPlane.CommonIntersection.Chain
   , clipLeft
   , clipRight
   , glueChains
-  , clipLeftLine, clipRightLine, consChain
+  , clipLeftLine, clipRightLine
+  , consChain, unconsChain
+  , snocChain, unsnocChain
   ) where
 
+import Data.Bifunctor (first)
 import Data.Foldable1
 import Data.Coerce (coerce)
 import Control.Lens hiding (Empty)
@@ -77,6 +80,30 @@ consChain      :: (Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
                   )
                => (halfPlane,Point 2 r) -> Chain f r halfPlane -> Chain f r halfPlane
 consChain (h,v) = over _ChainAlternating $ consElemWith (\_ _ -> v) h
+
+
+-- | split off the leftmost halfPlane and vertex from the chain
+unconsChain :: Chain Seq r halfPlane -> Either halfPlane ( (halfPlane, Point 2 r)
+                                                         , Chain Seq r halfPlane)
+unconsChain = fmap (fmap Chain) . unconsAlt . coerce
+
+
+
+-- | Add an element to the end of the chain
+snocChain    :: (Snoc (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+                  (Point 2 r, halfPlane)     (Point 2 r, halfPlane)
+                )
+             => Chain f r halfPlane -> (Point 2 r, halfPlane) -> Chain f r halfPlane
+snocChain (Chain (Alternating x0 xs)) z = Chain $  Alternating x0 (xs |> z)
+
+-- | split off the rightmost vertex and halfPlane from the chain
+unsnocChain :: Chain Seq r halfPlane -> Either halfPlane ( Chain Seq r halfPlane
+                                                         , (Point 2 r, halfPlane)
+                                                         )
+unsnocChain = fmap (first Chain) . unsnocAlt . coerce
+
+
+
 
 -- instance Traversable f => Bitraversable (Chain f) where
 --   bitraverse f g (Chain alt) = Chain <$> bitraverse (over coordinates f) g alt
@@ -187,3 +214,18 @@ glueChains pref suf = Chain $ concatAlternatingsWith f (coerce pref) (coerce suf
 
 
 --------------------------------------------------------------------------------
+
+
+-- -- | Access the first vertex of the chain
+-- firstVertex :: Cons (f (Point 2 r, halfPlane)) (f (Point 2 r, halfPlane))
+--                     (Point 2 r, halfPlane) (Point 2 r, halfPlane)
+--                => Traversal' (Chain f r halfPlane) (Point 2 r)
+-- firstVertex = _ChainAlternating.firstSeparator
+
+
+-- -- | Traversal to access the first separator
+-- --
+-- --
+-- firstSeparator                      :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+--                                     => Traversal' (Alternating f sep a) sep
+-- firstSeparator f (Alternating x xs) = Alternating x <$> (_head._1) f xs

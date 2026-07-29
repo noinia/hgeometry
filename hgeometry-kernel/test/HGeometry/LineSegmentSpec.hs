@@ -179,9 +179,29 @@ spec =
            counterexample (show $ hl `intersects` seg) $
             isNothing (hl `intersect` seg) && not (hl `intersects` seg )
 
+    theBug
+
+
+
+
 myHl1  = HalfLine (Point2 0 0) (Vector2 1 1)             :: HalfLine (Point 2 R)
 mySeg1 = ClosedLineSegment (Point2 0 0) (Point2 1 (-1))  :: ClosedLineSegment (Point 2 R)
 
+--------------------------------------------------------------------------------
+-- bug discovered while working on randomized lower enveloeps
+
+theBug :: Spec
+theBug = describe "halfine x line segment should not intersect" $ do
+        let hl  = HalfLine (Point2 1 (0 :: R)) (Vector2 0 (-1))
+            seg = ClosedLineSegment (Point2 1 (0 :: R)) (Point2 1 1)
+        it "intersect" $
+          (case hl `intersect` seg of
+                Just (HalfLine_x_LineSegment_LineSegment _seg) -> False
+                Just _                                         -> True
+                Nothing                                        -> False
+          ) `shouldBe` True
+        it "intersects" $
+          (hl `intersects` seg) `shouldBe` True
 
 --------------------------------------------------------------------------------
 -- * Make sure our 2d specialized instance ist he same as the generic one.

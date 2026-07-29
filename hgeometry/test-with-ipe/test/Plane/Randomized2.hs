@@ -19,24 +19,24 @@ import           System.Random
 import           Control.Lens hiding (Prism, Prism')
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
-import Data.List qualified as List
-import Data.List.NonEmpty qualified as NonEmpty
+import qualified Data.List as List
+import qualified Data.List.NonEmpty as NonEmpty
 import           Plane.BruteForce
 import           Plane.Sample
-import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
+import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import HGeometry.Plane.LowerEnvelope.Connected( mapVertices
                                               , MinimizationDiagram
                                               , MDVertex
                                               , VertexForm
                                               , fromVertexForm
                                               )
-import Data.Map.NonEmpty qualified as NEMap
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Map (Map)
-import Data.Map qualified as Map
+import qualified Data.Map as Map
 import           Prelude hiding (filter)
 import           Plane.Sample
 import           Data.Map.Monoidal (MonoidalMap)
-import Data.Map.Monoidal qualified as MonoidalMap
+import qualified Data.Map.Monoidal as MonoidalMap
 import           HGeometry.Triangle
 
 --------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ lowerEnvelopeOn'            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
 lowerEnvelopeOn' gen domain = fromVertices domain . verticesIn gen domain
 
 
--- | Randomzied algorithm to compute the vertices of the lower envelope
+-- | Randomized algorithm to compute the vertices of the lower envelope
 --
 -- we return only the vertices strictly inside the domain
 verticesIn               :: forall gen set plane corner r.
@@ -64,7 +64,7 @@ verticesIn               :: forall gen set plane corner r.
                             , Foldable1 set, Ord plane
                             , Point_ corner 2 r
 
-                            , Show r, Show plane
+                            , Show r, Show plane, Show corner
                             )
                          => gen
                          -> Triangle corner
@@ -85,8 +85,7 @@ verticesIn gen0 domain hs
        -- | The envelope; in which each vertex is tagged with whether it lies in the domain
        -- and its conflict list
        env :: TriangulatedLowerEnvelope'' r plane
-       env = mapMaybe ((intersectsDomain . triangulate) . withExtraConflictLists rest)
-           $ fromVertices domain vs
+       env = triangulate . withExtraConflictLists rest <$> fromVertices domain vs
 
        -- | Compute the vertices of the sample using a brute force manner
        vs = Set.mapMonotonic mkVertex $ bruteForceVertices rs
@@ -111,10 +110,10 @@ verticesIn gen0 domain hs
                          )
 
 
-       intersectsDomain :: NonEmpty (Prism'' r plane) -> Maybe (NonEmpty (Prism'' r plane))
-       intersectsDomain = NonEmpty.nonEmpty
-                        . NonEmpty.filter (`intersects` domain)
-         -- TODO we may be able to use the bools about vertex locations already to speed this up
+       -- intersectsDomain :: NonEmpty (Prism'' r plane) -> Maybe (NonEmpty (Prism'' r plane))
+       -- intersectsDomain = NonEmpty.nonEmpty
+       --                  . NonEmpty.filter (`intersects` domain)
+       --   -- TODO we may be able to use the bools about vertex locations already to speed this up
 
 
        computeConflictList v = let v' = location v
