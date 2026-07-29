@@ -120,10 +120,17 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                             [ stroke ?~ black
                             , fill   ?~ blue
                             ] poly handyCfg globalStdGen
+
+
+
           renderSvgToFile [osp|/tmp/out.svg|] $
             svg_ [ width_  "800"
                  , height_ "600"
-                 ] content
+                 ] (content
+                    <> draw @(SVG) [
+                                   ] (Label "foo" (Point2 200 500))
+
+                   )
 
           -- mapM_ print $ poly^..outgoingDartsOf 3.withIndex
           -- traverseOf_ (darts.withIndex) print poly

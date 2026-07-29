@@ -29,6 +29,7 @@ import           HGeometry.LineSegment
 import           Data.Default
 import           Ipe.Attributes
 import           Ipe.Draw
+import           Ipe.Content
 import           Miso (View)
 import           Data.Void
 import           HGeometry.Polygon
@@ -38,6 +39,7 @@ import           Miso.String (ToMisoString(..), ms, intercalate)
 import qualified Miso.Svg as Elem
 import qualified Miso.Svg.Property as Prop
 import           HGeometry.BezierSpline
+import qualified Miso
 
 --------------------------------------------------------------------------------
 
@@ -93,6 +95,18 @@ instance (Point_ point 2 r, Fractional r, ToMisoString r, r ~ NumType point
       str = let v :| rest = toNonEmptyOf (traversed1.asPoint) vs
             in "M " <> toStr v <> " C " <> intercalate ", " [ toStr w | w <- rest ]
       toStr (Point2 x y) = ms x <> " " <> ms y
+
+
+instance ToMisoString r => IsDrawable (Svg model action) (TextLabel r) where
+  type AttrOf (Svg model action) (TextLabel r) = TextAttributes r
+  draw ats (Label txt loc) = [ Elem.text_ ([ Prop.x_ (loc^.xCoord.to ms)
+                                           , Prop.y_ (loc^.yCoord.to ms)
+                                           ] <> Svg.svgWriteAttrs (apply ats)
+                                          )
+                                          [ Miso.text $ ms txt]
+                             ]
+  -- TODO: I think I should just not use TextAttributes, but a custom
+  -- SvgTextAttributes type
 
 
 -- | Helper function to apply attributes
