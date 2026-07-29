@@ -31,7 +31,6 @@ import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import           HGeometry.HalfPlane.CommonIntersection.Bounded
 import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
 import           Data.Foldable.WithIndex
-import           Data.Foldable (Foldable(..))
 import           Data.Maybe (fromMaybe, maybeToList)
 import           Plane.Sample
 import           HGeometry.Kernel
@@ -288,7 +287,7 @@ computeCellIn domain h vs = fmap mkVertex <$> boundedCommonIntersection halfPlan
       let half  = HalfSpace Positive l
           q     = pointInteriorTo half
           half' = half&halfSpaceSign %~ \s ->
-                    if (evalAt q h < evalAt q h') then s else flipSign s
+                    if evalAt q h < evalAt q h' then s else flipSign s
       in half' :+ Just h'
 
     -- | look up the vertex associated with this particular location. (Or create an Extra)

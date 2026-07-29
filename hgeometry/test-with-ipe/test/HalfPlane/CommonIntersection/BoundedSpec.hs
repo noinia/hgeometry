@@ -90,7 +90,7 @@ voronoiCell = prop "bounded voronoi cell" $
 closerHalfPlane     :: (Point_ point 2 r, Ord r, Fractional r)
                     => point -> point -> HalfSpaceF (VerticalOrLineEQ r)
 closerHalfPlane s t = half&halfSpaceSign %~ \sign ->
-                        if (dist q s < dist q t) then sign else flipSign sign
+                        if dist q s < dist q t then sign else flipSign sign
   where
     l    = let LinePV p v = bisector s t in fromPointAndVec p v
     half = HalfSpace Positive l
@@ -123,7 +123,7 @@ voronoiBug = prop "bounded voronoi cell" $
 --------------------------------------------------------------------------------
 
 
-testz = partitionHalfPlanes $ halfplanes
+testz = partitionHalfPlanes halfplanes
 
 
 
@@ -239,7 +239,7 @@ bug = do
 
     hs :: NonEmpty (HalfPlaneF (VerticalOrLineEQ R) :+ Maybe String)
     hs = NonEmpty.fromList
-      [ HalfSpace Positive( NonVertical ( LineEQ ( -0.5 ) 1.25 ) ) :+ Just "black"
+      [ HalfSpace Positive ( NonVertical ( LineEQ ( -0.5 ) 1.25 ) ) :+ Just "black"
         -- ( Plane 0 0 0 :+ ( Point2 0 0 :+ IpeColor ( Named "black" ) ) )
       , HalfSpace Positive  ( NonVertical ( LineEQ ( -1 ) 2 ) ) :+ Just "white"
       ]
@@ -349,5 +349,5 @@ drawHalfspaceCorrect = describe "drawing halfspaces is correct" $ do
         Just is -> case is of
           ActualPolygon interior -> let q = pointInteriorTo interior
                                     in counterexample (show q) $
-                                       ipeCounterExample (interior) $ q `intersects` h
+                                       ipeCounterExample interior $ q `intersects` h
           _                      -> discard
