@@ -1,9 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeData #-}
+{-# LANGUAGE QuasiQuotes #-}
 module Main
   (main) where
 
+import System.OsPath
 import Data.List.NonEmpty (NonEmpty(..))
 import Control.Monad.IO.Class
 import Data.Default
@@ -44,8 +47,12 @@ import Ipe.Color
 -- import Data.Functor.Apply (WrappedApplicative(..))
 import HGeometry.Foldable.Util
 import Ipe.Color
-import           Data.Functor.Contravariant
+import Data.Functor.Contravariant
 import Handy
+import HGeometry.Miso.Svg.Draw
+import Miso.Svg (svg_)
+import Miso.Html.Property(width_, height_)
+import HGeometry.Miso.Svg(renderSvgToFile)
 
 --------------------------------------------------------------------------------
 
@@ -108,6 +115,22 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                       , fill   ?~ blue
                       ] poly handyCfg globalStdGen
           printAsIpeSelection (res :: [IpeObject R])
+
+          content <- draw @(Handy SVG R (AtomicGenM StdGen) IO)
+                            [ stroke ?~ black
+                            , fill   ?~ blue
+                            ] poly handyCfg globalStdGen
+
+
+
+          renderSvgToFile [osp|/tmp/out.svg|] $
+            svg_ [ width_  "800"
+                 , height_ "600"
+                 ] (content
+                    <> draw @(SVG) [
+                                   ] (Label "foo" (Point2 200 500))
+
+                   )
 
           -- mapM_ print $ poly^..outgoingDartsOf 3.withIndex
           -- traverseOf_ (darts.withIndex) print poly

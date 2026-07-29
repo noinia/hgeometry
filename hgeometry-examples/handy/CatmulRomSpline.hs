@@ -1,30 +1,34 @@
+{-# LANGUAGE UndecidableInstances #-}
 module CatmulRomSpline
   ( CatmulRomSplineF(CatmulRomSpline, CatmulRomSegment), CatmulRomSpline
   , CatmulRomSegment
   , toCubicBezier
   ) where
 
-import Control.DeepSeq (NFData)
-import Control.Lens
--- import qualified Data.Foldable as F
-import Data.Functor.Classes
+import           Control.DeepSeq (NFData)
+import           Control.Lens
+import           Data.Functor.Classes
 -- import qualified Data.List.NonEmpty as NonEmpty
-import Data.Semigroup.Foldable
-import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import GHC.Generics (Generic)
+import           Data.Semigroup.Foldable
+import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import           GHC.Generics (Generic)
 --import HGeometry.Box
-import HGeometry.Point
-import HGeometry.Properties
+import           HGeometry.Point
+import           HGeometry.Properties
 -- import HGeometry.Transformation
-import HGeometry.Vector
-import HGeometry.Matrix
-import HGeometry.BezierSpline
-import HGeometry.Vector.NonEmpty.Util ()
-import Data.Kind (Type)
-import Data.Coerce
-import Data.Distributive
-import Ipe
-import Ipe.Draw
+import           HGeometry.Vector
+import           HGeometry.Matrix
+import           HGeometry.BezierSpline
+import           HGeometry.Vector.NonEmpty.Util ()
+import           Data.Kind (Type)
+import           Data.Coerce
+import           Data.Distributive
+import           Ipe
+import           Ipe.Draw
+import           HGeometry.Miso.Svg.Draw
+import qualified Miso.String as Miso
+import qualified Miso.Svg as Svg
+import           Miso.Svg.Property (d_)
 
 --------------------------------------------------------------------------------
 
@@ -97,6 +101,12 @@ instance (Point_ point 2 r, Fractional r
          ) => IsDrawable (Ipe r) (CatmulRomSegment point) where
   type AttrOf (Ipe r) (CatmulRomSegment point) = PathAttributes r
   draw ats = draw @(Ipe r) ats . toCubicBezier
+
+
+instance (Point_ point 2 r, Fractional r, Miso.ToMisoString r, r ~ NumType point
+         ) => IsDrawable (Svg model action) (CatmulRomSegment point) where
+  type AttrOf (Svg model action) (CatmulRomSegment point) = PathAttributes (NumType point)
+  draw ats = draw @(Svg model action) ats . toCubicBezier
 
 
 {-

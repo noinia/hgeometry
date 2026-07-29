@@ -191,7 +191,8 @@ instance ( Point_ point 2 r, Fractional r, Radical r
         Nothing -> mempty
         Just fc -> let fillAts  = ats <> [ stroke ?~ fc
                                          , fill   .~ Nothing
-                                         , pen    ?~ config^.hachureWeight
+                                         , pen     ?~ config^.hachureWeight
+                                         -- , lineCap ?~ 1
                                          -- TODO: set linecap
                                          ]
                        hachures = hachuring v poly
