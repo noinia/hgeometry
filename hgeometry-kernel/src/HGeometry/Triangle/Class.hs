@@ -108,7 +108,7 @@ toCounterClockwiseTriangle t@(Triangle_ a b c)
 -- halfspaces.
 --
 -- >>> let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
--- >>> mapM_ print $ intersectingHalfPlanes t
+-- >>> mapM_ print $ intersectingHalfPlanes @(LinePV 2 Int) t
 -- HalfSpace Positive (LinePV (Point2 0 0) (Vector2 (-1) 0))
 -- HalfSpace Positive (LinePV (Point2 (-1) 0) (Vector2 1 (-1)))
 -- HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))
@@ -125,15 +125,6 @@ intersectingHalfPlanes (toCounterClockwiseTriangle -> Triangle_ u v w) =
     Vector3 (leftPlane u v) (leftPlane v w) (leftPlane w u)
   where
     leftPlane p q = convertBoundingLineOf . leftHalfPlane $ lineThrough p q
-
-
--- instance HasPickInteriorPoint (HalfSpaceF)
-
--- pickPointIn   :: HalfSpace_ halfSpace d r => halfSpace -> Point d r
--- pickPointIn h =
-
--- class EquvalentHalfPlane hyperPlane where
-
 
 
 -- | Given a point q and a triangle, q inside the triangle, get the baricentric
