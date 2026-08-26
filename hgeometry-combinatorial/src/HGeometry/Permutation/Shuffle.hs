@@ -64,7 +64,7 @@ shuffle gen0 = construct . Builder.foldable
 -- slower.
 
 -- | "Inside-out" version of Fissher-Yates shuffle that returns a Seq.  see
--- https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_%22inside-out%22_algorithm
+-- https://en.wikipedia.org/w/index.php?title=Fisher%E2%80%93Yates_shuffle&oldid=1301571374#The_%22inside-out%22_algorithm
 -- for details.
 --
 -- O(n\log n)
@@ -90,7 +90,7 @@ data Acc gen s = Acc !gen !s
 --------------------------------------------------------------------------------
 
 -- | "Inside-out" version of Fissher-Yates shuffle that returns a Seq.  see
--- https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_%22inside-out%22_algorithm
+-- https://en.wikipedia.org/w/index.php?title=Fisher%E2%80%93Yates_shuffle&oldid=1301571374#The_%22inside-out%22_algorithm
 -- for details.
 --
 -- O(n\log n)
