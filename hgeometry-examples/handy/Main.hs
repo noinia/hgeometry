@@ -6,6 +6,7 @@
 module Main
   (main) where
 
+import HGeometry.Ball
 import System.OsPath
 import Data.List.NonEmpty (NonEmpty(..))
 import Control.Monad.IO.Class
@@ -122,13 +123,29 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                             ] poly handyCfg globalStdGen
 
 
+          let circle :: Circle (Point 2 R)
+              circle = Circle (Point2 800 800) 100
+              circ = draw @SVG [ stroke ?~ green
+                               -- , fill   ?~ blue
+                               ] circle
+
+          circ' <- draw @(Handy SVG R (AtomicGenM StdGen) IO)
+                          [ stroke ?~ green
+                            -- , fill   ?~ blue
+                          ] circle handyCfg globalStdGen
+
+
+          -- circ <- draw @(Handy SVG R (AtomicGenM StdGen) IO)
+          --                   , fill   ?~ blue
+          --                   [ stroke ?~ black
+          --                   ] (Circle (Point2 800 800) 100) handyCfg globalStdGen
 
           renderSvgToFile [osp|/tmp/out.svg|] $
-            svg_ [ width_  "800"
-                 , height_ "600"
-                 ] (content
+            svg_ [ width_  "1080"
+                 , height_ "900"
+                 ] (content <> circ <> circ'
                     <> draw @(SVG) [
-                                   ] (Label "foo" (Point2 200 500))
+                                   ] (Label "foo" (Point2 200 500 :: Point 2 R))
 
                    )
 

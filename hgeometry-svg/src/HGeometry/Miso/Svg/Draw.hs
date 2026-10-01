@@ -20,11 +20,15 @@ module HGeometry.Miso.Svg.Draw
   , module Ipe.Draw
   ) where
 
+import           HGeometry.Number.Radical
+import           Prelude hiding (sqrt)
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Control.Lens
 import           Data.Kind (Type)
 import           HGeometry.PolyLine
 import           HGeometry.Point
+import           HGeometry.Ball
+import           HGeometry.Box
 import           HGeometry.LineSegment
 import           Data.Default
 import           Ipe.Attributes
@@ -107,6 +111,24 @@ instance ToMisoString r => IsDrawable (Svg model action) (TextLabel r) where
                              ]
   -- TODO: I think I should just not use TextAttributes, but a custom
   -- SvgTextAttributes type
+
+instance ( Point_ center 2 r, Radical r
+         , ToMisoString r, r ~ NumType center
+         ) => IsDrawable (Svg model action) (Circle center) where
+  type AttrOf (Svg model action) (Circle center) = PathAttributes (NumType center)
+  draw ats c = [ Svg.dCircle c (Svg.svgWriteAttrs $ apply ats) ]
+
+instance ( Point_ center 2 r, Radical r
+         , ToMisoString r, r ~ NumType center, Radical r, Fractional r
+         ) => IsDrawable (Svg model action) (Disk center) where
+  type AttrOf (Svg model action) (Disk center) = PathAttributes (NumType center)
+  draw ats c = [ Svg.dDisk c (Svg.svgWriteAttrs $ apply ats) ]
+
+instance ( Point_ corner 2 r
+         , ToMisoString r, Num r, r ~ NumType corner
+         ) => IsDrawable (Svg model action) (Rectangle corner) where
+  type AttrOf (Svg model action) (Rectangle corner) = PathAttributes (NumType corner)
+  draw ats r = [ Svg.dRectangle r (Svg.svgWriteAttrs $ apply ats) ]
 
 
 -- | Helper function to apply attributes

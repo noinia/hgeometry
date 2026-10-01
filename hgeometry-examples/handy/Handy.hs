@@ -31,6 +31,7 @@ import System.Random
 import System.Random.Stateful
 import CatmulRomSpline
 import Data.Kind (Type)
+import HGeometry.Ball
 
 --------------------------------------------------------------------------------
 
@@ -215,6 +216,23 @@ instance ( Point_ point 2 r, Fractional r, Radical r
                <> foldMapOf (theHoles.folded.outerBoundaryEdgeSegments) draw' poly
     where
       draw' = draw @(Handy backend r gen m) ats
+
+
+
+
+
+-- instance ( Point_ center 2 r, Fractional r, Radical r
+--          , Monoid (m (Rendered backend))
+--          , Monoid (Rendered backend)
+--          , StatefulGen gen m
+--          , Ord r, UniformRange r
+--          , IsDrawable backend (CatmulRomSegment (Point 2 r))
+
+--          ) => IsDrawable (Handy backend r gen m) (Circle center) where
+--   draw ats cir = undefined -- draw @(Handy backend r gen m) ats $ asSpline circ
+
+-- asSpline :: Point_ center 2 r => Circle center -> CatmulRomSpline (Point 2 r)
+-- asSpline = undefined
 
 
 -- | Given a positive radius r, generates a vector uniformly at random

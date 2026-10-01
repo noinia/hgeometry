@@ -37,6 +37,8 @@ import           HGeometry.LineSegment
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.Number.Radical
+import           Prelude hiding (sqrt)
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
@@ -110,10 +112,10 @@ instance ( Point_ point 2 r, VertexContainer f point, HasFromFoldable1 f
          , ToMisoString r) => Drawable (ConvexPolygonF f point) where
   draw = dSimplePolygon . toSimplePolygon
 
-instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Circle point) where
+instance (Point_ point 2 r, Radical r, ToMisoString r) => Drawable (Circle point) where
   draw = dCircle
 
-instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Disk point) where
+instance (Point_ point 2 r, ToMisoString r, Radical r) => Drawable (Disk point) where
   draw = dDisk
 
 -- instance ToMisoString r => Drawable (Viewport r) where
@@ -203,18 +205,18 @@ toPointsString =
 
 
 -- | Draw a circle
-dCircle              :: (Point_ point 2 r, ToMisoString r)
+dCircle              :: (Point_ point 2 r, ToMisoString r, Radical r)
                      => Circle point -> [Attribute action] -> View model action
-dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
-                                         , ry_ . ms $ r
-                                         , cx_ . ms $ c^.xCoord
-                                         , cy_ . ms $ c^.yCoord
-                                         , fill_ "none"
-                                         ]
+dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ sqrt r
+                                        , ry_ . ms $ sqrt r
+                                        , cx_ . ms $ c^.xCoord
+                                        , cy_ . ms $ c^.yCoord
+                                        , fill_ "none"
+                                        ]
 
 -- | Draw a disk
 dDisk             :: ( Disk_ disk point, ConstructableBall_ disk point
-                     , Point_ point 2 r, ToMisoString r, Floating r)
+                     , Point_ point 2 r, ToMisoString r, Radical r)
                   => disk -> [Attribute action] -> View model action
 dDisk (Disk_ c r) = dCircle (Circle c r)
 
