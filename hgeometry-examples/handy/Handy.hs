@@ -277,7 +277,7 @@ instance ( Point_ center 2 r, RealFrac r, Radical r
     AttrOf backend (CatmulRomSegment (Point 2 r))
 
   draw ats (MkSphere circ) config gen = do
-      offset  <- uniformRM (zero, Vector2 (2*pi) (2*pi)) gen
+      offset  <- uniformRM (0, 2*pi) gen
       spline <- traverse perturb $ kgon (config^.numCircleControlPoints) offset circ
       pure $ draw @backend ats spline
     where
@@ -289,19 +289,19 @@ instance ( Point_ center 2 r, RealFrac r, Radical r
 
 
 -- | Produce a spline with k+2 control points somehow approximating a circle.
-kgon                   :: (Disk_ disk center, Point_ center 2 r, RealFrac r)
-                       => Int
-                       -> Vector 2 Double -- ^ offset for the starting point; in radians
-                       -> disk -> CatmulRomSplineF NonEmpty (Point 2 r)
-kgon k (Vector2 s t) d = let Point2 x y = (d^.center.asPoint)&coordinates %~ realToFrac
-                             r          = sqrt $ d^.squaredRadius.to realToFrac
-                             k'         = fromIntegral k
-                         in CatmulRomSpline . fmap (over coordinates realToFrac) $
-                            NonEmpty.unfoldr (\i -> (Point2 (x + r * cos (s + (i*2*pi / k')))
-                                                            (y + r * sin (t + (i*2*pi / k')))
-                                                    , if i <= k'+2 then Just (i+1) else Nothing
-                                                    )
-                                             ) (fromIntegral 0)
+kgon            :: (Disk_ disk center, Point_ center 2 r, RealFrac r)
+                => Int
+                -> Double -- ^ offset for the starting point; in radians
+                -> disk -> CatmulRomSplineF NonEmpty (Point 2 r)
+kgon k delta d = let Point2 x y = (d^.center.asPoint)&coordinates %~ realToFrac
+                     r          = sqrt $ d^.squaredRadius.to realToFrac
+                     k'         = fromIntegral k
+                 in CatmulRomSpline . fmap (over coordinates realToFrac) $
+                    NonEmpty.unfoldr (\i -> (Point2 (x + r * cos (delta + (i*2*pi / k')))
+                                                    (y + r * sin (delta + (i*2*pi / k')))
+                                            , if i <= k'+2 then Just (i+1) else Nothing
+                                            )
+                                     ) (fromIntegral 0)
 
 
 -- | Given a positive radius r, generates a vector uniformly at random
