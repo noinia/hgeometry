@@ -257,7 +257,7 @@ instance Point_ point 2 (NumType point) => Disk_ (Ball point) point where
 -- | Balls in 2D are also known as Disks
 type Disk = Ball
 
--- | Construct a disk
+-- | Construct a disk from its its center point and its squared radius.
 pattern Disk     :: point -> NumType point -> Disk point
 pattern Disk c r = Ball c r
 {-# COMPLETE Disk #-}
@@ -267,7 +267,8 @@ pattern Disk c r = Ball c r
 -- | A sphere, i.e. the boudary of a Ball.
 newtype Sphere point = MkSphere (Ball point)
 
--- | Construct a Sphere; the boundary of a ball
+-- | Construct a Sphere; the boundary of a ball given its center point
+-- and its squared radius.
 pattern Sphere     :: point -> NumType point -> Sphere point
 pattern Sphere c r = MkSphere (Ball c r)
 {-# COMPLETE Sphere #-}
@@ -275,7 +276,7 @@ pattern Sphere c r = MkSphere (Ball c r)
 -- | A circle, i.e. the boundary of a Disk
 type Circle = Sphere
 
--- | Construct a Circle
+-- | Construct a Circle from its center point and its squared radius
 pattern Circle     :: point -> NumType point -> Circle point
 pattern Circle c r = Sphere c r
 {-# COMPLETE Circle #-}

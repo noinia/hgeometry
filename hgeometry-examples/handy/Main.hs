@@ -1,9 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeData #-}
+{-# LANGUAGE QuasiQuotes #-}
 module Main
   (main) where
 
+import Data.Traversable
+import HGeometry.Ball
+import System.OsPath
 import Data.List.NonEmpty (NonEmpty(..))
 import Control.Monad.IO.Class
 import Data.Default
@@ -41,11 +46,14 @@ import Hachuring
 import Data.Sequence as Seq
 import Debug.Trace
 import Ipe.Color
--- import Data.Functor.Apply (WrappedApplicative(..))
 import HGeometry.Foldable.Util
 import Ipe.Color
-import           Data.Functor.Contravariant
+import Data.Functor.Contravariant
 import Handy
+import HGeometry.Miso.Svg.Draw
+import Miso.Svg (svg_)
+import Miso.Html.Property (width_, height_)
+import HGeometry.Miso.Svg (renderSvgToFile)
 
 --------------------------------------------------------------------------------
 
@@ -65,8 +73,21 @@ spline = CatmulRomSegment (Point2 (-1) 1) (Point2 0 0) (Point2 10 0) (Point2 11 
 
 
 
+type Handy' = Handy SVG R (AtomicGenM StdGen) IO
 
---------------------------------------------------------------------------------0
+--------------------------------------------------------------------------------
+
+-- idea: create some handy worldmap
+
+
+-- countries    :: OsPath -> Map OsPath (SimplePolygon (Point 2 R))
+-- countries fp = undefined
+
+
+
+
+
+--------------------------------------------------------------------------------
 
 main :: IO ()
 main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
@@ -82,6 +103,7 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
           --                     $ catmulRom origin (Point2 50 5) (Point2 75 5) (Point2 100 0)
 
           let handyCfg = def :: HandyConfig R
+
               seg :: ClosedLineSegment (Point 2 R)
               seg = ClosedLineSegment (Point2 0 0) (Point2 100 10)
 
@@ -108,6 +130,54 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                       , fill   ?~ blue
                       ] poly handyCfg globalStdGen
           printAsIpeSelection (res :: [IpeObject R])
+
+          content <- draw @Handy'
+                          [ stroke ?~ black
+                          , fill   ?~ blue
+                          ] poly handyCfg globalStdGen
+
+
+          let circle :: Disk (Point 2 R)
+              circle = Disk (Point2 800 800) 3000
+
+
+              circ = draw @SVG [ stroke ?~ green
+                               ] (circle^._DiskCircle)
+
+          circ' <- draw @Handy'
+                          [ stroke ?~ blue
+                          , fill   ?~ darkcyan
+                          ] circle handyCfg globalStdGen
+
+          let pts :: [Point 2 R]
+              pts = [ Point2 200 400
+                    , Point2 100 100
+                    ]
+
+          pts' <- flip foldMap pts $ \p ->
+                    draw @Handy'
+                         [ stroke ?~ black
+                         , fill   ?~ black
+                         ] p handyCfg globalStdGen
+
+
+          -- circ <- draw @(Handy SVG R (AtomicGenM StdGen) IO)
+          --                   , fill   ?~ blue
+          --                   [ stroke ?~ black
+          --                   ] (Circle (Point2 800 800) 100) handyCfg globalStdGen
+
+          renderSvgToFile [osp|/tmp/out.svg|] $
+            svg_ [ width_  "1080"
+                 , height_ "900"
+                 ] (circ <> circ' <> pts'
+                    <> draw @(SVG) [
+                                   ] (Label "foo" (Point2 200 500 :: Point 2 R))
+
+                   <> draw @SVG [
+                                  ] (Bezier3 (Point2 100 100) (Point2 200 (150 :: R))
+                                             (Point2 400 200) (Point2 500 300))
+                   )
+
 
           -- mapM_ print $ poly^..outgoingDartsOf 3.withIndex
           -- traverseOf_ (darts.withIndex) print poly

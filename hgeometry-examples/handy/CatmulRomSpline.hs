@@ -1,30 +1,37 @@
+{-# LANGUAGE UndecidableInstances #-}
 module CatmulRomSpline
   ( CatmulRomSplineF(CatmulRomSpline, CatmulRomSegment), CatmulRomSpline
   , CatmulRomSegment
   , toCubicBezier
   ) where
 
-import Control.DeepSeq (NFData)
-import Control.Lens
--- import qualified Data.Foldable as F
-import Data.Functor.Classes
+import           Data.Semigroup.Traversable
+import           Data.Foldable (toList)
+import qualified Data.List as List
+import           Control.DeepSeq (NFData)
+import           Control.Lens
+import           Data.Functor.Classes
 -- import qualified Data.List.NonEmpty as NonEmpty
-import Data.Semigroup.Foldable
-import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import GHC.Generics (Generic)
+import           Data.Semigroup.Foldable
+import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import           GHC.Generics (Generic)
 --import HGeometry.Box
-import HGeometry.Point
-import HGeometry.Properties
+import           HGeometry.Point
+import           HGeometry.Properties
 -- import HGeometry.Transformation
-import HGeometry.Vector
-import HGeometry.Matrix
-import HGeometry.BezierSpline
-import HGeometry.Vector.NonEmpty.Util ()
-import Data.Kind (Type)
-import Data.Coerce
-import Data.Distributive
-import Ipe
-import Ipe.Draw
+import           HGeometry.Vector
+import           HGeometry.Matrix
+import           HGeometry.BezierSpline
+import           HGeometry.Vector.NonEmpty.Util ()
+import           Data.Kind (Type)
+import           Data.Coerce
+import           Data.Distributive
+import           Ipe
+import           Ipe.Draw
+import           HGeometry.Miso.Svg.Draw
+import qualified Miso.String as Miso
+import qualified Miso.Svg as Svg
+import           Miso.Svg.Property (d_)
 
 --------------------------------------------------------------------------------
 
@@ -48,6 +55,13 @@ type CatmulRomSegment = CatmulRomSplineF (Vector 4)
 pattern CatmulRomSegment         :: point -> point -> point -> point -> CatmulRomSegment point
 pattern CatmulRomSegment a b c d = CatmulRomSpline (Vector4 a b c d)
 {-# COMPLETE CatmulRomSegment #-}
+
+
+instance Traversable f => Traversable (CatmulRomSplineF f) where
+  traverse f (CatmulRomSpline pts) = CatmulRomSpline <$> traverse f pts
+
+instance Traversable1 f => Traversable1 (CatmulRomSplineF f) where
+  traverse1 f (CatmulRomSpline pts) = CatmulRomSpline <$> traverse1 f pts
 
 --------------------------------------------------------------------------------
 
@@ -90,6 +104,12 @@ toCubicBezier (CatmulRomSpline controlPoints) =
 --------------------------------------------------------------------------------
 
 
+-- | Produce an ordered list of spline segments that together represent the input spline.
+toSplineSegments :: Foldable f => CatmulRomSplineF f point -> [CatmulRomSegment point]
+toSplineSegments (CatmulRomSpline pts') =
+    List.zipWith4 CatmulRomSegment pts (drop 1 pts) (drop 2 pts) (drop 3 pts)
+  where
+    pts = toList pts'
 
 --------------------------------------------------------------------------------
 
@@ -97,6 +117,12 @@ instance (Point_ point 2 r, Fractional r
          ) => IsDrawable (Ipe r) (CatmulRomSegment point) where
   type AttrOf (Ipe r) (CatmulRomSegment point) = PathAttributes r
   draw ats = draw @(Ipe r) ats . toCubicBezier
+
+instance ( Point_ point 2 r, Fractional r, Miso.ToMisoString r, r ~ NumType point
+         , Foldable f
+         ) => IsDrawable (Svg model action) (CatmulRomSplineF f point) where
+  type AttrOf (Svg model action) (CatmulRomSplineF f point) = PathAttributes (NumType point)
+  draw ats = draw @(Svg model action) ats . fmap toCubicBezier . toSplineSegments
 
 
 {-

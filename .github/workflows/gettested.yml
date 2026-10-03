@@ -4,18 +4,18 @@ on:
   - pull_request
 jobs:
   generate-matrix:
-    name: 'Generate matrix from cabal'
+    name: "Generate matrix from cabal"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     runs-on: ubuntu-latest
     steps:
       - name: Extract the tested GHC versions
         id: set-matrix
-        uses: kleidukos/get-tested@0.1.7.1
+        uses: kleidukos/get-tested@v0.1.10.0
         with:
           cabal-file: hgeometry/hgeometry.cabal
-          ubuntu-version: 'latest'
-          version: 0.1.7.0
+          ubuntu-version: "latest"
+          version: 0.1.10.0
   tests:
     name: ${{ matrix.ghc }} on ${{ matrix.os }}
     needs: generate-matrix
