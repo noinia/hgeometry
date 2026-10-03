@@ -257,6 +257,57 @@ instance ( Point_ point 2 r, Fractional r, Radical r
 
 
 
+
+instance ( RealFrac r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , IsDrawable backend (CatmulRomSplineF NonEmpty (Point 2 r))
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+         , IsDrawable backend (Disk (Point 2 r))
+
+         , AttrOf (Handy backend r gen m) (Disk (Point 2 r)) ~ PathAttributes r
+         , AttrOf backend                 (Disk (Point 2 r)) ~ PathAttributes r
+
+         , AttrOf (Handy backend r gen m) (Disk (Point 2 r))
+           ~ AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+
+
+         -- , Default (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r)))
+
+         -- , AttrOf (Handy backend r gen m) (Circle (Point 2 r))
+         --   ~ AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+
+
+         -- , HasStroke (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         -- , HasFill   (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         -- , HasPen    (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe (IpePen r))
+
+         ) => IsDrawable (Handy backend r gen m) (Point 2 r) where
+
+  type AttrOf (Handy backend r gen m) (Point 2 r) = SymbolAttributes r
+
+    -- AttrOf backend (CatmulRomSegment (Point 2 r))
+  draw sAts p config gen = do
+    let d   = Circle p r
+        r   = 4 --- TODO: do something with case symAts^.symbolSize of
+        r'  = r - 1
+        symAts = applyAttrs sAts def
+        ats = [ commonAttributes .~ symAts^.commonAttributes
+              , stroke           .~ symAts^.stroke
+              , pen              .~ symAts^.pen
+              ]
+        -- filling = draw @backend (ats <> [ fill .~ symAts^.fill]) (Disk p r')
+
+    res <- draw @(Handy backend r gen m) ats d config gen
+    pure res
+    -- pure $ filling <> res
+
+
+
 instance ( Point_ center 2 r, RealFrac r, Radical r
          , Monoid (m (Rendered backend))
          , Monoid (Rendered backend)
@@ -284,7 +335,7 @@ instance ( Point_ center 2 r, RealFrac r, Radical r
     where
       fill' config gen = case (applyAttrs ats def)^.fill of
         Nothing -> mempty
-        Just fc -> let k                  = config^.numCircleControlPoints
+        Just _  -> let k                  = config^.numCircleControlPoints
                        CatmulRomSpline vs = kgon k 0 disk
                    in case fromPoints =<< NonEmpty.nonEmpty (NonEmpty.take k vs) of
           Nothing   -> mempty
