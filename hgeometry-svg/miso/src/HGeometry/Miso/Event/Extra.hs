@@ -40,8 +40,8 @@ data Button = LeftButton
             deriving (Show,Eq)
 
 -- | on wheel events
-onWheel          :: (WheelDirection -> action) -> Attribute action
-onWheel toAction = on "wheel" (Decoder dec dt) (\res _ -> toAction res)
+onWheel          :: (WheelDirection -> action) -> Attribute model action
+onWheel toAction = on "wheel" (Decoder dec dt) (\res _ _ -> toAction res)
   where
     dt = DecodeTarget mempty
     dec = withObject "event" $ \o -> f <$> (o .: "deltaY")
@@ -49,8 +49,8 @@ onWheel toAction = on "wheel" (Decoder dec dt) (\res _ -> toAction res)
     f x = if x < 0 then Up else Down
 
 -- | get the mouse button that was clicked
-onClickWithButton          :: (Button -> action) -> Attribute action
-onClickWithButton toAction = on "click" (Decoder dec dt) (\res _ -> toAction res)
+onClickWithButton          :: (Button -> action) -> Attribute model action
+onClickWithButton toAction = on "click" (Decoder dec dt) (\res _ _ -> toAction res)
   where
     dt  = DecodeTarget mempty
     dec :: Value -> Parser Button
@@ -63,7 +63,7 @@ onClickWithButton toAction = on "click" (Decoder dec dt) (\res _ -> toAction res
               _ -> fail "unknown button"
 
 -- | Get right clicks
-onRightClick :: action -> Attribute action
+onRightClick :: action -> Attribute model action
 onRightClick = onContextMenuWithOptions disabled
   where
     disabled = Event.defaultOptions { _preventDefault  = True

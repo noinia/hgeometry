@@ -98,7 +98,9 @@ type ToSvgCoordinate = ToMisoString
 -- | Draws the actual canvas
 staticCanvas_               :: (RealFrac r, ToSvgCoordinate r)
                             => StaticCanvas r
-                            -> [Attribute action] -> [View model action] -> View model action
+                            -> [Attribute model action]
+                            -> [View context props model action]
+                            -> View context props model action
 staticCanvas_ canvas ats vs =
     svg_ ([ width_   . ms $ w
           , height_  . ms $ h

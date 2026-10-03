@@ -126,8 +126,8 @@ handleInternalCanvasAction canvas = put . \case
 -- | Draws the actual canvas using an svg tag
 svgCanvas_               :: (RealFrac r, ToSvgCoordinate r)
                          => Canvas r
-                         -> [Attribute action] -> [View model action]
-                         -> View model (Either InternalCanvasAction action)
+                         -> [Attribute model action] -> [View context props model action]
+                         -> View context props model (Either InternalCanvasAction action)
 svgCanvas_ canvas ats vs =
   svg_ ([ width_    . ms $ w
         , height_   . ms $ h

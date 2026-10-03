@@ -32,7 +32,7 @@ import           HGeometry.Box
 import           HGeometry.LineSegment
 import           Data.Default
 import           Ipe.Attributes
-import           Ipe.Color(black)
+import           Ipe.Color (black)
 import           Ipe.Draw
 import           Ipe.Content
 import           Miso (View)
@@ -45,16 +45,19 @@ import qualified Miso.Svg as Elem
 import qualified Miso.Svg.Property as Prop
 import           HGeometry.BezierSpline
 import qualified Miso
+import           Data.Void
 
 --------------------------------------------------------------------------------
 
 -- | The Svg backend; which renders to Svg using Miso
 type data Svg (model :: Type) (action :: Type)
+-- TODO: I think we can even leave out the model;
 
 -- | Static Svg
 type SVG = Svg () Void
 
-type instance Rendered (Svg model action) = [View model action]
+type instance Rendered (Svg model action) = [View Void Void model action]
+
 
 --------------------------------------------------------------------------------
 
