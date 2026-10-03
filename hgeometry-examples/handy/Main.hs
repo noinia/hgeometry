@@ -123,15 +123,16 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                             ] poly handyCfg globalStdGen
 
 
-          let circle :: Circle (Point 2 R)
-              circle = Circle (Point2 800 800) 3000
+          let circle :: Disk (Point 2 R)
+              circle = Disk (Point2 800 800) 3000
+
+
               circ = draw @SVG [ stroke ?~ green
-                               -- , fill   ?~ blue
-                               ] circle
+                               ] (circle^._DiskCircle)
 
           circ' <- draw @(Handy SVG R (AtomicGenM StdGen) IO)
                           [ stroke ?~ blue
-                            -- , fill   ?~ blue
+                          , fill   ?~ darkcyan
                           ] circle handyCfg globalStdGen
 
 

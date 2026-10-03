@@ -256,6 +256,43 @@ instance ( Point_ point 2 r, Fractional r, Radical r
                                ) (poly^..vertices) (drop 1 $ poly^..vertices)
 
 
+
+instance ( Point_ center 2 r, RealFrac r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , IsDrawable backend (CatmulRomSplineF NonEmpty (Point 2 r))
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+
+         , Default (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r)))
+
+         , AttrOf (Handy backend r gen m) (Circle center)
+           ~ AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+         , HasStroke (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         , HasFill   (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         , HasPen    (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe (IpePen r))
+
+         ) => IsDrawable (Handy backend r gen m) (Disk center) where
+
+  type AttrOf (Handy backend r gen m) (Disk center) =
+    AttrOf backend (CatmulRomSegment (Point 2 r))
+
+  draw ats disk = fill' <> draw @(Handy backend r gen m)
+                                (ats <> [fill .~ Nothing]) (MkSphere disk)
+    where
+      fill' config gen = case (applyAttrs ats def)^.fill of
+        Nothing -> mempty
+        Just fc -> let k                  = config^.numCircleControlPoints
+                       CatmulRomSpline vs = kgon k 0 disk
+                   in case fromPoints =<< NonEmpty.nonEmpty (NonEmpty.take k vs) of
+          Nothing   -> mempty
+          Just (poly :: SimplePolygonF NonEmpty (Point 2 r)) ->
+                       draw @(Handy backend r gen m)
+                            (ats <> [stroke .~ Nothing]) poly config gen
+
+
 instance ( Point_ center 2 r, RealFrac r, Radical r
          , Monoid (m (Rendered backend))
          , Monoid (Rendered backend)
@@ -282,8 +319,6 @@ instance ( Point_ center 2 r, RealFrac r, Radical r
       pure $ draw @backend ats spline
     where
       r = min ((1/20)* radius circ) (config^.roughness)
-      --
-
       -- function to perturb one of the endpoints
       perturb p = (p .+^) <$> uniformIn gen r
 
