@@ -56,7 +56,7 @@ type data Svg (model :: Type) (action :: Type)
 -- | Static Svg
 type SVG = Svg () Void
 
-type instance Rendered (Svg model action) = [View Void Void model action]
+type instance Rendered (Svg model action) = [View () () model action]
 
 
 --------------------------------------------------------------------------------

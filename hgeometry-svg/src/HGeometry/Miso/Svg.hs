@@ -42,7 +42,7 @@ import System.OsPath
 
 -- | Given an file path, and a view whose root is an svg element,
 -- render the output to the given file.
-renderSvgToFile    :: OsPath -> Miso.View model action -> IO ()
+renderSvgToFile    :: OsPath -> Miso.View () () () action -> IO ()
 renderSvgToFile fp = File.writeFile fp . renderAsSvgByteString
 
 -- | Add the doctype
@@ -69,11 +69,11 @@ withDocType content = mconcat
 -- | Given an View whose root is an svg element, renders the view to a
 -- lazy Text
 --
-renderAsSvgText :: Miso.View model action -> Text.Text
+renderAsSvgText :: Miso.View () () () action -> Text.Text
 renderAsSvgText = Text.decodeUtf8With Text.strictDecode . renderAsSvgByteString
 
 -- | Given an View whose root is an svg element, renders the view to a
 -- lazy ByteString.
 --
-renderAsSvgByteString :: Miso.View model action -> ByteString.ByteString
+renderAsSvgByteString :: Miso.View () () () action -> ByteString.ByteString
 renderAsSvgByteString = withDocType . Miso.toHtml
