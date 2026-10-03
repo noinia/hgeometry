@@ -5,6 +5,9 @@ module CatmulRomSpline
   , toCubicBezier
   ) where
 
+import           Data.Semigroup.Traversable
+import           Data.Foldable (toList)
+import qualified Data.List as List
 import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           Data.Functor.Classes
@@ -53,6 +56,13 @@ pattern CatmulRomSegment         :: point -> point -> point -> point -> CatmulRo
 pattern CatmulRomSegment a b c d = CatmulRomSpline (Vector4 a b c d)
 {-# COMPLETE CatmulRomSegment #-}
 
+
+instance Traversable f => Traversable (CatmulRomSplineF f) where
+  traverse f (CatmulRomSpline pts) = CatmulRomSpline <$> traverse f pts
+
+instance Traversable1 f => Traversable1 (CatmulRomSplineF f) where
+  traverse1 f (CatmulRomSpline pts) = CatmulRomSpline <$> traverse1 f pts
+
 --------------------------------------------------------------------------------
 
 -- | Given a function that acts on a vector of n individual coordinates, and a
@@ -94,6 +104,12 @@ toCubicBezier (CatmulRomSpline controlPoints) =
 --------------------------------------------------------------------------------
 
 
+-- | Produce an ordered list of spline segments that together represent the input spline.
+toSplineSegments :: Foldable f => CatmulRomSplineF f point -> [CatmulRomSegment point]
+toSplineSegments (CatmulRomSpline pts') =
+    List.zipWith4 CatmulRomSegment pts (drop 1 pts) (drop 2 pts) (drop 3 pts)
+  where
+    pts = toList pts'
 
 --------------------------------------------------------------------------------
 
@@ -102,11 +118,11 @@ instance (Point_ point 2 r, Fractional r
   type AttrOf (Ipe r) (CatmulRomSegment point) = PathAttributes r
   draw ats = draw @(Ipe r) ats . toCubicBezier
 
-
-instance (Point_ point 2 r, Fractional r, Miso.ToMisoString r, r ~ NumType point
-         ) => IsDrawable (Svg model action) (CatmulRomSegment point) where
-  type AttrOf (Svg model action) (CatmulRomSegment point) = PathAttributes (NumType point)
-  draw ats = draw @(Svg model action) ats . toCubicBezier
+instance ( Point_ point 2 r, Fractional r, Miso.ToMisoString r, r ~ NumType point
+         , Foldable f
+         ) => IsDrawable (Svg model action) (CatmulRomSplineF f point) where
+  type AttrOf (Svg model action) (CatmulRomSplineF f point) = PathAttributes (NumType point)
+  draw ats = draw @(Svg model action) ats . fmap toCubicBezier . toSplineSegments
 
 
 {-

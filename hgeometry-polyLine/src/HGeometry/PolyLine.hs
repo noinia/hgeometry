@@ -67,6 +67,22 @@ instance ( TraversableWithIndex Int f
          ) => HasVertices (PolyLineF f point) (PolyLineF f point') where
   vertices = _PolyLineF . traversed1
 
+-- instance ( TraversableWithIndex Int f
+--          , Traversable1 f
+--          , IxValue (f point) ~ point
+--          , Index   (f point) ~ Int
+--          , Ixed    (f point)
+--          ) => HasEdges (PolyLineF f point) (PolyLineF f point') where
+--   edges = _PolyLineF . trav'
+--     where
+--       trav' :: IndexedTraversal Int (f point) (point,point)
+--       trav' = conjoined trav (itrav.indexed)
+--         where
+--           trav :: (point,point) -> g (point,point)
+
+--     -- FIXME: this must be a fold; not a traversal.
+
+
 instance ( Traversable1 f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
@@ -99,6 +115,25 @@ instance ( TraversableWithIndex Int f
   type Vertex   (PolyLineF f point) = point
   type VertexIx (PolyLineF f point) = Int
   vertexAt i = _PolyLineF . iix i
+
+-- instance ( TraversableWithIndex Int f
+--          , Traversable1 f
+--          , Ixed (f point)
+--          , IxValue (f point) ~ point
+--          , Index (f point) ~ Int
+--          ) => HasEdges' (PolyLineF f point) where
+--   type Edge   (PolyLineF f point) = (point,point)
+--   type EdgeIx (PolyLineF f point) = Int
+
+--   edgeAt i = _PolyLineF . indexEdge
+--     where
+--       indexEdge         :: IndexedTraversal' Int (f point) (point,point)
+--       indexEdge paFb vs = (,) <$> iix i paFb vs <*> ix (i+1) (paFb) vs
+
+    -- forall (p :: Type -> Type -> Type) (f :: Type -> Type). (Indexable i p, Applicative f)
+    -- => p a (f b) -> s -> f t
+    -- _PolyLineF . iix i
+
 
 instance ( Traversable1 f
          -- , Ixed (f point)

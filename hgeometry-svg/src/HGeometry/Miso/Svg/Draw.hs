@@ -32,6 +32,7 @@ import           HGeometry.Box
 import           HGeometry.LineSegment
 import           Data.Default
 import           Ipe.Attributes
+import           Ipe.Color(black)
 import           Ipe.Draw
 import           Ipe.Content
 import           Miso (View)
@@ -93,7 +94,11 @@ instance (Point_ point 2 r, Fractional r, ToMisoString r, r ~ NumType point
          ) => IsDrawable (Svg model action) (CubicBezier point) where
   type AttrOf (Svg model action) (CubicBezier point) = PathAttributes (NumType point)
   draw ats (BezierSpline vs) = [ Elem.path_ ([ Prop.d_ str
-                                             ] <> Svg.svgWriteAttrs (apply ats))
+                                             , Prop.fill_ "none"
+                                             ] <> Svg.svgWriteAttrs (applyWith ats
+                                                                     $ def&stroke .~ Just black
+                                                                    )
+                                            )
                                ]
     where
       str = let v :| rest = toNonEmptyOf (traversed1.asPoint) vs
@@ -133,4 +138,7 @@ instance ( Point_ corner 2 r
 
 -- | Helper function to apply attributes
 apply :: Default at => [at -> at] -> at
-apply = foldl' (flip ($)) def
+apply = flip applyWith def
+
+applyWith      :: [at -> at] -> at -> at
+applyWith fs z = foldl' (flip ($)) z fs

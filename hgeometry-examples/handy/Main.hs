@@ -124,13 +124,13 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
 
 
           let circle :: Circle (Point 2 R)
-              circle = Circle (Point2 800 800) 100
+              circle = Circle (Point2 800 800) 3000
               circ = draw @SVG [ stroke ?~ green
                                -- , fill   ?~ blue
                                ] circle
 
           circ' <- draw @(Handy SVG R (AtomicGenM StdGen) IO)
-                          [ stroke ?~ green
+                          [ stroke ?~ blue
                             -- , fill   ?~ blue
                           ] circle handyCfg globalStdGen
 
@@ -143,11 +143,15 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
           renderSvgToFile [osp|/tmp/out.svg|] $
             svg_ [ width_  "1080"
                  , height_ "900"
-                 ] (content <> circ <> circ'
+                 ] (circ <> circ'
                     <> draw @(SVG) [
                                    ] (Label "foo" (Point2 200 500 :: Point 2 R))
 
+                   <> draw @SVG [
+                                  ] (Bezier3 (Point2 100 100) (Point2 200 (150 :: R))
+                                             (Point2 400 200) (Point2 500 300))
                    )
+
 
           -- mapM_ print $ poly^..outgoingDartsOf 3.withIndex
           -- traverseOf_ (darts.withIndex) print poly
