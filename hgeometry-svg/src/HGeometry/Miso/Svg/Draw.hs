@@ -36,7 +36,6 @@ import           Ipe.Color (black)
 import           Ipe.Draw
 import           Ipe.Content
 import           Miso (View)
-import           Data.Void
 import           HGeometry.Polygon
 import           HGeometry.Properties
 import qualified HGeometry.Miso.Svg as Svg
@@ -45,7 +44,6 @@ import qualified Miso.Svg as Elem
 import qualified Miso.Svg.Property as Prop
 import           HGeometry.BezierSpline
 import qualified Miso
-import           Data.Void
 
 --------------------------------------------------------------------------------
 
@@ -97,7 +95,6 @@ instance (Point_ point 2 r, Fractional r, ToMisoString r, r ~ NumType point
          ) => IsDrawable (Svg model action) (CubicBezier point) where
   type AttrOf (Svg model action) (CubicBezier point) = PathAttributes (NumType point)
   draw ats (BezierSpline vs) = [ Elem.path_ ([ Prop.d_ str
-                                             , Prop.fill_ "none"
                                              ] <> Svg.svgWriteAttrs (applyWith ats
                                                                      $ def&stroke .~ Just black
                                                                     )

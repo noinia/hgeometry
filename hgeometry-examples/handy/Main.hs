@@ -6,54 +6,65 @@
 module Main
   (main) where
 
-import Data.Traversable
-import HGeometry.Ball
-import System.OsPath
-import Data.List.NonEmpty (NonEmpty(..))
-import Control.Monad.IO.Class
-import Data.Default
-import Control.DeepSeq (NFData)
-import Control.Lens
-import Data.Functor.Classes
-import Data.Semigroup.Foldable
-import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import GHC.Generics (Generic)
-import HGeometry.Box
-import HGeometry.Point
-import HGeometry.Properties
-import HGeometry.Transformation
-import HGeometry.Polygon
-import HGeometry.Polygon.WithHoles
-import HGeometry.Vector
-import HGeometry.Matrix
-import HGeometry.BezierSpline
-import HGeometry.Vector.NonEmpty.Util ()
-import Hiraffe.Graph
-import Data.Kind (Type)
-import Data.Coerce
-import Data.Distributive
-import Ipe
-import HGeometry.Number.Real.Rational
-import CatmulRomSpline
-import System.Random
-import System.Random.Stateful
-import HGeometry.LineSegment
-import Ipe.Draw
-import Prelude hiding (sqrt)
-import HGeometry.Number.Radical
-import HGeometry.PlaneGraph.Class
-import Hachuring
-import Data.Sequence as Seq
-import Debug.Trace
-import Ipe.Color
-import HGeometry.Foldable.Util
-import Ipe.Color
-import Data.Functor.Contravariant
-import Handy
-import HGeometry.Miso.Svg.Draw
-import Miso.Svg (svg_)
-import Miso.Html.Property (width_, height_)
-import HGeometry.Miso.Svg (renderSvgToFile)
+import           Data.Char (toLower)
+import qualified System.OsString as OsString
+import           Data.Maybe (fromMaybe)
+import           HGeometry.Ext
+import           Data.Geospatial
+import qualified Data.Map as Map
+import           System.OsPath
+import           Data.Traversable
+import           HGeometry.Ball
+import           System.OsPath
+import           System.File.OsPath
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Control.Monad.IO.Class
+import           Data.Default
+import           Control.DeepSeq (NFData)
+import           Control.Lens
+import           Data.Functor.Classes
+import           Data.Semigroup.Foldable
+import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import           GHC.Generics (Generic)
+import           HGeometry.Box
+import           HGeometry.GeoJSON
+import           HGeometry.Point
+import           HGeometry.Properties
+import           HGeometry.Transformation
+import           HGeometry.Polygon
+import           HGeometry.Polygon.WithHoles
+import           HGeometry.Vector
+import           HGeometry.Matrix
+import           HGeometry.BezierSpline
+import           HGeometry.Vector.NonEmpty.Util ()
+import           Hiraffe.Graph
+import           Data.Kind (Type)
+import           Data.Coerce
+import           Data.Distributive
+import           Ipe
+import           HGeometry.Number.Real.Rational
+import           CatmulRomSpline
+import           System.Random
+import           System.Random.Stateful
+import           HGeometry.LineSegment
+import           Ipe.Draw
+import           Prelude hiding (sqrt)
+import           HGeometry.Number.Radical
+import           HGeometry.PlaneGraph.Class
+import           Hachuring
+import           Data.Sequence as Seq
+import           Debug.Trace
+import           Ipe.Color
+import           HGeometry.Foldable.Util
+import           Ipe.Color
+import           Data.Functor.Contravariant
+import           Handy
+import           HGeometry.Miso.Svg.Draw
+import           Miso.Svg (svg_)
+import           Miso.Html.Property (width_, height_)
+import           HGeometry.Miso.Svg (renderSvgToFile)
+import           Data.Aeson
+
 
 --------------------------------------------------------------------------------
 
@@ -80,12 +91,71 @@ type Handy' = Handy SVG R (AtomicGenM StdGen) IO
 -- idea: create some handy worldmap
 
 
--- countries    :: OsPath -> Map OsPath (SimplePolygon (Point 2 R))
--- countries fp = undefined
+-- countries    :: OsPath -> IO (Map OsPath (SimplePolygon (Point 2 R)))
+readCountries    :: OsPath -> IO (Map.Map OsPath GeoPolygon)
+readCountries fp = do content <- readFile' fp
+                      case eitherDecodeStrict' content of
+                        Left err                                      -> error err
+                        Right (collection :: GeoFeatureCollection ()) -> pure $
+                          foldMapOf (geofeatures.folded.geometry._Polygon) (Map.singleton fp)
+                                    collection
+
+-- | given a "country name" map it to the filename
+formatName :: OsString -> OsPath
+formatName = toLowerCase
+           . replace '&' [osp|and|]
+           . OsString.filter (/= OsString.unsafeFromChar '.')
+           . replace ' ' [osp|_|]
+ where
+   replace needle sep = OsString.intercalate sep
+                      . OsString.split (OsString.unsafeFromChar needle)
+   toLowerCase = OsString.map (OsString.unsafeFromChar . toLower . OsString.toChar)
+
+test = do
+  countries <- readCountries [osp|/Users/frank/workspace/hgeometry/hgeometry-geojson/data/world-geojson/countries/turkey.json|]
+
+  let polies = ifoldMap (\_ country ->
+                           draw @SVG [ stroke ?~ blue
+                                     , fill   ?~ lightcyan
+                                     ] country
+                        ) countries
+
+  renderSvgToFile [osp|/tmp/countries.svg|] $
+            svg_ [ width_  "1080"
+                 , height_ "900"
+                 ] polies
 
 
+instance IsDrawable (Svg model action) GeoPolygon where
+    type AttrOf (Svg model action) GeoPolygon = PathAttributes Double
+    draw ats poly = draw @(Svg model action) ats $ toPoly poly
+
+toPoly      :: GeoPolygon -> SimplePolygon (Point 2 Double)
+toPoly poly = fromMaybe err . fromPoints . map  (mercatorProject world)
+            $ poly^..unGeoPolygon.folded.folded._GeoPositionWithoutCRS.core
+  where
+    err = error "toPoly; absurd"
+
+    world = Vector2 1080 900
 
 
+-- | Given the width and height of the map and a Position, compute a Mercator Projection of
+-- the position. See
+-- <http://en.wikipedia.org/wiki/Mercator_projection#Derivation_of_the_Mercator_projection
+-- WikiPedia> for more info.
+mercatorProject                            :: Vector 2 Double
+                                           -- ^ with and height of the output map
+                                           -> PointXY
+                                           -> Point 2 Double
+mercatorProject (Vector2 width height) pos = Point2 x y
+  where
+    Point2 lon lat = pos^.asPoint
+    -- lat = pos^._xyX -- latitude
+    -- lon = pos^._xyY -- longitude
+
+    x    =                (width / 360)    * lon
+    y    = (height / 2) - (width / (2*pi)) * (log . tan $ (pi / 4) + (latR / 2))
+    latR = -1 * lat * pi / 180
 
 --------------------------------------------------------------------------------
 

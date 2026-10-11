@@ -14,7 +14,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Miso.Svg.Writer
   ( withAts
-  , Drawable(..)
+  -- , Drawable(..)
 
   , dPoint
   , dLineSegment
@@ -73,7 +73,7 @@ withAts f ats1 ats2 = f (ats1 <> ats2)
 --------------------------------------------------------------------------------
 -- * Default implementations for drawing geometric objects
 
--- | Default implementation for drawing geometric objects
+-- -- | Default implementation for drawing geometric objects
 class Drawable t where
   {-# MINIMAL draw | drawWith #-}
   -- | Draws the given object with the given attributes
@@ -160,7 +160,7 @@ dRectangle   :: ( Rectangle_ rectangle point, Point_ point 2 r, ToMisoString r, 
              => rectangle -> [Attribute model action] -> View context props model action
 dRectangle b = let Point2 x y  = over coordinates ms $ b^.minPoint.asPoint
                    Vector2 w h = ms <$> b^.to size
-               in withAts rect_ [ x_ x, y_ y, width_ w, height_ h, fill_ "none"
+               in withAts rect_ [ x_ x, y_ y, width_ w, height_ h
                                  , strokeLinejoin_ "round"
                                 ]
 
@@ -193,7 +193,6 @@ dSimplePolygon pg = withAts polygon_ [ points_ $ toPointsString $ pg^..vertices
 dPolyLine    :: (PolyLine_ polyLine point, Point_ point 2 r, ToMisoString r)
              => polyLine -> [Attribute model action] -> View context props model action
 dPolyLine pl = withAts polyline_ [ points_ . toPointsString $ pl^..vertices
-                                 , fill_ "none"
                                  , strokeLinejoin_ "round"
                                  ]
 
@@ -216,7 +215,6 @@ dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ sqrt r
                                         , ry_ . ms $ sqrt r
                                         , cx_ . ms $ c^.xCoord
                                         , cy_ . ms $ c^.yCoord
-                                        , fill_ "none"
                                         ]
 
 -- | Draw a disk
@@ -266,7 +264,7 @@ dDisk (Disk_ c r) = dCircle (Circle c r)
 
 --------------------------------------------------------------------------------
 -- * Functions to draw ipe objects
-
+{-
 instance ToMisoString r => Drawable (Ipe.IpeObject r) where
   draw = \case
     Ipe.IpeGroup g     -> draw g
@@ -311,9 +309,9 @@ instance ToMisoString r => Drawable (Ipe.IpeSymbol r) where
     where
       r = "5"
 
-instance ToMisoString r => Drawable (Ipe.Path r) where
-  draw (Ipe.Path s) ats = g_ [] (map (flip draw (fill_ "none":ats)) . F.toList $ s)
-  -- svg fills paths by default; don't do that unless specified otherwise
+-- instance ToMisoString r => Drawable (Ipe.Path r) where
+--   draw (Ipe.Path s) ats = g_ [] (map (flip draw (fill_ "ats)) . F.toList $ s)
+--   -- svg fills paths by default; don't do that unless specified otherwise
 
 instance ToMisoString r => Drawable (Ipe.PathSegment r) where
   draw = \case
@@ -323,7 +321,7 @@ instance ToMisoString r => Drawable (Ipe.PathSegment r) where
 
 
 
-
+-}
 --------------------------------------------------------------------------------
 -- * Dealing with attributes
 
@@ -334,30 +332,60 @@ instance ToMisoString r => Drawable (Ipe.PathSegment r) where
 
 newtype SvgF action val = SvgF (forall model. val -> [Attribute model action])
 
+-- | Helper newtype to represent 'forall model. Const [Attribute model action] val'
+-- i.e. we hide the 'model' parameter.
+newtype AttrList action val = AttrList (forall model. [Attribute model action])
 
 
   -- MisoString -> Attribute action
 
 class SvgWriteAttributes ats action where
+
+  -- | The functions that specify how to write the values to attributes
   svgAttrFunctions :: ats (SvgF action)
-  -- | Write the attributes to file
+
+  -- | The attribute values we are using if the attribute is set to Nothing.
+  --
+  -- This is particularly useful for e.g. fill. If there is no fill color set,
+  -- we should add a 'fill='none'.
+  svgAttrDefaults :: ats (AttrList action)
+  default svgAttrDefaults :: ApplicativeB ats => ats (AttrList action)
+  svgAttrDefaults = bpure $ AttrList []
+
+  -- | Write the actual attributes
   svgWriteAttrs :: ats Maybe -> [Attribute model action]
+
   default svgWriteAttrs :: (ApplicativeB ats, TraversableB ats)
                         => ats Maybe -> [Attribute model action]
-  svgWriteAttrs = bfoldMap getConst
-                . bzipWith writeAttr svgAttrFunctions
+  svgWriteAttrs = bfoldMap (\(AttrList res) -> res)
+                . bzipWith3 writeAttr svgAttrDefaults svgAttrFunctions
+
+
+writeAttr :: AttrList action a
+          -> SvgF action a
+          -> Maybe a
+          -> AttrList action a
+writeAttr (AttrList def') (SvgF attr) m = AttrList $ maybe def' attr m
 
 singleton :: a -> [a]
 singleton = (:[])
 
+
 instance SvgWriteAttributes (CommonAttributes r) action where
   svgAttrFunctions = bpure (SvgF $ const [])
-  svgWriteAttrs = bfoldMap getConst
-                . bzipWith writeAttr svgAttrFunctions
 
-writeAttr :: forall action. (forall model a. SvgF action a -> Maybe a -> Const [Attribute model action] a)
-writeAttr (SvgF attr) m = Const $ maybe [] attr m
+  -- svgWriteAttrs = bfoldMap getConst
+  --               . bzipWith writeAttr svgAttrFunctions
 
+-- writeAttr :: forall action model.
+--              (forall a. SvgF action a -> Maybe a -> AttrList action a)
+-- writeAttr = writeAttr' (Const [])
+
+-- writeAttr' :: forall action model.
+--               (forall a. AttrList action a -> SvgF action a
+-- -> Maybe a
+--                                            -> Const [Attribute model] a)
+-- writeAttr' (Const def) (SvgF attr) m = Const $ maybe def attr m
 
 instance ToMisoString r => SvgWriteAttributes (SymbolAttributesF r) action where
   svgAttrFunctions = SymbolAttributes
@@ -367,8 +395,11 @@ instance ToMisoString r => SvgWriteAttributes (SymbolAttributesF r) action where
     , _pen         = SvgF (const []           )
     , _symbolSize  = SvgF (const []           )
     }
-  svgWriteAttrs = bfoldMap getConst
-                . bzipWith writeAttr svgAttrFunctions
+  -- svgWriteAttrs = bfoldMap getConst
+  --               . bzipWith writeAttr svgAttrFunctions
+
+  svgAttrDefaults = (bpure $ AttrList [])&fill .~ AttrList [fill_ "none"]
+
 
 instance ToMisoString r => SvgWriteAttributes (PathAttributesF r) action where
   svgAttrFunctions = PathAttributes
@@ -387,12 +418,23 @@ instance ToMisoString r => SvgWriteAttributes (PathAttributesF r) action where
     , _tiling        = SvgF (const []                           )
     , _gradient      = SvgF (const []                           )
     }
+  svgAttrDefaults = (bpure $ AttrList [])&fill .~ AttrList [fill_ "none"]
+
+  -- svgWriteAttrs = bfoldMap getConst
+  --               . bzipWith3 writeAttr' defValues svgAttrFunctions
+  --   where
+  --     defValues :: PathAttributes (AttrList action)
+  --     defValues = pure (Const []) & fill .~ Const [fill_ "none"]
+
+
+
 
 instance SvgWriteAttributes (GroupAttributesF r) action where
   svgAttrFunctions = GroupAttributes
     { _commonAttrs = svgAttrFunctions
     , _clip        = SvgF (const [])
     }
+
 
 instance ToMisoString r => SvgWriteAttributes (TextAttributesF r) action where
   svgAttrFunctions = TextAttributes
