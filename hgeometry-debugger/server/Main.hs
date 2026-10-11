@@ -76,7 +76,7 @@ instance Accept HTMLMiso where
 instance ToHtml a => MimeRender HTMLMiso a where
     mimeRender _ = toHtml
 
-instance MimeRender HTMLMiso (View model action) where
+instance MimeRender HTMLMiso (View () () () action) where
     mimeRender _ = toHtml
 
 --------------------------------------------------------------------------------

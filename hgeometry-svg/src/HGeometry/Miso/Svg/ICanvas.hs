@@ -165,13 +165,13 @@ applyPan ps p c = case ps of
 -- iCanvas :: ( RealFrac r, ToSvgCoordinate r)
 --                 => (CanvasAction -> action)
 --                 -> ICanvas r
---                 -> [Attribute action] -> [View action] -> View action
+--                 -> [Attribute model action] -> [View action] -> View action
 -- iCanvas = view
 
 view            :: ( RealFrac r, ToSvgCoordinate r)
                 => (CanvasAction -> action)
                 -> ICanvas r
-                -> [Attribute action] -> [View action] -> View action
+                -> [Attribute model action] -> [View action] -> View action
 view f m ats vs = staticCanvas_ (m^.canvas)
                                 (mconcat [
                                   [ onMouseLeave $ f MouseLeave
@@ -199,7 +199,7 @@ z
     --   mouseLeave <> mouseDown <>
 
 
-onWheel :: (ZoomDirection -> action) -> Attribute action
+onWheel :: (ZoomDirection -> action) -> Attribute model action
 onWheel = on "wheel" (Decoder dec dt)
   where
     dt = DecodeTarget mempty

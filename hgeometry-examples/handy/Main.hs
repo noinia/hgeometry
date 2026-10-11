@@ -115,8 +115,9 @@ test = do
   countries <- readCountries [osp|/Users/frank/workspace/hgeometry/hgeometry-geojson/data/world-geojson/countries/turkey.json|]
 
   let polies = ifoldMap (\_ country ->
-                           draw @SVG [ stroke ?~ blue
-                                     , fill   ?~ lightcyan
+                           draw @SVG [ stroke  ?~ blue
+                                     , fill    ?~ lightcyan
+                                     , opacity ?~ "0.5"
                                      ] country
                         ) countries
 
@@ -171,6 +172,8 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
 
           -- printAsIpeSelection $ foldMap (draw @(Ipe R) [])
           --                     $ catmulRom origin (Point2 50 5) (Point2 75 5) (Point2 100 0)
+
+          test
 
           let handyCfg = def :: HandyConfig R
 

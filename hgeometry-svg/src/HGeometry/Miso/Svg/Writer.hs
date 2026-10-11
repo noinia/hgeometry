@@ -14,7 +14,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Miso.Svg.Writer
   ( withAts
-  -- , Drawable(..)
+  , Drawable(..)
 
   , dPoint
   , dLineSegment
@@ -62,13 +62,6 @@ withAts             ::  ([Attribute model action] -> View context props model ac
                     -> [Attribute model action] -> [Attribute model action]
                     -> View context props model action
 withAts f ats1 ats2 = f (ats1 <> ats2)
-
--- -- | Helper function to construct a View. See 'withAts' for its usage.
--- withAts'             :: ([Attribute action] -> View model action)
---                      -> [Attribute action]
---                      -> [Attribute action]
---                      -> View model action
--- withAts' f ats1 ats2 = f (ats1 <> ats2)
 
 --------------------------------------------------------------------------------
 -- * Default implementations for drawing geometric objects
@@ -226,10 +219,10 @@ dDisk (Disk_ c r) = dCircle (Circle c r)
 -- instance (ToMisoString r, Drawable v, Drawable  => Drawable (PlanarSubdivision s v e f r)
 
 
--- dPlanarSubdivision        :: PlanarSubdivision s (Maybe (View model action))
---                                                  (Maybe (View model action))
---                                                  (Maybe (View model action)) r
---                           -> [Attribute action] -> View model action
+-- dPlanarSubdivision        :: PlanarSubdivision s (Maybe (View context props model action))
+--                                                  (Maybe (View context props model action))
+--                                                  (Maybe (View context props model action)) r
+--                           -> [Attribute model action] -> View context props model action
 -- dPlanarSubdivision = dPlanarSubdivisionWith (^._2.vData) (^._2.extra) (^._2.extra)
 
 
@@ -238,8 +231,8 @@ dDisk (Disk_ c r) = dCircle (Circle c r)
 --                     => PlanarSubdivision s (Maybe (Ipe.IpeAttributes Ipe.IpeSymbol r))
 --                                            (Maybe (Ipe.IpeAttributes Ipe.Path r))
 --                                            (Maybe (Ipe.IpeAttributes Ipe.Path r)) r
---                     -> [Attribute action]
---                     -> View model action
+--                     -> [Attribute model action]
+--                     -> View context props model action
 -- dPlanarSubdivision' = dPlanarSubdivisionWith fv fe ff
 --   where
 --     fv (_,v) = (\ats -> draw (v^.location) (svgWriteAttrs ats)) <$> v^.vData
@@ -247,14 +240,14 @@ dDisk (Disk_ c r) = dCircle (Circle c r)
 --     ff (_,f) = (\ats -> draw (f^.core)     (svgWriteAttrs ats)) <$> f^.extra
 
 
--- type DrawF a action = a -> Maybe (View model action)
+-- type DrawF a action = a -> Maybe (View context props model action)
 
 -- dPlanarSubdivisionWith                 :: DrawF (VertexId' s, VertexData r v)          action
 --                                        -> DrawF (Dart s,      LineSegment 2 v r :+ e)  action
 --                                        -> DrawF (FaceId' s,   SomePolygon v r :+ f)    action
 --                                        -> PlanarSubdivision s v e f r
---                                        -> [Attribute action]
---                                        -> View model action
+--                                        -> [Attribute model action]
+--                                        -> View context props model action
 -- dPlanarSubdivisionWith fv fe ff ps ats = g_ ats (fs <> es <> vs)
 --     -- draw faces at the bottom, then edges, and finally the vertices
 --   where
@@ -264,7 +257,7 @@ dDisk (Disk_ c r) = dCircle (Circle c r)
 
 --------------------------------------------------------------------------------
 -- * Functions to draw ipe objects
-{-
+
 instance ToMisoString r => Drawable (Ipe.IpeObject r) where
   draw = \case
     Ipe.IpeGroup g     -> draw g
@@ -279,9 +272,6 @@ instance ( Drawable g
          , forall action. SvgWriteAttributes (ats r) action
          ) => Drawable (g :+ ats r Maybe) where
   draw (i :+ iAts) ats = draw i (svgWriteAttrs @(ats r) iAts <> ats)
-
-
-
 
 instance ToMisoString r => Drawable (Ipe.Group r) where
   draw (Ipe.Group os) ats = g_ ats (map (flip draw []) os)
@@ -309,9 +299,9 @@ instance ToMisoString r => Drawable (Ipe.IpeSymbol r) where
     where
       r = "5"
 
--- instance ToMisoString r => Drawable (Ipe.Path r) where
---   draw (Ipe.Path s) ats = g_ [] (map (flip draw (fill_ "ats)) . F.toList $ s)
---   -- svg fills paths by default; don't do that unless specified otherwise
+instance ToMisoString r => Drawable (Ipe.Path r) where
+  draw (Ipe.Path s) ats = g_ [] (map (flip draw (fill_ "none":ats)) . F.toList $ s)
+  -- svg fills paths by default; don't do that unless specified otherwise
 
 instance ToMisoString r => Drawable (Ipe.PathSegment r) where
   draw = \case
@@ -321,7 +311,7 @@ instance ToMisoString r => Drawable (Ipe.PathSegment r) where
 
 
 
--}
+
 --------------------------------------------------------------------------------
 -- * Dealing with attributes
 
@@ -335,9 +325,6 @@ newtype SvgF action val = SvgF (forall model. val -> [Attribute model action])
 -- | Helper newtype to represent 'forall model. Const [Attribute model action] val'
 -- i.e. we hide the 'model' parameter.
 newtype AttrList action val = AttrList (forall model. [Attribute model action])
-
-
-  -- MisoString -> Attribute action
 
 class SvgWriteAttributes ats action where
 

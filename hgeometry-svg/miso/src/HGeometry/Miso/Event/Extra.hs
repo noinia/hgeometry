@@ -21,7 +21,7 @@ module HGeometry.Miso.Event.Extra
   -- , onTouchEnd
   ) where
 
-import Data.Map qualified as Map
+import Data.Aeson.KeyMap as Map
 import Miso.JSON
 import Miso
 import Miso.Html.Event

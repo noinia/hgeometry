@@ -24,8 +24,7 @@ packages:
 -- ghc-options: -Werror
 
 package miso
-    flags: -native
-    --  +aeson
+    flags: -native +aeson
 
 allow-newer:
 -- 9.12
@@ -84,10 +83,10 @@ source-repository-package
   location: https://github.com/haskell-miso/miso-tagsoup
   tag: master
 
-source-repository-package
-  type: git
-  location: https://github.com/haskell-miso/miso-aeson
-  tag: master
+-- source-repository-package
+--   type: git
+--   location: https://github.com/haskell-miso/miso-aeson
+--   tag: master
 
 source-repository-package
     type: git

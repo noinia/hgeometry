@@ -14,7 +14,7 @@ module HGeometry.Miso.Svg
   , renderAsSvgText, renderAsSvgByteString
 
   , withAts
-  -- , Drawable(..)
+  , Drawable(..)
 
   , dPoint
   , dLineSegment

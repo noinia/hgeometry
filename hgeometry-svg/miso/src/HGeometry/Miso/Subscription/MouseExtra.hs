@@ -39,15 +39,15 @@ import           Miso.String (MisoString, unpack)
 --------------------------------------------------------------------------------
 
 -- | onMouseMove event, the position is relative to the target of the event
-onMouseMoveAt :: (Point 2 Int -> action) -> Attribute action
+onMouseMoveAt :: (Point 2 Int -> action) -> Attribute model action
 onMouseMoveAt = on "mousemove" mousePositionDecoder
 
 -- | onMouseEnter event, the position is relative to the target of the event
-onMouseEnterAt :: (Point 2 Int -> action) -> Attribute action
+onMouseEnterAt :: (Point 2 Int -> action) -> Attribute model action
 onMouseEnterAt = on "mouseenter" mousePositionDecoder
 
 -- | onMouseEnter event, the position is relative to the target of the event
-onMouseClickAt :: (Point 2 Int -> action) -> Attribute action
+onMouseClickAt :: (Point 2 Int -> action) -> Attribute model action
 onMouseClickAt = on "click" mousePositionDecoder
 
 -- | Mouse position decoder that captures the position of the event relative to the
@@ -61,15 +61,15 @@ mousePositionDecoder = Decoder dec dt
 --------------------------------------------------------------------------------
 
 -- | On start of a touch event,
-onTouchStartAt :: (Point 2 Int -> action) -> Attribute action
+onTouchStartAt :: (Point 2 Int -> action) -> Attribute model action
 onTouchStartAt = onRelativeTo "touchstart" touchDecoder
 
 -- | On touchMove event
-onTouchMoveAt :: (Point 2 Int -> action) -> Attribute action
+onTouchMoveAt :: (Point 2 Int -> action) -> Attribute model action
 onTouchMoveAt = onRelativeTo "touchmove" touchDecoder
 
 -- | onTouchEnd event
-onTouchEnd     :: action -> Attribute action
+onTouchEnd     :: action -> Attribute model action
 onTouchEnd act = on "touchend" emptyDecoder (const act)
 
 
@@ -119,7 +119,7 @@ touchDecoder = Decoder dec dt
 -- | A version of onWithOptions that also decodes the left, top, and clientLeft and clientTop
 -- values of the target element.
 onRelativeTo :: MisoString -> Decoder (Point 2 Int) -> (Point 2 Int -> action)
-                -> Attribute action
+                -> Attribute model action
 onRelativeTo eventName Decoder{..} toAction =
     Event $ \sink n _logLevel _events -> do
      eventObj <- getProp "events" n

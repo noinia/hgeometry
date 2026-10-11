@@ -44,6 +44,7 @@ import qualified Miso.Svg as Elem
 import qualified Miso.Svg.Property as Prop
 import           HGeometry.BezierSpline
 import qualified Miso
+import           Data.Void
 
 --------------------------------------------------------------------------------
 
