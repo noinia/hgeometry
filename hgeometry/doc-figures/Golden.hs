@@ -14,13 +14,13 @@ import qualified Data.ByteString.Lazy.Char8 as Char8
 
 --------------------------------------------------------------------------------
 
-instance Show (View model action) where
+instance Show (View () () () action) where
   show = Char8.unpack . toHtml
 
 instance ToMisoString R where
   toMisoString = toMisoString . realToFrac @_ @Double
 
-svgFileGolden :: Golden ByteString.ByteString (View model action)
+svgFileGolden :: Golden ByteString.ByteString (View () () () action)
 svgFileGolden = byteStringGolden { actualWriter = WriteActual renderSvgToFile
                                  , goldenFile   = [osp|figures.svg|]
                                  }

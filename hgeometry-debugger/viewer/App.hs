@@ -133,8 +133,8 @@ baseUrl :: MisoString
 baseUrl = toMisoString $ "http://" <> defaultHost <> ":" <> show defaultPort
 --------------------------------------------------------------------------------0
 
-viewModel         :: props -> Model -> View Model Action
-viewModel _ model = div_ []
+viewModel       :: Model -> View () () Model Action
+viewModel model = div_ []
     [ svg_ [ width_  "1024px"
              , height_ "700px"
              ,   style_ [border "1px solid black"]
@@ -260,7 +260,7 @@ viewModel _ model = div_ []
 
 
 
-flowBite :: View model action
+flowBite :: View context props model action
 flowBite = script_ [src_ "https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"
                    ] ""
 
@@ -291,7 +291,7 @@ data ParensLevel
     | Parens2
     deriving (Eq, Show, Bounded, Enum)
 
-pPrintStringHtml          :: [Attribute action] -> OutputOptions -> String -> View model action
+pPrintStringHtml          :: [Attribute model action] -> OutputOptions -> String -> View context props model action
 pPrintStringHtml as opts = renderHtml as . treeForm . annotateWithIndentation . layoutStringAbstract opts
   where
     annotateWithIndentation =
@@ -309,7 +309,7 @@ pPrintStringHtml as opts = renderHtml as . treeForm . annotateWithIndentation . 
 
 newtype Class = Class {unClass :: MisoString}
 
-renderHtml :: [Attribute action] -> SimpleDocTree [Class] -> View model action
+renderHtml :: [Attribute model action] -> SimpleDocTree [Class] -> View context props model action
 renderHtml as =
     let go = \case
             STEmpty -> [text ""]

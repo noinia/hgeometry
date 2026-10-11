@@ -10,6 +10,8 @@ module Ipe.AllColors
 
   , cssStandardColors
   , cssExtraColors
+
+  , rgb
   ) where
 
 import qualified Data.Map as Map
@@ -904,3 +906,8 @@ cssExtraColors = Valued <$> Map.fromList
   , ("yellowgreen", hex2color             0x9a 0xcd 0x32)
   , ("lightgoldenrodyellow", hex2color    0xfa 0xfa 0xd2)
   ]
+
+
+-- | Given three values in the range [0..255], construct an appropriate IpeColor
+rgb       :: Fractional r => Int -> Int -> Int -> IpeColor r
+rgb r g b = IpeColor $ Valued ((\x -> fromIntegral x / 255) <$> RGB r g b)

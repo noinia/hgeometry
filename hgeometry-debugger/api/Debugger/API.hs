@@ -15,9 +15,7 @@ import           GHC.Generics
 import           Data.Aeson
 import           Data.Text (Text)
 import           Miso.Types
-import           Miso.Aeson
 import qualified Data.Aeson as Aeson
-import qualified Miso.JSON as Miso
 import           Data.Coerce
 import           Data.Map (Map)
 import           Data.Sequence (Seq)
@@ -29,23 +27,9 @@ type LayerName = String
 
 newtype Drawing = Drawing MisoString
   deriving (Generic, Eq, Show)
-  deriving newtype (Miso.FromJSON, Miso.ToJSON)
-  deriving (Aeson.ToJSON, Aeson.FromJSON) via MisoAeson Drawing
 
-instance (Aeson.ToJSONKey k, Aeson.ToJSON k, Aeson.ToJSON v) => Miso.ToJSON (Map k v) where
-  toJSON = Miso.toJSON . MisoAeson
-
-instance (Aeson.FromJSONKey k, Ord k, Aeson.FromJSON v
-         ) => Miso.FromJSON (Map k v) where
-  parseJSON = fmap (\(MisoAeson x) -> x) . Miso.parseJSON
-
-instance Miso.ToJSON a => Aeson.ToJSON (MisoAeson a) where
-  toJSON (MisoAeson x) = jsonToAeson . Miso.toJSON $ x
-
-instance Miso.FromJSON a => Aeson.FromJSON (MisoAeson a) where
-  parseJSON s = case Miso.unParser . Miso.parseJSON . aesonToJSON $ s of
-                  Left err -> fail (show err)
-                  Right x  -> pure (MisoAeson x)
+instance Aeson.ToJSON Drawing where
+instance Aeson.FromJSON Drawing where
 
 
 type Drawings = Map LayerName (Seq (String, Drawing))
@@ -71,7 +55,7 @@ defaultHost = "localhost"
 
 --------------------------------------------------------------------------------
 
--- deriving instance (Generic action, Generic model) => Generic (View model action)
+-- deriving instance (Generic action, Generic model) => Generic (View context props model action)
 -- deriving instance (Generic parent, Generic model, Generic action
 --                   ) => Generic (Component parent model action)
 -- instance (Generic parent) => Generic (SomeComponent parent) where
@@ -80,7 +64,7 @@ defaultHost = "localhost"
 
 -- data ViewJSON =
 
--- instance (ToJSON model, ToJSON action) => ToJSON (View model action) where
+-- instance (ToJSON model, ToJSON action) => ToJSON (View context props model action) where
 --    toEncoding =
 
 

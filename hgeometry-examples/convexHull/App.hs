@@ -79,8 +79,8 @@ insertPoint p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel     :: props -> Model -> View Model Action
-viewModel _ m = div_ [ ]
+viewModel   :: Model -> View () () Model Action
+viewModel m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick AddPoint
@@ -118,7 +118,7 @@ main = startApp (Canvas.withCanvasEvents defaultEvents) $
 
 textAt                    :: ToMisoString r
                           => Point 2 r
-                          -> [Attribute action] -> MisoString -> View model action
+                          -> [Attribute model action] -> MisoString -> View context props model action
 textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                    , y_ $ ms y
                                    ] <> ats

@@ -100,8 +100,8 @@ insert p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel     :: props -> Model -> View Model Action
-viewModel _ m = div_ [ ]
+viewModel   :: Model -> View () () Model Action
+viewModel m = div_ [ ]
                    [ either PrimalCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.primalCanvas)
                                        [ onClick PrimalClick

@@ -23,6 +23,9 @@ packages:
 
 -- ghc-options: -Werror
 
+package miso
+    flags: -native +aeson
+
 allow-newer:
 -- 9.12
     servant:QuickCheck,
@@ -57,7 +60,8 @@ source-repository-package
 
 source-repository-package
     type: git
-    location: https://github.com/noinia/miso-bulma
+    location: https://github.com/dmjio/miso
+    tag: 4b930160082c4a24b446939e8752b4224b13a2c6
 
 source-repository-package
     type: git
@@ -79,10 +83,10 @@ source-repository-package
   location: https://github.com/haskell-miso/miso-tagsoup
   tag: master
 
-source-repository-package
-  type: git
-  location: https://github.com/haskell-miso/miso-aeson
-  tag: master
+-- source-repository-package
+--   type: git
+--   location: https://github.com/haskell-miso/miso-aeson
+--   tag: master
 
 source-repository-package
     type: git

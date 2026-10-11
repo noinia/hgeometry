@@ -1,51 +1,70 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeData #-}
+{-# LANGUAGE QuasiQuotes #-}
 module Main
   (main) where
 
-import Data.List.NonEmpty (NonEmpty(..))
-import Control.Monad.IO.Class
-import Data.Default
-import Control.DeepSeq (NFData)
-import Control.Lens
-import Data.Functor.Classes
-import Data.Semigroup.Foldable
-import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import GHC.Generics (Generic)
-import HGeometry.Box
-import HGeometry.Point
-import HGeometry.Properties
-import HGeometry.Transformation
-import HGeometry.Polygon
-import HGeometry.Polygon.WithHoles
-import HGeometry.Vector
-import HGeometry.Matrix
-import HGeometry.BezierSpline
-import HGeometry.Vector.NonEmpty.Util ()
-import Hiraffe.Graph
-import Data.Kind (Type)
-import Data.Coerce
-import Data.Distributive
-import Ipe
-import HGeometry.Number.Real.Rational
-import CatmulRomSpline
-import System.Random
-import System.Random.Stateful
-import HGeometry.LineSegment
-import Ipe.Draw
-import Prelude hiding (sqrt)
-import HGeometry.Number.Radical
-import HGeometry.PlaneGraph.Class
-import Hachuring
-import Data.Sequence as Seq
-import Debug.Trace
-import Ipe.Color
--- import Data.Functor.Apply (WrappedApplicative(..))
-import HGeometry.Foldable.Util
-import Ipe.Color
+import           Data.Char (toLower)
+import qualified System.OsString as OsString
+import           Data.Maybe (fromMaybe)
+import           HGeometry.Ext
+import           Data.Geospatial
+import qualified Data.Map as Map
+import           System.OsPath
+import           Data.Traversable
+import           HGeometry.Ball
+import           System.OsPath
+import           System.File.OsPath
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Control.Monad.IO.Class
+import           Data.Default
+import           Control.DeepSeq (NFData)
+import           Control.Lens
+import           Data.Functor.Classes
+import           Data.Semigroup.Foldable
+import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import           GHC.Generics (Generic)
+import           HGeometry.Box
+import           HGeometry.GeoJSON
+import           HGeometry.Point
+import           HGeometry.Properties
+import           HGeometry.Transformation
+import           HGeometry.Polygon
+import           HGeometry.Polygon.WithHoles
+import           HGeometry.Vector
+import           HGeometry.Matrix
+import           HGeometry.BezierSpline
+import           HGeometry.Vector.NonEmpty.Util ()
+import           Hiraffe.Graph
+import           Data.Kind (Type)
+import           Data.Coerce
+import           Data.Distributive
+import           Ipe
+import           HGeometry.Number.Real.Rational
+import           CatmulRomSpline
+import           System.Random
+import           System.Random.Stateful
+import           HGeometry.LineSegment
+import           Ipe.Draw
+import           Prelude hiding (sqrt)
+import           HGeometry.Number.Radical
+import           HGeometry.PlaneGraph.Class
+import           Hachuring
+import           Data.Sequence as Seq
+import           Debug.Trace
+import           Ipe.Color
+import           HGeometry.Foldable.Util
+import           Ipe.Color
 import           Data.Functor.Contravariant
-import Handy
+import           Handy
+import           HGeometry.Miso.Svg.Draw
+import           Miso.Svg (svg_)
+import           Miso.Html.Property (width_, height_)
+import           HGeometry.Miso.Svg (renderSvgToFile)
+import           Data.Aeson
+
 
 --------------------------------------------------------------------------------
 
@@ -65,8 +84,81 @@ spline = CatmulRomSegment (Point2 (-1) 1) (Point2 0 0) (Point2 10 0) (Point2 11 
 
 
 
+type Handy' = Handy SVG R (AtomicGenM StdGen) IO
 
---------------------------------------------------------------------------------0
+--------------------------------------------------------------------------------
+
+-- idea: create some handy worldmap
+
+
+-- countries    :: OsPath -> IO (Map OsPath (SimplePolygon (Point 2 R)))
+readCountries    :: OsPath -> IO (Map.Map OsPath GeoPolygon)
+readCountries fp = do content <- readFile' fp
+                      case eitherDecodeStrict' content of
+                        Left err                                      -> error err
+                        Right (collection :: GeoFeatureCollection ()) -> pure $
+                          foldMapOf (geofeatures.folded.geometry._Polygon) (Map.singleton fp)
+                                    collection
+
+-- | given a "country name" map it to the filename
+formatName :: OsString -> OsPath
+formatName = toLowerCase
+           . replace '&' [osp|and|]
+           . OsString.filter (/= OsString.unsafeFromChar '.')
+           . replace ' ' [osp|_|]
+ where
+   replace needle sep = OsString.intercalate sep
+                      . OsString.split (OsString.unsafeFromChar needle)
+   toLowerCase = OsString.map (OsString.unsafeFromChar . toLower . OsString.toChar)
+
+test = do
+  countries <- readCountries [osp|/Users/frank/workspace/hgeometry/hgeometry-geojson/data/world-geojson/countries/turkey.json|]
+
+  let polies = ifoldMap (\_ country ->
+                           draw @SVG [ stroke  ?~ blue
+                                     , fill    ?~ lightcyan
+                                     , opacity ?~ "0.5"
+                                     ] country
+                        ) countries
+
+  renderSvgToFile [osp|/tmp/countries.svg|] $
+            svg_ [ width_  "1080"
+                 , height_ "900"
+                 ] polies
+
+
+instance IsDrawable (Svg model action) GeoPolygon where
+    type AttrOf (Svg model action) GeoPolygon = PathAttributes Double
+    draw ats poly = draw @(Svg model action) ats $ toPoly poly
+
+toPoly      :: GeoPolygon -> SimplePolygon (Point 2 Double)
+toPoly poly = fromMaybe err . fromPoints . map  (mercatorProject world)
+            $ poly^..unGeoPolygon.folded.folded._GeoPositionWithoutCRS.core
+  where
+    err = error "toPoly; absurd"
+
+    world = Vector2 1080 900
+
+
+-- | Given the width and height of the map and a Position, compute a Mercator Projection of
+-- the position. See
+-- <http://en.wikipedia.org/wiki/Mercator_projection#Derivation_of_the_Mercator_projection
+-- WikiPedia> for more info.
+mercatorProject                            :: Vector 2 Double
+                                           -- ^ with and height of the output map
+                                           -> PointXY
+                                           -> Point 2 Double
+mercatorProject (Vector2 width height) pos = Point2 x y
+  where
+    Point2 lon lat = pos^.asPoint
+    -- lat = pos^._xyX -- latitude
+    -- lon = pos^._xyY -- longitude
+
+    x    =                (width / 360)    * lon
+    y    = (height / 2) - (width / (2*pi)) * (log . tan $ (pi / 4) + (latR / 2))
+    latR = -1 * lat * pi / 180
+
+--------------------------------------------------------------------------------
 
 main :: IO ()
 main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
@@ -81,7 +173,10 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
           -- printAsIpeSelection $ foldMap (draw @(Ipe R) [])
           --                     $ catmulRom origin (Point2 50 5) (Point2 75 5) (Point2 100 0)
 
+          test
+
           let handyCfg = def :: HandyConfig R
+
               seg :: ClosedLineSegment (Point 2 R)
               seg = ClosedLineSegment (Point2 0 0) (Point2 100 10)
 
@@ -108,6 +203,54 @@ main = do -- print $ coordinateWise (prefix :: Vector 4 R -> Vector 2 R)
                       , fill   ?~ blue
                       ] poly handyCfg globalStdGen
           printAsIpeSelection (res :: [IpeObject R])
+
+          content <- draw @Handy'
+                          [ stroke ?~ black
+                          , fill   ?~ blue
+                          ] poly handyCfg globalStdGen
+
+
+          let circle :: Disk (Point 2 R)
+              circle = Disk (Point2 800 800) 3000
+
+
+              circ = draw @SVG [ stroke ?~ green
+                               ] (circle^._DiskCircle)
+
+          circ' <- draw @Handy'
+                          [ stroke ?~ blue
+                          , fill   ?~ darkcyan
+                          ] circle handyCfg globalStdGen
+
+          let pts :: [Point 2 R]
+              pts = [ Point2 200 400
+                    , Point2 100 100
+                    ]
+
+          pts' <- flip foldMap pts $ \p ->
+                    draw @Handy'
+                         [ stroke ?~ black
+                         , fill   ?~ black
+                         ] p handyCfg globalStdGen
+
+
+          -- circ <- draw @(Handy SVG R (AtomicGenM StdGen) IO)
+          --                   , fill   ?~ blue
+          --                   [ stroke ?~ black
+          --                   ] (Circle (Point2 800 800) 100) handyCfg globalStdGen
+
+          renderSvgToFile [osp|/tmp/out.svg|] $
+            svg_ [ width_  "1080"
+                 , height_ "900"
+                 ] (circ <> circ' <> pts'
+                    <> draw @(SVG) [
+                                   ] (Label "foo" (Point2 200 500 :: Point 2 R))
+
+                   <> draw @SVG [
+                                  ] (Bezier3 (Point2 100 100) (Point2 200 (150 :: R))
+                                             (Point2 400 200) (Point2 500 300))
+                   )
+
 
           -- mapM_ print $ poly^..outgoingDartsOf 3.withIndex
           -- traverseOf_ (darts.withIndex) print poly

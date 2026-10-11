@@ -267,8 +267,8 @@ insertPoly p m = let k = case IntMap.lookupMax m of
 
 --------------------------------------------------------------------------------
 
-viewModel     :: props -> Model -> View Model Action
-viewModel _ m =
+viewModel   :: Model -> View context props Model Action
+viewModel m =
     div_ [ style_ [ CSS.display       "flex"
                   , CSS.flexDirection "column"
                   ]
@@ -282,7 +282,7 @@ singleton :: a -> [a]
 singleton = (:[])
 
 buttonGroup         :: Foldable f
-                    => f (MisoString, MisoString) -> View model action
+                    => f (MisoString, MisoString) -> View context props model action
 buttonGroup buttons =
     div_ [ ]
          (foldMap (singleton .  button) buttons)
@@ -293,7 +293,7 @@ buttonGroup buttons =
               ]
               [ icon icon' ]
 
-theToolbar   :: Model -> View Model Action
+theToolbar   :: Model -> View context props Model Action
 theToolbar m =
       div_ [ id_    "toolBar"
            , style_ [ CSS.border  "1px solid black"
@@ -340,10 +340,10 @@ theToolbar m =
 --------------------------------------------------------------------------------
 
 colorPickers            :: FoldableWithIndex Int f => Color -> Int -> f Color
-                        -> [View Model Action]
+                        -> [View context props  Model Action]
 colorPickers selected i = ifoldMap (\j c -> [colorPickerButton (i == j && selected == c) j c])
 
-colorPickerButton              :: Bool -> Int -> Color -> View Model Action
+colorPickerButton              :: Bool -> Int -> Color -> View context props Model Action
 colorPickerButton selected i c =
   button_ [ style_ [ CSS.backgroundColor c
                    , CSS.width           (ms size <> "px")
@@ -366,7 +366,7 @@ colorPickerButton selected i c =
 --------------------------------------------------------------------------------
 
 
-theCanvas   :: Model -> View Model Action
+theCanvas   :: Model -> View context props Model Action
 theCanvas m =
       div_ [ id_ "canvas"
            , style_ [ "margin-left"  =: "auto"
@@ -449,7 +449,7 @@ main = startApp (Canvas.withCanvasEvents defaultEvents) $
 
 -- textAt                    :: ToMisoString r
 --                           => Point 2 r
---                           -> [Attribute action] -> MisoString -> View model action
+--                           -> [Attribute model action] -> MisoString -> View context props model action
 -- textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
 --                                   , y_ $ ms y
 --                                   ] <> ats
@@ -457,7 +457,7 @@ main = startApp (Canvas.withCanvasEvents defaultEvents) $
 
 
 -- | Subscription that gets the window dimensions.
-windowDimensionsSub        :: (Vector 2 Int -> action) -> Sub action
+windowDimensionsSub        :: (Vector 2 Int -> action) -> Sub model action
 windowDimensionsSub f sink = createSub acquire release sink
   where
     eventName = "resize"
@@ -504,11 +504,11 @@ windowAddEventListener name cb = do
 --------------------------------------------------------------------------------
 
 -- | Produce an icon
-icon    :: MisoString -> View model action
+icon    :: MisoString -> View context props  model action
 icon cs = i_ [ class_ cs, textProp "aria-hidden" "true"] []
 
 -- | Produce a linked icon
-iconLink :: View model action
+iconLink :: View context props model action
 iconLink = Html.script_ [ src_ "https://use.fontawesome.com/releases/v5.3.1/js/all.js"
                         , defer_ True
                         ] mempty
