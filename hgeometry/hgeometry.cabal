@@ -188,8 +188,7 @@ common ipe-test-setup
       -- , quickcheck-instances
       , hgeometry-ipe
 
-
-common test-setup:
+common test-setup
     ghc-options:
          -fno-warn-unused-local-binds
 
@@ -569,7 +568,7 @@ common with-ipe-hspec-fractional
 
 
 test-suite with-ipe-hspec-rational
-  import:           all-setup, ipe-setup, all-quickcheck-setup, test-setup
+  import:           all-setup, ipe-setup, all-quickcheck-setup, test-setup,
                     quickcheck-setup, with-ipe-hspec-fractional
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
