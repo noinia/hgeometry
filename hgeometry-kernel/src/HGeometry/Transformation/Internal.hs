@@ -363,6 +363,11 @@ rotation a = Transformation . Matrix $ Vector3 (Vector3 (cos a) (- sin a) 0)
 reflection   :: ( Floating r
                 ) => r -> Transformation 2 r
 reflection a = rotation a |.| reflectionV |.| rotation (-a)
+-- TODO: if we just give the direction vector of the input line this can be done without
+-- Floating constraint. See HouseHolder's matrix
+-- see:
+-- https://en.wikipedia.org/wiki/Transformation_matrix#Reflection
+
 
 -- | Vertical reflection
 reflectionV :: (Num r) => Transformation 2 r

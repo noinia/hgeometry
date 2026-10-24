@@ -140,6 +140,7 @@ common all-quickcheck-setup
          -fno-warn-missing-signatures
          -fno-warn-type-defaults
          -fno-warn-orphans
+
     build-depends:
         hspec                           >= 2.9     && < 3
       , QuickCheck                      >= 2.18    && < 3
@@ -180,11 +181,17 @@ common ipe-test-setup
          -fno-warn-missing-signatures
          -fno-warn-type-defaults
          -fno-warn-orphans
+
     build-depends:
         hspec                   >= 2.9
       -- , QuickCheck              >= 2.10
       -- , quickcheck-instances
       , hgeometry-ipe
+
+
+common test-setup:
+    ghc-options:
+         -fno-warn-unused-local-binds
 
 --------------------------------------------------------------------------------
 -- * Libraries
@@ -562,7 +569,7 @@ common with-ipe-hspec-fractional
 
 
 test-suite with-ipe-hspec-rational
-  import:           all-setup, ipe-setup, all-quickcheck-setup,
+  import:           all-setup, ipe-setup, all-quickcheck-setup, test-setup
                     quickcheck-setup, with-ipe-hspec-fractional
   type:             exitcode-stdio-1.0
   main-is:          Main.hs

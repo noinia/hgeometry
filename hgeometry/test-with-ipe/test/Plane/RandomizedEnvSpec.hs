@@ -30,7 +30,7 @@ import           Plane.Sample
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
-import           Test.QuickCheck
+import           Test.QuickCheck hiding (Positive, Negative)
 import           Test.QuickCheck.Instances ()
 import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as Original
 import           R
@@ -62,6 +62,7 @@ import           Ipe.Draw
 import           Test.Util
 import           Data.Traversable
 import           System.Random.Stateful
+import           HGeometry.HalfPlane.CommonIntersection.Bounded
 
 --------------------------------------------------------------------------------
 
@@ -294,6 +295,7 @@ instance ( Point_ point 2 r, Num r, Ord r
 
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
+         missing
          testX
          -- testBug
          -- coneCovers
@@ -991,3 +993,79 @@ testBug1 = prop "testbug; brute force voronoi diagram; covers all points" $
 --------------------------------------------------------------------------------
 
 main = hspec voronoiClosest
+
+
+
+-- bug :
+
+missing :: Spec
+missing = describe "black point does not have a region" $ do
+            it "black point issue" $
+              show (vd^?ix blackP) `shouldBe`
+              "Just (ConvexPolygon [Extra (Point2 (-2) 1 :+ -3),Extra (Point2 (-0.58334~) (-0.41667~) :+ -0.16667~),Extra (Point2 0.125 1 :+ 1.25)])"
+
+            it "vd has two regions" $
+              length vd `shouldBe` 2
+
+            it "mirrored vd also has two regions" $ do
+              length vd' `shouldBe` 2
+
+            -- runIO $ printAsIpeSelection (draw @(Ipe R) [] (mirror tri))
+
+            -- runIO $ printAsIpeSelection (draw @(Ipe R) [] (view core <$> halfPlanes)
+            --                             <>
+            --                             draw @(Ipe R) [stroke ?~ black] tri
+            --                             <>
+            --                             draw @(Ipe R) [stroke ?~ green] intersection
+            --                             )
+
+            -- it "intersection should be nonmpty" $
+            --   show intersection `shouldBe` ""
+            -- fixme: these tests are just to print debugging stuff
+  where
+    -- the black one does not have a voronoi region somehow
+    blackP :: Point 2 R
+    blackP = Point2 (-1) 0
+    whiteP = Point2 0 (-0.5)
+    redP = Point2 2 (-0.5)
+
+    tri :: Triangle (Point 2 R)
+    tri = Triangle (Point2 1 1) (Point2 1 (-2)) (Point2 (-2) 1)
+
+    sites = NonEmpty.fromList [blackP, whiteP, redP]
+    vd    = voronoiDiagramIn tri (toNonEmpty sites)
+
+
+    -- Just intersection = boundedCommonIntersection halfPlanes
+
+    halfPlanes :: NonEmpty (HalfPlaneF (VerticalOrLineEQ R) :+ Maybe (Plane R :+ Point 2 R))
+    halfPlanes = ( HalfSpace Negative ( NonVertical ( LineEQ 0 1 ) ) :+ Nothing ) :|
+                 [ HalfSpace Positive ( NonVertical ( LineEQ ( -1 ) ( -1 ) ) ) :+ Nothing
+                 , HalfSpace Positive ( VerticalLineThrough 1 ) :+ Nothing
+                 , HalfSpace Positive ( NonVertical ( LineEQ 2 0.75 ) ) :+ Just ( Plane 0 1 0.25 :+ Point2 0 ( -0.5 ) )
+                 , HalfSpace Positive ( NonVertical ( LineEQ 6 ( -3.25 ) ) ) :+ Just ( Plane ( -4 ) 1 4.25 :+ Point2 2 ( -0.5 ) )
+                 ]
+
+    mirror :: (IsTransformable g, NumType g ~ R, Dimension g ~ 2) => g -> g
+    mirror = transformBy (reflectionH |.| translation (Vector2 10 0))
+
+    vd' = voronoiDiagramIn (mirror tri) (mirror sites)
+
+{-
+
+  boundedCommonIntersection halfPlanes `shouldBe` blackVoronoiRegion
+  where
+    halfPlanes :: HalfPlaneF _
+    halfPlanes = blackHalfPlanes <> intersectingHalfPlanes tri
+    blackHalfPlanes = []
+
+
+    blackVoronoiRegion = undefined -- some triangle
+
+
+    -- input = Input3 (fromList (Point2 (-1) 0 :| [Point2 0 (-0.5),Point2 2 (-0.5)]))
+    -- queries = Queries tri (q :| [])
+    q = Point2 (-0.3) 0.2
+
+
+-}
