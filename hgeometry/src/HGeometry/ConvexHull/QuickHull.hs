@@ -9,13 +9,14 @@ module HGeometry.ConvexHull.QuickHull
   ( convexHull
   ) where
 
+import           HGeometry.Vector
 import           Control.Lens
 import qualified Data.Foldable as F
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Ord (comparing)
 import           HGeometry.Line
-import           HGeometry.Line.PointAndVector(liesAbove)
+import           HGeometry.Line.PointAndVector (liesAbove)
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
@@ -71,7 +72,8 @@ incXdecY (Point2_ px py) (Point2_ qx qy) =
 
 -- | include neigher left or right
 --
-hull         :: forall point r. (Fractional r, Ord r, Point_ point 2 r)
+hull         :: forall point r. (Fractional r, Ord r, Point_ point 2 r
+                                )
              => point -> point -> [point ] -> [point]
 hull _ _ []  = []
 hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
@@ -80,7 +82,13 @@ hull l r pts = hull l mid ls <> [mid] <> hull mid r rs
     m       = lineThrough l r
     mid     = F.maximumBy (comparing dist) pts
 
-    dist p = p `squaredEuclideanDistTo` m
+    -- we compare based on distance to the line; if there are multiple, make sure to
+    -- select an extremal point rather than one in the middle. (i.e. if the line
+    -- is non-vertical we can just select an extremal one by x-coordinate of the points.
+    -- if the line is vertical we select based on y-coords
+    -- )
+    dist p = Vector3 (p `squaredEuclideanDistTo` m) (p^.xCoord) (p^.yCoord)
+
     t       = Triangle l mid r
     -- line through l and mid, which splits the remaining points in a left half and a right half.
     splitL   = lineThrough l mid

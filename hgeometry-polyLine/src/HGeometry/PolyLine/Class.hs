@@ -26,6 +26,7 @@ import           Hiraffe.Graph
 
 -- | A class representing PolyLines
 class ( HasVertices polyLine polyLine
+      -- , HasEdges polyLine polyLine
       , HasPoints' polyLine point
       , HasStart polyLine point
       , HasEnd polyLine point

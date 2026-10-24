@@ -27,7 +27,6 @@ import HGeometry.Sequence.Alternating
 import Prelude hiding (zipWith)
 import Data.Coerce
 
-
 --------------------------------------------------------------------------------
 
 -- | Given a (non)-empty set of n halfplanes with the guarantee that if
@@ -40,7 +39,7 @@ import Data.Coerce
 -- restricted to soem bounded domain (triangle or box).
 --
 -- \(O(n\log n)\)
-boundedCommonIntersection    :: forall set halfPlane r.
+boundedCommonIntersection    :: forall set halfPlane r p q.
                                 ( Foldable1 set
                                 , HalfPlane_ halfPlane r
                                 , Ord r, Fractional r
@@ -48,9 +47,13 @@ boundedCommonIntersection    :: forall set halfPlane r.
                                 , Intersection (BoundingHyperPlane halfPlane 2 r)
                                           (BoundingHyperPlane halfPlane 2 r)
                                   ~ Maybe (LineLineIntersectionG r (BoundingHyperPlane halfPlane 2 r))
-                                , HasIntersectionWith (Point 2 r) halfPlane
                                 , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                      (BoundingHyperPlane halfPlane 2 r)
+
+                                , IsIntersectableWith (Point 2 r) halfPlane
+                                , Intersection (Point 2 r) halfPlane ~
+                                    Maybe (Point_x_HalfSpace_Intersection p q)
+
                                 -- , Show r, Show halfPlane
                                 )
                               => set halfPlane
@@ -84,15 +87,18 @@ boundedCommonIntersection hs0 = case bimap extremes boundaries $ partitionHalfPl
 
 -- | Computes the bounded intersection
 --
-sweep :: forall halfPlane r.
+sweep :: forall halfPlane r p q.
          (Intersection (BoundingHyperPlane halfPlane 2 r)
                                           (BoundingHyperPlane halfPlane 2 r)
                               ~ Maybe (LineLineIntersectionG r (BoundingHyperPlane halfPlane 2 r))
                             , Ord r, Fractional r
                             , HalfPlane_ halfPlane r
-                            , HasIntersectionWith (Point 2 r) halfPlane
                             , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                   (BoundingHyperPlane halfPlane 2 r)
+                            , IsIntersectableWith (Point 2 r) halfPlane
+                            , Intersection (Point 2 r) halfPlane ~
+                                 Maybe (Point_x_HalfSpace_Intersection p q)
+
                             -- , Show halfPlane, Show r
                             )
       => Chain Seq r halfPlane
@@ -135,9 +141,11 @@ findLeftmostIntersection :: (Intersection (BoundingHyperPlane halfPlane 2 r)
                               ~ Maybe (LineLineIntersectionG r (BoundingHyperPlane halfPlane 2 r))
                             , Ord r, Fractional r
                             , HalfPlane_ halfPlane r
-                            , HasIntersectionWith (Point 2 r) halfPlane
                             , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                   (BoundingHyperPlane halfPlane 2 r)
+                            , IsIntersectableWith (Point 2 r) halfPlane
+                            , Intersection (Point 2 r) halfPlane ~
+                                 Maybe (Point_x_HalfSpace_Intersection p q)
                             )
                          => Chain Seq r halfPlane
                         -- ^ the lower boundary ; i.e. bounds the convex region from below
@@ -157,14 +165,14 @@ findLeftmostIntersection lower upper = case (unconsChain lower, unconsChain uppe
       | otherwise             -> findLeftmostIntersection l upper
 
     (Right ((h',w),l), Right ((h,v),u'))
-      | w <= v    -> if w `intersects` h
+      | w <= v    -> if w `intersectsInterior` h
                      then reportIntersection h' h
                           -- in general, it could be that v is not contained in h',
                           -- yet the bounding lines intersect. However, in that case their
                           -- common intersection is unbounded (i.e. as h' and h) diverge
                           -- towards the "top left".
                      else findLeftmostIntersection l upper -- drop h'
-      | otherwise -> if v `intersects` h'
+      | otherwise -> if v `intersectsInterior` h'
                      then reportIntersection h' h
                      else findLeftmostIntersection lower u' -- drop h
   where
@@ -187,15 +195,26 @@ findLeftmostIntersection lower upper = case (unconsChain lower, unconsChain uppe
 --
 -- If the chains intersect in a line segment this will return Nothing.
 --
+--
+-- FIXME: what is this supposed to return if there is no unique rightmost vertex; i.e.
+-- two vertices with same x-coord?
+--
+-- FIXME: There seems to indeed be an issue if v and w lie on the same vertical line
+
+--
 -- symmetric to findLeftmostIntersection
 findRightmostIntersection             :: (Intersection (BoundingHyperPlane halfPlane 2 r)
                                                        (BoundingHyperPlane halfPlane 2 r)
                                           ~ Maybe (LineLineIntersectionG r (BoundingHyperPlane halfPlane 2 r))
                                          , Ord r, Fractional r
                                          , HalfPlane_ halfPlane r
-                                         , HasIntersectionWith (Point 2 r) halfPlane
                                          , IsIntersectableWith (BoundingHyperPlane halfPlane 2 r)
                                                                (BoundingHyperPlane halfPlane 2 r)
+
+                                         , IsIntersectableWith (Point 2 r) halfPlane
+                                         , Intersection (Point 2 r) halfPlane ~
+                                           Maybe (Point_x_HalfSpace_Intersection p q)
+                                         -- , Show r, Show halfPlane
                                          )
                                       => Chain Seq r halfPlane
                                       -- ^ the lower boundary ;
@@ -222,14 +241,14 @@ findRightmostIntersection lower upper = case (unsnocChain lower, unsnocChain upp
       | otherwise             -> findRightmostIntersection l upper
 
     (Right (l,(w,h')), Right (u',(v,h)))
-      | w >= v    -> if w `intersects` h
+      | w >= v    -> if w `intersectsInterior` h
                      then reportIntersection h' h
                           -- in general, it could be that v is not contained in h',
                           -- yet the bounding lines intersect. However, in that case their
                           -- common intersection is unbounded (i.e. as h' and h) diverge
                           -- towards the "top right".
                      else findRightmostIntersection l upper -- drop h'
-      | otherwise -> if v `intersects` h'
+      | otherwise -> if v `intersectsInterior` h'
                      then reportIntersection h' h
                      else findRightmostIntersection lower u' -- drop h
   where
@@ -240,6 +259,20 @@ findRightmostIntersection lower upper = case (unsnocChain lower, unsnocChain upp
     reportIntersection l u = (l^.boundingHyperPlane) `intersect` (u^.boundingHyperPlane) >>= \case
       Line_x_Line_Point p     -> Just (lower, upper, p)
       Line_x_Line_Line _      -> Nothing -- the bounding halfplanes are the same.
+
+
+--------------------------------------------------------------------------------
+
+-- | Test if a point lies in the interior of the halfplane
+intersectsInterior       :: (Point_ point 2 r, HalfPlane_ halfPlane r
+                            , IsIntersectableWith point halfPlane
+                            , Intersection point halfPlane ~
+                              Maybe (Point_x_HalfSpace_Intersection p q)
+                            )
+                         => point -> halfPlane -> Bool
+q `intersectsInterior` h = case q `intersect` h of
+                             Just (Point_x_HalfSpace_Interior _) -> True
+                             _                                   -> False
 
 --------------------------------------------------------------------------------
 

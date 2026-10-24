@@ -36,6 +36,7 @@ instance Arbitrary PointSet where
 spec :: Spec
 spec = do
     describe "ConvexHull Algorithms" $ do
+      buggy
       modifyMaxSize (const 1000) $ do
         describe "GrahamScan and DivideAnd Conquer are the same" $ do
           prop "quickcheck convex hull " $
@@ -146,3 +147,11 @@ testPoints2 = NonEmpty.fromList
   , mPoint2 [6, 20]
   , mPoint2 [2, 20]
   ]
+
+
+buggy :: Spec
+buggy = prop "graham and qhull on buggy pots" $
+          (PG $ GrahamScan.convexHull buggyPts) === (PG $ QuickHull.convexHull buggyPts)
+
+buggyPts :: NonEmpty (Point 2 R)
+buggyPts = Point2 0 (-7) :| [Point2 2 10,Point2 0.1 10,Point2 1 10,Point2 2 (-7)]

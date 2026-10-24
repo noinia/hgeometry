@@ -181,16 +181,16 @@ scalingFactor = 10_000
 
 --------------------------------------------------------------------------------
 
-viewModel         :: props -> Model -> View Model Action
-viewModel _ model = div_ [ ]
-                         [ either CanvasAction id <$>
-                           Canvas.svgCanvas_ (model^.canvas)
-                                  [ style_ [border "1px solid blue"]
-                                  , onPointerDown (const StartRotate)
-                                  , onPointerUp   (const StopRotate)
-                                  ]
-                                  canvasBody
-                         ]
+viewModel       :: Model -> View () () Model Action
+viewModel model = div_ [ ]
+                       [ either CanvasAction id <$>
+                         Canvas.svgCanvas_ (model^.canvas)
+                                [ style_ [border "1px solid blue"]
+                                , onPointerDown (const StartRotate)
+                                , onPointerUp   (const StopRotate)
+                                ]
+                                canvasBody
+                       ]
   where
     canvasBody = [ draw (uniformScaleBy scalingFactor $ toTriangle2 t2)
                      [ fill_   (ms $ t^?!extra.faceAttrs._Just.fill._Just)

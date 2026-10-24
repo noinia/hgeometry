@@ -37,6 +37,8 @@ import           HGeometry.LineSegment
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.Number.Radical
+import           Prelude hiding (sqrt)
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
@@ -56,29 +58,25 @@ import           Barbies
 -- | Helper function to construct drawing functions. I..e it allows
 -- you do pre-specify a bunch of attributes that should be drawn
 -- (ats1) yet allow more attributes to be added by the user later.
-withAts             ::  ([Attribute action] -> View model action)
-                    -> [Attribute action] -> [Attribute action] -> View model action
+withAts             ::  ([Attribute model action] -> View context props model action)
+                    -> [Attribute model action] -> [Attribute model action]
+                    -> View context props model action
 withAts f ats1 ats2 = f (ats1 <> ats2)
-
--- -- | Helper function to construct a View. See 'withAts' for its usage.
--- withAts'             :: ([Attribute action] -> View model action)
---                      -> [Attribute action]
---                      -> [Attribute action]
---                      -> View model action
--- withAts' f ats1 ats2 = f (ats1 <> ats2)
 
 --------------------------------------------------------------------------------
 -- * Default implementations for drawing geometric objects
 
--- | Default implementation for drawing geometric objects
+-- -- | Default implementation for drawing geometric objects
 class Drawable t where
   {-# MINIMAL draw | drawWith #-}
   -- | Draws the given object with the given attributes
-  draw       :: t -> [Attribute action] -> View model action
+  draw       :: t -> [Attribute model action] -> View context props model action
   draw x ats = drawWith x ats []
 
   -- | draw the given object, as well as the given "children"
-  drawWith          :: t -> [Attribute action] -> [View model action] -> View model action
+  drawWith          :: t -> [Attribute model action]
+                    -> [View context props model action]
+                    -> View context props model action
   drawWith x ats _b = draw x ats
 
 instance (Drawable l, Drawable r) => Drawable (Either l r) where
@@ -110,10 +108,10 @@ instance ( Point_ point 2 r, VertexContainer f point, HasFromFoldable1 f
          , ToMisoString r) => Drawable (ConvexPolygonF f point) where
   draw = dSimplePolygon . toSimplePolygon
 
-instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Circle point) where
+instance (Point_ point 2 r, Radical r, ToMisoString r) => Drawable (Circle point) where
   draw = dCircle
 
-instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Disk point) where
+instance (Point_ point 2 r, ToMisoString r, Radical r) => Drawable (Disk point) where
   draw = dDisk
 
 -- instance ToMisoString r => Drawable (Viewport r) where
@@ -144,23 +142,24 @@ instance (Point_ point 2 r, ToMisoString r, Floating r) => Drawable (Disk point)
 -- * Functions to draw geometric objects
 
 -- | Draw a point
-dPoint   :: (Point_ point 2 r, ToMisoString r) => point -> [Attribute action] -> View model action
+dPoint   :: (Point_ point 2 r, ToMisoString r) => point
+         -> [Attribute model action] -> View context props model action
 dPoint p = withAts ellipse_ [ cx_ (ms $ p^.xCoord), cy_ (ms $ p^.yCoord)
                             , rx_ "5", ry_ "5"
                             ]
 
 -- | Draw a rectangle
 dRectangle   :: ( Rectangle_ rectangle point, Point_ point 2 r, ToMisoString r, Num r)
-             => rectangle -> [Attribute action] -> View model action
+             => rectangle -> [Attribute model action] -> View context props model action
 dRectangle b = let Point2 x y  = over coordinates ms $ b^.minPoint.asPoint
                    Vector2 w h = ms <$> b^.to size
-               in withAts rect_ [ x_ x, y_ y, width_ w, height_ h, fill_ "none"
+               in withAts rect_ [ x_ x, y_ y, width_ w, height_ h
                                  , strokeLinejoin_ "round"
                                 ]
 
 -- | Draw a simple polygon
 dSimplePolygon    :: (SimplePolygon_ simplePolygon point r, ToMisoString r)
-                  => simplePolygon -> [Attribute action] -> View model action
+                  => simplePolygon -> [Attribute model action] -> View context props model action
 dSimplePolygon pg = withAts polygon_ [ points_ $ toPointsString $ pg^..vertices
                                      , strokeLinejoin_ "round"
                                      ]
@@ -185,15 +184,14 @@ dSimplePolygon pg = withAts polygon_ [ points_ $ toPointsString $ pg^..vertices
 
 -- | Draw a polyline
 dPolyLine    :: (PolyLine_ polyLine point, Point_ point 2 r, ToMisoString r)
-             => polyLine -> [Attribute action] -> View model action
+             => polyLine -> [Attribute model action] -> View context props model action
 dPolyLine pl = withAts polyline_ [ points_ . toPointsString $ pl^..vertices
-                                 , fill_ "none"
                                  , strokeLinejoin_ "round"
                                  ]
 
 -- | Draw a line segment
 dLineSegment   :: ( LineSegment_ lineSegment point, Point_ point 2 r, ToMisoString r)
-               => lineSegment -> [Attribute action] -> View model action
+               => lineSegment -> [Attribute model action] -> View context props model action
 dLineSegment s = withAts polyline_ [ points_ $ toPointsString [s^.start, s^.end] ]
 
 -- | constructs a list of points to be used in the 'points' svg attribute.
@@ -203,28 +201,28 @@ toPointsString =
 
 
 -- | Draw a circle
-dCircle              :: (Point_ point 2 r, ToMisoString r)
-                     => Circle point -> [Attribute action] -> View model action
-dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
-                                         , ry_ . ms $ r
-                                         , cx_ . ms $ c^.xCoord
-                                         , cy_ . ms $ c^.yCoord
-                                         , fill_ "none"
-                                         ]
+dCircle              :: (Point_ point 2 r, ToMisoString r, Radical r)
+                     => Circle point -> [Attribute model action]
+                     -> View context props model action
+dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ sqrt r
+                                        , ry_ . ms $ sqrt r
+                                        , cx_ . ms $ c^.xCoord
+                                        , cy_ . ms $ c^.yCoord
+                                        ]
 
 -- | Draw a disk
 dDisk             :: ( Disk_ disk point, ConstructableBall_ disk point
-                     , Point_ point 2 r, ToMisoString r, Floating r)
-                  => disk -> [Attribute action] -> View model action
+                     , Point_ point 2 r, ToMisoString r, Radical r)
+                  => disk -> [Attribute model action] -> View context props model action
 dDisk (Disk_ c r) = dCircle (Circle c r)
 
 -- instance (ToMisoString r, Drawable v, Drawable  => Drawable (PlanarSubdivision s v e f r)
 
 
--- dPlanarSubdivision        :: PlanarSubdivision s (Maybe (View model action))
---                                                  (Maybe (View model action))
---                                                  (Maybe (View model action)) r
---                           -> [Attribute action] -> View model action
+-- dPlanarSubdivision        :: PlanarSubdivision s (Maybe (View context props model action))
+--                                                  (Maybe (View context props model action))
+--                                                  (Maybe (View context props model action)) r
+--                           -> [Attribute model action] -> View context props model action
 -- dPlanarSubdivision = dPlanarSubdivisionWith (^._2.vData) (^._2.extra) (^._2.extra)
 
 
@@ -233,8 +231,8 @@ dDisk (Disk_ c r) = dCircle (Circle c r)
 --                     => PlanarSubdivision s (Maybe (Ipe.IpeAttributes Ipe.IpeSymbol r))
 --                                            (Maybe (Ipe.IpeAttributes Ipe.Path r))
 --                                            (Maybe (Ipe.IpeAttributes Ipe.Path r)) r
---                     -> [Attribute action]
---                     -> View model action
+--                     -> [Attribute model action]
+--                     -> View context props model action
 -- dPlanarSubdivision' = dPlanarSubdivisionWith fv fe ff
 --   where
 --     fv (_,v) = (\ats -> draw (v^.location) (svgWriteAttrs ats)) <$> v^.vData
@@ -242,14 +240,14 @@ dDisk (Disk_ c r) = dCircle (Circle c r)
 --     ff (_,f) = (\ats -> draw (f^.core)     (svgWriteAttrs ats)) <$> f^.extra
 
 
--- type DrawF a action = a -> Maybe (View model action)
+-- type DrawF a action = a -> Maybe (View context props model action)
 
 -- dPlanarSubdivisionWith                 :: DrawF (VertexId' s, VertexData r v)          action
 --                                        -> DrawF (Dart s,      LineSegment 2 v r :+ e)  action
 --                                        -> DrawF (FaceId' s,   SomePolygon v r :+ f)    action
 --                                        -> PlanarSubdivision s v e f r
---                                        -> [Attribute action]
---                                        -> View model action
+--                                        -> [Attribute model action]
+--                                        -> View context props model action
 -- dPlanarSubdivisionWith fv fe ff ps ats = g_ ats (fs <> es <> vs)
 --     -- draw faces at the bottom, then edges, and finally the vertices
 --   where
@@ -274,9 +272,6 @@ instance ( Drawable g
          , forall action. SvgWriteAttributes (ats r) action
          ) => Drawable (g :+ ats r Maybe) where
   draw (i :+ iAts) ats = draw i (svgWriteAttrs @(ats r) iAts <> ats)
-
-
-
 
 instance ToMisoString r => Drawable (Ipe.Group r) where
   draw (Ipe.Group os) ats = g_ ats (map (flip draw []) os)
@@ -325,31 +320,59 @@ instance ToMisoString r => Drawable (Ipe.PathSegment r) where
 --------------------------------------------------------------------------------
 
 
-newtype SvgF action val = SvgF (val -> [Attribute action])
+newtype SvgF action val = SvgF (forall model. val -> [Attribute model action])
 
-
-
-  -- MisoString -> Attribute action
+-- | Helper newtype to represent 'forall model. Const [Attribute model action] val'
+-- i.e. we hide the 'model' parameter.
+newtype AttrList action val = AttrList (forall model. [Attribute model action])
 
 class SvgWriteAttributes ats action where
+
+  -- | The functions that specify how to write the values to attributes
   svgAttrFunctions :: ats (SvgF action)
-  -- | Write the attributes to file
-  svgWriteAttrs :: ats Maybe -> [Attribute action]
-  default svgWriteAttrs :: (ApplicativeB ats, TraversableB ats) => ats Maybe -> [Attribute action]
-  svgWriteAttrs = bfoldMap getConst
-                . bzipWith writeAttr svgAttrFunctions
+
+  -- | The attribute values we are using if the attribute is set to Nothing.
+  --
+  -- This is particularly useful for e.g. fill. If there is no fill color set,
+  -- we should add a 'fill='none'.
+  svgAttrDefaults :: ats (AttrList action)
+  default svgAttrDefaults :: ApplicativeB ats => ats (AttrList action)
+  svgAttrDefaults = bpure $ AttrList []
+
+  -- | Write the actual attributes
+  svgWriteAttrs :: ats Maybe -> [Attribute model action]
+
+  default svgWriteAttrs :: (ApplicativeB ats, TraversableB ats)
+                        => ats Maybe -> [Attribute model action]
+  svgWriteAttrs = bfoldMap (\(AttrList res) -> res)
+                . bzipWith3 writeAttr svgAttrDefaults svgAttrFunctions
+
+
+writeAttr :: AttrList action a
+          -> SvgF action a
+          -> Maybe a
+          -> AttrList action a
+writeAttr (AttrList def') (SvgF attr) m = AttrList $ maybe def' attr m
 
 singleton :: a -> [a]
 singleton = (:[])
 
+
 instance SvgWriteAttributes (CommonAttributes r) action where
   svgAttrFunctions = bpure (SvgF $ const [])
-  svgWriteAttrs = bfoldMap getConst
-                . bzipWith writeAttr svgAttrFunctions
 
-writeAttr :: forall action. (forall a. SvgF action a -> Maybe a -> Const [Attribute action] a)
-writeAttr (SvgF attr) m = Const $ maybe [] attr m
+  -- svgWriteAttrs = bfoldMap getConst
+  --               . bzipWith writeAttr svgAttrFunctions
 
+-- writeAttr :: forall action model.
+--              (forall a. SvgF action a -> Maybe a -> AttrList action a)
+-- writeAttr = writeAttr' (Const [])
+
+-- writeAttr' :: forall action model.
+--               (forall a. AttrList action a -> SvgF action a
+-- -> Maybe a
+--                                            -> Const [Attribute model] a)
+-- writeAttr' (Const def) (SvgF attr) m = Const $ maybe def attr m
 
 instance ToMisoString r => SvgWriteAttributes (SymbolAttributesF r) action where
   svgAttrFunctions = SymbolAttributes
@@ -359,8 +382,11 @@ instance ToMisoString r => SvgWriteAttributes (SymbolAttributesF r) action where
     , _pen         = SvgF (const []           )
     , _symbolSize  = SvgF (const []           )
     }
-  svgWriteAttrs = bfoldMap getConst
-                . bzipWith writeAttr svgAttrFunctions
+  -- svgWriteAttrs = bfoldMap getConst
+  --               . bzipWith writeAttr svgAttrFunctions
+
+  svgAttrDefaults = (bpure $ AttrList [])&fill .~ AttrList [fill_ "none"]
+
 
 instance ToMisoString r => SvgWriteAttributes (PathAttributesF r) action where
   svgAttrFunctions = PathAttributes
@@ -379,12 +405,23 @@ instance ToMisoString r => SvgWriteAttributes (PathAttributesF r) action where
     , _tiling        = SvgF (const []                           )
     , _gradient      = SvgF (const []                           )
     }
+  svgAttrDefaults = (bpure $ AttrList [])&fill .~ AttrList [fill_ "none"]
+
+  -- svgWriteAttrs = bfoldMap getConst
+  --               . bzipWith3 writeAttr' defValues svgAttrFunctions
+  --   where
+  --     defValues :: PathAttributes (AttrList action)
+  --     defValues = pure (Const []) & fill .~ Const [fill_ "none"]
+
+
+
 
 instance SvgWriteAttributes (GroupAttributesF r) action where
   svgAttrFunctions = GroupAttributes
     { _commonAttrs = svgAttrFunctions
     , _clip        = SvgF (const [])
     }
+
 
 instance ToMisoString r => SvgWriteAttributes (TextAttributesF r) action where
   svgAttrFunctions = TextAttributes

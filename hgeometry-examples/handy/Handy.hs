@@ -4,33 +4,42 @@
 module Handy
   ( Handy
   , HandyConfig(HandyConfig), roughness, hachureVector, hachurePerturbationLimit, hachureWeight
+  , kgon
   ) where
 
-import Data.Default
-import Control.Lens
-import Ipe
-import Ipe.Draw
-import HGeometry.Vector
-import GHC.Generics (Generic)
-import HGeometry.Box
-import HGeometry.Point
-import HGeometry.Properties
-import HGeometry.Transformation
-import HGeometry.Polygon
-import HGeometry.Polygon.WithHoles
-import HGeometry.Vector
-import HGeometry.Matrix
-import HGeometry.BezierSpline
-import HGeometry.LineSegment
-import HGeometry.Number.Radical
-import HGeometry.Foldable.Util
-import Ipe
-import Ipe.Draw
-import Hachuring
-import System.Random
-import System.Random.Stateful
-import CatmulRomSpline
-import Data.Kind (Type)
+
+import           Data.Foldable
+import           Prelude hiding (sqrt)
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Default
+import           Control.Lens
+import           Ipe
+import           Ipe.Draw
+import           HGeometry.Vector
+import           GHC.Generics (Generic)
+import           HGeometry.Box
+import           HGeometry.Point
+import           HGeometry.Properties
+import           HGeometry.Transformation
+import           HGeometry.Polygon
+import           HGeometry.PolyLine
+import           HGeometry.Polygon.WithHoles
+import           HGeometry.Vector
+import           HGeometry.Matrix
+import           HGeometry.BezierSpline
+import           HGeometry.LineSegment
+import           HGeometry.Number.Radical
+import           HGeometry.Foldable.Util
+import           Ipe
+import           Ipe.Draw
+import           Hachuring
+import           System.Random
+import           System.Random.Stateful
+import           CatmulRomSpline
+import           Data.Kind (Type)
+import           HGeometry.Ball
+import           HGeometry.PlaneGraph.Class
 
 --------------------------------------------------------------------------------
 
@@ -59,6 +68,10 @@ data HandyConfig r = HandyConfig { _roughness :: !r
                                  , _hachureWeight :: !(IpePen r)
                                  -- ^ pen width to use for the hachures
 
+                                 -- ^ the number of control points to use in the splines
+                                 -- when drawing a circle or disk.
+                                 , _numCircleControlPoints :: {-#UNPACK#-}!Int
+
                                  -- , _hachureAngle :: {-#UNPACK #-}!Float
                                  --   -- ^ Angle of diagonal hachuring
                                  --   --
@@ -83,6 +96,7 @@ instance Fractional r => Default (HandyConfig r) where
                     , _hachureVector            = Vector2 5 (-5)
                     , _hachurePerturbationLimit = Just 1
                     , _hachureWeight            = IpePen (Valued 2)
+                    , _numCircleControlPoints   = 16
                     }
   -- TODO: maybe extract the hachureStuff into a hachureConfig that is per-object based?
 
@@ -191,7 +205,8 @@ instance ( Point_ point 2 r, Fractional r, Radical r
         Nothing -> mempty
         Just fc -> let fillAts  = ats <> [ stroke ?~ fc
                                          , fill   .~ Nothing
-                                         , pen    ?~ config^.hachureWeight
+                                         , pen     ?~ config^.hachureWeight
+                                         -- , lineCap ?~ 1
                                          -- TODO: set linecap
                                          ]
                        hachures = hachuring v poly
@@ -214,6 +229,165 @@ instance ( Point_ point 2 r, Fractional r, Radical r
                <> foldMapOf (theHoles.folded.outerBoundaryEdgeSegments) draw' poly
     where
       draw' = draw @(Handy backend r gen m) ats
+
+
+
+instance ( Point_ point 2 r, Fractional r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , VertexContainer f point
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+         , Default (AttrOf backend (CatmulRomSegment (Point 2 r)))
+         , HasFill   (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe color)
+         , HasStroke (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe color)
+         -- , HasPen    (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe (IpePen r))
+         , HasFromFoldable1 f
+           -- we are leaking a bit of info this way; not sure what to do about that though.
+         ) => IsDrawable (Handy backend r gen m) (PolyLineF f point) where
+  type AttrOf (Handy backend r gen m) (PolyLineF f point) =
+    AttrOf backend (CatmulRomSegment (Point 2 r))
+
+  draw ats poly config gen = stroke'
+    where
+      stroke' = fold $ zipWith (\p q -> draw @(Handy backend r gen m) (ats <> [fill .~ Nothing])
+                                        (ClosedLineSegment p q) config gen
+                               ) (poly^..vertices) (drop 1 $ poly^..vertices)
+
+
+
+
+instance ( RealFrac r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , IsDrawable backend (CatmulRomSplineF NonEmpty (Point 2 r))
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+         , IsDrawable backend (Disk (Point 2 r))
+
+         , AttrOf (Handy backend r gen m) (Disk (Point 2 r)) ~ PathAttributes r
+         , AttrOf backend                 (Disk (Point 2 r)) ~ PathAttributes r
+
+         , AttrOf (Handy backend r gen m) (Disk (Point 2 r))
+           ~ AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+
+
+         -- , Default (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r)))
+
+         -- , AttrOf (Handy backend r gen m) (Circle (Point 2 r))
+         --   ~ AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+
+
+         -- , HasStroke (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         -- , HasFill   (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         -- , HasPen    (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe (IpePen r))
+
+         ) => IsDrawable (Handy backend r gen m) (Point 2 r) where
+
+  type AttrOf (Handy backend r gen m) (Point 2 r) = SymbolAttributes r
+
+    -- AttrOf backend (CatmulRomSegment (Point 2 r))
+  draw sAts p config gen = do
+    let d   = Circle p r
+        r   = 4 --- TODO: do something with case symAts^.symbolSize of
+        r'  = r - 1
+        symAts = applyAttrs sAts def
+        ats = [ commonAttributes .~ symAts^.commonAttributes
+              , stroke           .~ symAts^.stroke
+              , pen              .~ symAts^.pen
+              ]
+        -- filling = draw @backend (ats <> [ fill .~ symAts^.fill]) (Disk p r')
+
+    res <- draw @(Handy backend r gen m) ats d config gen
+    pure res
+    -- pure $ filling <> res
+
+
+
+instance ( Point_ center 2 r, RealFrac r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , IsDrawable backend (CatmulRomSplineF NonEmpty (Point 2 r))
+         , IsDrawable backend (CatmulRomSegment (Point 2 r))
+
+         , Default (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r)))
+
+         , AttrOf (Handy backend r gen m) (Circle center)
+           ~ AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+         , HasStroke (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         , HasFill   (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         , HasPen    (AttrOf backend (CatmulRomSegment (Point 2 r))) (Maybe (IpePen r))
+
+         ) => IsDrawable (Handy backend r gen m) (Disk center) where
+
+  type AttrOf (Handy backend r gen m) (Disk center) =
+    AttrOf backend (CatmulRomSegment (Point 2 r))
+
+  draw ats disk = fill' <> draw @(Handy backend r gen m)
+                                (ats <> [fill .~ Nothing]) (MkSphere disk)
+    where
+      fill' config gen = case (applyAttrs ats def)^.fill of
+        Nothing -> mempty
+        Just _  -> let k                  = config^.numCircleControlPoints
+                       CatmulRomSpline vs = kgon k 0 disk
+                   in case fromPoints =<< NonEmpty.nonEmpty (NonEmpty.take k vs) of
+          Nothing   -> mempty
+          Just (poly :: SimplePolygonF NonEmpty (Point 2 r)) ->
+                       draw @(Handy backend r gen m)
+                            (ats <> [stroke .~ Nothing]) poly config gen
+
+
+instance ( Point_ center 2 r, RealFrac r, Radical r
+         , Monoid (m (Rendered backend))
+         , Monoid (Rendered backend)
+         , StatefulGen gen m
+         , Ord r, UniformRange r
+         , IsDrawable backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+         , Default (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r)))
+
+         , AttrOf (Handy backend r gen m) (Circle center)
+           ~ AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))
+
+         , HasStroke (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+         , HasFill   (AttrOf backend (CatmulRomSplineF NonEmpty (Point 2 r))) (Maybe color)
+
+         ) => IsDrawable (Handy backend r gen m) (Circle center) where
+
+  type AttrOf (Handy backend r gen m) (Circle center) =
+    AttrOf backend (CatmulRomSegment (Point 2 r))
+
+  draw ats (MkSphere circ) config gen = do
+      offset  <- uniformRM (0, 2*pi) gen
+      spline <- traverse perturb $ kgon (config^.numCircleControlPoints) offset circ
+      pure $ draw @backend ats spline
+    where
+      r = min ((1/20)* radius circ) (config^.roughness)
+      -- function to perturb one of the endpoints
+      perturb p = (p .+^) <$> uniformIn gen r
+
+
+-- | Produce a spline with k+2 control points somehow approximating a circle.
+kgon            :: (Disk_ disk center, Point_ center 2 r, RealFrac r)
+                => Int
+                -> Double -- ^ offset for the starting point; in radians
+                -> disk -> CatmulRomSplineF NonEmpty (Point 2 r)
+kgon k delta d = let Point2 x y = (d^.center.asPoint)&coordinates %~ realToFrac
+                     r          = sqrt $ d^.squaredRadius.to realToFrac
+                     k'         = fromIntegral k
+                 in CatmulRomSpline . fmap (over coordinates realToFrac) $
+                    NonEmpty.unfoldr (\i -> (Point2 (x + r * cos (delta + (i*2*pi / k')))
+                                                    (y + r * sin (delta + (i*2*pi / k')))
+                                            , if i <= k'+2 then Just (i+1) else Nothing
+                                            )
+                                     ) (fromIntegral 0)
 
 
 -- | Given a positive radius r, generates a vector uniformly at random

@@ -126,8 +126,8 @@ handleInternalCanvasAction canvas = put . \case
 -- | Draws the actual canvas using an svg tag
 svgCanvas_               :: (RealFrac r, ToSvgCoordinate r)
                          => Canvas r
-                         -> [Attribute action] -> [View model action]
-                         -> View model (Either InternalCanvasAction action)
+                         -> [Attribute model action] -> [View context props model action]
+                         -> View context props model (Either InternalCanvasAction action)
 svgCanvas_ canvas ats vs =
   svg_ ([ width_    . ms $ w
         , height_   . ms $ h
@@ -157,8 +157,8 @@ svgCanvas_ canvas ats vs =
 -- | To be used instead of the text_ combinator in Miso
 -- textAt                     :: ToSvgCoordinate r
 --                            => Point 2 r -- ^ position where to draw (in world coordinates)
---                            -> [Attribute action]
---                            -> MisoString -> View model action
+--                            -> [Attribute model action]
+--                            -> MisoString -> View context props model action
 -- textAt (Point2 x y) ats t = g_ [ transform_ $ mconcat [ "translate("
 --                                                        , ms x
 --                                                        , ", "
@@ -170,9 +170,9 @@ svgCanvas_ canvas ats vs =
 
 
 -- class RenderWebSvg t where
---   renderWith :: t -> [Attribute action] -> [View model action] -> View model action
+--   renderWith :: t -> [Attribute model action] -> [View context props model action] -> View context props model action
 
--- render       :: RenderWebSvg t => t -> [Attribute action] -> View model action
+-- render       :: RenderWebSvg t => t -> [Attribute model action] -> View context props model action
 -- render x ats = renderWith x ats []
 
 -- instance ToSvgCoordinate r => RenderWebSvg (Point 2 r) where

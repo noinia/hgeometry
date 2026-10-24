@@ -21,49 +21,32 @@ import           HGeometry.Sign
 import           HGeometry.Intersection
 import           HGeometry.Boundary
 import           Data.Foldable
-import           HGeometry.HalfLine
 import           Control.Lens hiding (Prism, Prism')
 import           Prelude hiding (filter)
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import           Data.Foldable1
-import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import           HGeometry.HalfPlane.CommonIntersection.Bounded
-import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
-import           Data.Foldable.WithIndex
-import           Data.Maybe (fromMaybe, maybeToList)
-import           Plane.Sample
+import           Data.Maybe (fromMaybe)
 import           HGeometry.Kernel
-import           HGeometry.HyperPlane.Class
 import           HGeometry.Ext
 import           Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.List qualified as List
 import           Data.Map.Monoidal (MonoidalMap)
 import Data.Map.Monoidal qualified as MonoidalMap
-import           HGeometry.Combinatorial.Util
-import           Data.List (inits, tails)
-import           HGeometry.List.Util
 import           HGeometry.Triangle
 import           Data.Map (Map)
 import Data.Map qualified as Map
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           Control.DeepSeq
 import           GHC.Generics (Generic)
-import           Data.Functor.WithIndex
 import           Witherable
-import           HGeometry.Cyclic (Cyclic)
-import           Control.Applicative
 
 
-import           Plane.Debug
 import           HGeometry.Polygon
 import           HGeometry.Point.Either
-import           Data.Bifunctor
-import           HGeometry.Cone
-import           Data.Ord
-
-
+import           Plane.Debug
 
 
 --------------------------------------------------------------------------------

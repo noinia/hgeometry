@@ -11,34 +11,19 @@ import           HGeometry.Ext
 import           HGeometry.Point.Either
 import           HGeometry.Kernel
 import           HGeometry.Polygon
-import           HGeometry.HalfLine
-import           HGeometry.Map.NonEmpty.Monoidal
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import           System.Random
 import           Control.Lens hiding (Prism, Prism')
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import           Plane.BruteForce
 import           Plane.Sample
-import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
-import HGeometry.Plane.LowerEnvelope.Connected( mapVertices
-                                              , MinimizationDiagram
-                                              , MDVertex
-                                              , VertexForm
-                                              , fromVertexForm
-                                              )
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Map (Map)
-import qualified Data.Map as Map
 import           Prelude hiding (filter)
-import           Plane.Sample
 import           Data.Map.Monoidal (MonoidalMap)
-import qualified Data.Map.Monoidal as MonoidalMap
-import           HGeometry.Triangle
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Given a domain and a set of planes; computes for each plane the region at which it is

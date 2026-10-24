@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module App(main) where
 
+import           HGeometry.Miso.Svg.Draw
 import           Data.Bifunctor
 import           Data.Foldable1
 import qualified Data.Set.NonEmpty as NESet
@@ -19,7 +20,7 @@ import           HGeometry.Ext
 import           HGeometry.Sign
 import           HGeometry.Sequence.Alternating (Alternating, unsnocAlt, unconsAlt)
 import           HGeometry.Miso.OrphanInstances ()
-import           HGeometry.Miso.Svg
+import           HGeometry.Miso.Svg hiding (Drawable(..))
 import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinates, theViewport)
 import           HGeometry.Viewport
 import qualified HGeometry.Miso.Svg.Canvas as Canvas
@@ -36,13 +37,14 @@ import           Miso.CSS (style_, border, backgroundColor)
 import           Miso.Svg hiding (style_)
 import           Miso.Svg.Property
 import           Miso.Html hiding (style_)
-import           Miso.CSS.Color as Miso
+-- import           Miso.CSS.Color as Miso
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Vector as Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector.NonEmpty as NonEmptyV
 import qualified Ipe
-
+import           Ipe.Attributes
+import           Ipe.AllColors (rgb)
 import           Data.Coerce
 import           HGeometry.Polygon.Convex.Unbounded
 import           Data.Bifoldable
@@ -58,8 +60,7 @@ import           Debug.Trace
 
 type R = RealNumber 5
 
-
-
+type Color = Ipe.IpeColor R
 
 data Model = Model { _canvas         :: Canvas R
                    , _points         :: IntMap.IntMap (Point 2 R :+ Color)
@@ -202,8 +203,8 @@ closerHalfPlane p q b
 --     any  (corners rect)
 
 
-viewModel     :: props -> Model -> View Model Action
-viewModel _ m = div_ [ ]
+viewModel   :: Model -> View () () Model Action
+viewModel m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick AddPoint
@@ -211,7 +212,8 @@ viewModel _ m = div_ [ ]
                                        ]
                                        canvasBody
                    , div_ [ onClick AddPoint
-                          , style_ [backgroundColor currentColor ]
+                          -- , style_ [backgroundColor currentColor ]
+                            -- TODO: fix this
                           ]
                           [ text "add point" ]
                    , div_ []
@@ -223,10 +225,10 @@ viewModel _ m = div_ [ ]
   where
     currentColor = colorPresets NonEmptyV.! (m^.currentColorIx)
     canvasBody = theDiagram
-              <> [ g_ [] [ draw p [ fill_ (renderColor c)
-                                  ]
-                         , textAt p [] (ms i)
-                         ]
+              <> [ g_ [] ( (draw @(Svg _ _) [fill ?~ c] p)  <>
+                           [textAt p [] (ms i)]
+                         )
+
                  | (i,p :+ c) <- m^..points.ifolded.withIndex ]
               -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
 
@@ -234,29 +236,31 @@ viewModel _ m = div_ [ ]
         Nothing -> []
         Just vd -> case vd of
           AllColinear vd' -> case colinearVoronoiRegions vd' of
-            Left (s :+ (_,c))  -> [draw boundingBox' (voronoiRegionAts c)]
+            Left (s :+ (_,c))  -> draw @(Svg _ _) (voronoiRegionAts c) boundingBox'
                                   -- there is only one point;
             Right (l,middle,r) -> mconcat
-                                  [ drawHalfPlane (l^.core) (voronoiRegionAts $ l^.extra.extra._2)
+                                  [ drawHalfPlane (voronoiRegionAts $ l^.extra.extra._2) (l^.core)
                                    -- TODO draw middle
-                                  , drawHalfPlane (r^.core) (voronoiRegionAts $ r^.extra.extra._2)
+                                  , drawHalfPlane (voronoiRegionAts $ r^.extra.extra._2) (r^.core)
                                   ]
             where
-              drawHalfPlane h ats = case h `intersect` boundingBox' of
+              drawHalfPlane ats h = case h `intersect` boundingBox' of
                 Nothing -> []
                 Just is -> case is of
-                  ActualPolygon poly -> [draw poly ats]
+                  ActualPolygon poly -> draw @(Svg _ _) ats poly
                   _                  -> [] -- don't draw degenerate things
 
               boundingBox' :: Rectangle (Point 2 R)
               boundingBox' = m^.canvas.theViewport.viewPort
 
-          ConnectedVD vd'   -> [ drawVoronoiRegion reg (voronoiRegionAts c)
+          ConnectedVD vd'   -> concat
+                               [ drawVoronoiRegion (voronoiRegionAts c) reg
                                | (s :+ (_, c), reg) <- toList . NEMap.assocs . asMap $ vd'
                                ]
             where
-              drawVoronoiRegion reg =
-                either dSimplePolygon dSimplePolygon (toConvexPolygonIn boundingBox' reg)
+              drawVoronoiRegion ats =
+                either (draw @(Svg _ _) ats)
+                       (draw @(Svg _ _) ats) . toConvexPolygonIn boundingBox'
 
               boundingBox' :: Rectangle (Point 2 R)
               boundingBox' = unUnion $ Union (m^.canvas.theViewport.viewPort)
@@ -264,8 +268,8 @@ viewModel _ m = div_ [ ]
                                        cbifoldMap (Union . boundingBox)
                                                   (Union . boundingBox) vd'
       where
-        voronoiRegionAts c = [ fill_ (renderColor c)
-                             , fillOpacity_ "0.5"
+        voronoiRegionAts c = [ fill    ?~ c
+                             , opacity ?~ "0.5"
                              ]
       --
 
@@ -312,7 +316,7 @@ main = startApp (Canvas.withCanvasEvents defaultEvents) $
 
 textAt                    :: ToMisoString r
                           => Point 2 r
-                          -> [Attribute action] -> MisoString -> View model action
+                          -> [Attribute model action] -> MisoString -> View context props model action
 textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                    , y_ $ ms y
                                    ] <> ats
@@ -330,40 +334,35 @@ wrap f act = get >>= flip f act
 -- | default color presets in goodnotes
 colorPresets :: NonEmptyV.NonEmptyVector Color
 colorPresets = NonEmptyV.unsafeFromList
-               [ Miso.rgb 0   0   0
+               [ rgb 0   0   0
                , darkishGrey
                , mediumGrey
                , lightGrey
-               , Miso.rgb 252 252 252
+               , rgb 252 252 252
 
-               , Miso.rgb 119 41  135 -- purple
-               , Miso.rgb 192 40  27 -- darkish red
-               , Miso.rgb 229 95  90  -- lightish red
-               , Miso.rgb 241 156 153
-               , Miso.rgb 232 158 66 -- orange
+               , rgb 119 41  135 -- purple
+               , rgb 192 40  27 -- darkish red
+               , rgb 229 95  90  -- lightish red
+               , rgb 241 156 153
+               , rgb 232 158 66 -- orange
 
                , myBlue
-               , Miso.rgb 28  68  138 -- darkblue
-               , Miso.rgb 49  113 86 -- darkgreen
-               , Miso.rgb 142 196 79 -- lightgreen
-               , Miso.rgb 254 255 149
+               , rgb 28  68  138 -- darkblue
+               , rgb 49  113 86 -- darkgreen
+               , rgb 142 196 79 -- lightgreen
+               , rgb 254 255 149
                ]
 
 darkishGrey :: Color
-darkishGrey = Miso.rgb 99  99  99
+darkishGrey = rgb 99  99  99
 
 mediumGrey :: Color
-mediumGrey = Miso.rgb 155 155 155
+mediumGrey = rgb 155 155 155
 
 lightGrey :: Color
-lightGrey = Miso.rgb 210 210 210
+lightGrey = rgb 210 210 210
 
 
 -- | My color blue
 myBlue :: Color
-myBlue = Miso.rgb 53  121 246 -- blue
-
-
-instance Ord Color where
-  c `compare` c' = renderColor c `compare` renderColor c'
-  -- this is a terrible comparing instance, but whatever
+myBlue = rgb 53  121 246 -- blue
