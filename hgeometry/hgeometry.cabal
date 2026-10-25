@@ -47,9 +47,9 @@ source-repository head
 common all-setup
     ghc-options: -O2 -fspecialise-aggressively -fexpose-all-unfoldings
                  -Wall
-                 -fno-warn-unticked-promoted-constructors
-                 -fno-warn-type-defaults
-                 -fno-warn-partial-type-signatures
+                 -Wno-unticked-promoted-constructors
+                 -Wno-type-defaults
+                 -Wno-partial-type-signatures
                  -Werror=missing-methods
 
     build-depends:
@@ -135,11 +135,11 @@ common doctest
 common all-quickcheck-setup
     ghc-options:
          -Wall
-         -fno-warn-unticked-promoted-constructors
-         -fno-warn-partial-type-signatures
-         -fno-warn-missing-signatures
-         -fno-warn-type-defaults
-         -fno-warn-orphans
+         -Wno-unticked-promoted-constructors
+         -Wno-partial-type-signatures
+         -Wno-missing-signatures
+         -Wno-type-defaults
+         -Wno-orphans
 
     build-depends:
         hspec                           >= 2.9     && < 3
@@ -176,11 +176,11 @@ common ipe-setup
 common ipe-test-setup
     ghc-options:
          -Wall
-         -fno-warn-unticked-promoted-constructors
-         -fno-warn-partial-type-signatures
-         -fno-warn-missing-signatures
-         -fno-warn-type-defaults
-         -fno-warn-orphans
+         -Wno-unticked-promoted-constructors
+         -Wno-partial-type-signatures
+         -Wno-missing-signatures
+         -Wno-type-defaults
+         -Wno-orphans
 
     build-depends:
         hspec                   >= 2.9
@@ -190,7 +190,7 @@ common ipe-test-setup
 
 common test-setup
     ghc-options:
-         -fno-warn-unused-local-binds
+         -Wno-unused-local-binds
 
 --------------------------------------------------------------------------------
 -- * Libraries
@@ -519,6 +519,11 @@ common with-ipe-hspec-fractional
       Plane.Sample
       Plane.BruteForce
 
+
+      Plane.ConvexHullDemoSpec
+      -- TODO: move this
+      Plane.ObjEncoder
+
       Plane.Debug
 
       HalfPlane.IntersectSpec
@@ -566,6 +571,20 @@ common with-ipe-hspec-fractional
       , exceptions             >= 0.10.9  && < 0.11
       , pretty-simple          >= 4.1.4   && < 4.2
 
+
+test-suite current
+  import:           all-setup, ipe-setup, all-quickcheck-setup, test-setup,
+                    quickcheck-setup, with-ipe-hspec-fractional
+  type:             exitcode-stdio-1.0
+  main-is:          Current.hs
+  hs-source-dirs:   test-with-ipe/test
+  mixins:
+      hgeometry-vector:numtypes (Rational as R)
+  other-modules:
+      Plane.BruteForce
+      Plane.ConvexHullDemoSpec
+      -- TODO: move this
+      Plane.ObjEncoder
 
 test-suite with-ipe-hspec-rational
   import:           all-setup, ipe-setup, all-quickcheck-setup, test-setup,
