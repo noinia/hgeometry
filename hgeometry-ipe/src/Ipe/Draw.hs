@@ -33,6 +33,8 @@ import HGeometry.Vector
 import HGeometry.PolyLine
 import HGeometry.BezierSpline
 import HGeometry.LineSegment
+import HGeometry.HalfLine
+-- import HGeometry.Cone
 import HGeometry.Triangle
 import Data.List.NonEmpty (NonEmpty)
 
@@ -129,6 +131,19 @@ instance (Point_ point 2 r, Fractional r
   draw ats bez = draw @(Ipe r) ats thePath
     where
       thePath = singletonPath . CubicBezierSegment $ bez&allPoints %~ (^.asPoint)
+
+-- see Ipe.Instances for a DefaultIpeOut for Cone; we should probably move that to here
+--
+--
+-- instance (Point_ apex 2 r, Fractional r, Ord r, Show r
+--          ) => IsDrawable (Ipe r) (Cone r apex edge) where
+--   type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
+--   draw _ats c = [iO $ defIO c]
+
+instance (Point_ point 2 r, Fractional r, Ord r, Show r, Show point
+         ) => IsDrawable (Ipe r) (HalfLine point) where
+  type AttrOf (Ipe r) (HalfLine point) = PathAttributes r
+  draw _ats hl = [iO $ defIO hl]
 
 --------------------------------------------------------------------------------
 
