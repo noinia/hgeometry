@@ -220,6 +220,8 @@ test-suite hspec
   build-tool-depends: hspec-discover:hspec-discover
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
+  build-depends:
+      hgeometry-vector:numtypes
   other-modules:
       Spec
       Point2Spec
@@ -233,10 +235,14 @@ test-suite hspec
       HGeometry.HyperPlaneSpec
       HGeometry.IntervalSpec
       HGeometry.TriangleSpec
+      HGeometry.TriangleSpec
+      HGeometry.ConeSpec
 
   hs-source-dirs: test
   build-depends:
       hgeometry-kernel:quickcheck
+  mixins:
+      hgeometry-vector:numtypes (Rational as R)
 
 test-suite doctest
     import:           all-setup, doctest

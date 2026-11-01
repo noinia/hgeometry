@@ -132,44 +132,7 @@ instance (Point_ point 2 r, Fractional r, Ord r, Show r, Show point
 
 
 
---------------------------------------------------------------------------------
--- * Move to Kernel ; Cone x Triangle intersection stuff ?
 
-testX :: Spec
-testX = it "cone triangle boundary intersections" $
-  let testT :: Triangle (Point 2 R)
-      testT =  Triangle (Point2 1 0) (Point2 1 1) (Point2 0 0)
-
-      testC :: Cone R (Point 2 R) ()
-      testC = Cone (Point2 1 0) (Vector2 1 1 :+ ()) (Vector2 0 (-1) :+ ())
-  in coneTriangleBoundaryIntersections testC testT
-     `shouldBe`
-     [Point2 1 0,Point2 1 0,Point2 1 0,Point2 1 0]
-
-
--- | Computes the intersection points of the boundary of a cone with
--- the boundary of a triangle.
---
--- this may contain duplicates.
-coneTriangleBoundaryIntersections :: forall apex corner r edge.
-                                     ( Point_ apex 2 r, Point_ corner 2 r
-                                     , Ord r, Fractional r
-                                     )
-                                  => Cone r apex edge -> Triangle corner
-                                  -> [Point 2 r]
-coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
-    intersectionPoints (leftBoundary cone) <> intersectionPoints (rightBoundary cone)
-  where
-    intersectionPoints (HalfLine o v :+ _) =
-      flip foldMap sides $ \side -> case HalfLine (o^.asPoint) v `intersect` side of
-        Nothing                                       -> []
-        Just (HalfLine_x_LineSegment_Point p)         -> [p]
-        Just (HalfLine_x_LineSegment_LineSegment seg) -> [seg^.start,seg^.end]
-
-    sides = [ ClosedLineSegment a b
-            , ClosedLineSegment b c
-            , ClosedLineSegment c a
-            ]
 
 
 --------------------------------------------------------------------------------
@@ -296,7 +259,6 @@ instance ( Point_ point 2 r, Num r, Ord r
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
          missing
-         testX
          -- testBug
          -- coneCovers
          -- findMissingEdgeTest
