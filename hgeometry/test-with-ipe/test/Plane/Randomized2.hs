@@ -5,7 +5,6 @@ module Plane.Randomized2
 
 import           Data.Bifoldable
 import           Data.Foldable
-import           Witherable
 import           HGeometry.Plane
 import           HGeometry.Ext
 import           HGeometry.Point.Either
@@ -13,6 +12,8 @@ import           HGeometry.Kernel
 import           HGeometry.Polygon
 import           Data.Set (Set)
 import qualified Data.Set as Set
+import           Data.Set.NonEmpty (NESet, pattern IsNonEmpty, pattern IsEmpty)
+import qualified Data.Set.NonEmpty as NESet
 import           System.Random
 import           Control.Lens hiding (Prism, Prism')
 import           Data.Foldable1
@@ -23,7 +24,13 @@ import           Plane.Sample
 import           Prelude hiding (filter)
 import           Data.Map.Monoidal (MonoidalMap)
 
-import Debug.Trace
+
+import           System.IO.Unsafe (unsafePerformIO)
+import           Debug.Trace
+import           Ipe
+import           Ipe.Draw
+import           Ipe.Color
+
 --------------------------------------------------------------------------------
 
 -- | Given a domain and a set of planes; computes for each plane the region at which it is
@@ -33,63 +40,74 @@ import Debug.Trace
 --
 lowerEnvelopeOn'            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                               , Foldable1 set, RandomGen gen
-                              , Show plane, Show r
+                              , Show plane, Show r, IpeWriteText r
                               )
                            => gen -> Triangle (Point 2 r) -> set plane
                            -> BoundedLowerEnvelope r plane
-lowerEnvelopeOn' gen domain = fromVertices domain . verticesIn gen domain
+lowerEnvelopeOn' gen domain = fromVertices domain . verticesIn 0 gen domain
+                            . foldMap1 NESet.singleton
+
+
 
 
 -- | Randomized algorithm to compute the vertices of the lower envelope
 --
 -- we return only the vertices strictly inside the domain
-verticesIn               :: forall gen set plane corner r.
+verticesIn               :: forall gen plane corner r.
                             ( Plane_ plane r, Ord r, Fractional r
                             , RandomGen gen
-                            , Foldable1 set, Ord plane
+                            , Ord plane
                             , Point_ corner 2 r
 
-                            , Show r, Show plane, Show corner
+                            , Show r, Show plane, Show corner, IpeWriteText r
                             )
-                         => gen
+                         => Int -- TODO: remove
+                         -> gen
                          -> Triangle corner
-                         -> set plane
+                         -> NESet plane
                          -> Set (EnvVertex r plane)
-verticesIn gen0 domain hs
+verticesIn depth gen0 domain hs
+  | traceShow ("verticesIn",depth, n,domain, hs) False = undefined
   | n <= n0   = bruteForceVerticesIn domain hs
   | otherwise = lowerEnv $ sampleSubset gen0 r n hs
  where
    n = length hs
    -- r = n^{1/4}
-   r = ceiling . sqrt . sqrt $ fromIntegral n
+   r = n0 `max` (ceiling . sqrt . sqrt $ fromIntegral n)
 
-   lowerEnv                           :: (Sample NonEmpty plane, gen) -> Set (EnvVertex r plane)
+   lowerEnv                           :: (Sample NESet plane, gen) -> Set (EnvVertex r plane)
    lowerEnv (Sample rs _ rest _, gen) = foldMap report vs
                                      <> ifoldMap (foldMap . recurse) env
+                                     -- TODO: pass the gens
      where
        -- | The envelope; in which each vertex is tagged with whether it lies in the domain
        -- and its conflict list
        env :: TriangulatedLowerEnvelope'' r plane
-       env = triangulate . withExtraConflictLists rest <$> fromVertices domain vs
+       env = debugDraw ("env " <> show depth) $
+             triangulate . withExtraConflictLists rest <$> fromVertices domain vs
 
        -- | Compute the vertices of the sample using a brute force manner
        vs = Set.mapMonotonic mkVertex $ bruteForceVertices rs
          -- note: we will just tag the vertex with additional info; so mkVertex is monotonic
 
        -- | Test if we should report some vertex  from the sample
-       report (v :+ (inside', cl)) = if inside' && null cl then Set.singleton v else mempty
+       report (v :+ (inside', cl))
+         = -- traceShowWith ("report",inside',null cl,v,cl,) $
+           if inside' && null cl then Set.singleton v else mempty
 
        -- | We recurse on every prism
        recurse        :: plane
                       -> Prism'' r plane
                       -> Set (EnvVertex r plane)
-       recurse h cell = case NonEmpty.nonEmpty $ conflictListOf cell of
-           Nothing -> mempty
-           Just cl -> verticesIn gen cell (h NonEmpty.<| cl)
+       recurse h cell = case conflictListOf cell of
+                          IsEmpty       -> mempty
+                          IsNonEmpty cl -> verticesIn (depth+1) gen cell' (NESet.insert h cl)
+                                        -- FIXME: we can just use: 'cell' rather htan cell'
+         where cell' = (^.asPoint) <$> cell
 
 
        -- | Tag the vertex with whether it lies inside the domain, and its conflict list
-       mkVertex   :: EnvVertex r plane -> EnvVertex r plane :+ (Bool, [plane])
+       mkVertex   :: EnvVertex r plane -> EnvVertex r plane :+ (Bool, Set plane)
        mkVertex v = v :+ ( v `intersects` domain
                          , computeConflictList v
                          )
@@ -102,13 +120,13 @@ verticesIn gen0 domain hs
 
 
        computeConflictList v = let v' = location v
-                               in filter (\h -> verticalSideTest v' h == LT) (toList rest)
+                               in Set.filter (\h -> verticalSideTest v' h == LT) rest
        -- TODO: this should use the batched point loc, but whatever.
 
 
 -- Every vertex is tagged with whether it lies in the domain, and its conflict list.
-type V r plane = OriginalOrExtra (EnvVertex r plane :+ (Bool, [plane]))
-                                 ((Point 2 r :+ r)  :+ (Bool, [plane]))
+type V r plane = OriginalOrExtra (EnvVertex r plane :+ (Bool, Set plane))
+                                 ((Point 2 r :+ r)  :+ (Bool, Set plane))
 
 type Prism'' r plane = Triangle (V r plane)
 
@@ -119,18 +137,18 @@ type BoundedLowerEnvelope'' r plane =
 type TriangulatedLowerEnvelope'' r plane =
   MonoidalMap plane (NonEmpty (Prism'' r plane))
 
-withExtraConflictLists    :: (Plane_ plane r, Ord r, Num r, Foldable set
+withExtraConflictLists    :: (Plane_ plane r, Ord r, Num r, Ord plane
                              )
-                          => set plane
+                          => Set plane
                           -> ConvexPolygon (OriginalOrExtra
-                                               (EnvVertex r plane :+ (Bool, [plane]))
+                                               (EnvVertex r plane :+ (Bool, Set plane))
                                                (Point 2 r :+ r)
                                            )
                           -> ConvexPolygon (V r plane)
 withExtraConflictLists hs = over (vertices._Extra) $ \p@(Point2 x y :+ z) ->
                               p :+ (False, computeConflictList (Point3 x y z))
   where
-    computeConflictList q = filter (\h -> verticalSideTest q h == LT) (toList hs)
+    computeConflictList q = Set.filter (\h -> verticalSideTest q h == LT) hs
                             -- TODO: this should use the batched point loc, but whatever.
 
 
@@ -143,12 +161,14 @@ withExtraConflictLists hs = over (vertices._Extra) $ \p@(Point2 x y :+ z) ->
 
 -- | minimum value below which we just use the bruteForce method anyway
 n0 :: Int
-n0 = 5
+n0 = 10
+-- n0 = 5
 
 -- | computes the conflict list of a prism
-conflictListOf :: Triangle (OriginalOrExtra (orig :+ (bool,[plane]))
-                                            (extra :+ (bool,[plane]))
-                           ) -> [plane]
+conflictListOf :: Ord plane
+               => Triangle (OriginalOrExtra (orig :+ (bool,Set plane))
+                                            (extra :+ (bool,Set plane))
+                           ) -> Set plane
 conflictListOf = foldMap (bifoldMap (^.extra._2) (^.extra._2))
 
   -- toListOf (folded.both.extra._2.folded)
@@ -339,3 +359,19 @@ triangulate = MonoidalNEMap . fmap triangulate' . asMap
 -}
 
 -}
+
+debugDraw         :: forall r plane. (Num r, Ord r, IpeWriteText r, Show plane, Show r)
+                  => String -> TriangulatedLowerEnvelope'' r plane
+                  -> TriangulatedLowerEnvelope'' r plane
+debugDraw str env = unsafePerformIO $ do
+                       putStrLn str
+                       printAsIpeSelection (foldMap draw' $ zip colors $ toList env)
+                       pure env
+  where
+    draw' (color, prisms) = foldMap (\tri -> draw @(Ipe r) [fill ?~ color ] (foo tri)
+                                    ) prisms
+
+    colors = basicNamedColors
+
+    foo tri@(Triangle a b c) | ccw a b c == CoLinear = traceShowWith ("BOOM",) tri
+                             | otherwise = tri

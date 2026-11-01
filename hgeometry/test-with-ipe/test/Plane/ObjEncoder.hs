@@ -1,6 +1,6 @@
 module Plane.ObjEncoder
   ( writeFile
-
+  , encode
   ) where
 
 import           Data.Foldable
@@ -17,10 +17,11 @@ import           Prelude hiding (unwords, unlines, writeFile)
 
 --------------------------------------------------------------------------------
 
-
+-- | Write the given OBJ object to the given file.
 writeFile        :: OsPath -> WavefrontOBJ -> IO ()
 writeFile fp obj = File.writeFile fp $ encode obj
 
+-- | Encode the OBJ object into a bytestring
 encode     :: WavefrontOBJ -> ByteString
 encode obj = Builder.toLazyByteString $ unlines
              [ vertices
@@ -30,7 +31,7 @@ encode obj = Builder.toLazyByteString $ unlines
     vertices = unlines . fmap encodeLocation          $ objLocations obj
     faces    = unlines . fmap (encodeElem encodeFace) $ objFaces obj
 
-
+encodeLocation                    :: Location -> Builder.Builder
 encodeLocation (Location x y z w) = unwords
                                     [ Builder.char8 'v'
                                     , Builder.floatDec x
@@ -56,5 +57,5 @@ encodeFaceIndex fi = Builder.intDec (faceLocIndex fi)
 unwords :: [Builder.Builder] -> Builder.Builder
 unwords = mconcat . List.intersperse (Builder.char8 ' ')
 
-unlines :: Foldable list => list (Builder.Builder) -> Builder.Builder
+unlines :: Foldable list => list Builder.Builder -> Builder.Builder
 unlines = mconcat . List.intersperse (Builder.char8 '\n') . toList

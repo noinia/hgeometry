@@ -352,15 +352,45 @@ spec = describe "RandomizedEnvSpec" $ do
                               | q <- toList queries
                               ]
 
-
-           xprop "randomized2 same as (new) brute force" $
-             \(Input3 planes :: Input3 MyPlane)
-              (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
-               verticesOf (Randomized.verticesIn gen domain planes)
-               ===
-               verticesOf (bruteForceVerticesIn domain planes)
+           randomizedSameAsBruteForce
 
          lowest
+
+--------------------------------------------------------------------------------
+
+
+data SameAsBruteForce = SameAsBruteForce (Input3 MyPlane) (Triangle (Point 2 R)) StdGen
+  deriving (Show)
+
+instance Arbitrary SameAsBruteForce where
+  arbitrary = SameAsBruteForce <$> arbitrary <*> arbitrary <*> arbitrary
+  shrink (SameAsBruteForce hs@(Input3 planes) tri gen)
+    | length planes > 11 = [ SameAsBruteForce hs' tri gen
+                           | hs' <- shrink hs
+                           ]
+    | otherwise = []
+
+randomizedSameAsBruteForce = describe "randomized same as brute force" $ do
+    xprop "randomized2 same as (new) brute force" $
+      \(SameAsBruteForce (Input3 planes) domain gen) ->
+        verticesOf (Randomized.verticesIn 0 gen domain planes)
+        ===
+        verticesOf (bruteForceVerticesIn domain planes)
+
+    prop "manual" $
+      let planes :: NESet.NESet (Plane R)
+          planes =
+            NESet.fromList (Plane (-22.66667) (-8.04762) (-18.14286) :| [Plane (-21.26316) 22.21739 (-22.73334),Plane (-9) (-5.84616) 17.8,Plane (-5.86667) (-21.1) 12,Plane (-5.5) 0.5 (-14.81819),Plane (-1.46667) 21.66666 (-14.84616),Plane (-1.33334) (-19.36364) 22,Plane 8 (-3) 17.58333,Plane 10.83333 1.7 12.7,Plane 16.25 5.75 (-12),Plane 18.16666 8.17647 21.26666])
+
+          domain = Triangle (Point2 (-17) 8.66666)
+                            (Point2 (-3.71429) (-16.375))
+                            (Point2 14.5625 11.54545)
+      in  \(gen :: StdGen) ->
+         -- [] /= [Point3 (-7.29838) (-7.94493) (-176.28186),Point3 (-3.72279) 3.96035 (-49.72319),Point3 (-0.67060) 1.44623 (-14.58138),Point3 (-0.40602) (-0.27312) (-20.16806),Point3 (-0.21516) 0.16165 (-14.56684)]
+        verticesOf (Randomized.verticesIn 0 gen domain planes)
+        ===
+        verticesOf (bruteForceVerticesIn domain planes)
+
 
 --------------------------------------------------------------------------------
 
