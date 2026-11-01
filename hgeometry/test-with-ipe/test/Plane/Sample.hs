@@ -3,18 +3,15 @@ module Plane.Sample
   , sampleSubset
   ) where
 
-import Data.Foldable
 import System.Random
-import Data.Foldable1
-import Data.List.NonEmpty qualified as NonEmpty
-import Data.List qualified as List
-import Data.List.NonEmpty (NonEmpty(..))
-
+import Data.Set qualified as Set
+import Data.Set.NonEmpty qualified as NESet
+import Data.These
 --------------------------------------------------------------------------------
 
 data Sample sample a = Sample { sampled   :: sample a
                               , sampleSize :: {-#UNPACK#-}!Int
-                              , remaining :: [a]
+                              , remaining :: Set.Set a
                               , totalSize :: {-#UNPACK#-}!Int
                                 -- i.e. length sampled + length remaining
                               }
@@ -28,18 +25,25 @@ instance Foldable sample => Foldable (Sample sample) where
 -- the given set; we return both the sampled set, as well as the
 -- remainder (non-sampled elements).
 --
--- pre: r >= 3
+-- pre: 3 <= r <= n
 --
 -- more specifically, we return the first three elements, so that the
 -- ouput set has size at least 3, and a p-sample of the rest.
-sampleSubset            :: (Foldable1 set, RandomGen gen)
+sampleSubset            :: (Ord a, RandomGen gen)
                         => gen
                         -> Int -- ^ the desired sample size: pre >= 1
                         -> Int -- ^ the total size of the set
-                        -> set a
-                        -> (Sample NonEmpty a, gen)
-sampleSubset gen r n xs = (Sample (NonEmpty.fromList rs) r rest n, gen') -- the from list is safe since by precondition r >= 1
-  where
-    (rs,rest) = List.splitAt r (toList xs)
-    gen'      = gen  -- TODO
+                        -> NESet.NESet a
+                        -> (Sample NESet.NESet a, gen)
+sampleSubset gen r n xs = case NESet.splitAt r xs of
+   These sample rest -> (Sample sample r (NESet.toSet rest) n, gen)
+   _                 -> (Sample xs r Set.empty n, gen)
+
+
+  -- (Sample (NonEmpty.fromList rs) r rest n, gen') -- the from list is safe since by precondition r >= 1
+  -- where
+  --   NESet.splitAt
+
+  --   (rs,rest) = List.splitAt r (toList xs)
+    -- gen'      = gen  -- TODO
   -- FIXME: do the actual sampling rather than just returning the first r elents

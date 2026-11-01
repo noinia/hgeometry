@@ -63,18 +63,10 @@ import           Test.Util
 import           Data.Traversable
 import           System.Random.Stateful
 import           HGeometry.HalfPlane.CommonIntersection.Bounded
+import           Test.Common
+import           Plane.Voronoi
 
 --------------------------------------------------------------------------------
-
-
-instance Arbitrary StdGen where
-  arbitrary = mkStdGen <$> arbitrary
-
-instance Arbitrary (IpeColor R) where
-  arbitrary = Test.QuickCheck.elements basicNamedColors
-
-----------------------------------------
-
 
 -- | Generate a triangular domain, and a non-empty list of points
 -- strictly inside the domain.
@@ -111,16 +103,6 @@ testBarrycentric = prop "test barrycentric" $
 
 --------------------------------------------------------------------------------
 
-instance (Point_ apex 2 r, Fractional r, Ord r, Show r
-         ) => IsDrawable (Ipe r) (Cone r apex edge) where
-  type AttrOf (Ipe r) (Cone r apex edge) = PathAttributes r
-  draw _ats c = [iO $ defIO c]
-
-
-instance (Point_ point 2 r, Fractional r, Ord r, Show r, Show point
-         ) => IsDrawable (Ipe r) (HalfLine point) where
-  type AttrOf (Ipe r) (HalfLine point) = PathAttributes r
-  draw _ats hl = [iO $ defIO hl]
 
 
 
@@ -132,44 +114,7 @@ instance (Point_ point 2 r, Fractional r, Ord r, Show r, Show point
 
 
 
---------------------------------------------------------------------------------
--- * Move to Kernel ; Cone x Triangle intersection stuff ?
 
-testX :: Spec
-testX = it "cone triangle boundary intersections" $
-  let testT :: Triangle (Point 2 R)
-      testT =  Triangle (Point2 1 0) (Point2 1 1) (Point2 0 0)
-
-      testC :: Cone R (Point 2 R) ()
-      testC = Cone (Point2 1 0) (Vector2 1 1 :+ ()) (Vector2 0 (-1) :+ ())
-  in coneTriangleBoundaryIntersections testC testT
-     `shouldBe`
-     [Point2 1 0,Point2 1 0,Point2 1 0,Point2 1 0]
-
-
--- | Computes the intersection points of the boundary of a cone with
--- the boundary of a triangle.
---
--- this may contain duplicates.
-coneTriangleBoundaryIntersections :: forall apex corner r edge.
-                                     ( Point_ apex 2 r, Point_ corner 2 r
-                                     , Ord r, Fractional r
-                                     )
-                                  => Cone r apex edge -> Triangle corner
-                                  -> [Point 2 r]
-coneTriangleBoundaryIntersections cone (fmap (^.asPoint) -> Triangle a b c) =
-    intersectionPoints (leftBoundary cone) <> intersectionPoints (rightBoundary cone)
-  where
-    intersectionPoints (HalfLine o v :+ _) =
-      flip foldMap sides $ \side -> case HalfLine (o^.asPoint) v `intersect` side of
-        Nothing                                       -> []
-        Just (HalfLine_x_LineSegment_Point p)         -> [p]
-        Just (HalfLine_x_LineSegment_LineSegment seg) -> [seg^.start,seg^.end]
-
-    sides = [ ClosedLineSegment a b
-            , ClosedLineSegment b c
-            , ClosedLineSegment c a
-            ]
 
 
 --------------------------------------------------------------------------------
@@ -205,7 +150,7 @@ deriving instance Eq   (HalfLine apex) => Eq   (ClippedCone apex)
 instance ( Arbitrary apex, Point_ apex 2 r, Num r, Ord r, Arbitrary r
          ) => Arbitrary (ClippedCone apex) where
   arbitrary = do (cone :: Cone r apex ()) <- arbitrary
-                 lambdas                  <- arbitrary `suchThat` (all (> 0))
+                 lambdas                  <- arbitrary `suchThat` all (> 0)
                  pure $ fromConeAndShifts cone lambdas
 
 -- | Construct a clipped cone from a given cone and some offsets w.r.t the apex.
@@ -296,7 +241,6 @@ instance ( Point_ point 2 r, Num r, Ord r
 spec :: Spec
 spec = describe "RandomizedEnvSpec" $ do
          missing
-         testX
          -- testBug
          -- coneCovers
          -- findMissingEdgeTest
@@ -352,15 +296,45 @@ spec = describe "RandomizedEnvSpec" $ do
                               | q <- toList queries
                               ]
 
-
-           xprop "randomized2 same as (new) brute force" $
-             \(Input3 planes :: Input3 MyPlane)
-              (domain :: Triangle (Point 2 R)) (gen :: StdGen) ->
-               verticesOf (Randomized.verticesIn gen domain planes)
-               ===
-               verticesOf (bruteForceVerticesIn domain planes)
+           randomizedSameAsBruteForce
 
          lowest
+
+--------------------------------------------------------------------------------
+
+
+data SameAsBruteForce = SameAsBruteForce (Input3 MyPlane) (Triangle (Point 2 R)) StdGen
+  deriving (Show)
+
+instance Arbitrary SameAsBruteForce where
+  arbitrary = SameAsBruteForce <$> arbitrary <*> arbitrary <*> arbitrary
+  shrink (SameAsBruteForce hs@(Input3 planes) tri gen)
+    | length planes > 11 = [ SameAsBruteForce hs' tri gen
+                           | hs' <- shrink hs
+                           ]
+    | otherwise = []
+
+randomizedSameAsBruteForce = describe "randomized same as brute force" $ do
+    xprop "randomized2 same as (new) brute force" $
+      \(SameAsBruteForce (Input3 planes) domain gen) ->
+        verticesOf (Randomized.verticesIn 0 gen domain planes)
+        ===
+        verticesOf (bruteForceVerticesIn domain planes)
+
+    prop "manual" $
+      let planes :: NESet.NESet (Plane R)
+          planes =
+            NESet.fromList (Plane (-22.66667) (-8.04762) (-18.14286) :| [Plane (-21.26316) 22.21739 (-22.73334),Plane (-9) (-5.84616) 17.8,Plane (-5.86667) (-21.1) 12,Plane (-5.5) 0.5 (-14.81819),Plane (-1.46667) 21.66666 (-14.84616),Plane (-1.33334) (-19.36364) 22,Plane 8 (-3) 17.58333,Plane 10.83333 1.7 12.7,Plane 16.25 5.75 (-12),Plane 18.16666 8.17647 21.26666])
+
+          domain = Triangle (Point2 (-17) 8.66666)
+                            (Point2 (-3.71429) (-16.375))
+                            (Point2 14.5625 11.54545)
+      in  \(gen :: StdGen) ->
+         -- [] /= [Point3 (-7.29838) (-7.94493) (-176.28186),Point3 (-3.72279) 3.96035 (-49.72319),Point3 (-0.67060) 1.44623 (-14.58138),Point3 (-0.40602) (-0.27312) (-20.16806),Point3 (-0.21516) 0.16165 (-14.56684)]
+        verticesOf (Randomized.verticesIn 0 gen domain planes)
+        ===
+        verticesOf (bruteForceVerticesIn domain planes)
+
 
 --------------------------------------------------------------------------------
 
@@ -408,7 +382,6 @@ voronoiClosest = prop "brute force voronoi diagram; covers all points" $
                     conjoin [ verifyClosest sites q vd
                             | q <- toList queries
                             ]
-
 
 lowest :: Spec
 lowest = prop "brute force triangulated envelope; indeed lowest at query points" $
@@ -559,105 +532,6 @@ data Input' plane = Input' (Triangle (Point 2 R))
                           [Point 2 R] -- possible queries
                   deriving (Show,Read)
 
--- domain = Triangle (Point2 100 100) (Point2 110 100) (Point2 100 110)
-
--- test :: IO ()
--- test = do
---           writeIpeFile [osp|tri.ipe|]
---             . addStyleSheet (createIpeStyle "myColors" myColors)
---             . addStyleSheet opacitiesStyle
---             . ipeFile . NonEmpty.fromList . fmap (fromContent . concat) $
---               [ [ let testCoverCone :: ConvexPolygon (OriginalOrExtra (Point 2 R) (Point 2 R))
---                       testCoverCone = coverCone domain (Point2 1 3) (Vector2 (-1) (-1)) (Vector2 1 0)
---                   in
---                   [ iO $ defIO (mkCone (Point2 1 (3 :: R)) (Vector2 (-1) (-1)) (Vector2 1 0))
---                   , iO $ defIO domain  &layer ?~  "domain"
---                   , iO $ ipeSimplePolygon testCoverCone &layer  ?~ "result"
---                                                         &fill   ?~ seagreen
---                                                         &stroke ?~ black
---                   ] ]
---               , [ let leftV  = Vector2 1 (-1)
---                       rightV = Vector2 1 2
---                       al     = Point2 5 3
---                       ar     = Point2 8 (3 :: R)
---                       answer :: ConvexPolygon (Point 2 R)
---                       answer = uncheckedFromCCWPoints $ NonEmpty.fromList
---                                [ al .-^ (20 *^ leftV)
---                                , al, ar
---                                , ar .+^ (20 *^ rightV)
---                                ]
---                       result = coverClippedCone domain al leftV ar rightV
---                   in
---                   [ iO $ defIO answer &layer ?~  "clippedCone"
---                                       &fill ?~ blue
---                   , iO $ defIO domain  &layer ?~  "domain"
---                   , iO $ ipeSimplePolygon result
---                           &layer ?~  "result"
---                           &fill ?~ seagreen
---                           &stroke ?~  black
---                   ] ]
---               , [ let al     :: Point 2 R
---                       al     = Point2 1.80000 0.60000
---                       leftV  = Vector2 1 0.33333
---                       ar     = Point2 0.79091 1.60909
---                       rightV = Vector2 (-1) (-2.66666)
---                       answer :: ConvexPolygon (Point 2 R)
---                       answer = uncheckedFromCCWPoints $ NonEmpty.fromList
---                                [ al .-^ (20 *^ leftV)
---                                , al, ar
---                                , ar .+^ (20 *^ rightV)
---                                ]
---                       result = coverClippedCone domain al leftV ar rightV
---                   in
---                   [ iO $ defIO answer &layer ?~  "clippedCone"
---                                       &fill ?~ blue
---                   , iO $ defIO domain  &layer ?~  "domain"
---                   , iO $ ipeSimplePolygon result
---                           &layer ?~  "result"
---                           &fill ?~ seagreen
---                           &stroke ?~  black
---                   ] ]
---               ]
---   where
---     domain :: Triangle (Point 2 R)
---     domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
-
-
-
-
--- test2 = runTest $ Input domain planes []
---   where
---     domain = Triangle (Point2 (-10) (-10)) (Point2 20 0) (Point2 0 20)
-
---     planes :: NESet.NESet (MyPlane :+ IpeColor R)
---     planes = NESet.fromList
---            . NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
---             -- [ Plane 0    1    0
---             -- , Plane 0    (-1) 0
---             -- , Plane 1    0    2
---             -- , Plane (-1) (1/100)    2
---             -- ]
---              -- [ Plane (-1) 3 1
---              -- , Plane 1.66666 1.66666 (-3)
---              -- , Plane 2.66666 (-1) 0.5
---              -- , Plane 0 0 1
---              -- , Plane (-2) 2 2
---              -- ]
-
---              -- [ Plane (-15.9) (-2.83334) (-4.16667)
---              -- , Plane (-14.5) 17.57894 (-5.21053)
---              -- ,Plane (-14.23530) 17.6 2.1
---              -- ,Plane (-5) (-11.6) (-16)
---              -- ,Plane 11 (-7.26667) (-7.23077)]
-
---              [Plane (-17.10527) 14 15.77777, Plane (-4.3) (-12.93334) 0.28571,Plane (-2.42858) (-3.57143) (-9.92858),Plane (-0.27273) (-21.44445) 8.8,Plane 0.625 (-0.875) (-17.18182),Plane 1.2 0.28571 4.4,Plane 1.73333 (-10.9) 18,Plane 5.28571 4.85714 14,Plane 7.75 (-10.11112) (-16.14286),Plane 8.85714 7.25 (-13.3125),Plane 9.07142 3.5 21.44444,Plane 12.66666 (-5.52942) 17.77272,Plane 17.85714 10.8 (-5),Plane 18.4375 (-9.5) (-6.47620),Plane 20.1 9 14,Plane 21.29411 13.38461 3]
-
-
-
-
-
-
-
 runTest (Input' domain planes queries) = do
   print $ isInGeneralPosition planes
 {-
@@ -697,63 +571,6 @@ runTest (Input' domain planes queries) = do
 
 
 
-    -- test =
---           print lowestAtQ
---   where
---     input = Sample (toList planes) (length planes) [] (length planes)
---     env   = bruteForceTriangulatedEnvelope input
-
-
---     q = Point2 (-5) (-1)
---     lowestAtQ = minimumBy (comparing $ evalAt q) planes
-
-
---     planes :: NonEmpty (MyPlane :+ IpeColor R)
---     planes = NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
---     -- planes = NonEmpty.fromList . fmap (over core MyPlane) $
---     --          [ Plane (-1) 3 1           :+ red
---     --          , Plane 1.66666 1.66666 (-3) :+ blue
---     --          , Plane 2.66666 (-1) 0.5      :+ green
---     --          , Plane 0 0 1               :+ orange
---     --          , Plane (-2) 2 2              :+ yellow
---              -- ]
---     -- planes = NonEmpty.fromList . fmap (over core MyPlane) . flip (zipWith (:+)) colors $
---     --          [ Plane (-15.9) (-2.83334) (-4.16667)
---     --          , Plane (-14.5) 17.57894 (-5.21053)
---     --          ,Plane (-14.23530) 17.6 2.1
---     --          ,Plane (-5) (-11.6) (-16)
---     --          ,Plane 11 (-7.26667) (-7.23077)]
---              [ Plane (-52.74419) 21.3 (-34.26924)
---              , Plane (-52.06667) 7 (-43.09091),Plane (-45.09091) 45 (-2.55556),Plane (-40.79311) 0.91891 1.775,Plane (-31.96875) (-49.17648) 26.4,Plane (-29.5) 21.62790 (-38.65385),Plane (-29.24) (-49.81482) 31.2,Plane (-27.75) (-6.63830) (-20),Plane (-27.56522) 26.97560 (-0.81579),Plane (-25.27778) 42.60714 31.15789,Plane (-25.1875) 29.17647 (-51.96667),Plane (-23.70968) (-11.05556) (-11.58537),Plane (-19.14286) 41.40740 32.66666,Plane (-18.82759) 5 (-32.16667),Plane (-17.22223) 21.8125 (-39.43479),Plane (-16.88236) 39.36363 14.35714,Plane (-16.39286) 25.9375 (-32.89796),Plane (-5.14286) 38.66666 26.16666,Plane (-0.46667) (-23.38096) (-46.92453),Plane 1.15686 31.35 (-30.9375),Plane 3.97435 (-48.69231) 40.125,Plane 5.5 (-19.11112) (-27.3125),Plane 7.25 (-9.36112) (-38.83334),Plane 8 2.61538 (-14.5),Plane 17.86666 31.85185 (-28.51613),Plane 24.5 21 49.16129,Plane 37.19047 46.70588 (-43.34616),Plane 37.33333 20.48936 (-48.21740),Plane 41.8 (-8.23334) 31.17948,Plane 42.35135 (-1) 14.75,Plane 45.52380 22.41860 (-32.82759),Plane 46.70370 12.4 38,Plane 48.90909 (-15.63637) 43.87096,Plane 49 (-7.125) (-27.24490),Plane 52 (-32.79311) (-24.53659)]
-
-
-
---     vertices   = bruteForceVertices input
-
-
-
---         draw'' (prism :+ cl) =
---           [ iO $ defIO (projectPrism prism) &fill ?~ color
---           ]
---         -- loc :: Vertex' r (plane :+ IpeColor r) -> Point 2 r
---         -- loc = \case
---         --   Real v  -> location2 v
---         --   Dummy p -> projectPoint p
-
---           -- Cone v           -> [iO $ defIO $ location2 v]
---           -- ClippedCone u v  -> [iO $ defIO $ ClosedLineSegment (location2 u) (location2 v)]
-
-
--- projectPrism :: (Plane_ plane r, Fractional r, Ord r)
---              => Prism r plane -> Triangle (Point 2 r)
--- projectPrism = fmap $ \case
---   Real v  -> location2 v
---   Dummy p -> projectPoint p
-
-
-
-
-
 ----------------------------------------------------------------------------------
 -- * Drawing Utilities
 
@@ -771,57 +588,6 @@ drawEnv = ifoldMap draw'
     draw' (_h :+ color) cell = [ iO $ ipeSimplePolygon cell &fill ?~ color
                                                             &layer ?~  "env"
                                ]
-
-
-
-
---------------------------------------------------------------------------------
--- * Voronoi Diagrams on a bounded region (via the lifting to the lower envelope)
-
--- TODO: Move this into the main library I guess
-
-type BoundedVoronoiDiagram r site =
-  MonoidalMap site (ConvexPolygon (Vertex' (EnvVertex r site) r site))
-
--- | Computes the voronoi diagram in a given region
-voronoiDiagramIn        :: ( Point_ point 2 r, Ord r, Fractional r
-                           , Foldable1 set, Functor set
-                           , Ord point
-                           , Show point, Show r -- TODO
-                           )
-                        => Triangle (Point 2 r) -> set point -> BoundedVoronoiDiagram r point
-voronoiDiagramIn domain = MonoidalMap.mapKeys (^.extra)
-                        . fmap (over vertices (first (fmap (^.extra))))
-                        . lowerEnvelopeOn domain
-                        . fmap (\p -> pointToPlane p :+ p)
-  -- TODO: figure out if mapping monotonically is safe...
-
-
--- | Given a site and a voronoi diagram, find the set of sites that
--- are closest at the query point i.e. find the set of cells that
--- contain the query point.
---
--- (this uses a very naive O(n) time implementation)
-closestAt      :: ( Point_ queryPoint 2 r
-                  , Point_ site 2 r, Ord r, Fractional r, Ord site
-                  , Show site, Show r
-                  , HasIntersectionWith queryPoint (ConvexPolygon (OriginalOrExtra (EnvVertex r site) (Point 2 r :+ r)))
-                  ) => queryPoint -> BoundedVoronoiDiagram r site -> Set.Set site
-closestAt q = MonoidalMap.keysSet
-            . MonoidalMap.filter (\cell -> q `intersects` cell)
-
--- | Naive closest at implementation
-closestAt'   :: ( Point_ queryPoint 2 r
-                , Point_ site 2 r, Ord r, Fractional r, Ord site
-                , Show site, Show r, Foldable set
-                ) => queryPoint -> set site -> Set.Set site
-closestAt' q = maybe mempty fst
-             . MonoidalMap.minView
-             . foldMap (\s -> MonoidalMap.singleton (squaredEuclideanDist q s) (Set.singleton s)
-                       )
-
---------------------------------------------------------------------------------
-
 
 drawVD :: forall site r.
           (Ord site, Ord r, Fractional r, Show r)
@@ -928,7 +694,7 @@ testVD = writeIpeFile [osp|vd.ipe|]
 
 
 bugI :: NonEmpty (Point 2 R)
-bugI = (Point2 0 0 :| [Point2 0 1,Point2 1 2])
+bugI = Point2 0 0 :| [Point2 0 1,Point2 1 2]
 
 bugDomain ::Triangle (Point 2 R)
 bugDomain = Triangle (Point2 7.75 (-4.5)) (Point2 (-8.85715) 9) (Point2 7.4 (-4.42858))
@@ -971,30 +737,7 @@ testBug1 = prop "testbug; brute force voronoi diagram; covers all points" $
                             | q <- toList queries
                             ]
 
-
-
--- bug2 = prop "brute force vornoi diagram; covers all points" $
---           let sites' = NESet.fromList bugI
---               domain = bugDomain
---               sites = assignColors sites'
---               queries = [Point2 (-0.77) 0]
---               vd = voronoiDiagramIn domain (toNonEmpty sites)
---               verifyClosest sites q vd =
---                      let ss  = closestAt q vd
---                          ss' = closestAt' q sites
---                      in ss === ss'
---           in not (null vd) ==>
---                     ipeCounterExample (queries, domain, sites, vd) $
---                     counterexample (show vd) $
---                     conjoin [ verifyClosest sites q vd
---                             | q <- toList queries
---                             ]
-
 --------------------------------------------------------------------------------
-
-main = hspec voronoiClosest
-
-
 
 -- bug :
 
